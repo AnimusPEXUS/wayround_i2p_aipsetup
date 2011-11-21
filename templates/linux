@@ -19,6 +19,12 @@ linux() {
     EXITONERROR[$j]=1
     
     j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/boot"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='***error'
+    EXITONERROR[$j]=1
+    
+    j=$(( $j + 1 ))
     RUN[$j]='mkdir -p "$bs_install_dir/lib"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='***error'

@@ -95,13 +95,13 @@ EOF
 sleep 3
 echo -e '\e[32m\n'
 $CMD 2>&1 | tee -a "\$bs_buildlogfile" 
+e=\$?
+echo "===>command exit code===> \"\$e\""
 EOF
 
     if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
     then
     cat <<EOF >> ./_tnbuild_$form_p1
-e=\$?
-echo "===>command exit code===> \"\$e\""
 set +o pipefail
 EOF
     fi
