@@ -59,9 +59,8 @@ unsetup:
 	-rm "$(PREFIX)/$(BINDIR)/aipsetup"
 
 clean:
-	chown -R "`id -u`:`id -g`" .
-	find -type -d '!' -name '.' '!' -name '..' -exec chmod 700 '{}' ';'
-	find -type -f -exec chmod 600 '{}' ';'
+	find -type d '!' -name '.' '!' -name '..' -exec chmod 700 '{}' ';'
+	find -type f -exec chmod 600 '{}' ';'
 	find -type f '(' -name '*~' -o -name '*#' ')' -exec rm -v '{}' ';'
 
 # release: clean
