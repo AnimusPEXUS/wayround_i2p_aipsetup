@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #this will be changed during 'make install'
-AIP_DIR=""
+export AIP_DIR=""
 
 if [ ! -d "$AIP_DIR" ]
 then
@@ -21,21 +21,22 @@ case "$#" in
 		exit 0
 		;;
 	    --help)
-		echo -e "usage: `basename $0`"
+		echo -e "usage: `basename $0` [command] [command_parameters]"
 		echo
-		echo -e "\tcsc|cscript\t\tcopy builder script to current dir"
+		echo -e "[command]s:"
+		echo -e "\tcsc|cscript\t\tcopy builder script to current dir (for maintainers"
 		echo -e "\tesc|escript\t\tedit builder script"
 		echo -e "\tsc|script\t\tuse builder script (see $0 script --help)"
 		echo -e "\tpk|pack\t\t\tuse packing script"
 		echo -e "\tls|list\t\t\tlist installed packages"
 		echo -e "\trm|remove TARGET\tremove named package"
 #		echo -e "\tin|install FILE\t\tinstall named package file"
-		echo -e "\tfn|findcom FILENAME\t\tfind package by FILENAME"
+		echo -e "\tfn|findcom FILENAME\tfind package by FILENAME"
 		echo 
 		echo -e "\tex|extract FILE\t\textract to the current dir"
 		echo
-		echo -e "\t--help\tsee this help"
-		echo -e "\t--version\tversion info"
+		echo -e "\t--help\t\t\tsee this help"
+		echo -e "\t--version\t\tversion info"
 		exit 0
 		;;
 	    cscript | csc)

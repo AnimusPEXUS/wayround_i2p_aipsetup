@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ ! -d "$2" ]
+then
+    DESTDIR='.'
+else
+    DESTDIR="$2"
+fi
+
 if [ -f "$1" ]
 then
     ARCH_TYPE=
@@ -44,30 +51,30 @@ then
     case $ARCH_TYPE in
 	'tar.gz')
 	    set -o pipefail
-	    cat "$1" | gzip -d | tar -x
+	    cat "$1" | gzip -d | tar -xC "$DESTDIR"
 	    set +o pipefail
 	    fail=$?
 	    ;;
 	'tar.bz2')
 	    set -o pipefail
-	    cat "$1" | bzip2 -d | tar -x
+	    cat "$1" | bzip2 -d | tar -xC "$DESTDIR"
 	    set +o pipefail
 	    fail=$?
 	    ;;
 	'tar.lzma')
 	    set -o pipefail
-	    cat "$1" | lzma -d | tar -x
+	    cat "$1" | lzma -d | tar -xC "$DESTDIR"
 	    set +o pipefail
 	    fail=$?
 	    ;;
 	'tar.7z')
 	    set -o pipefail
-	    7z x -so "$1" | tar -x
+	    7z x -so "$1" | tar -xC "$DESTDIR"
 	    set +o pipefail
 	    fail=$?
 	    ;;
 	'zip')
-	    unzip -qq "$1"
+	    unzip -qq "$1" -d "$DESTDIR"
 	    fail=$?
 	    ;;
 	*)

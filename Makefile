@@ -51,7 +51,7 @@ setup:
 	@echo "setting base folder to $(AIP_B)"
 	-mkdir -p "$(PREFIX)/$(AIP_B)"
 	-mkdir -p "$(PREFIX)/$(BINDIR)"
-	cat aipsetup | sed -e "4{s#AIP_DIR=\"\"#AIP_DIR=\"$(AIP_B)\"#}" > "$(PREFIX)/$(BINDIR)/aipsetup"
+	cat aipsetup | sed -e "4{s#export AIP_DIR=\"\"#export AIP_DIR=\"$(AIP_B)\"#}" > "$(PREFIX)/$(BINDIR)/aipsetup"
 	chown root.root "$(PREFIX)/$(BINDIR)/aipsetup"
 	chmod 0700 "$(PREFIX)/$(BINDIR)/aipsetup"
 	@echo "<<<[ Sett Up ]>>>"

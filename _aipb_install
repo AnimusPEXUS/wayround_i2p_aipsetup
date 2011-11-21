@@ -1,0 +1,23 @@
+#!/bin/bash
+
+RUNDIR="`dirname \"$0\"`"
+echo "$DIRNAME"
+
+exit 0
+
+show_help() {
+    echo "fix me"
+    return
+}
+
+
+for i in $*
+do
+    if [ "$i" == "--help" ]
+    then
+	show_help()
+	exit 0
+    fi
+done
+
+tar
