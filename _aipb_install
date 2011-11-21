@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -d "$AIP_DIR" ]
+if [ ! -d "$AIP_DIR" ]
 then
     echo " SORRY: please, install aipsetup (if not yet), and run 'install' from main program (aipsetup)"
     echo " ERROR: AIP_DIR not set"
@@ -45,3 +45,4 @@ do
 	fi
     fi
 done
+echo " installed: $OKi , errors: $ERi, Total: $(( $OKi + $ERi ))"
