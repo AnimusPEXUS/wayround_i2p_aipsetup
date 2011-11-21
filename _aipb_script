@@ -36,7 +36,7 @@ cleanall() {
 
 # steps necessary to achieve required goal
     i=0
-    while [ $i -ne 9 ]
+    while [ $i -ne 256 ]
     do
 	unset RUN[$i]		# [string] command
 	unset RELATIVELY[$i]	# [0,1] this command required to be
@@ -101,6 +101,7 @@ EOF
     then
     cat <<EOF >> ./_tnbuild_$form_p1
 e=\$?
+echo "===>command exit code===> \"\$e\""
 set +o pipefail
 EOF
     fi
