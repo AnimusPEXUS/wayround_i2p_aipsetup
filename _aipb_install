@@ -1,23 +1,47 @@
 #!/bin/bash
 
-RUNDIR="`dirname \"$0\"`"
-echo "$DIRNAME"
+if [ -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet), and run 'install' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
 
-exit 0
+if [ ! -x "$AIP_DIR/_aip_extract" ]
+then
+    echo " ERROR: '$AIP_DIR/_aip_extract' not found"
+    exit 1
+fi
 
-show_help() {
-    echo "fix me"
-    return
-}
+# show_help() {
+#     echo "fix me"
+#     return
+# }
 
+# for i in $*
+# do
+#     if [ "$i" == "--help" ]
+#     then
+# 	show_help()
+# 	exit 0
+#     fi
+# done
+OKi=0
+ERi=0
 
 for i in $*
 do
-    if [ "$i" == "--help" ]
+    if [ -f "$i" ]
     then
-	show_help()
-	exit 0
+	printf "installing: "$i":"
+	"$AIP_DIR/_aip_extract" "$i"
+	if [ $? -eq 0 ]
+	then
+	    printf ":OK\n"
+	    OKi=$(( $OKi + 1 ))
+	else
+	    printf ":ERROR\n"
+	    ERi=$(( $ERi + 1 ))
+	fi
     fi
 done
-
-tar

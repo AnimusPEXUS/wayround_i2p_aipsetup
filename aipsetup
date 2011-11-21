@@ -30,7 +30,7 @@ case "$#" in
 		echo -e "\tpk|pack\t\t\tuse packing script"
 		echo -e "\tls|list\t\t\tlist installed packages"
 		echo -e "\trm|remove TARGET\tremove named package"
-#		echo -e "\tin|install FILE\t\tinstall named package file"
+		echo -e "\tin|install FILE\t\tinstall named package files"
 		echo -e "\tfn|findcom FILENAME\tfind package by FILENAME"
 		echo 
 		echo -e "\tex|extract FILE\t\textract to the current dir"
@@ -78,6 +78,10 @@ case "$#" in
 		shift
 		bash "$AIP_DIR/_aipb_fpbf" $*
 		exit $?
+		;;
+	    install | 'in')
+		shift
+		bash "$AIP_DIR/_aipb_install" $*
 		;;
 	    *)
 		echo "wrong parameter, use --help for info"
