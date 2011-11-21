@@ -63,5 +63,5 @@ clean:
 release: clean
 	echo "$(VERSION)" > ./VERSION
 	cd .. && cp -a ./aipsetup "./aipsetup-$(VERSION)"
-	cd .. && tar -c "./aipsetup-$(VERSION)" | bzip2 -9 > "aipsetup-$(VERSION).tar.bz2"
+	cd .. && tar -c "./aipsetup-$(VERSION)" | xz -9v > "aipsetup-$(VERSION).tar.xz"
 	cd .. && rm -r "./aipsetup-$(VERSION)"
