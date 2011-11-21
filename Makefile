@@ -50,7 +50,7 @@ setup:
 	-mkdir -p "$(PREFIX)/$(BINDIR)"
 	cat aipsetup | sed -e "4{s#export AIP_DIR=\"\"#export AIP_DIR=\"$(AIP_B)\"#}" > "$(PREFIX)/$(BINDIR)/aipsetup"
 	chown 0:0 "$(PREFIX)/$(BINDIR)/aipsetup"
-	chmod 0700 "$(PREFIX)/$(BINDIR)/aipsetup"
+	chmod -R 0755 "$(PREFIX)/$(BINDIR)/aipsetup"
 	@echo "<<<[ Sett Up ]>>>"
 
 unsetup:
