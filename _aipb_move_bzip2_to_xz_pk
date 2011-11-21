@@ -50,7 +50,7 @@ EOF
     
     cd "$ppwd"
 
-    rm -v -r "$tmpdir"
+    rm -r "$tmpdir"
 done
 
 exit 0
