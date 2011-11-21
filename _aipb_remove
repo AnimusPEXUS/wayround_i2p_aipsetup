@@ -22,14 +22,8 @@ remove() {
     while [ "$remove_i" -ne "$remove_line_count" ]
     do
 	FILENAME=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sed -e "s/.*\*/$DESTDIR/g"`
-	cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sha512sum -c > /dev/null 2>&1
-	if [ $? -eq 0 ]
-	then
-	    echo -e "rm \"$FILENAME\""
-	    rm "$FILENAME"
-	else
-	    remove_all_removed=0
-	fi
+	echo -e "rm \"$FILENAME\""
+	rm "$FILENAME"
 	remove_i=$(( $remove_i + 1 ))
     done
     if [ $remove_all_removed -eq 1 ]

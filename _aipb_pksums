@@ -20,7 +20,7 @@ rm ".$PKG_INFO/sums"/*  > /dev/null 2>&1
 
 mkdir -p ".$PKG_INFO/sums"  > /dev/null 2>&1
 
-find -type f ! -regex ".*$PKG_INFO/sums.*" -exec bash -c "sha512sum -b '{}' | sed -e \"s/\*\.\//\*\//g\" >> \".$PKG_INFO/sums/${PKGNAME}\"" ';'
+find -type l -type f ! -regex ".*$PKG_INFO/sums.*" -exec bash -c "sha512sum -b '{}' | sed -e \"s/\*\.\//\*\//g\" >> \".$PKG_INFO/sums/${PKGNAME}\"" ';'
 
 bzip2 -9 ".$PKG_INFO/sums/${PKGNAME}" > /dev/null 2>&1
 

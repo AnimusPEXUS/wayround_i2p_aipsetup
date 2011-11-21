@@ -48,7 +48,7 @@ usr() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -85,7 +85,7 @@ usri486() {
     EXITONERROR[$j]=0
     
     j=$(( $j + 1 ))
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu  --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -186,7 +186,7 @@ root() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -684,7 +684,7 @@ samba() {
     RELATIVE='./source'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc/samba --libexecdir=/usr/libexec --libdir=/usr/lib --with-configdir=/etc/samba --with-privatedir=/etc/samba/private --includedir=/usr/include --datarootdir=/usr/share --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc/samba --libexecdir=/usr/libexec --libdir=/usr/lib --with-configdir=/etc/samba --with-privatedir=/etc/samba/private --includedir=/usr/include --datarootdir=/usr/share --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -879,7 +879,7 @@ bash() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --with-curses --with-installed-readline  --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --with-curses --with-installed-readline  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -1247,6 +1247,30 @@ ncurses() {
     RUN[$j]='make install DESTDIR="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]="cd \"\$bs_install_dir/usr/lib\" ; cmdtmp1= ; cmdtmp2= ; cmdtmp1=\`find -maxdepth 1 -name '*w.so*'\` ; for cmdk in \$cmdtmp1 ;  do  cmdtmp2=\`echo \"\$cmdk\" | sed -e 's/w\.so/\.so/g' \`  ; ln -sf \"\$cmdk\" \"\$cmdtmp2\"  ; done ; unset cmdtmp1 ; unset cmdtmp2 #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** making simlinks error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]="cd \"\$bs_install_dir/usr/lib\" ; cmdtmp1= ; cmdtmp2= ; cmdtmp1=\`find -maxdepth 1 -name '*w_g.so*'\` ; for cmdk in \$cmdtmp1 ;  do  cmdtmp2=\`echo \"\$cmdk\" | sed -e 's/w_g\.so/_g\.a/so' \`  ; ln -sf \"\$cmdk\" \"\$cmdtmp2\"  ; done ; unset cmdtmp1 ; unset cmdtmp2 #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** making simlinks error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]="cd \"\$bs_install_dir/usr/lib\" ; cmdtmp1= ; cmdtmp2= ; cmdtmp1=\`find -maxdepth 1 -name '*w.a*'\` ; for cmdk in \$cmdtmp1 ;  do  cmdtmp2=\`echo \"\$cmdk\" | sed -e 's/w\.a/\.a/g' \`  ; ln -sf \"\$cmdk\" \"\$cmdtmp2\"  ; done ; unset cmdtmp1 ; unset cmdtmp2 #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** making simlinks error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]="cd \"\$bs_install_dir/usr/lib\" ; cmdtmp1= ; cmdtmp2= ; cmdtmp1=\`find -maxdepth 1 -name '*w_g.a*'\` ; for cmdk in \$cmdtmp1 ;  do  cmdtmp2=\`echo \"\$cmdk\" | sed -e 's/w_g\.a/_g\.a/g' \`  ; ln -sf \"\$cmdk\" \"\$cmdtmp2\"  ; done ; unset cmdtmp1 ; unset cmdtmp2 #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** making simlinks error'
     EXITONERROR[$j]=1
 }
 
@@ -1687,14 +1711,14 @@ echo -e " Build dir     \$bs_build_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
 
-echo " 5 seconds sleep to start operations..."
-count=5
-while [ \$count -ne 0 ]
-do
-printf "\$count.."
-sleep 1
-count=\$(( \$count - 1 ))
-done
+#echo " 5 seconds sleep to start operations..."
+#count=5
+#while [ \$count -ne 0 ]
+#do
+#printf "\$count.."
+#sleep 1
+#count=\$(( \$count - 1 ))
+#done
 echo
 unset count
 EOF
