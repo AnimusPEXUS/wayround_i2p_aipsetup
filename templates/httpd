@@ -6,7 +6,7 @@ apache() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-so --enable-cgi --enable-ssl --enable-http --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --libdir=/usr/lib/http --datarootdir=/usr/share/httpd --sysconfdir=/etc/httpd --localstatedir=/var --enable-shared --enable-modules=all --enable-mods-shared=all --enable-so --enable-cgi --enable-ssl --enable-http --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
