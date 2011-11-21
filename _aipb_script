@@ -82,29 +82,19 @@ looform() {
 
     
     cat <<EOF >> ./_tnbuild_$form_p1
-echo -e '==================[\e[47m\e[30m$CMD\e[0m]' | tee -a "\$bs_buildlogfile" 
+echo -e '==EXECUTING=======[\e[47m\e[30m$CMD\e[0m]' | tee -a "\$bs_buildlogfile" 
 EOF
 
-    if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
-    then
-    cat <<EOF >> ./_tnbuild_$form_p1
-set -o pipefail
-EOF
-    fi
     cat <<EOF >> ./_tnbuild_$form_p1
 sleep 3
 echo -e '\e[32m\n'
-$CMD 2>&1 | tee -a "\$bs_buildlogfile" 
+set -o pipefail
+$CMD 2>&1 | tee -a "\$bs_buildlogfile"
 e=\$?
-echo "===>command exit code===> \"\$e\""
+set +o pipefail
+echo "===>command exit code===> \"\$e\""  2>&1 | tee -a "\$bs_buildlogfile"
 EOF
 
-    if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
-    then
-    cat <<EOF >> ./_tnbuild_$form_p1
-set +o pipefail
-EOF
-    fi
 
     cat <<EOF >> ./_tnbuild_$form_p1
 echo -e '\e[0m'
