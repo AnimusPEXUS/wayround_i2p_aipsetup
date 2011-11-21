@@ -7,7 +7,7 @@ mplayer() {
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='configure --prefix=/usr --enable-gui --disable-liba52-internal --enable-radio --enable-radio-capture --enable-radio-v4l2 --enable-tv --enable-tv-v4l1 --enable-tv-v4l2 --enable-tv-teletext --enable-network --enable-live  --enable-vcd  --enable-freetype --enable-fontconfig --enable-ass --enable-gif --enable-png --enable-mng --enable-jpeg --enable-real --enable-xvid --enable-xvid-lavc --enable-x264-lavc --enable-x264'
+    RUN[$j]='configure --prefix=/usr --enable-gui --disable-liba52-internal --enable-radio --enable-radio-capture --enable-radio-v4l2 --enable-tv --enable-tv-v4l1 --enable-tv-v4l2 --enable-tv-teletext --enable-network  --enable-vcd  --enable-freetype --enable-ass --enable-gif --enable-png --enable-mng --enable-jpeg --enable-real --enable-xvid-lavc --enable-x264-lavc'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
