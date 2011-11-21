@@ -995,7 +995,7 @@ clamav() {
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='--prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-share --with-dbdir=/usr/share/clamav --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-share --with-dbdir=/usr/share/clamav --host=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -1318,7 +1318,7 @@ looform() {
 
     
     cat <<EOF >> ./_tnbuild_$form_p1
-echo '==================[$CMD]' | tee -a "\$bs_buildlogfile" 
+echo -e '==================[\e[47m\e[30m$CMD\e[0m]' | tee -a "\$bs_buildlogfile" 
 EOF
 
     if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
@@ -1328,6 +1328,7 @@ set -o pipefail
 EOF
     fi
     cat <<EOF >> ./_tnbuild_$form_p1
+echo -e '\e[32m'
 $CMD 2>&1 | tee -a "\$bs_buildlogfile" 
 EOF
 
@@ -1338,6 +1339,11 @@ e=\$?
 set +o pipefail
 EOF
     fi
+
+    cat <<EOF >> ./_tnbuild_$form_p1
+echo -e '\e[0m'
+EOF
+
     if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
     then
 	cat << EOF >> ./_tnbuild_$form_p1
@@ -1354,7 +1360,7 @@ EOF
 	looform_index=$(( $looform_index - 1 ))
     else
 	cat << EOF >> ./_tnbuild_$form_p1
-echo "all complete" | tee -a "\$bs_buildlogfile"
+echo -e "\e[1mall complete\e[0m" | tee -a "\$bs_buildlogfile"
 EOF
     fi
 
@@ -1362,7 +1368,7 @@ EOF
     then
 	cat <<EOF >> ./_tnbuild_$form_p1
 else
-echo "${ERRORMESSAGE[$looform_index]}" | tee -a "\$bs_buildlogfile" 
+echo -e "\e[31m${ERRORMESSAGE[$looform_index]}\e[0m" | tee -a "\$bs_buildlogfile" 
 exit 1
 fi
 EOF
@@ -1473,13 +1479,13 @@ mkdir -p "\`dirname \"\$bs_buildlogfile\"\`"
 EOF
    
     cat <<EOF >> ./_tnbuild_$form_p1
-echo "Building       \$bs_pkg_name" | tee -a "\$bs_buildlogfile" 
-echo " Start dir     \$bs_run_dir" | tee -a "\$bs_buildlogfile"
-echo " Parent dir    \$bs_parent_dir" | tee -a "\$bs_buildlogfile"
-echo " Source dir    \$bs_run_dir/$RELATIVE" | tee -a "\$bs_buildlogfile"
-echo " Build dir     \$bs_build_dir" | tee -a "\$bs_buildlogfile"
-echo " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
-echo " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
+echo -e "Building       \e[1m\$bs_pkg_name\e[0m" | tee -a "\$bs_buildlogfile" 
+echo -e " Start dir     \$bs_run_dir" | tee -a "\$bs_buildlogfile"
+echo -e " Parent dir    \$bs_parent_dir" | tee -a "\$bs_buildlogfile"
+echo -e " Source dir    \$bs_run_dir/$RELATIVE" | tee -a "\$bs_buildlogfile"
+echo -e " Build dir     \$bs_build_dir" | tee -a "\$bs_buildlogfile"
+echo -e " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
+echo -e " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
 
 echo " 5 seconds sleep to start operations..."
 count=5
