@@ -6,26 +6,26 @@ boost() {
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='configure --prefix=/usr'
+    RUN[$j]='bootstrap.sh'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make error'
+    RUN[$j]='bjam --prefix=/usr'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some bjam error'
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make check'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some check error'
-    EXITONERROR[$j]=0
+    RUN[$j]='bjam --prefix="$bs_install_dir/usr"'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make install DESTDIR="$bs_install_dir"'
-    RELATIVELY[$j]=0
+    RUN[$j]='pppp="`pwd`" ; cd $bs_install_dir/usr/include/ ; ln -s ./boost*/boost* ./boost ; cd "$pppp" '
+    RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 }

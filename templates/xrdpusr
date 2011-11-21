@@ -1,0 +1,38 @@
+#!/bin/bash
+
+xrdp() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='make DESTDIRDEB="$bs_install_dir" '
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make installdeb DESTDIRDEB="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -vp "$bs_install_dir/usr/sbin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some mkdir error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mv -v "$bs_install_dir/etc/init.d/xrdp_control.sh" "$bs_install_dir/usr/sbin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some mv error'
+    EXITONERROR[$j]=1
+}

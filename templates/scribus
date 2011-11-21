@@ -1,15 +1,15 @@
 #!/bin/bash
 
-mplayer() {
+scribus() {
     PACKAGENAME=
-    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
-    
+
     local j=0
-    RUN[$j]='configure --prefix=/usr --enable-gui --disable-liba52-internal'
-    RELATIVELY[$j]=1
-    ERRORMESSAGE[$j]='*** some configure script error'
+    RUN[$j]='cmake -DCMAKE_INSTALL_PREFIX=/usr .'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some cmake script error'
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
@@ -30,4 +30,3 @@ mplayer() {
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 }
-

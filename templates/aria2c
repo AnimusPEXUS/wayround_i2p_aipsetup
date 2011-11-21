@@ -1,13 +1,13 @@
 #!/bin/bash
 
-mplayer() {
+aria2c() {
     PACKAGENAME=
-    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
-    
+
     local j=0
-    RUN[$j]='configure --prefix=/usr --enable-gui --disable-liba52-internal'
+    RUN[$j]='configure --enable-bittorrent --enable-metalink --enable-epoll --with-gnutls --with-openssl --with-sqlite3 --with-libxml2 --with-libexpat --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -30,4 +30,3 @@ mplayer() {
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 }
-

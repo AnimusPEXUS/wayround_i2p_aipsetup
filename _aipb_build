@@ -64,7 +64,7 @@ finishproc() {
 }
 
 failproc() {
-    echo " \"$i\" " >> "$log".failed
+    echo -n " $i " >> "$log".failed
     finishproc
 }
 
