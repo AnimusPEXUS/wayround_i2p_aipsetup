@@ -36,7 +36,7 @@ def editing_help():
      -t template     use `template' as prototype, not `usr'.
                      WARNING: this also deletes template you've
                               selected to edit
-     -e editor       open template with given editor
+     -e editor       open template with named editor
      -m              template editing (default)
      -l | --list     list templates
 

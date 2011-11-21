@@ -10,7 +10,7 @@ template={
     'stages'           : [
 
         {
-            'RUN'          : """ configure --prefix=/usr --enable-system --enable-linux-user --disable-strip --audio-drv-list=alsa,sdl """,
+            'RUN'          : """ configure --prefix=/usr --enable-system --enable-linux-user --audio-drv-list=alsa,sdl """,
             'RELATIVELY'   : True,
             'ERRORMESSAGE' : '*** some configure script error',
             'EXITONERROR'  : True
@@ -21,13 +21,6 @@ template={
             'RELATIVELY'   : False,
             'ERRORMESSAGE' : '*** some make error',
             'EXITONERROR'  : True
-            },
-
-        {
-            'RUN'          : """ make test """,
-            'RELATIVELY'   : False,
-            'ERRORMESSAGE' : '*** some check error',
-            'EXITONERROR'  : False
             },
 
         {

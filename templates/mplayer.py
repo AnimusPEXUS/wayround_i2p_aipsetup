@@ -10,14 +10,14 @@ template={
     'stages'           : [
 
         {
-            'RUN'          : """ configure --prefix=/usr --enable-gui --disable-liba52-internal --enable-radio --enable-radio-capture --enable-radio-v4l2 --enable-tv --enable-tv-v4l1 --enable-tv-v4l2 --enable-network  --enable-vcd  --enable-freetype --enable-ass --enable-gif --enable-png --enable-mng --enable-jpeg --enable-real --enable-xvid-lavc --enable-x264-lavc """,
+            'RUN'          : """ configure --prefix=/usr --enable-gui --enable-radio --enable-radio-capture --enable-radio-v4l2 --enable-tv --enable-tv-v4l1 --enable-tv-v4l2 --enable-vcd  --enable-freetype --enable-ass --enable-gif --enable-png --enable-mng --enable-jpeg --enable-real --enable-xvid-lavc --enable-x264-lavc --extra-cflags="`pkg-config --cflags libass`" --extra-ldflags="`pkg-config --libs libass`"  """,
             'RELATIVELY'   : True,
             'ERRORMESSAGE' : '*** some configure script error',
             'EXITONERROR'  : True
             },
 
         {
-            'RUN'          : """ make """,
+            'RUN'          : """ make LDFLAGS="`pkg-config --libs libass`" """,
             'RELATIVELY'   : False,
             'ERRORMESSAGE' : '*** some make error',
             'EXITONERROR'  : True

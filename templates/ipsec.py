@@ -10,7 +10,7 @@ template={
     'stages'           : [
 
         {
-            'RUN'          : """ configure --enable-xpdf-headers --with-x --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu LIBPNG_CFLAGS=`pkg-config --cflags libpng12` LIBPNG_CFLAGS=`pkg-config --libs libpng12`  """,
+            'RUN'          : """ configure --prefix=/usr --enable-security-context=no --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu """,
             'RELATIVELY'   : True,
             'ERRORMESSAGE' : '*** some configure script error',
             'EXITONERROR'  : True

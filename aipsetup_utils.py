@@ -3,6 +3,7 @@
 import sys
 import ConfigParser
 import os
+import shutil
 
 def show_version_message():
     print """\
@@ -24,6 +25,7 @@ def update_modules_data(module_name, module_group, module_modes, module_help):
 def module_run_protection(name):
     if name == "__main__":
         print '-e- this module must be started by aipsetup, not by hand'
+        # this exit is ok.
         exit (-1)
 
 def get_configuration(defaults):
@@ -43,8 +45,7 @@ def get_configuration(defaults):
     try:
         cp.read(settings)
     except:
-        print '-e- file with settings not found '+settings
-        exit (-1)
+        return None
 
     home = cp.get('main', 'home')
     temps = cp.get('main', 'templates')
@@ -59,32 +60,12 @@ def get_configuration(defaults):
         }
 
 def filecopy(src, dst, verbose=False):
-    print '-i- copying '+src+' to '+dst
+    if verbose:
+        print '-i- copying '+src+' to '+dst
     try:
-        s = os.open(src, 'rb')
+        shutil.copy(src, dst)
     except:
-        if verbose:
-            print '-e- error opening file for read '+src
         return 1
-
-    try:
-        d =  os.open(dst, 'rb')
-    except:
-        if verbose:
-            print '-e- error opening file for write '+dst
-        return 2
-
-    try:
-        d.write(s.read())
-    except:
-        if verbose:
-            print '-e- error reading from file ' + src +\
-                ' or writing to file ' + dst
-        return 3
-    
-    s.close()
-    d.close()
-
     return 0
 
 module_run_protection(__name__)

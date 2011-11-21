@@ -11,19 +11,20 @@ import __builtin__
 
 # default settings
 
-aipsetup_config = {'homedir'  :'/usr/lib/aipsetup', # aipsetup home
-                                                    # dir
-                   
-                   'templates':'/usr/lib/aipsetup/templates', # aipsetup
-                                                              # templates
-                   'editor'   : os.environ['VISUAL'],         # editor
-                   'settings' :'/etc/aipsetup.conf'
-                   }
+etalon_aipsetup_config = {'homedir'  :'/usr/lib/aipsetup', # aipsetup
+                          # home dir
+
+                          'templates':'/usr/lib/aipsetup/templates', # aipsetup
+                                                                     # templates
+                          'editor'   : os.environ['VISUAL'],         # editor
+                          'settings' :'/etc/aipsetup.conf'
+                          }
+
+aipsetup_config = etalon_aipsetup_config
 
 # end of default settings
 
 sys.path.append(aipsetup_config['homedir'])
-
 
 try:
     import aipsetup_utils
@@ -33,18 +34,21 @@ except:
     exit (1)
 
 
-aipsetup_config=aipsetup_utils.get_configuration(aipsetup_config)
+aipsetup_config = aipsetup_utils.get_configuration(aipsetup_config)
+if (aipsetup_config == None):
+    print '-e- file with settings not found ' + etalon_aipsetup_config['settings']
+    exit (-1)
 
 
 
 # modules_data contains information populated by modules. basicly it
 # is an array, containing structures. each structure devides on few
-# fields:
+# fields.
 #
-#  modules_data=[['plugin name', 'module group', ['mode', 'names'], 'help text'],
-#                ['plugin name', 'module group', ['mode', 'names'], 'help text'],
-#                ['plugin name', 'module group', ['mode', 'names'], 'help text'],
-#                ...]
+#  modules_data = [['module name', 'module group', ['mode', 'names'], 'help text'],
+#                  ['module name', 'module group', ['mode', 'names'], 'help text'],
+#                  ['module name', 'module group', ['mode', 'names'], 'help text'],
+#                  ...]
 
 modules_data = []
 
@@ -93,14 +97,14 @@ for i in modules_data:
             # 'none module/mode must allways be'
             mode_none_present = True
 
-        mode_list.append(j)
-
-
-
 
 if not mode_none_present:
     print '-e- module ' + module_to_run + ' not loaded'
     exit (-1)
+
+for i in modules_data:
+    for j in i[2]:
+        mode_list.append(j)
 
 
 arguments = sys.argv[1:]
@@ -136,175 +140,5 @@ module_to_run_imported = __builtin__.__import__(module_to_run)
 
 module_to_run_imported.run(aipsetup_config,
                            arguments)
-
-exit(0)
-
-"""
-	    escript | esc)
-		if [ -z "$VISUAL" ]
-		then
-		    echo " VISUAL not defined"
-		    exit 1
-		fi
-		if [ -z "$2" ]
-		then
-		    "$VISUAL" "$AIP_DIR/_aipb_script"
-		else
-		    if [ ! -f "$AIP_DIR/templates/$2" ]
-		    then
-			cp "$AIP_DIR/templates/usr" "$AIP_DIR/templates/$2"
-		    fi
-		    "$VISUAL" "$AIP_DIR/templates/$2"
-		    size="`stat -c '%s' \"$AIP_DIR/templates/$2\"`" 2> /dev/null
-		    if [ "$size" -lt 10 ]
-		    then
-			echo "resulting file size < 10. it's a sign to remove it"
-			rm -v "$AIP_DIR/templates/$2"
-		    fi
-
-		    if [ "$2" != 'usr' ]
-		    then
-			md51="`md5sum -b \"$AIP_DIR/templates/usr\" | sed -e 's/\ .*//'`" 2> /dev/null
-			md52="`md5sum -b \"$AIP_DIR/templates/$2\" | sed -e 's/\ .*//'`" 2> /dev/null
-			if [ "$md51" = "$md52" ]
-			then
-			    echo "resulting file md5 = usr file md5. it's a sign to remove it"
-			    rm -v "$AIP_DIR/templates/$2"
-			fi
-		    fi
-		fi
-		exit $?
-		;;
-	    script | sc)
-		shift
-		bash "$AIP_DIR/_aipb_script" $*
-		exit $?
-		;;
-	    bd | build)
-		shift
-		bash "$AIP_DIR/_aipb_build" $*
-		exit $?
-		;;
-	    pksums | pks)
-		shift
-		bash "$AIP_DIR/_aipb_pksums " $*
-		exit $?
-		;;
-	    lnfix | lf)
-		shift
-		bash "$AIP_DIR/_aipb_slinksa2r" $*
-		exit $?
-		;;
-	    pack | pk)
-		shift
-		bash "$AIP_DIR/_aipb_pack" $*
-		exit $?
-		;;
-
-	    cscript | csc)
-		rm -rv ./templates
-		cp -vur "$AIP_DIR/templates" .
-		exit 0
-		;;
-
-	    list | ls)
-		shift
-		set -f
-		bash "$AIP_DIR/_aipb_list" $*
-		set +f
-		exit $?
-		;;
-	    listc | lsc)
-		shift
-		set -f
-		bash "$AIP_DIR/_aipb_list_cont" $*
-		set +f
-		exit $?
-		;;
-	    pkcheck | chk)
-		shift
-		set -f
-		bash "$AIP_DIR/_aipb_checksums" $*
-		set +f
-		exit $?
-		;;
-	    remove | rm)
-		shift
-		set -f
-		bash "$AIP_DIR/_aipb_remove" $*
-		set +f
-		exit $?
-		;;
-	    install | 'in')
-		shift
-		bash "$AIP_DIR/_aipb_install" $*
-		;;
-	    findcom | fn)
-		shift
-		bash "$AIP_DIR/_aipb_fpbf" $*
-		exit $?
-		;;
-	    finddep | fd)
-		shift
-		bash "$AIP_DIR/_aipb_finddeps" $*
-		exit $?
-		;;
-	    lddsums | 'ldd')
-		shift
-		bash "$AIP_DIR/_aipb_lddsums" $*
-		exit $?
-		;;
-	    bz2xzsys )
-		shift
-		bash "$AIP_DIR/_aipb_move_bzip2_to_xz" $*
-		exit $?
-		;;
-	    bz2xzpkg )
-		shift
-		bash "$AIP_DIR/_aipb_move_bzip2_to_xz_pk" $*
-		exit $?
-		;;
-
-	    extract | ex)
-		shift
-		bash "$AIP_DIR/_aipb_extract" $*
-		exit $?
-		;;
-	    nameparse | np)
-		shift
-		bash "$AIP_DIR/_aipb_pkgnameparse" $*
-		exit $?
-		;;
-	    listuniq | lu)
-		shift
-		bash "$AIP_DIR/_aipb_pkgnamelistuniq" $*
-		exit $?
-		;;
-	    pvc | pkgnamevcomp)
-		shift
-		bash "$AIP_DIR/_aipb_pkgnamevcompare" $*
-		exit $?
-		;;
-	    llu|pkgnamelstlat)
-		shift
-		bash "$AIP_DIR/_aipb_pkgnamelistalllatestuniq" $*
-		exit $?
-		;;
-	    slp|slashescape)
-		shift
-		bash "$AIP_DIR/_aipb_slashescape" $*
-		exit $?
-		;;
-	    cat0|catzero)
-		shift
-		bash "$AIP_DIR/_aipb_catzero" $*
-		exit $?
-		;;
-	    sfi|softfix)
-		shift
-		bash "$AIP_DIR/_aipb_fixsoftlinks" $*
-		exit $?
-		;;
-"""
 
 exit(0)

@@ -10,7 +10,7 @@ template={
     'stages'           : [
 
         {
-            'RUN'          : """ configure --enable-optimize --enable-default-toolkit=cairo-gtk2 --enable-xft --enable-freetype2  --enable-application=suite --disable-ldap --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --host=i486-pc-linux-gnu """,
+            'RUN'          : """ configure --disable-gnomeui --enable-optimize --enable-default-toolkit=cairo-gtk2 --enable-xft --enable-freetype2  --enable-application=suite --disable-ldap --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --host=i486-pc-linux-gnu """,
             'RELATIVELY'   : True,
             'ERRORMESSAGE' : '*** some configure script error',
             'EXITONERROR'  : True

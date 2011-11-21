@@ -22,7 +22,7 @@ aipsetup_utils.update_modules_data(module_name,
                                    module_group,
                                    module_modes,
                                    module_help)
-
+# show aipsetup help
 def module_help():
     print """\
 
@@ -43,37 +43,38 @@ def module_help():
     show_group_modules('packages')
     show_group_modules('misc')
 
+
 def get_module_modes(module='aipsetup_none'):
-    b=[]
+    b = []
     for i in __main__.modules_data:
-        if i[0]==module:
-            b=i[2]
+        if i[0] == module:
+            b = i[2]
             b.sort
             return b
 
 def show_group_modules(group='basic'):
 
-    modules=get_group_modules(group)
+    modules = get_group_modules(group)
 
-    outlist=modules
+    outlist = modules
     print '    == ' + group + ' modes ==\n'
 
     for i in outlist:
-        print '     "'+'" | "'.join(i[2])+'":'
+        print '     "' + '" | "'.join(i[2]) + '":'
         print textwrap.fill(i[3],
-                            subsequent_indent='        ',
-                            initial_indent='          ')
+                            subsequent_indent = '        ',
+                            initial_indent = '          ')
         print
         break
 
-def get_group_modules(group='basic'):
-    outlist=[]
+def get_group_modules(group = 'basic'):
+    outlist = []
     for i in __main__.modules_data:
-        if i[1]==group:
+        if i[1] == group:
             outlist.append(i)
     return outlist
 
-def run(aipsetup_config, 
+def run(aipsetup_config,
         arguments = []):
 
     optilist, args = getopt.getopt(arguments, 'h', ['help', 'version'])
