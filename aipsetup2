@@ -4,22 +4,26 @@
 
 import sys
 import getopt
+import os
 import __builtin__
 
 
 
 # default settings
 
-aipsetup_home_dir = '/usr/lib/aipsetup'
-aipsetup_template_dir = aipsetup_home_dir+'/template'
-aipsetup_editor= 'usr/bin/emacs'
+aipsetup_config = {'homedir'  :'/usr/lib/aipsetup', # aipsetup home
+                                                    # dir
+                   
+                   'templates':'/usr/lib/aipsetup/templates', # aipsetup
+                                                              # templates
+                   'editor'   : os.environ['VISUAL'],         # editor
+                   # 'editor'   :'emacs',             # editor
+                   'settings' :'/etc/aipsetup.conf'
+                   }
 
 # end of default settings
 
-
-
-
-sys.path.append(aipsetup_home_dir)
+sys.path.append(aipsetup_config['homedir'])
 
 
 try:
@@ -28,6 +32,9 @@ except:
     print '-e- main utilities module load error in '+aipsetup_home_dir
     print '    please reinstall or reconfigure aipsetup'
     exit (1)
+
+
+aipsetup_config=aipsetup_utils.get_configuration(aipsetup_config)
 
 
 
@@ -144,7 +151,8 @@ if not correct_mode_selected:
 
 module_to_run_imported = __builtin__.__import__(module_to_run)
 
-module_to_run_imported.run(show_help, arguments)
+module_to_run_imported.run(aipsetup_config,
+                           arguments)
 
 exit(0)
 

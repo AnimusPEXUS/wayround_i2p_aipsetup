@@ -59,8 +59,8 @@ def show_group_modules(group='basic'):
 
     for i in outlist:
         print '     "'+'" | "'.join(i[2])+'":'
-        print textwrap.fill(i[3], 
-                            subsequent_indent='        ', 
+        print textwrap.fill(i[3],
+                            subsequent_indent='        ',
                             initial_indent='          ')
         print
         break
@@ -72,8 +72,11 @@ def get_group_modules(group='basic'):
             outlist.append(i)
     return outlist
 
-def run(help_mode=False,arguments=[]):
+def run(aipsetup_config, 
+        arguments = []):
+
     if not (help_mode or (len(arguments) == 0)):
         print 'this mode only shows help. here it is:'
 
     module_help()
+    return

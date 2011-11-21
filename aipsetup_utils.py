@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import sys
+import ConfigParser
+import os
 
 def show_version_message():
     print """\
@@ -23,3 +25,61 @@ def module_run_protection(name):
         exit (-1)
 
 module_run_protection(__name__)
+
+def get_configuration(defaults):
+    home = defaults['homedir']
+    temps = defaults['templates']
+    editor = defaults['editor']
+    settings = defaults['settings']
+
+    cp = ConfigParser.RawConfigParser()
+
+    cp.add_section('main')
+
+    cp.set('main', 'home', home)
+    cp.set('main', 'templates', temps)
+    cp.set('main', 'editor', editor)
+
+    try:
+        cp.read(settings)
+    except:
+        print '-e- file with settings not found '+settings
+        exit (-1)
+
+    home = cp.get('main', 'home')
+    temps = cp.get('main', 'templates')
+    editor = cp.get('main', 'editor')
+
+
+    return {
+        'homedir'   : home,
+        'templates' : temps,
+        'editor'    : editor,
+        'settings'  : settings
+        }
+
+def filecopy(src, dst, verbose=False):
+    print '-i- copying '+src+' to '+dst
+    try:
+        s = os.open(src, 'rb')
+    except:
+        if verbose:
+            print '-e- error opening file for read '+src
+        return 1
+
+    try:
+        d =  os.open(dst, 'rb')
+    except:
+        if verbose:
+            print '-e- error opening file for write '+dst
+        return 2
+
+    try:
+        d.write(s.read())
+    except:
+        if verbose:
+            print '-e- error reading from file ' + src +\
+                ' or writing to file ' + dst
+        return 3
+
+    return 0
