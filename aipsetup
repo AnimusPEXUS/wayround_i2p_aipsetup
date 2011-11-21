@@ -81,6 +81,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		echo -e "    lu|listuniq          parse package filenames and show all uniq names"
 		echo -e "   pvc|pkgnamevcomp      find newest or oldest package from given by name (see --help)"
 		echo -e "   llu|pkgnamelstlat     list all latest packages of given"
+		echo -e "   slp|slashescape       escapes all slashes in parameter or stdin and throvs on stdout"
+		echo -e "  cat0|catzero           reads stdin and writes stdout untill first NULL in stdin"
 		echo
 		echo
 		echo -e "  --help      see this help"
@@ -229,6 +231,16 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 	    llu|pkgnamelstlat)
 		shift
 		bash "$AIP_DIR/_aipb_pkgnamelistalllatestuniq" $*
+		exit $?
+		;;
+	    slp|slashescape)
+		shift
+		bash "$AIP_DIR/_aipb_slashescape" $*
+		exit $?
+		;;
+	    cat0|catzero)
+		shift
+		bash "$AIP_DIR/_aipb_catzero" $*
 		exit $?
 		;;
 	    *)

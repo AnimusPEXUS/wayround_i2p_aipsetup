@@ -55,14 +55,14 @@ remove() {
     then
 	tmp=`bash $AIP_DIR/_aipb_gettempdir`
 	
-	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d > "$tmp/rm_list"
-	cat "$tmp/rm_list" | sed -e "s#^# rm -v '$BASEDIR#g;s/\$/'/"  > "$tmp/mrm_list"
+	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d | sort -r | sed -e "s|^|file='$BASEDIR|g;s|\$|' ; rm -v \"\$file\" ; dir=\"\`dirname \"\$file\"\`\" ; rmdir -v \"\$dir\" 2>/dev/null |"  > "$tmp/mrm_list"
+	less "$tmp/mrm_list"
 	bash "$tmp/mrm_list"
 	
 	rm -r "$tmp"
 	unset tmp
     fi
-
+    
     rm "$BASEDIR/$PKG_INFO/buildlogs/$remove_p1"
     rm "$BASEDIR/$PKG_INFO/sums/$remove_p1"
     rm "$BASEDIR/$PKG_INFO/$remove_p1"
