@@ -3,7 +3,7 @@
 if [ -f "$1" ]
 then
     ARCH_TYPE=
-    echo "extracting $1"
+#     echo "extracting $1"
 
     echo "$1" | grep -e '^.*\.tar\.gz$' > /dev/null 2>&1
     if [ $? -eq 0 ]
@@ -43,25 +43,43 @@ then
 
     case $ARCH_TYPE in
 	'tar.gz')
+	    set -o pipefail
 	    cat "$1" | gzip -d | tar -x
+	    set +o pipefail
+	    fail=$?
 	    ;;
 	'tar.bz2')
+	    set -o pipefail
 	    cat "$1" | bzip2 -d | tar -x
+	    set +o pipefail
+	    fail=$?
 	    ;;
 	'tar.lzma')
+	    set -o pipefail
 	    cat "$1" | lzma -d | tar -x
+	    set +o pipefail
+	    fail=$?
 	    ;;
 	'tar.7z')
+	    set -o pipefail
 	    7z x -so "$1" | tar -x
+	    set +o pipefail
+	    fail=$?
 	    ;;
 	'zip')
 	    unzip -qq "$1"
+	    fail=$?
 	    ;;
 	*)
 	    echo "unknown extention"
 	    exit 1
 	    ;;
     esac
+    if [ "$fail" -ne 0 ]
+    then
+	echo "file extraction error"
+    fi
+    exit $fail
 else
     echo "file not exists"
 fi
