@@ -3,6 +3,7 @@
 
 import sys
 import aipsetup_utils
+import textwrap
 import __main__
 
 
@@ -57,7 +58,10 @@ def show_group_modules(group='basic'):
     print '    == ' + group + ' modes ==\n'
 
     for i in outlist:
-        print '     "'+'" | "'.join(i[2])+'":\n       '+i[3]
+        print '     "'+'" | "'.join(i[2])+'":'
+        print textwrap.fill(i[3], 
+                            subsequent_indent='        ', 
+                            initial_indent='          ')
         print
         break
 

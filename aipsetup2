@@ -49,7 +49,7 @@ modules_data = []
 ####### aipsetup_* modules import section
 # try:
 import aipsetup_none
-# import aipsetup_edit
+import aipsetup_edit
 # except:
 #     print '-e- can not load one of the aipsetup_* modules'
 #     print '    please reinstall or reconfigure aipsetup'
@@ -135,8 +135,6 @@ for i in modules_data:
         if mode_select == j:
             correct_mode_selected = True
             module_to_run = i[0]
-
-
 
 
 if not correct_mode_selected:
