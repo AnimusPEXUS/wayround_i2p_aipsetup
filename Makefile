@@ -10,7 +10,7 @@ endif
 ifndef BINDIR
 BINDIR = /usr/bin
 endif
-# end settings
+# end of settings
 
 PPWD = `pwd`
 
@@ -33,6 +33,8 @@ default:
 	@printf "\tPREFIX == $(PREFIX)\n"
 	@printf "\tAIP_B == $(AIP_B)\n"
 	@printf "\tBINDIR == $(BINDIR)\n"
+
+help: default
 
 install: clean
 	@echo "<<<[ Installing ]>>>"
@@ -57,8 +59,9 @@ unsetup:
 	-rm "$(PREFIX)/$(BINDIR)/aipsetup"
 
 clean:
-	chown -R 0:0 .
-	chmod -R 0600 .
+	chown -R "`id -u`:`id -g`" .
+	find -type -d '!' -name '.' '!' -name '..' -exec chmod 700 '{}' ';'
+	find -type -f -exec chmod 600 '{}' ';'
 	find -type f '(' -name '*~' -o -name '*#' ')' -exec rm -v '{}' ';'
 
 release: clean
