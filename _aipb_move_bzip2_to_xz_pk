@@ -46,11 +46,11 @@ EOF
 
     cd ../pack
 
-    mv * "$ppwd"
+    mv -v * "$ppwd"
     
     cd "$ppwd"
 
-    rm -r "$tmpdir"
+    rm -v -r "$tmpdir"
 done
 
 exit 0
