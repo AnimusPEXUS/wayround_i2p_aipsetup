@@ -52,6 +52,9 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		echo -e "  misc tools:"
 		echo -e "\t ex|extract FILE\textract to the current dir"
 		echo -e "\t np|nameparse\t\tparse package filename"
+		echo -e "\t lu|listuniq\t\tparse package filenames and show all uniq names"
+		echo -e "\tpvc|pkgnamevcomp\tfind newest or oldest package from given by name (see --help)"
+		echo -e "\tllu|pkgnamelstlat\tlist all latest packages of given"
 		echo
 		echo
 		echo -e "\t--help\t\t\tsee this help"
@@ -150,10 +153,24 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		;;
 	    nameparse | np)
 		shift
-		bash "$AIP_DIR/_aipb_pkgnametool" $*
+		bash "$AIP_DIR/_aipb_pkgnameparse" $*
 		exit $?
-		;;		
-
+		;;
+	    listuniq | lu)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnamelistuniq" $*
+		exit $?
+		;;
+	    pvc | pkgnamevcomp)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnamevcompare" $*
+		exit $?
+		;;
+	    llu|pkgnamelstlat)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnamelistalllatestuniq" $*
+		exit $?
+		;;
 	    *)
 		echo "wrong parameter, use --help for info"
 		exit 0

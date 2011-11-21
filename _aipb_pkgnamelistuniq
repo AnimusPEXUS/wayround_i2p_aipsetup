@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run this from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_pkgnameparse" ]
+then
+    echo " ERROR: '$AIP_DIR/_aipb_pkgnameparse' not found"
+    exit 1
+fi
+
+list=
+for i in $*
+do
+    name="`bash \"$AIP_DIR/_aipb_pkgnameparse\" \"$i\" | grep -e \"^n:\" | sed -e \"s/^n://\"`"
+    found=0
+    for j in $list
+    do
+	if [ "$j" = "$name" ]
+	then
+	    found=1
+	    break
+	fi
+    done
+    if [ $found -ne 1 ]
+    then
+	list="$list $name"
+    fi
+done
+
+echo $list

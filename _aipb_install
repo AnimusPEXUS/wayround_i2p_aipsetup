@@ -14,6 +14,16 @@ then
     exit 1
 fi
 
+if [ "$1" = "-b" ]
+then
+    BASEDIR="$2"
+    mkdir -p "$BASEDIR"
+    shift
+    shift
+else
+    unset BASEDIR
+fi
+
 OKi=0
 ERi=0
 
@@ -22,6 +32,10 @@ do
     if [ -f "$i" ]
     then
 	printf "installing: \"$i\"...\n"
+	if [ -n "$BASEDIR" ]
+	then
+	    printf "        to:\"$BASEDIR\""
+	fi
 	printf "     md5:"
 	md5sum -c "$i".md5
 	if [ $? -ne 0 ]
@@ -41,7 +55,7 @@ do
 	fi
 
 	echo -n "      installing:"
-	bash "$AIP_DIR/_aipb_extract" "$i" "$DESTDIR"/
+	bash "$AIP_DIR/_aipb_extract" "$i" "$BASEDIR"/
 	if [ $? -eq 0 ]
 	then
 	    printf ":OK\n"

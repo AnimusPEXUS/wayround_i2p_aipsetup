@@ -1,0 +1,42 @@
+#!/bin/bash
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run this from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_pkgnamelistuniq" ]
+then
+    echo " ERROR: '$AIP_DIR/_aipb_pkgnamelistuniq' not found"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_pkgnameparse" ]
+then
+    echo " ERROR: '$AIP_DIR/_aipb_pkgnameparse' not found"
+    exit 1
+fi
+
+uniq=" `bash \"$AIP_DIR/_aipb_pkgnamelistuniq\" $*` "
+
+list=
+for i in $uniq
+do
+    echo -n "$i " 1>&2
+    nlist=
+    for j in $*
+    do
+	echo "$j" | grep -q "$i"
+	if [ "$?" -eq 0 ]
+	then
+	    nlist="$nlist $j"
+	fi
+    done
+    list="$list `bash \"$AIP_DIR/_aipb_pkgnamevcompare\" -max $i $nlist ` "
+done
+echo 1>&2
+
+echo $list
