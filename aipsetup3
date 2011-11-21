@@ -5,6 +5,7 @@
 import sys
 import getopt
 import os
+import cmd
 import __builtin__
 
 
@@ -59,13 +60,13 @@ modules_data = []
 ####### aipsetup_* modules import section
 # try:
 import aipsetup_none
-import aipsetup_templates
+import aipsetup_tpl
+import aipsetup_build
 # except:
 #     print '-e- Can not load one of the aipsetup_* modules'
 #     print '    please reinstall or reconfigure aipsetup'
 #     exit (1)
 ####### END aipsetup_* modules import section
-
 
 
 # flag to check aipsetup_none module is present

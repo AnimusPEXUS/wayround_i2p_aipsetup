@@ -1,6 +1,7 @@
-#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 
+import os.path
 import sys
 import textwrap
 import __main__
@@ -17,8 +18,8 @@ module_group = 'basic'
 module_modes = ['none']
 module_help = \
     """This is default (dummy) behavior mode. It's actually does
-    nothing, only shows this help text and list of subcommands shared
-    by submodules"""
+    nothing, only shows help text for aipsetup and list of aipsetup
+    modes"""
 
 aipsetup_utils.update_modules_data(module_name,
                                    module_group,
@@ -28,11 +29,11 @@ aipsetup_utils.update_modules_data(module_name,
 def module_help():
     print """\
 
-  usage: """+sys.argv[0:1][0]+""" -m mode [--help] [--version] \
+  usage: """+os.path.basename(sys.argv[0:1][0])+""" -m mode [--help] [--version] \
 
 
     --version       show version info
-    --help          show this help message or mode's one
+    --help          show this help message
 
     -m mode         mode (see below)
 
@@ -41,10 +42,13 @@ def module_help():
     -------
 """
     show_group_modules('basic')
-    show_group_modules('templates')
-    show_group_modules('packages')
+    show_group_modules('template')
+    show_group_modules('build')
+    show_group_modules('package')
     show_group_modules('misc')
-
+    print
+    aipsetup_utils.show_version_message()
+    return
 
 def get_module_modes(module='aipsetup_none'):
     b = []
@@ -62,7 +66,7 @@ def show_group_modules(group='basic'):
     print '    == ' + group + ' modes ==\n'
 
     for i in outlist:
-        print '     ' + ' | '.join(i[2]) + ':'
+        print u'     ' + u' | '.join(i[2]) + ':\n'
 
         tmps = i[3]
         tmps = tmps.replace('\n', ' ')
@@ -71,8 +75,8 @@ def show_group_modules(group='basic'):
 
         print textwrap.fill(
             tmps,
-            subsequent_indent = '        ',
-            initial_indent = '          ')
+            subsequent_indent = ur'         |   ',
+            initial_indent = ur'         | ')
         print
         break
 

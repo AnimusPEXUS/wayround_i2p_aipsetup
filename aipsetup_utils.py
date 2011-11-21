@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 import sys
-import ConfigParser
 import os
+import os.path
+import re
+import ConfigParser
 import shutil
 
 def module_run_protection(name):
@@ -86,3 +88,10 @@ def iocat(in_file, out_file, size=255, verbose=False):
     except:
         return 'ERROR'
     return 'EOF'
+
+def pathRemoveDblSlash(dir_str):
+    t = dir_str
+    while t.find('//') != -1:
+        t = t.replace('//', '/')
+    return t
+

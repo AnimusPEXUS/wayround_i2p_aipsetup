@@ -17,10 +17,10 @@ aipsetup_utils.module_run_protection(__name__)
 
 
 module_name = __name__
-module_group = 'templates'
-module_modes = ['tpl','templates']
+module_group = 'template'
+module_modes = ['tpl']
 module_help = \
-    """This is templates manipulations mode. Editing, deleting,
+    ur"""This is templates manipulations mode. Editing, deleting,
     listing templayes. See -m tpl --help for more info."""
 
 
@@ -29,7 +29,7 @@ aipsetup_utils.update_modules_data(
 
 
 
-def editing_help():
+def help():
     print ur"""
  This mode accepts only one argument - themplate name.
  Without argument, error will be displayed.
@@ -66,7 +66,7 @@ def run(aipsetup_config,
 
     for i in optilist:
         if i[0] == '--help':
-            editing_help()
+            help()
             exit (0)
 
     d_sett = False
