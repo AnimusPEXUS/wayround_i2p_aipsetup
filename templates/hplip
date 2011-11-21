@@ -1,12 +1,13 @@
 #!/bin/bash
-httpd() {
+
+hplip() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --with-apr=/usr/bin/apr-1-config --prefix=/usr --libdir=/usr/lib/http --datarootdir=/usr/share/httpd --sysconfdir=/etc/httpd --localstatedir=/var --enable-shared --enable-modules=all --enable-mods-shared=all --enable-so --enable-cgi --enable-ssl --enable-http --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --enable-hpijs-install --enable-hpcups-install --disable-scan-build --enable-gui-build --enable-foomatic-ppd-install --enable-foomatic-drv-install --enable-cups-drv-install --enable-cups-ppd-install  --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

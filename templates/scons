@@ -1,26 +1,26 @@
 #!/bin/bash
 
-xrdp() {
+scons() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='make'
+    RUN[$j]='python bootstrap.py build/scons'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make error'
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make check'
+    RUN[$j]='cd build/scons ; pwd'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some check error'
-    EXITONERROR[$j]=0
+    EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make install DESTDIRDEB="$bs_install_dir"'
+    RUN[$j]='python setup.py install --prefix="$bs_install_dir/usr"'
     RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make install error'
+    ERRORMESSAGE[$j]='*** some check error'
     EXITONERROR[$j]=1
 }
