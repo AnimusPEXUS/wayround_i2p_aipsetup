@@ -210,7 +210,7 @@ EOF
 #   bs_run_dir      - dir in which script was started
 #   bs_pkg_name     - package name, this used then creating
 #                     \$bs_install_dir and tar package
-#   bs_parent_dir  - parent dir of \$bs_run_dir
+#   bs_parent_dir   - parent dir of \$bs_run_dir
 #   bs_build_dir    - \$bs_parent_dir/build
 #   bs_install_dir  - \$bs_parent_dir/\$bs_pkg_name-\$PACKAGENAMESUFIX
 #   bs_buildlogfile - file, where will be all logs be placed

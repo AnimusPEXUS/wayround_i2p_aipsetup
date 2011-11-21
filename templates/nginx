@@ -1,12 +1,13 @@
 #!/bin/bash
-httpd() {
+
+nginx() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --with-apr=/usr/bin/apr-1-config --prefix=/usr/share/httpd --libdir=/usr/lib/http --datarootdir=/usr/share/httpd --bindir=/usr/bin --sbindir=/usr/sbin --mandir=/usr/share/man --includedir=/usr/include --oldincludedir=/usr/include --docdir=/usr/share/doc/httpd --dvidir=/usr/share/doc/httpd/dvi --pdfdir=/usr/share/doc/httpd/pdf --psdir=/usr/share/doc/httpd/ps --sysconfdir=/etc/httpd --localstatedir=/var --enable-shared --enable-modules=all --enable-mods-shared=all --enable-so --enable-cgi --enable-ssl --enable-http --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sbin-path=/etc/nginx --with-pcre --with-ipv6 --with-http_ssl_module'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
