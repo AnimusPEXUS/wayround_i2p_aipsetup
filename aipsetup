@@ -23,6 +23,8 @@ case "$#" in
 	    --help)
 		echo -e "usage: `basename $0`"
 		echo
+		echo -e "\tcsc|cscript\t\tcopy builder script to current dir"
+		echo -e "\tesc|escript\t\tedit builder script"
 		echo -e "\tsc|script\t\tuse builder script (see $0 script --help)"
 		echo -e "\tpk|pack\t\t\tuse packing script"
 		echo -e "\tls|list\t\t\tlist installed packages"
@@ -35,6 +37,14 @@ case "$#" in
 		echo -e "\t--help\tsee this help"
 		echo -e "\t--version\tversion info"
 		exit 0
+		;;
+	    cscript | csc)
+		cp "$AIP_DIR/_aipb_script" .
+		exit $?
+		;;
+	    escript | esc)
+		"$VISUAL" "$AIP_DIR/_aipb_script"
+		exit $?
 		;;
 	    list | ls)
 		shift
