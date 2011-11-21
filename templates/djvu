@@ -1,0 +1,36 @@
+djvu() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='export CFLAGS=" -O2 -march=i686 -mtune=i686 " ; export CPPFLAGS=" -O2 -march=i686 -mtune=i686 " ; export CXXFLAGS=" -O2 -march=i686 -mtune=i686 "  # '
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]=''
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i686-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}

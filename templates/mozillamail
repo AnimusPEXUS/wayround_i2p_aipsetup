@@ -1,0 +1,7 @@
+mozillamail() {
+    mozillabrowser
+    PACKAGENAME=thunderbird
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=mail --host=i486-pc-linux-gnu'
+}

@@ -1,0 +1,37 @@
+bzip2() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]="cat ./Makefile | sed -e \"s#PREFIX=/usr/local#PREFIX=/usr#\" | sed -e \"s#CFLAGS=-Wall -Winline -O2 -g \\\$(BIGFILES)#CFLAGS=-Wall -Winline -O2 -g \\\$(BIGFILES) -march=i486 -mtune=i486#\"  > Makefile2 #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** configuring error'
+    EXITONERROR[$j]=0
+
+
+    j=$(( $j + 1 ))
+    RUN[$j]="mv Makefile2 Makefile #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** configuring file error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install PREFIX="$bs_install_dir/usr"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}

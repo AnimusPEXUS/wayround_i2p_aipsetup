@@ -1,0 +1,5 @@
+pppms() {
+    ppp
+    local j=1
+    RUN[$j]='make CHAPMS=1 USE_CRYPT=1'
+}
