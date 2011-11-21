@@ -1445,9 +1445,12 @@ echo " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
 echo " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
 
 echo " 5 seconds sleep to start operations..."
-for (( count=5  ; [ \$count -ne 0 ] ; count=\$(( count - 1 )) ))
+count=5
+while [ \$count -ne 0 ]
 do
 printf "\$count.."
+sleep 1
+count=\$(( \$count - 1 ))
 done
 echo
 unset count
