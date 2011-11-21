@@ -1,3 +1,5 @@
+#!/bin/bash
+
 glibc() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
@@ -5,13 +7,13 @@ glibc() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]=' echo "CFLAGS += -march=i486 -mtune=native" > configparms ; '
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='xxx'
-    EXITONERROR[$j]=0
+#     RUN[$j]=' echo "CFLAGS += -march=i486 -mtune=native" > configparms  '
+#     RELATIVELY[$j]=0
+#     ERRORMESSAGE[$j]='xxx'
+#     EXITONERROR[$j]=0
     
-    j=$(( $j + 1 ))
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons=ports,soft-fp,nptl,libidn  --enable-kerner=2.6.16 --with-headers=/usr/src/linux/include --without-selinux'
+#     j=$(( $j + 1 ))
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons  --enable-kernel=2.6.16 --with-headers=/usr/src/linux/include --without-selinux --host=i486-pc-linux-gnu '
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

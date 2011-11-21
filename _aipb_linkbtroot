@@ -9,3 +9,5 @@ find -type l -printf " oldln=\`readlink \"%p\"\` ; rm '%p' ; newln=\` echo \"\$o
 echo >> ./work
 bash ./work
 rm ./work 2>&1 > /dev/null
+
+find -type f -exec bash -c " grep -q \"$ppwd\" '{}' ; if [ \"\$?\" -eq 0 ] ; then cat '{}' | sed -e \"s#$ppwd##g\" > ./tmp ; mv ./tmp \"{}\" ; fi "  ';'

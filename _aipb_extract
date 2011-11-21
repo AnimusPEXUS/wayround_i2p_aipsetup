@@ -32,19 +32,19 @@ then
 	case $ARCH_TYPE in
 	    'tar.gz' | 'tgz')
 		set -o pipefail
-		cat "$FILENAME" | gzip -d | tar -xC "$DESTDIR"
+		cat "$FILENAME" | gzip -d | tar -xvC "$DESTDIR"
 		set +o pipefail
 		fail=$?
 		;;
 	    'tar.bz2')
 		set -o pipefail
-		cat "$FILENAME" | bzip2 -d | tar -xC "$DESTDIR"
+		cat "$FILENAME" | bzip2 -d | tar -xvC "$DESTDIR"
 		set +o pipefail
 		fail=$?
 		;;
 	    'tar.lzma')
 		set -o pipefail
-		cat "$FILENAME" | lzma -d | tar -xC "$DESTDIR"
+		cat "$FILENAME" | lzma -d | tar -xvC "$DESTDIR"
 		set +o pipefail
 		fail=$?
 		;;

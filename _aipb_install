@@ -53,5 +53,9 @@ do
     fi
 done
 echo "  installed: $OKi, errors: $ERi, Total: $(( $OKi + $ERi ))"
-echo "  starting ldconfig"
+echo "ldconfig"
 ldconfig
+echo "sync"
+sync
+
+

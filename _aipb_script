@@ -148,7 +148,7 @@ form () {
     fi
     
     cleanall
-    grep -qe ".*$form_p1.*\(\).*" "$AIP_DIR/templates/$form_p1"
+    grep -qe "^$form_p1\(\)" "$AIP_DIR/templates/$form_p1"
     if [ "$?" -ne 0 ]
     then
 	echo "(error: '$form_p1' template format is bad)"
@@ -303,6 +303,7 @@ make_script () {
     form_p1=$make_script_p1
     form
 }
+
 if [ "$1" = "--help" ]
 then
     echo -e "usage: aipsetup sc [options | TRAGETS]"

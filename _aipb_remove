@@ -1,5 +1,34 @@
 #!/bin/bash
 
+#set -x
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'install' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_gettempdir" ]
+then
+    echo " ERROR: '$AIP_DIR/_aipb_gettempdir' not found"
+    exit 1
+fi
+
+onlyinfo=0
+    case "$1" in
+	"--help")
+	    echo "help"
+	    exit 0
+	    ;;
+	"-u")
+	    onlyinfo=1
+	    shift
+	    echo "only removing info about $1"
+	    ;;
+    esac
+
 PPWD=`pwd`
 
 remove_p1=
@@ -16,15 +45,18 @@ remove() {
 	echo " ERROR: wrong filelist file"
 	return 1
     fi
-    remove_line_count=`cat "$PKG_INFO/$remove_p1" | bzip2 -d | wc -l`
-    remove_i=1
-    while [ "$remove_i" -ne "$remove_line_count" ]
-    do
-	FILENAME=`cat "$PKG_INFO/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sed -e "s/^/$DESTDIR/g"`
-	echo -e "rm \"$FILENAME\""
-	rm "$FILENAME"
-	remove_i=$(( $remove_i + 1 ))
-    done
+
+    if [ $onlyinfo -ne 1 ]
+    then
+	tmp=`bash $AIP_DIR/_aipb_gettempdir`
+	
+	cat "$PKG_INFO/$remove_p1" | bzip2 -d > "$tmp/rm_list"
+	cat "$tmp/rm_list" | sed -e "s/^/ rm -v \"$DESTDIR/;s/\$/\"/"  > "$tmp/mrm_list"
+	bash "$tmp/mrm_list"
+	
+	rm -r "$tmp"
+	unset tmp
+    fi
 
     rm "$PKG_INFO/buildlogs/$remove_p1"
     rm "$PKG_INFO/sums/$remove_p1"
@@ -77,6 +109,9 @@ done
 
 err=$?
 
+echo "ldconfig"
 ldconfig
+echo "sync"
+sync
      
 exit $err
