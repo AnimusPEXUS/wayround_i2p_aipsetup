@@ -35,9 +35,10 @@ standardparser() {
     then
 	isaippackage=1
 	aipsetupbuild="$standardparser_input_filename"
-	standardparser_input_filename=`echo "$standardparser_input_filename" | sed -e 's,\-[[:digit:]]{14}\-i.86-pc-linux-gnu,,'`
+	standardparser_input_filename=`echo "$standardparser_input_filename" | sed -e 's,-\DIGIT{14}-i.86-pc-linux-gnu,,'`
     else
 	isaippackage=0
+	aipsetupbuild=
     fi
 
     l=${#standardparser_input_filename}
@@ -64,13 +65,13 @@ standardparser() {
     echo "v:$versions"
     echo "vv:$versions2"
     echo "vc:$i"
-    echo "ap:$isaippackage"
-    echo "ab:$aipsetupbuild"
 
     for (( l=0 ; l != i; l++ ))
     do
 	echo "v$l:${v[$l]}"
     done
+    echo "ap:$isaippackage"
+    echo "ab:$aipsetupbuild"
     echo
 }
 

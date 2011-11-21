@@ -103,6 +103,19 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 			cp "$AIP_DIR/templates/usr" "$AIP_DIR/templates/$2"
 		    fi
 		    "$VISUAL" "$AIP_DIR/templates/$2"
+		    size="`stat -c '%s' "$AIP_DIR/templates/$2"`"
+		    if [ "$size" -lt 10 ]
+		    then
+			echo "resulting file size < 10. it's a sign to remove it"
+			rm -v "$AIP_DIR/templates/$2"
+		    fi
+		    md51="`md5sum -b "$AIP_DIR/templates/usr"`"
+		    md52="`md5sum -b "$AIP_DIR/templates/$2"`"
+		    if [ "$md51" = "$md52" ]
+		    then
+			echo "resulting file md5 = usr file m5. it's a sign to remove it"
+			rm -v "$AIP_DIR/templates/$2"
+		    fi
 		fi
 		exit $?
 		;;

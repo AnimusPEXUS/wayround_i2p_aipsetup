@@ -41,6 +41,18 @@ then
     ARCH_TYPE="zip"
 fi
 
+echo "$FILENAME" | grep -e '^.*\.xz$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="xz"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.lzma$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="lzma"
+fi
+
 echo "$FILENAME" | grep -e '^.*\.tar\.gz$' > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
