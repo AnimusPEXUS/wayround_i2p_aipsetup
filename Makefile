@@ -62,7 +62,6 @@ unsetup:
 clean:
 	chown -R root.root .
 	chmod -R 0600 .
-	-rm _*build_*
 	find -type f -name '*~' -exec rm -v '{}' ';'
 
 release: clean
