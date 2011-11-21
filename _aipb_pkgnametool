@@ -1,0 +1,157 @@
+#!/bin/bash
+
+AIP_DIR="/mnt/sda3/_SRC/_builder/aipsetup"
+
+#set -x
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_getarchtype" ]
+then
+    echo " ERROR: can't find [$AIP_DIR/_aipb_getarchtype]"
+    exit 1
+fi
+
+# showhelp() {
+#     echo -e "usage: `basename $0` filename1 [filename2] ... [filenameN]"
+#     echo -e ""
+#     echo -e ""
+#     return
+# }
+
+# runcompare_
+# runcompare() {
+    
+#     return
+# }
+
+# filenameparse_input_filename=
+
+# filenameparse_output_pkgname_mutch=
+# filenameparse_output_pkgname=
+# for (( i=0 ; i != 10 ; i++ ))
+# do
+#     filenameparse_output_v[$i]=
+# done
+# filenameparse_output_rc_found=
+# filenameparse_output_rc_number=
+
+# filenameparse() {
+#     echo "$filenameparse_input_filename" |  grep -q -e "^$pkgname"
+#     if [ $? -ne 0 ]
+#     then
+# 	filenameparse_output_pkgname_mutch=0
+# 	echo "no mutch"
+# 	return 1
+#     fi
+#     filenameparse_output_pkgname_mutch=1
+#     local full=`basename "$filenameparse_input_filename"`
+#     local archt=`bash "$AIP_DIR/_aipb_getarchtype" "$full"`
+#     local versions=`echo "$full" | sed -e "s/^$pkgname// ; s/^[.,-]// ; s/\.$archt\$// ; s/-src\$// "`
+
+#     for (( i=0 ; i != 10 ; i++ ))
+#     do
+# 	filenameparse_output_v[$i]=
+#     done
+#     filenameparse_output_rc_found=0
+#     filenameparse_output_rc_number=0
+
+#     echo "$versions" | grep -q 'rc'
+#     if [ $? -eq 0 ]
+#     then
+# 	filenameparse_output_rc_found=1
+# 	if [ $allowrc = 'n' ]
+# 	then
+# 	    return
+# 	fi
+# 	filenameparse_output_rc_number=`echo "$versions" | sed -e "s/.*rc//" `
+# 	versions=`echo "$versions" | sed -e "s/rc.*//" `
+#     else
+# 	filenameparse_output_rc_found=0
+#     fi
+#     echo "f:$full art:$archt v:$versions rc1:$filenameparse_output_rc_found rc2:$filenameparse_output_rc_number"
+#     exit 0
+#     i=0
+#     for i in `echo "$full1" | sed -e "s/^$name1//" `
+#     do
+# 	echo -n "$i "
+#     done
+#     return 0
+# }
+
+standardparser_input_filename=
+standardparser_output_name=
+standardparser() {
+    local i
+    local l
+    local versions
+    local versions2
+    local arch
+    for (( i=0 ; i != 10 ; i++ ))
+    do
+	local v[$i]=
+    done
+    standardparser_input_filename=`basename "$standardparser_input_filename"`
+    l=${#standardparser_input_filename}
+    for (( i=l-1 ; i != -1 ; i-- ))
+    do
+	if [ "${standardparser_input_filename:$i:1}" = '-' ]
+	then
+	    standardparser_output_name=${standardparser_input_filename:0:$i}
+	    archt=`bash "$AIP_DIR/_aipb_getarchtype" "$standardparser_input_filename"`
+	    versions=` echo "$standardparser_input_filename" | sed -e "s/^$standardparser_output_name.//;s/\.$archt\$//"`
+	    break
+	fi
+    done
+    versions2=`echo "$versions" | sed -e "s/\./ /g"`
+    i=0
+    for l in $versions2
+    do
+	v[$i]=$l
+	i="$(( $i + 1 ))"
+    done
+    echo "n:$standardparser_output_name"
+    echo "a:$archt"
+    echo "v:$versions"
+    echo "vv:$versions2"
+    echo "vc:$i"
+    for (( l=0 ; l != i; l++ ))
+    do
+	echo "v$l:${v[$l]}"
+    done
+}
+
+# if [ "$#" -lt 4 ]
+# then
+#     echo "not enough parameters"
+#     exit 1
+# fi
+# pkgname=$1
+# shift
+# searchfor=$1			# 'l' or 'g'
+# if [ $searchfor != 'l' -a $searchfor != 'g' ]
+# then
+#     echo "second parameter must be 'g' or 'l' "
+#     exit 1
+# fi
+# shift
+# allowrc=$1     			# allow Release candidates 'y' or 'n'
+# if [ $allowrc != 'y' -a $allowrc != 'n' ]
+# then
+#     echo "third parameter must be 'y' or 'n' "
+#     exit 1
+# fi
+# shift
+# allowab				# allow alphas or betas
+
+# filenameparse_input_filename=$1
+# filenameparse
+
+standardparser_input_filename=$1
+standardparser
