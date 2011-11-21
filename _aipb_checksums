@@ -4,22 +4,22 @@
 
 PPWD=`pwd`
 
-remove_p1=
-remove() {
+check_p1=
+check() {
     
-    if [ ! -f "$PKG_INFO/sums/$remove_p1" ]
+    if [ ! -f "$PKG_INFO/sums/$check_p1" ]
     then
-	echo " ERROR: file $PKG_INFO/sums/$remove_p1 not found"
+	echo " ERROR: file $PKG_INFO/sums/$check_p1 not found"
 	return 1
     fi
-    basename "$remove_p1" .bz2
+    basename "$check_p1" .bz2
     if [ $? -ne 0 ]
     then
 	echo " ERROR: wrong checksum file"
 	return 1
     fi
 
-    cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sha512sum -c 
+    cat "$PKG_INFO/sums/$check_p1" | bzip2 -d | sha512sum -c 
 
     return $?
 }
