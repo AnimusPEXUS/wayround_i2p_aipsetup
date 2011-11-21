@@ -4,7 +4,7 @@ import sys
 
 def show_version_message():
     print """\
-Copyright (C) 2008-2010 (Alexey V. Gorshkov) AGUtilities
+Copyright (C) 2008-2010 Alexey V. Gorshkov (AGUtilities)
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
 

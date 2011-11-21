@@ -6,15 +6,21 @@ import sys
 import getopt
 import __builtin__
 
-# defaults
+
+
+# default settings
 
 aipsetup_home_dir = '/usr/lib/aipsetup'
 aipsetup_template_dir = aipsetup_home_dir+'/template'
 aipsetup_editor= 'usr/bin/emacs'
 
-# end of defaults
+# end of default settings
+
+
+
 
 sys.path.append(aipsetup_home_dir)
+
 
 try:
     import aipsetup_utils
@@ -23,85 +29,119 @@ except:
     print '    please reinstall or reconfigure aipsetup'
     exit (1)
 
+
+
 # modules_data contains information populated by modules. basicly it
 # is an array, containing structures. each structure devides on few
 # fields:
 #
-#  modules_data=[['plugin name', 'module group', ['mode', 'names'], ['s', 'h', 'o', 'r', 't', 'p', 'i', 'n', 's'], ['long', 'options'],'help text'],
-#                ['plugin name', 'module group', ['mode', 'names'], ['s', 'h', 'o', 'r', 't', 'p', 'i', 'n', 's'], ['long', 'options'],'help text'],
-#                ['plugin name', 'module group', ['mode', 'names'], ['s', 'h', 'o', 'r', 't', 'p', 'i', 'n', 's'], ['long', 'options'],'help text'],
+#  modules_data=[['plugin name', 'module group', ['mode', 'names'], 'help text'],
+#                ['plugin name', 'module group', ['mode', 'names'], 'help text'],
+#                ['plugin name', 'module group', ['mode', 'names'], 'help text'],
 #                ...]
-modules_data=[]
+
+modules_data = []
+
+
+
+
 
 ####### aipsetup_* modules import section
 # try:
 import aipsetup_none
-import aipsetup_edit
+# import aipsetup_edit
 # except:
 #     print '-e- can not load one of the aipsetup_* modules'
 #     print '    please reinstall or reconfigure aipsetup'
 #exit (1)
 ####### END aipsetup_* modules import section
-    
+
+
+
 # flag to check aipsetup_none module is present
-mode_none_present=False
+mode_none_present = False
 
-# generate all modules mode list to verify -m option
-mode_list=[]
-for i in modules_data:
-    for j in i[2]:
-        if j=='none':
-            # 'none module/mode must allways be'
-            mode_none_present=True
-        mode_list.append(j)
 
-if not mode_none_present:
-    print '-e- module \'none\' not loaded'
-    exit (-1)
+# here will be placed valid mode list
+mode_list = []
 
-# mode selector. default mode can be changed here, but this is not
-# recommended
-mode_select='none'
 
-# help mode will be transmited to selected module
-show_help=False
+# mode selector
+mode_select = 'none'
+
+
+# help mode will be transmitted to selected module
+show_help = False
+
 
 # default module to start
-module_to_run='aipsetup_none'
+module_to_run = 'aipsetup_none'
+
 
 # flag to check existing mode selected
-correct_mode_selected=False
+correct_mode_selected = False
 
-arguments=sys.argv[1:]
 
+# generate all modules mode list to verify -m option (populate
+# mode_list)
+for i in modules_data:
+    for j in i[2]:
+
+        if j == 'none':
+            # 'none module/mode must allways be'
+            mode_none_present = True
+
+        mode_list.append(j)
+
+
+
+
+if not mode_none_present:
+    print '-e- module ' + module_to_run + ' not loaded'
+    exit (-1)
+
+
+arguments = sys.argv[1:]
+
+# working with first argument
 if len(arguments) > 0:
-    if arguments[0]=='-m':
+    if arguments[0] == '-m':
         if len(arguments) > 1:
-            mode=arguments[1]
+            mode_select = arguments[1]
             del arguments[:2]
         else:
             print '-e- -m option must have a value'
             exit (-1)
-    elif arguments[0]=='--help':
-        show_help=True
+
+    elif arguments[0] == '--help':
+        show_help = True
         del arguments[:1]
-    elif arguments[0]=='--version':
+
+    elif arguments[0] == '--version':
         aipsetup_utils.show_version_message()
         exit (0)
+
     else:
         print """\
 -e- first argument must! be an option -m with value, --help or --version.
     Not either"""
         exit(-1)
 
+
+
+
 for i in modules_data:
     for j in i[2]:
-        if mode_select==j:
-            correct_mode_selected=True
-            module_to_run=i[0]
+        if mode_select == j:
+            correct_mode_selected = True
+            module_to_run = i[0]
+
+
+
 
 if not correct_mode_selected:
-    print '-e- incorrect mode selected or module for this mode not installed. see --help'
+    print """\
+-e- incorrect mode selected or module for this mode not installed. see --help"""
     exit (-1)
 
 module_to_run_imported = __builtin__.__import__(module_to_run)

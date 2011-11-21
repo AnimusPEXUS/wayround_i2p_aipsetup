@@ -1,19 +1,25 @@
 #!/usr/bin/python
 
+
 import sys
 import aipsetup_utils
 import __main__
 
+
 # protect module from being run as script
 aipsetup_utils.module_run_protection(__name__)
 
-module_name=__name__
-module_group='basic'
-module_modes=['none']
-module_help='This is default behavior mode. Does nothing. \
-Only shows this help page'
 
-aipsetup_utils.update_modules_data(module_name, module_group, module_modes, module_help)
+module_name = __name__
+module_group = 'basic'
+module_modes = ['none']
+module_help = \
+    "This is default behavior mode. Does nothing. Only shows this help page"
+
+aipsetup_utils.update_modules_data(module_name,
+                                   module_group,
+                                   module_modes,
+                                   module_help)
 
 def module_help():
     print """\
@@ -31,8 +37,9 @@ def module_help():
     -------
 """
     show_group_modules('basic')
-
     show_group_modules('build')
+    show_group_modules('install')
+    show_group_modules('service')
 
 def get_module_modes(module='aipsetup_none'):
     b=[]
@@ -48,7 +55,7 @@ def show_group_modules(group='basic'):
 
     outlist=modules
     print '    == ' + group + ' modes ==\n'
-    
+
     for i in outlist:
         print '     "'+'" | "'.join(i[2])+'":\n       '+i[3]
         print
@@ -62,7 +69,7 @@ def get_group_modules(group='basic'):
     return outlist
 
 def run(help_mode=False,arguments=[]):
-    if not (help_mode or (len(args) == 0)):
+    if not (help_mode or (len(arguments) == 0)):
         print 'this mode only shows help. here it is:'
 
     module_help()
