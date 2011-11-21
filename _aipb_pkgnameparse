@@ -24,7 +24,22 @@ standardparser() {
     do
 	local v[$i]=
     done
+    local aipsetupbuild
+    local isaippackage
+
     standardparser_input_filename=`basename "$standardparser_input_filename"`
+
+    echo "$standardparser_input_filename" | grep -E '\-[[:digit:]]{14}\-i.86-pc-linux-gnu' > /dev/null
+    err="$?"
+    if [ "$err" -eq 0 ]
+    then
+	isaippackage=1
+	aipsetupbuild="$standardparser_input_filename"
+	standardparser_input_filename=`echo "$standardparser_input_filename" | sed -e 's,\-[[:digit:]]{14}\-i.86-pc-linux-gnu,,'`
+    else
+	isaippackage=0
+    fi
+
     l=${#standardparser_input_filename}
     for (( i=l-1 ; i != -1 ; i-- ))
     do
@@ -49,6 +64,9 @@ standardparser() {
     echo "v:$versions"
     echo "vv:$versions2"
     echo "vc:$i"
+    echo "ap:$isaippackage"
+    echo "ab:$aipsetupbuild"
+
     for (( l=0 ; l != i; l++ ))
     do
 	echo "v$l:${v[$l]}"
