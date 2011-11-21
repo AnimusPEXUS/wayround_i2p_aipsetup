@@ -53,12 +53,12 @@ case "$#" in
 		;;
 
 	    escript | esc)
-		if [ -e "$VISUAL" ]
+		if [ -z "$VISUAL" ]
 		then
 		    echo " VISUAL not defined"
 		    exit 1
 		fi
-		if [ -e "$2" ]
+		if [ -z "$2" ]
 		then
 		    "$VISUAL" "$AIP_DIR/_aipb_script"
 		else
@@ -84,6 +84,7 @@ case "$#" in
 
 	    cscript | csc)
 		cp "$AIP_DIR/_aipb_script" .
+		cp -r "$AIP_DIR/templates" .
 		exit $?
 		;;
 
