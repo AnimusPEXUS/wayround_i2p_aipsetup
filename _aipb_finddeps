@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# this script looking for files, openable by ldd, depenfing on given
+# file
+
+filename=$1
+theretosearch=$2
+
+ppwd=`pwd`
+
+cd "$theretosearch"
+find -maxdepth 1 -type f -exec bash -c " ldd '{}' | grep '$filename' 2>&1 > /dev/null ; if [ $? -eq 0 ] ; then echo '{}' ; fi  " ';'
+
+cd "$ppwd"
