@@ -1,3 +1,5 @@
+#!/bin/bash
+
 readline() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
@@ -5,13 +7,13 @@ readline() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-curses --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-static --enable-shared --with-curses --enable-multibyte --host=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make'
+    RUN[$j]='make LDFLAGS=" -lncurses "'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make error'
     EXITONERROR[$j]=1

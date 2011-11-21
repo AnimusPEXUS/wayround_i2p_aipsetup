@@ -6,6 +6,7 @@ jdkbin() {
     SEPARATEDIR=0
     RELATIVE='.'
 
+
     local j=0
     RUN[$j]='bash jdk-*-i586.bin<<<yes'
     RELATIVELY[$j]=0
@@ -13,7 +14,7 @@ jdkbin() {
     EXITONERROR[$j]=1
     
     j=$(( $j + 1 ))
-    RUN[$j]='jdk=`find -maxdepth 1 -type d -name "jdk*"` ; jdk=`echo "$jdk" | sed -e "s/\.\///"` ; bs_install_dir="$bs_parent_dir/$jdk-$bs_pkg_sufix" ;  echo "jdk dir is $jdk" ; echo "New install dir is $bs_install_dir" ; mkdir -pv "$bs_install_dir/usr/lib/java"'
+    RUN[$j]='jdk=`find -maxdepth 1 -type d -name "jdk*"` ; jdk=`basename "$jdk"` ; bs_install_dir="$bs_run_dir/$jdk-$bs_pkg_sufix" ;  echo "jdk dir is $jdk" ; echo "New install dir is $bs_install_dir" ; mkdir -pv "$bs_install_dir/usr/lib/java"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1

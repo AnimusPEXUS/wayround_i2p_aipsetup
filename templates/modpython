@@ -1,15 +1,15 @@
 #!/bin/bash
 
-cmakeusr() {
+modpython() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='cmake -DCMAKE_INSTALL_PREFIX=/usr .'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some cmake script error'
+    RUN[$j]='configure --with-apxs=`which apxs` '
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
@@ -29,4 +29,16 @@ cmakeusr() {
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -pv "$bs_install_dir/usr/share/doc/modpython"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1    
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -r doc-html "$bs_install_dir/usr/share/doc/modpython"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1    
 }
