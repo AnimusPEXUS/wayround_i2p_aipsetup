@@ -1,0 +1,1560 @@
+#!/bin/bash
+
+############## Don't edit this function
+searchtargets() {   
+    t=''
+    TARGETS="`cat "$0" | sed -e "6d;/^.*()/{s/()/ /g;s/{//g;s/cleanall//g;s/searchtargets//g;s/looform//g;s/make_script//g;s/form//g;s/looform//g;p};d" | sort`"
+    for i in $TARGETS
+    do
+	t="$t $i"
+    done
+    TARGETS=$t
+    unset t
+}
+
+# used also as a template
+cleanall() {
+    unset PACKAGENAME	       # [string] if not set - determined from
+			       # parent dirname
+    unset PACKAGENAMESUFIX     # [string] suffix to pkg name,
+			       # e.g. ``date '+%Y%m%d%H%M%S'`-i486-pc-linux-gnu'
+    unset SEPARATEDIR	       # [0,1] dir there to do all work
+    unset RELATIVE	       # [string] dir relatively to which
+			       # "configure" are; in samba it is
+			       # `./source'. if in current then just
+			       # `./'
+    
+
+# steps necessary to achieve required goal
+    i=0
+    while [ $i -ne 9 ]
+    do
+	unset RUN[$i]		# [string] command
+	unset RELATIVELY[$i]	# [0,1] this command required to be
+				# started in source directory in case
+				# of outsource building
+	unset ERRORMESSAGE[$i]	# [string] error message in case of
+				# fault
+	unset EXITONERROR[$i]	# [0,1] if error then farther steps
+				# are useless
+	i=$(( $i + 1 ))
+    done
+}
+
+usr() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+root() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+Mesa() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-x --with-driver=xlib --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+pidgin() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-gtkspell --disable-meanwhile --disable-avahi --disable-nm  --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+apacheant() {
+    PACKAGENAME='apache-ant'
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-java-sun"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='build.sh'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some build error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/lib/apache-ant" ; cp -a dist/* "$bs_install_dir/usr/lib/apache-ant" ; mkdir -p "$bs_install_dir/etc/profile.d"  ; printf "export ANT_HOME=/usr/lib/apache-ant \nexport PATH=\"\$PATH:/usr/lib/apache-ant/bin\" \n " > "$bs_install_dir/etc/profile.d/apache-ant.sh" ; chmod 755 "$bs_install_dir/etc/profile.d/apache-ant.sh" ; mkdir -p "$bs_install_dir/usr/share/doc/apache-ant" ; cp -a docs/* "$bs_install_dir/usr/share/doc/apache-ant"  # '
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=0
+}
+
+erlang() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install INSTALL_PREFIX="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+ejabberd() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='src'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+fontforge() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-freetype-src="$bs_parent_dir\freetype" --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+}
+
+amaya() {
+    #! - I'm don't remenber
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+perl() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure.gnu --prefix=/usr --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+ppp() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install INSTROOT="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]=''
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+pppms() {
+    ppp
+    local j=1
+    RUN[$j]='make CHAPMS=1 USE_CRYPT=1'
+}
+
+quotatools() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='make install ROOTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+readline() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-curses --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+samba() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=1
+    RELATIVE='./source'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc/samba --libexecdir=/usr/libexec --libdir=/usr/lib --with-configdir=/etc/samba --with-privatedir=/etc/samba/private --includedir=/usr/include --datarootdir=/usr/share --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+squid() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/opt/squid --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+wine() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --host=i686-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make depend'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some depend error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+mozillabrowser() {
+    PACKAGENAME=firefox
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=browser  --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+mozillamail() {
+    mozillabrowser
+    PACKAGENAME=thunderbird
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=mail --host=i486-pc-linux-gnu'
+}
+
+mozillacalendar() {
+    mozillabrowser
+    PACKAGENAME=sunbird
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=calendar  --host=i486-pc-linux-gnu'
+}
+
+xfs() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='make distclean'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some distclean error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='autoconf'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some autoconf error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make clean'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some clean error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DIST_ROOT="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install-lib DIST_ROOT="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some install-lib error'
+    EXITONERROR[$j]=1
+}
+
+bash() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=1
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --with-curses --with-installed-readline  --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+pam() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-selinux --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+pwdutils() {
+    pam
+}
+
+binutils() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=1
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-targets=all --disable-werror --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+binutilsmingw32() {
+    binutils
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-mingw32"
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-targets=all --disable-werror  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
+}
+
+bochs() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-all-optimizations --host=i686-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+mplayer() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+cups() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-pam --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+boost() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+gcc() {
+    binutils
+    SEPARATEDIR=1
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-bootstrap --enable-targets=all --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu'
+    EXITONERROR[$j]=1
+}
+
+gccmingw32() {
+    binutils
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-mingw32"
+    SEPARATEDIR=1
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
+    EXITONERROR[$j]=1
+}
+
+gccmingw32o() {
+    gccmingw32
+    RUN[$j]='configure --prefix=/opt/mingw --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
+
+}
+
+e2fsprogs() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/lib --sysconfdir=/etc --localstatedir=/var --enable-elf-shlibs --enable-fsck --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+bzip2() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]="cat ./Makefile | sed -e \"s#PREFIX=/usr/local#PREFIX=/usr#\" | sed -e \"s#CFLAGS=-Wall -Winline -O2 -g \\\$(BIGFILES)#CFLAGS=-Wall -Winline -O2 -g \\\$(BIGFILES) -march=i486 -mtune=i486#\"  > Makefile2 #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** configuring error'
+    EXITONERROR[$j]=0
+
+
+    j=$(( $j + 1 ))
+    RUN[$j]="mv Makefile2 Makefile #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** configuring file error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install PREFIX="$bs_install_dir/usr"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+clamav() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='--prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-share --with-dbdir=/usr/share/clamav --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+ncurses() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-shared --enable-widec --with-gpm --with-ticlib --with-termlib --enable-const --enable-ext-colors  --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+tcltk() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=1
+    RELATIVE='unix'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-threads --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install-private-headers DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install-private-headers error'
+    EXITONERROR[$j]=1
+}
+
+expect() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-threads --enable-64bit --enable-64bit-vis --enable-wince --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make check'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+firefox() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr  --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+gdbm() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+ffmpeg() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --enable-shared --enable-gpl --enable-libtheora --enable-libvorbis --enable-x11grab --enable-libmp3lame --enable-libx264 --enable-libxvid --enable-swscale'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+glibc() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=1
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]=' echo "CFLAGS += -march=i486 -mtune=native" > configparms ; '
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='xxx'
+    EXITONERROR[$j]=0
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons=ports,soft-fp,nptl,libidn  --enable-kerner=2.6.16 --with-headers=/usr/src/linux/include --without-selinux'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install install_root="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+clisp() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=1
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='configure --prefix=/usr --cbc --srcdir=$bs_run_dir --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+}
+
+latex() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-ncurses --with-system-zlib --with-system-pnglib --with-system-t1lib --with-system-freetype --with-system-freetype2 --with-system-gd --without-xindy --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+
+looform_start=1
+looform_index=0
+looform() {
+    if [ "$looform_start" -eq 1 ]
+    then
+	looform_index=0
+	looform_start=0
+    fi
+    # add command
+    CMD="${RUN[$looform_index]}"
+
+    # add path to file in source tree
+    #???     CMD="$RELATIVE/$CMD"
+
+    # add full path in case of outsource building
+    if [ "$SEPARATEDIR" -eq 1 ]
+    then
+	if [ "${RELATIVELY[$looform_index]}" -eq 1 ]
+	then
+	    CMD="\$bs_run_dir/$RELATIVE/$CMD"
+	fi
+    else
+	if [ "${RELATIVELY[$looform_index]}" -eq 1 ]
+	then
+#	    CMD="$RELATIVE/$CMD"
+	    CMD="./$CMD"
+	fi
+    fi
+
+    
+    cat <<EOF >> ./_tnbuild_$form_p1
+echo '==================[$CMD]' | tee -a "\$bs_buildlogfile" 
+EOF
+
+    if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
+    then
+    cat <<EOF >> ./_tnbuild_$form_p1
+set -o pipefail
+EOF
+    fi
+    cat <<EOF >> ./_tnbuild_$form_p1
+$CMD 2>&1 | tee -a "\$bs_buildlogfile" 
+EOF
+
+    if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
+    then
+    cat <<EOF >> ./_tnbuild_$form_p1
+e=\$?
+set +o pipefail
+EOF
+    fi
+    if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
+    then
+	cat << EOF >> ./_tnbuild_$form_p1
+if [ \$e -eq 0 ]
+then
+EOF
+    fi
+
+    t=$(( $looform_index + 1 ))
+    if [ ! -z "${RUN[$t]}" ]
+    then
+	looform_index=$(( $looform_index + 1 ))
+	looform
+	looform_index=$(( $looform_index - 1 ))
+    else
+	cat << EOF >> ./_tnbuild_$form_p1
+echo "all complete" | tee -a "\$bs_buildlogfile"
+EOF
+    fi
+
+    if [ "${EXITONERROR[$looform_index]}" -eq 1 ]
+    then
+	cat <<EOF >> ./_tnbuild_$form_p1
+else
+echo "${ERRORMESSAGE[$looform_index]}" | tee -a "\$bs_buildlogfile" 
+exit 1
+fi
+EOF
+    fi
+}
+
+form_p1=
+form () {
+    if [ -z "$form_p1" ]
+    then
+	echo "form parameter error"
+	return 1
+    fi
+    
+    cleanall
+    $form_p1
+    
+    cat << EOF > ./_tnbuild_$form_p1
+#!/bin/bash
+#####  Builder script for $form_p1
+
+#####  WARNING! This file is generated by Make.sh, make changes in
+#####  Make.sh, not in this file
+
+#####  Settings where following:
+# \$PACKAGENAME==$PACKAGENAME
+# \$PACKAGENAMESUFIX==$PACKAGENAMESUFIX
+# \$SEPARATEDIR==$SEPARATEDIR
+# \$RELATIVE==$RELATIVE
+# \$LOGALL==$LOGALL
+
+EOF
+    i=0
+    while [ "${RUN[$i]}" != "" ]
+    do
+	cat <<EOF >> ./_tnbuild_$form_p1
+# \$RUN[$i]==${RUN[$i]}
+# \$RELATIVELY[$i]==${RELATIVELY[$i]}
+# \$ERRORMESSAGE[$i]==${ERRORMESSAGE[$i]}
+# \$EXITONERROR[$i]==${EXITONERROR[$i]}
+EOF
+	i=$(( $i + 1 ))	
+    done
+
+    cat <<EOF >> ./_tnbuild_$form_p1
+
+# Building notes:
+EOF
+    if [ "$SEPARATEDIR" -eq 1 ]
+    then
+	cat << EOF >> ./_tnbuild_$form_p1
+#   * All actions will be done in separate directory "../build"
+EOF
+    else
+	cat << EOF >> ./_tnbuild_$form_p1
+#   * All actions will be done in current directory
+EOF
+    fi
+
+    cat << EOF >> ./_tnbuild_$form_p1
+#   * Command running relatively to source dir "$SEPARATEDIR"
+
+EOF
+
+    cat << EOF >> ./_tnbuild_$form_p1
+# constants:
+#   bs_run_dir      - dir in which script was started
+#   bs_pkg_name     - package name, this used then creating
+#                     \$bs_install_dir and tar package
+#   bs_parent_dir  - parent dir of \$bs_run_dir
+#   bs_build_dir    - \$bs_parent_dir/build
+#   bs_install_dir  - \$bs_parent_dir/\$bs_pkg_name-\$PACKAGENAMESUFIX
+#   bs_buildlogfile - file, where will be all logs be placed
+
+# constants implementation:
+bs_run_dir="\`pwd\`"
+bs_parent_dir="\`dirname "\$bs_run_dir"\`"
+EOF
+
+    if [ -z "$PACKAGENAME" ]
+    then
+	cat <<EOF >> ./_tnbuild_$form_p1
+bs_pkg_name="\`basename \$bs_run_dir\`-$PACKAGENAMESUFIX"
+EOF
+    else
+	cat <<EOF >> ./_tnbuild_$form_p1
+bs_pkg_name="$PACKAGENAME-$PACKAGENAMESUFIX"
+EOF
+    fi
+
+    if [ "$SEPARATEDIR" -eq 1 ]
+    then
+	cat <<EOF >> ./_tnbuild_$form_p1
+bs_build_dir="\$bs_parent_dir/build"
+EOF
+    else
+	cat <<EOF >> ./_tnbuild_$form_p1
+bs_build_dir="\$bs_run_dir/$RELATIVE"
+EOF
+    fi
+
+    cat <<EOF >> ./_tnbuild_$form_p1
+bs_install_dir="\$bs_parent_dir/\$bs_pkg_name"
+bs_buildlogfile="\$bs_install_dir/var/log/packages/buildlogs/\$bs_pkg_name"
+
+# operations:
+mkdir -p "\`dirname \"\$bs_buildlogfile\"\`"
+EOF
+   
+    cat <<EOF >> ./_tnbuild_$form_p1
+echo "Building       \$bs_pkg_name" | tee -a "\$bs_buildlogfile" 
+echo " Start dir     \$bs_run_dir" | tee -a "\$bs_buildlogfile"
+echo " Parent dir    \$bs_parent_dir" | tee -a "\$bs_buildlogfile"
+echo " Source dir    \$bs_run_dir/$RELATIVE" | tee -a "\$bs_buildlogfile"
+echo " Build dir     \$bs_build_dir" | tee -a "\$bs_buildlogfile"
+echo " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
+echo " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
+
+echo " 5 seconds sleep to start operations..."
+for (( count=5  ; [ \$count -ne 0 ] ; count=\$(( count - 1 )) ))
+do
+printf "\$count.."
+done
+echo
+unset count
+EOF
+    
+    if [ "$SEPARATEDIR" -eq 1 ]
+    then
+	cat <<EOF >> ./_tnbuild_$form_p1
+
+mkdir -p "\$bs_build_dir"
+cd "\$bs_build_dir"
+EOF
+    else
+	cat <<EOF >> ./_tnbuild_$form_p1
+
+cd "\$bs_build_dir"
+EOF
+	
+    fi
+
+    looform_start=1
+    
+    looform
+	cat <<EOF >> ./_tnbuild_$form_p1
+
+bzip2 -9 "\$bs_buildlogfile"
+exit 0
+EOF
+    
+    return 
+}
+
+make_script_p1=
+make_script () {
+    if [ -z "$make_script_p1" ]
+    then
+	echo "*** wrong make script parameter"
+	return 1
+    fi
+    form_p1=$make_script_p1
+    form
+}
+
+searchtargets
+GENERATE=
+NGENERATE=
+FOUND=0
+
+case "$#" in
+    0)
+	echo "not enough parameters, use --help"
+	exit 0
+	;;
+    *)
+	for i in $*
+	do
+	case "$i" in
+	    --help)
+		echo -e "usage: $0 [options | TRAGETS]"
+		echo
+		echo -e "\t--list       list all builtin targets"
+		echo -e "\t--all        make all targets"
+		echo
+		echo -e "Copyright (C) 2008 AGUtilities Software, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+		exit 0
+		;;
+	    --list)
+		echo $TARGETS
+		exit 0
+		;;
+	    --all)
+		GENERATE=$TARGETS
+		break;
+		;;
+	    *)
+		FOUND=0
+		for j in $TARGETS
+		do
+		    if [ $i == $j ]
+		    then
+			GENERATE="$GENERATE $i"
+			FOUND=1
+			break
+		    fi
+		done
+		if [ "$FOUND" -eq 0 ]
+		then
+		    NGENERATE="$NGENERATE $i"
+		fi
+		;;
+	esac
+	done
+	;;
+
+esac
+if [ ! -z "$NGENERATE" ]
+then
+    echo -e "Not found:\n$NGENERATE"
+fi
+echo -e "Writing:"
+for z in $GENERATE
+do
+    echo -n " $z"
+    make_script_p1=$z
+    make_script
+done
+echo
+exit 0

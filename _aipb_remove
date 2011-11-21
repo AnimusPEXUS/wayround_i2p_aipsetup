@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ ! -f "$1" ]
+then
+    echo "*** $1 does not exists"
+    exit 1
+fi
+
+echo "removing $1"
+
+PPWD=`pwd`
+
+FILES=`cat $1 | bzip2 -d | sed -e "/^.*:.*&/d"`
+
+for i in $FILES
+do
+    rm -v "/$i"
+done
+
+exit 0

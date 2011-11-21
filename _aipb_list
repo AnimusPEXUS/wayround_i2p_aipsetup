@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ $? -eq 0 ]
+then
+    LIST=`find -maxdepth 1 -type f -name '*.bz2' | sort `
+
+    for i in $LIST
+    do
+	ls -l $i
+    done
+fi
+exit 0

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo 'changing owner'
+chown -R root.root *
+echo 'changing rules'
+chmod -R 755 *
+
+PPWD=`pwd`
+PKGNAME=`basename $PPWD`
+
+FILEDIR=./var/log/packages
+FILELIST="$FILEDIR/$PKGNAME"
+
+# rm ./*.tar.bz2 > /dev/null 2> /dev/null
+# rm ./*.tar.bz2.md5 > /dev/null 2> /dev/null
+# rm ./*.tar.bz2.sha512 > /dev/null 2> /dev/null
+
+echo "Creating package: $PKGNAME..."
+echo "  creating installed file list"
+mkdir -p "$FILEDIR" > /dev/null 2> /dev/null
+rm  "$FILEDIR"/* > /dev/null 2> /dev/null
+
+touch "$FILELIST"
+find -type f | sed -e "s/$PKGNAME\$/$PKGNAME.bz2\n/" >> "$FILELIST"
+find -type l >> "$FILELIST"
+#echo "$FILEDIR/$PKGNAME.bz2" >> "$FILELIST"
+
+cat "$FILELIST" | sort > "$FILELIST"1
+cat "$FILELIST"1 > "$FILELIST"
+rm "$FILELIST"1
+
+bzip2 -9 "$FILELIST"
+
+
+mkdir ../pack > /dev/null 2> /dev/null
+
+echo "   tarring..."
+tar --exclude _aipb_pack -c * | bzip2 -9 > "../pack/$PKGNAME.tar.bz2"
+echo "     md5..."
+md5sum -b "../pack/$PKGNAME.tar.bz2" > "../pack/$PKGNAME.tar.bz2.md5"
+echo "     sha512sum..."
+sha512sum -b "../pack/$PKGNAME.tar.bz2" > "../pack/$PKGNAME.tar.bz2.sha512"
+
+echo "done"
+exit 0

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#####                    USER editing part:
+# Settings, making all the passion on the rest of the actions
+export HOSTOPT=i486
+export OTHEROPTS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared"
+unset FLAGS
+export ACTIONDIR=`pwd`
+new_base=`basename $ACTIONDIR-$HOSTOPT`
+parent_dir=`dirname $ACTIONDIR`
+
+
+##### this is not for editing!!
+if [ -z "$FLAGS" ]
+then
+    unset FLAGS
+    unset CFLAGS
+    unset LDFLAGS
+    unset CPPFLAGS
+    unset CXXFLAGS
+else
+    export CFLAGS=$FLAGS
+    export LDFLAGS=$FLAGS
+    export CPPFLAGS=$FLAGS
+    export CXXFLAGS=$FLAGS
+fi
+##### "this is not for editing!!" section ended
+if [ ! -f ./Makefile ]
+then
+    echo "_nbuild_bzip: *** Makefile not found"
+    exit 1
+fi
+
+cat ./DEFAULTS/Defaults.linux | sed -e "s#/opt/schily#/usr#g" > ./DEFAULTS/Defaults.linux2
+rm ./DEFAULTS/Defaults.linux
+mv ./DEFAULTS/Defaults.linux2 ./DEFAULTS/Defaults.linux
+
+cat ./DEFAULTS_ENG/Defaults.linux | sed -e "s#/opt/schily#/usr#g" > ./DEFAULTS_ENG/Defaults.linux2
+rm ./DEFAULTS_ENG/Defaults.linux
+mv ./DEFAULTS_ENG/Defaults.linux2 ./DEFAULTS_ENG/Defaults.linux
+
+make clean
+make
+err=$?
+if [ $err -eq 0 ]
+then
+    make check 2>&1 | tee ./check_log
+    mkdir -p "$parent_dir/$new_base"
+    cat ./DEFAULTS/Defaults.linux | sed -e "s#INS_BASE=       /opt/schily#INS_BASE=       \"$parent_dir/$new_base\"#" > ./DEFAULTS/Defaults.linux2
+    rm ./DEFAULTS/Defaults.linux
+    mv ./DEFAULTS/Defaults.linux2 ./DEFAULTS/Defaults.linux
+    make install
+else
+    echo "_nbuild_user: *** some make errors"
+    exit 1
+fi
+exit 0

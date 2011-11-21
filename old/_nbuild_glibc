@@ -1,0 +1,41 @@
+#!/bin/bash
+#####                    USER editing part:
+# Settings, making all the passion on the rest of the actions
+export HOSTOPT=i486
+export OTHEROPTS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons --enable-kerner=2.6.24.2 --with-headers=/usr/src/linux/include --without-selinux"
+unset FLAGS
+export ACTIONDIR=`pwd`
+new_base=`basename $ACTIONDIR-$HOSTOPT`
+parent_dir=`dirname $ACTIONDIR`
+
+
+##### this is not for editing!!
+if [ -z "$FLAGS" ]
+then
+    unset FLAGS
+    unset CFLAGS
+    unset LDFLAGS
+    unset CPPFLAGS
+    unset CXXFLAGS
+else
+    export CFLAGS=$FLAGS
+    export LDFLAGS=$FLAGS
+    export CPPFLAGS=$FLAGS
+    export CXXFLAGS=$FLAGS
+fi
+##### "this is not for editing!!" section ended
+
+rm -r build > /dev/null 2> /dev/null
+mkdir build > /dev/null 2> /dev/null
+cd build
+
+../configure $OTHEROPTS --host=$HOSTOPT-pc-linux-gnu
+err=$?
+if [ $err -eq 0 ]
+then
+    make
+    err=$?
+else
+    exit 1
+fi
+exit 0

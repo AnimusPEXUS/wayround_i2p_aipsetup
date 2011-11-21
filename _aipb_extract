@@ -1,0 +1,68 @@
+#!/bin/bash
+
+if [ -f "$1" ]
+then
+    ARCH_TYPE=
+    echo "extracting $1"
+
+    echo "$1" | grep -e '^.*\.tar\.gz$' > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+	ARCH_TYPE="tar.gz"
+    fi
+
+    echo "$1" | grep -e '^.*\.tar\.bz2$' > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+	ARCH_TYPE="tar.bz2"
+    fi
+    
+    echo "$1" | grep -e '^.*\.tar\.lzma$' > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+	ARCH_TYPE="tar.lzma"
+    fi
+
+    echo "$1" | grep -e '^.*\.tgz$' > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+	ARCH_TYPE="tar.gz"
+    fi
+
+    echo "$1" | grep -e '^.*\.tar\.7z$' > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+	ARCH_TYPE="tar.7z"
+    fi
+
+    echo "$1" | grep -e '^.*\.zip$' > /dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+	ARCH_TYPE="zip"
+    fi
+
+    case $ARCH_TYPE in
+	'tar.gz')
+	    cat "$1" | gzip -d | tar -x
+	    ;;
+	'tar.bz2')
+	    cat "$1" | bzip2 -d | tar -x
+	    ;;
+	'tar.lzma')
+	    cat "$1" | lzma -d | tar -x
+	    ;;
+	'tar.7z')
+	    7z x -so "$1" | tar -x
+	    ;;
+	'zip')
+	    unzip -qq "$1"
+	    ;;
+	*)
+	    echo "unknown extention"
+	    exit 1
+	    ;;
+    esac
+else
+    echo "file not exists"
+fi
+exit 0

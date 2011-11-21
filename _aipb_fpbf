@@ -1,0 +1,5 @@
+#!/bin/bash
+cd /var/log/packages
+find -maxdepth 1 -name '*.bz2' -exec bash -c " cat '{}' |  bzip2 -d | grep '$1' ; e=\$? ; if [ \$e -eq 0 ] ; then echo -e 'found $1 in: {}\n' ; fi  " ';'
+echo "search complite"
+exit 0
