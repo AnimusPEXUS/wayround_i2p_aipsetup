@@ -1,159 +1,51 @@
 #!/usr/bin/python
 
-# this is main aipsetup executable
-
-# it is mast be disigned in such way so it needed lesser to change it in
-# future. all functional mast be in modules
-
-import sys
 import getopt
 import os
-import cmd
-import __builtin__
+import os.path
+import sys
+import aipsetup.utils
+import aipsetup.build
 
-# default settings
-
-etalon_aipsetup_config = {
-    # settings are allways here but can be overriden by option
-    'settings' :'/etc/aipsetup.conf',
-
-    # aipsetup home dir
-    'homedir'  :'/usr/lib/aipsetup',
-
-    # aipsetup templates
-    'templates':'/usr/lib/aipsetup/templates',
-
-    # editor
-    'editor'   : os.environ['VISUAL'],
-    }
-
-global aipsetup_config
-aipsetup_config = etalon_aipsetup_config
-
-# end of default settings
-
-sys.path.append(aipsetup_config['homedir'])
-
-# Next module is very required for aipsetup to function properly
 try:
-    import aipsetup_utils
-except:
-    print '-e- Main utilities module load error in '+aipsetup_home_dir
-    print '    Please reinstall or reconfigure aipsetup'
-    exit (1)
+    optilist, args = getopt.getopt(sys.argv[1:],
+                                   'v',
+                                   ['smode=', 'mode=', 
+                                    'verbose'])
 
+except getopt.GetoptError, e:
+    print '-e- Error while parsing parameters: ' + e.msg
+    exit(1)
 
-# Getting configuration from file named in intial settings
-aipsetup_config = aipsetup_utils.get_configuration(aipsetup_config)
-if (aipsetup_config == None):
-    print '-e- File with settings not found ' + etalon_aipsetup_config['settings']
-    exit (-1)
+mode=aipsetup.utils.option_check(['--mode', '-m'], optilist)
+smode=aipsetup.utils.option_check(['--smode', '-s'], optilist)
+verbose_option=aipsetup.utils.option_check(['--verbose', '-v'], optilist)
 
+ret = 0                         # default return value
 
+if not mode[0] or not smode[0]:
+    print '-e- mode and submode must be set'
+    exit(1)
 
-# ***********************************
-# The modules_data var contains information populated by aipsetup modules.
-# basicly it is an array of arrays. each such sub array devides on few fields.
-# The first field - for module name, second one - group to which this module
-# must be sett, third - array of mode names which can be used in -m key, forth -
-# some simple description text for showing on aipsetup --help
-#
-#  modules_data = [['module name', 'module group', ['mode', 'names'], 'help text'],
-#                  ['module name', 'module group', ['mode', 'names'], 'help text'],
-#                  ['module name', 'module group', ['mode', 'names'], 'help text'],
-#                  ...]
+if mode[2] == 'build' and smode[2] == 'init':
 
-# it's basicly empty
-modules_data = []
+    init_dir = 'tmp'
+    if len(args) == 1:
+        init_dir = args[0]
 
-# ***********************************
+    if len(args) > 1:
+        print '-e- too many arguments'
+        exit(1)
 
+    ret = aipsetup.build.init(directory=init_dir, verbose=verbose_option[0])
 
+if mode[2] == 'utils' and smode[2] == 'pkg_name_parse':
 
+    if len(args) != 1:
+        print '-e- exectly one argument required'
+        exit(1)
 
-####### aipsetup_* modules import section
-# try:
-import aipsetup_none
-import aipsetup_tpl
-import aipsetup_build
-# except:
-#     print '-e- Can not load one of the aipsetup_* modules'
-#     print '    please reinstall or reconfigure aipsetup'
-#     exit (1)
-####### END aipsetup_* modules import section
+    ret = aipsetup.utils.pkg_name_parse(args[0])
 
-
-# flag to check aipsetup_none module is present
-mode_none_present = False
-
-
-# here will be placed valid mode list. initialy empty.
-mode_list = []
-
-
-# mode selector. defailt mode is 'none'
-mode_select = 'none'
-
-
-# default module to start. run this module if other not requested.
-# !! so this module is requred to be on it's place always !!
-module_to_run = 'aipsetup_none'
-
-
-# flag to check existing mode selected
-correct_mode_selected = False
-
-
-# generate all modules mode list to verify -m option (populate
-# mode_list)
-for i in modules_data:
-    for j in i[2]:
-
-        if j == 'none':
-            # 'none module/mode must allways be'
-            mode_none_present = True
-
-
-if not mode_none_present:
-    print '-e- Module ' + module_to_run + ' not loaded'
-    exit (-1)
-
-for i in modules_data:
-    for j in i[2]:
-        mode_list.append(j)
-
-
-arguments = sys.argv[1:]
-
-# working with first argument
-if len(arguments) > 0:
-    if arguments[0] == '-m':
-        if len(arguments) > 1:
-            mode_select = arguments[1]
-            del arguments[:2]
-        else:
-            print '-e- -m option must have the value'
-            exit (-1)
-
-    else:
-        mode_select = 'none'
-
-
-
-for i in modules_data:
-    for j in i[2]:
-        if mode_select == j:
-            correct_mode_selected = True
-            module_to_run = i[0]
-
-
-if not correct_mode_selected:
-    print "-e- Incorrect mode selected or module for this mode is not installed."
-    print "    See aipsetup --help for correct modes."
-    exit (-1)
-
-module_to_run_imported = __builtin__.__import__(module_to_run)
-
-module_to_run_imported.run(aipsetup_config, arguments)
-
-exit(0)
+print '-i- end'
+exit(ret)

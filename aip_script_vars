@@ -1,8 +1,0 @@
-Building      $bs_pkg_name
-Name sufix    $bs_pkg_sufix
-Start dir     $bs_run_dir
-Parent dir    $bs_parent_dir
-Source dir    $bs_run_dir
-Build dir     $bs_build_dir
-Install dir   $bs_install_dir
-Logging to    $bs_buildlogfile

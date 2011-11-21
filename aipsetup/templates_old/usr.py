@@ -10,7 +10,7 @@ template={
     'stages'           : [
 
         {
-            'RUN'          : """ configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu """,
+            'RUN'          : """ configure  """,
             'RELATIVELY'   : True,
             'ERRORMESSAGE' : '*** some configure script error',
             'EXITONERROR'  : True

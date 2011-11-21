@@ -7,10 +7,11 @@ import os.path
 import re
 import ConfigParser
 import shutil
+import traceback
 
 
 # *******************
-# Protective function. Protects modules using it from being run as scripts
+# Protective function. Protects modules from being run as scripts
 # requires __name__ as parameter
 def module_run_protection(name):
     if name == "__main__":
@@ -101,3 +102,28 @@ def pathRemoveDblSlash(dir_str):
     while t.find('//') != -1:
         t = t.replace('//', '/')
     return t
+
+def option_check(names=['--help', '-h'], optionlist=[]):
+    '''search option list for required option and returnd tupil in
+    which first element is False or True depending on search success,
+    second is option exect name, third is value'''
+
+    for i in optionlist:
+        for j in names:
+            
+            if i[0] == j:
+                return (True, i[0], i[1])
+
+    return (False, None, None)
+
+# def traceback_return(info):
+#     ret = u''
+#     print repr(info[0])
+#     for i in traceback.extract_tb(info[2]):
+#         ret += u'   -T-  ['+unicode(i[1])+'] ('+unicode(repr())+')'+unicode()+' ('+unicode(repr(tb_object.tb_frame))+')'
+#         tb_object = tb_object.tb_next
+#     return ret
+
+def pkg_name_parse(name='aaa-1.1.1.1.tar.gz'):
+    result = re.match('([0-9A-Za-z_\ -]*)-?(.*)(tar\.gz|tar\.bz2|tar\.xz|tgz|tbz2|zip|7z|tar)$', name)
+    print repr(result.groups())
