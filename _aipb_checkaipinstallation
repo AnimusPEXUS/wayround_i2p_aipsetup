@@ -37,7 +37,7 @@ incheck() {
 	return 1
     fi
     
-    for i in _aipb_build _aipb_catzero _aipb_checkaipinstallation _aipb_checksums _aipb_extract _aipb_finddeps _aipb_fpbf _aipb_getarchtype _aipb_gettempdir _aipb_init _aipb_install _aipb_lddsums _aipb_list _aipb_listfromunic _aipb_move_bzip2_to_xz _aipb_move_bzip2_to_xz_pk _aipb_pack _aipb_pkgnamelistalllatestuniq _aipb_pkgnamelistuniq _aipb_pkgnameparse _aipb_pkgnamevcompare _aipb_pksums _aipb_remove _aipb_script _aipb_slashescape _aipb_slinksa2r 
+    for i in _aipb_build _aipb_catzero _aipb_checkaipinstallation _aipb_checksums _aipb_extract _aipb_finddeps _aipb_fixsoftlink _aipb_fixsoftlink~ _aipb_fixsoftlinks _aipb_fixsoftlinks~ _aipb_fpbf _aipb_getarchtype _aipb_gettempdir _aipb_init _aipb_install _aipb_lddsums _aipb_list _aipb_listfromunic _aipb_move_bzip2_to_xz _aipb_move_bzip2_to_xz_pk _aipb_pack _aipb_pkgnamelistalllatestuniq _aipb_pkgnamelistuniq _aipb_pkgnameparse _aipb_pkgnamevcompare _aipb_pksums _aipb_remove _aipb_script _aipb_slashescape _aipb_slinksa2r
     do
 	
 	if [ ! -f "$AIP_DIR/$i" -o ! -r "$AIP_DIR/$i" ]

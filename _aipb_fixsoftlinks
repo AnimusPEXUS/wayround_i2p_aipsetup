@@ -14,13 +14,6 @@ fi
 
 PPWD=`pwd`
 
-links=
+find -type l -exec bash "$AIP_DIR/_aipb_fixsoftlink" '{}' ';'
 
-find -type l 
-
-j=0
-for $i in $links 
-do
-    echo "$j: $i"
-    j="$(( $j + 1 ))"
-done
+exit 0
