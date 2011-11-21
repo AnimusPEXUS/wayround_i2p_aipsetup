@@ -1,13 +1,13 @@
 #!/bin/bash
 
-openssl() {
+TeXLive() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='config --prefix=/usr 386 '
+    RUN[$j]='configure  --without-xindy --with-system-freetype --with-system-freetype2 --with-system-ncurses --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -19,13 +19,13 @@ openssl() {
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make test'
+    RUN[$j]='make check'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some check error'
     EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
-    RUN[$j]='make install INSTALL_PREFIX="$bs_install_dir"'
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
