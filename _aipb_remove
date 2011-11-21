@@ -62,7 +62,7 @@ remove() {
 	tmp=`bash $AIP_DIR/_aipb_gettempdir`
 	
 	cat "$BASEDIR/$PKG_INFO/$remove_p1" | bzip2 -d > "$tmp/rm_list"
-	cat "$tmp/rm_list" | sed -e "s/^/ rm -v \"$BASEDIR/;s/\$/\"/"  > "$tmp/mrm_list"
+	cat "$tmp/rm_list" | sed -e "s#^# rm -v '$BASEDIR#g;s/\$/'/"  > "$tmp/mrm_list"
 	bash "$tmp/mrm_list"
 	
 	rm -r "$tmp"
@@ -99,7 +99,7 @@ done
 
 err=$?
 
-if [ -n "$BASEDIR" ]
+if [ -z "$BASEDIR" ]
 then
     echo "ldconfig"
     ldconfig
