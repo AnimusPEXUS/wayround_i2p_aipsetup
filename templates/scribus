@@ -3,11 +3,11 @@
 scribus() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
-    SEPARATEDIR=0
+    SEPARATEDIR=1
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='cmake -DCMAKE_INSTALL_PREFIX=/usr .'
+    RUN[$j]='cmake -DCMAKE_INSTALL_PREFIX=/usr "$bs_run_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some cmake script error'
     EXITONERROR[$j]=1

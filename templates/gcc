@@ -7,7 +7,7 @@ gcc() {
     RELATIVE='.'
     # --enable-targets=all 
     local j=0
-    RUN[$j]='configure --enable-targets=all --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-bootstrap --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-bootstrap --enable-threads=posix --enable-targets=all --enable-multiarch --with-arch-32=i486 --with-tune=generic --enable-checking=release --with-gmp --with-mpfr --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

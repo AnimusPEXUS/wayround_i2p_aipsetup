@@ -1,0 +1,68 @@
+#!/bin/bash
+
+libwrap() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+    
+    local j=0
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/lib/libwrap"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/bin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/sbin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/include"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/libexec"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='make REAL_DAEMON_DIR="/usr/libexec" linux'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -v libwrap.a "$bs_install_dir/usr/lib"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -v tcpd  "$bs_install_dir/usr/libexec"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -v tcpdchk try-from tcpdmatch  "$bs_install_dir/usr/bin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -v *.h  "$bs_install_dir/usr/include"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}

@@ -7,7 +7,7 @@ openssh() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --with-tcp-wrappers --with-pam --with-selinux --prefix=/usr --sysconfdir=/etc/ssh --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --with-tcp-wrappers --with-pam --prefix=/usr --sysconfdir=/etc/ssh --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

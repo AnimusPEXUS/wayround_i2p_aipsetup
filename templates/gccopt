@@ -2,12 +2,12 @@
 
 gccopt() {
     PACKAGENAME=
-    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-mingw32"
     SEPARATEDIR=1
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/opt/gcc --enable-targets=all --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/opt/gcc --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
