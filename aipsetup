@@ -3,11 +3,33 @@
 #this will be changed during 'make install'
 export AIP_DIR=""
 
-if [ ! -d "$AIP_DIR" ]
+if [ -z "$AIP_DIR" ]
 then
-    echo "\$AIP_DIR variable not set, please use 'make install' in the source directory"
+    echo " SORRY: \$AIP_DIR must be set by aipsetup installed in /usr/bin."
+    echo "        but it isn't set."
+    echo " ERROR: aipsetup not installed. reinstall please."
     exit 1
 fi
+
+if [ ! -f "$AIP_DIR/_aipb_checkaipinstallation" ]
+then
+    echo "file \"\$AIP_DIR/_aipb_checkaipinstallation\" not found"
+    if [ ! -r "$AIP_DIR/_aipb_checkaipinstallation" ]
+    then
+	echo "file \"\$AIP_DIR/_aipb_checkaipinstallation\" not readable"
+	exit 1
+    fi
+    exit 1
+fi
+
+bash "$AIP_DIR/_aipb_checkaipinstallation" ins
+if [ "$?" -ne 0 ]
+then
+    echo "some aipsetup installation error. reinstall please."
+    exit 1
+fi
+
+exit 0
 
 case "$#" in
     0)

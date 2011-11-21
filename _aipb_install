@@ -8,12 +8,6 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_extract" ]
-then
-    echo " ERROR: '$AIP_DIR/_aipb_extract' not found"
-    exit 1
-fi
-
 if [ "$1" = "-b" ]
 then
     BASEDIR="$2"

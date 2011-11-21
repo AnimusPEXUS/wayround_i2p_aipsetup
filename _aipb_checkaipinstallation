@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# this script's main goal is, to check aipsetup installation
+# correctancy.
+
+# it is must be started by the aipsetup, before any other thing. So
+# this script will tellback it's opinion on this subject. 
+
+# If ansver is:
+#
+#  0 - then aipsetup is correctly installed, and all tools it needs
+#  are in place. if ansver is
+#
+#  1 - dependency check. then there is no some needed tools in place
+#  for all aipsetup's needs.
+#
+#  2 - something wrong with aipsetup installation itself
+
+depcheck() {
+    return 0
+}
+
+incheck() {
+    if [ -z "$AIP_DIR" ]
+    then
+	echo " SORRY: \$AIP_DIR must be set by aipsetup installed in /usr/bin."
+	echo "        but it isn't set."
+	echo " ERROR: aipsetup not installed. reinstall please."
+	return 1
+    fi
+    
+    if [ ! -d "$AIP_DIR" -o ! -r "$AIP_DIR" -o ! -w "$AIP_DIR" ]
+    then
+	echo " SORRY: aipsetup directory must exist and be readable,"
+	echo "        writable and executable by You. But it isn't"
+	echo " ERROR: aipsetup directory is not accessiable"
+	return 1
+    fi
+    
+    for i in _aipb_build _aipb_checksums\
+_aipb_extract _aipb_finddeps _aipb_fpbf _aipb_getarchtype\
+_aipb_gettempdir _aipb_init _aipb_install _aipb_lddsums _aipb_list\
+_aipb_listfromunic _aipb_pack _aipb_pkgnamelistalllatestuniq\
+_aipb_pkgnamelistuniq _aipb_pkgnameparse _aipb_pkgnamevcompare\
+_aipb_pksums _aipb_remove _aipb_script _aipb_slinksa2r    
+    do
+	
+	if [ ! -f "$AIP_DIR/$i" -o ! -r "$AIP_DIR/$i" ]
+	then
+	    echo " ERROR: can't find [$AIP_DIR/$i]. installation broken!. exiting."
+	    return 1
+	fi
+	
+    done
+    return 0
+}
+
+case "$1" in
+    'dep'))
+    depcheck
+    if [ "$?" -ne 0 ]
+    then
+	exit 1
+    fi
+    ;
+    'ins'))
+    incheck
+    if [ "$?" -ne 0 ]
+    then
+	exit 1
+    fi
+    ;
+    'all'))
+    incheck
+    if [ "$?" -ne 0 ]
+    then
+	exit 1
+    fi
+    depcheck
+    if [ "$?" -ne 0 ]
+    then
+	exit 1
+    fi
+    ;
+    *)
+    echo "unknown parameter"
+    exit 1
+    ;
+esac
+
+
+exit 0

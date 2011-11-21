@@ -20,7 +20,6 @@ default:
 	@printf "aipsetup " ; cat VERSION ; echo
 	@printf "when installing:\n"
 	@printf "\tmake install     - install to PREFIX/AIP_B dir and 'make setup' it\n"
-# 	@printf "\tmake uninstall   - 'make unsetup' and remove PREFIX/AIP_B dir\n"
 	@printf "\n"
 	@printf "when installed:\n"
 	@printf "\tmake setup       - setup to BINDIR\n"
@@ -42,9 +41,6 @@ install: clean
 	cp -r * "$(PREFIX)/$(AIP_B)"
 	@echo "<<<[ Installed ]>>>"
 	$(MAKE) -C "$(PREFIX)/$(AIP_B)" setup
-
-# uninstall: unset
-# 	-rm -rf *
 
 setup:
 	@echo "<<<[ Setting Up ]>>>"

@@ -1,17 +1,14 @@
-WARNING: This README is heavily outdated and all futures are complete.
-         You can do full specter of fings in aipsetup.
-         Please see `aipsetup --help' for more info.
-         
-         Friday 24 July 2009
-~~~~~~~~~~~
+October 31 2009
+
 Hi All
 
-I'm AGUtilities, and I'm trying to build my own GNU/Linux
-distribution. And, while moving to my target, I realized that there is
-no packaging system suitable to my requirements. So I decided to write
-My own. So here it is. I called it `aipsetup'
+I'm AGUtilities, and I'm mainteining my own GNU/Linux distribution,
+it's called Atlas WayRound GNU/Linux (Atlas Linux for short). While
+i've moved to my target, I realized that there is no packaging system,
+suitable by my requests. So I decided to write My own. So here it
+is. I called it `aipsetup'
 
-~
+~~~
 
 What does it do?
 
@@ -27,54 +24,108 @@ of this tools are follow:
 6. checking installed package integrity
 etc
 
-At current time installation and check is not realized at
-all. Partially realized removal. Building component realized, but
-requires little rules tuning.
-
-
+~~~
 
 Installation.
 
+Download lattest aipsetup package from
+http://wayround.org/mirrors/AtlasLinux/aipsetup/ , extract it
+somewhere, and do:
 
-Download aipsetup(version number).tar.lzma. Extract it. : 
+make install
 
-cat file.tar.lzma | lzma -d | tar -x /root/aip
+It will be installed in /usr/lib/aipsetup directory, and executable
+file, will be placed to /usr/bin.
 
->>> By the way, You need to be a root to use aipsetup
+Installation is now complite :-)
 
-then type: 
-#make install 
-
-and, by default, it will be installed to /usr/lib/aipsetup, and
-aipsetup front end will be placed to file /usr/bin/aipsetup, and will
-be madden executable only by root
-
-
+~~~
 
 Usage.
 
+~~~~~~~~
+One command program build
+~~~~~~~~
 
-to extract files from archive:
-aipsetup ex file.tar.lzma
+if your' aipsetup has propriaste template installed, then You can
+build many apps by one single command:
 
-to build e.g. tar do:
-cd tar<tab>
-aipsetup sc usr
-bash _tnbuild_usr
+aipsetup bd wine wine-1.1.31.tar.gz
 
-to pack it:
-cd ../tar-(something)
-aipsetup pack
+ where:
+  aipsetup           - command
+  bd       	     - aipsetup command
+  wine     	     - template aipsetup must use to build package
+  wine-1.1.31.tar.gz - sources ( can be multiple filenames or wildcard)
 
-to install pack:
-cd ../pack
-tar -xf <tab> -jC /
+aipsetup, internaly, does all staff, including extraction, building
+and packaging.
 
-to list already installed files:
-aipsetup list | less -S
+on the end, You'll have pack directory with new, ready to install
+package, or if any errors will happen, log of all operation
 
-to remove Slackware or aipsetup package:
-aipsetup rm (package file from list .tar.bz2)
+~~~~~~~~
+File extraction
+~~~~~~~~
 
-search package by file:
-aipsetup fn `which soffice`
+aipsetup ex filename
+
+will extract fiven file to current dir
+
+~~~~~~~~
+Compilling building script 
+~~~~~~~~
+
+aipsetup sc wine
+
+Will create build script for building package.
+
+This command assumed to be deploid right in the first source dir ofthe
+package. 
+
+~~~~~~~~
+Building packare
+~~~~~~~~
+
+execute script created by aipsetup with bash and it will build
+package, logging all process to package's 'var' dir.
+
+~~~~~~~~
+Creating installation package
+~~~~~~~~
+
+Go to new package dir and command
+
+aipsetup pk
+
+and it will create package in ../pack directory
+
+~~~~~~~~
+Installing and uninstallin package
+~~~~~~~~
+
+package can be installed or uninstalled
+
+aipsetup in 'package filename or wildcard'
+aipsetup in wine-*.tar.bz2
+
+aipsetup rm 'package filename or wildcard'
+aipsetup rm 'wine-*'
+
+~~~~~~~~
+List installed packages
+~~~~~~~~
+
+aipsetup ls 'wine-*'
+
+
+~~~~~~~~~~~
+
+aipsetup have also some nice tools for serchid dependenties and things
+like thet. See aipsetup --help
+
+~~
+
+Finally I have updated this README. 
+
+be Happy

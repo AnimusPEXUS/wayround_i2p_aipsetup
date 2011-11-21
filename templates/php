@@ -1,4 +1,5 @@
 #!/bin/bash
+
 php() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
@@ -24,7 +25,43 @@ php() {
     EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/etc/httpd"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='echo -e "\n\nLoadModule rewrite_module modules/mod_rewrite.so\nLoadModule rewrite_module modules/mod_rewrite.so\n\n" > "$bs_install_dir/etc/httpd/httpd.conf" #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some install error'
+    EXITONERROR[$j]=0
+    
+    j=$(( $j + 1 ))
     RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mv "$bs_install_dir/etc/httpd/httpd.conf" "$bs_install_dir/etc/httpd/httpd.conf.php"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some install error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cd "$bs_install_dir" #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='find -maxdepth 1 -type d "(" -name ".channels" -o -name ".registry" ")" -print -exec rm -vr "{}" ";"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='find -maxdepth 1 -type f -name ".*" -print -exec rm "{}" ";"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1

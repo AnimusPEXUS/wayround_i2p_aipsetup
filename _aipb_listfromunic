@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -f
+
 if [ ! -d "$AIP_DIR" ]
 then
     echo " SORRY: please, install aipsetup (if not yet),"
@@ -7,11 +9,6 @@ then
     echo " ERROR: AIP_DIR not set"
     exit 1
 fi
-
-# this file lists packages installed in system.  -b parameter can be
-# used to change system base dir ( by default / ).
-
-set -f
 
 unset BASEDIR
 if [ "$1" = "-b" ]

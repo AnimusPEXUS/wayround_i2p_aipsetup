@@ -12,11 +12,6 @@ searchtargets() {
     t=`pwd`
     cd "$AIP_DIR/templates"
     TARGETS=`find . -type f ! -name '*~' -exec bash -c "echo \"{}\" | sed -e \"s/^.\///g\" " ';' | sort `
-#     for i in $TARGETS
-#     do
-# 	t="$t $i"
-#     done
-#     TARGETS=$t
     cd "$t"
     unset t
 }

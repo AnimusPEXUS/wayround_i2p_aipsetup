@@ -8,7 +8,7 @@ then
     exit 1
 fi
 
-. "$AIP_DIR/_aipb_init"
+# this program searchs given file in packages installation logs
 
 cd "$PKG_INFO"
 find -maxdepth 1 -name '*.bz2' -exec bash -c " cat '{}' |  bzip2 -d | grep '$1' ; e=\$? ; if [ \$e -eq 0 ] ; then echo -e 'found $1 in: {}\n' ; fi  " ';'

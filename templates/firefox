@@ -7,17 +7,36 @@ firefox() {
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=browser  --host=i486-pc-linux-gnu'
-    RELATIVELY[$j]=1
+    RUN[$j]='mkdir -p "$bs_build_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cd "$bs_run_dir" #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]="echo -e \"mk_add_options MOZ_OBJDIR='\$bs_build_dir' \nac_add_options --enable-application=suite \nac_add_options --enable-optimize \nac_add_options --enable-default-toolkit=cairo-gtk2 \nac_add_options --enable-xft \nac_add_options --enable-freetype2\" > \"\$bs_run_dir/.mozconfig\" #"
+#    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=browser  --host=i486-pc-linux-gnu'
+    RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
     
     j=$(( $j + 1 ))
-    RUN[$j]='make'
+    RUN[$j]='make -f "$bs_run_dir/client.mk" build'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make error'
     EXITONERROR[$j]=1
     
+    j=$(( $j + 1 ))
+    RUN[$j]='cd "$bs_build_dir" #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
     j=$(( $j + 1 ))
     RUN[$j]='make check'
     RELATIVELY[$j]=0

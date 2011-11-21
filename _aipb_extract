@@ -8,12 +8,6 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_getarchtype" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_getarchtype]"
-    exit 1
-fi
-
 FILENAME="$1"
 
 if [ ! -d "$2" ]
@@ -45,6 +39,12 @@ then
 	    'tar.lzma')
 		set -o pipefail
 		cat "$FILENAME" | lzma -d | tar -xvC "$DESTDIR"
+		set +o pipefail
+		fail=$?
+		;;
+	    'tar.xz')
+		set -o pipefail
+		cat "$FILENAME" | xz -d | tar -xvC "$DESTDIR"
 		set +o pipefail
 		fail=$?
 		;;

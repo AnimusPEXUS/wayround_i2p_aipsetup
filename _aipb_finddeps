@@ -3,6 +3,15 @@
 # this script looking for files, openable by ldd, depenfing on given
 # file
 
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run this from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
 filename=$1
 theretosearch=$2
 

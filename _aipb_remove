@@ -10,12 +10,6 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_gettempdir" ]
-then
-    echo " ERROR: '$AIP_DIR/_aipb_gettempdir' not found"
-    exit 1
-fi
-
 unset BASEDIR
 onlyinfo=0
 while [ '1' -eq '1' ]

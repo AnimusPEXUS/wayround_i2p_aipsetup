@@ -8,29 +8,8 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_extract" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_extract]"
-    exit 1
-fi
-
-if [ ! -f "$AIP_DIR/_aipb_script" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_script]"
-    exit 1
-fi
-
-if [ ! -f "$AIP_DIR/_aipb_pack" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_script]"
-    exit 1
-fi
-
-if [ ! -f "$AIP_DIR/_aipb_gettempdir" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_gettempdir]"
-    exit 1
-fi
+# this is packet building program. it searches file names by extention
+# and builds it using given template
 
 if [ -z "$1" ]
 then
@@ -40,7 +19,7 @@ fi
 
 if [ ! -f "$AIP_DIR/templates/$1" ]
 then
-    echo "wrong template"
+    echo "wrong template. not found."
     exit 1
 fi
 

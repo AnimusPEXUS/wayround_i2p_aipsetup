@@ -8,12 +8,6 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_pkgnameparse" ]
-then
-    echo " ERROR: '$AIP_DIR/_aipb_pkgnameparse' not found"
-    exit 1
-fi
-
 list=
 for i in $*
 do

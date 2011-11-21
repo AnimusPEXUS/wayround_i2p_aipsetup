@@ -1,5 +1,5 @@
 #!/bin/bash
 
-INSTALL_AIPSETUP_TO="$DESTDIR/usr/bin"
+export INSTALL_AIPSETUP_TO="$DESTDIR/usr/bin"
 
-PKG_INFO="$DESTDIR/var/log/packages"
+export PKG_INFO="$DESTDIR/var/log/packages"

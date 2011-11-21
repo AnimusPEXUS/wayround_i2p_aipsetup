@@ -8,8 +8,6 @@ then
     exit 1
 fi
 
-. "$AIP_DIR/_aipb_init"
-
 echo -n "checksums creating..."
 
 PPWD=`pwd`

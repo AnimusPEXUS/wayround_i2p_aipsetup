@@ -12,12 +12,6 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_getarchtype" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_getarchtype]"
-    exit 1
-fi
-
 standardparser_input_filename=
 standardparser_output_name=
 standardparser() {

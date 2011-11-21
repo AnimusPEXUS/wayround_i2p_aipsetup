@@ -8,12 +8,6 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aipb_pkgnameparse" ]
-then
-    echo " ERROR: can't find [$AIP_DIR/_aipb_pkgnameparse]"
-    exit 1
-fi
-
 sif=
 
 case "$1" in

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run this from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
 ARCH_TYPE=
 FILENAME="$1"
 
@@ -49,6 +57,12 @@ echo "$FILENAME" | grep -e '^.*\.tar\.lzma$' > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
     ARCH_TYPE="tar.lzma"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.tar\.xz$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="tar.xz"
 fi
 
 echo "$FILENAME" | grep -e '^.*\.tar\.7z$' > /dev/null 2>&1
