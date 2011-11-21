@@ -1,5 +1,0 @@
-#!/bin/bash
-./configure --disable-nls --target=mingw32 \
---prefix=/opt/cross-tools --disable-shared
-make  "CFLAGS=-O2 -fno-exceptions" "LDFLAGS=-s"
-make install

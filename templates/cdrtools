@@ -1,0 +1,74 @@
+#!/bin/bash
+cdrtools() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+
+    RUN[$j]='cat ./DEFAULTS/Defaults.linux | sed -e "s#/opt/schily#/usr#g" > ./DEFAULTS/Defaults.linux2 #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='?'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='rm ./DEFAULTS/Defaults.linux #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='?'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mv ./DEFAULTS/Defaults.linux2 ./DEFAULTS/Defaults.linux #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='?'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cat ./DEFAULTS_ENG/Defaults.linux | sed -e "s#/opt/schily#/usr#g" > ./DEFAULTS_ENG/Defaults.linux2 #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='?'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='rm ./DEFAULTS_ENG/Defaults.linux #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='?'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mv ./DEFAULTS_ENG/Defaults.linux2 ./DEFAULTS_ENG/Defaults.linux #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='?'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cat ./DEFAULTS/Defaults.linux | sed -e "s#INS_BASE=       /opt/schily#INS_BASE=       \"$parent_dir/$new_base\"#" > ./DEFAULTS/Defaults.linux2 #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='rm ./DEFAULTS/Defaults.linux'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mv ./DEFAULTS/Defaults.linux2 ./DEFAULTS/Defaults.linux'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}

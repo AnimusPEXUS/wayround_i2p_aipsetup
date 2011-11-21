@@ -53,7 +53,17 @@ case "$#" in
 		;;
 
 	    escript | esc)
-		"$VISUAL" "$AIP_DIR/_aipb_script"
+		if [ -e "$VISUAL" ]
+		then
+		    echo " VISUAL not defined"
+		    exit 1
+		fi
+		if [ -e "$2" ]
+		then
+		    "$VISUAL" "$AIP_DIR/_aipb_script"
+		else
+		    "$VISUAL" "$AIP_DIR/templates/$2"
+		fi
 		exit $?
 		;;
 	    script | sc)
