@@ -31,7 +31,7 @@ jdkbin() {
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='echo -en "#!/bin/bash\n export PATH="\$PATH:/usr/lib/java/$jdk/bin:/usr/lib/java/$jdk/jre/bin"\n  " > "$bs_install_dir/etc/profile.d/SET/009.java" '
+    RUN[$j]='echo -en "#!/bin/bash\n export PATH="\$PATH:/usr/lib/java/$jdk/bin:/usr/lib/java/$jdk/jre/bin"\n export JAVA_HOME=/usr/lib/java/$jdk  " > "$bs_install_dir/etc/profile.d/SET/009.java" '
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1

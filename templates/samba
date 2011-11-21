@@ -4,10 +4,10 @@ samba() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=1
-    RELATIVE='source'
+    RELATIVE='source3'
 
     local j=0
-    RUN[$j]='configure --with-swatdir=/usr/share/samba/swat --prefix=/usr --localstatedir=/var --sysconfdir=/etc/samba --libexecdir=/usr/libexec --libdir=/usr/lib --with-configdir=/etc/samba --with-privatedir=/etc/samba/private --includedir=/usr/include --datarootdir=/usr/share --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --with-pam --with-pam_smbpass --enable-fhs --with-swatdir=/usr/share/samba/swat --prefix=/usr --localstatedir=/var --sysconfdir=/etc/samba --libexecdir=/usr/libexec --libdir=/usr/lib --with-configdir=/etc/samba --with-privatedir=/etc/samba/private --includedir=/usr/include --datarootdir=/usr/share --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
