@@ -6,7 +6,7 @@ ejabberd() {
     RELATIVE='src'
     
     local j=0
-    RUN[$j]='configure  --enable-shared --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --with-openssl=/usr --enable-shared --host=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
