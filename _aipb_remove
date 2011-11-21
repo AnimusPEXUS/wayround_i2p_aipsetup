@@ -61,32 +61,11 @@ remove() {
 	
 	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d | sort -r > "$tmp/list_1"
 
-	loca="`wc -l \"$tmp/list_1\" | bash \"$AIP_DIR/_aipb_slashescape\" | sed -e 's/\ .*//'`"
-	if [ -z "$loca" ]
-	then
-	    echo "error on $remove_p1"
-	    continue
-	fi
-	
-	for (( iii=1 ; iii != loca+1 ; iii++ ))
-	do
-	    filedirname="`cat \"$tmp/list_1\" | sed -e \"$iii{p};d\"`"
-	    filename_tr="$BASEDIR$filedirname"
-	    if [ -n "$filedirname" ]
-	    then
-		if [ -f "$filename_tr" ]
-		then
-		    rm -vf "$filename_tr"
-		    dirname_tr="`dirname \"$filename_tr\"`"
-		    rmdir -v "$dirname_tr"
-		fi
-		if [ -d "$filename_tr" ]
-		then
-		    rmdir -v "$filename_tr"
-		fi
-	    fi
-	done
-	
+
+	cat "$tmp/list_1" | sed -e "s|^|file='|;s|\$|' ; if [ -f \"\$file\" ] ; then rm -v \"\$file\" ; rmdir -v \"\`dirname \"\$file\"\`\" 2>/dev/null ; fi ; if [ -d \"\$file\" ] ; then rmdir -v  \"\$file\" 2>/dev/null ;  fi  \n|" > "$tmp/list_2"
+
+	bash "$tmp/list_2"
+
 	rm -r "$tmp"	
 	unset tmp
     fi
