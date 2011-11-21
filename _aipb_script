@@ -304,7 +304,14 @@ make_script () {
     form_p1=$make_script_p1
     form
 }
-
+if [ "$1" = "--help" ]
+then
+    echo -e "usage: aipsetup sc [options | TRAGETS]"
+    echo
+    echo -e "\t--list       list all builtin targets"
+    echo -e "\t--all        make all targets"
+    exit 0
+fi
 searchtargets
 
 GENERATE=
@@ -319,17 +326,6 @@ case "$#" in
 	for i in $*
 	do
 	case "$i" in
-	    --help)
-		echo -e "usage: $0 [options | TRAGETS]"
-		echo
-		echo -e "\t--list       list all builtin targets"
-		echo -e "\t--all        make all targets"
-		echo
-		echo -e "Copyright (C) 2008 AGUtilities Software, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-		exit 0
-		;;
 	    --list)
 		echo $TARGETS
 		exit 0

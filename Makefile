@@ -63,7 +63,7 @@ clean:
 	chown -R root.root .
 	chmod -R 0600 .
 	-rm _*build_*
-	-rm *~
+	find -type f -name '*~' -exec rm -v '{}' ';'
 
 release: clean
 	echo "$(VERSION)" > ./VERSION

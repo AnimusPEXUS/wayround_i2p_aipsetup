@@ -1,12 +1,19 @@
 #!/bin/bash
-apache() {
+
+imagemagick() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-so --enable-cgi --enable-ssl --enable-http --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]="export CFLAGS=' -march=i486 -mtune=i486 ' ; export CPPFLAGS=' -march=i486 -mtune=i486 ' ; export CXXFLAGS=' -march=i486 -mtune=i486 ' ; export LDFLAGS=' -march=i486 -mtune=i486 ' #"
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]=''
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

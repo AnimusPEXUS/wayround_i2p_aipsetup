@@ -18,6 +18,10 @@ case "$#" in
 	    --version)
 		printf "aipsetup " 
 		cat "$AIP_DIR/VERSION"
+		echo
+		echo -e "Copyright (C) 2008,2009 AGUtilities Software, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		exit 0
 		;;
 	    --help)
@@ -37,9 +41,9 @@ case "$#" in
 		echo -e "\t\t\t\tdir (for maintainers)"
 		echo 
 		echo -e "  system tools:"
-		echo -e "\t ls|list\t\tlist installed packages"
+		echo -e "\t ls|list [filemask]\tlist installed packages"
 		echo -e "\tchk|pkcheck TARGET\tcheck pkg sums"
-		echo -e "\t rm|remove TARGET\tremove named package"
+		echo -e "\t rm|remove [filemask]\tremove named package"
 		echo -e "\t in|install FILE\tinstall named package files"
 		echo -e "\t fn|findcom FILENAME\tfind package by FILENAME"
 		echo -e "\tldd|lddsums PROGRAM\tmake sha512 sums for PROGRAM ldd output"
@@ -96,17 +100,23 @@ case "$#" in
 
 	    list | ls)
 		shift
+		set -f
 		bash "$AIP_DIR/_aipb_list" $*
+		set +f
 		exit $?				
 		;;
 	    pkcheck | chk)
 		shift
+		set -f
 		bash "$AIP_DIR/_aipb_checksums" $*
+		set +f
 		exit $?				
 		;;
 	    remove | rm)
 		shift
+		set -f
 		bash "$AIP_DIR/_aipb_remove" $*
+		set +f
 		exit $?				
 		;;
 	    install | 'in')

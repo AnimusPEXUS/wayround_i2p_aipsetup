@@ -48,11 +48,11 @@ bash "$AIP_DIR/_aipb_pksums"
 mkdir ../pack > /dev/null 2> /dev/null
 
 echo "   tarring..."
-tar --exclude _aipb_pack -c * | bzip2 -9 > "../pack/$PKGNAME.tar.bz2"
+tar --exclude _aipb_pack -c * | bzip2 -9 | sed -e 's/\.\.\/pack\//\.\//'  > "../pack/$PKGNAME.tar.bz2"
 echo "     md5..."
-md5sum -b "../pack/$PKGNAME.tar.bz2" > "../pack/$PKGNAME.tar.bz2.md5"
+md5sum -b "../pack/$PKGNAME.tar.bz2" | sed -e 's/\.\.\/pack\//\.\//'  > "../pack/$PKGNAME.tar.bz2.md5"
 echo "     sha512sum..."
-sha512sum -b "../pack/$PKGNAME.tar.bz2" > "../pack/$PKGNAME.tar.bz2.sha512"
+sha512sum -b "../pack/$PKGNAME.tar.bz2" | sed -e 's/\.\.\/pack\//\.\//'  > "../pack/$PKGNAME.tar.bz2.sha512"
 
 echo "done"
 exit 0

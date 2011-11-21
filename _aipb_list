@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -f
+
 if [ ! -d "$AIP_DIR" ]
 then
     echo " SORRY: please, install aipsetup (if not yet),"
@@ -10,15 +12,23 @@ fi
 
 . "$AIP_DIR/_aipb_init"
 
-cd "$PKG_INFO/sums"
+cd "$PKG_INFO"
 
 if [ $? -eq 0 ]
 then
-    LIST=`find -maxdepth 1 -type f -name '*.bz2' | sort `
-
+    if [ -z "$1" ]
+    then
+	LIST=`find -maxdepth 1 -type f -name '*.bz2' | sort `
+    else
+	set -f
+	LIST=`find -maxdepth 1 -type f -name "$1" | sort `
+    fi
     for i in $LIST
     do
-	ls -l $i
+	stat --printf="%n \t Changed: \"%z\"\n" $i
     done
+else
+    echo "can't cd to packages dir"
+    exit 1
 fi
 exit 0

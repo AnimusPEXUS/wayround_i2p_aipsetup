@@ -55,8 +55,25 @@ then
     exit 1
 fi
 
-remove_p1="$1"
-remove
+cd "$PKG_INFO"
+pwd
+set -f
+echo "searching for: $@"
+b_filelist=
+for b_i in $@
+do
+    b_filelist="$b_filelist `find . -maxdepth 1 -type f -name \"$b_i\" -printf \" %f\" ` "
+#    find . -maxdepth 1 -type f -name "$b_i" -printf " %f"
+done
+
+set +f
+echo "found: $b_filelist"
+
+for b_i in $b_filelist
+do
+    remove_p1="$b_i"
+    remove
+done
 
 err=$?
 
