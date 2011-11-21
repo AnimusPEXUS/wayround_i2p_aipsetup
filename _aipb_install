@@ -84,3 +84,7 @@ sync
 
 echo "update-mime-database /usr/share/mime"
 update-mime-database /usr/share/mime
+echo "gdk-pixbuf-query-loaders > /etc/gtk-2.0/gdk-pixbuf.loaders"
+gdk-pixbuf-query-loaders > /etc/gtk-2.0/gdk-pixbuf.loaders
+echo "pango-querymodules > /etc/pango/pango.modules"
+pango-querymodules > /etc/pango/pango.modules

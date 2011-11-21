@@ -1,20 +1,14 @@
 #!/bin/bash
 
-qt() {
+mc() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='export CFLAGS=" -march=i486 -mtune=i486  " ; export CXXFLAGS=" -march=i486 -mtune=i486  " #'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some configure script error'
-    EXITONERROR[$j]=1
-
-    j=$(( $j + 1 ))
-    RUN[$j]='( ./configure -opensource -prefix /usr/lib/qt4 -sysconfdir /etc <<<yes ) '
-    RELATIVELY[$j]=0
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
 
@@ -31,7 +25,7 @@ qt() {
     EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
-    RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
+    RUN[$j]='make install DESTDIR="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
@@ -43,7 +37,7 @@ qt() {
     EXITONERROR[$j]=1
     
     j=$(( $j + 1 ))
-    RUN[$j]='echo -en "#!/bin/bash\nexport PATH="$PATH:/usr/lib/qt4/bin"\n export QTDIR=/usr/lib/qt4"\n  " > "$bs_install_dir/etc/profile.d/SET/009.qt" '
+    RUN[$j]='echo -en "#!/bin/bash\nalias mc=". /usr/share/mc/bin/mc-wrapper.sh"\n  " > "$bs_install_dir/etc/profile.d/SET/009.mc" '
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1

@@ -200,6 +200,7 @@ EOF
     cat << EOF >> ./_tnbuild_$form_p1
 # constants:
 #   bs_run_dir      - dir in which script was started
+#   bs_pkg_sufix    - package sufix
 #   bs_pkg_name     - package name, this used then creating
 #                     \$bs_install_dir and tar package
 #   bs_parent_dir   - parent dir of \$bs_run_dir
@@ -222,7 +223,10 @@ EOF
 bs_pkg_name="$PACKAGENAME-$PACKAGENAMESUFIX"
 EOF
     fi
-
+    cat <<EOF >> ./_tnbuild_$form_p1
+bs_pkg_sufix="$PACKAGENAMESUFIX"
+EOF
+    
     if [ "$SEPARATEDIR" -eq 1 ]
     then
 	cat <<EOF >> ./_tnbuild_$form_p1
@@ -244,6 +248,7 @@ EOF
    
     cat <<EOF >> ./_tnbuild_$form_p1
 echo -e "Building       \e[1m\$bs_pkg_name\e[0m" | tee -a "\$bs_buildlogfile" 
+echo -e " Name sufix    \$bs_pkg_sufix" | tee -a "\$bs_buildlogfile"
 echo -e " Start dir     \$bs_run_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Parent dir    \$bs_parent_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Source dir    \$bs_run_dir/$RELATIVE" | tee -a "\$bs_buildlogfile"
