@@ -7,9 +7,9 @@ then
     exit 1
 fi
 
-if [ ! -f "$AIP_DIR/_aip_extract" ]
+if [ ! -f "$AIP_DIR/_aipb_extract" ]
 then
-    echo " ERROR: '$AIP_DIR/_aip_extract' not found"
+    echo " ERROR: '$AIP_DIR/_aipb_extract' not found"
     exit 1
 fi
 
@@ -34,7 +34,7 @@ do
     if [ -f "$i" ]
     then
 	printf "installing: "$i":"
-	"$AIP_DIR/_aip_extract" "$i"
+	"$AIP_DIR/_aipb_extract" "$i"
 	if [ $? -eq 0 ]
 	then
 	    printf ":OK\n"
