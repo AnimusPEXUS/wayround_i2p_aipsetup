@@ -268,9 +268,9 @@ EOF
     then
 	cat <<EOF >> ./_tnbuild_$form_p1
 echo "cleaning build dir..."
-rm -r "\$bs_build_dir" 2>&1 > /dev/null
-mkdir -p "\$bs_build_dir" 2>&1 > /dev/null
-cd "\$bs_build_dir" 2>&1 > /dev/null
+rm -r "\$bs_build_dir" > /dev/null 2>&1
+mkdir -p "\$bs_build_dir" > /dev/null 2>&1
+cd "\$bs_build_dir" > /dev/null 2>&1
 EOF
     else
 	cat <<EOF >> ./_tnbuild_$form_p1

@@ -7,7 +7,7 @@ postgresql() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-tcl --with-perl --with-python --with-openssl --with-libxml --with-libxslt --build=i486-pc-linux-gnu --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-tcl --with-tclconfig=/usr/lib --with-perl --with-python --with-openssl --with-libxml --with-libxslt --build=i486-pc-linux-gnu --host=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

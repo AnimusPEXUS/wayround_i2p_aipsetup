@@ -13,8 +13,8 @@ qt() {
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='configure -opensource -prefix /usr -sysconfdir /etc '
-    RELATIVELY[$j]=1
+    RUN[$j]='( ./configure -opensource -prefix /usr/lib/qt4 -sysconfdir /etc <<<yes ) '
+    RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
 
