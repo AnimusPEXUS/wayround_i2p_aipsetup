@@ -35,7 +35,7 @@ default:
 	@printf "\tAIP_B == $(AIP_B)\n"
 	@printf "\tBINDIR == $(BINDIR)\n"
 
-install:
+install: clean
 	@echo "<<<[ Installing ]>>>"
 	-rm -rf "$(PREFIX)/$(AIP_B)"
 	mkdir -p "$(PREFIX)/$(AIP_B)"

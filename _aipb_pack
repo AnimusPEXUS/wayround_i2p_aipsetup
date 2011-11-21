@@ -15,6 +15,7 @@ then
     exit 1
 fi
 
+. "$AIP_DIR/_aipb_init"
 
 echo 'changing owner'
 chown -R root.root *
@@ -28,19 +29,18 @@ FILEDIR=./var/log/packages
 FILELIST="$FILEDIR/$PKGNAME"
 
 echo "Creating package: $PKGNAME..."
-# echo "  creating installed file list"
+echo "  creating installation file list"
 mkdir -p "$FILEDIR" > /dev/null 2> /dev/null
 rm  "$FILEDIR"/* > /dev/null 2> /dev/null
 
-# touch "$FILELIST"
-# find ./ -type f ! -regex '.*/var/log/packages/.*' | sed -e "s/^\.//g"  >> "$FILELIST"
-# find ./ -type l ! -regex '.*/var/log/packages/.*'| sed -e "s/^\.//g" >> "$FILELIST"
+touch "$FILELIST"
+find ./ '(' '(' -type f -o -type l ')' -a '(' ! -regex '.*/var/log/packages.*' ')' ')' | sed -e "s/^\.//g" >> "$FILELIST"
+ 
+cat "$FILELIST" | sort > "$FILELIST"1
+cat "$FILELIST"1 > "$FILELIST"
+rm "$FILELIST"1
 
-# cat "$FILELIST" | sort > "$FILELIST"1
-# cat "$FILELIST"1 > "$FILELIST"
-# rm "$FILELIST"1
-
-# bzip2 -9 "$FILELIST"
+bzip2 -9 "$FILELIST"
 
 bash "$AIP_DIR/_aipb_pksums"
 

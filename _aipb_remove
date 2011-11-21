@@ -5,31 +5,31 @@ PPWD=`pwd`
 remove_p1=
 remove() {
     
-    if [ ! -f "$PKG_INFO/sums/$remove_p1" ]
+    if [ ! -f "$PKG_INFO/$remove_p1" ]
     then
-	echo " ERROR: file $PKG_INFO/sums/$remove_p1 not found"
+	echo " ERROR: file $PKG_INFO/$remove_p1 not found"
 	return 1
     fi
     basename "$remove_p1" .bz2
     if [ $? -ne 0 ]
     then
-	echo " ERROR: wrong checksum file"
+	echo " ERROR: wrong filelist file"
 	return 1
     fi
-    remove_line_count=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | wc -l`
+    remove_line_count=`cat "$PKG_INFO/$remove_p1" | bzip2 -d | wc -l`
     remove_i=1
-    remove_all_removed=1
     while [ "$remove_i" -ne "$remove_line_count" ]
     do
-	FILENAME=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sed -e "s/.*\*/$DESTDIR/g"`
+	FILENAME=`cat "$PKG_INFO/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sed -e "s/^/$DESTDIR/g"`
 	echo -e "rm \"$FILENAME\""
 	rm "$FILENAME"
 	remove_i=$(( $remove_i + 1 ))
     done
-    if [ $remove_all_removed -eq 1 ]
-    then
-	rm "$PKG_INFO/sums/$remove_p1"
-    fi
+
+    rm "$PKG_INFO/buildlogs/$remove_p1"
+    rm "$PKG_INFO/sums/$remove_p1"
+    rm "$PKG_INFO/$remove_p1"
+
     return 0
 }
 
