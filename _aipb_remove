@@ -106,5 +106,8 @@ then
 fi
 echo "sync"
 sync
-     
+
+echo "update-mime-database /usr/share/mime"
+update-mime-database /usr/share/mime
+
 exit $err
