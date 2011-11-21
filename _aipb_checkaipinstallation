@@ -29,10 +29,10 @@ incheck() {
 	return 1
     fi
     
-    if [ ! -d "$AIP_DIR" -o ! -r "$AIP_DIR" -o ! -w "$AIP_DIR" ]
+    if [ ! -d "$AIP_DIR" -o ! -r "$AIP_DIR" -o ! -x "$AIP_DIR" ]
     then
-	echo " SORRY: aipsetup directory must exist and be readable,"
-	echo "        writable and executable by You. But it isn't"
+	echo " SORRY: aipsetup directory must exist and be readable"
+	echo "        and executable by You. But it isn't"
 	echo " ERROR: aipsetup directory is not accessiable"
 	return 1
     fi
@@ -42,7 +42,7 @@ incheck() {
 	
 	if [ ! -f "$AIP_DIR/$i" -o ! -r "$AIP_DIR/$i" ]
 	then
-	    echo " ERROR: can't find [$AIP_DIR/$i]. installation broken!. exiting."
+	    echo " ERROR: can't find [$AIP_DIR/$i], or it's not readable. installation broken!. exiting."
 	    return 1
 	fi
 	
