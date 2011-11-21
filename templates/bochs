@@ -1,4 +1,5 @@
 #!/bin/bash
+
 bochs() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"

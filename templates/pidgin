@@ -7,7 +7,7 @@ pidgin() {
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-gtkspell --disable-meanwhile --disable-avahi --disable-nm  --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --disable-idn --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-gtkspell --disable-meanwhile --disable-avahi --disable-nm  --host=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

@@ -1,19 +1,13 @@
 #!/bin/bash
 
-utillinux() {
+dev86() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --disable-use-tty-group --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/usr/lib --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
-    RELATIVELY[$j]=1
-    ERRORMESSAGE[$j]='*** some configure script error'
-    EXITONERROR[$j]=1
-
-    j=$(( $j + 1 ))
-    RUN[$j]='make'
+    RUN[$j]='make PREFIX="$bs_install_dir/usr"  <<<quit'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make error'
     EXITONERROR[$j]=1
@@ -25,9 +19,14 @@ utillinux() {
     EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
-    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RUN[$j]='mkdir -p "$bs_install_dir/usr"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install PREFIX="$bs_install_dir/usr"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 }
-

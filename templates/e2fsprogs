@@ -5,9 +5,9 @@ e2fsprogs() {
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
-
+#--disable-uuidd --disable-libblkid
     local j=0
-    RUN[$j]='configure --disable-libblkid --prefix=/usr --bindir=/bin --sbindir=/sbin --sysconfdir=/etc --localstatedir=/var --enable-elf-shlibs --enable-fsck --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure  --prefix=/usr --bindir=/bin --sbindir=/sbin --sysconfdir=/etc --localstatedir=/var --enable-elf-shlibs --enable-fsck --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

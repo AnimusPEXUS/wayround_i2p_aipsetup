@@ -7,7 +7,7 @@ qemu() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --enable-system'
+    RUN[$j]='configure --prefix=/usr --enable-system --enable-linux-user --disable-strip --audio-drv-list=alsa,sdl'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -19,7 +19,7 @@ qemu() {
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make check'
+    RUN[$j]='make test'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some check error'
     EXITONERROR[$j]=0

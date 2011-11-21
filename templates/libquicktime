@@ -1,13 +1,13 @@
 #!/bin/bash
 
-utillinux() {
+libquicktime() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --disable-use-tty-group --prefix=/usr --bindir=/bin --sbindir=/sbin --libdir=/usr/lib --sysconfdir=/etc --localstatedir=/var --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --with-libdv --with-x264 --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -30,4 +30,3 @@ utillinux() {
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 }
-

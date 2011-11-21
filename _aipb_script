@@ -92,7 +92,8 @@ set -o pipefail
 EOF
     fi
     cat <<EOF >> ./_tnbuild_$form_p1
-echo -e '\e[32m'
+sleep 3
+echo -e '\e[32m\n'
 $CMD 2>&1 | tee -a "\$bs_buildlogfile" 
 EOF
 

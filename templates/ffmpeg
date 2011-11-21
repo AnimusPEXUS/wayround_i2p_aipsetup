@@ -6,7 +6,7 @@ ffmpeg() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --enable-shared --enable-gpl --enable-libtheora --enable-libvorbis --enable-x11grab --enable-libmp3lame --enable-libx264 --enable-libxvid'
+    RUN[$j]='configure --prefix=/usr --enable-shared --enable-gpl --enable-libtheora --enable-libvorbis --enable-x11grab --enable-libmp3lame --enable-libx264 --enable-libxvid --enable-runtime-cpudetect'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
