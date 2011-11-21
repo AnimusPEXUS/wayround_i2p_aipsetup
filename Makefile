@@ -58,7 +58,7 @@ unsetup:
 clean:
 	chown -R 0:0 .
 	chmod -R 0600 .
-	find -type f -name '*~' -exec rm -v '{}' ';'
+	find -type f '(' -name '*~' -o -name '*#' ')' -exec rm -v '{}' ';'
 
 release: clean
 	echo "$(VERSION)" > ./VERSION
