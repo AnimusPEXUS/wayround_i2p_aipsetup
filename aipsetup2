@@ -29,14 +29,14 @@ sys.path.append(aipsetup_config['homedir'])
 try:
     import aipsetup_utils
 except:
-    print '-e- main utilities module load error in '+aipsetup_home_dir
-    print '    please reinstall or reconfigure aipsetup'
+    print '-e- Main utilities module load error in '+aipsetup_home_dir
+    print '    Please reinstall or reconfigure aipsetup'
     exit (1)
 
 
 aipsetup_config = aipsetup_utils.get_configuration(aipsetup_config)
 if (aipsetup_config == None):
-    print '-e- file with settings not found ' + etalon_aipsetup_config['settings']
+    print '-e- File with settings not found ' + etalon_aipsetup_config['settings']
     exit (-1)
 
 
@@ -61,7 +61,7 @@ modules_data = []
 import aipsetup_none
 import aipsetup_templates
 # except:
-#     print '-e- can not load one of the aipsetup_* modules'
+#     print '-e- Can not load one of the aipsetup_* modules'
 #     print '    please reinstall or reconfigure aipsetup'
 #     exit (1)
 ####### END aipsetup_* modules import section
@@ -99,7 +99,7 @@ for i in modules_data:
 
 
 if not mode_none_present:
-    print '-e- module ' + module_to_run + ' not loaded'
+    print '-e- Module ' + module_to_run + ' not loaded'
     exit (-1)
 
 for i in modules_data:
@@ -132,8 +132,8 @@ for i in modules_data:
 
 
 if not correct_mode_selected:
-    print """\
--e- incorrect mode selected or module for this mode not installed. see --help"""
+    print "-e- Incorrect mode selected or module for this mode is not installed."
+    print "    See aipsetup --help for correct modes."
     exit (-1)
 
 module_to_run_imported = __builtin__.__import__(module_to_run)

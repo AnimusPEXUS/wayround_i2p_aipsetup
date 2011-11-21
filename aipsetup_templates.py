@@ -18,7 +18,7 @@ aipsetup_utils.module_run_protection(__name__)
 module_name = __name__
 module_group = 'templates'
 module_modes = ['tpl','templates']
-module_help = 'This is template mode. See -m tpl --help for more info'
+module_help = 'This is template mode. See -m tpl --help for more info.'
 
 
 aipsetup_utils.update_modules_data(module_name, module_group, module_modes, module_help)
@@ -37,8 +37,10 @@ def editing_help():
                      WARNING: this also deletes template you've
                               selected to edit
      -e editor       open template with named editor
-     -m              template editing (default)
+
      -l | --list     list templates
+
+     default         template editing
 
 
  -d, -t, -m and -l are not compatible. -e usefull only with -m option.
@@ -49,9 +51,14 @@ def editing_help():
 def run(aipsetup_config,
         arguments = []):
 
-    optilist, args = getopt.getopt(arguments,
-                                   'dt:e:',
+    try:
+        optilist, args = getopt.getopt(arguments,
+                                   'dt:e:l',
                                    ['help'])
+    except getopt.GetoptError, e:
+        print '-e- Error while parsing parameters: ' + e.msg
+        return -1
+
 
     for i in optilist:
         if i[0] == '--help':
@@ -63,6 +70,7 @@ def run(aipsetup_config,
     t_sett_mean = ''
     e_sett = False
     e_sett_mean = 'less'
+    l_sett = False
 
 
     if len(args) != 1:
@@ -81,40 +89,51 @@ def run(aipsetup_config,
             e_sett = True
             e_sett_mean = i[1]
 
+        if i[0] == '-l':
+            l_sett = True
+
     if d_sett and t_sett:
         print '-e- -t and -d options can not be combined'
         return -1
 
     if d_sett:
-        print '-i- deleting template '+aipsetup_config['templates']+'/'+args[0]
+        print '-i- deleting template ' + aipsetup_config['templates'] + '/' + args[0]
         try:
-            os.unlink(aipsetup_config['templates']+'/'+args[0])
+            os.unlink(aipsetup_config['templates'] + '/' + args[0])
         except OSError as err:
             print '-e- can not remove file: '+err.strerror
             return -1
+        else:
+            print '-i- deleted'
+            return 0
 
     if t_sett:
-        print '-i- using '+t_sett_mean+' as template'
+        print '-i- using ' + t_sett_mean + ' as template'
     else:
-        t_sett_mean='usr'
+        t_sett_mean='usr.py'
 
     if t_sett:
-        if aipsetup_utils.filecopy(aipsetup_config['templates']+'/'+t_sett_mean,
-                                   aipsetup_config['templates']+'/'+args[0],
+        if aipsetup_utils.filecopy(aipsetup_config['templates'] + '/' + t_sett_mean,
+                                   aipsetup_config['templates'] + '/' + args[0],
                                    True) != 0:
-            print '-e- can\'t use template '+t_sett_mean
+            print '-e- can\'t use template ' + t_sett_mean
             return -1
 
     editor = aipsetup_config['editor']
     if e_sett:
         editor = e_sett_mean
-            
-    print '-i- opening '+aipsetup_config['templates']+'/'+args[0]+' with '+editor
+
+    print '-i- opening ' + aipsetup_config['templates'] + '/' + args[0] + ' with ' + editor
     subproc = subprocess.Popen([editor,
-                                aipsetup_config['templates']+'/'+args[0]])
-            
-            
-    subproc.wait()
-    print '-i- process exited'
-    
+                                aipsetup_config['templates'] + '/' + args[0]])
+
+
+    try:
+        code = subproc.wait()
+    except KeyboardInterrupt:
+        print '\b\b-?- Interrupted by user. Editor will now be killed.'
+        subproc.kill()
+    else:
+        print '-i- process exited with code: ' + str(code)
+
     return 0

@@ -77,14 +77,35 @@ def get_group_modules(group = 'basic'):
 def run(aipsetup_config,
         arguments = []):
 
-    optilist, args = getopt.getopt(arguments, 'h', ['help', 'version'])
+    optilist = None
+    args = None
+
+    try:
+        optilist, args = getopt.getopt(arguments, '', ['help', 'version'])
+    except getopt.GetoptError, e:
+        print '-e- Error while parsing parameters: ' + e.msg
+        return -1
 
     h_sett = False
     help_sett = False
     version_sett = False
 
-    if not (len(arguments) == 0):
+    for i in optilist:
+        if i[0] == '--version':
+            version_sett = True
+
+        if (i[0] == '--help'):
+            help_sett = True
+
+    if not (len(arguments) == 0) and (len(optilist) == 0):
         print 'this mode only shows help. here it is:'
+        module_help()
+        return 0
+
+
+    if version_sett:
+        aipsetup_utils.show_version_message()
+        return 0
 
     module_help()
-    return
+    return 0

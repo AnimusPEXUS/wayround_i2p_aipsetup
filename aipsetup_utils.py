@@ -24,7 +24,7 @@ def update_modules_data(module_name, module_group, module_modes, module_help):
 
 def module_run_protection(name):
     if name == "__main__":
-        print '-e- this module must be started by aipsetup, not by hand'
+        print '-e- This module must be started by aipsetup. Not by hand.'
         # this exit is ok.
         exit (-1)
 
@@ -61,7 +61,8 @@ def get_configuration(defaults):
 
 def filecopy(src, dst, verbose=False):
     if verbose:
-        print '-i- copying '+src+' to '+dst
+        print '-i- Copying "' + src + '"'
+        print '       to "' + dst + '"'
     try:
         shutil.copy(src, dst)
     except:
