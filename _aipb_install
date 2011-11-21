@@ -67,9 +67,9 @@ do
     fi
 done
 echo "  installed: $OKi, errors: $ERi, Total: $(( $OKi + $ERi ))"
-echo "ldconfig"
 if [ -z "$BASEDIR" ]
 then
+    echo "ldconfig"
     ldconfig
 fi
 echo "sync"

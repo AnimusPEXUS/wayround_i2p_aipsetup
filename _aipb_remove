@@ -18,6 +18,8 @@ fi
 
 unset BASEDIR
 onlyinfo=0
+while [ '1' -eq '1' ]
+do
     case "$1" in
 	"--help")
 	    echo "help"
@@ -26,20 +28,24 @@ onlyinfo=0
 	"-u")
 	    onlyinfo=1
 	    shift
-	    echo "only removing info about $1"
+	    echo "only removing info"
 	    ;;
 	"-b")
 	    BASEDIR="$2"
-	    shift
+	    shift 2	    
+	    ;;
+	*)
+	    break
 	    ;;
     esac
+done
 
 PPWD=`pwd`
 
 remove_p1=
 remove() {
     
-    if [ ! -f "$PKG_INFO/$remove_p1" ]
+    if [ ! -f "$BASEDIR/$PKG_INFO/$remove_p1" ]
     then
 	echo " ERROR: file $PKG_INFO/$remove_p1 not found"
 	return 1
@@ -55,7 +61,7 @@ remove() {
     then
 	tmp=`bash $AIP_DIR/_aipb_gettempdir`
 	
-	cat "$PKG_INFO/$remove_p1" | bzip2 -d > "$tmp/rm_list"
+	cat "$BASEDIR/$PKG_INFO/$remove_p1" | bzip2 -d > "$tmp/rm_list"
 	cat "$tmp/rm_list" | sed -e "s/^/ rm -v \"$BASEDIR/;s/\$/\"/"  > "$tmp/mrm_list"
 	bash "$tmp/mrm_list"
 	
@@ -72,7 +78,7 @@ remove() {
 
 . "$AIP_DIR/_aipb_init"
 
-cd "$PKG_INFO"
+cd "$BASEDIR/$PKG_INFO"
 pwd
 set -f
 echo "searching for: $@"
@@ -80,11 +86,10 @@ b_filelist=
 for b_i in $@
 do
     b_filelist="$b_filelist `find . -maxdepth 1 -type f -name \"$b_i\" -printf \" %f\" ` "
-#    find . -maxdepth 1 -type f -name "$b_i" -printf " %f"
 done
 
 set +f
-echo "found: $b_filelist"
+echo -e "found:\n$b_filelist"
 
 for b_i in $b_filelist
 do
@@ -94,8 +99,11 @@ done
 
 err=$?
 
-echo "ldconfig"
-ldconfig
+if [ -n "$BASEDIR" ]
+then
+    echo "ldconfig"
+    ldconfig
+fi
 echo "sync"
 sync
      
