@@ -19,8 +19,11 @@ p="$1"
 
 if [ -z "$p" ]
 then
-    p=`read`
-    exit 0
+    p=`cat <<EOF `
+    if [ -z "$p" ]
+    then
+	exit 0
+    fi
 fi
 
 pl="${#p}"
