@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
 
 
 
@@ -18,17 +19,20 @@ aipsetup_utils.module_run_protection(__name__)
 module_name = __name__
 module_group = 'templates'
 module_modes = ['tpl','templates']
-module_help = 'This is template mode. See -m tpl --help for more info.'
+module_help = \
+    """This is templates manipulations mode. Editing, deleting,
+    listing templayes. See -m tpl --help for more info."""
 
 
-aipsetup_utils.update_modules_data(module_name, module_group, module_modes, module_help)
+aipsetup_utils.update_modules_data(
+    module_name, module_group, module_modes, module_help)
 
 
 
 def editing_help():
-    print """\
-  this mode accepts only one argument - themplate name.
-  without argument, error will be displayed.
+    print ur"""
+ This mode accepts only one argument - themplate name.
+ Without argument, error will be displayed.
 
     options are following:
 
@@ -54,7 +58,7 @@ def run(aipsetup_config,
     try:
         optilist, args = getopt.getopt(arguments,
                                    'dt:e:l',
-                                   ['help'])
+                                   ['help', 'list'])
     except getopt.GetoptError, e:
         print '-e- Error while parsing parameters: ' + e.msg
         return -1
@@ -72,11 +76,6 @@ def run(aipsetup_config,
     e_sett_mean = 'less'
     l_sett = False
 
-
-    if len(args) != 1:
-        print '-e- must be exacly one argument'
-        exit (-1)
-
     for i in optilist:
         if i[0] == '-d':
             d_sett = True
@@ -89,8 +88,20 @@ def run(aipsetup_config,
             e_sett = True
             e_sett_mean = i[1]
 
-        if i[0] == '-l':
+        if i[0] == '-l' or i[0] == '--list':
             l_sett = True
+
+    if l_sett:
+        print '-i- listing templates installed in'
+        print '    ' + aipsetup_config['templates'] + ':'
+        print
+        subproc = subprocess.Popen(['ls', '-l', aipsetup_config['templates']])
+        subproc.wait()
+        return 0
+
+    if len(args) != 1:
+        print '-e- must be exacly one argument'
+        exit (-1)
 
     if d_sett and t_sett:
         print '-e- -t and -d options can not be combined'
@@ -101,10 +112,10 @@ def run(aipsetup_config,
         try:
             os.unlink(aipsetup_config['templates'] + '/' + args[0])
         except OSError as err:
-            print '-e- can not remove file: '+err.strerror
+            print '-e- can not remove file: ' + err.strerror
             return -1
         else:
-            print '-i- deleted'
+            print '-i-  deleted'
             return 0
 
     if t_sett:
@@ -113,9 +124,11 @@ def run(aipsetup_config,
         t_sett_mean='usr.py'
 
     if t_sett:
-        if aipsetup_utils.filecopy(aipsetup_config['templates'] + '/' + t_sett_mean,
-                                   aipsetup_config['templates'] + '/' + args[0],
-                                   True) != 0:
+        if aipsetup_utils.filecopy(
+            aipsetup_config['templates'] + '/' + t_sett_mean,
+            aipsetup_config['templates'] + '/' + args[0],
+            True) != 0:
+
             print '-e- can\'t use template ' + t_sett_mean
             return -1
 
@@ -124,9 +137,16 @@ def run(aipsetup_config,
         editor = e_sett_mean
 
     print '-i- opening ' + aipsetup_config['templates'] + '/' + args[0] + ' with ' + editor
-    subproc = subprocess.Popen([editor,
-                                aipsetup_config['templates'] + '/' + args[0]])
-
+    try:
+        subproc = subprocess.Popen(
+            [
+                editor,
+                aipsetup_config['templates'] + '/' + args[0]
+                ]
+            )
+    except:
+        print '-e- can\'t start editor'
+        return -1
 
     try:
         code = subproc.wait()

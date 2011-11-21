@@ -16,7 +16,9 @@ module_name = __name__
 module_group = 'basic'
 module_modes = ['none']
 module_help = \
-    "This is default behavior mode. Does nothing. Only shows this help page"
+    """This is default (dummy) behavior mode. It's actually does
+    nothing, only shows this help text and list of subcommands shared
+    by submodules"""
 
 aipsetup_utils.update_modules_data(module_name,
                                    module_group,
@@ -60,10 +62,17 @@ def show_group_modules(group='basic'):
     print '    == ' + group + ' modes ==\n'
 
     for i in outlist:
-        print '     "' + '" | "'.join(i[2]) + '":'
-        print textwrap.fill(i[3],
-                            subsequent_indent = '        ',
-                            initial_indent = '          ')
+        print '     ' + ' | '.join(i[2]) + ':'
+
+        tmps = i[3]
+        tmps = tmps.replace('\n', ' ')
+        while (tmps.find('  ') != -1):
+            tmps = tmps.replace('  ', ' ')
+
+        print textwrap.fill(
+            tmps,
+            subsequent_indent = '        ',
+            initial_indent = '          ')
         print
         break
 
