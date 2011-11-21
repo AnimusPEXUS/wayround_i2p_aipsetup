@@ -3,7 +3,7 @@
 cmakeusr() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
-    SEPARATEDIR=0
+    SEPARATEDIR=1
     RELATIVE='.'
 
     local j=0

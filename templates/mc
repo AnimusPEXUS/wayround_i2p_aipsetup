@@ -35,9 +35,21 @@ mc() {
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/share/mc/bin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -av ./contrib/*sh "$bs_install_dir/usr/share/mc/bin"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
     
     j=$(( $j + 1 ))
-    RUN[$j]='echo -en "#!/bin/bash\nalias mc=". /usr/share/mc/bin/mc-wrapper.sh"\n  " > "$bs_install_dir/etc/profile.d/SET/009.mc" '
+    RUN[$j]='echo -en "#!/bin/bash\nalias mc=\". /usr/share/mc/bin/mc-wrapper.sh\"\n  " > "$bs_install_dir/etc/profile.d/SET/009.mc" '
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
