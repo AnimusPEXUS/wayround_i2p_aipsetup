@@ -7,7 +7,7 @@ db() {
     RELATIVE='build_unix'
 
     local j=0
-    RUN[$j]='../dist/configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-compat185 --enable-cxx --enable-tcl --with-tcl=/usr/lib --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu '
+    RUN[$j]='../dist/configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-sql --enable-compat185 --enable-cxx --enable-tcl --with-tcl=/usr/lib --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu '
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

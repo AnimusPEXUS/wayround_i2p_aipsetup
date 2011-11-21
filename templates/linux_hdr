@@ -1,0 +1,26 @@
+#!/bin/bash
+
+linux_hdr() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-hdr-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='make headers_check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='***error'
+    EXITONERROR[$j]=1
+
+    RUN[$j]='mkdir -p "$bs_install_dir/usr"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='***error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make headers_install INSTALL_HDR_PATH="$bs_install_dir/usr"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='***error'
+    EXITONERROR[$j]=1
+
+}

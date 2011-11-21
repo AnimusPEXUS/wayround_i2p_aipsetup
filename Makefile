@@ -64,8 +64,8 @@ clean:
 	find -type -f -exec chmod 600 '{}' ';'
 	find -type f '(' -name '*~' -o -name '*#' ')' -exec rm -v '{}' ';'
 
-release: clean
-	echo "$(VERSION)" > ./VERSION
-	cd .. && cp -a ./aipsetup "./aipsetup-$(VERSION)"
-	cd .. && tar -c "./aipsetup-$(VERSION)" | xz -9v > "aipsetup-$(VERSION).tar.xz"
-	cd .. && rm -r "./aipsetup-$(VERSION)"
+# release: clean
+# 	echo "$(VERSION)" > ./VERSION
+# 	cd .. && cp -a ./aipsetup "./aipsetup-$(VERSION)"
+# 	cd .. && tar -c "./aipsetup-$(VERSION)" | xz -9v > "aipsetup-$(VERSION).tar.xz"
+# 	cd .. && rm -r "./aipsetup-$(VERSION)"

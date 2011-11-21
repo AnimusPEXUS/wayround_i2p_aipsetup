@@ -34,7 +34,7 @@ then
     fi
     for i in $LIST
     do
-	stat --printf="%n \t Changed: \"%z\"\n" "$i"
+	stat --printf="%n" # \t Changed: \"%z\"\n" "$i"
     done
 else
     echo "can't cd to packages dir"
