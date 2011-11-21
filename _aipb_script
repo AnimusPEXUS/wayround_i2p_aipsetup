@@ -143,14 +143,21 @@ form_p1=
 form () {
     if [ -z "$form_p1" ]
     then
-	echo "form parameter error"
+	echo "error: form parameter empty"
 	return 1
     fi
     
     cleanall
+    grep -qe ".*$form_p1.*\(\).*" "$AIP_DIR/templates/$form_p1"
+    if [ "$?" -ne 0 ]
+    then
+	echo "(error: '$form_p1' template format is bad)"
+	return 1
+    fi
+    
     source "$AIP_DIR/templates/$form_p1"
     $form_p1
-    
+
     cat << EOF > ./_tnbuild_$form_p1
 #!/bin/bash
 #####  Builder script for $form_p1

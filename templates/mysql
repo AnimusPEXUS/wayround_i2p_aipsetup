@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usr() {
+mysql() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
