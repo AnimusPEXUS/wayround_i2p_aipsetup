@@ -19,9 +19,10 @@ p="$1"
 
 if [ -z "$p" ]
 then
-    p=`cat <<EOF `
+    p="`cat`"
     if [ -z "$p" ]
     then
+	echo -n "$p"
 	exit 0
     fi
 fi

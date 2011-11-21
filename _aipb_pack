@@ -9,6 +9,8 @@ then
     exit 1
 fi
 
+du -s .
+
 echo 'changing owner'
 chown -R 0:0 *
 echo 'changing rules'
@@ -26,9 +28,9 @@ mkdir -p "$FILEDIR" > /dev/null 2> /dev/null
 rm  "$FILEDIR"/* > /dev/null 2> /dev/null
 
 touch "$FILELIST"
-find ./ '(' '(' -type f -o -type l ')' -a '(' ! -regex '.*/var/log/packages.*' ')' ')' | sed -e "s/^\.//g" >> "$FILELIST"
+find  '(' -type f -o -type l -o -type d ')' ! -regex '.*/var/log/packages.*' ! -name '..' ! -name '.' | sed -e "s/^\.//g" >> "$FILELIST"
  
-cat "$FILELIST" | sort > "$FILELIST"1
+cat "$FILELIST" | sort -r > "$FILELIST"1
 cat "$FILELIST"1 > "$FILELIST"
 rm "$FILELIST"1
 

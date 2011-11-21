@@ -54,10 +54,36 @@ remove() {
     if [ $onlyinfo -ne 1 ]
     then
 	tmp=`bash $AIP_DIR/_aipb_gettempdir`
+
+	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d | sort -r > "$tmp/list_1"
+
+	loca="`wc -l \"$tmp/list_1\" | bash \"$AIP_DIR/_aipb_slashescape\" | sed -e 's/\ .*//'`"
+	if [ -z "$loca" ]
+	then
+	    echo "error on $remove_p1"
+	    continue
+	fi
 	
-	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d | sort -r | sed -e "s|^|file='$BASEDIR|g;s|\$|' ; rm -v \"\$file\" ; dir=\"\`dirname \"\$file\"\`\" ; rmdir -v \"\$dir\" 2>/dev/null |"  > "$tmp/mrm_list"
-	less "$tmp/mrm_list"
-	bash "$tmp/mrm_list"
+	for (( iii=1 ; iii != loca+1 ; iii++ ))
+	do
+	    filename_tr="$BASEDIR/`cat \"$tmp/list_1\" | sed -e '7{p};d'`"
+	    if [ -n "$filename_tr" ]
+	    then
+		if [ ! -d "$filename_tr" ]
+		then
+		    rm -v "$filename_tr"
+		    dirname_tr="`dirname \"$filename_tr\"`"
+		    rmdir -v "$dirname_tr" 2>/dev/null
+		else
+		    rmdir -v "$filename_tr" 2>/dev/null
+		fi
+	    fi
+	done
+	
+	# BASEDIR_E="`bash \"$AIP_DIR/_aipb_catzero\" \"$BASEDIR\" \"`"
+	# cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d | sort -r | sed -e "s/^/file='/;s|\$|' ; rm -v \"\$file\" ; dir=\"\`dirname \"\$file\"\`\" ; rmdir -v \"\$dir\" 2>/dev/null |"  > "$tmp/mrm_list"
+	#less "$tmp/mrm_list"
+	#bash "$tmp/mrm_list"
 	
 	rm -r "$tmp"
 	unset tmp
@@ -73,6 +99,10 @@ remove() {
 . "$AIP_DIR/_aipb_init"
 
 cd "$BASEDIR/$PKG_INFO"
+if [ "$BASEDIR" = '/' ]
+then
+    "$BASEDIR"=
+fi
 pwd
 set -f
 echo "searching for: $@"
