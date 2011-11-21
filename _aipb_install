@@ -21,7 +21,7 @@ PPWD=`pwd`
 
 OKi=0
 ERi=0
-
+returneee=0
 filebname=
 dirbname=
 for i in $*
@@ -42,6 +42,7 @@ do
 	then
 	    echo "error"
 	    ERi=$(( $ERi + 1 ))
+	    returneee=1
 	    continue
 	fi
 
@@ -51,6 +52,7 @@ do
 	then
 	    echo "error"
 	    ERi=$(( $ERi + 1 ))
+	    returneee=1
 	    continue
 	fi
 
@@ -67,6 +69,7 @@ do
 	cd "$PPWD"
     fi
 done
+
 echo "  installed: $OKi, errors: $ERi, Total: $(( $OKi + $ERi ))"
 if [ -z "$BASEDIR" ]
 then
@@ -81,3 +84,5 @@ then
 fi
 echo "sync"
 sync
+
+exit $returneee

@@ -35,6 +35,11 @@ do
     mkdir -p "$tmpdir_pkgname"
 
     bash "$AIP_DIR/_aipb_install" -b "$tmpdir_pkgname" "$i"
+    if [ "$?" -ne 0 ]
+    then
+	echo "can't unpack file"
+	continue
+    fi
     
     bash "$AIP_DIR/_aipb_move_bzip2_to_xz" -b "$tmpdir_pkgname" <<EOF
 yes
