@@ -276,7 +276,7 @@ EOF
     looform
     cat <<EOF >> ./_tnbuild_$form_p1
 
-bzip2 -9 "\$bs_buildlogfile"
+xz -9 "\$bs_buildlogfile"
 exit 0
 EOF
     

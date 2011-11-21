@@ -11,6 +11,6 @@ fi
 # this program searchs given file in packages installation logs
 
 cd "$PKG_INFO"
-find -maxdepth 1 -name '*.bz2' -exec bash -c " cat '{}' |  bzip2 -d | grep '$1' ; e=\$? ; if [ \$e -eq 0 ] ; then echo -e 'found $1 in: {}\n' ; fi  " ';'
+find -maxdepth 1 -name '*.xz' -exec bash -c " cat '{}' |  xz -d | grep '$1' ; e=\$? ; if [ \$e -eq 0 ] ; then echo -e 'found $1 in: {}\n' ; fi  " ';'
 echo "search complite"
 exit 0
