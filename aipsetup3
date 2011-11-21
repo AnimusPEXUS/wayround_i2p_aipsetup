@@ -2,31 +2,39 @@
 
 # this is main aipsetup executable
 
+# it is mast be disigned in such way so it needed lesser to change it in
+# future. all functional mast be in modules
+
 import sys
 import getopt
 import os
 import cmd
 import __builtin__
 
-
-
 # default settings
 
-etalon_aipsetup_config = {'homedir'  :'/usr/lib/aipsetup', # aipsetup
-                          # home dir
+etalon_aipsetup_config = {
+    # settings are allways here but can be overriden by option
+    'settings' :'/etc/aipsetup.conf',
 
-                          'templates':'/usr/lib/aipsetup/templates', # aipsetup
-                                                                     # templates
-                          'editor'   : os.environ['VISUAL'],         # editor
-                          'settings' :'/etc/aipsetup.conf'
-                          }
+    # aipsetup home dir
+    'homedir'  :'/usr/lib/aipsetup',
 
+    # aipsetup templates
+    'templates':'/usr/lib/aipsetup/templates',
+
+    # editor
+    'editor'   : os.environ['VISUAL'],
+    }
+
+global aipsetup_config
 aipsetup_config = etalon_aipsetup_config
 
 # end of default settings
 
 sys.path.append(aipsetup_config['homedir'])
 
+# Next module is very required for aipsetup to function properly
 try:
     import aipsetup_utils
 except:
@@ -35,6 +43,7 @@ except:
     exit (1)
 
 
+# Getting configuration from file named in intial settings
 aipsetup_config = aipsetup_utils.get_configuration(aipsetup_config)
 if (aipsetup_config == None):
     print '-e- File with settings not found ' + etalon_aipsetup_config['settings']
@@ -42,17 +51,22 @@ if (aipsetup_config == None):
 
 
 
-# modules_data contains information populated by modules. basicly it
-# is an array, containing structures. each structure devides on few
-# fields.
+# ***********************************
+# The modules_data var contains information populated by aipsetup modules.
+# basicly it is an array of arrays. each such sub array devides on few fields.
+# The first field - for module name, second one - group to which this module
+# must be sett, third - array of mode names which can be used in -m key, forth -
+# some simple description text for showing on aipsetup --help
 #
 #  modules_data = [['module name', 'module group', ['mode', 'names'], 'help text'],
 #                  ['module name', 'module group', ['mode', 'names'], 'help text'],
 #                  ['module name', 'module group', ['mode', 'names'], 'help text'],
 #                  ...]
 
+# it's basicly empty
 modules_data = []
 
+# ***********************************
 
 
 
@@ -73,15 +87,16 @@ import aipsetup_build
 mode_none_present = False
 
 
-# here will be placed valid mode list
+# here will be placed valid mode list. initialy empty.
 mode_list = []
 
 
-# mode selector
+# mode selector. defailt mode is 'none'
 mode_select = 'none'
 
 
-# default module to start
+# default module to start. run this module if other not requested.
+# !! so this module is requred to be on it's place always !!
 module_to_run = 'aipsetup_none'
 
 
@@ -139,7 +154,6 @@ if not correct_mode_selected:
 
 module_to_run_imported = __builtin__.__import__(module_to_run)
 
-module_to_run_imported.run(aipsetup_config,
-                           arguments)
+module_to_run_imported.run(aipsetup_config, arguments)
 
 exit(0)

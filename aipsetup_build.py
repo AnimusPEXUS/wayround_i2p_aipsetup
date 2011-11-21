@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import os
@@ -8,7 +9,8 @@ import shutil
 import getopt
 import uuid
 import aipsetup_utils
-from aipsetup_utils import pathRemoveDblSlash
+import aipsetup_builder
+
 
 # protect module from being run as script
 aipsetup_utils.module_run_protection(__name__)
@@ -209,62 +211,6 @@ def run(aipsetup_config,
     return 0
 
 
-def isWdDirRestricted(dir_str):
-    dirs_begining_with = ['/bin', '/boot' , '/daemons',
-                          '/dev', '/etc', '/lib', '/proc' ,
-                          '/sbin', '/sys',
-                          '/usr/bin', '/usr/sbin', '/usr/lib',
-                          '/usr/man', '/usr/share']
-    exec_dirs = ['/opt', '/usr', '/var', '/']
-
-    dir_str_abs = os.path.abspath(dir_str)
-
-    for i in dirs_begining_with:
-        if (re.match('^'+i, dir_str_abs) != None):
-            return True
-
-    for i in exec_dirs:
-        if i == dir_str_abs:
-            return True
-
-    return False
-
-def initWdDir(dir_str):
-    if isWdDirRestricted(dir_str):
-        print '-e- ' + dir_str + ' is restricted working dir'
-        print '    won\'t init'
-        return -1
-
-    if (os.path.exists(dir_str)) and not os.path.isdir(dir_str):
-        print '-e- selected path exists and not dir'
-        return -2
-
-    if (not os.path.exists(dir_str)):
-        os.makedirs(dir_str)
-
-    if (os.path.exists(dir_str)) and os.path.isdir(dir_str):
-        files = os.listdir(dir_str)
-        for i in files:
-            tfile = pathRemoveDblSlash(dir_str+'/'+i)
-            if (os.path.isdir(tfile)):
-                shutil.rmtree(tfile)
-                continue
-            os.unlink(tfile)
-
-    try:
-        os.makedirs(pathRemoveDblSlash(dir_str+'/00.TARBALL'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/01.SOURCE'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/02.PATCH'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/03.BUILD'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/04.FS_ROOT'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/05.LOGS'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/06.LISTS'))
-        os.makedirs(pathRemoveDblSlash(dir_str+'/07.PACKAGE'))
-    except:
-        print '-e- error creating working dir tree'
-        return -3
-
-    return 0
 
 def isWdDirValid(dir_str):
     if isWdDirRestricted(dir_str):

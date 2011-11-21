@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import sys
 import os
@@ -7,13 +8,19 @@ import re
 import ConfigParser
 import shutil
 
+
+# *******************
+# Protective function. Protects modules using it from being run as scripts
+# requires __name__ as parameter
 def module_run_protection(name):
     if name == "__main__":
-        print '-e- This module must be started by aipsetup. Not as script by hand.'
-        # this exit is ok.
+        print '-e- !! This module must be started by aipsetup, not as script !!'
+        # this exit is ok, but try not to use exit() function anywhere else
         exit (-1)
 
 module_run_protection(__name__)
+
+# *******************
 
 def show_version_message():
     print """\
@@ -61,7 +68,7 @@ def get_configuration(defaults):
         'templates' : temps,
         'editor'    : editor,
         'settings'  : settings
-        }
+    }
 
 def filecopy(src, dst, verbose=False):
     if verbose:
@@ -94,4 +101,3 @@ def pathRemoveDblSlash(dir_str):
     while t.find('//') != -1:
         t = t.replace('//', '/')
     return t
-
