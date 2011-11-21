@@ -3,7 +3,7 @@
 ############## Don't edit this function
 searchtargets() {   
     t=''
-    TARGETS="`cat "$0" | sed -e "6d;/^.*()/{s/()/ /g;s/{//g;s/cleanall//g;s/searchtargets//g;s/looform//g;s/make_script//g;s/form//g;s/looform//g;p};d" | sort`"
+    TARGETS=`cat "$0" | sed -e "6d;/^.*()/{s/()/ /g;s/{//g;s/cleanall//g;s/searchtargets//g;s/looform//g;s/make_script//g;s/form//g;s/looform//g;p};d" | sort`
     for i in $TARGETS
     do
 	t="$t $i"
@@ -972,7 +972,7 @@ binutils() {
 binutilsmingw32() {
     binutils
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-mingw32"
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-targets=all --disable-werror  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-werror  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
 }
 
 bochs() {
@@ -1036,6 +1036,7 @@ mplayer() {
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 }
+
 cups() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
@@ -1116,7 +1117,6 @@ gccmingw32() {
 gccmingw32o() {
     gccmingw32
     RUN[$j]='configure --prefix=/opt/mingw --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-mingw32'
-
 }
 
 e2fsprogs() {
@@ -1726,7 +1726,8 @@ EOF
     if [ "$SEPARATEDIR" -eq 1 ]
     then
 	cat <<EOF >> ./_tnbuild_$form_p1
-
+echo "cleaning build dir..."
+rm -r "\$bs_build_dir"
 mkdir -p "\$bs_build_dir"
 cd "\$bs_build_dir"
 EOF
