@@ -1,0 +1,70 @@
+#!/bin/bash
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_extract" ]
+then
+    echo " ERROR: can't find [$AIP_DIR/_aipb_extract]"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_script" ]
+then
+    echo " ERROR: can't find [$AIP_DIR/_aipb_script]"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_pack" ]
+then
+    echo " ERROR: can't find [$AIP_DIR/_aipb_script]"
+    exit 1
+fi
+
+if [ ! -f "$1"]
+then
+    echo "file \"$1\" not found"
+    exit 1
+fi
+
+if [ -z "$2" ]
+then
+    echo "dir not defined"
+    exit 1
+fi
+
+if [ -z "$3" ]
+then
+    echo "template not defined"
+    exit 1
+fi
+
+if [ -z "$4" ]
+then
+    echo "prepkg dir not defined not defined"
+    exit 1
+fi
+
+"$AIP_DIR/_aipb_extract" "$2"
+
+cd "`find -type d -name \"$2\"`"
+
+"$AIP_DIR/_aipb_script" "$3"
+
+bash "_tnbuild_$3"
+if [ $? -eq 0 ]
+then
+    cd ..
+
+    cd "`find -type d -name \"$4\"`"
+    
+    "$AIP_DIR/_aipb_pack"
+fi
+
+
+cd ..

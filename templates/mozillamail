@@ -6,7 +6,7 @@ mozillamail() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=mail --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-system-jpeg --with-system-zlib --with-system-bz2 --enable-application=mail --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu '
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

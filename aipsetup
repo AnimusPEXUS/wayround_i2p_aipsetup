@@ -30,6 +30,7 @@ case "$#" in
 		echo -e "\t\t\t\t(see \``basename $0` script --help')"
 		echo -e "\tpks|pksums\t\tcreate sha512 sums for current dir"
 		echo -e "\t pk|pack\t\tpack current dir"
+		echo -e "\t bd|build arch ardir templ abdir\t\tpack current dir"
 		echo 
 		echo -e "  aipsetup system tools:"
 		echo -e "\tcsc|cscript\t\tcopy builder script to current"
@@ -70,6 +71,11 @@ case "$#" in
 		shift
 		bash "$AIP_DIR/_aipb_script" $*
 		exit $?		
+		;;
+	    bd | build)
+		shift
+		bash "$AIP_DIR/_aipb_build" $*
+		exit $?
 		;;
 	    pksums | pks)
 		shift
