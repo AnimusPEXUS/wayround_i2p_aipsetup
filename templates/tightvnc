@@ -18,29 +18,29 @@ tightvnc() {
     ERRORMESSAGE[$j]='*** some check error'
     EXITONERROR[$j]=1
 
-    j=$(( $j + 1 ))
-    RUN[$j]='cd Xvnc ; pwd'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some Xvnc cd error'
-    EXITONERROR[$j]=1
+    # j=$(( $j + 1 ))
+    # RUN[$j]='cd Xvnc ; pwd'
+    # RELATIVELY[$j]=0
+    # ERRORMESSAGE[$j]='*** some Xvnc cd error'
+    # EXITONERROR[$j]=1
 
-    j=$(( $j + 1 ))
-    RUN[$j]='./configure'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some Xvnc configure error'
-    EXITONERROR[$j]=1
+    # j=$(( $j + 1 ))
+    # RUN[$j]='./configure'
+    # RELATIVELY[$j]=0
+    # ERRORMESSAGE[$j]='*** some Xvnc configure error'
+    # EXITONERROR[$j]=1
 
-    j=$(( $j + 1 ))
-    RUN[$j]='make'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some Xvnc make error'
-    EXITONERROR[$j]=1
+    # j=$(( $j + 1 ))
+    # RUN[$j]='make'
+    # RELATIVELY[$j]=0
+    # ERRORMESSAGE[$j]='*** some Xvnc make error'
+    # EXITONERROR[$j]=1
 
-    j=$(( $j + 1 ))
-    RUN[$j]='cd .. ; pwd'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some pwd error'
-    EXITONERROR[$j]=1
+    # j=$(( $j + 1 ))
+    # RUN[$j]='cd .. ; pwd'
+    # RELATIVELY[$j]=0
+    # ERRORMESSAGE[$j]='*** some pwd error'
+    # EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
     RUN[$j]='mkdir -p "$bs_install_dir/usr/bin" "$bs_install_dir/usr/share/man" '
