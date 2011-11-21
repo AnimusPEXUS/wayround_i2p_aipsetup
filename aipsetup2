@@ -27,27 +27,22 @@ except:
 # is an array, containing structures. each structure devides on few
 # fields:
 #
-#  modules_data=[['plugin name', 'module group', ['mode', 'names'],'help text'],
-#                ['plugin name', 'module group', ['mode', 'names'],'help text'],
-#                ['plugin name', 'module group', ['mode', 'names'],'help text'],
+#  modules_data=[['plugin name', 'module group', ['mode', 'names'], ['s', 'h', 'o', 'r', 't', 'p', 'i', 'n', 's'], ['long', 'options'],'help text'],
+#                ['plugin name', 'module group', ['mode', 'names'], ['s', 'h', 'o', 'r', 't', 'p', 'i', 'n', 's'], ['long', 'options'],'help text'],
+#                ['plugin name', 'module group', ['mode', 'names'], ['s', 'h', 'o', 'r', 't', 'p', 'i', 'n', 's'], ['long', 'options'],'help text'],
 #                ...]
 modules_data=[]
 
 ####### aipsetup_* modules import section
-try:
-    import aipsetup_none
-except:
-    print '-e- can not load one of the aipsetup_* modules'
-    print '    please reinstall or reconfigure aipsetup'
-    exit (1)
-
-try:
-    optilist, args = getopt.gnu_getopt(sys.argv[1:], 'm:',['help', 'version', 'test='])
-except(getopt.GetoptError):
-    print 'options error. try '+sys.argv[0:1][0]+' --help'
-    exit(-1)
-
-
+# try:
+import aipsetup_none
+import aipsetup_edit
+# except:
+#     print '-e- can not load one of the aipsetup_* modules'
+#     print '    please reinstall or reconfigure aipsetup'
+#exit (1)
+####### END aipsetup_* modules import section
+    
 # flag to check aipsetup_none module is present
 mode_none_present=False
 
@@ -71,23 +66,33 @@ mode_select='none'
 # help mode will be transmited to selected module
 show_help=False
 
-for i in optilist:
-
-    if i[0]=='--help':
-        show_help=True
-
-    if i[0]=='--version':
-        aipsetup_utils.show_version_message()
-        exit (0)
-
-    if i[0]=='-m':
-        mode_select=i[1]
-
 # default module to start
 module_to_run='aipsetup_none'
 
 # flag to check existing mode selected
 correct_mode_selected=False
+
+arguments=sys.argv[1:]
+
+if len(arguments) > 0:
+    if arguments[0]=='-m':
+        if len(arguments) > 1:
+            mode=arguments[1]
+            del arguments[:2]
+        else:
+            print '-e- -m option must have a value'
+            exit (-1)
+    elif arguments[0]=='--help':
+        show_help=True
+        del arguments[:1]
+    elif arguments[0]=='--version':
+        aipsetup_utils.show_version_message()
+        exit (0)
+    else:
+        print """\
+-e- first argument must! be an option -m with value, --help or --version.
+    Not either"""
+        exit(-1)
 
 for i in modules_data:
     for j in i[2]:
@@ -101,7 +106,7 @@ if not correct_mode_selected:
 
 module_to_run_imported = __builtin__.__import__(module_to_run)
 
-module_to_run_imported.run(show_help, optilist, args)
+module_to_run_imported.run(show_help, arguments)
 
 exit(0)
 
