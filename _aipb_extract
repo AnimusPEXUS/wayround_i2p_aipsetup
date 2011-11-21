@@ -72,6 +72,6 @@ then
 	echo "unknown extention"
     fi
 else
-    echo "file not exists"
+    echo "file \"$FILENAME\" not exists"
 fi
 exit 0

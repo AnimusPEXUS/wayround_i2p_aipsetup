@@ -44,18 +44,21 @@ then
     exit 1
 fi
 
-if [ -z "$4" ]
+echo "extracting"
+bash "$AIP_DIR/_aipb_extract" "$1"
+if [ $? -ne 0 ]
 then
-    echo "prepkg dir not defined not defined"
+    echo "can't extract \"$1\""
     exit 1
 fi
 
-bash "$AIP_DIR/_aipb_extract" "$2"
+echo "searching"
+ardir="`find -maxdepth 1 -type d -name \"$2\"`"
 
-ardir="`find -type d -name \"$2\"`"
-if [ -d "$ardir" ]
+if [ ! -d "$ardir" ]
 then
     echo "dir not found \"$ardir\""
+    exit 1
 fi
 
 echo "buiding in \"$ardir\""
@@ -64,14 +67,38 @@ cd  "$ardir"
 
 bash "$AIP_DIR/_aipb_script" "$3"
 
-bash "_tnbuild_$3"
-if [ $? -eq 0 ]
+if [ $? -ne 0 ]
 then
-    cd ..
+    echo "can't create template \"$3\""
+    exit 1
+fi
 
-    cd "`find -type d -name \"$4\"`"
-    
-    bash "$AIP_DIR/_aipb_pack"
+bash "_tnbuild_$3"
+if [ $? -ne 0 ]
+then
+    echo "error while running build in templete"
+    exit 1
+fi
+
+cd ..
+
+ardir=`cat "lastresultdir"`
+
+if [ ! -d "$ardir" ]
+then
+    echo "dir not found \"$ardir\""
+    exit 1
+fi
+
+echo "packing \"$ardir\""
+cd  "$ardir"
+
+bash "$AIP_DIR/_aipb_pack"
+
+if [ $? -ne 0 ]
+then
+    echo "error while packing"
+    exit 1
 fi
 
 
