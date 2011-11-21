@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# this tool converts all symbolic links in current dir from direct to
+# relative
+
+PPWD=`pwd`
+
+find -type l -exec bash -c "set -x ; linkname='{}' ; oldlvalue=\`readlink \"\$linkname\"\` ; oldlvaluefn=\`basename \"\$oldlvalue\"\` ; newlvalue=\"./\$oldlvaluefn\" ; echo \"\$oldlvalue\" |  grep -q \"^$PPWD\" ; if [ \$? -eq 0 ] ; then rm \"\$linkname\" ; ln -s \"\$newlvalue\" \"\$linkname\"  ; fi " ';'
