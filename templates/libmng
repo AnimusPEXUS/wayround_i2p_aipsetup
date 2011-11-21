@@ -1,13 +1,19 @@
 #!/bin/bash
 
-pidgin() {
+libmng() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-gtkspell --disable-meanwhile --disable-avahi --disable-nm  --host=i486-pc-linux-gnu'
+    RUN[$j]='bash ./unmaintained/autogen.sh'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -23,22 +29,10 @@ pidgin() {
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some check error'
     EXITONERROR[$j]=0
-    
+
     j=$(( $j + 1 ))
     RUN[$j]='make install DESTDIR="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
-    
-    j=$(( $j + 1 ))
-    RUN[$j]='rm "$bs_install_dir/*"'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make install error'
-    EXITONERROR[$j]=0
-    
-    j=$(( $j + 1 ))
-    RUN[$j]='rm -r "$bs_install_dir/auto"'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make install error'
-    EXITONERROR[$j]=0
 }
