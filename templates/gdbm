@@ -5,7 +5,7 @@ gdbm() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -23,7 +23,7 @@ gdbm() {
     EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
-    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1

@@ -7,13 +7,13 @@ glibc() {
     RELATIVE='.'
 
     local j=0
-#     RUN[$j]=' echo "CFLAGS += -march=i486 -mtune=native" > configparms  '
-#     RELATIVELY[$j]=0
-#     ERRORMESSAGE[$j]='xxx'
-#     EXITONERROR[$j]=0
+    RUN[$j]='echo "CFLAGS += -march=i486 -mtune=native" > configparms #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='xxx'
+    EXITONERROR[$j]=0
     
-#     j=$(( $j + 1 ))
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons  --enable-kernel=2.6.16 --with-headers=/usr/src/linux/include --without-selinux --host=i486-pc-linux-gnu '
+    j=$(( $j + 1 ))
+    RUN[$j]='configure --without-selinux --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu --with-cpu=i486 --with-tls --with-elf'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -28,7 +28,7 @@ glibc() {
     RUN[$j]='make check'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some check error'
-    EXITONERROR[$j]=1
+    EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
     RUN[$j]='make install install_root="$bs_install_dir"'
