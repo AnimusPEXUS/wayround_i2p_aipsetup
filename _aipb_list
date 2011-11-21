@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+. "$AIP_DIR/_aipb_init"
+
+cd "$PKG_INFO/sums"
+
 if [ $? -eq 0 ]
 then
     LIST=`find -maxdepth 1 -type f -name '*.bz2' | sort `

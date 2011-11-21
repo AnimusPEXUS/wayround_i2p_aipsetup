@@ -1,0 +1,35 @@
+#!/bin/bash
+
+FILENAME="$1"
+WHICH=`which "$FILENAME" 2> /dev/null` 
+
+if [ ! -f "$WHICH" ]
+then 
+    echo " ERROR: File not found"
+    exit 1
+fi
+
+LIST=`ldd "$WHICH" | sed -e "s/.*=>//g;s/(.*//g"`
+
+for i in $LIST
+do
+    if [ -f "$i" ]
+    then
+	if [ -h "$i" ]
+	then
+	    LINK=`readlink -f $i`
+	    if [ -f "$LINK" ]
+	    then
+		sha512sum -b "$LINK" 
+	    fi
+	    unset LINK
+	else
+	    if [ -f "$i" ]
+	    then
+		sha512sum -b "$i" 
+	    fi	
+	fi
+    else
+	echo " ERROR: \"$i\" not found"
+    fi
+done 

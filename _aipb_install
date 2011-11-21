@@ -13,19 +13,6 @@ then
     exit 1
 fi
 
-# show_help() {
-#     echo "fix me"
-#     return
-# }
-
-# for i in $*
-# do
-#     if [ "$i" == "--help" ]
-#     then
-# 	show_help()
-# 	exit 0
-#     fi
-# done
 OKi=0
 ERi=0
 
@@ -34,7 +21,7 @@ do
     if [ -f "$i" ]
     then
 	printf "installing: "$i":"
-	bash "$AIP_DIR/_aipb_extract" "$i" /
+	bash "$AIP_DIR/_aipb_extract" "$i" "$DESTDIR"/
 	if [ $? -eq 0 ]
 	then
 	    printf ":OK\n"

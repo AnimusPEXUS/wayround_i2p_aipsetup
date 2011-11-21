@@ -1,5 +1,21 @@
 #!/bin/bash
 
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_pksums" ]
+then
+    echo " ERROR: can't find [$AIP_DIR/_aipb_pksums]"
+    exit 1
+fi
+
+
 echo 'changing owner'
 chown -R root.root *
 echo 'changing rules'
@@ -11,25 +27,22 @@ PKGNAME=`basename $PPWD`
 FILEDIR=./var/log/packages
 FILELIST="$FILEDIR/$PKGNAME"
 
-# rm ./*.tar.bz2 > /dev/null 2> /dev/null
-# rm ./*.tar.bz2.md5 > /dev/null 2> /dev/null
-# rm ./*.tar.bz2.sha512 > /dev/null 2> /dev/null
-
 echo "Creating package: $PKGNAME..."
-echo "  creating installed file list"
+# echo "  creating installed file list"
 mkdir -p "$FILEDIR" > /dev/null 2> /dev/null
 rm  "$FILEDIR"/* > /dev/null 2> /dev/null
 
-touch "$FILELIST"
-find -type f | sed -e "s/$PKGNAME\$/$PKGNAME.bz2\n/" >> "$FILELIST"
-find -type l >> "$FILELIST"
-#echo "$FILEDIR/$PKGNAME.bz2" >> "$FILELIST"
+# touch "$FILELIST"
+# find ./ -type f ! -regex '.*/var/log/packages/.*' | sed -e "s/^\.//g"  >> "$FILELIST"
+# find ./ -type l ! -regex '.*/var/log/packages/.*'| sed -e "s/^\.//g" >> "$FILELIST"
 
-cat "$FILELIST" | sort > "$FILELIST"1
-cat "$FILELIST"1 > "$FILELIST"
-rm "$FILELIST"1
+# cat "$FILELIST" | sort > "$FILELIST"1
+# cat "$FILELIST"1 > "$FILELIST"
+# rm "$FILELIST"1
 
-bzip2 -9 "$FILELIST"
+# bzip2 -9 "$FILELIST"
+
+bash "$AIP_DIR/_aipb_pksums"
 
 
 mkdir ../pack > /dev/null 2> /dev/null

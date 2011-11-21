@@ -1,20 +1,67 @@
 #!/bin/bash
 
-if [ ! -f "$1" ]
+PPWD=`pwd`
+
+remove_p1=
+remove() {
+    
+    if [ ! -f "$PKG_INFO/sums/$remove_p1" ]
+    then
+	echo " ERROR: file $PKG_INFO/sums/$remove_p1 not found"
+	return 1
+    fi
+    basename "$remove_p1" .bz2
+    if [ $? -ne 0 ]
+    then
+	echo " ERROR: wrong checksum file"
+	return 1
+    fi
+    remove_line_count=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | wc -l`
+    remove_i=1
+    remove_all_removed=1
+    while [ "$remove_i" -ne "$remove_line_count" ]
+    do
+	FILENAME=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sed -e "s/.*\*/$DESTDIR/g"`
+	cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sha512sum -c > /dev/null 2>&1
+	if [ $? -eq 0 ]
+	then
+	    echo -e "rm \"$FILENAME\""
+	    rm "$FILENAME"
+	else
+	    remove_all_removed=0
+	fi
+	remove_i=$(( $remove_i + 1 ))
+    done
+    if [ $remove_all_removed -eq 1 ]
+    then
+	rm "$PKG_INFO/sums/$remove_p1"
+    fi
+    return 0
+}
+
+if [ ! -d "$AIP_DIR" ]
 then
-    echo "*** $1 does not exists"
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
     exit 1
 fi
 
-echo "removing $1"
+. "$AIP_DIR/_aipb_init"
 
-PPWD=`pwd`
+if [ -n "$DESTDIR" -a ! -a "$DESTDIR" ]
+then
+    echo "*** DESTDIR is set, but does not exists"
+    exit 1
+fi
 
-FILES=`cat $1 | bzip2 -d | sed -e "/^.*:.*&/d"`
+if [ -n "$DESTDIR" -a ! -d "$DESTDIR" ]
+then
+    echo "*** DESTDIR is set, exists, but isn't directory"
+    exit 1
+fi
 
-for i in $FILES
-do
-    rm -v "/$i"
-done
-
-exit 0
+remove_p1="$1"
+remove
+     
+exit $?

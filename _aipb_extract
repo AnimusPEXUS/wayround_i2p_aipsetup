@@ -1,5 +1,21 @@
 #!/bin/bash
 
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+if [ ! -f "$AIP_DIR/_aipb_getarchtype" ]
+then
+    echo " ERROR: can't find [$AIP_DIR/_aipb_getarchtype]"
+    exit 1
+fi
+
+FILENAME="$1"
+
 if [ ! -d "$2" ]
 then
     DESTDIR='.'
@@ -7,86 +23,54 @@ else
     DESTDIR="$2"
 fi
 
-if [ -f "$1" ]
+if [ -f "$FILENAME" ]
 then
-    ARCH_TYPE=
-#     echo "extracting $1"
+    ARCH_TYPE=`bash "$AIP_DIR/_aipb_getarchtype" "$FILENAME"`
 
-    echo "$1" | grep -e '^.*\.tar\.gz$' > /dev/null 2>&1
     if [ $? -eq 0 ]
     then
-	ARCH_TYPE="tar.gz"
+	case $ARCH_TYPE in
+	    'tar.gz' | 'tgz')
+		set -o pipefail
+		cat "$FILENAME" | gzip -d | tar -xC "$DESTDIR"
+		set +o pipefail
+		fail=$?
+		;;
+	    'tar.bz2')
+		set -o pipefail
+		cat "$FILENAME" | bzip2 -d | tar -xC "$DESTDIR"
+		set +o pipefail
+		fail=$?
+		;;
+	    'tar.lzma')
+		set -o pipefail
+		cat "$FILENAME" | lzma -d | tar -xC "$DESTDIR"
+		set +o pipefail
+		fail=$?
+		;;
+	    'tar.7z')
+		set -o pipefail
+		7z x -so "$FILENAME" | tar -xC "$DESTDIR"
+		set +o pipefail
+		fail=$?
+		;;
+	    'zip')
+		unzip -qq "$FILENAME" -d "$DESTDIR"
+		fail=$?
+		;;
+	    *)
+		echo "unknown extention"
+		exit 1
+		;;
+	esac
+	if [ "$fail" -ne 0 ]
+	then
+	    echo "file extraction error"
+	fi
+	exit $fail
+    else
+	echo "unknown extention"
     fi
-
-    echo "$1" | grep -e '^.*\.tar\.bz2$' > /dev/null 2>&1
-    if [ $? -eq 0 ]
-    then
-	ARCH_TYPE="tar.bz2"
-    fi
-    
-    echo "$1" | grep -e '^.*\.tar\.lzma$' > /dev/null 2>&1
-    if [ $? -eq 0 ]
-    then
-	ARCH_TYPE="tar.lzma"
-    fi
-
-    echo "$1" | grep -e '^.*\.tgz$' > /dev/null 2>&1
-    if [ $? -eq 0 ]
-    then
-	ARCH_TYPE="tar.gz"
-    fi
-
-    echo "$1" | grep -e '^.*\.tar\.7z$' > /dev/null 2>&1
-    if [ $? -eq 0 ]
-    then
-	ARCH_TYPE="tar.7z"
-    fi
-
-    echo "$1" | grep -e '^.*\.zip$' > /dev/null 2>&1
-    if [ $? -eq 0 ]
-    then
-	ARCH_TYPE="zip"
-    fi
-
-    case $ARCH_TYPE in
-	'tar.gz')
-	    set -o pipefail
-	    cat "$1" | gzip -d | tar -xC "$DESTDIR"
-	    set +o pipefail
-	    fail=$?
-	    ;;
-	'tar.bz2')
-	    set -o pipefail
-	    cat "$1" | bzip2 -d | tar -xC "$DESTDIR"
-	    set +o pipefail
-	    fail=$?
-	    ;;
-	'tar.lzma')
-	    set -o pipefail
-	    cat "$1" | lzma -d | tar -xC "$DESTDIR"
-	    set +o pipefail
-	    fail=$?
-	    ;;
-	'tar.7z')
-	    set -o pipefail
-	    7z x -so "$1" | tar -xC "$DESTDIR"
-	    set +o pipefail
-	    fail=$?
-	    ;;
-	'zip')
-	    unzip -qq "$1" -d "$DESTDIR"
-	    fail=$?
-	    ;;
-	*)
-	    echo "unknown extention"
-	    exit 1
-	    ;;
-    esac
-    if [ "$fail" -ne 0 ]
-    then
-	echo "file extraction error"
-    fi
-    exit $fail
 else
     echo "file not exists"
 fi

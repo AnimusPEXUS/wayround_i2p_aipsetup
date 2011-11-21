@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ ! -d "$AIP_DIR" ]
+then
+    echo " SORRY: please, install aipsetup (if not yet),"
+    echo "        and run 'remove' from main program (aipsetup)"
+    echo " ERROR: AIP_DIR not set"
+    exit 1
+fi
+
+. "$AIP_DIR/_aipb_init"
+
+echo -n "checksums creating..."
+
+PPWD=`pwd`
+PKGNAME=`basename $PPWD`
+
+
+rm ".$PKG_INFO/sums"/*  > /dev/null 2>&1
+
+mkdir -p ".$PKG_INFO/sums"  > /dev/null 2>&1
+
+find -type f ! -regex ".*$PKG_INFO/sums.*" -exec bash -c "sha512sum -b '{}' | sed -e \"s/\*\.\//\*\//g\" >> \".$PKG_INFO/sums/${PKGNAME}\"" ';'
+
+bzip2 -9 ".$PKG_INFO/sums/${PKGNAME}" > /dev/null 2>&1
+
+echo

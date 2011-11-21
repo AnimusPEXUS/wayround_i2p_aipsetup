@@ -1,0 +1,60 @@
+#!/bin/bash
+
+ARCH_TYPE=
+FILENAME="$1"
+
+if [ -z "$FILENAME" ]
+then
+    echo " ERROR: file name not given"
+    exit 1
+fi
+
+echo "$FILENAME" | grep -e '^.*\.bz2$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="bz2"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.gz$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="gz"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.tgz$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="tgz"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.zip$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="zip"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.tar\.gz$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="tar.gz"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.tar\.bz2$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="tar.bz2"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.tar\.lzma$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="tar.lzma"
+fi
+
+echo "$FILENAME" | grep -e '^.*\.tar\.7z$' > /dev/null 2>&1
+if [ $? -eq 0 ]
+then
+    ARCH_TYPE="tar.7z"
+fi
+
+echo "$ARCH_TYPE"

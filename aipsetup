@@ -24,49 +24,45 @@ case "$#" in
 		echo -e "usage: `basename $0` [command] [command_parameters]"
 		echo
 		echo -e "[command]s:"
-		echo -e "\tcsc|cscript\t\tcopy builder script to current dir (for maintainers"
-		echo -e "\tesc|escript\t\tedit builder script"
-		echo -e "\tsc|script\t\tuse builder script (see $0 script --help)"
-		echo -e "\tpk|pack\t\t\tuse packing script"
-		echo -e "\tls|list\t\t\tlist installed packages"
-		echo -e "\trm|remove TARGET\tremove named package"
-		echo -e "\tin|install FILE\t\tinstall named package files"
-		echo -e "\tfn|findcom FILENAME\tfind package by FILENAME"
+		echo -e "  building tools:"
+		echo -e "\tesc|escript\t\tedit script compiler"
+		echo -e "\t sc|script\t\tuse script compiler"
+		echo -e "\t\t\t\t(see \``basename $0` script --help')"
+		echo -e "\tpks|pksums\t\tcreate sha512 sums for current dir"
+		echo -e "\t pk|pack\t\tpack current dir"
 		echo 
-		echo -e "\tex|extract FILE\t\textract to the current dir"
+		echo -e "  aipsetup system tools:"
+		echo -e "\tcsc|cscript\t\tcopy builder script to current"
+		echo -e "\t\t\t\tdir (for maintainers)"
+		echo 
+		echo -e "  system tools:"
+		echo -e "\t ls|list\t\tlist installed packages"
+		echo -e "\t rm|remove TARGET\tremove named package"
+		echo -e "\t in|install FILE\tinstall named package files"
+		echo -e "\t fn|findcom FILENAME\tfind package by FILENAME"
+		echo -e "\tldd|lddsums PROGRAM\tmake sha512 sums for PROGRAM ldd output"
+		echo
+		echo -e "  misc tools:"
+		echo -e "\t ex|extract FILE\textract to the current dir"
+		echo
 		echo
 		echo -e "\t--help\t\t\tsee this help"
 		echo -e "\t--version\t\tversion info"
 		exit 0
 		;;
-	    cscript | csc)
-		cp "$AIP_DIR/_aipb_script" .
-		exit $?
-		;;
+
 	    escript | esc)
 		"$VISUAL" "$AIP_DIR/_aipb_script"
 		exit $?
-		;;
-	    list | ls)
-		shift
-		cd /var/log/packages
-		bash "$AIP_DIR/_aipb_list" $*
-		exit $?				
-		;;
-	    remove | rm)
-		shift
-		cd /var/log/packages
-		bash "$AIP_DIR/_aipb_remove" $*
-		exit $?				
 		;;
 	    script | sc)
 		shift
 		bash "$AIP_DIR/_aipb_script" $*
 		exit $?		
 		;;
-	    extract | ex)
+	    pksums | pks)
 		shift
-		bash "$AIP_DIR/_aipb_extract" $*
+		bash "$AIP_DIR/_aipb_pksums " $*
 		exit $?
 		;;
 	    pack | pk)
@@ -74,15 +70,42 @@ case "$#" in
 		bash "$AIP_DIR/_aipb_pack" $*
 		exit $?
 		;;
-	    findcom | fn)
-		shift
-		bash "$AIP_DIR/_aipb_fpbf" $*
+
+	    cscript | csc)
+		cp "$AIP_DIR/_aipb_script" .
 		exit $?
+		;;
+
+	    list | ls)
+		shift
+		bash "$AIP_DIR/_aipb_list" $*
+		exit $?				
+		;;
+	    remove | rm)
+		shift
+		bash "$AIP_DIR/_aipb_remove" $*
+		exit $?				
 		;;
 	    install | 'in')
 		shift
 		bash "$AIP_DIR/_aipb_install" $*
 		;;
+	    findcom | fn)
+		shift
+		bash "$AIP_DIR/_aipb_fpbf" $*
+		exit $?
+		;;
+	    lddsums | 'ldd')
+		shift
+		bash "$AIP_DIR/_aipb_lddsums" $*
+		;;
+
+	    extract | ex)
+		shift
+		bash "$AIP_DIR/_aipb_extract" $*
+		exit $?
+		;;
+
 	    *)
 		echo "wrong parameter, use --help for info"
 		exit 0
