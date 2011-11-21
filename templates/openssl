@@ -7,7 +7,7 @@ openssl() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='config --prefix=/usr 386 '
+    RUN[$j]='config -shared --prefix=/usr 386 '
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

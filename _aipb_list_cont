@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# this script, lists all files installed by named package
+
 if [ ! -d "$AIP_DIR" ]
 then
     echo " SORRY: please, install aipsetup (if not yet),"
@@ -7,11 +9,6 @@ then
     echo " ERROR: AIP_DIR not set"
     exit 1
 fi
-
-# this file lists packages installed in system.  -b parameter can be
-# used to change system base dir ( by default / ).
-
-set -f
 
 unset BASEDIR
 if [ "$1" = "-b" ]
@@ -26,15 +23,18 @@ if [ $? -eq 0 ]
 then
     if [ -z "$1" ]
     then
-	echo test
+        echo test
 	LIST=`find -maxdepth 1 -type f -name '*.xz' | sort`
     else
-	set -f
+        set -f
 	LIST=`find -maxdepth 1 -type f -name "$1" | sort `
     fi
+
     for i in $LIST
     do
 	stat --printf="%n \t Changed: \"%z\"\n" "$i"
+        cat "$i" | xz -d | sort
+	echo
     done
 else
     echo "can't cd to packages dir"

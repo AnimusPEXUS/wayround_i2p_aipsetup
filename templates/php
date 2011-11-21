@@ -7,7 +7,7 @@ php() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --enable-mbstring --with-sqlite --enable-sqlite-utf8 --with-pdo-sqlite --with-gd --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-jpeg-dir --with-png-dir --with-zlib-dir --with-ttf --with-freetype-dir  --with-apxs2 --with-pdo-pgsql --with-pgsql --with-mysql --with-ncurses --with-pdo-mysql --with-mysqli --with-readline  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --enable-ftp --with-openssl --enable-mbstring --with-sqlite --enable-sqlite-utf8 --with-pdo-sqlite --with-gd --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-jpeg-dir --with-png-dir --with-zlib-dir --with-ttf --with-freetype-dir  --with-apxs2 --with-pdo-pgsql --with-pgsql --with-mysql --with-ncurses --with-pdo-mysql --with-mysqli --with-readline  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

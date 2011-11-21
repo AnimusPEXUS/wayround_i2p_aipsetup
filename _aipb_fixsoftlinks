@@ -14,6 +14,14 @@ fi
 
 PPWD=`pwd`
 
+echo searching for "$PPWD" in files to remove it.
+
+echo fixing links...
 find -type l -exec bash "$AIP_DIR/_aipb_fixsoftlink" '{}' ';'
+
+cd usr
+
+echo fixing files...
+find -type f -exec bash -c '  grep '"$PPWD"'  "{}"  > /dev/null  ; e="$?" ; if [ "$e" -eq 0 ] ; then echo "editing {}" ; sed -i -e "s|'"$PPWD"'||g" "{}" ; fi ' ';'
 
 exit 0

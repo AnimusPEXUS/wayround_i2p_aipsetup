@@ -66,6 +66,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		echo 
 		echo -e "  system tools:"
 		echo -e "    ls|list [-b BASEDIR] ['filemask']    list installed packages"
+		echo -e "   lsc|listc [-b BASEDIR] ['filemask']    list files installed by packages"
 		echo -e "   chk|pkcheck TARGET                    check pkg sums"
 		echo -e "    rm|remove [-b BASEDIR] ['filemask']  remove named package"
 		echo -e "    in|install [-b BASEDIR] FILEMASK  install named package files"
@@ -163,6 +164,13 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		shift
 		set -f
 		bash "$AIP_DIR/_aipb_list" $*
+		set +f
+		exit $?				
+		;;
+	    listc | lsc)
+		shift
+		set -f
+		bash "$AIP_DIR/_aipb_list_cont" $*
 		set +f
 		exit $?				
 		;;
