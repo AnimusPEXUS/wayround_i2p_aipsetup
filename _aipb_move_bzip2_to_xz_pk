@@ -11,6 +11,8 @@ fi
 
 ppwd="`pwd`"
 
+#set -x 
+
 for i in $*
 do
     if [ ! -f "$i" ]
@@ -19,9 +21,10 @@ do
 	continue
     fi
     
-    pkgname=`echo "$i" | sed -e 's,.bz2$,,'`
+    pkgname=`echo "$i" | sed -e 's,.tar.bz2$,,'`
 
-    tmpdir=`"$AIP_DIR/_aipb_gettempdir"`
+    tmpdir=`bash "$AIP_DIR/_aipb_gettempdir"`
+    echo "tempdir = $tmpdir"
     if [ "$?" -eq 1 ]
     then
 	echo "cant get temp dir"
@@ -31,13 +34,15 @@ do
     tmpdir_pkgname="$tmpdir/$pkgname"
     mkdir -p "$tmpdir_pkgname"
 
-    "$AIP_DIR/_aipb_install" -b "$tmpdir_pkgname" "$i"
+    bash "$AIP_DIR/_aipb_install" -b "$tmpdir_pkgname" "$i"
     
-    "$AIP_DIR/_aipb_move_bzip2_to_xz" -b "$tmpdir_pkgname"
+    bash "$AIP_DIR/_aipb_move_bzip2_to_xz" -b "$tmpdir_pkgname" <<EOF
+yes
+EOF
     
     cd "$tmpdir_pkgname"
     
-    "$AIP_DIR/_aipb_pack"
+    bash "$AIP_DIR/_aipb_pack"
 
     cd ../pack
 
