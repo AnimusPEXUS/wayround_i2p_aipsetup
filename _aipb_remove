@@ -44,7 +44,7 @@ remove() {
 	echo " ERROR: file $PKG_INFO/$remove_p1 not found"
 	return 1
     fi
-    basename "$remove_p1" .bz2
+    basename "$remove_p1" .xz
     if [ $? -ne 0 ]
     then
 	echo " ERROR: wrong filelist file"
@@ -55,7 +55,7 @@ remove() {
     then
 	tmp=`bash $AIP_DIR/_aipb_gettempdir`
 	
-	cat "$BASEDIR/$PKG_INFO/$remove_p1" | bzip2 -d > "$tmp/rm_list"
+	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d > "$tmp/rm_list"
 	cat "$tmp/rm_list" | sed -e "s#^# rm -v '$BASEDIR#g;s/\$/'/"  > "$tmp/mrm_list"
 	bash "$tmp/mrm_list"
 	

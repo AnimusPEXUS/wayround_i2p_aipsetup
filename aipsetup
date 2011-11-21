@@ -29,7 +29,7 @@ then
     exit 1
 fi
 
-exit 0
+. "$AIP_DIR/_aipb_init"
 
 case "$#" in
     0)
@@ -41,7 +41,7 @@ case "$#" in
 		printf "aipsetup " 
 		cat "$AIP_DIR/VERSION"
 		echo
-		echo -e "Copyright (C) 2008,2009 AGUtilities Software, Inc.
+		echo -e "Copyright (C) 2008,2009 WayRound.org Software, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		exit 0
@@ -65,21 +65,22 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		echo -e "                               dir (for maintainers)"
 		echo 
 		echo -e "  system tools:"
-		echo -e "    ls|list [filemask]         list installed packages"
-		echo -e "   chk|pkcheck TARGET          check pkg sums"
-		echo -e "    rm|remove [filemask]       remove named package"
-		echo -e "    in|install FILE            install named package files"
-		echo -e "    fn|findcom FILENAME        find package by FILENAME"
-		echo -e "    fd|finddep FILENAME PATH   look for files depending on FILENAME in PATH dir"
-		echo -e "   ldd|lddsums PROGRAM         make sha512 sums for PROGRAM ldd output"
+		echo -e "    ls|list [-b BASEDIR] ['filemask']    list installed packages"
+		echo -e "   chk|pkcheck TARGET                    check pkg sums"
+		echo -e "    rm|remove [-b BASEDIR] ['filemask']  remove named package"
+		echo -e "    in|install [-b BASEDIR] FILEMASK  install named package files"
+		echo -e "    fn|findcom FILENAME       find package by FILENAME"
+		echo -e "    fd|finddep FILENAME PATH  look for files depending on FILENAME in PATH dir"
+		echo -e "   ldd|lddsums PROGRAM        make sha512 sums for PROGRAM ldd output"
+		echo -e "      |bz2xzsys [-b BASEDIR]  transfer existing bzip2 aipsetup system to xz"
+		echo -e "      |bz2xzpkg FILEMASK      transfer existing bzip2 aipsetup packages to xz"
 		echo
 		echo -e "  misc tools:"
-		echo -e "    ex|extract FILE            extract to the current dir"
-		echo -e "    np|nameparse               parse package filename"
-		echo -e "    lu|listuniq                parse package filenames and show all uniq names"
-		echo -e "   pvc|pkgnamevcomp            find newest or oldest package from given by name"
-		echo -e "                               (see --help)"
-		echo -e "   llu|pkgnamelstlat           list all latest packages of given"
+		echo -e "    ex|extract FILE      extract to the current dir"
+		echo -e "    np|nameparse         parse package filename"
+		echo -e "    lu|listuniq          parse package filenames and show all uniq names"
+		echo -e "   pvc|pkgnamevcomp      find newest or oldest package from given by name (see --help)"
+		echo -e "   llu|pkgnamelstlat     list all latest packages of given"
 		echo
 		echo
 		echo -e "  --help      see this help"
@@ -169,10 +170,22 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 	    finddep | fd)
 		shift
 		bash "$AIP_DIR/_aipb_finddeps" $*
+		exit $?
 		;;
 	    lddsums | 'ldd')
 		shift
 		bash "$AIP_DIR/_aipb_lddsums" $*
+		exit $?
+		;;
+	    bz2xzsys )
+		shift
+		bash "$AIP_DIR/_aipb_move_bzip2_to_xz" $*
+		exit $?
+		;;
+	    bz2xzpkg )
+		shift
+		bash "$AIP_DIR/_aipb_move_bzip2_to_xz_pkg" $*
+		exit $?
 		;;
 
 	    extract | ex)
@@ -202,7 +215,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		;;
 	    *)
 		echo "wrong parameter, use --help for info"
-		exit 0
+		exit 1
 		;;
 	esac
 	;;

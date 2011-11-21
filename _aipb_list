@@ -26,7 +26,8 @@ if [ $? -eq 0 ]
 then
     if [ -z "$1" ]
     then
-	LIST=`find -maxdepth 1 -type f -name '*.bz2' | sort `
+	echo test
+	LIST=`find -maxdepth 1 -type f -name '*.xz' | sort`
     else
 	set -f
 	LIST=`find -maxdepth 1 -type f -name "$1" | sort `

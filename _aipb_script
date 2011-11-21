@@ -77,11 +77,10 @@ looform() {
 
     
     cat <<EOF >> ./_tnbuild_$form_p1
-echo -e '==EXECUTING=======[\e[47m\e[30m$CMD\e[0m]' | tee -a "\$bs_buildlogfile" 
+echo -e '==EXECUTING==[\e[47m\e[30m$CMD\e[0m] ' | tee -a "\$bs_buildlogfile" 
 EOF
 
     cat <<EOF >> ./_tnbuild_$form_p1
-#sleep 3
 echo -e '\e[32m\n'
 set -o pipefail
 $CMD 2>&1 | tee -a "\$bs_buildlogfile"
