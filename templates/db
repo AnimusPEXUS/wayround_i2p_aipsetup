@@ -1,12 +1,13 @@
 #!/bin/bash
-ffmpeg() {
+
+db() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
-    RELATIVE='.'
+    RELATIVE='build_unix'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --enable-shared --enable-gpl --enable-libtheora --enable-libvorbis --enable-x11grab --enable-libmp3lame --enable-libx264 --enable-libxvid'
+    RUN[$j]='../dist/configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --enable-compat185 --enable-cxx --enable-rpc --enable-tcl -with-tcl=/usr/lib --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu '
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

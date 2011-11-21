@@ -18,7 +18,7 @@ fi
 . "$AIP_DIR/_aipb_init"
 
 echo 'changing owner'
-chown -R root.root *
+chown -R 0:0 *
 echo 'changing rules'
 chmod -R 755 *
 
