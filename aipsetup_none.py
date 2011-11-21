@@ -2,9 +2,10 @@
 
 
 import sys
-import aipsetup_utils
 import textwrap
 import __main__
+import getopt
+import aipsetup_utils
 
 
 # protect module from being run as script
@@ -38,9 +39,9 @@ def module_help():
     -------
 """
     show_group_modules('basic')
-    show_group_modules('build')
-    show_group_modules('install')
-    show_group_modules('service')
+    show_group_modules('templates')
+    show_group_modules('packages')
+    show_group_modules('misc')
 
 def get_module_modes(module='aipsetup_none'):
     b=[]
@@ -75,7 +76,13 @@ def get_group_modules(group='basic'):
 def run(aipsetup_config, 
         arguments = []):
 
-    if not (help_mode or (len(arguments) == 0)):
+    optilist, args = getopt.getopt(arguments, 'h', ['help', 'version'])
+
+    h_sett = False
+    help_sett = False
+    version_sett = False
+
+    if not (len(arguments) == 0):
         print 'this mode only shows help. here it is:'
 
     module_help()

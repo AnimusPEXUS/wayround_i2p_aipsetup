@@ -9,6 +9,7 @@ def show_version_message():
 Copyright (C) 2008-2010 Alexey V. Gorshkov (AGUtilities)
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
+    return
 
 def update_modules_data(module_name, module_group, module_modes, module_help):
     import __main__
@@ -18,13 +19,12 @@ def update_modules_data(module_name, module_group, module_modes, module_help):
         print '-e- __main__.modules_data error'
     else:
         __main__.modules_data.append([module_name, module_group, module_modes, module_help])
+    return
 
 def module_run_protection(name):
     if name == "__main__":
         print '-e- this module must be started by aipsetup, not by hand'
         exit (-1)
-
-module_run_protection(__name__)
 
 def get_configuration(defaults):
     home = defaults['homedir']
@@ -86,3 +86,5 @@ def filecopy(src, dst, verbose=False):
     d.close()
 
     return 0
+
+module_run_protection(__name__)

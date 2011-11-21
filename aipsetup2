@@ -17,7 +17,6 @@ aipsetup_config = {'homedir'  :'/usr/lib/aipsetup', # aipsetup home
                    'templates':'/usr/lib/aipsetup/templates', # aipsetup
                                                               # templates
                    'editor'   : os.environ['VISUAL'],         # editor
-                   # 'editor'   :'emacs',             # editor
                    'settings' :'/etc/aipsetup.conf'
                    }
 
@@ -56,11 +55,11 @@ modules_data = []
 ####### aipsetup_* modules import section
 # try:
 import aipsetup_none
-import aipsetup_edit
+import aipsetup_templates
 # except:
 #     print '-e- can not load one of the aipsetup_* modules'
 #     print '    please reinstall or reconfigure aipsetup'
-#exit (1)
+#     exit (1)
 ####### END aipsetup_* modules import section
 
 
@@ -75,10 +74,6 @@ mode_list = []
 
 # mode selector
 mode_select = 'none'
-
-
-# help mode will be transmitted to selected module
-show_help = False
 
 
 # default module to start
@@ -117,23 +112,11 @@ if len(arguments) > 0:
             mode_select = arguments[1]
             del arguments[:2]
         else:
-            print '-e- -m option must have a value'
+            print '-e- -m option must have the value'
             exit (-1)
 
-    elif arguments[0] == '--help':
-        show_help = True
-        del arguments[:1]
-
-    elif arguments[0] == '--version':
-        aipsetup_utils.show_version_message()
-        exit (0)
-
     else:
-        print """\
--e- first argument must! be an option -m with value, --help or --version.
-    Not either"""
-        exit(-1)
-
+        mode_select = 'none'
 
 
 

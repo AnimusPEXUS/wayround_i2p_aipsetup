@@ -16,13 +16,9 @@ aipsetup_utils.module_run_protection(__name__)
 
 
 module_name = __name__
-module_group = 'build'
-module_modes = ['esc','escript']
-module_help = """\
-This is template editing mode. By default \
-it starts editor with opened selected template. if template is \
-not exist, then it's created from `usr' template. if saved file \
-is empty or it's hash equals to user's - new template will be deleted"""
+module_group = 'templates'
+module_modes = ['tpl','templates']
+module_help = 'This is template mode. See -m tpl --help for more info'
 
 
 aipsetup_utils.update_modules_data(module_name, module_group, module_modes, module_help)
@@ -39,7 +35,16 @@ def editing_help():
      -d              delete template
      -t template     use `template' as prototype, not `usr'.
                      WARNING: this also deletes template you've
-                              selected to edit"""
+                              selected to edit
+     -e editor       open template with given editor
+     -m              template editing (default)
+     -l | --list     list templates
+
+
+ -d, -t, -m and -l are not compatible. -e usefull only with -m option.
+ -m, -d and -m takes only one argument - template to work with
+ -l doesn't allow any arguments with this aipsetup mode
+"""
 
 def run(aipsetup_config,
         arguments = []):
