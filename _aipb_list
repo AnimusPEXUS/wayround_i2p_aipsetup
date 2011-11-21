@@ -12,7 +12,14 @@ fi
 
 . "$AIP_DIR/_aipb_init"
 
-cd "$PKG_INFO"
+unset BASEDIR
+if [ "$1" = "-b" ]
+then
+    BASEDIR="$2"
+    shift 2
+fi
+
+cd "$BASEDIR/$PKG_INFO"
 
 if [ $? -eq 0 ]
 then

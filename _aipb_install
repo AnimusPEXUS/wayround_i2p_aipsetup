@@ -18,8 +18,7 @@ if [ "$1" = "-b" ]
 then
     BASEDIR="$2"
     mkdir -p "$BASEDIR"
-    shift
-    shift
+    shift 2
 else
     unset BASEDIR
 fi
