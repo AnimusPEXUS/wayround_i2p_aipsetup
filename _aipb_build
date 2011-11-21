@@ -26,7 +26,7 @@ then
     exit 1
 fi
 
-if [ ! -f "$1"]
+if [ ! -f "$1" ]
 then
     echo "file \"$1\" not found"
     exit 1
@@ -50,7 +50,7 @@ then
     exit 1
 fi
 
-"$AIP_DIR/_aipb_extract" "$2"
+bash "$AIP_DIR/_aipb_extract" "$2"
 
 ardir="`find -type d -name \"$2\"`"
 if [ -d "$ardir" ]
@@ -62,7 +62,7 @@ echo "buiding in \"$ardir\""
 
 cd  "$ardir"
 
-"$AIP_DIR/_aipb_script" "$3"
+bash "$AIP_DIR/_aipb_script" "$3"
 
 bash "_tnbuild_$3"
 if [ $? -eq 0 ]
@@ -71,7 +71,7 @@ then
 
     cd "`find -type d -name \"$4\"`"
     
-    "$AIP_DIR/_aipb_pack"
+    bash "$AIP_DIR/_aipb_pack"
 fi
 
 
