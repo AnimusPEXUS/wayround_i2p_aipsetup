@@ -52,7 +52,7 @@ setup:
 	-mkdir -p "$(PREFIX)/$(AIP_B)"
 	-mkdir -p "$(PREFIX)/$(BINDIR)"
 	cat aipsetup | sed -e "4{s#export AIP_DIR=\"\"#export AIP_DIR=\"$(AIP_B)\"#}" > "$(PREFIX)/$(BINDIR)/aipsetup"
-	chown root.root "$(PREFIX)/$(BINDIR)/aipsetup"
+	chown 0:0 "$(PREFIX)/$(BINDIR)/aipsetup"
 	chmod 0700 "$(PREFIX)/$(BINDIR)/aipsetup"
 	@echo "<<<[ Sett Up ]>>>"
 
@@ -60,7 +60,7 @@ unsetup:
 	-rm "$(PREFIX)/$(BINDIR)/aipsetup"
 
 clean:
-	chown -R root.root .
+	chown -R 0:0 .
 	chmod -R 0600 .
 	find -type f -name '*~' -exec rm -v '{}' ';'
 

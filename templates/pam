@@ -1,4 +1,5 @@
 #!/bin/bash
+
 pam() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
@@ -6,7 +7,7 @@ pam() {
     RELATIVE='.'
     
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-selinux --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --disable-selinux --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

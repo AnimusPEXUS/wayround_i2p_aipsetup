@@ -34,7 +34,7 @@ do
 	printf "installing: \"$i\"...\n"
 	if [ -n "$BASEDIR" ]
 	then
-	    printf "        to:\"$BASEDIR\""
+	    echo "        to:\"$BASEDIR\""
 	fi
 	printf "     md5:"
 	md5sum -c "$i".md5
@@ -68,7 +68,10 @@ do
 done
 echo "  installed: $OKi, errors: $ERi, Total: $(( $OKi + $ERi ))"
 echo "ldconfig"
-ldconfig
+if [ -z "$BASEDIR" ]
+then
+    ldconfig
+fi
 echo "sync"
 sync
 

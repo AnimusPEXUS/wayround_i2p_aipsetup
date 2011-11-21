@@ -13,7 +13,8 @@ glibc() {
     EXITONERROR[$j]=0
     
     j=$(( $j + 1 ))
-    RUN[$j]='configure --without-selinux --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu --with-cpu=i486 --with-tls --with-elf'
+#    RUN[$j]='configure --without-selinux --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu --with-cpu=i486 --with-tls --with-elf'
+    RUN[$j]='configure --without-selinux --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-add-ons=ports,soft-fp,nptl,libidn  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu --target=i486-pc-linux-gnu --enable-kernel=2.6.28.7  --with-tls --with-elf'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

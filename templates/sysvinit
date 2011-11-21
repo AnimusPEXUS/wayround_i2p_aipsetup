@@ -1,16 +1,16 @@
 #!/bin/bash
 
-perl() {
+sysvinit() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
     SEPARATEDIR=0
-    RELATIVE='.'
+    RELATIVE='src'
     
     local j=0
-    RUN[$j]='configure.gnu --prefix=/usr'
-    RELATIVELY[$j]=1
+    RUN[$j]='cat Makefile | sed -e "s/^CFLAGS.*=.*/CFLAGS = -Wall -O2 -fomit-frame-pointer -D_GNU_SOURCE -march=i486 -mtune=i486/" > Makefile2 ; mv Makefile2 Makefile # '
+    RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some configure script error'
-    EXITONERROR[$j]=1
+    EXITONERROR[$j]=0
     
     j=$(( $j + 1 ))
     RUN[$j]='make'
@@ -19,13 +19,7 @@ perl() {
     EXITONERROR[$j]=1
     
     j=$(( $j + 1 ))
-    RUN[$j]='make check'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some check error'
-    EXITONERROR[$j]=0
-    
-    j=$(( $j + 1 ))
-    RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RUN[$j]='make install ROOT="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
