@@ -39,6 +39,7 @@ install: clean
 	-rm -rf "$(PREFIX)/$(AIP_B)"
 	mkdir -p "$(PREFIX)/$(AIP_B)"
 	cp -r * "$(PREFIX)/$(AIP_B)"
+	chmod -R 755 "$(PREFIX)/$(AIP_B)"
 	@echo "<<<[ Installed ]>>>"
 	$(MAKE) -C "$(PREFIX)/$(AIP_B)" setup
 

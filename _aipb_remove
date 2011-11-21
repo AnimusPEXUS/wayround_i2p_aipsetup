@@ -62,7 +62,7 @@ remove() {
 	cat "$BASEDIR/$PKG_INFO/$remove_p1" | xz -d | sort -r > "$tmp/list_1"
 
 
-	cat "$tmp/list_1" | sed -e "s|^|file='|;s|\$|' ; if [ -f \"\$file\" ] ; then rm -v \"\$file\" ; rmdir -v \"\`dirname \"\$file\"\`\" 2>/dev/null ; fi ; if [ -d \"\$file\" ] ; then rmdir -v  \"\$file\" 2>/dev/null ;  fi  \n|" > "$tmp/list_2"
+	cat "$tmp/list_1" | sed -e "s|^|file='|;s|\$|' ; if [ -f \"\$file\" ] ; then rm -v \"\$file\" ; rmdir \"\`dirname \"\$file\"\`\" 2>/dev/null ; fi ; if [ -d \"\$file\" ] ; then rmdir \"\$file\" 2>/dev/null ;  fi |" > "$tmp/list_2"
 
 	bash "$tmp/list_2"
 
