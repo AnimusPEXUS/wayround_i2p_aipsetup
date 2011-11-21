@@ -56,36 +56,36 @@ _aipb_pksums _aipb_remove _aipb_script _aipb_slinksa2r
 }
 
 case "$1" in
-    'dep'))
-    depcheck
-    if [ "$?" -ne 0 ]
-    then
-	exit 1
-    fi
-    ;
-    'ins'))
-    incheck
-    if [ "$?" -ne 0 ]
-    then
-	exit 1
-    fi
-    ;
-    'all'))
-    incheck
-    if [ "$?" -ne 0 ]
-    then
-	exit 1
-    fi
-    depcheck
-    if [ "$?" -ne 0 ]
-    then
-	exit 1
-    fi
-    ;
+    'dep')
+	depcheck
+	if [ "$?" -ne 0 ]
+	then
+	    exit 1
+	fi
+	;;
+    'ins')
+	incheck
+	if [ "$?" -ne 0 ]
+	then
+	    exit 1
+	fi
+	;;
+    'all')
+	incheck
+	if [ "$?" -ne 0 ]
+	then
+	    exit 1
+	fi
+	depcheck
+	if [ "$?" -ne 0 ]
+	then
+	    exit 1
+	fi
+	;;
     *)
-    echo "unknown parameter"
-    exit 1
-    ;
+	echo "unknown parameter"
+	exit 1
+	;;
 esac
 
 
