@@ -70,16 +70,18 @@ remove() {
 	
 	for (( iii=1 ; iii != loca+1 ; iii++ ))
 	do
-	    filedirname="`cat \"$tmp/list_1\" | sed -e "$iii{p};d"`"
+	    filedirname="`cat \"$tmp/list_1\" | sed -e \"$iii{p};d\"`"
 	    filename_tr="$BASEDIR$filedirname"
-	    if [ -n "$filename_tr" ]
+	    if [ -n "$filedirname" ]
 	    then
-		if [ ! -d "$filename_tr" ]
+		if [ -f "$filename_tr" ]
 		then
-		    rm -v "$filename_tr"
+		    rm -vf "$filename_tr"
 		    dirname_tr="`dirname \"$filename_tr\"`"
 		    rmdir -v "$dirname_tr"
-		else
+		fi
+		if [ -d "$filename_tr" ]
+		then
 		    rmdir -v "$filename_tr"
 		fi
 	    fi
