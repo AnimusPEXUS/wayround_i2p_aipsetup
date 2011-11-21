@@ -1,0 +1,88 @@
+#!/bin/bash
+
+mkdir t
+
+cd templates
+
+files=`echo *`
+
+cd ..
+
+for i in $files
+do
+    unset RUN
+    unset RELATIVELY
+    unset ERRORMESSAGE
+    unset EXITONERROR
+
+    . ./templates/$i
+
+    $i
+
+    newfile="./t/$i.py"
+
+    touch "$newfile"
+
+    j=0
+
+    echo '#!/usr/bin/python' > "$newfile"
+
+    echo >> "$newfile"
+
+    echo 'template={'  >> "$newfile"
+
+    if [ $SEPARATEDIR == "1" ]
+    then
+        SEPARATEDIR='True'
+    else
+        SEPARATEDIR='False'
+    fi
+
+    cat <<EOF >> "$newfile"
+
+    'PACKAGENAME'      : '$PACKAGENAME',
+    'PACKAGENAMESUFIX' : """ $PACKAGENAMESUFIX """,
+    'SEPARATEDIR'      : $SEPARATEDIR,
+    'RELATIVE'         : '$RELATIVE',
+
+    'stages'           : [
+
+EOF
+
+    while [ -n "${RUN[$j]}" ]
+    do
+        if [ "${RELATIVELY[$j]}" == '0' ]
+        then
+            RELATIVELY[$j]='False'
+        else
+            RELATIVELY[$j]='True'
+        fi
+
+
+        if [ "${EXITONERROR[$j]}" == '0' ]
+        then
+            EXITONERROR[$j]='False'
+        else
+            EXITONERROR[$j]='True'
+        fi
+
+        cat <<EOF >>  "$newfile"
+        {
+            'RUN'          : """ ${RUN[$j]} """,
+            'RELATIVELY'   : ${RELATIVELY[$j]},
+            'ERRORMESSAGE' : '${ERRORMESSAGE[$j]}',
+            'EXITONERROR'  : ${EXITONERROR[$j]}
+            },
+
+EOF
+        j="$(( $j + 1 ))"
+    done
+
+cat <<EOF >>  "$newfile"
+
+        ]
+    }
+
+EOF
+done
+

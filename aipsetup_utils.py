@@ -81,5 +81,8 @@ def filecopy(src, dst, verbose=False):
             print '-e- error reading from file ' + src +\
                 ' or writing to file ' + dst
         return 3
+    
+    s.close()
+    d.close()
 
     return 0
