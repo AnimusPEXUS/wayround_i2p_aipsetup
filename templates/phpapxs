@@ -1,0 +1,69 @@
+#!/bin/bash
+
+phpapxs() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='configure --enable-ftp --with-openssl --enable-mbstring --with-sqlite --enable-sqlite-utf8 --with-pdo-sqlite --with-gd --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-jpeg-dir --with-png-dir --with-zlib-dir --with-ttf --with-freetype-dir  --with-apxs2 --with-pdo-pgsql --with-pgsql --with-mysql --with-ncurses --with-pdo-mysql --with-mysqli --with-readline  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make test'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/etc/httpd"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='echo -e "\n\nLoadModule rewrite_module modules/mod_rewrite.so\nLoadModule rewrite_module modules/mod_rewrite.so\n\n" > "$bs_install_dir/etc/httpd/httpd.conf" #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some install error'
+    EXITONERROR[$j]=0
+    
+    j=$(( $j + 1 ))
+    RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mv "$bs_install_dir/etc/httpd/httpd.conf" "$bs_install_dir/etc/httpd/httpd.conf.php"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some install error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cd "$bs_install_dir" #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='find -maxdepth 1 -type d "(" -name ".channels" -o -name ".registry" ")" -print -exec rm -vr "{}" ";"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='find -maxdepth 1 -type f -name ".*" -print -exec rm "{}" ";"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
+

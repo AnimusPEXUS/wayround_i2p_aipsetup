@@ -7,7 +7,7 @@ mlt() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --swig-languages="java lua perl php python ruby" --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --swig-languages="python java lua perl ruby" --aviformat-swscale --disable-qimage --disable-kdenlive --enable-gpl --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1
@@ -26,6 +26,18 @@ mlt() {
 
     j=$(( $j + 1 ))
     RUN[$j]='make install DESTDIR="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='mkdir -p "$bs_install_dir/usr/lib/python2.6/site-packages"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='cp -v "src/swig/python/_mlt.so" "src/swig/python/mlt.py" "src/swig/python/mlt_wrap.o" "$bs_install_dir/usr/lib/python2.6/site-packages"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
