@@ -32,7 +32,7 @@ cat "$FILELIST" | sort > "$FILELIST"1
 cat "$FILELIST"1 > "$FILELIST"
 rm "$FILELIST"1
 
-bzip2 -9 "$FILELIST"
+xz -9vM "$((200*1024*1024))" "$FILELIST"
 
 bash "$AIP_DIR/_aipb_pksums"
 

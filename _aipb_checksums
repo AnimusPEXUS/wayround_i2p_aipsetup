@@ -20,14 +20,14 @@ check() {
 	echo " ERROR: file $PKG_INFO/sums/$check_p1 not found"
 	return 1
     fi
-    basename "$check_p1" .bz2
+    basename "$check_p1" .xz
     if [ $? -ne 0 ]
     then
 	echo " ERROR: wrong checksum file"
 	return 1
     fi
 
-    cat "$PKG_INFO/sums/$check_p1" | bzip2 -d | sha512sum -c 
+    cat "$PKG_INFO/sums/$check_p1" | xz -d | sha512sum -c 
     
     if [ $? -eq 0 ]
     then
@@ -39,15 +39,7 @@ check() {
     fi
 }
 
-if [ ! -d "$AIP_DIR" ]
-then
-    echo " SORRY: please, install aipsetup (if not yet),"
-    echo "        and run 'remove' from main program (aipsetup)"
-    echo " ERROR: AIP_DIR not set"
-    exit 1
-fi
 
-. "$AIP_DIR/_aipb_init"
 
 if [ -n "$DESTDIR" -a ! -a "$DESTDIR" ]
 then

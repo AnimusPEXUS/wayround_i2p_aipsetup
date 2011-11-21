@@ -19,6 +19,6 @@ mkdir -p ./var/log/packages/sums  > /dev/null 2>&1
 
 find -type f ! -regex '.*/var/log/packages.*' -exec bash -c "sha512sum -b '{}' | sed -e \"s/\*\.\//\*\//g\" >> \"./var/log/packages/sums/${PKGNAME}\"" ';'
 
-bzip2 -9 "./var/log/packages/sums/${PKGNAME}" > /dev/null 2>&1
+xz -v9M "$((200*1024*1024))" "./var/log/packages/sums/${PKGNAME}" > /dev/null 2>&1
 
 echo

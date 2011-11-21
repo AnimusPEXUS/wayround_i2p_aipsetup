@@ -45,6 +45,7 @@ ans=`cat`
 myproc_v1=
 function myproc() {
     cd "$myproc_v1"
+    pwd
     if [ "$?" -eq 0 ]
     then
 	find -maxdepth 1 -type f -name '*.bz2' -print -exec bash -c " cat '{}' | bzip2 -d | xz -v9M \"\$((200*1024*1024))\" > tmp  ; mv tmp \"\`echo '{}' | sed -e 's,.bz2$,.xz,' \`\"  " ';'
@@ -63,13 +64,13 @@ then
     then
 	exit 1
     else
-	myproc_v1= "$BASEDIR/var/log/packages/sums"
+	myproc_v1="$BASEDIR/var/log/packages/sums"
 	myproc
 	if [ "$?" -ne 0 ]
 	then
 	    exit 1
 	else
-	    myproc_v1= "$BASEDIR/var/log/packages"
+	    myproc_v1="$BASEDIR/var/log/packages"
 	    myproc
 	    if [ "$?" -ne 0 ]
 	    then
