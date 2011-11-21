@@ -18,32 +18,20 @@ erlang() {
     EXITONERROR[$j]=1
 
     j=$(( $j + 1 ))
-    RUN[$j]='make check'
+    RUN[$j]='export INSTALL_PREFIX="$bs_install_dir" #'
     RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some check error'
+    ERRORMESSAGE[$j]=''
     EXITONERROR[$j]=0
 
     j=$(( $j + 1 ))
-    RUN[$j]='export INSTALL_PREFIX = "$bs_install_dir"'
+    RUN[$j]='make install INSTALL_PREFIX="$bs_install_dir"'
     RELATIVELY[$j]=0
     ERRORMESSAGE[$j]='*** some make install error'
     EXITONERROR[$j]=1
 
-    j=$(( $j + 1 ))
-    RUN[$j]='cd "$bs_install_dir"'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make install error'
-    EXITONERROR[$j]=1
-
-    j=$(( $j + 1 ))
-    RUN[$j]="find -type 'l' -exec  bash -c \"echo \"rm \"{}\" ; ln -s \"`readlink \"{}\" | sed -e \"s/^$bs_install_dir//\" `\" \"{}\"  \"\"\"\" ';' > exe #"
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make install error'
-    EXITONERROR[$j]=1
-
-    j=$(( $j + 1 ))
-    RUN[$j]='bash ./exe ; rm ./exe'
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]='*** some make install error'
-    EXITONERROR[$j]=1
+     j=$(( $j + 1 ))
+     RUN[$j]='( cd "$bs_install_dir" ; aipsetup lf ) #'
+     RELATIVELY[$j]=0
+     ERRORMESSAGE[$j]='*** some make install error'
+     EXITONERROR[$j]=1
 }

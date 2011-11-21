@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ppwd=`pwd`
+rm ./work 2>&1 > /dev/null
+
+echo '#!/bin/bash' > ./work
+echo 'ppwd=`pwd`' >> ./work
+find -type l -printf " oldln=\`readlink \"%p\"\` ; rm '%p' ; newln=\` echo \"\$oldln\" | sed -e \"s#^"$ppwd"##g\" \` ; ln -s \"\$newln\" \"%p\" \n" >> ./work
+echo >> ./work
+bash ./work
+rm ./work 2>&1 > /dev/null

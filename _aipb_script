@@ -259,16 +259,8 @@ echo -e " Build dir     \$bs_build_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
 
-#echo " 5 seconds sleep to start operations..."
-#count=5
-#while [ \$count -ne 0 ]
-#do
-#printf "\$count.."
-#sleep 1
-#count=\$(( \$count - 1 ))
-#done
 echo
-rm "\$bs_parent_dir/lastresultdir"
+rm "\$bs_parent_dir/lastresultdir" 2>&1 > /dev/null
 unset count
 EOF
     

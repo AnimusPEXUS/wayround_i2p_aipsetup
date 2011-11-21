@@ -18,73 +18,6 @@ then
     exit 1
 fi
 
-# showhelp() {
-#     echo -e "usage: `basename $0` filename1 [filename2] ... [filenameN]"
-#     echo -e ""
-#     echo -e ""
-#     return
-# }
-
-# runcompare_
-# runcompare() {
-    
-#     return
-# }
-
-# filenameparse_input_filename=
-
-# filenameparse_output_pkgname_mutch=
-# filenameparse_output_pkgname=
-# for (( i=0 ; i != 10 ; i++ ))
-# do
-#     filenameparse_output_v[$i]=
-# done
-# filenameparse_output_rc_found=
-# filenameparse_output_rc_number=
-
-# filenameparse() {
-#     echo "$filenameparse_input_filename" |  grep -q -e "^$pkgname"
-#     if [ $? -ne 0 ]
-#     then
-# 	filenameparse_output_pkgname_mutch=0
-# 	echo "no mutch"
-# 	return 1
-#     fi
-#     filenameparse_output_pkgname_mutch=1
-#     local full=`basename "$filenameparse_input_filename"`
-#     local archt=`bash "$AIP_DIR/_aipb_getarchtype" "$full"`
-#     local versions=`echo "$full" | sed -e "s/^$pkgname// ; s/^[.,-]// ; s/\.$archt\$// ; s/-src\$// "`
-
-#     for (( i=0 ; i != 10 ; i++ ))
-#     do
-# 	filenameparse_output_v[$i]=
-#     done
-#     filenameparse_output_rc_found=0
-#     filenameparse_output_rc_number=0
-
-#     echo "$versions" | grep -q 'rc'
-#     if [ $? -eq 0 ]
-#     then
-# 	filenameparse_output_rc_found=1
-# 	if [ $allowrc = 'n' ]
-# 	then
-# 	    return
-# 	fi
-# 	filenameparse_output_rc_number=`echo "$versions" | sed -e "s/.*rc//" `
-# 	versions=`echo "$versions" | sed -e "s/rc.*//" `
-#     else
-# 	filenameparse_output_rc_found=0
-#     fi
-#     echo "f:$full art:$archt v:$versions rc1:$filenameparse_output_rc_found rc2:$filenameparse_output_rc_number"
-#     exit 0
-#     i=0
-#     for i in `echo "$full1" | sed -e "s/^$name1//" `
-#     do
-# 	echo -n "$i "
-#     done
-#     return 0
-# }
-
 standardparser_input_filename=
 standardparser_output_name=
 standardparser() {
@@ -116,6 +49,7 @@ standardparser() {
 	v[$i]=$l
 	i="$(( $i + 1 ))"
     done
+    echo "s:$standardparser_input_filename"
     echo "n:$standardparser_output_name"
     echo "a:$archt"
     echo "v:$versions"
@@ -125,33 +59,11 @@ standardparser() {
     do
 	echo "v$l:${v[$l]}"
     done
+    echo
 }
 
-# if [ "$#" -lt 4 ]
-# then
-#     echo "not enough parameters"
-#     exit 1
-# fi
-# pkgname=$1
-# shift
-# searchfor=$1			# 'l' or 'g'
-# if [ $searchfor != 'l' -a $searchfor != 'g' ]
-# then
-#     echo "second parameter must be 'g' or 'l' "
-#     exit 1
-# fi
-# shift
-# allowrc=$1     			# allow Release candidates 'y' or 'n'
-# if [ $allowrc != 'y' -a $allowrc != 'n' ]
-# then
-#     echo "third parameter must be 'y' or 'n' "
-#     exit 1
-# fi
-# shift
-# allowab				# allow alphas or betas
-
-# filenameparse_input_filename=$1
-# filenameparse
-
-standardparser_input_filename=$1
-standardparser
+for base_i in $*
+do
+    standardparser_input_filename=$base_i
+    standardparser
+done
