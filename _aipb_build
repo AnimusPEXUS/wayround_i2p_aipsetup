@@ -52,7 +52,15 @@ fi
 
 "$AIP_DIR/_aipb_extract" "$2"
 
-cd "`find -type d -name \"$2\"`"
+ardir="`find -type d -name \"$2\"`"
+if [ -d "$ardir" ]
+then
+    echo "dir not found \"$ardir\""
+fi
+
+echo "buiding in \"$ardir\""
+
+cd  "$ardir"
 
 "$AIP_DIR/_aipb_script" "$3"
 
