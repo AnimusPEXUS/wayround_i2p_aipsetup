@@ -34,7 +34,7 @@ do
     if [ -f "$i" ]
     then
 	printf "installing: "$i":"
-	"$AIP_DIR/_aipb_extract" "$i"
+	bash "$AIP_DIR/_aipb_extract" "$i"
 	if [ $? -eq 0 ]
 	then
 	    printf ":OK\n"
@@ -45,4 +45,4 @@ do
 	fi
     fi
 done
-echo " installed: $OKi , errors: $ERi, Total: $(( $OKi + $ERi ))"
+echo " installed: $OKi, errors: $ERi, Total: $(( $OKi + $ERi ))"
