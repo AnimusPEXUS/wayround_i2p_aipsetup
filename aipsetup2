@@ -1,144 +1,269 @@
-#!/usr/bin/python
+#!/bin/bash
 
-# this is main aipsetup executable
+#this will be changed during 'make install'
+export AIP_DIR=""
 
-import sys
-import getopt
-import os
-import __builtin__
+if [ -z "$AIP_DIR" ]
+then
+    echo " SORRY: \$AIP_DIR must be set by aipsetup installed in /usr/bin."
+    echo "        but it isn't set."
+    echo " ERROR: aipsetup not installed. reinstall please."
+    exit 1
+fi
 
+if [ ! -f "$AIP_DIR/_aipb_checkaipinstallation" ]
+then
+    echo "file \"\$AIP_DIR/_aipb_checkaipinstallation\" not found"
+    if [ ! -r "$AIP_DIR/_aipb_checkaipinstallation" ]
+    then
+	echo "file \"\$AIP_DIR/_aipb_checkaipinstallation\" not readable"
+	exit 1
+    fi
+    exit 1
+fi
 
+bash "$AIP_DIR/_aipb_checkaipinstallation" ins
+if [ "$?" -ne 0 ]
+then
+    echo "some aipsetup installation error. reinstall please."
+    exit 1
+fi
 
-# default settings
+. "$AIP_DIR/_aipb_init"
 
-etalon_aipsetup_config = {'homedir'  :'/usr/lib/aipsetup', # aipsetup
-                          # home dir
+case "$#" in
+    0)
+	echo "not enough parameters, use --help for info"
+	;;
+    *)
+	case "$1" in
+	    --version)
+		printf "aipsetup " 
+		cat "$AIP_DIR/VERSION"
+		echo
+		echo -e "Copyright (C) 2008,2009 WayRound.org Software, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+		exit 0
+		;;
+	    --help)
+		echo -e "usage: `basename $0` [command] [command_parameters]"
+		echo
+		echo -e "[command]s:"
+		echo -e "  building tools:"
+		echo -e "   esc|escript                 edit builder"
+		echo -e "    sc|script                  generate builder"
+		echo -e "                               (see \``basename $0` script --help')"
+		echo -e "   pks|pksums                  create sha512 sums for current dir"
+		echo -e "    lf|lnfix                   fix symlinks in current dir"
+		echo -e "    pk|pack                    pack current dir"
+		echo -e "    bd|build templete"
+		echo -e "             file [file2] ... [filex]"
+		echo 
+		echo -e "  aipsetup system tools:"
+		echo -e "   csc|cscript                 copy builder script to current"
+		echo -e "                               dir (for maintainers)"
+		echo 
+		echo -e "  system tools:"
+		echo -e "    ls|list [-b BASEDIR] ['filemask']    list installed packages"
+		echo -e "   lsc|listc [-b BASEDIR] ['filemask']    list files installed by packages"
+		echo -e "   chk|pkcheck TARGET                    check pkg sums"
+		echo -e "    rm|remove [-b BASEDIR] ['filemask']  remove named package"
+		echo -e "    in|install [-b BASEDIR] FILEMASK  install named package files"
+		echo -e "    fn|findcom FILENAME       find package by FILENAME"
+		echo -e "    fd|finddep FILENAME PATH  look for files depending on FILENAME in PATH dir"
+		echo -e "   ldd|lddsums PROGRAM        make sha512 sums for PROGRAM ldd output"
+		echo -e "      |bz2xzsys [-b BASEDIR]  transfer existing bzip2 aipsetup system to xz"
+		echo -e "      |bz2xzpkg FILEMASK      transfer existing bzip2 aipsetup packages to xz"
+		echo
+		echo -e "  misc tools:"
+		echo -e "    ex|extract FILE      extract to the current dir"
+		echo -e "    np|nameparse         parse package filename"
+		echo -e "    lu|listuniq          parse package filenames and show all uniq names"
+		echo -e "   pvc|pkgnamevcomp      find newest or oldest package from given by name (see --help)"
+		echo -e "   llu|pkgnamelstlat     list all latest packages of given"
+		echo -e "   slp|slashescape       escapes all slashes in parameter or stdin and throvs on stdout"
+		echo -e "   sfi|softfix           fixes soft links, remowing "'`pwd`'" from walue"
 
-                          'templates':'/usr/lib/aipsetup/templates', # aipsetup
-                                                                     # templates
-                          'editor'   : os.environ['VISUAL'],         # editor
-                          'settings' :'/etc/aipsetup.conf'
-                          }
+		echo -e "  cat0|catzero           reads stdin and writes stdout untill first NULL in stdin"
+		echo
+		echo
+		echo -e "  --help      see this help"
+		echo -e "  --version   version info"
+		exit 0
+		;;
 
-aipsetup_config = etalon_aipsetup_config
+	    escript | esc)
+		if [ -z "$VISUAL" ]
+		then
+		    echo " VISUAL not defined"
+		    exit 1
+		fi
+		if [ -z "$2" ]
+		then
+		    "$VISUAL" "$AIP_DIR/_aipb_script"
+		else
+		    if [ ! -f "$AIP_DIR/templates/$2" ]
+		    then
+			cp "$AIP_DIR/templates/usr" "$AIP_DIR/templates/$2"
+		    fi
+		    "$VISUAL" "$AIP_DIR/templates/$2"
+		    size="`stat -c '%s' \"$AIP_DIR/templates/$2\"`" 2> /dev/null
+		    if [ "$size" -lt 10 ]
+		    then
+			echo "resulting file size < 10. it's a sign to remove it"
+			rm -v "$AIP_DIR/templates/$2"
+		    fi
+		    
+		    if [ "$2" != 'usr' ]
+		    then
+			md51="`md5sum -b \"$AIP_DIR/templates/usr\" | sed -e 's/\ .*//'`" 2> /dev/null
+			md52="`md5sum -b \"$AIP_DIR/templates/$2\" | sed -e 's/\ .*//'`" 2> /dev/null
+			if [ "$md51" = "$md52" ]
+			then
+			    echo "resulting file md5 = usr file md5. it's a sign to remove it"
+			    rm -v "$AIP_DIR/templates/$2"
+			fi
+		    fi
+		fi
+		exit $?
+		;;
+	    script | sc)
+		shift
+		bash "$AIP_DIR/_aipb_script" $*
+		exit $?		
+		;;
+	    bd | build)
+		shift
+		bash "$AIP_DIR/_aipb_build" $*
+		exit $?
+		;;
+	    pksums | pks)
+		shift
+		bash "$AIP_DIR/_aipb_pksums " $*
+		exit $?
+		;;
+	    lnfix | lf)
+		shift
+		bash "$AIP_DIR/_aipb_slinksa2r" $*
+		exit $?
+		;;
+	    pack | pk)
+		shift
+		bash "$AIP_DIR/_aipb_pack" $*
+		exit $?
+		;;
 
-# end of default settings
+	    cscript | csc)
+		rm -rv ./templates 
+		cp -vur "$AIP_DIR/templates" .
+		exit 0
+		;;
 
-sys.path.append(aipsetup_config['homedir'])
+	    list | ls)
+		shift
+		set -f
+		bash "$AIP_DIR/_aipb_list" $*
+		set +f
+		exit $?				
+		;;
+	    listc | lsc)
+		shift
+		set -f
+		bash "$AIP_DIR/_aipb_list_cont" $*
+		set +f
+		exit $?				
+		;;
+	    pkcheck | chk)
+		shift
+		set -f
+		bash "$AIP_DIR/_aipb_checksums" $*
+		set +f
+		exit $?				
+		;;
+	    remove | rm)
+		shift
+		set -f
+		bash "$AIP_DIR/_aipb_remove" $*
+		set +f
+		exit $?				
+		;;
+	    install | 'in')
+		shift
+		bash "$AIP_DIR/_aipb_install" $*
+		;;
+	    findcom | fn)
+		shift
+		bash "$AIP_DIR/_aipb_fpbf" $*
+		exit $?
+		;;
+	    finddep | fd)
+		shift
+		bash "$AIP_DIR/_aipb_finddeps" $*
+		exit $?
+		;;
+	    lddsums | 'ldd')
+		shift
+		bash "$AIP_DIR/_aipb_lddsums" $*
+		exit $?
+		;;
+	    bz2xzsys )
+		shift
+		bash "$AIP_DIR/_aipb_move_bzip2_to_xz" $*
+		exit $?
+		;;
+	    bz2xzpkg )
+		shift
+		bash "$AIP_DIR/_aipb_move_bzip2_to_xz_pk" $*
+		exit $?
+		;;
 
-try:
-    import aipsetup_utils
-except:
-    print '-e- Main utilities module load error in '+aipsetup_home_dir
-    print '    Please reinstall or reconfigure aipsetup'
-    exit (1)
+	    extract | ex)
+		shift
+		bash "$AIP_DIR/_aipb_extract" $*
+		exit $?
+		;;
+	    nameparse | np)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnameparse" $*
+		exit $?
+		;;
+	    listuniq | lu)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnamelistuniq" $*
+		exit $?
+		;;
+	    pvc | pkgnamevcomp)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnamevcompare" $*
+		exit $?
+		;;
+	    llu|pkgnamelstlat)
+		shift
+		bash "$AIP_DIR/_aipb_pkgnamelistalllatestuniq" $*
+		exit $?
+		;;
+	    slp|slashescape)
+		shift
+		bash "$AIP_DIR/_aipb_slashescape" $*
+		exit $?
+		;;
+	    cat0|catzero)
+		shift
+		bash "$AIP_DIR/_aipb_catzero" $*
+		exit $?
+		;;
+	    sfi|softfix)
+		shift
+		bash "$AIP_DIR/_aipb_fixsoftlinks" $*
+		exit $?
+		;;
+	    *)
+		echo "wrong parameter, use --help for info"
+		exit 1
+		;;
+	esac
+	;;
+esac 
 
-
-aipsetup_config = aipsetup_utils.get_configuration(aipsetup_config)
-if (aipsetup_config == None):
-    print '-e- File with settings not found ' + etalon_aipsetup_config['settings']
-    exit (-1)
-
-
-
-# modules_data contains information populated by modules. basicly it
-# is an array, containing structures. each structure devides on few
-# fields.
-#
-#  modules_data = [['module name', 'module group', ['mode', 'names'], 'help text'],
-#                  ['module name', 'module group', ['mode', 'names'], 'help text'],
-#                  ['module name', 'module group', ['mode', 'names'], 'help text'],
-#                  ...]
-
-modules_data = []
-
-
-
-
-
-####### aipsetup_* modules import section
-# try:
-import aipsetup_none
-import aipsetup_templates
-# except:
-#     print '-e- Can not load one of the aipsetup_* modules'
-#     print '    please reinstall or reconfigure aipsetup'
-#     exit (1)
-####### END aipsetup_* modules import section
-
-
-
-# flag to check aipsetup_none module is present
-mode_none_present = False
-
-
-# here will be placed valid mode list
-mode_list = []
-
-
-# mode selector
-mode_select = 'none'
-
-
-# default module to start
-module_to_run = 'aipsetup_none'
-
-
-# flag to check existing mode selected
-correct_mode_selected = False
-
-
-# generate all modules mode list to verify -m option (populate
-# mode_list)
-for i in modules_data:
-    for j in i[2]:
-
-        if j == 'none':
-            # 'none module/mode must allways be'
-            mode_none_present = True
-
-
-if not mode_none_present:
-    print '-e- Module ' + module_to_run + ' not loaded'
-    exit (-1)
-
-for i in modules_data:
-    for j in i[2]:
-        mode_list.append(j)
-
-
-arguments = sys.argv[1:]
-
-# working with first argument
-if len(arguments) > 0:
-    if arguments[0] == '-m':
-        if len(arguments) > 1:
-            mode_select = arguments[1]
-            del arguments[:2]
-        else:
-            print '-e- -m option must have the value'
-            exit (-1)
-
-    else:
-        mode_select = 'none'
-
-
-
-for i in modules_data:
-    for j in i[2]:
-        if mode_select == j:
-            correct_mode_selected = True
-            module_to_run = i[0]
-
-
-if not correct_mode_selected:
-    print "-e- Incorrect mode selected or module for this mode is not installed."
-    print "    See aipsetup --help for correct modes."
-    exit (-1)
-
-module_to_run_imported = __builtin__.__import__(module_to_run)
-
-module_to_run_imported.run(aipsetup_config,
-                           arguments)
-
-exit(0)
+exit 0
