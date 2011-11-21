@@ -75,7 +75,7 @@ then
 	    then
 		exit 1
 	    else
-		find -type f -name '*.bz2' -exec rm -v '{}' ;
+		find -type f -name '*.bz2' -exec rm -v '{}' ';'
 	    fi	    
 	fi
     fi
