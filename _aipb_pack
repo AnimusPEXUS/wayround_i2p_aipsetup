@@ -9,7 +9,7 @@ then
     exit 1
 fi
 
-du -s .
+du -sh .
 
 echo 'changing owner'
 chown -R 0:0 *
