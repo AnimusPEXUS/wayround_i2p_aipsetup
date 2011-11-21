@@ -49,7 +49,7 @@ template="$1"
 shift
 
 log="$PPWD/buildlog-`date +%Y.%m.%d.%H.%M`"
-set -x
+
 echo "====>[[[ New building process, started at `date`" | tee "$log"
 echo "===[in dir $PPWD ]" | tee -a "$log"
 echo "===[using template \"$template\"]" | tee -a "$log"
@@ -61,13 +61,15 @@ do
     tempdir=`bash "$AIP_DIR/_aipb_gettempdir"`
     echo "-i- temporary dir is $tempdir" | tee -a "$log"
     echo "-i- copying source file to temporary dir" | tee -a "$log"
-    cp "$i" "$tempdir" 
+    cp "$i" "$tempdir"
     cd "$tempdir"
     echo "-i- extracting source file" | tee -a "$log"
     aipsetup ex "$i"
     if [ "$?" -eq 0 ]
     then
 	echo "-i- extracted" | tee -a "$log"
+	echo "-i- removing source package $i" | tee -a "$log"
+	rm "$i" 2>&1 > /dev/null
 	echo "-i- looking for new dir" | tee -a "$log"
 	nsrcdir=`find -maxdepth 1 -type d ! -name '.' ! -name '..'`
 	if [ -d "$nsrcdir" ]
@@ -104,7 +106,7 @@ do
 			    fi
 			else
 			    echo "-e- errors where while building $i, log:" | tee -a "$log"
-			    cat var/log/packages/buildlogs/*.bz2 | bzip2 -d | sed -e "s/^/^ |  /g"  | tee -a "$log"
+			    cat "$lastresultdir/var/log/packages/buildlogs/`basename \"$lastresultdir\"`" | sed -e "s/^/ |  /g"  | tee -a "$log"
 			fi
 		    else
 			echo "-e- file lastresultdir exists, but dir named in it - does not" | tee -a "$log"

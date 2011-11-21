@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if [ ! -w "/tmp" ]
+if [ ! -w "`pwd`" ]
 then
-    echo " ERROR: to create temporary dir I need /tmp to be writable by Me"
+    echo " ERROR: to create temporary dir I need current directory to be writable by Me"
     exit 1
 fi
 
 DATE=`date '+%Y%m%d%H%M%S'`
-NAME="/tmp/aipsetup-$DATE"
+NAME="`pwd`/aipsetup-$DATE"
 
 mkdir -p "$NAME" > /dev/null 2>&1
 err=$?

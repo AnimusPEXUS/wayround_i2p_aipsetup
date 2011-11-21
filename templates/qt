@@ -1,0 +1,38 @@
+#!/bin/bash
+
+qt() {
+    PACKAGENAME=
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    SEPARATEDIR=0
+    RELATIVE='.'
+
+    local j=0
+    RUN[$j]='export CFLAGS=" -march=i486 -mtune=i486  " ; export CXXFLAGS=" -march=i486 -mtune=i486  " #'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='configure -opensource -prefix /usr -sysconfdir /etc '
+    RELATIVELY[$j]=1
+    ERRORMESSAGE[$j]='*** some configure script error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make error'
+    EXITONERROR[$j]=1
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make check'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some check error'
+    EXITONERROR[$j]=0
+
+    j=$(( $j + 1 ))
+    RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
+    RELATIVELY[$j]=0
+    ERRORMESSAGE[$j]='*** some make install error'
+    EXITONERROR[$j]=1
+}
