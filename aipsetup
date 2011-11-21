@@ -110,12 +110,15 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 			rm -v "$AIP_DIR/templates/$2"
 		    fi
 		    
-		    md51="`md5sum -b \"$AIP_DIR/templates/usr\" | sed -e 's/\ .*//'`" 2> /dev/null
-		    md52="`md5sum -b \"$AIP_DIR/templates/$2\" | sed -e 's/\ .*//'`" 2> /dev/null
-		    if [ "$md51" = "$md52" ]
+		    if [ "$2" != 'usr' ]
 		    then
-			echo "resulting file md5 = usr file md5. it's a sign to remove it"
-			rm -v "$AIP_DIR/templates/$2"
+			md51="`md5sum -b \"$AIP_DIR/templates/usr\" | sed -e 's/\ .*//'`" 2> /dev/null
+			md52="`md5sum -b \"$AIP_DIR/templates/$2\" | sed -e 's/\ .*//'`" 2> /dev/null
+			if [ "$md51" = "$md52" ]
+			then
+			    echo "resulting file md5 = usr file md5. it's a sign to remove it"
+			    rm -v "$AIP_DIR/templates/$2"
+			fi
 		    fi
 		fi
 		exit $?
