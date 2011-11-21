@@ -20,8 +20,15 @@ check() {
     fi
 
     cat "$PKG_INFO/sums/$check_p1" | bzip2 -d | sha512sum -c 
-
-    return $?
+    
+    if [ $? -eq 0 ]
+    then
+	echo " all ok"
+	return 0
+    else
+	echo " errors found"
+	return 1
+    fi
 }
 
 if [ ! -d "$AIP_DIR" ]
