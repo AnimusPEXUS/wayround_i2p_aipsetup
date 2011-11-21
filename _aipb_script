@@ -260,7 +260,7 @@ echo -e " Install dir   \$bs_install_dir" | tee -a "\$bs_buildlogfile"
 echo -e " Logging to    \$bs_buildlogfile" | tee -a "\$bs_buildlogfile"
 
 echo
-rm "\$bs_parent_dir/lastresultdir" 2>&1 > /dev/null
+echo "\$bs_install_dir" > "\$bs_parent_dir/lastresultdir"
 unset count
 EOF
     
@@ -268,9 +268,9 @@ EOF
     then
 	cat <<EOF >> ./_tnbuild_$form_p1
 echo "cleaning build dir..."
-rm -r "\$bs_build_dir"
-mkdir -p "\$bs_build_dir"
-cd "\$bs_build_dir"
+rm -r "\$bs_build_dir" 2>&1 > /dev/null
+mkdir -p "\$bs_build_dir" 2>&1 > /dev/null
+cd "\$bs_build_dir" 2>&1 > /dev/null
 EOF
     else
 	cat <<EOF >> ./_tnbuild_$form_p1
@@ -286,7 +286,6 @@ EOF
     cat <<EOF >> ./_tnbuild_$form_p1
 
 bzip2 -9 "\$bs_buildlogfile"
-echo "\$bs_install_dir" > "\$bs_parent_dir/lastresultdir"
 exit 0
 EOF
     

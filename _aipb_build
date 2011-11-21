@@ -26,80 +26,103 @@ then
     exit 1
 fi
 
-if [ ! -f "$1" ]
+if [ ! -f "$AIP_DIR/_aipb_gettempdir" ]
 then
-    echo "file \"$1\" not found"
+    echo " ERROR: can't find [$AIP_DIR/_aipb_gettempdir]"
     exit 1
 fi
 
-if [ -z "$2" ]
-then
-    echo "dir not defined"
-    exit 1
-fi
-
-if [ -z "$3" ]
+if [ -z "$1" ]
 then
     echo "template not defined"
     exit 1
 fi
 
-echo "extracting"
-bash "$AIP_DIR/_aipb_extract" "$1"
-if [ $? -ne 0 ]
+if [ ! -f "$AIP_DIR/templates/$1" ]
 then
-    echo "can't extract \"$1\""
+    echo "wrong template"
     exit 1
 fi
 
-echo "searching"
-ardir="`find -maxdepth 1 -type d -name \"$2\"`"
+PPWD=`pwd`
+template="$1"
+shift
 
-if [ ! -d "$ardir" ]
-then
-    echo "dir not found \"$ardir\""
-    exit 1
-fi
+log="$PPWD/buildlog-`date +%Y.%m.%d.%H.%M`"
+set -x
+echo "====>[[[ New building process, started at `date`" | tee "$log"
+echo "===[in dir $PPWD ]" | tee -a "$log"
+echo "===[using template \"$template\"]" | tee -a "$log"
+echo "" | tee -a "$log"
 
-echo "buiding in \"$ardir\""
-
-cd  "$ardir"
-
-bash "$AIP_DIR/_aipb_script" "$3"
-
-if [ $? -ne 0 ]
-then
-    echo "can't create template \"$3\""
-    exit 1
-fi
-
-bash "_tnbuild_$3"
-if [ $? -ne 0 ]
-then
-    echo "error while running build in templete"
-    exit 1
-fi
-
-cd ..
-
-ardir=`cat "lastresultdir"`
-
-if [ ! -d "$ardir" ]
-then
-    echo "dir not found \"$ardir\""
-    exit 1
-fi
-
-echo "packing \"$ardir\""
-cd  "$ardir"
-
-bash "$AIP_DIR/_aipb_pack"
-
-if [ $? -ne 0 ]
-then
-    echo "error while packing"
-    exit 1
-fi
-
-
-cd ..
+for i in $*
+do
+    echo "-i- `date`, source file is $i" | tee -a "$log"
+    tempdir=`bash "$AIP_DIR/_aipb_gettempdir"`
+    echo "-i- temporary dir is $tempdir" | tee -a "$log"
+    echo "-i- copying source file to temporary dir" | tee -a "$log"
+    cp "$i" "$tempdir" 
+    cd "$tempdir"
+    echo "-i- extracting source file" | tee -a "$log"
+    aipsetup ex "$i"
+    if [ "$?" -eq 0 ]
+    then
+	echo "-i- extracted" | tee -a "$log"
+	echo "-i- looking for new dir" | tee -a "$log"
+	nsrcdir=`find -maxdepth 1 -type d ! -name '.' ! -name '..'`
+	if [ -d "$nsrcdir" ]
+	then
+	    echo "-i- new dir is $nsrcdir" | tee -a "$log"
+	    cd "$nsrcdir"
+	    echo "-i- generating building script:" | tee -a "$log"
+	    aipsetup sc "$template"
+	    if [ "$?" -eq 0 ]
+	    then
+		echo "-i- `date`, starting build process:" | tee -a "$log"
+		bash "_tnbuild_$template"
+		buildresult="$?"
+		if [ -f "../lastresultdir" ]
+		then
+		    lastresultdir=`cat ../lastresultdir`
+		    if [ -d "$lastresultdir" ]
+		    then
+			echo "-i- `date`, distreb was created in \"$lastresultdir\" dir" | tee -a "$log"
+			cd "$lastresultdir"
+			if [ "$buildresult" -eq 0 ]
+			then
+			    echo "-i- `date`, creating package" | tee -a "$log"
+			    aipsetup pk
+			    if [ "$?" -eq 0 ]
+			    then
+				mkdir -p "$PPWD/pack" 2>&1 > /dev/null
+				cd ../pack
+				echo "-i- `date`, copying package to \"$PPWD/pack\"" | tee -a "$log"
+				cp * "$PPWD/pack"
+				echo "-i- `date`, $i build complite" | tee -a "$log"
+			    else
+				echo "-e- can't pack files" | tee -a "$log"
+			    fi
+			else
+			    echo "-e- errors where while building $i, log:" | tee -a "$log"
+			    cat var/log/packages/buildlogs/*.bz2 | bzip2 -d | sed -e "s/^/^ |  /g"  | tee -a "$log"
+			fi
+		    else
+			echo "-e- file lastresultdir exists, but dir named in it - does not" | tee -a "$log"
+		    fi
+		else
+		    echo "-e- some build script error, so lastresultdir was not provided" | tee -a "$log"
+		fi
+	    else
+		echo "-e- error while generating building script" | tee -a "$log"
+	    fi
+	else
+	    echo "-e- error while lookin for dir afterextraction" | tee -a "$log"
+	fi
+	unset nsrcdir
+    fi
+    echo "-i- removing temporary dir at `date`" | tee -a "$log"
+    cd "$PPWD"
+    rm -r "$tempdir"
+    echo "-i- removed temporary dir at `date`" | tee -a "$log"
+    echo | tee -a "$log"
+done
