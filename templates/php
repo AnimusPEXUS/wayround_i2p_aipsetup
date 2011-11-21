@@ -1,3 +1,4 @@
+#!/bin/bash
 php() {
     PACKAGENAME=
     PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
@@ -5,7 +6,7 @@ php() {
     RELATIVE='.'
 
     local j=0
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-apxs2 --with-pdo-pgsql --with-pgsql --host=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --with-apxs2 --with-pdo-pgsql --with-pgsql --with-mysql --with-ncurses --with-pdo-mysql --with-readline  --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

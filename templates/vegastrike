@@ -1,19 +1,13 @@
 #!/bin/bash
 
-imagemagick() {
+vegastrike() {
     PACKAGENAME=
-    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i486-pc-linux-gnu"
+    PACKAGENAMESUFIX="\`date '+%Y%m%d%H%M%S'\`-i686-pc-linux-gnu"
     SEPARATEDIR=0
     RELATIVE='.'
 
     local j=0
-    RUN[$j]="export CFLAGS=' -march=i486 -mtune=i486 ' ; export CPPFLAGS=' -march=i486 -mtune=i486 ' ; export CXXFLAGS=' -march=i486 -mtune=i486 ' ; export LDFLAGS=' -march=i486 -mtune=i486 ' #"
-    RELATIVELY[$j]=0
-    ERRORMESSAGE[$j]=''
-    EXITONERROR[$j]=0
-
-    j=$(( $j + 1 ))
-    RUN[$j]='configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-shared --host=i486-pc-linux-gnu --build=i486-pc-linux-gnu'
+    RUN[$j]='configure --prefix=/usr/games/vega --datadir=/usr/games/vega/data --host=i686-pc-linux-gnu --build=i486-pc-linux-gnu'
     RELATIVELY[$j]=1
     ERRORMESSAGE[$j]='*** some configure script error'
     EXITONERROR[$j]=1

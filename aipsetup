@@ -67,6 +67,10 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 		then
 		    "$VISUAL" "$AIP_DIR/_aipb_script"
 		else
+		    if [ ! -f "$AIP_DIR/templates/$2" ]
+		    then
+			cp "$AIP_DIR/templates/usr" "$AIP_DIR/templates/$2"
+		    fi
 		    "$VISUAL" "$AIP_DIR/templates/$2"
 		fi
 		exit $?
