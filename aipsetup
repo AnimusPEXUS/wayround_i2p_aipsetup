@@ -37,6 +37,7 @@ case "$#" in
 		echo 
 		echo -e "  system tools:"
 		echo -e "\t ls|list\t\tlist installed packages"
+		echo -e "\tchk|pkcheck TARGET\tcheck pkg sums"
 		echo -e "\t rm|remove TARGET\tremove named package"
 		echo -e "\t in|install FILE\tinstall named package files"
 		echo -e "\t fn|findcom FILENAME\tfind package by FILENAME"
@@ -79,6 +80,11 @@ case "$#" in
 	    list | ls)
 		shift
 		bash "$AIP_DIR/_aipb_list" $*
+		exit $?				
+		;;
+	    pkcheck | chk)
+		shift
+		bash "$AIP_DIR/_aipb_checksums" $*
 		exit $?				
 		;;
 	    remove | rm)

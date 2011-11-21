@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#!/bin/bash
+
 PPWD=`pwd`
 
 remove_p1=
@@ -16,27 +18,10 @@ remove() {
 	echo " ERROR: wrong checksum file"
 	return 1
     fi
-    remove_line_count=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | wc -l`
-    remove_i=1
-    remove_all_removed=1
-    while [ "$remove_i" -ne "$remove_line_count" ]
-    do
-	FILENAME=`cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sed -e "s/.*\*/$DESTDIR/g"`
-	cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sed -ne "$remove_i{p;q}" | sha512sum -c > /dev/null 2>&1
-	if [ $? -eq 0 ]
-	then
-	    echo -e "rm \"$FILENAME\""
-	    rm "$FILENAME"
-	else
-	    remove_all_removed=0
-	fi
-	remove_i=$(( $remove_i + 1 ))
-    done
-    if [ $remove_all_removed -eq 1 ]
-    then
-	rm "$PKG_INFO/sums/$remove_p1"
-    fi
-    return 0
+
+    cat "$PKG_INFO/sums/$remove_p1" | bzip2 -d | sha512sum -c 
+
+    return $?
 }
 
 if [ ! -d "$AIP_DIR" ]
@@ -61,11 +46,7 @@ then
     exit 1
 fi
 
-remove_p1="$1"
-remove
-
-err=$?
-
-ldconfig
+check_p1="$1"
+check
      
-exit $err
+exit $?
