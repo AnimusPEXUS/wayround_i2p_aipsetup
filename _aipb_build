@@ -55,76 +55,146 @@ echo "===[in dir $PPWD ]" | tee -a "$log"
 echo "===[using template \"$template\"]" | tee -a "$log"
 echo "" | tee -a "$log"
 
-for i in $*
-do
-    echo "-i- `date`, source file is $i" | tee -a "$log"
-    tempdir=`bash "$AIP_DIR/_aipb_gettempdir"`
-    echo "-i- temporary dir is $tempdir" | tee -a "$log"
-    echo "-i- copying source file to temporary dir" | tee -a "$log"
-    cp "$i" "$tempdir"
-    cd "$tempdir"
-    echo "-i- extracting source file" | tee -a "$log"
-    aipsetup ex "$i"
-    if [ "$?" -eq 0 ]
-    then
-	echo "-i- extracted" | tee -a "$log"
-	echo "-i- removing source package $i" | tee -a "$log"
-	rm "$i" 2>&1 > /dev/null
-	echo "-i- looking for new dir" | tee -a "$log"
-	nsrcdir=`find -maxdepth 1 -type d ! -name '.' ! -name '..'`
-	if [ -d "$nsrcdir" ]
-	then
-	    echo "-i- new dir is $nsrcdir" | tee -a "$log"
-	    cd "$nsrcdir"
-	    echo "-i- generating building script:" | tee -a "$log"
-	    aipsetup sc "$template"
-	    if [ "$?" -eq 0 ]
-	    then
-		echo "-i- `date`, starting build process:" | tee -a "$log"
-		bash "_tnbuild_$template"
-		buildresult="$?"
-		if [ -f "../lastresultdir" ]
-		then
-		    lastresultdir=`cat ../lastresultdir`
-		    if [ -d "$lastresultdir" ]
-		    then
-			echo "-i- `date`, distreb was created in \"$lastresultdir\" dir" | tee -a "$log"
-			cd "$lastresultdir"
-			if [ "$buildresult" -eq 0 ]
-			then
-			    echo "-i- `date`, creating package" | tee -a "$log"
-			    aipsetup pk
-			    if [ "$?" -eq 0 ]
-			    then
-				mkdir -p "$PPWD/pack" 2>&1 > /dev/null
-				cd ../pack
-				echo "-i- `date`, copying package to \"$PPWD/pack\"" | tee -a "$log"
-				cp * "$PPWD/pack"
-				echo "-i- `date`, $i build complite" | tee -a "$log"
-			    else
-				echo "-e- can't pack files" | tee -a "$log"
-			    fi
-			else
-			    echo "-e- errors where while building $i, log:" | tee -a "$log"
-			    cat "$lastresultdir/var/log/packages/buildlogs/`basename \"$lastresultdir\"`" | sed -e "s/^/ |  /g"  | tee -a "$log"
-			fi
-		    else
-			echo "-e- file lastresultdir exists, but dir named in it - does not" | tee -a "$log"
-		    fi
-		else
-		    echo "-e- some build script error, so lastresultdir was not provided" | tee -a "$log"
-		fi
-	    else
-		echo "-e- error while generating building script" | tee -a "$log"
-	    fi
-	else
-	    echo "-e- error while lookin for dir afterextraction" | tee -a "$log"
-	fi
-	unset nsrcdir
-    fi
+finishproc() {
     echo "-i- removing temporary dir at `date`" | tee -a "$log"
     cd "$PPWD"
     rm -r "$tempdir"
     echo "-i- removed temporary dir at `date`" | tee -a "$log"
     echo | tee -a "$log"
+}
+
+failproc() {
+    echo " \"$i\" " >> "$log".failed
+    finishproc
+}
+
+for i in $*
+do
+    # check everything is default
+    cd "$PPWD"
+    
+    # check file existance
+    echo "-i- `date`, source file is $i" | tee -a "$log"
+    echo "-i- checking file $i existence" | tee -a "$log"
+    if [ ! -f "$i" ]
+    then
+	echo "-e- `date`, file $i not exists" | tee -a "$log"
+	echo | tee -a "$log"
+	continue
+    fi
+
+    # ok, preparing for action, creating temporary dir
+    echo "-i- `date`, creating temporary dir $i" | tee -a "$log"
+    tempdir=`bash "$AIP_DIR/_aipb_gettempdir"`
+    if [ ! "$?" -eq 0 ]
+    then
+	echo "-e- error creating temp dir $tempdir" | tee -a "$log"
+	continue
+    fi
+    echo "-i- temporary dir is $tempdir" | tee -a "$log"
+
+    #
+    echo "-i- `date` copying source file to temporary dir" | tee -a "$log"
+    cp "$i" "$tempdir"
+    cd "$tempdir"
+
+    #
+    echo "-i- `date` extracting source file" | tee -a "$log"
+    aipsetup ex "$i"
+    if [ ! "$?" -eq 0 ]
+    then
+	echo "-e- `date` error while extracting package" | tee -a "$log"
+	failproc
+	continue
+    fi
+    echo "-i- extracted at `date`" | tee -a "$log"
+
+    #
+    echo "-i- removing source package $i" | tee -a "$log"
+    rm "$i" 2>&1 > /dev/null
+
+    #
+    echo "-i- looking for new dir" | tee -a "$log"
+    nsrcdir="`find -maxdepth 1 -type d ! -name '.' ! -name '..'`"
+    if [ ! -d "$nsrcdir" ]
+    then
+	echo "-e- error while lookin for dir afterextraction" | tee -a "$log"
+	failproc
+	continue
+    fi
+    echo "-i- new dir is $nsrcdir" | tee -a "$log"    
+
+    #
+    cd "$tempdir/$nsrcdir"
+
+    #
+    echo "-i- generating building script:" | tee -a "$log"
+    aipsetup sc "$template"
+    if [ ! "$?" -eq 0 ]
+    then
+	echo "-e- error while generating building script" | tee -a "$log"
+	failproc
+	continue
+    fi
+
+    #
+    echo "-i- `date`, starting build process:" | tee -a "$log"
+    bash "_tnbuild_$template"
+    buildresult="$?"
+    if [ ! -f "../lastresultdir" ]
+    then
+	echo "-e- `date`, some build script error, so lastresultdir was not provided" | tee -a "$log"
+	failproc
+	continue
+    fi
+
+    #
+    lastresultdir=`cat ../lastresultdir`
+    if [ ! -d "$lastresultdir" ]
+    then
+	echo "-e- file lastresultdir exists, but dir named in it - does not" | tee -a "$log"
+	failproc
+	continue
+    fi
+    echo "-i- `date`, distreb was created in \"$lastresultdir\" dir" | tee -a "$log"
+
+    #
+    cd "$lastresultdir"
+    if [ ! "$buildresult" -eq 0 ]
+    then
+	echo "-e- errors where while building $i, log:" | tee -a "$log"
+	cat "$lastresultdir/var/log/packages/buildlogs/`basename \"$lastresultdir\"`" | sed -e "s/^/ |  /g"  | tee -a "$log"
+	failproc
+	continue
+    fi
+
+    #
+    echo "-i- `date`, removing temp souce dir" | tee -a "$log"
+    if [ ! -d "$tempdir/$nsrcdir" ]
+    then
+	echo "-i- `date`, temp souce dir not found!! strange, but not error :-? " | tee -a "$log"
+    else
+	rm -r "$tempdir/$nsrcdir"
+	echo "-i- `date`, removed temp souce dir" | tee -a "$log"
+    fi
+    
+    #
+    echo "-i- `date`, creating package" | tee -a "$log"
+    aipsetup pk
+    if [ ! "$?" -eq 0 ]
+    then
+	echo "-e- can't pack files" | tee -a "$log"
+	failproc
+	continue
+    fi
+    
+    #
+    mkdir -p "$PPWD/pack" 2>&1 > /dev/null
+    cd ../pack
+    echo "-i- `date`, copying package to \"$PPWD/pack\"" | tee -a "$log"
+    cp * "$PPWD/pack"
+    echo "-i- `date`, $i build complite" | tee -a "$log"
+    unset nsrcdir
+    
+    finishproc
 done

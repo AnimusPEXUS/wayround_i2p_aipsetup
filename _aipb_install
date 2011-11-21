@@ -23,20 +23,27 @@ else
     unset BASEDIR
 fi
 
+PPWD=`pwd`
+
 OKi=0
 ERi=0
 
+filebname=
+dirbname=
 for i in $*
 do
     if [ -f "$i" ]
     then
-	printf "installing: \"$i\"...\n"
+	filebname=`basename "$i"`
+	dirbname=`dirname "$i"`
+	cd "$dirbname"
+	printf "installing: \"$filebname\"...\n"
 	if [ -n "$BASEDIR" ]
 	then
 	    echo "        to:\"$BASEDIR\""
 	fi
 	printf "     md5:"
-	md5sum -c "$i".md5
+	md5sum -c "$filebname".md5
 	if [ $? -ne 0 ]
 	then
 	    echo "error"
@@ -45,7 +52,7 @@ do
 	fi
 
 	printf "  sha512:"
-	sha512sum -c "$i".sha512
+	sha512sum -c "$filebname".sha512
 	if [ $? -ne 0 ]
 	then
 	    echo "error"
@@ -54,7 +61,7 @@ do
 	fi
 
 	echo -n "      installing:"
-	bash "$AIP_DIR/_aipb_extract" "$i" "$BASEDIR"/
+	bash "$AIP_DIR/_aipb_extract" "$filebname" "$BASEDIR"/
 	if [ $? -eq 0 ]
 	then
 	    printf ":OK\n"
@@ -63,6 +70,7 @@ do
 	    printf ":ERROR\n"
 	    ERi=$(( $ERi + 1 ))
 	fi
+	cd "$PPWD"
     fi
 done
 echo "  installed: $OKi, errors: $ERi, Total: $(( $OKi + $ERi ))"
