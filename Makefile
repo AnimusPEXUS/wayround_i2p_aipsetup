@@ -1,20 +1,20 @@
 # settings
 ifndef PREFIX
-PREFIX = "/"
+PREFIX = /
 endif
 
 ifndef AIP_B
-AIP_B = "/usr/lib/aipsetup"
+AIP_B = /usr/lib/aipsetup
 endif
 
 ifndef BINDIR
-BINDIR = "/usr/bin"
+BINDIR = /usr/bin
 endif
 # end settings
 
-PPWD = "`pwd`"
+PPWD = `pwd`
 
-VERSION = "`date +%Y.%m.%d.%H.%M`"
+VERSION = `date +%Y.%m.%d.%H.%M`
 
 default:
 	@printf "aipsetup " ; cat VERSION ; echo
@@ -48,16 +48,16 @@ install:
 
 setup:
 	@echo "<<<[ Setting Up ]>>>"
-	@echo "setting base folder to $(PPWD)"
+	@echo "setting base folder to $(AIP_B)"
 	-mkdir -p "$(PREFIX)/$(AIP_B)"
-	-mkdir -p "$(BINDIR)"
-	cat aipsetup | sed -e "4{s#AIP_DIR=\"\"#AIP_DIR=\"$(PPWD)\"#}" > "$(BINDIR)/aipsetup"
-	chown root.root "$(BINDIR)/aipsetup"
-	chmod 755 "$(BINDIR)/aipsetup"
+	-mkdir -p "$(PREFIX)/$(BINDIR)"
+	cat aipsetup | sed -e "4{s#AIP_DIR=\"\"#AIP_DIR=\"$(AIP_B)\"#}" > "$(PREFIX)/$(BINDIR)/aipsetup"
+	chown root.root "$(PREFIX)/$(BINDIR)/aipsetup"
+	chmod 0700 "$(PREFIX)/$(BINDIR)/aipsetup"
 	@echo "<<<[ Sett Up ]>>>"
 
 unsetup:
-	-rm "$(BINDIR)/aipsetup"
+	-rm "$(PREFIX)/$(BINDIR)/aipsetup"
 
 clean:
 	chown -R root.root .

@@ -17,8 +17,7 @@ case "$#" in
 	case "$1" in
 	    --version)
 		printf "aipsetup " 
-		cat "$AIP_DIR/VERSION" 
-		echo
+		cat "$AIP_DIR/VERSION"
 		exit 0
 		;;
 	    --help)
