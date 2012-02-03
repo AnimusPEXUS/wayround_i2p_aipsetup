@@ -4,6 +4,7 @@ import getopt
 import os
 import os.path
 import sys
+
 import aipsetup.utils
 import aipsetup.build
 

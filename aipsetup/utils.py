@@ -12,7 +12,7 @@ import traceback
 
 # *******************
 # Protective function. Protects modules from being run as scripts
-# requires __name__ as parameter
+# requires __name__ tobe passed as parameter
 def module_run_protection(name):
     if name == "__main__":
         print '-e- !! This module must be started by aipsetup, not as script !!'
@@ -25,7 +25,7 @@ module_run_protection(__name__)
 
 def show_version_message():
     print """\
-Copyright (C) 2008-2010 Alexey V. Gorshkov (a.k.a. AnimusPEXUS)
+Copyright (C) 2008-2012 Alexey V. Gorshkov (a.k.a. AnimusPEXUS)
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
     return
@@ -86,11 +86,11 @@ def iocat(in_file, out_file, size=255, verbose=False):
     try:
         while (buff != r''):
             if verbose:
-                print 'reading '+str(size)
+                print 'reading ' + str(size)
             buff = in_file.read(255)
             if verbose:
-                print 'readed  '+str(len(buff))
-                print 'write '+str(len(buff))
+                print 'readed  ' + str(len(buff))
+                print 'write ' + str(len(buff))
             out_file.write(buff)
             out_file.flush()
     except:
@@ -105,8 +105,8 @@ def pathRemoveDblSlash(dir_str):
 
 def option_check(names=['--help', '-h'], optionlist=[]):
     '''search option list for required option and returnd tupil in
-    which first element is False or True depending on search success,
-    second is option exect name, third is value'''
+       which first element is False or True depending on search
+       success, second is option exect name, third is value'''
 
     for i in optionlist:
         for j in names:

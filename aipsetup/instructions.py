@@ -14,27 +14,27 @@ def help():
 
     options are following:
 
-     -d              delete template
-     -t template     use `template' as prototype, not `usr'.
-                     WARNING: this also deletes template you've
-                              selected to edit
-     -e editor       open template with named editor
+     -d                delete instruction
+     -i instruction    use `instruction' as prototype, not `usr'.
+                       WARNING: this also deletes instruction you've
+                                selected to edit
+     -e editor         open instruction with named editor
 
-     -l | --list     list templates
+     -l | --list       list instructions
 
-     default         template editing
+     default           instruction editing
 
 
  -d, -t, -m and -l are not compatible. -e usefull only with -m option.
- -m, -d and -m takes only one argument - template to work with
+ -m, -d and -m takes only one argument - instruction to work with
  -l doesn't allow any arguments with this aipsetup mode
 """
 
-def delete(name='temp.py', templatedir=os.path.expanduser('~/aipsetup/templates')):
+def delete(name='temp.py', instructiondir=os.path.expanduser('~/aipsetup/instructions')):
 
-    full_path = templatedir + '/' + name
+    full_path = instructiondir + '/' + name
 
-    print '-i- deleting template ' + full_path
+    print '-i- deleting instruction ' + full_path
     try:
         os.unlink(full_path)
     except OSError as err:
@@ -44,9 +44,9 @@ def delete(name='temp.py', templatedir=os.path.expanduser('~/aipsetup/templates'
         print '-i-  deleted'
         return 0
 
-def edit(name='temp.py', editor='emacs', templatedir=''):
+def edit(name='temp.py', editor='emacs', instructiondir=''):
 
-    full_path = templatedir + '/' + name
+    full_path = instructiondir + '/' + name
 
     print '-i- opening ' + full_path + ' with ' + editor
     try:

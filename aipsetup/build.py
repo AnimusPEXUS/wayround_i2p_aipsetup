@@ -18,34 +18,34 @@ use pointed themplate for source building.
 
 !! Packaging and downloading routines must be on other classes !!"""
 
-DIR_TARBALL  = '00.TARBALL'
-DIR_TEMPLATE = '01.TEMPLATE'
-DIR_SOURCE   = '02.SOURCE'
-DIR_PATCH    = '03.PATCH'
-DIR_BUILD    = '04.BUILD'
-DIR_FS_ROOT  = '05.FS_ROOT'
-DIR_LOGS     = '06.LOGS'
-DIR_LISTS    = '07.LISTS'
-DIR_PACKAGE  = '08.PACKAGE'
+DIR_TARBALL    = '00.TARBALL'
+DIR_SOURCE     = '01.SOURCE'
+DIR_PATCHES    = '02.PATCHES'
+DIR_BUILDING   = '03.BUILDING'
+DIR_DESTDIR    = '04.DESTDIR'
+DIR_BUILD_LOGS = '05.BUILD_LOGS'
+DIR_LISTS      = '06.LISTS'
+DIR_OUTPUT     = '07.OUTPUT'
 
 DIR_ALL = [
     DIR_TARBALL,
-    DIR_TEMPLATE, 
     DIR_SOURCE,
-    DIR_PATCH,
-    DIR_BUILD,
-    DIR_FS_ROOT,
-    DIR_LOGS,
+    DIR_PATCHES,
+    DIR_BUILDING,
+    DIR_DESTDIR,
+    DIR_BUILD_LOGS,
     DIR_LISTS,
-    DIR_PACKAGE
+    DIR_OUTPUT
     ]
 
 
 directory = ''
 
 def isWdDirRestricted(self):
-    """This function is a rutine to check supplied dir is it suitable to be
-    a working dir"""
+    """This function is a rutine to check supplied dir is it suitable
+    to be a working dir"""
+
+    ret = False
 
     dirs_begining_with = [
         '/bin', '/boot' , '/daemons',
@@ -61,56 +61,44 @@ def isWdDirRestricted(self):
 
     for i in dirs_begining_with:
         if (re.match('^'+i, dir_str_abs) != None):
-            return True
+            ret = True
+            break
 
-    for i in exec_dirs:
-        if i == dir_str_abs:
-            return True
+    if not ret:
+        for i in exec_dirs:
+            if i == dir_str_abs:
+                ret = True
+                break
+    return ret
 
-    return False
+def init(directory='build'):
 
-def init(directory='build', verbose=False):
-    """Initiates pointed dir for farver usage. All contents is
-    removed"""
+    """Initiates pointed dir for farver usage. All contents is removed"""
 
-    if verbose:
-        print '-v- initiating dir ' + directory
+    print '-i- initiating dir ' + directory
 
-    # Commented it out. I fink it's not needed in class
-    # if self.isWdDirRestricted(self.directory):
-        # print '-e- ' + dir_str + ' is restricted working dir'
-        # print '    won\'t init'
-        # return -1
+    if isWdDirRestricted(directory):
+        print '-e- ' + dir_str + ' is restricted working dir'
+        print '    won\'t init'
+        return -1
 
     # if exists and not derictory - not continue
-    if verbose:
-        print '-v- checking dir name safety'
+    print '-v- checking dir name safety'
     if ((os.path.exists(directory))
         and not os.path.isdir(directory)):
         print '-e- file already exists ant it is not a directory'
         return -2
 
-    # ensure directory exists
-    if verbose:
-        print '-v- creating directory if not exists'
-    if (not os.path.exists(directory)):
-        os.makedirs(directory)
-
     # remove all files and directories in initiating dir
     if (os.path.exists(directory)) and os.path.isdir(directory):
-        if verbose:
-            print '-v- directory already exists. cleaning...'
-        files = os.listdir(directory)
-        for i in files:
-            tfile = aipsetup.utils.pathRemoveDblSlash(directory+'/'+i)
-            if (os.path.isdir(tfile)):
-                shutil.rmtree(tfile)
-                continue
-            os.unlink(tfile)
+        print '-i- directory already exists. cleaning...'
+        shutil.rmtree(directory)
+
+    os.mkdir(directory)
 
     # create all subdirs
     # NOTE: probebly '/' in paths is not a problem, couse we
-    #       working with GNU/Linux (maiby other UNIXes) only
+    #       working with GNU/Linux (maybe other UNIXes) only
     for i in DIR_ALL:
         a = aipsetup.utils.pathRemoveDblSlash(
             directory+'/' + i)
@@ -121,45 +109,27 @@ def init(directory='build', verbose=False):
 
     return 0
 
-def cp(self, filename):
-    '''This method copyes pointed file to 00.TARBALL directory'''
+def set_instructions(settings, name, where='.'):
 
-    src_file_base_name = os.path.basename(filename);
+    '''copy building instructions to pointed dir'''
 
-    shutil.copy(filename,
-                directory + '/' + self.DIR_TARBALL + '/' + src_file_base_name)
+    ret = True
 
-    return
+    if not os.path.isfile(os.path.join(settings['templates'], name)):
+        print '-e- Such instructions not found in ' + settings['templates']
 
-def person(self, template):
-    '''Personalize working directory
+        ret = False
 
-    Simply copyes template to working dir'''
+    else:
 
-    if not os.path.isfile(aipsetup_config['templates'] + '/' + template):
-        print '-e- This template not found in ' + aipsetup_config['templates']
-        return False
+        try:
+            shutil.copy(os.path.join(settings['templates'], name),
+                        where)
+        except:
+            print '-e- Instructions copying error'
+            ret = False
 
-    try:
-        shutil.copy(aipsetup_config['templates'] + '/' + template,
-                   directory + '/' + self.DIR_TEMPLATE + '/' + template)
-    except:
-        print '-e- Some template copying error'
-        return False
+    if ret:
+        print '-i- Copyed ' + name + ' to ' + where
 
-    return True
-
-def e_src(self):
-    '''Clean extracted source dir and extract fresh source there'''
-
-    sources_dir = directory+'/'+self.DIR_SOURCE
-
-    if ((os.path.exists(sources_dir))
-        and os.path.isdir(sources_dir)):
-        files = os.listdir(sources_dir)
-        for i in files:
-            tfile = pathRemoveDblSlash(directory+'/'+i)
-            if (os.path.isdir(tfile)):
-                shutil.rmtree(tfile)
-                continue
-            os.unlink(tfile)
+    return ret
