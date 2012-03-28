@@ -7,46 +7,232 @@ import sys
 
 import aipsetup.utils
 import aipsetup.build
+import aipsetup.pkgrepo
+import aipsetup.getopt2
 
-try:
-    optilist, args = getopt.getopt(sys.argv[1:],
-                                   'v',
-                                   ['smode=', 'mode=', 
-                                    'verbose'])
+def show_help():
+    print \
+"""
+   usage: %(basename)s [command] [command_parameters]
 
-except getopt.GetoptError, e:
-    print '-e- Error while parsing parameters: ' + e.msg
-    exit(1)
 
-mode=aipsetup.utils.option_check(['--mode', '-m'], optilist)
-smode=aipsetup.utils.option_check(['--smode', '-s'], optilist)
-verbose_option=aipsetup.utils.option_check(['--verbose', '-v'], optilist)
+   commands:
+
+     building tools:
+
+         ini|init [-d dir_name] [src_file]
+
+               Initiate building dir.
+
+               Default dir_name == 'tmp'.
+
+               If src_file is given and is plain file, it's copied to
+               00.TARBALL.
+
+               If src_file is given and is directory, it's contents
+               copied to 01.SOURCE.
+
+          lb|listbuilders [MASK]
+
+               List available builders
+
+          eb|editbuilder NAME
+
+               Edit builder
+
+          cb|copybuilder NAME
+
+               Copy builder to current dir
+
+         pks|pksums
+
+               create sha512 sums for current dir
+
+          lf|lnfix
+
+               fix symlinks in current dir
+
+          pk|pack
+
+               pack current dir
+
+          bd|build templete
+
+               file [file2] ... [filex]
+
+     aipsetup system tools:
+
+         csc|cscript
+
+               copy builder script to current dir (for maintainers)
+
+     system tools:
+
+          ls|list [-b BASEDIR] ['filemask']
+
+               list installed packages
+
+         lsc|listc [-b BASEDIR] ['filemask']
+
+               list files installed by packages
+
+         chk|pkcheck TARGET
+
+               check pkg sums
+
+          rm|remove [-b BASEDIR] ['filemask']
+
+               remove named package
+
+          in|install [-b BASEDIR] FILEMASK
+
+               install named package files
+
+          fn|findcom FILENAME
+
+               find package by FILENAME
+
+          fd|finddep FILENAME PATH
+
+               look for files depending on FILENAME in PATH dir
+
+         ldd|lddsums PROGRAM
+
+               make sha512 sums for PROGRAM ldd output
+
+            |bz2xzsys [-b BASEDIR]
+
+               transfer existing bzip2 aipsetup system to xz
+
+            |bz2xzpkg FILEMASK
+
+               transfer existing bzip2 aipsetup packages to xz
+
+     misc tools:
+
+          ex|extract FILE
+
+               extract to current dir
+
+       np|nameparse
+
+               parse package filename
+
+       lu|listuniq
+
+               parse package filenames and show all uniq names
+
+      pvc|pkgnamevcomp
+
+               find newest or oldest package from given by name (see
+               --help)
+
+      llu|pkgnamelstlat
+
+               list all latest packages of given
+
+      slp|slashescape
+
+               escapes all slashes in parameter or stdin and throvs on
+               stdout
+
+      sfi|softfix
+
+               fixes soft links, remowing '`pwd`' from walue
+
+     cat0|catzero
+
+               reads stdin and writes stdout untill first NULL in
+               stdin
+
+
+     --help      see this help
+     --version   version info
+"""
+    return
 
 ret = 0                         # default return value
 
-if not mode[0] or not smode[0]:
-    print '-e- mode and submode must be set'
-    exit(1)
 
-if mode[2] == 'build' and smode[2] == 'init':
+optilist, args = aipsetup.getopt2.getopt(sys.argv[1:])
 
-    init_dir = 'tmp'
-    if len(args) == 1:
-        init_dir = args[0]
+print repr(optilist)
+print repr(args)
 
-    if len(args) > 1:
-        print '-e- too many arguments'
+help_reqvested = False
+
+verbose_option = False
+
+for i in optilist:
+    if i[0] == '--help':
+        help_reqvested = True
+
+for i in optilist:
+    if i[0] == '--verbose' or i[0] == '-v':
+        verbose_option = True
+
+
+if help_reqvested:
+    show_help()
+else:
+
+
+    if len(args) == 0:
+        print "-e- no commands or parameters passed. try aipsetup --help"
         exit(1)
+    else:
 
-    ret = aipsetup.build.init(directory=init_dir, verbose=verbose_option[0])
+        if args[0] == 'init' or args[0] == 'ini':
 
-if mode[2] == 'utils' and smode[2] == 'pkg_name_parse':
+            init_dir = 'tmp'
 
-    if len(args) != 1:
-        print '-e- exectly one argument required'
-        exit(1)
+            src_file = None
 
-    ret = aipsetup.utils.pkg_name_parse(args[0])
+            for i in optilist:
+                if i[0] == '-d':
+
+                    init_dir = i[1]
+
+            if len(args) == 2:
+                src_file = args[1]
+
+
+            if isinstance(init_dir, basestring):
+
+                ret = aipsetup.build.init(
+                    directory=init_dir,
+                    source_file=src_file,
+                    verbose=verbose_option)
+
+                if ret != 0:
+                    print '-e- Error initiating directory'
+
+            else:
+                print "-e- Wrong -d parameter"
+
+
+
+
+        if args[0] == 'pkgrepo':
+            if len(args) > 1:
+
+                if args[1] == 'scan':
+                    r = aipsetup.pkgrepo.PackageRepository(repo_dir='/home/agu/_sda3/_UHT/pkg_publish', debug=[])
+                    r.scan_tree()
+
+                if args[1] == 'collisions':
+                    r = aipsetup.pkgrepo.PackageRepository(repo_dir='/home/agu/_sda3/_UHT/pkg_publish', debug=[])
+                    r.find_package_name_collisions()
+
+
+        # if mode[2] == 'utils' and smode[2] == 'pkg_name_parse':
+
+        #     if len(args) != 1:
+        #         print '-e- exectly one argument required'
+        #         exit(1)
+
+        #     ret = aipsetup.utils.pkg_name_parse(args[0])
 
 print '-i- end'
+
 exit(ret)

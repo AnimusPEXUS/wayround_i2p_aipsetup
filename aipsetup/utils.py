@@ -103,18 +103,18 @@ def pathRemoveDblSlash(dir_str):
         t = t.replace('//', '/')
     return t
 
-def option_check(names=['--help', '-h'], optionlist=[]):
-    '''search option list for required option and returnd tupil in
-       which first element is False or True depending on search
-       success, second is option exect name, third is value'''
+# def option_check(names=['--help', '-h'], optionlist=[]):
+#     '''search option list for required option and returnd tupil in
+#        which first element is False or True depending on search
+#        success, second is option exect name, third is value'''
 
-    for i in optionlist:
-        for j in names:
+#     for i in optionlist:
+#         for j in names:
             
-            if i[0] == j:
-                return (True, i[0], i[1])
+#             if i[0] == j:
+#                 return (True, i[0], i[1])
 
-    return (False, None, None)
+#     return (False, None, None)
 
 # def traceback_return(info):
 #     ret = u''

@@ -1,4 +1,6 @@
 /.bzr
+/log
+/html
 *~
 *.pyc
 *.pyo

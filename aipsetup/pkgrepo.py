@@ -32,7 +32,7 @@ class PackageRepository:
 
         self._repo_dir = repo_dir
 
-        db_file = os.path.join(repo_dir, 'repo_db.sqlite')
+        db_file = os.path.join(repo_dir, 'index.sqlite')
 
         if not os.path.isdir(repo_dir):
             raise ValueError
@@ -169,7 +169,7 @@ class PackageRepository:
                 isfiles += 1
 
         if isfiles >= 3:
-            print "-w- too many non-dir files in: %(path)s" % {
+            print "-w- too many non-dirs : %(path)s" % {
                 'path': root_dir}
             print "       skipping"
             return 1
@@ -263,19 +263,24 @@ class PackageRepository:
         sess.close()
 
         del(lst)
-        lst_ok = []
-        lst_dup = []
+
+        lst_dup = {}
+        pkg_paths = {}
 
         for each in lst2:
             # print repr(each)
+
             l = each[-1][1].lower()
-            if not l in lst_dup:
-                if l in lst_ok:
-                    lst_dup.append(l)
-                    while l in lst_ok:
-                        lst_ok.remove(l)
-                else:
-                    lst_ok.append(l)
+
+            if not l in pkg_paths:
+                pkg_paths[l] = []
+
+            pkg_paths[l].append(join_pkg_path(each))
+
+
+        for each in pkg_paths.keys():
+            if len(pkg_paths[each]) > 1:
+                lst_dup[each] = pkg_paths[each]
 
 
         t = len(lst_dup)
@@ -292,12 +297,21 @@ class PackageRepository:
         if len(lst_dup) > 0:
             print "       listing:"
 
-            for each in lst2:
-                l = each[-1][1].lower()
-                if l in lst_dup:
-                    print "          %(path)s" % {
-                        'path': join_pkg_path(each)
+            sorted_keys = lst_dup.keys()
+            sorted_keys.sort()
+
+            for each in sorted_keys:
+                print "          %(key)s:" % {
+                    'key': each
+                    }
+
+                lst_dup[each].sort()
+
+                for each2 in lst_dup[each]:
+                    print "             %(path)s" % {
+                        'path': each2
                         }
+                print
 
         return 0
 

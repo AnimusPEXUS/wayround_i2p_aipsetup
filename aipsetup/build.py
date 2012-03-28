@@ -4,9 +4,9 @@
 import sys
 import os.path
 import os
-import re
 import aipsetup.utils
 import shutil
+import glob
 
 
 
@@ -41,26 +41,26 @@ DIR_ALL = [
 
 directory = ''
 
-def isWdDirRestricted(self):
+def isWdDirRestricted(directory):
     """This function is a rutine to check supplied dir is it suitable
     to be a working dir"""
 
     ret = False
 
     dirs_begining_with = [
-        '/bin', '/boot' , '/daemons',
-        '/dev', '/etc', '/lib', '/proc' ,
-        '/sbin', '/sys',
+        '/bin',     '/boot' ,    '/daemons',
+        '/dev',     '/etc',      '/lib',     '/proc',
+        '/sbin',    '/sys',
         '/usr/bin', '/usr/sbin', '/usr/lib',
         '/usr/man', '/usr/share'
     ]
 
     exec_dirs = ['/opt', '/usr', '/var', '/']
 
-    dir_str_abs = os.path.abspath(self.directory)
+    dir_str_abs = os.path.abspath(directory)
 
     for i in dirs_begining_with:
-        if (re.match('^'+i, dir_str_abs) != None):
+        if dir_str_abs.startswith(i):
             ret = True
             break
 
@@ -71,43 +71,77 @@ def isWdDirRestricted(self):
                 break
     return ret
 
-def init(directory='build'):
+def init(directory='build', source_file=False, verbose=False):
 
     """Initiates pointed dir for farver usage. All contents is removed"""
 
-    print '-i- initiating dir ' + directory
+    ret = 0
+
+    if verbose:
+        print '-i- initiating dir ' + directory
 
     if isWdDirRestricted(directory):
-        print '-e- ' + dir_str + ' is restricted working dir'
-        print '    won\'t init'
-        return -1
+        print '-e- %(dir_str)s is restricted working dir' % {
+            'dir_str': dir_str
+            }
+        print "    won't init"
+        ret = -1
+
 
     # if exists and not derictory - not continue
-    print '-v- checking dir name safety'
-    if ((os.path.exists(directory))
-        and not os.path.isdir(directory)):
-        print '-e- file already exists ant it is not a directory'
-        return -2
+    if ret == 0:
 
-    # remove all files and directories in initiating dir
-    if (os.path.exists(directory)) and os.path.isdir(directory):
-        print '-i- directory already exists. cleaning...'
-        shutil.rmtree(directory)
-
-    os.mkdir(directory)
-
-    # create all subdirs
-    # NOTE: probebly '/' in paths is not a problem, couse we
-    #       working with GNU/Linux (maybe other UNIXes) only
-    for i in DIR_ALL:
-        a = aipsetup.utils.pathRemoveDblSlash(
-            directory+'/' + i)
         if verbose:
-            print '-v- creating directory ' + a
-        os.makedirs(a)
+            print '-v- checking dir name safety'
 
+        if ((os.path.exists(directory))
+            and not os.path.isdir(directory)):
+            print '-e- file already exists ant it is not a directory'
+            ret = -2
 
-    return 0
+    if ret == 0:
+
+        # remove all files and directories in initiating dir
+        if (os.path.exists(directory)) and os.path.isdir(directory):
+            if verbose:
+                print '-i- directory already exists. cleaning...'
+            shutil.rmtree(directory)
+
+        os.mkdir(directory)
+
+        # create all subdirs
+        # NOTE: probebly '/' in paths is not a problem, couse we
+        #       working with POSIX only
+        for i in DIR_ALL:
+            a = aipsetup.utils.pathRemoveDblSlash(
+                directory+'/' + i)
+            if verbose:
+                print '-v- creating directory ' + a
+            os.makedirs(a)
+
+    if verbose:
+        print "-v- copying source"
+
+    if ret == 0:
+        if source_file != None:
+            if os.path.isdir(source_file):
+                for i in glob.glob(os.path.join(source_file,'*')):
+                    if os.path.isdir(i):
+                        shutil.copytree(
+                            i, os.path.join(directory, DIR_SOURCE, os.path.basename(i)))
+                    else:
+                        shutil.copy2(
+                            i, os.path.join(directory, DIR_SOURCE))
+            elif os.path.isfile(source_file):
+                shutil.copy(
+                    source_file, os.path.join(directory, DIR_TARBALL))
+            else:
+                print "-e- file %(file)s - not dir and not file." % {
+                    'file': source_file
+                    }
+                print "    skipping copy"
+
+    return ret
 
 def set_instructions(settings, name, where='.'):
 
