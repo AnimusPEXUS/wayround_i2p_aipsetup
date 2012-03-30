@@ -4,10 +4,11 @@ import getopt
 import os
 import os.path
 import sys
+import glob
+import subprocess
+import shutil
 
 import aipsetup.utils
-import aipsetup.build
-import aipsetup.pkgrepo
 import aipsetup.getopt2
 
 def show_help():
@@ -40,7 +41,11 @@ def show_help():
 
                Edit builder
 
-          cb|copybuilder NAME
+          cb|copybuilder NAME NAME2
+
+               Copy builder NAME to builder NAME2.
+
+          ub|usebuilder NAME
 
                Copy builder to current dir
 
@@ -148,16 +153,36 @@ def show_help():
 
      --help      see this help
      --version   version info
-"""
+""" % {
+        'basename': os.path.basename(__file__)
+        }
     return
+
+
+config = {
+    'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
+    'editor': 'emacs',
+    'builders': '/mnt/sda3/home/agu/_UHT/pkg_builders',
+    'public': '/mnt/sda3/home/agu/_UHT/pkg_public',
+    'info': '/mnt/sda3/home/agu/_UHT/pkg_info'
+    }
+
+if os.path.isfile('/etc/aipsetup.conf'):
+    r = aipsetup.utils.get_configuration(
+        config,
+        '/etc/aipsetup.conf')
+    if isinstance(r, dict):
+        config = r
+    else:
+        exit(1)
 
 ret = 0                         # default return value
 
 
 optilist, args = aipsetup.getopt2.getopt(sys.argv[1:])
 
-print repr(optilist)
-print repr(args)
+# print repr(optilist)
+# print repr(args)
 
 help_reqvested = False
 
@@ -183,6 +208,7 @@ else:
     else:
 
         if args[0] == 'init' or args[0] == 'ini':
+            import aipsetup.build
 
             init_dir = 'tmp'
 
@@ -210,10 +236,113 @@ else:
             else:
                 print "-e- Wrong -d parameter"
 
+        elif args[0] == 'lb' or args[0] == 'listbuilders':
+
+            mask = '*'
+
+            if len(args) > 1:
+
+                if len(args) > 2:
+                    print '-e- Too many parameters'
+                else:
+                    mask = args[1]
+
+            lst = glob.glob('%(path)s/%(mask)s' % {
+                    'path': config['builders'],
+                    'mask': mask
+                    })
+
+            lst.sort()
+
+            semi = ''
+            if len(lst) > 0:
+                semi = ':'
+
+            print 'found %(n)s builder(s)%(s)s' % {
+                'n': len(lst),
+                's': semi
+                }
+
+            for each in lst:
+                print os.path.basename(each)
+
+        elif args[0] == 'eb' or args[0] == 'editbuilder':
+
+            if len(args) != 2:
+                print "-e- builder to edit not specified"
+            else:
+                p = None
+                try:
+                    p = subprocess.Popen([config['editor'], '%(path)s/%(file)s' % {
+                                'path': config['builders'],
+                                'file': args[1]
+                                }])
+                except:
+                    print '-e- error starting editor'
+                else:
+                    try:
+                        p.wait()
+                    except:
+                        print '-e- error waiting for editor'
+
+                    print '-i- editor exited'
+
+                del(p)
+
+        elif args[0] == 'cb' or args[0] == 'copybuilder':
+
+            if len(args) != 3:
+                print "-e- wrong parameters count"
+            else:
+
+                folder = config['builders']
+
+                f1 = os.path.join(folder, args[1])
+                f2 = os.path.join(folder, args[2])
+
+                if os.path.isfile(f1):
+                    if os.path.exists(f2):
+                        print "-e- destination already exists"
+                    else:
+                        print "-i- copying %(f1)s to %(f2)s" % {
+                            'f1': f1,
+                            'f2': f2
+                            }
+                        shutil.copy(f1, f2)
+                else:
+                    print "-e- source builder not exists"
+
+
+        elif args[0] == 'ub' or args[0] == 'usebuilder':
+
+            if len(args) != 2:
+                print "-e- wrong parameters count"
+            else:
+
+                folder = config['builders']
+
+                f1 = os.path.join(folder, args[1])
+                f2 = os.path.join(os.getcwd(), os.path.basename(args[1]))
+
+                if os.path.isfile(f1):
+                    if os.path.exists(f2) and not os.path.isfile(f2):
+                        print "-e- destination already exists and not is file"
+                        
+                    else:
+                        print "-i- copying %(f1)s to %(f2)s" % {
+                            'f1': f1,
+                            'f2': f2
+                            }
+                        shutil.copy(f1, f2)
+                else:
+                    print "-e- builder not exists"
 
 
 
-        if args[0] == 'pkgrepo':
+
+        elif args[0] == 'pkgrepo':
+            import aipsetup.pkgrepo
+
             if len(args) > 1:
 
                 if args[1] == 'scan':
@@ -233,6 +362,6 @@ else:
 
         #     ret = aipsetup.utils.pkg_name_parse(args[0])
 
-print '-i- end'
+# print '-i- end'
 
 exit(ret)

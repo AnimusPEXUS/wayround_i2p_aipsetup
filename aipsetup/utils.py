@@ -40,36 +40,40 @@ def update_modules_data(module_name, module_group, module_modes, module_help):
         __main__.modules_data.append([module_name, module_group, module_modes, module_help])
     return
 
-def get_configuration(defaults):
-    home = defaults['homedir']
-    temps = defaults['templates']
-    editor = defaults['editor']
-    settings = defaults['settings']
+def get_configuration(defaults, file='/etc/aipsetup.conf'):
+
+    ret = defaults
 
     cp = ConfigParser.RawConfigParser()
 
-    cp.add_section('main')
-
-    cp.set('main', 'home', home)
-    cp.set('main', 'templates', temps)
-    cp.set('main', 'editor', editor)
+    f = None
 
     try:
-        cp.read(settings)
+        f = open(file, 'r')
     except:
-        return None
+        print "-e- Can't open %(file)s" % {'file': file}
+        ret = None
 
-    home = cp.get('main', 'home')
-    temps = cp.get('main', 'templates')
-    editor = cp.get('main', 'editor')
+    try:
+        cp.readfp(f)
+    except:
+        print "-e- Can't read %(file)s" % {'file': file}
+        ret = None
 
+    f.close()
 
-    return {
-        'homedir'   : home,
-        'templates' : temps,
-        'editor'    : editor,
-        'settings'  : settings
-    }
+    if isinstance(ret, dict):
+
+        if cp.has_section('main'):
+
+            for i in defaults:
+
+                if cp.has_option('main', i):
+
+                    ret[i] = cp.get('main', i)
+
+    del(cp)
+    return ret
 
 def filecopy(src, dst, verbose=False):
     if verbose:
@@ -110,7 +114,7 @@ def pathRemoveDblSlash(dir_str):
 
 #     for i in optionlist:
 #         for j in names:
-            
+
 #             if i[0] == j:
 #                 return (True, i[0], i[1])
 
