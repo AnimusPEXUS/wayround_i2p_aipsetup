@@ -163,8 +163,9 @@ config = {
     'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
     'editor': 'emacs',
     'builders': '/mnt/sda3/home/agu/_UHT/pkg_builders',
-    'public': '/mnt/sda3/home/agu/_UHT/pkg_public',
-    'info': '/mnt/sda3/home/agu/_UHT/pkg_info'
+    'repository': '/mnt/sda3/home/agu/_UHT/pkg_repository',
+    'info': '/mnt/sda3/home/agu/_UHT/pkg_info',
+    'sqlalchemy_engine_string': '/mnt/sda3/home/agu/_UHT/everything.sqlite'
     }
 
 if os.path.isfile('/etc/aipsetup.conf'):
@@ -340,18 +341,11 @@ else:
 
 
 
-        elif args[0] == 'pkgrepo':
-            import aipsetup.pkgrepo
+        elif args[0] == 'database':
+            import aipsetup.database
 
-            if len(args) > 1:
+            ret = aipsetup.database.router(optilist, args[1:], config)
 
-                if args[1] == 'scan':
-                    r = aipsetup.pkgrepo.PackageRepository(repo_dir='/home/agu/_sda3/_UHT/pkg_publish', debug=[])
-                    r.scan_tree()
-
-                if args[1] == 'collisions':
-                    r = aipsetup.pkgrepo.PackageRepository(repo_dir='/home/agu/_sda3/_UHT/pkg_publish', debug=[])
-                    r.find_package_name_collisions()
 
 
         # if mode[2] == 'utils' and smode[2] == 'pkg_name_parse':
