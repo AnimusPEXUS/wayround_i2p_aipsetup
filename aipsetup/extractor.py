@@ -3,7 +3,7 @@ import os
 
 def _extract_zip(file_name, output_dir):
     ret = os.system("unzip -qq '%(file_name)s' -d '%(output_dir)s'" % {
-            'file_name': file_name
+            'file_name': file_name,
             'output_dir': output_dir
             })
 
@@ -11,7 +11,7 @@ def _extract_zip(file_name, output_dir):
 
 def _extract_tar_7z(file_name, output_dir):
     ret = os.system("7z x -so '%(file_name)s' | tar --no-same-owner --no-same-permissions -xlRC '%(output_dir)s'" % {
-            'file_name': file_name
+            'file_name': file_name,
             'output_dir': output_dir
             })
 
@@ -40,28 +40,28 @@ def extract(file_name, output_dir):
 
     ret = None
 
-    if file_name.ends_with('.tar.lzma'):
+    if file_name.endswith('.tar.lzma'):
         ret = _extract_tar_arch(file_name, output_dir, 'lzma')
 
-    elif file_name.ends_with('.tar.bz2'):
+    elif file_name.endswith('.tar.bz2'):
         ret = _extract_tar_arch(file_name, output_dir, 'bzip2')
 
-    elif file_name.ends_with('.tar.gz'):
+    elif file_name.endswith('.tar.gz'):
         ret = _extract_tar_arch(file_name, output_dir, 'gzip')
 
-    elif file_name.ends_with('.tar.xz'):
+    elif file_name.endswith('.tar.xz'):
         ret = _extract_tar_arch(file_name, output_dir, 'xz')
 
-    elif file_name.ends_with('.tar.7z'):
+    elif file_name.endswith('.tar.7z'):
         ret = _extract_tar_7z(file_name, output_dir)
 
-    elif file_name.ends_with('.tgz'):
+    elif file_name.endswith('.tgz'):
         ret = _extract_tar_arch(file_name, output_dir, 'gzip')
 
-    elif file_name.ends_with('.zip'):
+    elif file_name.endswith('.zip'):
         pass
 
-    elif file_name.ends_with('.7z'):
+    elif file_name.endswith('.7z'):
         pass
 
     else:
