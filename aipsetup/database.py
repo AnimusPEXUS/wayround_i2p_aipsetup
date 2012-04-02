@@ -3,9 +3,48 @@
 import os
 import os.path
 import sys
+import glob
 
 import sqlalchemy
 import sqlalchemy.orm
+
+import pkginfo
+
+
+def print_help():
+    print """\
+
+aipsetup database command
+
+where command one of:
+
+   scan_repo_for_pkg_and_cat
+
+       scan repository and save it's categories and packages indexes
+       to database
+
+   find_repository_package_name_collisions_in_database
+
+       scan index for equal package names
+
+   find_missing_pkg_info_records [-t] [-f]
+
+       search packages which have no corresponding info records
+
+       if -m option is present - automatically creates non-existing
+       corresponding .xml file templates in info dir
+
+   backup_package_info_to_filesystem
+
+       save package information from database to info directory
+
+   load_package_info_from_filesystem
+
+       load package information from info directory to database
+
+       notice: package information table cleaned up before operation
+
+"""
 
 def router(opts, args, config):
 
@@ -16,23 +55,47 @@ def router(opts, args, config):
         if args[0] == 'scan_repo_for_pkg_and_cat':
             # scan repository for packages and categories. result
             # replaces data in database
-            r = PackageDatabase(
-                repo_dir='/home/agu/_sda3/_UHT/pkg_publish',
-                debug=[])
+            r = PackageDatabase(config)
             r.scan_repo_for_pkg_and_cat()
 
         if args[0] == 'find_repository_package_name_collisions_in_database':
             # search database package table for collisions: no more
             # when one package with same name can exist!
-            r = PackageDatabase(
-                repo_dir='/home/agu/_sda3/_UHT/pkg_publish',
-                debug=[])
+            r = PackageDatabase(config)
             r.find_repository_package_name_collisions_in_database()
 
+        if args[0] == 'find_missing_pkg_info_records':
+            t = False
+            for i in opts:
+                if i[0] == '-t':
+                    t = True
+                    break
+
+            f = False
+            for i in opts:
+                if i[0] == '-f':
+                    f = True
+                    break
+
+            r = PackageDatabase(config)
+            r.find_missing_pkg_info_records(t, f)
+
         if args[0] == 'compare_database_and_filesystem_package_info':
-            # check every db.Package has db.PackageInfo .
+            # check every db Package has corresponding db PackageInfo .
             # check db.PackageInfo.* == fs.PackageInfo .
             pass
+
+        if args[0] == 'backup_package_info_to_filesystem':
+            r = PackageDatabase(config)
+            r.backup_package_info_to_filesystem()
+
+        if args[0] == 'load_package_info_from_filesystem':
+            r = PackageDatabase(config)
+            r.load_package_info_from_filesystem()
+
+        if args[0] == 'help':
+            print_help()
+
 
     else:
         print "wrong aipsetup command. try `aipsetup database help'"
@@ -42,7 +105,8 @@ def router(opts, args, config):
     return ret
 
 def is_package(path):
-    return os.path.isdir(path) and os.path.isfile(os.path.join(path, '.package'))
+    return os.path.isdir(path) \
+        and os.path.isfile(os.path.join(path, '.package'))
 
 
 
@@ -60,26 +124,23 @@ def join_pkg_path(pkg_path):
 
 class PackageDatabase:
 
-    def __init__(self,
-                 repo_dir='.',
-                 db_engine_string='',
-                 debug=['db_echo']):
+    def __init__(self, config):
 
-        self._repo_dir = repo_dir
+        self._config = config
 
-        db_file = os.path.join(repo_dir, 'index.sqlite')
-
-        if not os.path.isdir(repo_dir):
-            raise ValueError
-
-        if os.path.exists(db_file) and not os.path.isfile(db_file):
+        if not os.path.isdir(self._config['repository']):
             raise Exception
 
-        db_echo = 'db_echo' in debug
+        db_echo = False
 
-        self._db_engine = sqlalchemy.create_engine('sqlite:///%(path)s' % {'path': db_file}, echo=db_echo)
+        self._db_engine = \
+            sqlalchemy.create_engine(
+            self._config['sqlalchemy_engine_string'],
+            echo=db_echo
+            )
 
-        self._db_metadata = sqlalchemy.MetaData(bind=self._db_engine)
+        self._db_metadata = \
+            sqlalchemy.MetaData(bind=self._db_engine)
 
         self._table_Package = sqlalchemy.Table(
             'package', self._db_metadata,
@@ -88,9 +149,9 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              default=u''),
+                              default=''),
             sqlalchemy.Column('cid',
                               sqlalchemy.Integer,
                               nullable=False,
@@ -106,9 +167,9 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              default=u''),
+                              default=''),
             sqlalchemy.Column('parent_cid',
                               sqlalchemy.Integer,
                               nullable=False,
@@ -119,41 +180,45 @@ class PackageDatabase:
         self._table_VersionPrefix = sqlalchemy.Table(
             'version_prefix', self._db_metadata,
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              primary_key=True
-                              default=u''),
+                              primary_key=True,
+                              default=''),
             sqlalchemy.Column('prefix',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              default=u'')
+                              default='')
             )
 
         self._table_PackageInfo = sqlalchemy.Table(
             'package_info', self._db_metadata,
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              primary_key=True
-                              default=u''),
+                              primary_key=True,
+                              default=''),
             sqlalchemy.Column('home_page',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              default=u''),
+                              default=''),
             sqlalchemy.Column('description',
-                              sqlalchemy.UnicodeText,
+                              sqlalchemy.Text,
                               nullable=False,
-                              default=u''),
+                              default=''),
             # 'standard', 'local' or other package name
             sqlalchemy.Column('pkg_name_type',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              default=u''),
+                              default=''),
             # if 'local' - then regexp is used
             sqlalchemy.Column('regexp',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False,
-                              default=u'')
+                              default=''),
+            sqlalchemy.Column('builder',
+                              sqlalchemy.String(256),
+                              nullable=False,
+                              default='')
             )
 
         self._table_PackageSource = sqlalchemy.Table(
@@ -164,12 +229,12 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False),
             sqlalchemy.Column('url',
-                              sqlalchemy.UnicodeText,
-                              nullable=False
-                              default=u''),
+                              sqlalchemy.Text,
+                              nullable=False,
+                              default=''),
             )
 
         self._table_PackageMirror = sqlalchemy.Table(
@@ -180,12 +245,12 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False),
             sqlalchemy.Column('url',
-                              sqlalchemy.UnicodeText,
-                              nullable=False
-                              default=u''),
+                              sqlalchemy.Text,
+                              nullable=False,
+                              default=''),
             )
 
         self._table_PackageTag = sqlalchemy.Table(
@@ -196,10 +261,10 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False),
             sqlalchemy.Column('tag',
-                              sqlalchemy.Unicode(256),
+                              sqlalchemy.String(256),
                               nullable=False),
             )
 
@@ -291,6 +356,7 @@ class PackageDatabase:
             print "-w- too many non-dirs : %(path)s" % {
                 'path': root_dir}
             print "       skipping"
+            sys.stdout.flush()
             return 1
 
         for each in files:
@@ -304,22 +370,35 @@ class PackageDatabase:
                 sess.add(new_cat)
                 sess.commit()
 
-                self._scan_repo_for_pkg_and_cat(sess, full_path, new_cat.cid)
+                self._scan_repo_for_pkg_and_cat(
+                    sess, full_path, new_cat.cid)
             else:
-                print "-w- garbage file found: %(path)s" % {'path': full_path}
+                print "-w- garbage file found: %(path)s" % {
+                    'path': full_path}
+                sys.stdout.flush()
 
         return 0
 
     def scan_repo_for_pkg_and_cat(self):
+        sys.stdout.flush()
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        sys.stdout.flush()
         print "-i- deleting old data"
+        sys.stdout.flush()
         sess.query(Category).delete()
         sess.query(Package).delete()
+        sys.stdout.flush()
         print "-i- commiting"
+        sys.stdout.flush()
         sess.commit()
+        sys.stdout.flush()
         print "-i- scanning..."
-        self._scan_repo_for_pkg_and_cat(sess, self._repo_dir, 0)
+        sys.stdout.flush()
+        self._scan_repo_for_pkg_and_cat(
+            sess, self._config['repository'], 0)
+        sys.stdout.flush()
         print "-i- closing."
+        sys.stdout.flush()
         sess.close()
 
     def get_package_tags(self, name):
@@ -460,12 +539,15 @@ class PackageDatabase:
         t = len(lst_dup)
         if len(lst_dup) == 0:
             t='i'
+            t2 = '. Package locations look good!'
         else:
             t='w'
+            t2 = ''
 
-        print "-%(t)s- found %(c)s duplicated package names" % {
-            'c': len(lst_dup),
-            't': t
+        print "-%(t)s- found %(c)s duplicated package names%(t2)s" % {
+            'c' : len(lst_dup),
+            't' : t,
+            't2': t2
             }
 
         if len(lst_dup) > 0:
@@ -522,13 +604,24 @@ class PackageDatabase:
 
         return (found, not_found)
 
-    def package_info_record_to_dict(self, name):
+    def package_info_record_to_dict(self, name=None, record=None):
+        """
+        This method can accept package name or complited record
+        instance.
+
+        If name is given, record is not used and method does db query
+        itself.
+
+        If name is not given, record is used as if it wer this method
+        query result.
+        """
 
         ret = None
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        if name != None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageInfo).filter_by(name = name).first()
+            q = sess.query(PackageInfo).filter_by(name = name).first()
 
         if q == None:
             ret = None
@@ -547,10 +640,12 @@ class PackageDatabase:
                 'category'     : category,
                 'tags'         : tags,
                 'sources'      : sources,
-                'mirrors'      : mirrors
+                'mirrors'      : mirrors,
+                'builder'      : q.builder
                 }
 
-        sess.close()
+        if name != None:
+            sess.close()
 
         return ret
 
@@ -569,13 +664,14 @@ class PackageDatabase:
             creating_new = True
 
         q.name          = name
-        q.description   = struct['description'],
-        q.home_page     = struct['homepage'],
-        q.pkg_name_type = struct['pkg_name_type'],
-        q.regexp        = struct['regexp'],
+        q.description   = struct['description']
+        q.home_page     = struct['homepage']
+        q.pkg_name_type = struct['pkg_name_type']
+        q.regexp        = struct['regexp']
+        q.builder       = struct['builder']
 
         # category set only through pkg_repository
-        # q.category     = category,
+        # q.category    = category
 
         if creating_new:
             sess.add(q)
@@ -585,6 +681,119 @@ class PackageDatabase:
         self.set_package_tags(name, struct['tags'])
         self.set_package_sources(name, struct['sources'])
         self.set_package_mirrors(name, struct['mirrors'])
+
+    def backup_package_info_to_filesystem(self):
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        q = sess.query(PackageInfo).all()
+
+        for i in q:
+            r = self.package_info_record_to_dict(record=i)
+            if isinstance(r, dict):
+                filename = os.path.join(
+                    self._config['info'], '%(name)s.xml' % {
+                        'name': i.name
+                        })
+                if pkginfo.write_to_file(filename) != 0:
+                    print "-e- can't write file %(name)s" % {
+                        'name': filename
+                        }
+
+        sess.close()
+
+    def load_package_info_from_filesystem(self):
+
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        sess.query(PackageInfo).delete()
+        sess.close()
+
+        files = glob.glob(os.path.join(self._config['info'], '*.xml'))
+
+        for i in files:
+            struct = read_from_file(i)
+            if isinstance(struct, dict):
+                name = i[:-4]
+                self.package_info_dict_to_record(name, struct)
+            else:
+                print "-e- can't get info from file %(name)s" % {
+                    'name': i
+                    }
+
+    def find_missing_pkg_info_records(
+        self, create_templates=False, force_rewrite=False):
+
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        q = sess.query(Package).order_by(Package.name).all()
+
+        pkgs_checked = 0
+        pkgs_missing = 0
+        pkgs_written = 0
+        pkgs_exists  = 0
+        pkgs_failed  = 0
+        pkgs_forced  = 0
+
+        for each in q:
+
+            pkgs_checked += 1
+
+            q2 = sess.query(PackageInfo).filter_by(name = each.name).first()
+
+            if q2 == None:
+
+                pkgs_missing += 1
+
+                print "-w- missing package info record: %(name)s" % {
+                    'name': each.name
+                    }
+
+                if create_templates:
+
+                    filename = os.path.join(
+                        self._config['info'],
+                        '%(name)s.xml' % {'name': each.name}
+                        )
+
+                    if os.path.exists(filename):
+                        if not force_rewrite:
+                            print "-i- xml info file already exists"
+                            pkgs_exists += 1
+                            continue
+                        else:
+                            pkgs_forced += 1
+
+                    if force_rewrite:
+                        print "-i- forced template rewriting"
+
+                    if pkginfo.write_to_file(
+                        filename,
+                        pkginfo.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
+                        pkgs_failed += 1
+                        print "-e- failed writing template to %(name)s" % {
+                            'name': filename
+                            }
+                    else:
+                        pkgs_written += 1
+
+        sess.close()
+
+        print """\
+-i- Total records checked     : %(n1)d
+    Missing records           : %(n2)d
+    Missing but present on FS : %(n3)d
+    Written                   : %(n4)d
+    Write failed              : %(n5)d
+    Write forced              : %(n6)d
+""" % {
+            'n1': pkgs_checked,
+            'n2': pkgs_missing,
+            'n3': pkgs_exists,
+            'n4': pkgs_written,
+            'n5': pkgs_failed,
+            'n6': pkgs_forced
+}
+
+
 
 
 class Package(object):

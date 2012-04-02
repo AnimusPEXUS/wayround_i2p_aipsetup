@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import getopt
 import os
 import os.path
 import sys
@@ -165,7 +164,7 @@ config = {
     'builders': '/mnt/sda3/home/agu/_UHT/pkg_builders',
     'repository': '/mnt/sda3/home/agu/_UHT/pkg_repository',
     'info': '/mnt/sda3/home/agu/_UHT/pkg_info',
-    'sqlalchemy_engine_string': '/mnt/sda3/home/agu/_UHT/everything.sqlite'
+    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/everything.sqlite'
     }
 
 if os.path.isfile('/etc/aipsetup.conf'):
