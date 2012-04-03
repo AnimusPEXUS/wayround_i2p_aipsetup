@@ -31,11 +31,9 @@ where command one of:
 
        search packages which have no corresponding info records
 
-       if -t option is present - automatically creates non-existing
-       corresponding .xml file templates in info dir
+       -t creates non-existing .xml file templates in info dir
 
-       -f forces rewrite existing .xml files. this option only action
-        with -t option
+       -f forces rewrite existing .xml files
 
    find_outdated_pkg_info_records
 
@@ -49,16 +47,13 @@ where command one of:
 
        save package information from database to info directory.
 
-       existing files are skipped, unless -f set
+       existing files are skipped, unless -f is set
 
    load_package_info_from_filesystem [-a] [file names]
 
-       load package information from named files
+       load missing package information from named files
 
-       by default only missing records are loaded
-
-       if -a is set, all seleted record are loaded even if they
-       already present in db.
+       -a force load all records, not only missing.
 
    delete_pkg_info_records MASK
 
