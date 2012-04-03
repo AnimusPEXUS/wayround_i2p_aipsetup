@@ -3,7 +3,8 @@
 import os
 import os.path
 import sys
-import glob
+import fnmatch
+
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -13,7 +14,6 @@ import pkginfo
 
 def print_help():
     print """\
-
 aipsetup database command
 
 where command one of:
@@ -31,19 +31,46 @@ where command one of:
 
        search packages which have no corresponding info records
 
-       if -m option is present - automatically creates non-existing
+       if -t option is present - automatically creates non-existing
        corresponding .xml file templates in info dir
 
-   backup_package_info_to_filesystem
+       -f forces rewrite existing .xml files. this option only action
+        with -t option
 
-       save package information from database to info directory
+   find_outdated_pkg_info_records
 
-   load_package_info_from_filesystem
+       finds pkg info records which differs to FS .xml files
 
-       load package information from info directory to database
+   update_outdated_pkg_info_records
 
-       notice: package information table cleaned up before operation
+       loads pkg info records which differs to FS .xml files
 
+   backup_package_info_to_filesystem [-f] [MASK]
+
+       save package information from database to info directory.
+
+       existing files are skipped, unless -f set
+
+   load_package_info_from_filesystem [-a] [file names]
+
+       load package information from named files
+
+       by default only missing records are loaded
+
+       if -a is set, all seleted record are loaded even if they
+       already present in db.
+
+   delete_pkg_info_records MASK
+
+       if mask must be given or operation will fail
+
+   list_pkg_info_records [MASK]
+
+       default MASK is *
+
+   print_pkg_info_record NAME
+
+       print package info record information
 """
 
 def router(opts, args, config):
@@ -80,18 +107,78 @@ def router(opts, args, config):
             r = PackageDatabase(config)
             r.find_missing_pkg_info_records(t, f)
 
-        if args[0] == 'compare_database_and_filesystem_package_info':
-            # check every db Package has corresponding db PackageInfo .
-            # check db.PackageInfo.* == fs.PackageInfo .
-            pass
+        if args[0] == 'find_outdated_pkg_info_records':
+            r = PackageDatabase(config)
+            r.find_outdated_pkg_info_records()
+
+        if args[0] == 'update_outdated_pkg_info_records':
+            r = PackageDatabase(config)
+            r.update_outdated_pkg_info_records()
 
         if args[0] == 'backup_package_info_to_filesystem':
+            mask = '*'
+
+            if len(args) > 1:
+                mask = args[1]
+
+            f = False
+            for i in opts:
+                if i[0] == '-f':
+                    f = True
+                    break
+
             r = PackageDatabase(config)
-            r.backup_package_info_to_filesystem()
+            r.backup_package_info_to_filesystem(mask, f)
 
         if args[0] == 'load_package_info_from_filesystem':
+            a = False
+            for i in opts:
+                if i[0] == '-a':
+                    a = True
+
             r = PackageDatabase(config)
-            r.load_package_info_from_filesystem()
+            r.load_package_info_from_filesystem(args[1:], a)
+
+
+        if args[0] == 'delete_pkg_info_records':
+
+            mask = None
+
+            if len(args) > 1:
+                mask = args[1]
+
+            if mask != None:
+
+                r = PackageDatabase(config)
+                r.delete_pkg_info_records(mask)
+            else:
+                print "-e- Mask is not given"
+
+        if args[0] == 'list_pkg_info_records':
+
+            mask = '*'
+
+            if len(args) > 1:
+                mask = args[1]
+
+
+            r = PackageDatabase(config)
+            r.list_pkg_info_records(mask)
+
+
+        if args[0] == 'print_pkg_info_record':
+            name = None
+
+            if len(args) > 1:
+                name = args[1]
+
+            if name != None:
+
+                r = PackageDatabase(config)
+                r.print_pkg_info_record(name)
+            else:
+                print "-e- Name is not given"
+
 
         if args[0] == 'help':
             print_help()
@@ -103,6 +190,7 @@ def router(opts, args, config):
 
 
     return ret
+
 
 def is_package(path):
     return os.path.isdir(path) \
@@ -314,6 +402,21 @@ class PackageDatabase:
 
         return lst
 
+    def get_package_id(self, name):
+
+        ret = None
+
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        q = sess.query(Package).filter_by(name=name).first()
+        if q != None:
+            ret = q.pid
+
+        sess.close()
+
+        return ret
+
+
     def ls_packages(self, cid=None):
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
@@ -440,28 +543,37 @@ class PackageDatabase:
     def set_package_tags(self, name, tags):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
+        sess.query(PackageTag).filter_by(name=name).delete()
+
         for i in tags:
             n = PackageTag(name, i)
             sess.add(n)
 
+        sess.commit()
         sess.close()
 
     def set_package_sources(self, name, sources):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
+        sess.query(PackageSource).filter_by(name=name).delete()
+
         for i in sources:
             n = PackageSource(name, i)
             sess.add(n)
 
+        sess.commit()
         sess.close()
 
     def set_package_mirrors(self, name, mirrors):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
+        sess.query(PackageMirror).filter_by(name=name).delete()
+
         for i in mirrors:
             n = PackageMirror(name, i)
             sess.add(n)
 
+        sess.commit()
         sess.close()
 
     def get_package_path(self, pid):
@@ -622,22 +734,22 @@ class PackageDatabase:
             sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
             q = sess.query(PackageInfo).filter_by(name = name).first()
+        else:
+            q = record
 
         if q == None:
             ret = None
         else:
 
-            category = ''
-            tags = get_package_tags(name)
-            sources = get_package_sources(name)
-            mirrors = get_package_mirrors(name)
+            tags = self.get_package_tags(q.name)
+            sources = self.get_package_sources(q.name)
+            mirrors = self.get_package_mirrors(q.name)
 
             ret = {
                 'homepage'     : q.home_page,
                 'description'  : q.description,
                 'pkg_name_type': q.pkg_name_type,
                 'regexp'       : q.regexp,
-                'category'     : category,
                 'tags'         : tags,
                 'sources'      : sources,
                 'mirrors'      : mirrors,
@@ -676,48 +788,137 @@ class PackageDatabase:
         if creating_new:
             sess.add(q)
 
+        sess.commit()
+
         sess.close()
 
         self.set_package_tags(name, struct['tags'])
         self.set_package_sources(name, struct['sources'])
         self.set_package_mirrors(name, struct['mirrors'])
 
-    def backup_package_info_to_filesystem(self):
+    def backup_package_info_to_filesystem(
+        self, mask='*', force_rewrite=False):
+
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
         q = sess.query(PackageInfo).all()
 
         for i in q:
-            r = self.package_info_record_to_dict(record=i)
-            if isinstance(r, dict):
+            if fnmatch.fnmatch(i.name, mask):
                 filename = os.path.join(
                     self._config['info'], '%(name)s.xml' % {
                         'name': i.name
                         })
-                if pkginfo.write_to_file(filename) != 0:
-                    print "-e- can't write file %(name)s" % {
+                if not force_rewrite and os.path.exists(filename):
+                    print "-w- File exists - skipping: %(name)s" % {
+                        'name': filename
+                        }
+                    continue
+                if force_rewrite and os.path.exists(filename):
+                    print "-i- File exists - rewriting: %(name)s" % {
+                        'name': filename
+                        }
+                if not os.path.exists(filename):
+                    print "-i- Writing: %(name)s" % {
                         'name': filename
                         }
 
+                r = self.package_info_record_to_dict(record=i)
+                if isinstance(r, dict):
+                    if pkginfo.write_to_file(filename, r) != 0:
+                        print "-e- can't write file %(name)s" % {
+                            'name': filename
+                            }
+
         sess.close()
 
-    def load_package_info_from_filesystem(self):
+    def load_package_info_from_filesystem(
+        self, filenames=[], all_records=False):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        sess.query(PackageInfo).delete()
-        sess.close()
+        """
+        If names list is given - load only named and don't delete
+        existing
+        """
 
-        files = glob.glob(os.path.join(self._config['info'], '*.xml'))
+        files = []
+        loaded = 0
+
+        for i in filenames:
+            if i.endswith('.xml'):
+                files.append(i)
+
+        files.sort()
 
         for i in files:
-            struct = read_from_file(i)
+            name = os.path.basename(i)
+            name = name[:-4]
+
+            missing = False
+            if not all_records:
+                sess = sqlalchemy.orm.Session(bind=self._db_engine)
+                q = sess.query(PackageInfo).filter_by(name=name).first()
+                if q == None:
+                    missing = True
+                sess.close()
+                if not missing:
+                    continue
+
+            struct = pkginfo.read_from_file(i)
             if isinstance(struct, dict):
-                name = i[:-4]
+                print "-i- loading record: %(name)s" % {'name': name}
                 self.package_info_dict_to_record(name, struct)
+                loaded += 1
             else:
                 print "-e- can't get info from file %(name)s" % {
                     'name': i
                     }
+
+        print "-i- Total loaded %(n)d records" % {'n': loaded}
+        return
+
+    def delete_pkg_info_records(self, mask='*'):
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        q = sess.query(PackageInfo).all()
+
+        deleted = 0
+
+        for i in q:
+
+            if fnmatch.fnmatch(i.name, mask):
+                sess.delete(i)
+                deleted += 1
+                print "-i- deleted pkg info: %(name)s" % {
+                    'name': i.name
+                    }
+                sys.stdout.flush()
+
+        sess.commit()
+        sess.close()
+        print "-i- Total deleted %(n)d records" % {
+            'n': deleted
+            }
+        return
+
+    def list_pkg_info_records(self, mask='*'):
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        q = sess.query(PackageInfo).order_by(PackageInfo.name).all()
+
+        found = 0
+
+        for i in q:
+
+            if fnmatch.fnmatch(i.name, mask):
+                found += 1
+                print i.name
+                sys.stdout.flush()
+
+        sess.close()
+        print "-i- Total found %(n)d records" % {
+            'n': found
+            }
+        return
 
     def find_missing_pkg_info_records(
         self, create_templates=False, force_rewrite=False):
@@ -733,6 +934,8 @@ class PackageDatabase:
         pkgs_failed  = 0
         pkgs_forced  = 0
 
+        missing = []
+
         for each in q:
 
             pkgs_checked += 1
@@ -742,6 +945,7 @@ class PackageDatabase:
             if q2 == None:
 
                 pkgs_missing += 1
+                missing.append(each.name)
 
                 print "-w- missing package info record: %(name)s" % {
                     'name': each.name
@@ -793,6 +997,131 @@ class PackageDatabase:
             'n6': pkgs_forced
 }
 
+        missing.sort()
+        return missing
+
+    def find_outdated_pkg_info_records(self, mute=False):
+
+        ret = []
+
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        q = sess.query(PackageInfo).order_by(PackageInfo.name).all()
+
+        for i in q:
+
+            filename = os.path.join(
+                self._config['info'],
+                '%(name)s.xml' % {'name': i.name}
+                )
+
+            if not os.path.exists(filename):
+                ret.append(i.name)
+                if not mute:
+                    print "-w- file missing: %(name)s" % {
+                        'name': filename
+                        }
+                continue
+
+            d1 = pkginfo.read_from_file(filename)
+
+            if not isinstance(d1, dict):
+                print "-i- Error parsing file: %(name)s" % {
+                    'name': filename
+                    }
+            else:
+                d2 = self.package_info_record_to_dict(record=i)
+                if not pkginfo.is_dicts_equal(d1, d2):
+                    ret.append(i.name)
+                    if not mute:
+                        print "-w- xml init file differs for: %(name)s" % {
+                            'name': i.name
+                            }
+
+        sess.close()
+
+        if not mute:
+            print "-i- Total %(n)d warnings" % {'n': len(ret)}
+
+        return ret
+
+    def update_outdated_pkg_info_records(self):
+        # find_missing_pkg_info_records
+
+        opir = self.find_outdated_pkg_info_records(mute=True)
+
+        opir2 = []
+
+        for i in opir:
+            opir2.append(
+                os.path.join(
+                    self._config['info'],
+                    '%(name)s.xml' % {'name': i}
+                    )
+                )
+
+        self.load_package_info_from_filesystem(
+            filenames=opir2,
+            all_records=True
+            )
+
+
+        return
+
+
+    def print_pkg_info_record(self, name):
+        r = self.package_info_record_to_dict(name = name)
+        if r == None:
+            print "-e- Not found named info record"
+        else:
+
+            pid = self.get_package_id(name)
+            if pid != None:
+                category = self.get_package_path_string(pid)
+            else:
+                category = "< Package not indexed! >"
+
+            print """
+Name: %(name)s
+
+File Name Type: %(pkg_name_type)s
+
+Regular Expression: %(regexp)s
+
+Builder: %(builder)s
+
+== Description ==
+
+%(description)s
+
+Home Page: %(homepage)s
+
+== Sources ==
+
+%(sources)s
+
+== Mirrors ==
+
+%(mirrors)s
+
+----
+
+Category: %(category)s
+
+Tags: %(tags)s
+
+""" % {
+                'name': name,
+                'homepage': r['homepage'],
+                'pkg_name_type': r['pkg_name_type'],
+                'regexp': r['regexp'],
+                'builder': r['builder'],
+                'description': r['description'],
+                'sources': '\n'.join(r['sources']),
+                'mirrors': '\n'.join(r['mirrors']),
+                'tags': ', '.join(r['tags']),
+                'category': category
+                }
 
 
 
