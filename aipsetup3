@@ -158,23 +158,9 @@ def show_help():
     return
 
 
-config = {
-    'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
-    'editor': 'emacs',
-    'builders': '/mnt/sda3/home/agu/_UHT/pkg_builders',
-    'repository': '/mnt/sda3/home/agu/_UHT/pkg_repository',
-    'info': '/mnt/sda3/home/agu/_UHT/pkg_info',
-    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/everything.sqlite'
-    }
-
-if os.path.isfile('/etc/aipsetup.conf'):
-    r = aipsetup.utils.get_configuration(
-        config,
-        '/etc/aipsetup.conf')
-    if isinstance(r, dict):
-        config = r
-    else:
-        exit(1)
+config = aipsetup.utils.load_config()
+if config == None:
+    exit(1)
 
 ret = 0                         # default return value
 

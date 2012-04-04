@@ -30,6 +30,16 @@ This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
     return
 
+default_config = {
+    'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
+    'editor': 'emacs',
+    'builders': '/mnt/sda3/home/agu/_UHT/pkg_builders',
+    'repository': '/mnt/sda3/home/agu/_UHT/pkg_repository',
+    'info': '/mnt/sda3/home/agu/_UHT/pkg_info',
+    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/everything.sqlite'
+    }
+
+
 def update_modules_data(module_name, module_group, module_modes, module_help):
     import __main__
     try:
@@ -39,6 +49,23 @@ def update_modules_data(module_name, module_group, module_modes, module_help):
     else:
         __main__.modules_data.append([module_name, module_group, module_modes, module_help])
     return
+
+def load_config():
+
+    ret = None
+
+    if os.path.isfile('/etc/aipsetup.conf'):
+        r = get_configuration(
+            default_config,
+            '/etc/aipsetup.conf')
+
+        if isinstance(r, dict):
+            ret = r
+        else:
+            ret = None
+
+    return ret
+
 
 def get_configuration(defaults, file='/etc/aipsetup.conf'):
 
