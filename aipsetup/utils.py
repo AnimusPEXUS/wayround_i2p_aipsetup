@@ -10,33 +10,38 @@ import shutil
 import traceback
 
 
-# *******************
-# Protective function. Protects modules from being run as scripts
-# requires __name__ tobe passed as parameter
-def module_run_protection(name):
-    if name == "__main__":
-        print '-e- !! This module must be started by aipsetup, not as script !!'
-        # this exit is ok, but try not to use exit() function anywhere else
-        exit (-1)
-
-module_run_protection(__name__)
-
-# *******************
-
 def show_version_message():
     print """\
-Copyright (C) 2008-2012 Alexey V. Gorshkov (a.k.a. AnimusPEXUS)
+aipsetup %(version)s
+
+Copyright (C) 2008-2012 Alexey V. Gorshkov (AKA AnimusPEXUS)
 This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+""" % {
+        'version': '3.0'
+        }
     return
 
 default_config = {
     'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
-    'editor': 'emacs',
-    'builders': '/mnt/sda3/home/agu/_UHT/pkg_builders',
-    'repository': '/mnt/sda3/home/agu/_UHT/pkg_repository',
-    'info': '/mnt/sda3/home/agu/_UHT/pkg_info',
-    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/everything.sqlite'
+
+    'editor'             : 'emacs',
+
+    'uhtroot'            : '/mnt/sda3/home/agu/_UHT',
+
+    'builders'           : '/mnt/sda3/home/agu/_UHT/pkg_builders',
+    'repository'         : '/mnt/sda3/home/agu/_UHT/pkg_repository',
+    'source'             : '/mnt/sda3/home/agu/_UHT/pkg_source',
+    'info'               : '/mnt/sda3/home/agu/_UHT/pkg_info',
+
+    'repository_index'   : '/mnt/sda3/home/agu/_UHT/index_repository.lst',
+    'source_index'       : '/mnt/sda3/home/agu/_UHT/index_source.lst',
+
+    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/pkgindex.sqlite',
+
+    'server_ip'          : '127.0.0.1',
+    'server_port'        : '8005',
+    'server_prefix'      : '/'
     }
 
 

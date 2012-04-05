@@ -1,0 +1,103 @@
+
+<div class="info-info">
+
+<h2 style="display: inline;">${ name | x }</h2>
+<em>(<a href="files_info/${ name | x }.xml">xml</a>)</em>
+
+<table>
+  <tr>
+    <td>
+      File Name Type
+    </td>
+
+    <td>
+      ${ pkg_name_type | x }
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Regular Expression
+    </td>
+
+    <td>
+      ${ regexp |x }
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Builder
+    </td>
+
+    <td>
+      ${ builder | x }
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Description
+    </td>
+
+    <td>
+      <pre>${ description | x }</pre>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Home Page
+    </td>
+
+    <td>
+      <a href="${ homepage | x }">${ homepage | x }</a>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Sources
+    </td>
+
+    <td>
+      % for i in sources:
+      <a href="${ i | x }">${ i | x }</a>
+      % endfor
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Mirrors
+    </td>
+
+    <td>
+      % for i in mirrors:
+      <a href="${ i | x }">${ i | x }</a>
+      % endfor
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Category
+    </td>
+
+    <td>
+      ${ category | x }
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Tags
+    </td>
+
+    <td>
+      ${ ', '.join(tags) | x }
+    </td>
+  </tr>
+
+</table>
+</div>

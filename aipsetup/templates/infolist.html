@@ -1,0 +1,18 @@
+<div id="toc">
+% for i in toc_sl:
+<a href="#${ i | x }">${ i | x }</a>
+% endfor
+</div>
+
+% for i in toc_sl:
+<div class="infolist-letter">
+  <h2 style="display: inline;" id="${ i | x }">${ i | x }</h2> <em>(<a href="#toc">toc</a>)</em>
+% for j in infos:
+% if j[0] == i:
+  <div>
+    <a href="info?name=${ j | x }">${ j | x }</a> <em>(<a href="files_info/${ j | x }.xml">xml</a>)</em>
+  </div>
+% endif
+% endfor
+</div>
+% endfor
