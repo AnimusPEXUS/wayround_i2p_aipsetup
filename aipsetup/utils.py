@@ -41,7 +41,8 @@ default_config = {
 
     'server_ip'          : '127.0.0.1',
     'server_port'        : '8005',
-    'server_prefix'      : '/'
+    'server_prefix'      : '/',
+    'server_password'    : '123456789'
     }
 
 

@@ -35,6 +35,9 @@ where command one of:
 
        -f forces rewrite existing .xml files
 
+   TODO: load_missing_pkg_info_records
+
+
    find_outdated_pkg_info_records
 
        finds pkg info records which differs to FS .xml files
@@ -458,7 +461,14 @@ class PackageDatabase:
             return 1
 
         for each in files:
+            if each in ['.', '..']:
+                continue
+
             full_path = os.path.join(root_dir, each)
+
+            if os.path.islink(full_path):
+                continue
+
             if is_package(full_path):
                 sess.add(Package(name=each, cid=cid))
                 sess.commit()
@@ -495,6 +505,8 @@ class PackageDatabase:
         self._scan_repo_for_pkg_and_cat(
             sess, self._config['repository'], 0)
         sys.stdout.flush()
+        count_p = sess.query(Package).count()
+        print "-i- %(n)d packages found" % {'n': count_p}
         print "-i- closing."
         sys.stdout.flush()
         sess.close()
@@ -620,6 +632,8 @@ class PackageDatabase:
         for each in lst:
             lst2.append(self.get_package_path(pid=each.pid))
 
+        print "-i- Processing %(n)s packages" % {'n': len(lst)}
+        sys.stdout.flush()
         sess.close()
 
         del(lst)
@@ -674,7 +688,6 @@ class PackageDatabase:
                     print "             %(path)s" % {
                         'path': each2
                         }
-                print
 
         return 0
 

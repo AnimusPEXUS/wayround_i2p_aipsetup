@@ -1,6 +1,9 @@
+<%
+import urllib
+%>
 <div id="toc">
 % for i in toc_sl:
-<a href="#${ i | x }">${ i | x }</a>
+<a href="#${ urllib.quote(i) | x }">${ i | x }</a>
 % endfor
 </div>
 
@@ -10,7 +13,7 @@
 % for j in infos:
 % if j[0] == i:
   <div>
-    <a href="info?name=${ j | x }">${ j | x }</a> <em>(<a href="files_info/${ j | x }.xml">xml</a>)</em>
+    <a href="info?name=${ urllib.quote(j) | x }">${ j | x }</a> <em>(<a href="files_info/${ urllib.quote(j) | x }.xml">xml</a>)</em>
   </div>
 % endif
 % endfor
