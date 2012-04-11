@@ -37,23 +37,37 @@ default_config = {
     'repository_index'   : '/mnt/sda3/home/agu/_UHT/index_repository.lst',
     'source_index'       : '/mnt/sda3/home/agu/_UHT/index_source.lst',
 
-    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/pkgindex.sqlite',
+    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/\
+_UHT/pkgindex.sqlite',
 
     'server_ip'          : '127.0.0.1',
     'server_port'        : '8005',
     'server_prefix'      : '/',
-    'server_password'    : '123456789'
+    'server_password'    : '123456789',
+
+    'client_proto'       : 'http',
+    'client_host'        : '127.0.0.1',
+    'client_port'        : '8005',
+    'client_prefix'      : '/'
     }
 
 
-def update_modules_data(module_name, module_group, module_modes, module_help):
+def update_modules_data(module_name,
+                        module_group,
+                        module_modes,
+                        module_help):
     import __main__
     try:
         __main__.modules_data
     except:
         print '-e- __main__.modules_data error'
     else:
-        __main__.modules_data.append([module_name, module_group, module_modes, module_help])
+        __main__.modules_data.append(
+            [module_name,
+             module_group,
+             module_modes,
+             module_help]
+            )
     return
 
 def load_config():

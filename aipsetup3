@@ -18,136 +18,10 @@ def show_help():
 
    commands:
 
-     building tools:
-
-         ini|init [-d dir_name] [src_file]
-
-               Initiate building dir.
-
-               Default dir_name == 'tmp'.
-
-               If src_file is given and is plain file, it's copied to
-               00.TARBALL.
-
-               If src_file is given and is directory, it's contents
-               copied to 01.SOURCE.
-
-          lb|listbuilders [MASK]
-
-               List available builders
-
-          eb|editbuilder NAME
-
-               Edit builder
-
-          cb|copybuilder NAME NAME2
-
-               Copy builder NAME to builder NAME2.
-
-          ub|usebuilder NAME
-
-               Copy builder to current dir
-
-         pks|pksums
-
-               create sha512 sums for current dir
-
-          lf|lnfix
-
-               fix symlinks in current dir
-
-          pk|pack
-
-               pack current dir
-
-          bd|build templete
-
-               file [file2] ... [filex]
-
-     aipsetup system tools:
-
-         csc|cscript
-
-               copy builder script to current dir (for maintainers)
-
-     system tools:
-
-          ls|list [-b BASEDIR] ['filemask']
-
-               list installed packages
-
-         lsc|listc [-b BASEDIR] ['filemask']
-
-               list files installed by packages
-
-         chk|pkcheck TARGET
-
-               check pkg sums
-
-          rm|remove [-b BASEDIR] ['filemask']
-
-               remove named package
-
-          in|install [-b BASEDIR] FILEMASK
-
-               install named package files
-
-          fn|findcom FILENAME
-
-               find package by FILENAME
-
-          fd|finddep FILENAME PATH
-
-               look for files depending on FILENAME in PATH dir
-
-         ldd|lddsums PROGRAM
-
-               make sha512 sums for PROGRAM ldd output
-
-            |bz2xzsys [-b BASEDIR]
-
-               transfer existing bzip2 aipsetup system to xz
-
-            |bz2xzpkg FILEMASK
-
-               transfer existing bzip2 aipsetup packages to xz
-
-     misc tools:
-
-          ex|extract FILE
-
-               extract to current dir
-
-       np|nameparse
-
-               parse package filename
-
-       lu|listuniq
-
-               parse package filenames and show all uniq names
-
-      pvc|pkgnamevcomp
-
-               find newest or oldest package from given by name (see
-               --help)
-
-      llu|pkgnamelstlat
-
-               list all latest packages of given
-
-      slp|slashescape
-
-               escapes all slashes in parameter or stdin and throvs on
-               stdout
-
-      sfi|softfix
-
-               fixes soft links, remowing '`pwd`' from walue
-
-     cat0|catzero
-
-               reads stdin and writes stdout untill first NULL in
-               stdin
+      source     Source actions
+      build      Building actions
+      server     UHT server related actions
+      pkgindex   Package index actions
 
 
      --help      see this help
@@ -326,6 +200,11 @@ else:
 
 
 
+
+        elif args[0] == 'client':
+            import aipsetup.client
+
+            ret = aipsetup.client.router(optilist, args[1:], config)
 
         elif args[0] == 'pkgindex':
             import aipsetup.pkgindex

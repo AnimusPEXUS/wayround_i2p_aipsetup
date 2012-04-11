@@ -54,10 +54,7 @@ def router(opts, args, config):
 
         elif args[0] == 'index_uht':
 
-            for i in ['source', 'repository']:
-                index_directory(
-                    config[i], config['%(n)s_index' % {'n': i}])
-
+            index_uht(config)
 
         elif args[0] == 'start':
 
@@ -69,7 +66,20 @@ def router(opts, args, config):
 
     return ret
 
-def _index_directory(f, root_dir, root_dirl):
+def index_uht(config):
+    index_directory(config['source'],
+                    config['source_index'],
+                    ['.tar.gz', '.tar.bz2', '.zip',
+                     '.7z', '.tgz', '.tar.xz', '.tar.lzma',
+                     '.tbz2'])
+    index_directory(config['repository'],
+                    config['repository_index'],
+                    ['.asp'])
+
+
+
+
+def _index_directory(f, root_dir, root_dirl, acceptable_endings=None):
 
     files = os.listdir(root_dir)
     files.sort()
@@ -86,23 +96,31 @@ def _index_directory(f, root_dir, root_dirl):
             continue
 
         if not each[0] == '.' and os.path.isdir(full_path):
-            _index_directory(f, full_path, root_dirl)
+            _index_directory(f, full_path, root_dirl, acceptable_endings)
 
         elif not each[0] == '.' and os.path.isfile(full_path):
+
+            if isinstance(acceptable_endings, list):
+
+                match_found = False
+
+                for i in acceptable_endings:
+                    if each.endswith(i):
+                        match_found = True
+                        break
+
+                if not match_found:
+                    continue
+
+
             p = full_path[root_dirl:]
             f.write('%(name)s\n' % {
                     'name': p
                     })
 
 
-def print_exception_info(e):
-
-    print "-e- EXCEPTION: %(type)s" % {'type': repr(e[0])}
-    print "        VALUE: %(val)s"  % {'val' : repr(e[1])}
-    print "    TRACEBACK:"
-    traceback.print_tb(e[2])
-
-def index_directory(dir_name, outputfilename='index.txt'):
+def index_directory(dir_name, outputfilename='index.txt',
+                    acceptable_endings=None):
 
     dir_name = os.path.abspath(dir_name)
     dir_namel = len(dir_name)
@@ -111,11 +129,19 @@ def index_directory(dir_name, outputfilename='index.txt'):
 
     f=open(outputfilename, 'w')
 
-    _index_directory(f, dir_name, dir_namel)
+    _index_directory(f, dir_name, dir_namel, acceptable_endings)
 
     f.close()
 
     return 0
+
+
+def print_exception_info(e):
+
+    print "-e- EXCEPTION: %(type)s" % {'type': repr(e[0])}
+    print "        VALUE: %(val)s"  % {'val' : repr(e[1])}
+    print "    TRACEBACK:"
+    traceback.print_tb(e[2])
 
 
 class Index:
@@ -208,9 +234,9 @@ class Index:
 
         if action == 'reindex':
             self.index_indexing = True
-            for i in ['source', 'repository']:
-                index_directory(
-                    self.config[i], self.config['%(n)s_index' % {'n': i}])
+
+            index_uht(self.config)
+
             self.reload_indexes()
             self.index_indexing = False
 
@@ -242,15 +268,16 @@ class Index:
 
     index.exposed = True
 
-    def search(self, what=None, type=None, format=None, sensitive=None, value=None):
+    def search(self, what=None, how=None, view=None,
+               sensitive=None, value=None):
 
         self.check_index()
 
         out = ''
 
         if not what in ['info', 'source', 'repository'] \
-                or not type in ['regexp', 'begins', 'exac', 'contains'] \
-                or not format in ['html', 'list'] \
+                or not how in ['regexp', 'begins', 'exac', 'contains'] \
+                or not view in ['html', 'list'] \
                 or not sensitive in [None, 'on'] \
                 or not isinstance(value, basestring):
             raise cherrypy.HTTPError(400, "Wrong parameter")
@@ -291,13 +318,13 @@ class Index:
                         ):
                         continue
 
-                    if type == 'regexp' and re.match(vw, bw):
+                    if how == 'regexp' and re.match(vw, bw):
                         lst.append(i)
-                    elif type == 'begins' and bw.startswith(vw):
+                    elif how == 'begins' and bw.startswith(vw):
                         lst.append(i)
-                    elif type == 'exac' and bw == vw:
+                    elif how == 'exac' and bw == vw:
                         lst.append(i)
-                    elif type == 'contains' and bw.find(vw) != -1:
+                    elif how == 'contains' and bw.find(vw) != -1:
                         lst.append(i)
 
             elif what in ['info']:
@@ -312,16 +339,16 @@ class Index:
                     else:
                         iw = i.lower()
 
-                    if type == 'regexp' and re.match(vw, iw):
+                    if how == 'regexp' and re.match(vw, iw):
                         lst.append(i)
-                    elif type == 'begins' and iw.startswith(vw):
+                    elif how == 'begins' and iw.startswith(vw):
                         lst.append(i)
-                    elif type == 'exac' and iw == vw:
+                    elif how == 'exac' and iw == vw:
                         lst.append(i)
-                    elif type == 'contains' and iw.find(vw) != -1:
+                    elif how == 'contains' and iw.find(vw) != -1:
                         lst.append(i)
 
-            if format == 'html':
+            if view == 'html':
                 search_html = self.templates['search'].render(
                     what = what,
                     results = lst
@@ -331,9 +358,9 @@ class Index:
                     title = 'UHT Server',
                     body = search_html
                     )
-            elif format == 'list':
+            elif view == 'list':
                 cherrypy.response.headers['Content-Type'] = 'text/plain'
-                out = '\n'.join(lst)
+                out = '%(list)s\n' % {'list': '\n'.join(lst)}
 
 
         return out
