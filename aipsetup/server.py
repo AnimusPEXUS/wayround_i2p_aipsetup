@@ -135,15 +135,6 @@ def index_directory(dir_name, outputfilename='index.txt',
 
     return 0
 
-
-def print_exception_info(e):
-
-    print "-e- EXCEPTION: %(type)s" % {'type': repr(e[0])}
-    print "        VALUE: %(val)s"  % {'val' : repr(e[1])}
-    print "    TRACEBACK:"
-    traceback.print_tb(e[2])
-
-
 class Index:
 
     def __init__(self, config, templates):
@@ -499,7 +490,7 @@ def start_host(config=None):
                 )
         except:
             e = sys.exc_info()
-            print_exception_info(e)
+            aipsetup.utils.print_exception_info(e)
             print "-e- Error reading template %(name)s" % {
                 'name': os.path.join(
                     config['uhtroot'],

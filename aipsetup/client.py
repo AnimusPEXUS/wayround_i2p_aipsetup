@@ -1,35 +1,41 @@
 import urllib
+import sys
+
+
+import pkgindex
+import utils
+
 
 def print_help():
     print """\
 aipsetup client command
 
-   search p|r|e|i|c|s r|l s|r|i NAME
+   search [-s] [-h=b|r|e|i|c] [-w=r|l] [-a=s|r|i] [NAME]
 
       List source packages containing on remote or local UHT server
 
-      First parameter:
+      -s - NAME is case sensitive
 
-      p - NAME is prefix
+      -h values:
+
+      b - package name begins with NAME
       r - NAME is regular expression
       e - NAME is exact name
-      i - assume NAME tobe package info name and get re for it
+      i - assume NAME tobe package info name and get RE for it
       c - NAME is package name substring
-      s - NAME is case sensitive
 
-      Second parameter:
+      -w values: 'r' or 'l' - is for remote or local access
 
-      'r' or 'l' - is for remote or local access
+      -a values: 's', 'r' or 'i' - is for source, repository or info
+                 access
 
-      Third parameter:
-      's', 'r' or 'i' - is for source, repository or info access
 
    get [-p] [-r] [-e] [-c] [-s] [-d[=DIRNAME]]
        [-u[=(T|YES|TRUE|ON)|(F|NO|FALSE|OFF)]] r|l s|r|i NAME
 
       Get files from remote UHT server
 
-      -p - same as in `search'
+      -b - same as in `search'
       -r - ...
       -e - ...
       -c - ...
@@ -56,17 +62,93 @@ def router(opts, args, config):
 
         elif args[0] == 'search':
 
-            if len(args) != 4:
-                print "-e- must be axactly 4 parameters"
+            if len(args) != 2:
+                print "-e- must be axactly 1 parameter"
 
             else:
 
-                where = args[1]
-                what = args[2]
-                value = args[3]
-                how = 'byinfo'
+                p_errors = False
 
-                search(config,)
+                how = 'i'
+
+                for i in opts:
+                    if i[0] == '-h':
+                        how = i[1]
+
+                where = 'r'
+
+                for i in opts:
+                    if i[0] == '-w':
+                        where = i[1]
+
+                what = 'r'
+
+                for i in opts:
+                    if i[0] == '-a':
+                        what = i[1]
+
+
+                sensitive = False
+
+                for i in opts:
+                    if i[0] == '-s':
+                        sensitive = True
+
+
+                if not how in 'breic':
+                    p_errors = True
+
+                if not where in 'rl':
+                    p_errors = True
+
+                if not what in 'sri':
+                    p_errors = True
+
+                value = args[1]
+
+
+                name_errs = False
+                if how == 'i':
+                    r = pkgindex.PackageDatabase(config)
+                    idic = r.package_info_record_to_dict(name=value)
+                    del(r)
+
+                    if idic == None:
+                        print "-e- Can't find info for %(name)s" % {
+                            'name': value
+                            }
+                        name_errs = True
+                    else:
+                        print "-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
+                            're': idic['regexp'],
+                            'name': value
+                            }
+
+                        value = idic['regexp']
+                        how = 'r'
+
+                if not name_errs:
+
+                    hows = {'b': 'begins', 'r': 'regexp',
+                            'e': 'exac',   'c': 'contains'}
+
+                    whats = {'s': 'source',
+                             'r': 'repository',
+                             'i': 'info'}
+
+                    wheres = {'r': 'remote',
+                              'l': 'local'}
+
+                    how = hows[how]
+                    what = whats[what]
+                    where = wheres[where]
+
+                    result = search(config, what=what, how=how,
+                                    where=where, sensitive=sensitive,
+                                    value=value
+                                    )
+
+
 
         else:
             print "-e- wrong command"
@@ -75,7 +157,7 @@ def router(opts, args, config):
     return ret
 
 
-def client(config, what='repository', how='begins',
+def search(config, what='repository', how='begins', where='remote',
            sensitive=True, value=''):
 
     ret = 0
@@ -84,9 +166,16 @@ def client(config, what='repository', how='begins',
             or not how in ['regexp', 'begins', 'exac', 'contains'] \
             or not isinstance(sensitive, bool) \
             or not isinstance(value, basestring):
+        print "-e- Wrong parameters"
         ret = 1
 
     else:
+
+        for i in ['proto', 'host', 'port', 'prefix']:
+            exec("%(i)s = config['client_%(where)s_%(i)s']" % {
+                    'where': where,
+                    'i': i
+                    } )
 
         semi = ''
         if port != None and port != '':
@@ -96,24 +185,39 @@ def client(config, what='repository', how='begins',
         if sensitive:
             sens = '&sensitive=on'
 
-        request = ("%(proto)s://%(host)s%(semi)s%(port)s%(path)search?"\
+        request = ("%(proto)s://%(host)s%(semi)s%(port)s%(path)ssearch?"\
                        + "what=%(what)s&how=%(how)s&"\
                        + "view=list%(sensitive)s&"\
                        + "value=%(value)s") % {
-            'proto'     : config['client_proto'],
-            'host'      : config['client_host'],
+            'proto'     : proto,
+            'host'      : host,
             'semi'      : semi,
-            'port'      : str(port),
-            'path'      : config['client_prefix'],
+            'port'      : port,
+            'path'      : prefix,
+            'what'      : what,
+            'how'       : how,
             'sensitive' : sens,
             'value'     : urllib.quote(unicode(value))
             }
 
-        print request
+        print "-i- Requesting: %(req)s" % {
+            'req': request
+            }
+
+        try:
+            req_res = urllib.urlopen(request)
+        except IOError:
+            print "-e- Connection Refused"
+        except:
+            e = sys.exc_info()
+            utils.print_exception_info(e)
+        else:
+            code = req_res.getcode()
+            if code != 200:
+                print "-e- Response code: %(n)d" % {
+                    'n': code
+                    }
+            else:
+                print req_res.read()
 
     return ret
-
-def search(config, what='repository', how='begins',
-           sensitive=True, value=''):
-
-    client(config, what, how, sensitive, value)

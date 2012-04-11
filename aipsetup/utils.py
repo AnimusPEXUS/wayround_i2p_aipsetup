@@ -45,10 +45,15 @@ _UHT/pkgindex.sqlite',
     'server_prefix'      : '/',
     'server_password'    : '123456789',
 
-    'client_proto'       : 'http',
-    'client_host'        : '127.0.0.1',
-    'client_port'        : '8005',
-    'client_prefix'      : '/'
+    'client_local_proto'       : 'http',
+    'client_local_host'        : '127.0.0.1',
+    'client_local_port'        : '8005',
+    'client_local_prefix'      : '/',
+
+    'client_remote_proto'      : 'http',
+    'client_remote_host'       : '127.0.0.1',
+    'client_remote_port'       : '8005',
+    'client_remote_prefix'     : '/'
     }
 
 
@@ -178,3 +183,11 @@ def pathRemoveDblSlash(dir_str):
 def pkg_name_parse(name='aaa-1.1.1.1.tar.gz'):
     result = re.match('([0-9A-Za-z_\ -]*)-?(.*)(tar\.gz|tar\.bz2|tar\.xz|tgz|tbz2|zip|7z|tar)$', name)
     print repr(result.groups())
+
+def print_exception_info(e):
+
+    print "-e- EXCEPTION: %(type)s" % {'type': repr(e[0])}
+    print "        VALUE: %(val)s"  % {'val' : repr(e[1])}
+    print "    TRACEBACK:"
+    traceback.print_tb(e[2])
+
