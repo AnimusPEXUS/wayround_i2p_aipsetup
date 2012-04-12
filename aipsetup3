@@ -211,10 +211,18 @@ else:
 
             ret = aipsetup.pkgindex.router(optilist, args[1:], config)
 
+        elif args[0] == 'pkginfo':
+            import aipsetup.pkginfo
+
+            ret = aipsetup.pkginfo.router(optilist, args[1:], config)
+
         elif args[0] == 'server':
             import aipsetup.server
 
             ret = aipsetup.server.router(optilist, args[1:], config)
+
+        else:
+            print "-e- wrong command. try --help"
 
 
 

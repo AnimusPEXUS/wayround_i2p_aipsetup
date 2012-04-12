@@ -276,11 +276,13 @@ class Index:
 
             lst = []
 
+            re_flags = re.UNICODE
             vw = ''
             if sensitive == 'on':
                 vw = value
             else:
                 vw = value.lower()
+                re_flags = re.UNICODE | re.IGNORECASE
 
 
             if what in ['source', 'repository']:
@@ -309,7 +311,11 @@ class Index:
                         ):
                         continue
 
-                    if how == 'regexp' and re.match(vw, bw):
+                    if how == 'regexp' and re.match(value, base, re_flags) != None:
+                        print "-iii- RE : `%(n1)s' `%(n2)s'" % {
+                            'n1': value,
+                            'n2': base
+                            }
                         lst.append(i)
                     elif how == 'begins' and bw.startswith(vw):
                         lst.append(i)
@@ -330,7 +336,7 @@ class Index:
                     else:
                         iw = i.lower()
 
-                    if how == 'regexp' and re.match(vw, iw):
+                    if how == 'regexp' and re.match(value, i, re_flags) != None:
                         lst.append(i)
                     elif how == 'begins' and iw.startswith(vw):
                         lst.append(i)

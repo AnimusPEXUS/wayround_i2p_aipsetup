@@ -4,6 +4,7 @@
 import os.path
 import os
 import copy
+import glob
 
 import lxml
 import lxml.etree
@@ -88,6 +89,38 @@ def _find_list(tree, tag, field):
         if isinstance(z, basestring):
             y.append(z)
     return y
+
+def print_help():
+    print """\
+aipsetup pkginfo command
+
+   mass_info_fix  applayes fixes to info files
+
+"""
+
+
+def router(opts, args, config):
+
+    ret = 0
+
+    if len(args) == 0:
+        print "-e- not enough parameters"
+        ret = 1
+    else:
+
+        if args[0] == 'help':
+            print_help()
+            ret = 0
+
+        elif args[0] == 'mass_info_fix':
+
+            mass_info_fix(config)
+
+        else:
+            print "-e- wrong command"
+            ret = 1
+
+    return ret
 
 def is_dicts_equal(d1, d2):
 
@@ -175,13 +208,13 @@ def write_to_file(name, struct):
 
     txt = pkg_info_file_template.render(
         pkg_name_type = struct['pkg_name_type'],
-        regexp = struct['regexp'],
-        description = struct['description'],
-        homepage = struct['homepage'],
-        sources = struct['sources'],
-        mirrors = struct['mirrors'],
-        tags = struct['tags'],
-        builder = struct['builder']
+        regexp        = struct['regexp'],
+        description   = struct['description'],
+        homepage      = struct['homepage'],
+        sources       = struct['sources'],
+        mirrors       = struct['mirrors'],
+        tags          = struct['tags'],
+        builder       = struct['builder']
         )
 
     try:
@@ -192,3 +225,29 @@ def write_to_file(name, struct):
         ret = 1
 
     return ret
+
+def info_fixes(dicti, name):
+
+    if dicti['pkg_name_type'] == 'standard':
+        dicti['regexp'] = r'%(name)s-(?P<version>(\d*\.?)+)(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma)' % {'name': name}
+
+def mass_info_fix(config):
+
+    lst = glob.glob(os.path.join(config['info'], '*.xml'))
+
+
+    for i in lst:
+
+        name = os.path.basename(i)[:-4]
+
+        dicti = read_from_file(i)
+
+        info_fixes(dicti, name)
+
+        write_to_file(i, dicti)
+
+    print "-i- processed %(n)d files" % {
+        'n': len(lst)
+        }
+
+    return

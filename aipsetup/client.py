@@ -10,11 +10,11 @@ def print_help():
     print """\
 aipsetup client command
 
-   search [-s] [-h=b|r|e|i|c] [-w=r|l] [-a=s|r|i] [NAME]
+   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [NAME]
 
-      List source packages containing on remote or local UHT server
+      Search contents of remote or local UHT server
 
-      -s - NAME is case sensitive
+      -i - NAME is case insensitive
 
       -h values:
 
@@ -30,22 +30,139 @@ aipsetup client command
                  access
 
 
-   get [-p] [-r] [-e] [-c] [-s] [-d[=DIRNAME]]
-       [-u[=(T|YES|TRUE|ON)|(F|NO|FALSE|OFF)]] r|l s|r|i NAME
+   get [-o[=DIRNAME]] [-s] [-h=b|r|e|i|c] [-w=r|l] [-a=s|r|i] [NAME]
 
-      Get files from remote UHT server
+      Get files from remote or local UHT server
 
-      -b - same as in `search'
-      -r - ...
-      -e - ...
-      -c - ...
-      -s - ...
+      All options and parameters same as in search, plus -d option
 
-      -u - Place requested files into local UHT server
-      -d - Place requested files in pointed (by default current)
+      -o - Place requested files in pointed (by default current)
            directory
 
 """
+
+def workout_search_params(opts, args, config):
+
+    what = ''
+    how = ''
+    where = ''
+    sensitive = ''
+    value = ''
+    n_errors = False
+    p_errors = False
+
+    if len(args) != 2:
+        print "-e- must be axactly 1 parameter"
+        p_errors = True
+    else:
+
+        how = 'i'
+
+        for i in opts:
+            if i[0] == '--how':
+                how = i[1]
+
+        where = 'r'
+
+        for i in opts:
+            if i[0] == '--where':
+                where = i[1]
+
+        what = 'r'
+
+        for i in opts:
+            if i[0] == '--what':
+                what = i[1]
+
+
+        sensitive = True
+
+        for i in opts:
+            if i[0] == '-i':
+                sensitive = False
+
+
+        if not how in 'breic':
+            print "-e- `how' error"
+            p_errors = True
+
+        if not where in 'rl':
+            print "-e- `where' error"
+            p_errors = True
+
+        if not what in 'sri':
+            print "-e- `what' error"
+            p_errors = True
+
+
+        value = args[1]
+
+        if not p_errors:
+
+            n_errors = False
+
+            if how == 'i':
+                r = pkgindex.PackageDatabase(config)
+                idic = r.package_info_record_to_dict(name=value)
+                del(r)
+
+                if idic == None:
+                    print "-e- Can't find info for %(name)s" % {
+                        'name': value
+                        }
+                    n_errors = True
+
+                else:
+
+                    if what == 's':
+                        regexp = idic['regexp']
+                        print "-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
+                            're': regexp,
+                            'name': value
+                            }
+
+                        value = regexp
+                        how = 'r'
+                        sensitive = True
+
+                    elif what == 'r':
+                        regexp = r"%(name)s-(?P<version>.*?)-(?P<date>[\d]*).asp" % {
+                            'name': value
+                            }
+                        print "-i- Using regexp `%(re)s' for pkg name `%(name)s'" % {
+                            'name': value,
+                            're': regexp
+                            }
+
+                        value = regexp
+                        how = 'r'
+                        sensitive = True
+
+                    elif what == 'i':
+                        print "-e- Invalid parameters combination"
+                        p_errors = True
+
+                    else:
+                        raise ValueError
+
+            if not n_errors and not p_errors:
+
+                hows = {'b': 'begins', 'r': 'regexp',
+                        'e': 'exac',   'c': 'contains'}
+
+                whats = {'s': 'source',
+                         'r': 'repository',
+                         'i': 'info'}
+
+                wheres = {'r': 'remote',
+                          'l': 'local'}
+
+                how = hows[how]
+                what = whats[what]
+                where = wheres[where]
+
+    return what, how, where, sensitive, value, p_errors, n_errors
+
 
 def router(opts, args, config):
 
@@ -62,93 +179,34 @@ def router(opts, args, config):
 
         elif args[0] == 'search':
 
-            if len(args) != 2:
-                print "-e- must be axactly 1 parameter"
+            what, how, where, sensitive, value, p_errors, n_errors = \
+                workout_search_params(opts, args, config)
 
-            else:
+            if not p_errors and not n_errors:
 
-                p_errors = False
+                result = search(config, what=what, how=how,
+                                where=where, sensitive=sensitive,
+                                value=value
+                                )
 
-                how = 'i'
+        elif args[0] == 'get':
 
-                for i in opts:
-                    if i[0] == '-h':
-                        how = i[1]
+            what, how, where, sensitive, value, p_errors, n_errors = \
+                workout_search_params(opts, args, config)
 
-                where = 'r'
+            output = None
 
-                for i in opts:
-                    if i[0] == '-w':
-                        where = i[1]
-
-                what = 'r'
-
-                for i in opts:
-                    if i[0] == '-a':
-                        what = i[1]
+            for i in opts:
+                if i[0] == '-o':
+                    output = i[1]
 
 
-                sensitive = False
+            if not p_errors and not n_errors:
 
-                for i in opts:
-                    if i[0] == '-s':
-                        sensitive = True
-
-
-                if not how in 'breic':
-                    p_errors = True
-
-                if not where in 'rl':
-                    p_errors = True
-
-                if not what in 'sri':
-                    p_errors = True
-
-                value = args[1]
-
-
-                name_errs = False
-                if how == 'i':
-                    r = pkgindex.PackageDatabase(config)
-                    idic = r.package_info_record_to_dict(name=value)
-                    del(r)
-
-                    if idic == None:
-                        print "-e- Can't find info for %(name)s" % {
-                            'name': value
-                            }
-                        name_errs = True
-                    else:
-                        print "-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
-                            're': idic['regexp'],
-                            'name': value
-                            }
-
-                        value = idic['regexp']
-                        how = 'r'
-
-                if not name_errs:
-
-                    hows = {'b': 'begins', 'r': 'regexp',
-                            'e': 'exac',   'c': 'contains'}
-
-                    whats = {'s': 'source',
-                             'r': 'repository',
-                             'i': 'info'}
-
-                    wheres = {'r': 'remote',
-                              'l': 'local'}
-
-                    how = hows[how]
-                    what = whats[what]
-                    where = wheres[where]
-
-                    result = search(config, what=what, how=how,
-                                    where=where, sensitive=sensitive,
-                                    value=value
-                                    )
-
-
+                result = get(config, output=output, what=what, how=how,
+                             where=where, sensitive=sensitive,
+                             value=value
+                             )
 
         else:
             print "-e- wrong command"
@@ -157,7 +215,71 @@ def router(opts, args, config):
     return ret
 
 
+def get(config, output=None, what='repository', how='begins',
+        where='remote', sensitive=True, value=''):
+
+    ret = 0
+
+    lst = client(config, what, how, where, sensitive, value)
+
+    if not isinstance(lst, list):
+        ret = lst
+
+    else:
+
+        for i in ['proto', 'host', 'port', 'prefix']:
+            exec("%(i)s = config['client_%(where)s_%(i)s']" % {
+                    'where': where,
+                    'i': i
+                    } )
+
+        semi = ''
+        if port != None and port != '':
+            semi = ':'
+
+        path = 'files_%(what)s' % {'what': what}
+
+        for i in lst:
+
+            name = ''
+            if what == 'info':
+                name = '/%(v)s.xml' % {
+                    'v': value
+                    }
+            else:
+                name = i
+
+            # name = urllib.quote(name)
+
+
+            request = "%(proto)s://%(host)s%(semi)s%(port)s%(prefix)s%(path)s%(name)s" % {
+                'proto'     : proto,
+                'host'      : host,
+                'semi'      : semi,
+                'port'      : port,
+                'prefix'    : prefix,
+                'path'      : path,
+                'name'      : name
+                }
+
+            print "-i- Requesting: %(req)s" % {
+                'req': request
+                }
+
+
 def search(config, what='repository', how='begins', where='remote',
+           sensitive=True, value=''):
+
+    lst = client(config, what, how, where,  sensitive, value)
+
+    for i in lst:
+        print i
+
+    print "count: %(n)s" % {
+        'n': len(lst)
+        }
+
+def client(config, what='repository', how='begins', where='remote',
            sensitive=True, value=''):
 
     ret = 0
@@ -185,7 +307,7 @@ def search(config, what='repository', how='begins', where='remote',
         if sensitive:
             sens = '&sensitive=on'
 
-        request = ("%(proto)s://%(host)s%(semi)s%(port)s%(path)ssearch?"\
+        request = ("%(proto)s://%(host)s%(semi)s%(port)s%(prefix)ssearch?"\
                        + "what=%(what)s&how=%(how)s&"\
                        + "view=list%(sensitive)s&"\
                        + "value=%(value)s") % {
@@ -193,7 +315,7 @@ def search(config, what='repository', how='begins', where='remote',
             'host'      : host,
             'semi'      : semi,
             'port'      : port,
-            'path'      : prefix,
+            'prefix'    : prefix,
             'what'      : what,
             'how'       : how,
             'sensitive' : sens,
@@ -218,6 +340,12 @@ def search(config, what='repository', how='begins', where='remote',
                     'n': code
                     }
             else:
-                print req_res.read()
+                lst = req_res.readlines()
+                lst2 = []
+                for i in lst:
+                    s = i.strip()
+                    if s != '':
+                        lst2.append(s)
+                ret = lst2
 
     return ret
