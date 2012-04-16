@@ -1,6 +1,7 @@
-import urllib
+import os
+import os.path
 import sys
-
+import urllib
 
 import pkgindex
 import utils
@@ -10,8 +11,7 @@ def print_help():
     print """\
 aipsetup client command
 
-   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i]
-          [--ver=[ANY|MAX|MIN|ver]] [--ver-limit=VER] [NAME]
+   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [NAME]
 
       Search contents of remote or local UHT server
 
@@ -30,16 +30,11 @@ aipsetup client command
       --what  values: 's', 'r' or 'i' - is for source, repository or
                       info access
 
-      --ver   values:
-
-          MIN - filter minimal version
-
-
-   get [-o[=DIRNAME]] [-s] [-h=b|r|e|i|c] [-w=r|l] [-a=s|r|i] [NAME]
+   get [-o[=DIRNAME]] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [NAME]
 
       Get files from remote or local UHT server
 
-      All options and parameters same as in search, plus -d option
+      All options and parameters same as in search, plus -o option
 
       -o - Place requested files in pointed (by default current)
            directory
@@ -79,18 +74,18 @@ def workout_search_params(opts, args, config):
             if i[0] == '--what':
                 what = i[1]
 
-        ver = 'ANY'
+        # ver = 'ANY'
 
-        for i in opts:
-            if i[0] == '--ver':
-                ver = i[1]
+        # for i in opts:
+        #     if i[0] == '--ver':
+        #         ver = i[1]
 
 
-        ver_limit = None
+        # ver_limit = None
 
-        for i in opts:
-            if i[0] == '--ver-limit':
-                ver_limit = i[1]
+        # for i in opts:
+        #     if i[0] == '--ver-limit':
+        #         ver_limit = i[1]
 
 
         sensitive = True
@@ -112,9 +107,9 @@ def workout_search_params(opts, args, config):
             print "-e- `what' error"
             p_errors = True
 
-        if not ver in ['ANY', 'MAX', 'MIN']:
-            print "-e- `ver' error"
-            p_errors = True
+        # if not ver in ['ANY', 'MAX', 'MIN']:
+        #     print "-e- `ver' error"
+        #     p_errors = True
 
 
         value = args[1]
@@ -188,8 +183,8 @@ def workout_search_params(opts, args, config):
         how = how,
         where = where,
         sensitive = sensitive,
-        ver = ver,
-        ver_limit = ver_limit,
+        # ver = ver,
+        # ver_limit = ver_limit,
         value=value,
         p_errors=p_errors,
         n_errors=n_errors
@@ -213,15 +208,13 @@ def router(opts, args, config):
 
             wsp = workout_search_params(opts, args, config)
 
-            if not p_errors and not n_errors:
+            if not wsp['p_errors'] and not wsp['n_errors']:
 
                 result = search(config,
                                 wsp['what'],
                                 wsp['how'],
                                 wsp['where'],
                                 wsp['sensitive'],
-                                wsp['ver'],
-                                wsp['ver_limit'],
                                 wsp['value']
                                 )
 
@@ -236,7 +229,7 @@ def router(opts, args, config):
                     output = i[1]
 
 
-            if not p_errors and not n_errors:
+            if not wsp['p_errors'] and not wsp['n_errors']:
 
                 result = get(config,
                              output,
@@ -244,8 +237,6 @@ def router(opts, args, config):
                              wsp['how'],
                              wsp['where'],
                              wsp['sensitive'],
-                             wsp['ver'],
-                             wsp['ver_limit'],
                              wsp['value']
                              )
 
@@ -262,55 +253,87 @@ def get(config, output=None, what='repository', how='begins',
 
     ret = 0
 
-    lst = client(config, what, how, where, sensitive, value)
+    if not output == None:
+        if os.path.exists(output) and not os.path.isdir(output):
+            print "-e- Destination file exists and is not dir"
+            ret = 1
 
-    if not isinstance(lst, list):
-        ret = lst
+        elif os.path.exists(output) and os.path.isdir(output):
+            print "-i- using %(dir)s for output" % {
+                'dir': output
+                }
+        elif not os.path.exists(output):
+            print "-i- creating %(dir)s" % {
+                'dir': output
+                }
+            try:
+                os.path.makedirs(output)
+            except:
+                print "-e- Can't create output dir"
+                ret = 2
 
+    if ret != 0:
+        pass
     else:
 
-        for i in ['proto', 'host', 'port', 'prefix']:
-            exec("%(i)s = config['client_%(where)s_%(i)s']" % {
-                    'where': where,
-                    'i': i
-                    } )
+        lst = client(config, what, how, where, sensitive, value)
 
-        semi = ''
-        if port != None and port != '':
-            semi = ':'
+        if not isinstance(lst, list):
+            ret = lst
 
-        path = 'files_%(what)s' % {'what': what}
+        else:
 
-        for i in lst:
+            for i in ['proto', 'host', 'port', 'prefix']:
+                exec("%(i)s = config['client_%(where)s_%(i)s']" % {
+                        'where': where,
+                        'i': i
+                        } )
 
-            name = ''
-            if what == 'info':
-                name = '/%(v)s.xml' % {
-                    'v': value
+            semi = ''
+            if port != None and port != '':
+                semi = ':'
+
+            path = 'files_%(what)s' % {'what': what}
+
+            for i in lst:
+
+                name = ''
+                if what == 'info':
+                    name = '/%(v)s.xml' % {
+                        'v': value
+                        }
+                else:
+                    name = i
+
+                name = urllib.quote(name)
+
+                request = "%(proto)s://%(host)s%(semi)s%(port)s%(prefix)s%(path)s%(name)s" % {
+                    'proto'     : proto,
+                    'host'      : host,
+                    'semi'      : semi,
+                    'port'      : port,
+                    'prefix'    : prefix,
+                    'path'      : path,
+                    'name'      : name
                     }
-            else:
-                name = i
 
-            # name = urllib.quote(name)
+                print "-i- Requesting: %(req)s" % {
+                    'req': request
+                    }
 
+                bn = os.path.basename(i)
 
-            request = "%(proto)s://%(host)s%(semi)s%(port)s%(prefix)s%(path)s%(name)s" % {
-                'proto'     : proto,
-                'host'      : host,
-                'semi'      : semi,
-                'port'      : port,
-                'prefix'    : prefix,
-                'path'      : path,
-                'name'      : name
-                }
+                os.system("wget -O '%(bn)s' '%(url)s'" % {
+                        'bn': bn,
+                        'url': request
+                        })
 
-            print "-i- Requesting: %(req)s" % {
-                'req': request
-                }
+    return ret
+
 
 
 def search(config, what='repository', how='begins', where='remote',
-           sensitive=True, ver='ANY', ver_limit=None, value=''):
+           sensitive=True, value=''):
 
     lst = client(config, what, how, where,  sensitive, value)
 
@@ -322,7 +345,7 @@ def search(config, what='repository', how='begins', where='remote',
         }
 
 def client(config, what='repository', how='begins', where='remote',
-           sensitive=True, ver='ANY', ver_limit=None, value=''):
+           sensitive=True, value=''):
 
     ret = 0
 

@@ -11,16 +11,15 @@ import aipsetup.utils
 import aipsetup.getopt2
 
 def show_help():
-    print \
-"""
+    print """\
    usage: %(basename)s [command] [command_parameters]
-
 
    commands:
 
       source     Source actions
       build      Building actions
       server     UHT server related actions
+      client     Download actions
       pkgindex   Package index actions
 
 
@@ -201,10 +200,10 @@ else:
 
 
 
-        elif args[0] == 'name':
-            import aipsetup.name
+        # elif args[0] == 'name':
+        #     import aipsetup.name
 
-            ret = aipsetup.name.router(optilist, args[1:], config)
+        #     ret = aipsetup.name.router(optilist, args[1:], config)
 
         elif args[0] == 'client':
             import aipsetup.client

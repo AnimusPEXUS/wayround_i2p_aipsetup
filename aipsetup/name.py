@@ -1,8 +1,24 @@
 
+
 import os.path
 import re
 import sys
 
+
+class RegexpsError(Exception):
+    pass
+
+
+NAME_REGEXPS_ORDER = ['standard_with_date',
+                      'standard',
+                      'underscored_with_date',
+                      'underscored',
+                      'standard_with_letter_after_version',
+                      'standard_with_status',
+                      'underscored_with_status',
+                      'version_right_after_name',
+                      'version_right_after_name_with_status'
+                      ]
 
 NAME_REGEXPS = {
     'standard': \
@@ -11,10 +27,10 @@ NAME_REGEXPS = {
     'standard_with_date': \
         r'%(standard_name)s-%(standard_version)s-%(date)s%(standard_extensions)s',
 
-    'standard_underscores': \
+    'underscored': \
         r'%(standard_name)s_%(underscored_version)s%(standard_extensions)s',
 
-    'standard_underscores_with_date': \
+    'underscored_with_date': \
         r'%(standard_name)s_%(underscored_version)s_%(date)%(standard_extensions)s',
 
     'standard_with_letter_after_version': \
@@ -23,7 +39,7 @@ NAME_REGEXPS = {
     'standard_with_status': \
         r'%(standard_name)s-%(standard_version)s%(standard_statuses)s%(standard_extensions)s',
 
-    'standard_underscores_with_status': \
+    'underscored_with_status': \
         r'%(standard_name)s_%(underscored_version)s%(underscored_statuses)s%(standard_extensions)s',
 
     'version_right_after_name': \
@@ -34,18 +50,32 @@ NAME_REGEXPS = {
 
     }
 
-for i in NAME_REGEXPS:
 
+for i in NAME_REGEXPS:
     NAME_REGEXPS[i] = NAME_REGEXPS[i] % {
         'statuses'            : r'pre|alpha|beta|rc|test|source|src|dist|full',
         'standard_extensions' : r'(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2)',
-        'standard_name'       : r'(?P<name>.*?)',
+        'standard_name'       : r'(?P<name>.+?)',
         'standard_version'    : r'(?P<version>(\d+\.??)+)',
-        'standard_statuses'   : r'(?P<status>([-\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
+        'standard_statuses'   : r'(?P<statuses>([-\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
         'underscored_version' : r'(?P<version>(\d+_??)+)',
-        'underscored_statuses': r'(?P<status>([_\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
+        'underscored_statuses': r'(?P<statuses>([_\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
         'date'                : r'(?P<date>\d{8,16})'
         }
+
+# Ensure exception in case something missed
+for each in NAME_REGEXPS_ORDER:
+    try:
+        NAME_REGEXPS[each]
+    except:
+        raise RegexpsError
+
+for each in NAME_REGEXPS:
+    if not each in NAME_REGEXPS_ORDER:
+        raise RegexpsError
+
+
+
 
 def print_help():
     print """\
@@ -93,16 +123,7 @@ def test_expressions_on_sources(config):
 
         match_found = False
 
-        for j in ['standard_with_date',
-                  'standard',
-                  'standard_underscores_with_date',
-                  'standard_underscores',
-                  'standard_with_letter_after_version',
-                  'standard_with_status',
-                  'standard_underscores_with_status',
-                  'version_right_after_name',
-                  'version_right_after_name_with_status'
-                  ]:
+        for j in NAME_REGEXPS_ORDER:
 
             print "-i- Matching `%(re)s'" % {
                 're': j
@@ -146,13 +167,14 @@ def test_expressions_on_sources(config):
 def source_name_parse(name, nametype):
 
     d = {
-        'name': '',
-        'version': '',
-        'version_letter': '',
-        'extension': '',
-        'status': '',
-        'status_ver': '',
-        'patch': ''
+        'name': None,
+        'version': None,
+        'version_letter': None,
+        'version_letter_number': None,
+        'statuses': None,
+        'patch': None,
+        'date': None,
+        'extension': None,
         }
 
     r = re.match(NAME_REGEXPS[nametype], name)

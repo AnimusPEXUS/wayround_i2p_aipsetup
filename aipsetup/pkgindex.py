@@ -4,6 +4,7 @@ import os
 import os.path
 import sys
 import fnmatch
+import glob
 
 
 import sqlalchemy
@@ -16,59 +17,57 @@ def print_help():
     print """\
 aipsetup pkgindex command
 
-where command one of:
+Where command is one of:
 
    scan_repo_for_pkg_and_cat
 
-       scan repository and save it's categories and packages indexes
+       Scan repository and save it's categories and packages indexes
        to database
 
    find_repository_package_name_collisions_in_database
 
-       scan index for equal package names
+       Scan index for equal package names
 
    find_missing_pkg_info_records [-t] [-f]
 
-       search packages which have no corresponding info records
+       Search packages which have no corresponding info records
 
        -t creates non-existing .xml file templates in info dir
 
        -f forces rewrite existing .xml files
 
-   TODO: load_missing_pkg_info_records
-
-
-   find_outdated_pkg_info_records
-
-       finds pkg info records which differs to FS .xml files
-
-   update_outdated_pkg_info_records
-
-       loads pkg info records which differs to FS .xml files
-
-   backup_package_info_to_filesystem [-f] [MASK]
-
-       save package information from database to info directory.
-
-       existing files are skipped, unless -f is set
-
    load_package_info_from_filesystem [-a] [file names]
 
-       load missing package information from named files
+       Load missing package information from named files. If no files
+       listed - assume all files in info dir
 
        -a force load all records, not only missing.
 
+   find_outdated_pkg_info_records
+
+       Finds pkg info records which differs to FS .xml files
+
+   update_outdated_pkg_info_records
+
+       Loads pkg info records which differs to FS .xml files
+
+   backup_package_info_to_filesystem [-f] [MASK]
+
+       Save package information from database to info directory.
+
+       Existing files are skipped, unless -f is set
+
    delete_pkg_info_records MASK
 
-       if mask must be given or operation will fail
+       If mask must be given or operation will fail
 
    list_pkg_info_records [MASK]
 
-       default MASK is *
+       Default MASK is *
 
    print_pkg_info_record NAME
 
-       print package info record information
+       Print package info record information
 """
 
 def router(opts, args, config):
@@ -129,13 +128,19 @@ def router(opts, args, config):
             r.backup_package_info_to_filesystem(mask, f)
 
         if args[0] == 'load_package_info_from_filesystem':
+
+            file_list = args[1:]
+
             a = False
             for i in opts:
                 if i[0] == '-a':
                     a = True
 
+            if len(file_list) == 0:
+                file_list = glob.glob(os.path.join(config['info'], '*.xml'))
+
             r = PackageDatabase(config)
-            r.load_package_info_from_filesystem(args[1:], a)
+            r.load_package_info_from_filesystem(file_list, a)
 
 
         if args[0] == 'delete_pkg_info_records':
