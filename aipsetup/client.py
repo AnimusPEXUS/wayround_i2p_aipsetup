@@ -10,13 +10,14 @@ def print_help():
     print """\
 aipsetup client command
 
-   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [NAME]
+   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i]
+          [--ver=[ANY|MAX|MIN|ver]] [--ver-limit=VER] [NAME]
 
       Search contents of remote or local UHT server
 
       -i - NAME is case insensitive
 
-      -h values:
+      --how values:
 
       b - package name begins with NAME
       r - NAME is regular expression
@@ -24,10 +25,14 @@ aipsetup client command
       i - assume NAME tobe package info name and get RE for it
       c - NAME is package name substring
 
-      -w values: 'r' or 'l' - is for remote or local access
+      --where values: 'r' or 'l' - is for remote or local access
 
-      -a values: 's', 'r' or 'i' - is for source, repository or info
-                 access
+      --what  values: 's', 'r' or 'i' - is for source, repository or
+                      info access
+
+      --ver   values:
+
+          MIN - filter minimal version
 
 
    get [-o[=DIRNAME]] [-s] [-h=b|r|e|i|c] [-w=r|l] [-a=s|r|i] [NAME]
@@ -74,6 +79,19 @@ def workout_search_params(opts, args, config):
             if i[0] == '--what':
                 what = i[1]
 
+        ver = 'ANY'
+
+        for i in opts:
+            if i[0] == '--ver':
+                ver = i[1]
+
+
+        ver_limit = None
+
+        for i in opts:
+            if i[0] == '--ver-limit':
+                ver_limit = i[1]
+
 
         sensitive = True
 
@@ -92,6 +110,10 @@ def workout_search_params(opts, args, config):
 
         if not what in 'sri':
             print "-e- `what' error"
+            p_errors = True
+
+        if not ver in ['ANY', 'MAX', 'MIN']:
+            print "-e- `ver' error"
             p_errors = True
 
 
@@ -161,7 +183,17 @@ def workout_search_params(opts, args, config):
                 what = whats[what]
                 where = wheres[where]
 
-    return what, how, where, sensitive, value, p_errors, n_errors
+    return dict(
+        what = what,
+        how = how,
+        where = where,
+        sensitive = sensitive,
+        ver = ver,
+        ver_limit = ver_limit,
+        value=value,
+        p_errors=p_errors,
+        n_errors=n_errors
+        )
 
 
 def router(opts, args, config):
@@ -179,20 +211,23 @@ def router(opts, args, config):
 
         elif args[0] == 'search':
 
-            what, how, where, sensitive, value, p_errors, n_errors = \
-                workout_search_params(opts, args, config)
+            wsp = workout_search_params(opts, args, config)
 
             if not p_errors and not n_errors:
 
-                result = search(config, what=what, how=how,
-                                where=where, sensitive=sensitive,
-                                value=value
+                result = search(config,
+                                wsp['what'],
+                                wsp['how'],
+                                wsp['where'],
+                                wsp['sensitive'],
+                                wsp['ver'],
+                                wsp['ver_limit'],
+                                wsp['value']
                                 )
 
         elif args[0] == 'get':
 
-            what, how, where, sensitive, value, p_errors, n_errors = \
-                workout_search_params(opts, args, config)
+            wsp = workout_search_params(opts, args, config)
 
             output = None
 
@@ -203,10 +238,17 @@ def router(opts, args, config):
 
             if not p_errors and not n_errors:
 
-                result = get(config, output=output, what=what, how=how,
-                             where=where, sensitive=sensitive,
-                             value=value
+                result = get(config,
+                             output,
+                             wsp['what'],
+                             wsp['how'],
+                             wsp['where'],
+                             wsp['sensitive'],
+                             wsp['ver'],
+                             wsp['ver_limit'],
+                             wsp['value']
                              )
+
 
         else:
             print "-e- wrong command"
@@ -268,7 +310,7 @@ def get(config, output=None, what='repository', how='begins',
 
 
 def search(config, what='repository', how='begins', where='remote',
-           sensitive=True, value=''):
+           sensitive=True, ver='ANY', ver_limit=None, value=''):
 
     lst = client(config, what, how, where,  sensitive, value)
 
@@ -280,7 +322,7 @@ def search(config, what='repository', how='begins', where='remote',
         }
 
 def client(config, what='repository', how='begins', where='remote',
-           sensitive=True, value=''):
+           sensitive=True, ver='ANY', ver_limit=None, value=''):
 
     ret = 0
 

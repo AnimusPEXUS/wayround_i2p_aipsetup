@@ -201,6 +201,11 @@ else:
 
 
 
+        elif args[0] == 'name':
+            import aipsetup.name
+
+            ret = aipsetup.name.router(optilist, args[1:], config)
+
         elif args[0] == 'client':
             import aipsetup.client
 

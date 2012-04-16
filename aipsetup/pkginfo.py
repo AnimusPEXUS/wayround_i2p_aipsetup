@@ -9,6 +9,9 @@ import glob
 import lxml
 import lxml.etree
 
+import name
+import version
+
 from mako.template import Template
 from mako import exceptions
 
@@ -229,7 +232,10 @@ def write_to_file(name, struct):
 def info_fixes(dicti, name):
 
     if dicti['pkg_name_type'] == 'standard':
-        dicti['regexp'] = r'%(name)s-(?P<version>(\d*\.?)+)(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma)' % {'name': name}
+        r = name.NAME_REGEXPS['standard']
+        r.replace('(?P<name>.*?)', '%(name)s')
+        
+        dicti['regexp'] = r % {'name': name}
 
 def mass_info_fix(config):
 
