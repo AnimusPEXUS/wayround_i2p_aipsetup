@@ -10,21 +10,25 @@ import shutil
 import aipsetup.utils
 import aipsetup.getopt2
 
-def show_help():
+def print_help():
     print """\
    usage: %(basename)s [command] [command_parameters]
 
    commands:
 
-      source     Source actions
-      build      Building actions
-      server     UHT server related actions
-      client     Download actions
-      pkgindex   Package index actions
+      info          pkg info files actions
+      build_info    build info files actions
+      builders      builder files actions
+
+      source        Source actions
+      build         Building actions
+      server        UHT server related actions
+      client        Download actions
+      pkgindex      Package index actions
 
 
-     --help      see this help
-     --version   version info
+      help      see this help
+      version   version info
 """ % {
         'basename': os.path.basename(__file__)
         }
@@ -36,208 +40,50 @@ if config == None:
     print "-e- configuration file error exiting"
     exit(1)
 
-ret = 0                         # default return value
+ret = 0
 
 
 optilist, args = aipsetup.getopt2.getopt(sys.argv[1:])
-
-# print repr(optilist)
-# print repr(args)
-
-help_reqvested = False
-
-verbose_option = False
-
-for i in optilist:
-    if i[0] == '--help':
-        help_reqvested = True
-
-for i in optilist:
-    if i[0] == '--verbose' or i[0] == '-v':
-        verbose_option = True
+args_l = len(args)
 
 
-if help_reqvested:
-    show_help()
+if args_l == 0:
+    print "-e- no commands or parameters passed. try aipsetup help"
+    exit(1)
 else:
 
+    if args[0] == 'help':
+        print_help()
 
-    if len(args) == 0:
-        print "-e- no commands or parameters passed. try aipsetup --help"
-        exit(1)
+    elif args[0] == 'builders':
+        import aipsetup.pkgbuilders
+
+        ret = aipsetup.pkgbuilders.router(optilist, args[1:], config)
+
+    elif args[0] == 'build':
+        import aipsetup.build
+
+    elif args[0] == 'client':
+        import aipsetup.client
+
+        ret = aipsetup.client.router(optilist, args[1:], config)
+
+    elif args[0] == 'pkgindex':
+        import aipsetup.pkgindex
+
+        ret = aipsetup.pkgindex.router(optilist, args[1:], config)
+
+    elif args[0] == 'info':
+        import aipsetup.info
+
+        ret = aipsetup.info.router(optilist, args[1:], config)
+
+    elif args[0] == 'server':
+        import aipsetup.server
+
+        ret = aipsetup.server.router(optilist, args[1:], config)
+
     else:
-
-        if args[0] == 'init' or args[0] == 'ini':
-            import aipsetup.build
-
-            init_dir = 'tmp'
-
-            src_file = None
-
-            for i in optilist:
-                if i[0] == '-d':
-
-                    init_dir = i[1]
-
-            if len(args) == 2:
-                src_file = args[1]
-
-
-            if isinstance(init_dir, basestring):
-
-                ret = aipsetup.build.init(
-                    directory=init_dir,
-                    source_file=src_file,
-                    verbose=verbose_option)
-
-                if ret != 0:
-                    print '-e- Error initiating directory'
-
-            else:
-                print "-e- Wrong -d parameter"
-
-        elif args[0] == 'lb' or args[0] == 'listbuilders':
-
-            mask = '*'
-
-            if len(args) > 1:
-
-                if len(args) > 2:
-                    print '-e- Too many parameters'
-                else:
-                    mask = args[1]
-
-            lst = glob.glob('%(path)s/%(mask)s' % {
-                    'path': config['builders'],
-                    'mask': mask
-                    })
-
-            lst.sort()
-
-            semi = ''
-            if len(lst) > 0:
-                semi = ':'
-
-            print 'found %(n)s builder(s)%(s)s' % {
-                'n': len(lst),
-                's': semi
-                }
-
-            for each in lst:
-                print os.path.basename(each)
-
-        elif args[0] == 'eb' or args[0] == 'editbuilder':
-
-            if len(args) != 2:
-                print "-e- builder to edit not specified"
-            else:
-                p = None
-                try:
-                    p = subprocess.Popen([config['editor'], '%(path)s/%(file)s' % {
-                                'path': config['builders'],
-                                'file': args[1]
-                                }])
-                except:
-                    print '-e- error starting editor'
-                else:
-                    try:
-                        p.wait()
-                    except:
-                        print '-e- error waiting for editor'
-
-                    print '-i- editor exited'
-
-                del(p)
-
-        elif args[0] == 'cb' or args[0] == 'copybuilder':
-
-            if len(args) != 3:
-                print "-e- wrong parameters count"
-            else:
-
-                folder = config['builders']
-
-                f1 = os.path.join(folder, args[1])
-                f2 = os.path.join(folder, args[2])
-
-                if os.path.isfile(f1):
-                    if os.path.exists(f2):
-                        print "-e- destination already exists"
-                    else:
-                        print "-i- copying %(f1)s to %(f2)s" % {
-                            'f1': f1,
-                            'f2': f2
-                            }
-                        shutil.copy(f1, f2)
-                else:
-                    print "-e- source builder not exists"
-
-
-        elif args[0] == 'ub' or args[0] == 'usebuilder':
-
-            if len(args) != 2:
-                print "-e- wrong parameters count"
-            else:
-
-                folder = config['builders']
-
-                f1 = os.path.join(folder, args[1])
-                f2 = os.path.join(os.getcwd(), os.path.basename(args[1]))
-
-                if os.path.isfile(f1):
-                    if os.path.exists(f2) and not os.path.isfile(f2):
-                        print "-e- destination already exists and not is file"
-                        
-                    else:
-                        print "-i- copying %(f1)s to %(f2)s" % {
-                            'f1': f1,
-                            'f2': f2
-                            }
-                        shutil.copy(f1, f2)
-                else:
-                    print "-e- builder not exists"
-
-
-
-
-        # elif args[0] == 'name':
-        #     import aipsetup.name
-
-        #     ret = aipsetup.name.router(optilist, args[1:], config)
-
-        elif args[0] == 'client':
-            import aipsetup.client
-
-            ret = aipsetup.client.router(optilist, args[1:], config)
-
-        elif args[0] == 'pkgindex':
-            import aipsetup.pkgindex
-
-            ret = aipsetup.pkgindex.router(optilist, args[1:], config)
-
-        elif args[0] == 'pkginfo':
-            import aipsetup.pkginfo
-
-            ret = aipsetup.pkginfo.router(optilist, args[1:], config)
-
-        elif args[0] == 'server':
-            import aipsetup.server
-
-            ret = aipsetup.server.router(optilist, args[1:], config)
-
-        else:
-            print "-e- wrong command. try --help"
-
-
-
-        # if mode[2] == 'utils' and smode[2] == 'pkg_name_parse':
-
-        #     if len(args) != 1:
-        #         print '-e- exectly one argument required'
-        #         exit(1)
-
-        #     ret = aipsetup.utils.pkg_name_parse(args[0])
-
-# print '-i- end'
+        print "-e- wrong command. try aipsetup help"
 
 exit(ret)

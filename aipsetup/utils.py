@@ -30,6 +30,7 @@ default_config = {
     'uhtroot'            : '/mnt/sda3/home/agu/_UHT',
 
     'builders'           : '/mnt/sda3/home/agu/_UHT/pkg_builders',
+    'buildinfo'          : '/mnt/sda3/home/agu/_UHT/pkg_buildinfo',
     'repository'         : '/mnt/sda3/home/agu/_UHT/pkg_repository',
     'source'             : '/mnt/sda3/home/agu/_UHT/pkg_source',
     'info'               : '/mnt/sda3/home/agu/_UHT/pkg_info',

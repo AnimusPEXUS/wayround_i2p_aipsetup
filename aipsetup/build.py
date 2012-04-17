@@ -41,6 +41,70 @@ DIR_ALL = [
 
 directory = ''
 
+def print_help():
+    print """\
+aipsetup build command
+
+   init
+
+   extract
+
+   configure
+
+   make
+
+   install
+
+   pack
+
+"""
+
+def router(opts, args, config):
+
+    ret = 0
+    args_l = len(args)
+
+    if args_l == 0:
+        print "-e- not enough parameters"
+        ret = 1
+    else:
+
+        if args[0] == 'init':
+
+            init_dir = 'tmp'
+
+            src_file = None
+
+            for i in optilist:
+                if i[0] == '-d':
+
+                    init_dir = i[1]
+
+            if args_l == 2:
+                src_file = args[1]
+
+
+            if isinstance(init_dir, basestring):
+
+                ret = init(
+                    directory=init_dir,
+                    source_file=src_file,
+                    verbose=verbose_option
+                    )
+
+                if ret != 0:
+                    print '-e- Error initiating directory'
+
+            else:
+                print "-e- Wrong -d parameter"
+
+
+
+
+    return ret
+
+
+
 def isWdDirRestricted(directory):
     """This function is a rutine to check supplied dir is it suitable
     to be a working dir"""

@@ -95,7 +95,7 @@ def _find_list(tree, tag, field):
 
 def print_help():
     print """\
-aipsetup pkginfo command
+aipsetup info command
 
    mass_info_fix  applayes fixes to info files
 
