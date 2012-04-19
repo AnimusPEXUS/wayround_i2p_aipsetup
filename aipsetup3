@@ -16,19 +16,21 @@ def print_help():
 
    commands:
 
-      info          pkg info files actions
-      build_info    build info files actions
+      info          Pkg info files actions
+      buildinfo     Build info files actions
       builders      builder files actions
 
-      source        Source actions
       build         Building actions
       server        UHT server related actions
       client        Download actions
       pkgindex      Package index actions
 
+      name          Tools for parsing file names
+      docbook       Docbook tools
 
-      help      see this help
-      version   version info
+
+      help          see this help
+      version       version info
 """ % {
         'basename': os.path.basename(__file__)
         }
@@ -55,33 +57,17 @@ else:
     if args[0] == 'help':
         print_help()
 
-    elif args[0] == 'builders':
-        import aipsetup.pkgbuilders
+    elif args[0] in ['info', 'buildinfo', 'builders',
+                     'build', 'server',
+                     'client', 'pkgindex', 'name', 'docbook']:
 
-        ret = aipsetup.pkgbuilders.router(optilist, args[1:], config)
+        exec("import aipsetup.%(name)s" % {
+                'name': args[0]
+                })
 
-    elif args[0] == 'build':
-        import aipsetup.build
-
-    elif args[0] == 'client':
-        import aipsetup.client
-
-        ret = aipsetup.client.router(optilist, args[1:], config)
-
-    elif args[0] == 'pkgindex':
-        import aipsetup.pkgindex
-
-        ret = aipsetup.pkgindex.router(optilist, args[1:], config)
-
-    elif args[0] == 'info':
-        import aipsetup.info
-
-        ret = aipsetup.info.router(optilist, args[1:], config)
-
-    elif args[0] == 'server':
-        import aipsetup.server
-
-        ret = aipsetup.server.router(optilist, args[1:], config)
+        exec("ret = aipsetup.%(name)s.router(optilist, args[1:], config)" % {
+                'name': args[0]
+                })
 
     else:
         print "-e- wrong command. try aipsetup help"

@@ -47,7 +47,11 @@ aipsetup build command
 
    init
 
+   apply_info
+
    extract
+
+   patch
 
    configure
 
@@ -69,7 +73,10 @@ def router(opts, args, config):
         ret = 1
     else:
 
-        if args[0] == 'init':
+        if args[0] == 'help':
+            print_help()
+
+        elif args[0] == 'init':
 
             init_dir = 'tmp'
 
@@ -98,7 +105,8 @@ def router(opts, args, config):
             else:
                 print "-e- Wrong -d parameter"
 
-
+        else:
+            print "-e- Wrong command"
 
 
     return ret

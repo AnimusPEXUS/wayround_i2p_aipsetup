@@ -4,6 +4,7 @@ import os.path
 import re
 import sys
 
+import info
 
 class RegexpsError(Exception):
     pass
@@ -79,12 +80,23 @@ for each in NAME_REGEXPS:
 
 def print_help():
     print """\
+
+   test_expressions_on_sources
+
+
+   parse_name [-w] NAME
+
+     if -w is set - change <name>.xml info file nametype value to
+     result
+
 """
 
 def router(opts, args, config):
     ret = 0
 
-    if len(args) == 0:
+    args_l = len(args)
+
+    if args_l == 0:
         print "-e- not enough parameters"
         ret = 1
     else:
@@ -96,6 +108,24 @@ def router(opts, args, config):
         elif args[0] == 'test_expressions_on_sources':
             test_expressions_on_sources(config)
 
+        elif args[0] == 'parse_name':
+
+            if args_l != 2:
+                print "-e- file name required"
+            else:
+
+                filename = args[1]
+
+                write = False
+                for i in opts:
+                    if i[0] == '-w':
+                        write = True
+
+                parse_name(config, filename, mute=False,
+                           modify_info_file=write)
+
+        else:
+            print "-e- Wrong command"
 
     return ret
 
@@ -119,88 +149,139 @@ def test_expressions_on_sources(config):
 
     for i in lst:
 
-        bn = os.path.basename(i)
-
-        match_found = False
-
-        for j in NAME_REGEXPS_ORDER:
-
-            print "-i- Matching `%(re)s'" % {
-                're': j
-                }
-            re_r = re.match(NAME_REGEXPS[j], bn)
-
-            if re_r  != None:
-
-
-                groups = ''
-
-                for k in re_r.re.groupindex:
-
-                    groups += "       %(group)s:`%(value)s'\n" % {
-                        'group': k,
-                        'value': re_r.group(re_r.re.groupindex[k])
-                        }
-
-                print "-i- Match `%(i)s' `%(re)s'\n%(groups)s" % {
-                    'i': bn,
-                    're': j,
-                    'groups': groups
-                    }
-                match_found = True
-
-            del(re_r)
-
-            if match_found:
-                break
-
-        if not match_found:
-            print "-e- No match `%(i)s'" % {
-                'i': bn
-                }
+        parse_name(i, False, False)
 
         print ""
         sys.stdout.flush()
 
     return
 
-def source_name_parse(name, nametype):
-
-    d = {
-        'name': None,
-        'version': None,
-        'version_letter': None,
-        'version_letter_number': None,
-        'statuses': None,
-        'patch': None,
-        'date': None,
-        'extension': None,
-        }
-
-    r = re.match(NAME_REGEXPS[nametype], name)
-
-    if r != None:
-        for i in d:
-            try:
-                d[i] = r.group(i)
-            except:
-                d[i] = ''
-
-    if d['status'] in ['a', 'alpha']:
-       d['status'] = 'alpha'
-
-    elif d['status'] in ['b', 'beta']:
-        d['status'] = 'beta'
-
-    elif d['status'] in ['rc']:
-        d['status'] = 'rc'
-
-    elif d['status'] in ['pre', 'p']:
-        d['status'] = 'pre'
-
-
-    return d
-
 
 def asp_name_parse():
     pass
+
+
+def source_name_parse(config, filename, mute=False,
+                      modify_info_file=False):
+
+    ret = None
+
+    bn = os.path.basename(filename)
+
+    match_found = False
+
+    for j in NAME_REGEXPS_ORDER:
+
+        if not mute:
+            print "-i- Matching `%(re)s'" % {
+                're': j
+                }
+        re_r = re.match(NAME_REGEXPS[j], bn)
+
+        if re_r != None:
+
+            ret = {
+                'groups': {
+                    'name': None,
+                    'version': None,
+                    'version_letter': None,
+                    'version_letter_number': None,
+                    'statuses': None,
+                    'patch': None,
+                    'date': None,
+                    'extension': None
+                    }
+                }
+
+            for i in ret['groups']:
+                try:
+                    ret['groups'][i] = re_r.group(i)
+                except:
+                    ret['groups'][i] = ''
+
+            groups = ''
+
+            for k in re_r.re.groupindex:
+
+                ret['groups'][k] = re_r.group(re_r.re.groupindex[k])
+
+                if not mute:
+
+                    groups += "       %(group)s: %(value)s\n" % {
+                        'group': k,
+                        'value': repr(re_r.group(re_r.re.groupindex[k]))
+                        }
+
+
+            ret['groups']['version'] = \
+                ret['groups']['version'].replace('_', '.')
+
+            ret['groups']['version'] = \
+                ret['groups']['version'].strip('.')
+
+            ret['groups']['statuses'] = \
+                ret['groups']['statuses'].replace('_', '-')
+
+            ret['groups']['statuses'] = \
+                ret['groups']['statuses'].replace('.', '-')
+
+            ret['groups']['statuses'] = \
+                ret['groups']['statuses'].strip('-')
+
+            ret['groups']['statuses_list'] = \
+                ret['groups']['statuses'].split('-')
+
+            ret['groups']['statuses_list'].remove('')
+
+
+            ret['name'] = bn
+            ret['re'] = j
+
+            if not mute:
+                print "-i- Match `%(i)s' `%(re)s'\n%(groups)s" % {
+                    'i': bn,
+                    're': j,
+                    'groups': groups
+                    }
+
+            match_found = True
+
+        del(re_r)
+
+        if match_found:
+            break
+
+    if not mute:
+        if not match_found:
+            print "-e- No match `%(i)s'" % {
+                'i': bn
+                }
+
+    if ret != None and modify_info_file:
+        fn = os.path.join(
+            config['info'],
+            '%(name)s.xml' % {
+                'name': ret['groups']['name']
+                }
+            )
+
+        if not mute:
+            print "-i- Updating info file %(name)s" % {
+                'name': fn
+                }
+
+
+        data = info.read_from_file(
+            fn
+            )
+
+        if data == None:
+            if not mute:
+                print "-i- Error reading file. Creating new."
+            data = info.SAMPLE_PACKAGE_INFO_STRUCTURE
+
+        data['pkg_name_type'] = ret['re']
+
+        info.write_to_file(fn, data)
+
+    return ret

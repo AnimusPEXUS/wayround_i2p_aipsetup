@@ -312,10 +312,10 @@ class Index:
                         continue
 
                     if how == 'regexp' and re.match(value, base, re_flags) != None:
-                        print "-iii- RE : `%(n1)s' `%(n2)s'" % {
-                            'n1': value,
-                            'n2': base
-                            }
+                        # print "-iii- RE : `%(n1)s' `%(n2)s'" % {
+                        #     'n1': value,
+                        #     'n2': base
+                        #     }
                         lst.append(i)
                     elif how == 'begins' and bw.startswith(vw):
                         lst.append(i)
@@ -412,12 +412,17 @@ class Index:
             else:
                 category = "< Package not indexed! >"
 
+            regexp = '< Wrong regexp type name >'
+            if r['pkg_name_type'] in name.NAME_REGEXPS:
+                regexp = name.NAME_REGEXPS[r['pkg_name_type']]
+
+
             out = self.templates['info'].render(
                 name = name,
                 homepage = r['homepage'],
                 pkg_name_type = r['pkg_name_type'],
-                regexp = r['regexp'],
-                builder = r['builder'],
+                regexp = regexp,
+                buildinfo = r['buildinfo'],
                 description = r['description'],
                 sources = r['sources'],
                 mirrors = r['mirrors'],

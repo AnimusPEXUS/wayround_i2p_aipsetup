@@ -10,7 +10,7 @@ import glob
 import sqlalchemy
 import sqlalchemy.orm
 
-import pkginfo
+import info
 
 
 def print_help():
@@ -296,17 +296,11 @@ class PackageDatabase:
                               sqlalchemy.Text,
                               nullable=False,
                               default=''),
-            # 'standard', 'local' or other package name
             sqlalchemy.Column('pkg_name_type',
                               sqlalchemy.String(256),
                               nullable=False,
                               default=''),
-            # if 'local' - then regexp is used
-            sqlalchemy.Column('regexp',
-                              sqlalchemy.String(256),
-                              nullable=False,
-                              default=''),
-            sqlalchemy.Column('builder',
+            sqlalchemy.Column('buildinfo',
                               sqlalchemy.String(256),
                               nullable=False,
                               default='')
@@ -762,11 +756,10 @@ class PackageDatabase:
                 'homepage'     : q.home_page,
                 'description'  : q.description,
                 'pkg_name_type': q.pkg_name_type,
-                'regexp'       : q.regexp,
                 'tags'         : tags,
                 'sources'      : sources,
                 'mirrors'      : mirrors,
-                'builder'      : q.builder
+                'buildinfo'    : q.buildinfo
                 }
 
         if name != None:
@@ -792,8 +785,7 @@ class PackageDatabase:
         q.description   = struct['description']
         q.home_page     = struct['homepage']
         q.pkg_name_type = struct['pkg_name_type']
-        q.regexp        = struct['regexp']
-        q.builder       = struct['builder']
+        q.buildinfo     = struct['buildinfo']
 
         # category set only through pkg_repository
         # q.category    = category
@@ -801,8 +793,8 @@ class PackageDatabase:
         if creating_new:
             sess.add(q)
 
-        sess.commit()
 
+        sess.commit()
         sess.close()
 
         self.set_package_tags(name, struct['tags'])
@@ -838,7 +830,7 @@ class PackageDatabase:
 
                 r = self.package_info_record_to_dict(record=i)
                 if isinstance(r, dict):
-                    if pkginfo.write_to_file(filename, r) != 0:
+                    if info.write_to_file(filename, r) != 0:
                         print "-e- can't write file %(name)s" % {
                             'name': filename
                             }
@@ -869,14 +861,18 @@ class PackageDatabase:
             missing = False
             if not all_records:
                 sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
                 q = sess.query(PackageInfo).filter_by(name=name).first()
+
                 if q == None:
                     missing = True
+
                 sess.close()
+
                 if not missing:
                     continue
 
-            struct = pkginfo.read_from_file(i)
+            struct = info.read_from_file(i)
             if isinstance(struct, dict):
                 print "-i- loading record: %(name)s" % {'name': name}
                 self.package_info_dict_to_record(name, struct)
@@ -885,6 +881,7 @@ class PackageDatabase:
                 print "-e- can't get info from file %(name)s" % {
                     'name': i
                     }
+
 
         print "-i- Total loaded %(n)d records" % {'n': loaded}
         return
@@ -986,9 +983,9 @@ class PackageDatabase:
                     if force_rewrite:
                         print "-i- forced template rewriting"
 
-                    if pkginfo.write_to_file(
+                    if info.write_to_file(
                         filename,
-                        pkginfo.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
+                        info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                         pkgs_failed += 1
                         print "-e- failed writing template to %(name)s" % {
                             'name': filename
@@ -1040,7 +1037,7 @@ class PackageDatabase:
                         }
                 continue
 
-            d1 = pkginfo.read_from_file(filename)
+            d1 = info.read_from_file(filename)
 
             if not isinstance(d1, dict):
                 print "-i- Error parsing file: %(name)s" % {
@@ -1048,7 +1045,7 @@ class PackageDatabase:
                     }
             else:
                 d2 = self.package_info_record_to_dict(record=i)
-                if not pkginfo.is_dicts_equal(d1, d2):
+                if not info.is_dicts_equal(d1, d2):
                     ret.append(i.name)
                     if not mute:
                         print "-w- xml init file differs for: %(name)s" % {
@@ -1098,6 +1095,10 @@ class PackageDatabase:
             else:
                 category = "< Package not indexed! >"
 
+            regexp = '< Wrong regexp type name >'
+            if r['pkg_name_type'] in name.NAME_REGEXPS:
+                regexp = name.NAME_REGEXPS[r['pkg_name_type']]
+
             print """
 Name: %(name)s
 
@@ -1105,7 +1106,7 @@ File Name Type: %(pkg_name_type)s
 
 Regular Expression: %(regexp)s
 
-Builder: %(builder)s
+Buildinfo: %(buildinfo)s
 
 == Description ==
 
@@ -1131,7 +1132,7 @@ Tags: %(tags)s
                 'name': name,
                 'homepage': r['homepage'],
                 'pkg_name_type': r['pkg_name_type'],
-                'regexp': r['regexp'],
+                'regexp': regexp,
                 'builder': r['builder'],
                 'description': r['description'],
                 'sources': '\n'.join(r['sources']),

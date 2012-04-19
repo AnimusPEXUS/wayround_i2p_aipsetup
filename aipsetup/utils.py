@@ -57,6 +57,8 @@ _UHT/pkgindex.sqlite',
     'client_remote_prefix'     : '/'
     }
 
+actual_config = None
+
 
 def update_modules_data(module_name,
                         module_group,
@@ -77,18 +79,26 @@ def update_modules_data(module_name,
     return
 
 def load_config():
+    global actual_config
 
     ret = None
 
-    if os.path.isfile('/etc/aipsetup.conf'):
-        r = get_configuration(
-            default_config,
-            '/etc/aipsetup.conf')
+    if actual_config != None:
+        ret = actual_config
 
-        if isinstance(r, dict):
-            ret = r
-        else:
-            ret = None
+    else:
+
+        if os.path.isfile('/etc/aipsetup.conf'):
+            r = get_configuration(
+                default_config,
+                '/etc/aipsetup.conf')
+
+            if isinstance(r, dict):
+                ret = r
+            else:
+                ret = None
+
+        actual_config = ret
 
     return ret
 
@@ -192,3 +202,20 @@ def print_exception_info(e):
     print "    TRACEBACK:"
     traceback.print_tb(e[2])
 
+def remove_if_exists(file_or_dir):
+    if os.path.exists(file_or_dir):
+        if os.path.isdir(file_or_dir):
+            try:
+                shutil.rmtree(file_or_dir)
+            except:
+                print "-e-       can't remove dir %(dir)s" % {
+                    'dir': file_or_dir}
+                return 1
+        else:
+            try:
+                os.unlink(file_or_dir)
+            except:
+                print "-e-       can't remove file %(file)s" % {
+                    'file': file_or_dir}
+                return 1
+    return 0

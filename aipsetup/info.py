@@ -32,7 +32,7 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # string list
     tags = [],
     # string
-    builder = ''
+    buildinfo = ''
     )
 
 pkg_info_file_template = Template(text="""\
@@ -42,7 +42,7 @@ pkg_info_file_template = Template(text="""\
 
   <!-- name type can be 'standard', 'local' or other package name -->
   <nametype value="${ pkg_name_type | x}" />
-  <regexp value="${ regexp | x}" />
+
 
   <description>${ description | x}</description>
   <homepage url="${ homepage | x}" />
@@ -71,7 +71,7 @@ pkg_info_file_template = Template(text="""\
   <tag name="${ i | x}" />
   % endfor
 
-  <builder value="${ builder | x }" />
+  <buildinfo value="${ buildinfo | x }" />
 
 </package>
 """)
@@ -107,7 +107,7 @@ def router(opts, args, config):
     ret = 0
 
     if len(args) == 0:
-        print "-e- not enough parameters"
+        print "-e- command not given"
         ret = 1
     else:
 
@@ -129,8 +129,8 @@ def is_dicts_equal(d1, d2):
 
     ret = True
 
-    for i in ['pkg_name_type',
-              'regexp', 'builder', 'homepage', 'description']:
+    for i in ['pkg_name_type', 'buildinfo',
+              'homepage', 'description']:
         if d1[i] != d2[i]:
             ret = False
             break
@@ -177,7 +177,7 @@ def read_from_file(name):
             ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
 
 
-            for i in ['regexp', 'builder']:
+            for i in ['buildinfo']:
                 x = _find_latest(tree, i, 'value')
                 if x != None:
                     ret[i] = x
@@ -211,13 +211,12 @@ def write_to_file(name, struct):
 
     txt = pkg_info_file_template.render(
         pkg_name_type = struct['pkg_name_type'],
-        regexp        = struct['regexp'],
         description   = struct['description'],
         homepage      = struct['homepage'],
         sources       = struct['sources'],
         mirrors       = struct['mirrors'],
         tags          = struct['tags'],
-        builder       = struct['builder']
+        buildinfo     = struct['buildinfo']
         )
 
     try:
@@ -232,10 +231,8 @@ def write_to_file(name, struct):
 def info_fixes(dicti, name):
 
     if dicti['pkg_name_type'] == 'standard':
-        r = name.NAME_REGEXPS['standard']
-        r.replace('(?P<name>.*?)', '%(name)s')
-        
-        dicti['regexp'] = r % {'name': name}
+
+        pass
 
 def mass_info_fix(config):
 

@@ -1,20 +1,40 @@
 
 
 import name
+import utils
 
 
-def version_comparator(name1, name2, nametype, action, limit):
+def version_comparator(name1, name2):
 
     ret = 0
 
-    d2 = ''
-    
-    d1 = name.source_name_parse(name1, nametype)
-    d2 = name.source_name_parse(name2, nametype)
 
-    if nametype == 'standard':
-        pass
-    
+    d1 = name.source_name_parse(
+        utils.actual_config,
+        name1, mute=True, modify_info_file=False)
+
+    d2 = name.source_name_parse(
+        utils.actual_config,
+        name2, mute=True, modify_info_file=False)
+
+    if d1 == None or d2 == None:
+        print "-e- Can't parse filename"
+        raise Exception
+
+    if d1['groups']['name'] != d2['groups']['name']:
+        print "-e- Different names"
+        raise Exception
+
+    else:
+        com_res = standard_comparison(d1['groups']['version'], d2['groups']['version'])
+        if com_res != 0:
+
+            ret = com_res
+
+        else:
+            ret = 0
+
+
     return ret
 
 
@@ -46,9 +66,10 @@ def standard_comparison(e1, e2):
     # first comparison part
 
     for i in range(el_1):
-        if vers1[i] > vers2[i]:
+
+        if int(vers1[i]) > int(vers2[i]):
             return +1
-        elif vers1[i] < vers2[i]:
+        elif int(vers1[i]) < int(vers2[i]):
             return -1
         else:
             continue

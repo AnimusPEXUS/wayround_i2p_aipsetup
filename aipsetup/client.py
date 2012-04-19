@@ -3,17 +3,18 @@ import os.path
 import sys
 import urllib
 
-import pkgindex
 import utils
+import version
+import name
 
 
 def print_help():
     print """\
 aipsetup client command
 
-   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [NAME]
+   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] NAME [VERSION]
 
-      Search contents of remote or local UHT server
+      Search files on remote or local UHT server
 
       -i - NAME is case insensitive
 
@@ -30,7 +31,13 @@ aipsetup client command
       --what  values: 's', 'r' or 'i' - is for source, repository or
                       info access
 
-   get [-o[=DIRNAME]] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [NAME]
+      VERSION can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default
+              is 'ANY'
+
+      VERSION works only with --how=i
+
+   get [-o[=DIRNAME]] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i]
+       NAME [VERSION]
 
       Get files from remote or local UHT server
 
@@ -43,6 +50,10 @@ aipsetup client command
 
 def workout_search_params(opts, args, config):
 
+    import pkgindex
+
+    args_l = len(args)
+
     what = ''
     how = ''
     where = ''
@@ -51,8 +62,8 @@ def workout_search_params(opts, args, config):
     n_errors = False
     p_errors = False
 
-    if len(args) != 2:
-        print "-e- must be axactly 1 parameter"
+    if args_l != 2 and args_l != 3:
+        print "-e- can be one or two parameters"
         p_errors = True
     else:
 
@@ -74,19 +85,10 @@ def workout_search_params(opts, args, config):
             if i[0] == '--what':
                 what = i[1]
 
-        # ver = 'ANY'
+        ver = 'ANY'
 
-        # for i in opts:
-        #     if i[0] == '--ver':
-        #         ver = i[1]
-
-
-        # ver_limit = None
-
-        # for i in opts:
-        #     if i[0] == '--ver-limit':
-        #         ver_limit = i[1]
-
+        if args_l == 3:
+            ver = args[2]
 
         sensitive = True
 
@@ -107,9 +109,9 @@ def workout_search_params(opts, args, config):
             print "-e- `what' error"
             p_errors = True
 
-        # if not ver in ['ANY', 'MAX', 'MIN']:
-        #     print "-e- `ver' error"
-        #     p_errors = True
+        if how != 'i' and ver != 'ANY':
+            print "-e- VERSION can only be used with --how=i"
+            p_errors = True
 
 
         value = args[1]
@@ -132,7 +134,7 @@ def workout_search_params(opts, args, config):
                 else:
 
                     if what == 's':
-                        regexp = idic['regexp']
+                        regexp = name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
                         print "-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
                             're': regexp,
                             'name': value
@@ -183,8 +185,7 @@ def workout_search_params(opts, args, config):
         how = how,
         where = where,
         sensitive = sensitive,
-        # ver = ver,
-        # ver_limit = ver_limit,
+        ver = ver,
         value=value,
         p_errors=p_errors,
         n_errors=n_errors
@@ -211,11 +212,7 @@ def router(opts, args, config):
             if not wsp['p_errors'] and not wsp['n_errors']:
 
                 result = search(config,
-                                wsp['what'],
-                                wsp['how'],
-                                wsp['where'],
-                                wsp['sensitive'],
-                                wsp['value']
+                                wsp
                                 )
 
         elif args[0] == 'get':
@@ -233,11 +230,7 @@ def router(opts, args, config):
 
                 result = get(config,
                              output,
-                             wsp['what'],
-                             wsp['how'],
-                             wsp['where'],
-                             wsp['sensitive'],
-                             wsp['value']
+                             wsp
                              )
 
 
@@ -248,8 +241,7 @@ def router(opts, args, config):
     return ret
 
 
-def get(config, output=None, what='repository', how='begins',
-        where='remote', sensitive=True, value=''):
+def get(config, output=None, wsp={}):
 
     ret = 0
 
@@ -276,12 +268,15 @@ def get(config, output=None, what='repository', how='begins',
         pass
     else:
 
-        lst = client(config, what, how, where, sensitive, value)
+        lst = client(config, wsp)
 
         if not isinstance(lst, list):
             ret = lst
+            print "-e- Error getting response list"
 
         else:
+
+            lst.sort(version.version_comparator)
 
             for i in ['proto', 'host', 'port', 'prefix']:
                 exec("%(i)s = config['client_%(where)s_%(i)s']" % {
@@ -332,20 +327,34 @@ def get(config, output=None, what='repository', how='begins',
 
 
 
-def search(config, what='repository', how='begins', where='remote',
-           sensitive=True, value=''):
+def search(config, wsp):
 
-    lst = client(config, what, how, where,  sensitive, value)
+    ret = 0
 
-    for i in lst:
-        print i
+    lst = client(config, wsp)
 
-    print "count: %(n)s" % {
-        'n': len(lst)
-        }
+    if isinstance(lst, list):
+        lst.sort(version.version_comparator)
 
-def client(config, what='repository', how='begins', where='remote',
-           sensitive=True, value=''):
+        for i in lst:
+            print i
+
+        print "count: %(n)s" % {
+            'n': len(lst)
+            }
+
+    else:
+        print "-e- Error getting response list"
+        ret = lst
+
+    return ret
+
+def client(config, wsp={}):
+
+    for i in wsp:
+        exec("%(i)s = wsp['%(i)s']" % {
+                'i': i
+                })
 
     ret = 0
 
@@ -394,7 +403,7 @@ def client(config, what='repository', how='begins', where='remote',
         try:
             req_res = urllib.urlopen(request)
         except IOError:
-            print "-e- Connection Refused"
+            print "-e- Connection refused"
         except:
             e = sys.exc_info()
             utils.print_exception_info(e)
