@@ -1,8 +1,8 @@
 
-
 import os.path
 import re
 import sys
+import fnmatch
 
 import info
 
@@ -10,16 +10,17 @@ class RegexpsError(Exception):
     pass
 
 
-NAME_REGEXPS_ORDER = ['standard_with_date',
-                      'standard',
-                      'underscored_with_date',
-                      'underscored',
-                      'standard_with_letter_after_version',
-                      'standard_with_status',
-                      'underscored_with_status',
-                      'version_right_after_name',
-                      'version_right_after_name_with_status'
-                      ]
+NAME_REGEXPS_ORDER = [
+    'standard_with_date',
+    'standard',
+    'underscored_with_date',
+    'underscored',
+    'standard_with_letter_after_version',
+    'standard_with_status',
+    'underscored_with_status',
+    'version_right_after_name',
+    'version_right_after_name_with_status'
+    ]
 
 NAME_REGEXPS = {
     'standard': \
@@ -211,8 +212,9 @@ def source_name_parse(config, filename, mute=False,
 
         fnmatched = False
         if isinstance(acceptable_vn, basestring):
-            if fnmatch.fnmatch(ret['groups']['version'], acceptable_fn):
+            if fnmatch.fnmatch(ret['groups']['version'], acceptable_vn):
                 fnmatched = True
+
 
         if acceptable_vn == None or \
                 (isinstance(acceptable_vn, basestring) and fnmatched):
@@ -237,7 +239,7 @@ def source_name_parse(config, filename, mute=False,
 
             if '' in ret['groups']['statuses_list']:
                 ret['groups']['statuses_list'].remove('')
-                
+
 
             ret['name'] = bn
             ret['re'] = j

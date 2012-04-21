@@ -2,11 +2,11 @@ import os
 import os.path
 import sys
 import urllib
-import fnmatch
 
 import utils
 import version
 import name
+import info
 
 
 def print_help():
@@ -123,11 +123,15 @@ def workout_search_params(opts, args, config):
             n_errors = False
 
             if how == 'i':
-                r = pkgindex.PackageDatabase(config)
-                idic = r.package_info_record_to_dict(name=value)
-                del(r)
+                idic = info.read_from_file(
+                    os.path.join(
+                        config['info'], '%(name)s.xml' % {
+                            'name': value
+                            }
+                        )
+                    )
 
-                if idic == None:
+                if not isinstance(idic, dict):
                     print "-e- Can't find info for %(name)s" % {
                         'name': value
                         }
@@ -278,7 +282,7 @@ def get(config, output=None, wsp={}):
 
         else:
 
-            lst = fn_version_filter(lst, wsp)
+            lst = fn_version_filter(config, lst, wsp)
 
             lst.sort(version.version_comparator)
 
@@ -341,7 +345,7 @@ def search(config, wsp):
 
     if isinstance(lst, list):
 
-        lst = fn_version_filter(lst, wsp)
+        lst = fn_version_filter(config, lst, wsp)
 
         lst.sort(version.version_comparator)
 
@@ -436,7 +440,7 @@ def client(config, wsp={}):
     return ret
 
 
-def fn_version_filter(lst, wsp):
+def fn_version_filter(config, lst, wsp):
     ret = []
     if not wsp['ver'] in ['MAX', 'MIN', 'ANY']:
 
@@ -453,11 +457,10 @@ def fn_version_min_max_filter(lst, wsp):
 
     lst2 = []
 
-    if wsp['ver'] != 'ANY':
-        if wsp['ver'] == 'MAX':
-            lst2 = [lst[-1]]
-        elif wsp['ver'] == 'MIN':
-            lst2 = [lst[0]]
+    if wsp['ver'] == 'MAX':
+        lst2 = [lst[-1]]
+    elif wsp['ver'] == 'MIN':
+        lst2 = [lst[0]]
     else:
         lst2 = lst
 
