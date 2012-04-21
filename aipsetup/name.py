@@ -121,8 +121,8 @@ def router(opts, args, config):
                     if i[0] == '-w':
                         write = True
 
-                parse_name(config, filename, mute=False,
-                           modify_info_file=write)
+                source_name_parse(config, filename, mute=False,
+                                  modify_info_file=write)
 
         else:
             print "-e- Wrong command"
@@ -162,14 +162,15 @@ def asp_name_parse():
 
 
 def source_name_parse(config, filename, mute=False,
-                      modify_info_file=False):
+                      modify_info_file=False, acceptable_vn=None):
 
     ret = None
 
     bn = os.path.basename(filename)
 
-    match_found = False
+    re_r = None
 
+    # Find matching regular expression
     for j in NAME_REGEXPS_ORDER:
 
         if not mute:
@@ -179,39 +180,42 @@ def source_name_parse(config, filename, mute=False,
         re_r = re.match(NAME_REGEXPS[j], bn)
 
         if re_r != None:
+            break
 
-            ret = {
-                'groups': {
-                    'name': None,
-                    'version': None,
-                    'version_letter': None,
-                    'version_letter_number': None,
-                    'statuses': None,
-                    'patch': None,
-                    'date': None,
-                    'extension': None
-                    }
+    # Perform file name elements separation
+    if re_r != None:
+
+        ret = {
+            'groups': {
+                'name': None,
+                'version': None,
+                'version_letter': None,
+                'version_letter_number': None,
+                'statuses': None,
+                'patch': None,
+                'date': None,
+                'extension': None
                 }
+            }
 
-            for i in ret['groups']:
-                try:
-                    ret['groups'][i] = re_r.group(i)
-                except:
-                    ret['groups'][i] = ''
+        for i in ret['groups']:
+            try:
+                ret['groups'][i] = re_r.group(i)
+            except:
+                ret['groups'][i] = ''
 
-            groups = ''
 
-            for k in re_r.re.groupindex:
+        for k in re_r.re.groupindex:
+            ret['groups'][k] = re_r.group(re_r.re.groupindex[k])
 
-                ret['groups'][k] = re_r.group(re_r.re.groupindex[k])
 
-                if not mute:
+        fnmatched = False
+        if isinstance(acceptable_vn, basestring):
+            if fnmatch.fnmatch(ret['groups']['version'], acceptable_fn):
+                fnmatched = True
 
-                    groups += "       %(group)s: %(value)s\n" % {
-                        'group': k,
-                        'value': repr(re_r.group(re_r.re.groupindex[k]))
-                        }
-
+        if acceptable_vn == None or \
+                (isinstance(acceptable_vn, basestring) and fnmatched):
 
             ret['groups']['version'] = \
                 ret['groups']['version'].replace('_', '.')
@@ -231,31 +235,40 @@ def source_name_parse(config, filename, mute=False,
             ret['groups']['statuses_list'] = \
                 ret['groups']['statuses'].split('-')
 
-            ret['groups']['statuses_list'].remove('')
-
+            if '' in ret['groups']['statuses_list']:
+                ret['groups']['statuses_list'].remove('')
+                
 
             ret['name'] = bn
             ret['re'] = j
 
-            if not mute:
-                print "-i- Match `%(i)s' `%(re)s'\n%(groups)s" % {
-                    'i': bn,
-                    're': j,
-                    'groups': groups
-                    }
+        else:
+            ret = None
 
-            match_found = True
+    del(re_r)
 
-        del(re_r)
-
-        if match_found:
-            break
 
     if not mute:
-        if not match_found:
+        if ret == None:
             print "-e- No match `%(i)s'" % {
                 'i': bn
                 }
+
+        else:
+
+            groups = ''
+            for i in ret['groups']:
+                groups += "       %(group)s: %(value)s\n" % {
+                    'group': i,
+                    'value': repr(ret['groups'][i])
+                    }
+
+            print "-i- Match `%(bn)s' `%(re)s'\n%(groups)s" % {
+                'bn': bn,
+                're': j,
+                'groups': groups
+                }
+
 
     if ret != None and modify_info_file:
         fn = os.path.join(

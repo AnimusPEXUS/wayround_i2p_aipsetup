@@ -2,6 +2,7 @@ import os
 import os.path
 import sys
 import urllib
+import fnmatch
 
 import utils
 import version
@@ -12,7 +13,7 @@ def print_help():
     print """\
 aipsetup client command
 
-   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] NAME [VERSION]
+   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [-v=VER] NAME
 
       Search files on remote or local UHT server
 
@@ -31,13 +32,13 @@ aipsetup client command
       --what  values: 's', 'r' or 'i' - is for source, repository or
                       info access
 
-      VERSION can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default
-              is 'ANY'
+      VER can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default is
+          'ANY'
 
-      VERSION works only with --how=i
+      VER works only with --how=i
 
-   get [-o[=DIRNAME]] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i]
-       NAME [VERSION]
+   get [-o=DIRNAME] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i]
+       [-v=VER] NAME
 
       Get files from remote or local UHT server
 
@@ -62,8 +63,8 @@ def workout_search_params(opts, args, config):
     n_errors = False
     p_errors = False
 
-    if args_l != 2 and args_l != 3:
-        print "-e- can be one or two parameters"
+    if args_l != 2:
+        print "-e- can be one parameter"
         p_errors = True
     else:
 
@@ -87,8 +88,9 @@ def workout_search_params(opts, args, config):
 
         ver = 'ANY'
 
-        if args_l == 3:
-            ver = args[2]
+        for i in opts:
+            if i[0] == '-v':
+                ver = i[1]
 
         sensitive = True
 
@@ -276,11 +278,16 @@ def get(config, output=None, wsp={}):
 
         else:
 
+            lst = fn_version_filter(lst, wsp)
+
             lst.sort(version.version_comparator)
+
+            lst = fn_version_min_max_filter(lst, wsp)
+
 
             for i in ['proto', 'host', 'port', 'prefix']:
                 exec("%(i)s = config['client_%(where)s_%(i)s']" % {
-                        'where': where,
+                        'where': wsp['where'],
                         'i': i
                         } )
 
@@ -288,12 +295,12 @@ def get(config, output=None, wsp={}):
             if port != None and port != '':
                 semi = ':'
 
-            path = 'files_%(what)s' % {'what': what}
+            path = 'files_%(what)s' % {'what': wsp['what']}
 
             for i in lst:
 
                 name = ''
-                if what == 'info':
+                if wsp['what'] == 'info':
                     name = '/%(v)s.xml' % {
                         'v': value
                         }
@@ -326,7 +333,6 @@ def get(config, output=None, wsp={}):
     return ret
 
 
-
 def search(config, wsp):
 
     ret = 0
@@ -334,7 +340,12 @@ def search(config, wsp):
     lst = client(config, wsp)
 
     if isinstance(lst, list):
+
+        lst = fn_version_filter(lst, wsp)
+
         lst.sort(version.version_comparator)
+
+        lst = fn_version_min_max_filter(lst, wsp)
 
         for i in lst:
             print i
@@ -423,3 +434,31 @@ def client(config, wsp={}):
                 ret = lst2
 
     return ret
+
+
+def fn_version_filter(lst, wsp):
+    ret = []
+    if not wsp['ver'] in ['MAX', 'MIN', 'ANY']:
+
+        for i in lst:
+            if name.source_name_parse(config, i, mute=True, modify_info_file=False, acceptable_vn=wsp['ver']) != None:
+                ret.append(i)
+
+    else:
+        ret = lst
+
+    return ret
+
+def fn_version_min_max_filter(lst, wsp):
+
+    lst2 = []
+
+    if wsp['ver'] != 'ANY':
+        if wsp['ver'] == 'MAX':
+            lst2 = [lst[-1]]
+        elif wsp['ver'] == 'MIN':
+            lst2 = [lst[0]]
+    else:
+        lst2 = lst
+
+    return lst2

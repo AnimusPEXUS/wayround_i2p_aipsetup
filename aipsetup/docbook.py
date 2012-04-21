@@ -9,6 +9,57 @@ import re
 import lxml.etree
 
 import utils
+import version
+
+def print_help():
+    print """\
+
+    install [-b=DIR] FILES
+
+       -b - Change basedir. Default is /
+
+"""
+
+def router(opts, args, config):
+    ret = 0
+
+    args_l = len(args)
+
+
+    if args_l == 0:
+        print "-e- command not given"
+        ret = 1
+    else:
+
+        if args[0] == 'help':
+            print_help()
+            ret = 0
+
+
+        elif args[0] == 'install':
+
+            if args_l == 1:
+                print '-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments'
+                ret = 10
+            else:
+
+                base_dir = '/'
+
+                for i in opts:
+                    if i[0] == '-b':
+                        base_dir = i[1]
+
+                install(args[1:], base_dir)
+
+        else:
+            print "-e- Wrong command"
+
+
+        ret = 0
+
+    return ret
+
+
 
 def set_correct_modes(directory):
 
@@ -317,7 +368,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
 
         installed_versions.append(version)
 
-    installed_versions.sort(compare_versions)
+    installed_versions.sort(version.standard_comparison)
 
     print "-i- Installed XSL: %(versions)s" % {'versions': ', '.join(installed_versions)}
 
@@ -362,60 +413,6 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
 
 
     return 0
-
-def compare_versions(e1, e2):
-
-    vers1 = e1.split('.')
-    vers2 = e2.split('.')
-
-    longer = None
-
-    v1l = len(vers1)
-    v2l = len(vers2)
-
-    #  length used in first comparison part
-    el_1 = v1l
-
-    if v1l == v2l:
-        longer = None
-        el_1 = v1l
-
-    elif v1l > v2l:
-        longer = 'vers1'
-        el_1 = v2l
-
-    else:
-        longer = 'vers2'
-        el_1 = v1l
-
-    # first comparison part
-
-    for i in range(el_1):
-        if int(vers1[i]) > int(vers2[i]):
-            return +1
-        elif int(vers1[i]) < int(vers2[i]):
-            return -1
-        else:
-            continue
-
-    # second comparison part
-
-    if longer != None:
-        if longer == 'vers1':
-            return +1
-        else:
-            return -1
-
-
-    return 0
-
-
-def print_help():
-    print """\
-
-    install
-
-"""
 
 def install(files, base_dir):
 
@@ -499,41 +496,3 @@ def install(files, base_dir):
 
     return 0
 
-def router(opts, args, config):
-    ret = 0
-
-    args_l = len(args)
-
-
-    if args_l == 0:
-        print "-e- command not given"
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-            ret = 0
-
-
-        elif args[0] == 'install':
-
-            if args_l == 1:
-                print '-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments'
-                ret = 10
-            else:
-
-                base_dir = '/'
-
-                for i in opts:
-                    if i[0] == '-b':
-                        base_dir = i[1]
-
-                install(args[1:], base_dir)
-
-        else:
-            print "-e- Wrong command"
-
-
-        ret = 0
-
-    return ret
