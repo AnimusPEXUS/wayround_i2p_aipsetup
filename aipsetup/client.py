@@ -13,7 +13,8 @@ def print_help():
     print """\
 aipsetup client command
 
-   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [-v=VER] NAME
+   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [-v=VER]
+          NAME
 
       Search files on remote or local UHT server
 
@@ -37,8 +38,8 @@ aipsetup client command
 
       VER works only with --how=i
 
-   get [-o=DIRNAME] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i]
-       [-v=VER] NAME
+   get [-o=DIRNAME] [-i] [--how=b|r|e|i|c] [--where=r|l]
+       [--what=s|r|i] [-v=VER] NAME
 
       Get files from remote or local UHT server
 

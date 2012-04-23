@@ -11,6 +11,7 @@ import lxml.etree
 
 import name
 import version
+import utils
 
 from mako.template import Template
 from mako import exceptions
@@ -106,7 +107,9 @@ def router(opts, args, config):
 
     ret = 0
 
-    if len(args) == 0:
+    args_l = len(args)
+
+    if args_l == 0:
         print "-e- command not given"
         ret = 1
     else:
@@ -118,6 +121,35 @@ def router(opts, args, config):
         elif args[0] == 'mass_info_fix':
 
             mass_info_fix(config)
+
+        elif args[0] == 'list':
+
+            mask = '*'
+
+            if args_l > 2:
+                print '-e- Too many parameters'
+            else:
+
+                if args_l > 1:
+                    mask = args[1]
+
+                utils.list_files(config, mask, 'info')
+
+
+        elif args[0] == 'edit':
+
+            if args_l != 2:
+                print "-e- builder to edit not specified"
+            else:
+                utils.edit_file(config, args[1], 'info')
+
+        elif args[0] == 'copy':
+
+            if args_l != 3:
+                print "-e- wrong parameters count"
+            else:
+
+                utils.copy_file(config, args[1], args[2], 'info')
 
         else:
             print "-e- wrong command"

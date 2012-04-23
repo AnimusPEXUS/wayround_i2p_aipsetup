@@ -47,7 +47,7 @@ aipsetup build command
 
    init
 
-   apply_info
+   apply_data
 
    extract
 
@@ -100,7 +100,7 @@ def router(opts, args, config):
                     )
 
                 if ret != 0:
-                    print '-e- Error initiating directory'
+                    print "-e- Error initiating directory"
 
             else:
                 print "-e- Wrong -d parameter"
@@ -150,10 +150,12 @@ def init(directory='build', source_file=False, verbose=False):
     ret = 0
 
     if verbose:
-        print '-i- initiating dir ' + directory
+        print "-i- Initiating dir %(dir)s" % {
+            'dir': directory
+            }
 
     if isWdDirRestricted(directory):
-        print '-e- %(dir_str)s is restricted working dir' % {
+        print "-e- %(dir_str)s is restricted working dir" % {
             'dir_str': dir_str
             }
         print "    won't init"
@@ -164,11 +166,11 @@ def init(directory='build', source_file=False, verbose=False):
     if ret == 0:
 
         if verbose:
-            print '-v- checking dir name safety'
+            print "-v- checking dir name safety"
 
         if ((os.path.exists(directory))
             and not os.path.isdir(directory)):
-            print '-e- file already exists ant it is not a directory'
+            print "-e- file already exists ant it is not a directory"
             ret = -2
 
     if ret == 0:
@@ -176,7 +178,7 @@ def init(directory='build', source_file=False, verbose=False):
         # remove all files and directories in initiating dir
         if (os.path.exists(directory)) and os.path.isdir(directory):
             if verbose:
-                print '-i- directory already exists. cleaning...'
+                print "-i- directory already exists. cleaning..."
             shutil.rmtree(directory)
 
         os.mkdir(directory)
@@ -188,7 +190,7 @@ def init(directory='build', source_file=False, verbose=False):
             a = aipsetup.utils.pathRemoveDblSlash(
                 directory+'/' + i)
             if verbose:
-                print '-v- creating directory ' + a
+                print "-v- creating directory " + a
             os.makedirs(a)
 
     if verbose:
@@ -222,7 +224,7 @@ def set_instructions(settings, name, where='.'):
     ret = True
 
     if not os.path.isfile(os.path.join(settings['templates'], name)):
-        print '-e- Such instructions not found in ' + settings['templates']
+        print "-e- Such instructions not found in %(dir)s" + settings['templates']
 
         ret = False
 
@@ -232,10 +234,13 @@ def set_instructions(settings, name, where='.'):
             shutil.copy(os.path.join(settings['templates'], name),
                         where)
         except:
-            print '-e- Instructions copying error'
+            print "-e- Instructions copying error"
             ret = False
 
     if ret:
-        print '-i- Copyed ' + name + ' to ' + where
+        print "-i- Copyed %(name)s to %(where)s" % {
+            'name': name,
+            'where': where
+            }
 
     return ret

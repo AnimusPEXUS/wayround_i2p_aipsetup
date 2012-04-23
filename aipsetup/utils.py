@@ -1,13 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
+import ConfigParser
+import fcntl
+import glob
 import os
 import os.path
 import re
-import ConfigParser
 import shutil
+import struct
+import sys
 import traceback
+import termios
+
 
 
 def show_version_message():
@@ -38,8 +43,7 @@ default_config = {
     'repository_index'   : '/mnt/sda3/home/agu/_UHT/index_repository.lst',
     'source_index'       : '/mnt/sda3/home/agu/_UHT/index_source.lst',
 
-    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/\
-_UHT/pkgindex.sqlite',
+    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UHT/pkgindex.sqlite',
 
     'server_ip'          : '127.0.0.1',
     'server_port'        : '8005',
@@ -138,63 +142,6 @@ def get_configuration(defaults, file='/etc/aipsetup.conf'):
     del(cp)
     return ret
 
-def filecopy(src, dst, verbose=False):
-    if verbose:
-        print '-i- Copying "' + src + '"'
-        print '       to "' + dst + '"'
-    try:
-        shutil.copy(src, dst)
-    except:
-        return 1
-    return 0
-
-def iocat(in_file, out_file, size=255, verbose=False):
-    buff = 'tmp'
-    try:
-        while (buff != r''):
-            if verbose:
-                print 'reading ' + str(size)
-            buff = in_file.read(255)
-            if verbose:
-                print 'readed  ' + str(len(buff))
-                print 'write ' + str(len(buff))
-            out_file.write(buff)
-            out_file.flush()
-    except:
-        return 'ERROR'
-    return 'EOF'
-
-def pathRemoveDblSlash(dir_str):
-    t = dir_str
-    while t.find('//') != -1:
-        t = t.replace('//', '/')
-    return t
-
-# def option_check(names=['--help', '-h'], optionlist=[]):
-#     '''search option list for required option and returnd tupil in
-#        which first element is False or True depending on search
-#        success, second is option exect name, third is value'''
-
-#     for i in optionlist:
-#         for j in names:
-
-#             if i[0] == j:
-#                 return (True, i[0], i[1])
-
-#     return (False, None, None)
-
-# def traceback_return(info):
-#     ret = u''
-#     print repr(info[0])
-#     for i in traceback.extract_tb(info[2]):
-#         ret += u'   -T-  ['+unicode(i[1])+'] ('+unicode(repr())+')'+unicode()+' ('+unicode(repr(tb_object.tb_frame))+')'
-#         tb_object = tb_object.tb_next
-#     return ret
-
-def pkg_name_parse(name='aaa-1.1.1.1.tar.gz'):
-    result = re.match('([0-9A-Za-z_\ -]*)-?(.*)(tar\.gz|tar\.bz2|tar\.xz|tgz|tbz2|zip|7z|tar)$', name)
-    print repr(result.groups())
-
 def print_exception_info(e):
 
     print "-e- EXCEPTION: %(type)s" % {'type': repr(e[0])}
@@ -219,3 +166,185 @@ def remove_if_exists(file_or_dir):
                     'file': file_or_dir}
                 return 1
     return 0
+
+
+def list_files(config, mask, what):
+
+    lst = glob.glob('%(path)s/%(mask)s' % {
+            'path': config[what],
+            'mask': mask
+            })
+
+    lst2 = []
+    for each in lst:
+        if isinstance(each, str):
+            lst2.append(each.decode('utf-8'))
+        else:
+            lst2.append(each)
+    lst = lst2
+    del(lst2)
+
+    lst.sort()
+
+    semi = ''
+    if len(lst) > 0:
+        semi = ':'
+
+    print 'found %(n)s file(s)%(s)s' % {
+        'n': len(lst),
+        's': semi
+        }
+
+    bases = []
+    for each in lst:
+        bases.append(os.path.basename(each))
+
+    columned_list_print(bases)
+
+    return
+
+def edit_file(config, filename, what):
+    p = None
+    try:
+        p = subprocess.Popen([config['editor'], '%(path)s/%(file)s' % {
+                    'path': config[what],
+                    'file': filename
+                    }])
+    except:
+        print '-e- error starting editor'
+    else:
+        try:
+            p.wait()
+        except:
+            print '-e- error waiting for editor'
+
+        print '-i- editor exited'
+
+    del(p)
+
+def copy_file(config, file1, file2, what):
+    folder = config[what]
+
+    f1 = os.path.join(folder, file1)
+    f2 = os.path.join(folder, file2)
+
+    if os.path.isfile(f1):
+        if os.path.exists(f2):
+            print "-e- destination file or dir already exists"
+        else:
+            print "-i- copying %(f1)s to %(f2)s" % {
+                'f1': f1,
+                'f2': f2
+                }
+            try:
+                shutil.copy(f1, f2)
+            except:
+                print "-e- Error copying file"
+                print_exception_info(sys.exc_info())
+    else:
+        print "-e- source file not exists"
+
+def get_terminal_size(fd=sys.stdout.fileno()):
+    res = None
+    io_res = None
+    arg = struct.pack('HHHH', 0, 0, 0, 0)
+
+    # print "-e- op:%(op)s fd:%(fd)s arg:%(arg)s" % {
+    #     'op': repr(termios.TIOCGWINSZ),
+    #     'fd': repr(fd),
+    #     'arg': repr(arg)
+    #     }
+    try:
+        io_res = fcntl.ioctl(
+            fd,
+            termios.TIOCGWINSZ,
+            arg
+            # '        '
+            )
+    except:
+        # print_exception_info(sys.exc_info())
+        res = None
+    else:
+        try:
+            res = struct.unpack('HHHH', io_res)
+        except:
+            # print_exception_info(sys.exc_info())
+            res = None
+
+
+    if res != None:
+        res = {
+            'ws_row': res[0],
+            'ws_col': res[1],
+            'ws_xpixel': res[2],
+            'ws_ypixel': res[3]
+            }
+
+    return res
+
+def columned_list_print(lst, width=None, columns=None,
+                        margin_right=u' | ', margin_left=u' | ', spacing=u' | ',
+                        fd=sys.stdout.fileno()):
+
+
+
+    if width == None:
+        if (isinstance(fd, int) and os.isatty(fd)) \
+                or (isinstance(fd, file) and fd.isatty()):
+
+            size = get_terminal_size(fd)
+            if size == None:
+                width = 80
+            else:
+                width = size['ws_col']
+        else:
+            width = 80
+
+    longest = 0
+    lst_l = len(lst)
+    for i in lst:
+        l = len(i)
+        if l > longest:
+            longest = l
+
+
+    mrr_l = len(margin_right)
+    mrl_l = len(margin_left)
+    spc_l = len(spacing)
+
+    int_l = width-mrr_l-mrl_l
+
+    if columns == None:
+        columns = (int_l / (longest+spc_l))
+
+    if columns < 1:
+        columns = 1
+
+
+    rows = int(lst_l / columns)
+
+    # print "int_l   == " + str(int_l)
+    # print "longest == " + str(longest)
+    # print "width   == " + str(width)
+    # print "lst_l   == " + str(lst_l)
+    # print "columns == " + str(columns)
+
+    for i in range(0, lst_l, columns):
+        # print "i == " + str(i)
+        l2 = lst[i:i+columns]
+
+        l3 = []
+        for j in l2:
+            l3.append(j.ljust(longest))
+
+        while len(l3) != columns:
+            l3.append(u''.ljust(longest))
+
+
+        print "%(mrl)s%(row)s%(mrr)s" % {
+            'mrl': margin_left,
+            'mrr': margin_right,
+            'row': spacing.join(l3)
+            }
+
+    return
