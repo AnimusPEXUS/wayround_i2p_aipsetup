@@ -1,1 +1,1 @@
-epydoc aipsetup
+python ./gen.py aipsetup

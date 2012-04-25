@@ -68,7 +68,7 @@ ready_modules.sort()
 
 print "Creating doc for: %(list)s ." % {'list': ', '.join(ready_modules)}
 
-modules_str = " 'dns' "
+modules_str = " "
 
 for i in ready_modules:
     modules_str += " '%(name)s' " % {'name': i}
