@@ -29,6 +29,9 @@ def walk_package(name):
             else:
                 print "-i- Found module %(name)s" % {'name': name2}
                 modules.append(name2)
+#            exec("del(%(name)s)" % {'name': name2})
+
+#    exec("del(%(name)s)" % {'name': name})
 
     return packages, modules
 
@@ -73,4 +76,4 @@ modules_str = " "
 for i in ready_modules:
     modules_str += " '%(name)s' " % {'name': i}
 
-os.system("epydoc --show-sourcecode --show-private --show-imports --graph=all %(names)s " % {'names': modules_str})
+os.system("epydoc -v --show-sourcecode --show-private --show-imports --graph=all %(names)s " % {'names': modules_str})

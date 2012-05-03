@@ -19,7 +19,7 @@ def show_version_message():
     print """\
 aipsetup %(version)s
 
-Copyright (C) 2008-2012 Alexey V. Gorshkov (AKA AnimusPEXUS)
+Copyright (C) 2008-2012 Alexey V. Gorshkov (aka AnimusPEXUS)
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 """ % {
@@ -63,24 +63,6 @@ default_config = {
 
 actual_config = None
 
-
-def update_modules_data(module_name,
-                        module_group,
-                        module_modes,
-                        module_help):
-    import __main__
-    try:
-        __main__.modules_data
-    except:
-        print '-e- __main__.modules_data error'
-    else:
-        __main__.modules_data.append(
-            [module_name,
-             module_group,
-             module_modes,
-             module_help]
-            )
-    return
 
 def load_config():
     global actual_config
@@ -199,7 +181,7 @@ def list_files(config, mask, what):
     for each in lst:
         bases.append(os.path.basename(each))
 
-    columned_list_print(bases)
+    columned_list_print(bases, fd=sys.stdout.fileno())
 
     return
 
@@ -244,7 +226,7 @@ def copy_file(config, file1, file2, what):
     else:
         print "-e- source file not exists"
 
-def get_terminal_size(fd=sys.stdout.fileno()):
+def get_terminal_size(fd=1):
     res = None
     io_res = None
     arg = struct.pack('HHHH', 0, 0, 0, 0)
@@ -284,7 +266,7 @@ def get_terminal_size(fd=sys.stdout.fileno()):
 
 def columned_list_print(lst, width=None, columns=None,
                         margin_right=u' | ', margin_left=u' | ', spacing=u' | ',
-                        fd=sys.stdout.fileno()):
+                        fd=1):
 
 
 

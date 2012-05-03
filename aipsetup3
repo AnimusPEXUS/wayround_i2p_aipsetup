@@ -8,35 +8,10 @@ import glob
 import subprocess
 import shutil
 
+
+import aipsetup
 import aipsetup.utils
-
 import aipsetup.getopt2
-
-def print_help():
-    print """\
-   usage: %(basename)s [command] [command_parameters]
-
-   commands:
-
-      info          Pkg info files actions
-      buildinfo     Build info files actions
-      builders      builder files actions
-
-      build         Building actions
-      server        UHT server related actions
-      client        Download actions
-      pkgindex      Package index actions
-
-      name          Tools for parsing file names
-      docbook       Docbook tools
-
-
-      help          see this help
-      version       version info
-""" % {
-        'basename': os.path.basename(__file__)
-        }
-    return
 
 
 config = aipsetup.utils.load_config()
@@ -50,18 +25,44 @@ ret = 0
 optilist, args = aipsetup.getopt2.getopt(sys.argv[1:])
 args_l = len(args)
 
+if '--help' in [ i[0] for i in optilist ]:
+    print """\
+   Usage: %(basename)s [command] [command_parameters]
 
-if args_l == 0:
+   Commands:
+
+      info          Pkg info files Actions
+      buildinfo     Build info files Actions
+      builders      builder files Actions
+
+      buildingsite  Building Site Manuvers
+      build         Building Actions
+      server        UHT Server Related Actions
+      client        Download Actions
+      pkgindex      Package Index Actions
+
+      name          Tools for Parsing File Names
+      docbook       Docbook Tools
+
+
+      --help        See this Help
+      --version     Version Info
+""" % {
+        'basename': os.path.basename(__file__)
+        }
+
+elif '--version' in [ i[0] for i in optilist ]:
+    print aipsetup.AIPSETUP_VERSION
+
+elif args_l == 0:
     print "-e- no commands or parameters passed. try aipsetup help"
-    exit(1)
+    ret = 1
+
 else:
 
-    if args[0] == 'help':
-        print_help()
-
-    elif args[0] in ['info', 'buildinfo', 'builders',
+    if args[0] in ['info', 'buildinfo', 'builders',
                      'build', 'server', 'client',
-                     'pkgindex', 'name', 'docbook']:
+                     'pkgindex', 'name', 'docbook', buildingsite]:
 
         exec("import aipsetup.%(name)s" % {
                 'name': args[0]

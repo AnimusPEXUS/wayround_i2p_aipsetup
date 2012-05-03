@@ -1,0 +1,17 @@
+Package building logic for aipsetup version 3.x
+
+
+
+First of all, we need to determine actions for building and packing
+packages. Thous steps must include some before- after- and in-
+building time package documenting, so users could determine mechanisms
+and ways by which some particular package were build. -- This is a
+GNU-Way, thus must be as clear as possible.
+
+
+
+Personaly I, tending to copy `builder', `build-info' and `info' files
+into building site (here and farther, `building site' term is for
+directory containing DIR_* directories listed in build.py). But if I
+do so, this can lead to personalityes multiplication and some nasty
+mess in outer world, if aipsetup will ever reach some popularity.
