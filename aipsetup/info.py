@@ -9,9 +9,9 @@ import glob
 import lxml
 import lxml.etree
 
-import name
-import version
-import utils
+import aipsetup.name
+import aipsetup.version
+import aipsetup.utils
 
 from mako.template import Template
 from mako import exceptions
@@ -27,9 +27,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     mirrors = [],
     # 'standard', 'local' or other package name
     pkg_name_type = 'standard',
-    #
-    # TODO: correct re
-    regexp = 'name-(\d)*\.tar.(xz|gz|bz2|lzma)',
     # string list
     tags = [],
     # string

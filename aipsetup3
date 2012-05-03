@@ -35,6 +35,7 @@ if '--help' in [ i[0] for i in optilist ]:
       buildinfo     Build info files Actions
       builders      builder files Actions
 
+      constitution  View or Edit Constitution
       buildingsite  Building Site Manuvers
       build         Building Actions
       server        UHT Server Related Actions
@@ -61,8 +62,9 @@ elif args_l == 0:
 else:
 
     if args[0] in ['info', 'buildinfo', 'builders',
-                     'build', 'server', 'client',
-                     'pkgindex', 'name', 'docbook', buildingsite]:
+                   'build', 'server', 'client',
+                   'pkgindex', 'name', 'docbook',
+                   'buildingsite', 'constitution']:
 
         exec("import aipsetup.%(name)s" % {
                 'name': args[0]

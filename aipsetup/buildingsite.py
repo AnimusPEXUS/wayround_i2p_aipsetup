@@ -1,4 +1,16 @@
 
+import os
+import shutil
+import sys
+import inspect
+import copy
+# import json
+import pprint
+
+import aipsetup.info
+import aipsetup.constitution
+import aipsetup.utils
+
 DIR_TARBALL    = '00.TARBALL'
 DIR_SOURCE     = '01.SOURCE'
 DIR_PATCHES    = '02.PATCHES'
@@ -37,7 +49,7 @@ aipsetup build command
       TARBALL, if sett - Copy TARBALL file right into package TARBALL
                dir
 
-   apply_pkg_info [-d=DIRNAME] NAME
+   apply_info [-d=DIRNAME] NAME
 
       Apply package info. NAME can be any file in pkg_info dir
 
@@ -64,10 +76,16 @@ def router(opts, args, config):
 
             src_file = None
 
-            for i in optilist:
+            for i in opts:
                 if i[0] == '-d':
 
                     init_dir = i[1]
+
+            verbose_option = False
+
+            for i in opts:
+                if i[0] == '-v':
+                    verbose_option = True
 
             if args_l == 2:
                 src_file = args[1]
@@ -87,6 +105,22 @@ def router(opts, args, config):
             else:
                 print "-e- Wrong -d parameter"
 
+        elif args[0] == 'apply_info':
+            if args_l != 2:
+                print "-e- buildinfo to apply not specified"
+            else:
+
+                name = args[1]
+
+                dirname = '.'
+
+                for i in opts:
+                    if i[0] == '-d':
+                        dirname = i[1]
+
+                apply_info(config, name, dirname)
+
+
         else:
             print "-e- Wrong command"
 
@@ -104,11 +138,10 @@ def isWdDirRestricted(directory):
         '/bin',     '/boot' ,    '/daemons',
         '/dev',     '/etc',      '/lib',     '/proc',
         '/sbin',    '/sys',
-        '/usr/bin', '/usr/sbin', '/usr/lib',
-        '/usr/man', '/usr/share'
+        '/usr'
     ]
 
-    exec_dirs = ['/opt', '/usr', '/var', '/']
+    exec_dirs = ['/opt', '/var', '/']
 
     dir_str_abs = os.path.abspath(directory)
 
@@ -135,9 +168,12 @@ def init(directory='build', source_file=None, verbose=False):
             'dir': directory
             }
 
+    if verbose:
+        print "-v- checking dir name safety"
+
     if isWdDirRestricted(directory):
         print "-e- %(dir_str)s is restricted working dir" % {
-            'dir_str': dir_str
+            'dir_str': directory
             }
         print "    won't init"
         ret = -1
@@ -145,9 +181,6 @@ def init(directory='build', source_file=None, verbose=False):
 
     # if exists and not derictory - not continue
     if ret == 0:
-
-        if verbose:
-            print "-v- checking dir name safety"
 
         if ((os.path.exists(directory))
             and not os.path.isdir(directory)):
@@ -165,11 +198,8 @@ def init(directory='build', source_file=None, verbose=False):
         os.mkdir(directory)
 
         # create all subdirs
-        # NOTE: probebly '/' in paths is not a problem, couse we
-        #       working with POSIX only
         for i in DIR_ALL:
-            a = aipsetup.utils.pathRemoveDblSlash(
-                directory+'/' + i)
+            a = os.path.abspath(os.path.join(directory, i))
             if verbose:
                 print "-v- creating directory " + a
             os.makedirs(a)
@@ -183,7 +213,8 @@ def init(directory='build', source_file=None, verbose=False):
                 for i in glob.glob(os.path.join(source_file,'*')):
                     if os.path.isdir(i):
                         shutil.copytree(
-                            i, os.path.join(directory, DIR_SOURCE, os.path.basename(i)))
+                            i, os.path.join(
+                                directory, DIR_SOURCE, os.path.basename(i)))
                     else:
                         shutil.copy2(
                             i, os.path.join(directory, DIR_SOURCE))
@@ -198,30 +229,109 @@ def init(directory='build', source_file=None, verbose=False):
 
     return ret
 
-def apply_pkg_info(config, name, where='.'):
+def apply_info(config, infoname, dirname='.'):
 
-    '''copy building instructions to pointed dir'''
+    info_filename = os.path.join(config['info'], '%(name)s.xml' % {
+            'name': infoname
+            })
 
-    ret = True
-
-    if not os.path.isfile(os.path.join(settings['templates'], name)):
-        print "-e- Such instructions not found in %(dir)s" + settings['templates']
-
-        ret = False
+    info = aipsetup.info.read_from_file(info_filename)
+    if not isinstance(info, dict):
+        print "-e- Can't read info from %(filename)s" % {
+            'filename': info_filename
+            }
 
     else:
 
-        try:
-            shutil.copy(os.path.join(settings['templates'], name),
-                        where)
-        except:
-            print "-e- Instructions copying error"
-            ret = False
+        name = info['buildinfo']
 
-    if ret:
-        print "-i- Copyed %(name)s to %(where)s" % {
-            'name': name,
-            'where': where
-            }
+        const = aipsetup.constitution.read_constitution(config)
+        if not isinstance(const, dict):
+            print "-e- Error getting constitution for farver configuration"
+        else:
 
-    return ret
+            buildinfodir = config['buildinfo']
+
+            buildinfo_filename = os.path.join(buildinfodir, '%(name)s.py' % {
+                    'name':name
+                    })
+
+            wfile = os.path.join(dirname, 'package_info.txt')
+
+            if os.path.exists(wfile) and not os.path.isfile(wfile):
+                print "-e- can't use %(file)s - remove it first" % {
+                    'file': wfile
+                    }
+
+            else:
+
+                if not os.path.exists(buildinfo_filename) \
+                        or not os.path.isfile(buildinfo_filename):
+                    print "-e- Can't find buildinfo module `%(name)s'" % {
+                        'name': buildinfo_filename
+                        }
+                else:
+
+                    module = None
+                    g = {}
+                    l = {}
+
+                    try:
+                        module = execfile(buildinfo_filename, g, l)
+                    except:
+                        print "-e- Can't load Python script `%(name)s'" % {
+                            'name': buildinfo_filename
+                            }
+                        utils.print_exception_info(sys.exc_info())
+                    else:
+
+                        # print repr(g)
+                        # print repr(l)
+
+                        if not 'build_info' in l \
+                                or not inspect.isfunction(l['build_info']):
+
+                            print "-e- Named module doesn't have 'build_info' function"
+
+                        else:
+                            d = None
+                            try:
+                                d = l['build_info'](
+                                    copy.copy(config), info, const)
+                            except:
+                                print "-e- Error while calling for build_info() in %(name)s " % {
+                                    'name': buildinfo_filename
+                                    }
+                                aipsetup.utils.print_exception_info(sys.exc_info())
+
+                            else:
+
+                                f = None
+
+                                try:
+                                    f = open(wfile, 'w')
+                                except:
+                                    print "-e- can't open %(file)s for writing" % {
+                                        'file': wfile
+                                        }
+                                    aipsetup.utils.print_exception_info(sys.exc_info())
+                                else:
+                                    txt = ''
+                                    try:
+                                        # txt = json.dumps(d)
+                                        txt=pprint.pformat(d)
+                                    except:
+                                        print "-e- can't represent data for package info"
+                                        aipsetup.utils.print_exception_info(sys.exc_info())
+                                    else:
+
+                                        f.write("#!/usr/bin/python\n")
+                                        f.write("# -*- coding: utf-8 -*-\n")
+
+                                        f.write("\n")
+                                        f.write("\n")
+
+                                        f.write(txt)
+
+                                    f.close()
+    return

@@ -12,6 +12,7 @@ import struct
 import sys
 import traceback
 import termios
+import subprocess
 
 
 
@@ -33,6 +34,8 @@ default_config = {
     'editor'             : 'emacs',
 
     'uhtroot'            : '/mnt/sda3/home/agu/_UHT',
+
+    'constitution'       : '/mnt/sda3/home/agu/_UHT/system_constitution.py',
 
     'builders'           : '/mnt/sda3/home/agu/_UHT/pkg_builders',
     'buildinfo'          : '/mnt/sda3/home/agu/_UHT/pkg_buildinfo',
@@ -186,14 +189,21 @@ def list_files(config, mask, what):
     return
 
 def edit_file(config, filename, what):
+    return edit_file_direct(config, '%(path)s/%(file)s' % {
+            'path': config[what],
+            'file': filename
+            })
+
+
+def edit_file_direct(config, filename):
     p = None
     try:
-        p = subprocess.Popen([config['editor'], '%(path)s/%(file)s' % {
-                    'path': config[what],
+        p = subprocess.Popen([config['editor'], '%(file)s' % {
                     'file': filename
                     }])
     except:
         print '-e- error starting editor'
+        print_exception_info(sys.exc_info())
     else:
         try:
             p.wait()
