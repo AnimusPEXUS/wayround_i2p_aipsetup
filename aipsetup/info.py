@@ -5,6 +5,7 @@ import os.path
 import os
 import copy
 import glob
+import sys
 
 import lxml
 import lxml.etree
@@ -191,16 +192,24 @@ def read_from_file(name):
     tree = None
 
     try:
-        f = open(name, 'r')
+        f = open(aipsetup.utils.deunicodify(name), 'r')
         txt = f.read()
         f.close()
     except:
-        ret = 1
+        print "-e- Can't open file %(name)s" % {
+            'name': name
+            }
+        aipsetup.utils.print_exception_info(sys.exc_info())
+        
 
     else:
         try:
             tree = lxml.etree.fromstring(txt)
         except:
+            print "-e- Can't parse file %(name)s" % {
+                'name': name
+                }
+            aipsetup.utils.print_exception_info(sys.exc_info())
             ret = 2
         else:
             ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
@@ -249,10 +258,14 @@ def write_to_file(name, struct):
         )
 
     try:
-        f = open(name, 'w')
+        f = open(aipsetup.utils.deunicodify(name), 'w')
         f.write(txt)
         f.close()
     except:
+        print "-e- Can't rewrite file %(name)s" % {
+            'name': name
+            }
+        aipsetup.utils.print_exception_info(sys.exc_info())
         ret = 1
 
     return ret
@@ -265,7 +278,9 @@ def info_fixes(dicti, name):
 
 def mass_info_fix(config):
 
-    lst = glob.glob(os.path.join(config['info'], '*.xml'))
+    lst = aipsetup.utils.unicodify(
+        glob.glob(os.path.join(config['info'], '*.xml'))
+        )
 
 
     for i in lst:

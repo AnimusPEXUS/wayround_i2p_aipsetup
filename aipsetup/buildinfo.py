@@ -71,7 +71,7 @@ def router(opts, args, config):
                 utils.copy_file(config, args[1], args[2], 'buildinfo')
 
         elif args[0] == 'apply':
-
+            pass
 
         else:
             print "-e- wrong command. try aipsetup buildinfo help"

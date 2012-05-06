@@ -10,7 +10,8 @@ import glob
 import sqlalchemy
 import sqlalchemy.orm
 
-import info
+import aipsetup.info
+import aipsetup.utils
 
 
 def print_help():
@@ -137,7 +138,9 @@ def router(opts, args, config):
                     a = True
 
             if len(file_list) == 0:
-                file_list = glob.glob(os.path.join(config['info'], '*.xml'))
+                file_list = aipsetup.utils.unicodify(
+                    glob.glob(os.path.join(config['info'], '*.xml'))
+                    )
 
             r = PackageDatabase(config)
             r.load_package_info_from_filesystem(file_list, a)
@@ -240,9 +243,9 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('cid',
                               sqlalchemy.Integer,
                               nullable=False,
@@ -258,9 +261,9 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('parent_cid',
                               sqlalchemy.Integer,
                               nullable=False,
@@ -271,39 +274,39 @@ class PackageDatabase:
         self._table_VersionPrefix = sqlalchemy.Table(
             'version_prefix', self._db_metadata,
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
                               primary_key=True,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('prefix',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
-                              default='')
+                              default=u'')
             )
 
         self._table_PackageInfo = sqlalchemy.Table(
             'package_info', self._db_metadata,
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
                               primary_key=True,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('home_page',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('description',
-                              sqlalchemy.Text,
+                              sqlalchemy.UnicodeText,
                               nullable=False,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('pkg_name_type',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
-                              default=''),
+                              default=u''),
             sqlalchemy.Column('buildinfo',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False,
-                              default='')
+                              default=u'')
             )
 
         self._table_PackageSource = sqlalchemy.Table(
@@ -314,12 +317,12 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False),
             sqlalchemy.Column('url',
-                              sqlalchemy.Text,
+                              sqlalchemy.UnicodeText,
                               nullable=False,
-                              default=''),
+                              default=u''),
             )
 
         self._table_PackageMirror = sqlalchemy.Table(
@@ -330,12 +333,12 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False),
             sqlalchemy.Column('url',
                               sqlalchemy.Text,
                               nullable=False,
-                              default=''),
+                              default=u''),
             )
 
         self._table_PackageTag = sqlalchemy.Table(
@@ -346,10 +349,10 @@ class PackageDatabase:
                               primary_key=True,
                               autoincrement=True),
             sqlalchemy.Column('name',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False),
             sqlalchemy.Column('tag',
-                              sqlalchemy.String(256),
+                              sqlalchemy.Unicode(256),
                               nullable=False),
             )
 
@@ -440,8 +443,12 @@ class PackageDatabase:
 
     def _scan_repo_for_pkg_and_cat(self, sess, root_dir, cid):
 
+        ld = os.listdir(root_dir)
 
-        files = os.listdir(root_dir)
+        files = aipsetup.utils.unicodify(
+            ld
+            )
+
         files.sort()
 
         isfiles = 0
@@ -830,7 +837,7 @@ class PackageDatabase:
 
                 r = self.package_info_record_to_dict(record=i)
                 if isinstance(r, dict):
-                    if info.write_to_file(filename, r) != 0:
+                    if aipsetup.info.write_to_file(filename, r) != 0:
                         print "-e- can't write file %(name)s" % {
                             'name': filename
                             }
@@ -855,7 +862,7 @@ class PackageDatabase:
         files.sort()
 
         for i in files:
-            name = os.path.basename(i)
+            name = aipsetup.utils.unicodify(os.path.basename(i))
             name = name[:-4]
 
             missing = False
@@ -872,7 +879,7 @@ class PackageDatabase:
                 if not missing:
                     continue
 
-            struct = info.read_from_file(i)
+            struct = aipsetup.info.read_from_file(i)
             if isinstance(struct, dict):
                 print "-i- loading record: %(name)s" % {'name': name}
                 self.package_info_dict_to_record(name, struct)
@@ -922,13 +929,11 @@ class PackageDatabase:
 
             if fnmatch.fnmatch(i.name, mask):
                 found += 1
-                if not mute:
-                    print i.name
                 lst.append(i.name)
-                sys.stdout.flush()
 
         sess.close()
         if not mute:
+            aipsetup.utils.columned_list_print(lst)
             print "-i- Total found %(n)d records" % {
                 'n': found
                 }
@@ -983,9 +988,9 @@ class PackageDatabase:
                     if force_rewrite:
                         print "-i- forced template rewriting"
 
-                    if info.write_to_file(
+                    if aipsetup.info.write_to_file(
                         filename,
-                        info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
+                        aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                         pkgs_failed += 1
                         print "-e- failed writing template to %(name)s" % {
                             'name': filename
@@ -1037,7 +1042,7 @@ class PackageDatabase:
                         }
                 continue
 
-            d1 = info.read_from_file(filename)
+            d1 = aipsetup.info.read_from_file(filename)
 
             if not isinstance(d1, dict):
                 print "-i- Error parsing file: %(name)s" % {
@@ -1045,7 +1050,7 @@ class PackageDatabase:
                     }
             else:
                 d2 = self.package_info_record_to_dict(record=i)
-                if not info.is_dicts_equal(d1, d2):
+                if not aipsetup.info.is_dicts_equal(d1, d2):
                     ret.append(i.name)
                     if not mute:
                         print "-w- xml init file differs for: %(name)s" % {
