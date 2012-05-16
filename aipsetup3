@@ -76,5 +76,6 @@ else:
 
     else:
         print "-e- wrong command. try aipsetup --help"
+        ret = 1
 
 exit(ret)

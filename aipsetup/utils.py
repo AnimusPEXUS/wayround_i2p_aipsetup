@@ -153,6 +153,11 @@ def remove_if_exists(file_or_dir):
                 return 1
     return 0
 
+def cleanup_dir(dirname):
+    files = glob.glob(os.path.join(dirname, '*'))
+    for i in files:
+        remove_if_exists(i)
+    return
 
 def list_files(config, mask, what):
 
@@ -343,7 +348,9 @@ def columned_list_print(lst, width=None, columns=None,
     return
 
 
-def codify(list_or_basestring, on_wrong_type='exception', ftype='str', ttype='unicode', operation='decode', coding='utf-8'):
+def codify(list_or_basestring, on_wrong_type='exception',
+           ftype='str', ttype='unicode', operation='decode',
+           coding='utf-8'):
 
     ret = None
     if isinstance(list_or_basestring, eval(ftype)):
@@ -386,7 +393,8 @@ def unicodify(list_or_basestring, on_wrong_type='exception'):
 
     """
 
-    return codify(list_or_basestring, on_wrong_type='exception', ftype='str', ttype='unicode', operation='decode')
+    return codify(list_or_basestring, on_wrong_type='exception',
+                  ftype='str', ttype='unicode', operation='decode')
 
 def deunicodify(list_or_basestring, on_wrong_type='exception'):
 
@@ -404,4 +412,24 @@ def deunicodify(list_or_basestring, on_wrong_type='exception'):
 
     """
 
-    return codify(list_or_basestring, on_wrong_type='exception', ftype='unicode', ttype='str', operation='encode')
+    return codify(list_or_basestring, on_wrong_type='exception',
+                  ftype='unicode', ttype='str', operation='encode')
+
+def env_vars_edit(var_list, mode='copy'):
+
+    ret = []
+
+    if mode == 'copy':
+        ret = copy.copy(os.environ)
+    elif mode == 'clean':
+        ret = []
+    else:
+        raise ValueError
+
+    for i in var_list:
+        if var_list[i] == None and i in ret:
+            del(ret[i])
+        else:
+            ret[i] = var_list[i]
+
+    return ret

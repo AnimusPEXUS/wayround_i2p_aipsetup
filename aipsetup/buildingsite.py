@@ -305,6 +305,8 @@ def write_package_info(config, directory, info):
 
 def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
 
+    ret = 0
+
     d = read_package_info(config, dirname, ret_on_error={})
 
     d['pkg_nameinfo'] = None
@@ -318,28 +320,44 @@ def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
 
     if parse_result == None:
         print "-e- Can't correctly parse file name"
-
+        ret = 1
     else:
         d['pkg_nameinfo'] = parse_result
 
-    write_package_info(config, dirname, d)
+        write_package_info(config, dirname, d)
 
-    return
+        ret = 0
+
+    return ret
 
 
 
 def apply_constitution_on_buildingsite(config, dirname):
 
+    ret = 0
+
     d = read_package_info(config, dirname, ret_on_error={})
 
-    d['constitution'] = aipsetup.constitution.read_constitution(config)
+    const = aipsetup.constitution.read_constitution(config)
 
-    write_package_info(config, dirname, d)
+    if const == None:
 
-    return
+        ret = 1
+
+    else:
+
+        d['constitution'] = const
+
+        write_package_info(config, dirname, d)
+
+        ret = 0
+
+    return ret
 
 
 def apply_pkg_info_on_buildingsite(config, dirname):
+
+    ret = 0
 
     d = read_package_info(config, dirname, ret_on_error={})
 
@@ -355,6 +373,7 @@ def apply_pkg_info_on_buildingsite(config, dirname):
 
         print "-e- info undetermined"
         d['pkg_info'] = {}
+        ret = 1
 
     else:
         infoname = d['pkg_nameinfo']['groups']['name']
@@ -363,23 +382,31 @@ def apply_pkg_info_on_buildingsite(config, dirname):
                 'name': infoname
                 })
 
+        print "-i- Reading info file `%(name)s'" % {
+            'name': info_filename
+            }
         info = aipsetup.info.read_from_file(info_filename)
         if not isinstance(info, dict):
             print "-e- Can't read info from %(filename)s" % {
                 'filename': info_filename
                 }
             d['pkg_info'] = {}
+            ret = 2
         else:
 
             d['pkg_info'] = info
             # print repr(info)
 
-    write_package_info(config, dirname, d)
+            write_package_info(config, dirname, d)
 
-    return
+            ret = 0
+
+    return ret
 
 
 def apply_pkg_buildinfo_on_buildingsite(config, dirname):
+
+    ret = 0
 
     pi = read_package_info(config, dirname, ret_on_error={})
 
@@ -390,6 +417,7 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
             or not isinstance(pi['pkg_info']['buildinfo'], basestring):
         print "-e- buildinfo undetermined"
         pi['pkg_buildinfo'] = {}
+        ret = 1
 
     else:
 
@@ -404,6 +432,8 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
             print "-e- Can't find buildinfo Python script `%(name)s'" % {
                 'name': buildinfo_filename
                 }
+            ret = 2
+
         else:
 
             g = {}
@@ -415,13 +445,16 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                 print "-e- Can't load buildinfo Python script `%(name)s'" % {
                     'name': buildinfo_filename
                     }
-                utils.print_exception_info(sys.exc_info())
+                aipsetup.utils.print_exception_info(sys.exc_info())
+                ret = 3
+
             else:
 
                 if not 'build_info' in l \
                         or not inspect.isfunction(l['build_info']):
 
                     print "-e- Named module doesn't have 'build_info' function"
+                    ret = 4
 
                 else:
 
@@ -433,19 +466,28 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                             }
                         aipsetup.utils.print_exception_info(sys.exc_info())
                         pi['pkg_buildinfo'] = {}
+                        ret = 5
 
-    write_package_info(config, dirname, pi)
+                    else:
 
-    # print repr(pi)
+                        write_package_info(config, dirname, pi)
 
-    return
+                        ret = 0
+
+    return ret
 
 
 def apply_info(config, dirname='.', source_filename=None):
 
-    apply_pkg_nameinfo_on_buildingsite(config, dirname, source_filename)
-    apply_constitution_on_buildingsite(config, dirname)
-    apply_pkg_info_on_buildingsite(config, dirname)
-    apply_pkg_buildinfo_on_buildingsite(config, dirname)
+    ret = 0
 
-    return
+    if apply_pkg_nameinfo_on_buildingsite(config, dirname, source_filename) != 0:
+        ret = 1
+    elif apply_constitution_on_buildingsite(config, dirname) != 0:
+        ret = 2
+    elif apply_pkg_info_on_buildingsite(config, dirname) != 0:
+        ret = 3
+    elif apply_pkg_buildinfo_on_buildingsite(config, dirname) != 0:
+        ret = 4
+
+    return ret

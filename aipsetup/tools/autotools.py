@@ -2,10 +2,97 @@ import os.path
 import subprocess
 import glob
 import shutil
+import sys
 
 import aipsetup.extractor
 import aipsetup.buildingsite
+import aipsetup.utils
 # import aipsetup.name
+
+
+def determine_source_dir(config, buildingsite, pkginfo):
+
+    source_dir = os.path.abspath(
+        os.path.join(
+            buildingsite,
+            aipsetup.buildingsite.DIR_SOURCE,
+            pkginfo['pkg_buildinfo']['autotools_configure_opts']['config_dir']
+            )
+        )
+
+    return source_dir
+
+def determine_building_dir(config, buildingsite, source_dir, pkginfo):
+    building_dir = ''
+
+    if pkginfo['pkg_buildinfo']['autotools_configure_opts']['separate_build_dir'] == True:
+
+        building_dir = os.path.abspath(
+            os.path.join(
+                buildingsite,
+                aipsetup.buildingsite.DIR_BUILDING,
+                pkginfo['pkg_buildinfo']['autotools_configure_opts']['config_dir']
+                )
+            )
+
+    else:
+
+        building_dir = source_dir
+
+    return building_dir
+
+def determine_configurer_parameters(config, pkginfo):
+
+    run_parameters = []
+
+    for i in pkginfo['pkg_buildinfo']['autotools_configure_params']:
+        if pkginfo['pkg_buildinfo']['autotools_configure_params'][i] != None:
+            run_parameters.append("--%(par_name)s=%(par_value)s" % {
+                    'par_name': i,
+                    'par_value': pkginfo['pkg_buildinfo']['autotools_configure_params'][i]
+                    })
+        else:
+            run_parameters.append("--%(par_name)s" % {
+                    'par_name': i
+                    })
+
+    return run_parameters
+
+
+def determine_builder_parameters(config, pkginfo):
+
+    run_parameters = []
+
+    for i in pkginfo['pkg_buildinfo']['autotools_build_params']:
+        if pkginfo['pkg_buildinfo']['autotools_build_params'][i] != None:
+            run_parameters.append("%(par_name)s=%(par_value)s" % {
+                    'par_name': i,
+                    'par_value': pkginfo['pkg_buildinfo']['autotools_build_params'][i]
+                    })
+        else:
+            run_parameters.append("%(par_name)s" % {
+                    'par_name': i
+                    })
+
+    return run_parameters
+
+
+def determine_installer_parameters(config, pkginfo):
+
+    run_parameters = []
+
+    for i in pkginfo['pkg_buildinfo']['autotools_install_params']:
+        if pkginfo['pkg_buildinfo']['autotools_install_params'][i] != None:
+            run_parameters.append("%(par_name)s=%(par_value)s" % {
+                    'par_name': i,
+                    'par_value': pkginfo['pkg_buildinfo']['autotools_install_params'][i]
+                    })
+        else:
+            run_parameters.append("%(par_name)s" % {
+                    'par_name': i
+                    })
+
+    return run_parameters
 
 
 def extract(config, buildingsite='.'):
@@ -46,5 +133,247 @@ def extract(config, buildingsite='.'):
     return
 
 
-def configure(options, build_dir, run_dir):
-    pass
+def configure(config, buildingsite='.'):
+
+    ret = 0
+
+    pi = aipsetup.buildingsite.read_package_info(
+        config, buildingsite, ret_on_error=None)
+
+    if pi == None:
+        print "-e- error getting information about package"
+    else:
+
+        source_dir = determine_source_dir(
+            config, buildingsite, pi
+            )
+
+        building_dir = determine_building_dir(
+            config, buildingsite, source_dir, pi
+            )
+
+        run_parameters = determine_configurer_parameters(
+            config, pi
+            )
+
+        config_script = os.path.abspath(
+            os.path.join(
+                source_dir,
+                pi['pkg_buildinfo']['autotools_configure_opts']['script_name']
+                )
+            )
+
+        cmd = ['bash'] + [config_script] + run_parameters
+
+        print "-i- Starting autotools configurer script with following command:"
+        print "    %(cmd)s" % {
+            'cmd': repr(cmd)
+            }
+        print "-i-"
+
+        env = aipsetup.utils.env_vars_edit(
+            pi['pkg_buildinfo']['autotools_configure_envs'],
+            pi['pkg_buildinfo']['autotools_configure_env_opts']['mode']
+            )
+
+        if len(pi['pkg_buildinfo']['autotools_configure_envs']) > 0:
+            print "-i- Environment Modifications: %(list)s" % {
+                'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_configure_envs'])
+                }
+
+        init_working_dir = os.getcwd()
+        os.chdir(building_dir)
+
+        p = None
+        try:
+            p = subprocess.Popen(cmd, env=env)
+        except:
+            print "-e- exception while starting configuration script"
+            print "    command line was:"
+            print "    " + repr(cmd)
+            aipsetup.utils.print_exception_info(sys.exc_info())
+            ret = 100
+
+        else:
+
+            try:
+                p.wait()
+            except:
+                print "\n-e- exception oqured while waiting for configure"
+                aipsetup.utils.print_exception_info(sys.exc_info())
+                ret = 100
+            else:
+                print "-i- configurer return code was: %(code)d" % {
+                    'code': p.returncode
+                    }
+                ret = p.returncode
+
+        os.chdir(init_working_dir)
+
+    return ret
+
+def build(config, buildingsite='.'):
+
+    ret = 0
+
+    pi = aipsetup.buildingsite.read_package_info(
+        config, buildingsite, ret_on_error=None)
+
+    if pi == None:
+        print "-e- error getting information about package"
+    else:
+
+        source_dir = determine_source_dir(
+            config, buildingsite, pi
+            )
+
+        building_dir = determine_building_dir(
+            config, buildingsite, source_dir, pi
+            )
+
+        run_parameters = determine_builder_parameters(
+            config, pi
+            )
+
+        makefile = os.path.abspath(
+            os.path.join(
+                building_dir,
+                pi['pkg_buildinfo']['autotools_build_opts']['make_file_name']
+                )
+            )
+
+        cmd = ['make'] + ['-f', makefile] + run_parameters
+
+        print "-i- Starting autotools make script with following command:"
+        print "    %(cmd)s" % {
+            'cmd': repr(cmd)
+            }
+        print "-i-"
+
+        env = aipsetup.utils.env_vars_edit(
+            pi['pkg_buildinfo']['autotools_build_envs'],
+            pi['pkg_buildinfo']['autotools_build_env_opts']['mode']
+            )
+
+        if len(pi['pkg_buildinfo']['autotools_build_envs']) > 0:
+            print "-i- Environment Modifications: %(list)s" % {
+                'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_build_envs'])
+                }
+
+        init_working_dir = os.getcwd()
+        os.chdir(building_dir)
+
+        p = None
+        try:
+            p = subprocess.Popen(cmd, env=env)
+        except:
+            print "-e- exception while starting make script"
+            print "    command line was:"
+            print "    " + repr(cmd)
+            aipsetup.utils.print_exception_info(sys.exc_info())
+            ret = 100
+
+        else:
+
+            try:
+                p.wait()
+            except:
+                print "\n-e- exception oqured while waiting for builder"
+                aipsetup.utils.print_exception_info(sys.exc_info())
+                ret = 100
+            else:
+                print "-i- builder return code was: %(code)d" % {
+                    'code': p.returncode
+                    }
+                ret = p.returncode
+
+        os.chdir(init_working_dir)
+
+    return ret
+
+
+def install(config, buildingsite='.'):
+
+    ret = 0
+
+    pi = aipsetup.buildingsite.read_package_info(
+        config, buildingsite, ret_on_error=None)
+
+    if pi == None:
+        print "-e- error getting information about package"
+    else:
+
+        source_dir = determine_source_dir(
+            config, buildingsite, pi
+            )
+
+        building_dir = determine_building_dir(
+            config, buildingsite, source_dir, pi
+            )
+
+        run_parameters = determine_installer_parameters(
+            config, pi
+            )
+
+        makefile = os.path.abspath(
+            os.path.join(
+                building_dir,
+                pi['pkg_buildinfo']['autotools_install_opts']['make_file_name']
+                )
+            )
+
+        destdir = os.path.abspath(
+            os.path.join(
+                buildingsite,
+                aipsetup.buildingsite.DIR_DESTDIR
+                )
+            )
+
+        cmd = ['make'] + ['-f', makefile] + run_parameters + ['install'] + ['DESTDIR=%(dd)s' % {'dd':destdir}]
+
+        print "-i- Starting autotools install script with following command:"
+        print "    %(cmd)s" % {
+            'cmd': repr(cmd)
+            }
+        print "-i-"
+
+        env = aipsetup.utils.env_vars_edit(
+            pi['pkg_buildinfo']['autotools_install_envs'],
+            pi['pkg_buildinfo']['autotools_install_env_opts']['mode']
+            )
+
+        if len(pi['pkg_buildinfo']['autotools_install_envs']) > 0:
+            print "-i- Environment Modifications: %(list)s" % {
+                'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_install_envs'])
+                }
+
+        init_working_dir = os.getcwd()
+        os.chdir(building_dir)
+
+        p = None
+        try:
+            p = subprocess.Popen(cmd, env=env)
+        except:
+            print "-e- exception while starting install script"
+            print "    command line was:"
+            print "    " + repr(cmd)
+            aipsetup.utils.print_exception_info(sys.exc_info())
+            ret = 100
+
+        else:
+
+            try:
+                p.wait()
+            except:
+                print "\n-e- exception oqured while waiting for installer"
+                aipsetup.utils.print_exception_info(sys.exc_info())
+                ret = 100
+            else:
+                print "-i- installer return code was: %(code)d" % {
+                    'code': p.returncode
+                    }
+                ret = p.returncode
+
+        os.chdir(init_working_dir)
+
+    return ret
