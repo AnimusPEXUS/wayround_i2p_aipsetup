@@ -1,3 +1,4 @@
+import os
 import os.path
 import subprocess
 import glob
@@ -106,6 +107,13 @@ def extract(config, buildingsite='.'):
         aipsetup.buildingsite.DIR_SOURCE
         )
 
+    if os.path.isdir(output_dir):
+        print "-i- cleaningup source dir"
+        aipsetup.utils.cleanup_dir(output_dir)
+
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+
     arch = glob.glob(os.path.join(tarball_dir, '*'))
     if len(arch) == 0:
         print "-e- No tarballs supplied"
@@ -152,6 +160,9 @@ def configure(config, buildingsite='.'):
             config, buildingsite, source_dir, pi
             )
 
+        if not os.path.isdir(building_dir):
+            os.makedirs(building_dir)
+
         run_parameters = determine_configurer_parameters(
             config, pi
             )
@@ -181,12 +192,9 @@ def configure(config, buildingsite='.'):
                 'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_configure_envs'])
                 }
 
-        init_working_dir = os.getcwd()
-        os.chdir(building_dir)
-
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env)
+            p = subprocess.Popen(cmd, env=env, cwd=building_dir)
         except:
             print "-e- exception while starting configuration script"
             print "    command line was:"
@@ -207,8 +215,6 @@ def configure(config, buildingsite='.'):
                     'code': p.returncode
                     }
                 ret = p.returncode
-
-        os.chdir(init_working_dir)
 
     return ret
 
@@ -260,12 +266,9 @@ def build(config, buildingsite='.'):
                 'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_build_envs'])
                 }
 
-        init_working_dir = os.getcwd()
-        os.chdir(building_dir)
-
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env)
+            p = subprocess.Popen(cmd, env=env, cwd=building_dir)
         except:
             print "-e- exception while starting make script"
             print "    command line was:"
@@ -286,8 +289,6 @@ def build(config, buildingsite='.'):
                     'code': p.returncode
                     }
                 ret = p.returncode
-
-        os.chdir(init_working_dir)
 
     return ret
 
@@ -329,6 +330,9 @@ def install(config, buildingsite='.'):
                 )
             )
 
+        if not os.path.isdir(destdir):
+            os.makedirs(destdir)
+
         cmd = ['make'] + ['-f', makefile] + run_parameters + ['install'] + ['DESTDIR=%(dd)s' % {'dd':destdir}]
 
         print "-i- Starting autotools install script with following command:"
@@ -347,12 +351,9 @@ def install(config, buildingsite='.'):
                 'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_install_envs'])
                 }
 
-        init_working_dir = os.getcwd()
-        os.chdir(building_dir)
-
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env)
+            p = subprocess.Popen(cmd, env=env, cwd=building_dir)
         except:
             print "-e- exception while starting install script"
             print "    command line was:"
@@ -373,7 +374,5 @@ def install(config, buildingsite='.'):
                     'code': p.returncode
                     }
                 ret = p.returncode
-
-        os.chdir(init_working_dir)
 
     return ret

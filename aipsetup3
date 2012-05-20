@@ -38,6 +38,7 @@ if '--help' in [ i[0] for i in optilist ]:
       constitution  View or Edit Constitution
       buildingsite  Building Site Manuvers
       build         Building Actions
+      pack          Packaging Actions
       server        UHT Server Related Actions
       client        Download Actions
       pkgindex      Package Index Actions
@@ -64,7 +65,8 @@ else:
     if args[0] in ['info', 'buildinfo', 'builders',
                    'build', 'server', 'client',
                    'pkgindex', 'name', 'docbook',
-                   'buildingsite', 'constitution']:
+                   'buildingsite', 'constitution',
+                   'pack']:
 
         exec("import aipsetup.%(name)s" % {
                 'name': args[0]

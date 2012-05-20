@@ -36,11 +36,19 @@ aipsetup build command
 
    configure
 
-   make
+   build
 
    install
 
+   prepack
+
+   compress
+
+   decompress
+
    pack
+
+   unpack
 
 """
 
@@ -93,6 +101,25 @@ def router(opts, args, config):
 
             install(config, d)
 
+        elif args[0] == 'prepack':
+
+            d = '.'
+
+            if args_l > 1:
+                d = args[1]
+
+            prepack(config, d)
+
+
+        elif args[0] == 'pack':
+
+            d = '.'
+
+            if args_l > 1:
+                d = args[1]
+
+            pack(config, d)
+
         else:
             print "-e- Wrong build command"
 
@@ -105,20 +132,6 @@ def extract(config, dirname):
 
     pi = aipsetup.buildingsite.read_package_info(
         config, dirname, ret_on_error=None)
-
-    output_dir = os.path.abspath(
-        os.path.join(
-            dirname,
-            aipsetup.buildingsite.DIR_SOURCE
-            )
-        )
-
-    if os.path.isdir(output_dir):
-        print "-i- cleaningup source dir"
-        aipsetup.utils.cleanup_dir(output_dir)
-
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
 
     if pi == None:
         print "-e- Error getting information about extraction"
@@ -222,4 +235,10 @@ def install(config, dirname):
                         'toolname': installer
                         })
 
+    return
+
+def postinstall(config, dirname):
+    return
+
+def pack(config, dirname):
     return

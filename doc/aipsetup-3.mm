@@ -1,7 +1,8 @@
 <map version="0.9.0">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1285332014171" ID="ID_187329704" MODIFIED="1285332743831" TEXT="aipsetup-3">
+<node CREATED="1285332014171" ID="ID_187329704" MODIFIED="1337336919903" TEXT="aipsetup-3 (outdated)">
 <font NAME="SansSerif" SIZE="12"/>
+<icon BUILTIN="button_cancel"/>
 <node CREATED="1285332030055" ID="ID_902572008" MODIFIED="1285332743830" POSITION="right" TEXT="templates">
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1285332755279" ID="ID_424051191" MODIFIED="1294280536633" TEXT="create new">

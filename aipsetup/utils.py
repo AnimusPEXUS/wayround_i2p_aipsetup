@@ -14,6 +14,8 @@ import traceback
 import termios
 import subprocess
 import copy
+import hashlib
+import threading
 
 
 
@@ -433,3 +435,118 @@ def env_vars_edit(var_list, mode='copy'):
             ret[i] = var_list[i]
 
     return ret
+
+def make_dir_checksums(dirname, output_filename):
+
+    dirname = os.path.abspath(dirname)
+    dirname_l = len(dirname)
+
+    summs_fd = open(output_filename, 'w')
+
+    res = make_dir_checksums_fo(dirname, summs_fd)
+    
+    summs_fd.close()
+
+    return res
+
+def make_dir_checksums_fo(dirname, output_fileobj):
+
+    dirname = os.path.abspath(dirname)
+    dirname_l = len(dirname)
+
+    summs_fd = output_fileobj
+
+    for root, dirs, files in os.walk(dirname):
+        for f in files:
+            if os.path.isfile(root+'/'+f) and not os.path.islink(root+'/'+f):
+                m = hashlib.sha512()
+                fd = open(root+'/'+f, 'r')
+                m.update(fd.read())
+                fd.close()
+                wfn = ('/' + (root+'/'+f)[1:])[dirname_l:]
+                summs_fd.write(m.hexdigest() + ' *' + wfn  + '\n')
+
+    return
+
+
+def _list_files_recurcive(start_root, start_root_len, root_dir, fd):
+
+    ld = os.listdir(root_dir)
+
+    files = unicodify(
+        ld
+        )
+
+    files.sort()
+
+    for each in files:
+        if each in ['.', '..']:
+            continue
+
+        full_path = os.path.abspath(
+            os.path.join(
+                root_dir,
+                each)
+            )
+
+        if os.path.isdir(full_path) \
+                and not os.path.islink(full_path):
+            _list_files_recurcive(start_root, start_root_len, full_path, fd)
+        else:
+
+            if not os.path.isdir(full_path):
+                fd.write("%(filename)s\n" % {
+                        'filename': deunicodify(
+                            "%(filename)s" % {
+                                'filename': full_path[start_root_len:]
+                                })
+                        }
+                    )
+            else:
+                # TODO: figureout what to do now
+                raise Exception
+
+    return
+
+def list_files_recurcive(dirname, output_filename):
+
+    fd = open(output_filename, 'w')
+    absp = os.path.abspath(dirname)
+    _list_files_recurcive(absp, len(absp), absp, fd)
+    fd.close()
+
+
+def cat(stdin, stdout, threaded=False):
+    return dd(stdin, stdout, bs=(2*1024**2), count=None,
+              threaded=threaded)
+
+def dd(stdin, stdout, bs=1, count=None, threaded=False):
+
+    if threaded:
+        return threading.Thread(
+            tartget=dd,
+            args=(stdin, stdout),
+            kwargs=dict(bs=bs, count=count, threaded=False))
+    else:
+
+        buff = ' '
+
+        c = 0
+
+        while True:
+            buff = stdin.read(bs)
+
+            if  len(buff) == 0:
+                break
+
+            stdout.write(buff)
+
+            c += 1
+
+            if c == count:
+                break
+
+        return
+
+    # control shuld never reach this return
+    return

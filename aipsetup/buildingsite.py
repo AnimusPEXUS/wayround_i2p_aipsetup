@@ -19,6 +19,29 @@ DIR_DESTDIR    = '04.DESTDIR'
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
 DIR_LISTS      = '06.LISTS'
 
+for i in ['TARBALL',
+          'SOURCE',
+          'PATCHES',
+          'BUILDING',
+          'DESTDIR',
+          'BUILD_LOGS',
+          'LISTS']:
+    exec("""\
+def getDir_%(name)s(directory):
+    '''
+    Returns absolute path to DIR_%(name)s
+
+    note: this method is generated dinamicly
+    '''
+    return os.path.abspath(
+        os.path.join(
+            directory,
+            DIR_%(name)s)
+        )
+""" % {
+            'name': i
+            })
+
 
 DIR_ALL = [
     DIR_TARBALL,
@@ -37,7 +60,7 @@ DIR_LIST = DIR_ALL
 
 def print_help():
     print """\
-aipsetup build command
+aipsetup buildingsite command
 
    init [-d=DIRNAME] [-v] [TARBALL1] [TARBALL2] .. [TARBALLn]
 
