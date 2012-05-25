@@ -125,7 +125,7 @@ def pack_dir_contents_tar(dirname, output_filename,
         tarproc = aipsetup.tar.tar(
             options = options,
             stdin = None,
-            stdout = xzproc.stdin,
+            stdout = outf,
             cwd = dirname,
             bufsize=2*1024**2,
             stderr = stderr

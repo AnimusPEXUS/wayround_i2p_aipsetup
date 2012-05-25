@@ -57,7 +57,7 @@ elif '--version' in [ i[0] for i in optilist ]:
     print aipsetup.AIPSETUP_VERSION
 
 elif args_l == 0:
-    print "-e- no commands or parameters passed. try aipsetup help"
+    print "-e- No commands or parameters passed. Try aipsetup --help"
     ret = 1
 
 else:
@@ -77,7 +77,7 @@ else:
                 })
 
     else:
-        print "-e- wrong command. try aipsetup --help"
+        print "-e- Wrong command. Try aipsetup --help"
         ret = 1
 
 exit(ret)

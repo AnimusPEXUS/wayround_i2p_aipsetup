@@ -96,7 +96,10 @@ def determine_installer_parameters(config, pkginfo):
     return run_parameters
 
 
-def extract(config, buildingsite='.'):
+def extract(config, log, buildingsite='.'):
+
+    ret = 0
+
     tarball_dir = os.path.join(
         buildingsite,
         aipsetup.buildingsite.DIR_TARBALL
@@ -108,7 +111,7 @@ def extract(config, buildingsite='.'):
         )
 
     if os.path.isdir(output_dir):
-        print "-i- cleaningup source dir"
+        log.write("-i- cleaningup source dir")
         aipsetup.utils.cleanup_dir(output_dir)
 
     if not os.path.isdir(output_dir):
@@ -116,32 +119,42 @@ def extract(config, buildingsite='.'):
 
     arch = glob.glob(os.path.join(tarball_dir, '*'))
     if len(arch) == 0:
-        print "-e- No tarballs supplied"
+        log.write("-e- No tarballs supplied")
+        ret = 1
     elif len(arch) > 1:
-        print "-e- autotools[configurer]: too many source files"
+        log.write("-e- autotools[configurer]: too many source files")
+        ret = 2
     else:
 
         arch = arch[0]
 
         arch_bn = os.path.basename(arch)
 
-        aipsetup.extractor.extract(arch, output_dir)
+        extr_error = aipsetup.extractor.extract(arch, output_dir)
 
-        extracted_dir = glob.glob(os.path.join(output_dir, '*'))
-
-        if len(extracted_dir) > 1:
-            print "-e- autotools[configurer]: too many extracted files"
+        if extr_error != 0:
+            log.write("-e- Extraction error: %(num)d" % {
+                    'num': extr_error
+                })
+            ret = 3
         else:
-            extracted_dir = extracted_dir[0]
-            extracted_dir_files = glob.glob(os.path.join(extracted_dir, '*'))
-            for i in extracted_dir_files:
-                shutil.move(i, output_dir)
-            shutil.rmtree(extracted_dir)
 
-    return
+            extracted_dir = glob.glob(os.path.join(output_dir, '*'))
+
+            if len(extracted_dir) > 1:
+                log.write("-e- autotools[configurer]: too many extracted files")
+                ret = 4
+            else:
+                extracted_dir = extracted_dir[0]
+                extracted_dir_files = glob.glob(os.path.join(extracted_dir, '*'))
+                for i in extracted_dir_files:
+                    shutil.move(i, output_dir)
+                shutil.rmtree(extracted_dir)
+
+    return ret
 
 
-def configure(config, buildingsite='.'):
+def configure(config, log, buildingsite='.'):
 
     ret = 0
 
@@ -149,7 +162,8 @@ def configure(config, buildingsite='.'):
         config, buildingsite, ret_on_error=None)
 
     if pi == None:
-        print "-e- error getting information about package"
+        log.write("-e- error getting information about package")
+        ret = 101
     else:
 
         source_dir = determine_source_dir(
@@ -176,11 +190,11 @@ def configure(config, buildingsite='.'):
 
         cmd = ['bash'] + [config_script] + run_parameters
 
-        print "-i- Starting autotools configurer script with following command:"
-        print "    %(cmd)s" % {
-            'cmd': repr(cmd)
-            }
-        print "-i-"
+        log.write("-i- Starting autotools configurer script with following command:")
+        log.write("    %(cmd)s" % {
+                'cmd': repr(cmd)
+                })
+        log.write("-i-")
 
         env = aipsetup.utils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_configure_envs'],
@@ -188,37 +202,39 @@ def configure(config, buildingsite='.'):
             )
 
         if len(pi['pkg_buildinfo']['autotools_configure_envs']) > 0:
-            print "-i- Environment Modifications: %(list)s" % {
-                'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_configure_envs'])
-                }
+            log.write("-i- Environment Modifications: %(list)s" % {
+                    'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_configure_envs'])
+                    })
 
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env, cwd=building_dir)
+            p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir)
         except:
-            print "-e- exception while starting configuration script"
-            print "    command line was:"
-            print "    " + repr(cmd)
-            aipsetup.utils.print_exception_info(sys.exc_info())
+            log.write("-e- exception while starting configuration script")
+            log.write("    command line was:")
+            log.write("    " + repr(cmd))
+            log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
             ret = 100
 
         else:
 
+            aipsetup.utils.lbl_write(p.stdout, log)
+
             try:
                 p.wait()
             except:
-                print "\n-e- exception oqured while waiting for configure"
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                log.write("\n-e- exception oqured while waiting for configure")
+                log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
                 ret = 100
             else:
-                print "-i- configurer return code was: %(code)d" % {
-                    'code': p.returncode
-                    }
+                log.write("-i- configurer return code was: %(code)d" % {
+                        'code': p.returncode
+                        })
                 ret = p.returncode
 
     return ret
 
-def build(config, buildingsite='.'):
+def build(config, log, buildingsite='.'):
 
     ret = 0
 
@@ -226,7 +242,8 @@ def build(config, buildingsite='.'):
         config, buildingsite, ret_on_error=None)
 
     if pi == None:
-        print "-e- error getting information about package"
+        log.write("-e- error getting information about package")
+        ret = 101
     else:
 
         source_dir = determine_source_dir(
@@ -250,11 +267,11 @@ def build(config, buildingsite='.'):
 
         cmd = ['make'] + ['-f', makefile] + run_parameters
 
-        print "-i- Starting autotools make script with following command:"
-        print "    %(cmd)s" % {
-            'cmd': repr(cmd)
-            }
-        print "-i-"
+        log.write("-i- Starting autotools make script with following command:")
+        log.write("    %(cmd)s" % {
+                'cmd': repr(cmd)
+                })
+        log.write("-i-")
 
         env = aipsetup.utils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_build_envs'],
@@ -262,38 +279,40 @@ def build(config, buildingsite='.'):
             )
 
         if len(pi['pkg_buildinfo']['autotools_build_envs']) > 0:
-            print "-i- Environment Modifications: %(list)s" % {
-                'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_build_envs'])
-                }
+            log.write("-i- Environment Modifications: %(list)s" % {
+                    'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_build_envs'])
+                    })
 
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env, cwd=building_dir)
+            p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir)
         except:
-            print "-e- exception while starting make script"
-            print "    command line was:"
-            print "    " + repr(cmd)
-            aipsetup.utils.print_exception_info(sys.exc_info())
+            log.write("-e- exception while starting make script")
+            log.write("    command line was:")
+            log.write("    " + repr(cmd))
+            log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
             ret = 100
 
         else:
 
+            aipsetup.utils.lbl_write(p.stdout, log)
+
             try:
                 p.wait()
             except:
-                print "\n-e- exception oqured while waiting for builder"
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                log.write("\n-e- exception oqured while waiting for builder")
+                log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
                 ret = 100
             else:
-                print "-i- builder return code was: %(code)d" % {
-                    'code': p.returncode
-                    }
+                log.write("-i- builder return code was: %(code)d" % {
+                        'code': p.returncode
+                        })
                 ret = p.returncode
 
     return ret
 
 
-def install(config, buildingsite='.'):
+def install(config, log, buildingsite='.'):
 
     ret = 0
 
@@ -301,7 +320,8 @@ def install(config, buildingsite='.'):
         config, buildingsite, ret_on_error=None)
 
     if pi == None:
-        print "-e- error getting information about package"
+        log.write("-e- error getting information about package")
+        ret = 101
     else:
 
         source_dir = determine_source_dir(
@@ -335,11 +355,11 @@ def install(config, buildingsite='.'):
 
         cmd = ['make'] + ['-f', makefile] + run_parameters + ['install'] + ['DESTDIR=%(dd)s' % {'dd':destdir}]
 
-        print "-i- Starting autotools install script with following command:"
-        print "    %(cmd)s" % {
-            'cmd': repr(cmd)
-            }
-        print "-i-"
+        log.write("-i- Starting autotools install script with following command:")
+        log.write("    %(cmd)s" % {
+                'cmd': repr(cmd)
+                })
+        log.write("-i-")
 
         env = aipsetup.utils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_install_envs'],
@@ -347,32 +367,34 @@ def install(config, buildingsite='.'):
             )
 
         if len(pi['pkg_buildinfo']['autotools_install_envs']) > 0:
-            print "-i- Environment Modifications: %(list)s" % {
-                'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_install_envs'])
-                }
+            log.write("-i- Environment Modifications: %(list)s" % {
+                    'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_install_envs'])
+                    })
 
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env, cwd=building_dir)
+            p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir)
         except:
-            print "-e- exception while starting install script"
-            print "    command line was:"
-            print "    " + repr(cmd)
-            aipsetup.utils.print_exception_info(sys.exc_info())
+            log.write("-e- exception while starting install script")
+            log.write("    command line was:")
+            log.write("    " + repr(cmd))
+            log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
             ret = 100
 
         else:
 
+            aipsetup.utils.lbl_write(p.stdout, log)
+
             try:
                 p.wait()
             except:
-                print "\n-e- exception oqured while waiting for installer"
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                log.write("\n-e- exception oqured while waiting for installer")
+                log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
                 ret = 100
             else:
-                print "-i- installer return code was: %(code)d" % {
-                    'code': p.returncode
-                    }
+                log.write("-i- installer return code was: %(code)d" % {
+                        'code': p.returncode
+                        })
                 ret = p.returncode
 
     return ret

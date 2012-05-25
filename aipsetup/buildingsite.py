@@ -10,6 +10,9 @@ import aipsetup.info
 import aipsetup.constitution
 import aipsetup.utils
 import aipsetup.name
+import aipsetup.build
+import aipsetup.pack
+
 
 DIR_TARBALL    = '00.TARBALL'
 DIR_SOURCE     = '01.SOURCE'
@@ -62,17 +65,20 @@ def print_help():
     print """\
 aipsetup buildingsite command
 
-   init [-d=DIRNAME] [-v] [TARBALL1] [TARBALL2] .. [TARBALLn]
+   init [-b] [DIRNAME] [TARBALL1] [TARBALL2] .. [TARBALLn]
 
-      Initiates new buildingsite under DIRNAME. If TARBALLs are given,
-      they will be placed under TARBALL directory in new buildingsite.
+      Initiates new buildingsite under DIRNAME.
 
-         -d=DIRNAME set building directory name. DIRNAME defaults to
-                    `tmp'
+      If TARBALLs are given, they will be placed under TARBALL
+      directory in new buildingsite.
 
-         -v - be verbose
+      If atleast one TARBALL given, it will be used for info
+      pplication
 
-   apply_info [-d=DIRNAME] TARBALL
+         -b - start fullcircle building process if apply_info returned
+              zero
+
+   apply_info [-d=DIRNAME] [TARBALL]
 
       Apply package info to DIRNAME directory. Use TARBALL as name for
       parsing and farver package buildingsite configuration.
@@ -97,38 +103,29 @@ def router(opts, args, config):
 
         elif args[0] == 'init':
 
-            init_dir = 'tmp'
+            init_dir = '.'
 
-            src_file = None
+            src_files = None
 
+            build = False
             for i in opts:
-                if i[0] == '-d':
+                if i[0] == '-b':
+                    build = True
 
-                    init_dir = i[1]
+            if args_l > 1:
+                init_dir = args[1]
 
-            verbose_option = False
-
-            for i in opts:
-                if i[0] == '-v':
-                    verbose_option = True
-
-            if args_l == 2:
-                src_file = args[1]
+            if args_l > 2:
+                src_files = args[2:]
 
 
-            if isinstance(init_dir, basestring):
+            ret = init(
+                config,
+                directory = init_dir,
+                source_files = src_files,
+                build = build
+                )
 
-                ret = init(
-                    directory=init_dir,
-                    source_file=src_file,
-                    verbose=verbose_option
-                    )
-
-                if ret != 0:
-                    print "-e- Error initiating directory"
-
-            else:
-                print "-e- Wrong -d parameter"
 
         elif args[0] == 'apply_info':
             if args_l != 2:
@@ -144,6 +141,15 @@ def router(opts, args, config):
                         dirname = i[1]
 
                 apply_info(config, dirname, source_filename=name)
+
+        elif args[0] == 'complite':
+
+            dirname = '.'
+
+            if args_l > 1:
+                dirname = args[1]
+
+            ret = complite(config, dirname)
 
         else:
             print "-e- Wrong command"
@@ -181,25 +187,26 @@ def isWdDirRestricted(directory):
                 break
     return ret
 
-def init(directory='build', source_file=None, verbose=False):
+def init(config, directory='build', source_files=None, build=False):
 
-    """Initiates pointed dir for farver usage. All contents is removed"""
 
     ret = 0
 
-    if verbose:
-        print "-i- Initiating dir %(dir)s" % {
+    directory = os.path.abspath(directory)
+
+    print(
+        "-i- Initiating building site %(dir)s" % {
             'dir': directory
             }
+        )
 
-    if verbose:
-        print "-v- checking dir name safety"
+    print("-i- Checking dir name safety")
 
     if isWdDirRestricted(directory):
-        print "-e- %(dir_str)s is restricted working dir" % {
+        print("-e- %(dir_str)s is restricted working dir" % {
             'dir_str': directory
-            }
-        print "    won't init"
+            })
+        print("    won't init")
         ret = -1
 
 
@@ -208,48 +215,83 @@ def init(directory='build', source_file=None, verbose=False):
 
         if ((os.path.exists(directory))
             and not os.path.isdir(directory)):
-            print "-e- file already exists ant it is not a directory"
+            print("-e- File already exists and it is not a directory")
             ret = -2
 
     if ret == 0:
 
-        # remove all files and directories in initiating dir
-        if (os.path.exists(directory)) and os.path.isdir(directory):
-            if verbose:
-                print "-i- directory already exists. cleaning..."
-            shutil.rmtree(directory)
+        if not os.path.exists(directory):
+            print("-i- Building site not exists - creating")
+            os.mkdir(directory)
 
-        os.mkdir(directory)
-
-        # create all subdirs
+        print("-i- Create all subdirs")
         for i in DIR_ALL:
             a = os.path.abspath(os.path.join(directory, i))
-            if verbose:
-                print "-v- creating directory " + a
-            os.makedirs(a)
 
-    if verbose:
-        print "-v- copying source"
+            if not os.path.exists(a):
+                resh = 'creating'
+            elif not os.path.isdir(a):
+                resh = 'not a dir!'
+            elif os.path.islink(a):
+                resh = 'is a link!'
+            else:
+                resh = 'exists'
+
+            print("       %(dirname)s - %(resh)s" % {
+                'dirname': i,
+                'resh': resh
+                })
+
+            if os.path.exists(a):
+                pass
+            else:
+                os.makedirs(a)
+
 
     if ret == 0:
-        if source_file != None:
-            if os.path.isdir(source_file):
-                for i in glob.glob(os.path.join(source_file,'*')):
-                    if os.path.isdir(i):
-                        shutil.copytree(
-                            i, os.path.join(
-                                directory, DIR_SOURCE, os.path.basename(i)))
-                    else:
-                        shutil.copy2(
-                            i, os.path.join(directory, DIR_SOURCE))
-            elif os.path.isfile(source_file):
-                shutil.copy(
-                    source_file, os.path.join(directory, DIR_TARBALL))
-            else:
-                print "-e- file %(file)s - not dir and not file." % {
-                    'file': source_file
-                    }
-                print "    skipping copy"
+        if source_files != None and isinstance(source_files, list):
+
+            print("-i- copying sources")
+
+            for source_file in source_files:
+
+                print("-i-    %(name)s" % {
+                    'name': source_file
+                    })
+
+                if os.path.isfile(source_file) \
+                        and not os.path.islink(source_file):
+
+                    try:
+                        shutil.copy(
+                            source_file, os.path.join(directory, DIR_TARBALL)
+                            )
+                    except:
+                        aipsetup.utils.print_exception_info(sys.exc_info())
+                        ret = -3
+
+                else:
+
+                    print("-e- file %(file)s - not dir and not file." % {
+                        'file': source_file
+                        })
+                    print("    skipping copy")
+
+            if ret != 0:
+                print("-e- Exception while copying one of tarballs")
+
+            print("-i- Trying to apply info")
+            if ret == 0 \
+                    and apply_info(config, directory, source_files[0]) == 0 \
+                    and build:
+                print("-i- Build requested. Initiating build process")
+                complite(config, directory)
+
+
+    if ret == 0:
+        print("-i- Init complite")
+    else:
+        print("-e- Init error")
 
     return ret
 
@@ -512,5 +554,26 @@ def apply_info(config, dirname='.', source_filename=None):
         ret = 3
     elif apply_pkg_buildinfo_on_buildingsite(config, dirname) != 0:
         ret = 4
+
+    return ret
+
+
+def complite(config, dirname):
+
+    log = aipsetup.utils.Log(config, dirname, 'buildingsite complite')
+    log.write("-i- Buildingsite processes started")
+    log.write("-i- Closing this log now, cause it can't be done farther")
+    log.stop()
+
+    ret = 0
+
+    if init(config, dirname) != 0:
+        log.write("-e- Error on initiation stage")
+    elif aipsetup.build.complite(config, dirname) != 0:
+        log.write("-e- Error on building stage")
+    elif aipsetup.pack.complite(config, dirname) != 0:
+        log.write("-e- Error on packaging stage")
+    else:
+        pass
 
     return ret

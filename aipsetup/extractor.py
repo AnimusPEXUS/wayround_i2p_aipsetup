@@ -70,3 +70,5 @@ def extract(file_name, output_dir):
     if ret == None:
         print "-e- Not implemented"
         raise Exception
+
+    return ret

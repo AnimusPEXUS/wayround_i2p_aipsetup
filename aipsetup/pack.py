@@ -1,6 +1,7 @@
 
 import os.path
 import tempfile
+import shutil
 
 import aipsetup.utils
 import aipsetup.buildingsite
@@ -27,32 +28,35 @@ def router(opts, args, config):
         if args[0] == 'help':
             print_help()
 
-        elif args[0] == 'destdir_checksum':
-            pass
+        elif args[0] in ['destdir_checksum',
+                         'destdir_filelist',
+                         'remove_source_and_build_dirs',
+                         'compress_patches_destdir_and_logs',
+                         'compress_files_in_lists_dir',
+                         'remove_patches_destdir_and_buildlogs_dirs',
+                         'make_checksums_for_building_site',
+                         'pack_buildingsite']:
 
-        elif args[0] == 'destdir_filelist':
-            pass
+            dirname = '.'
 
-        elif args[0] == 'remove_source_and_build_dirs':
-            pass
+            if args_l > 1:
+                dirname = args[1]
 
-        elif args[0] == 'compress_patches_destdir_and_logs':
-            pass
+            ret = eval("%(name)s(config, dirname)" % {
+                    'name': args[0]
+                    })
 
-        elif args[0] == 'compress_files_in_lists_dir':
-            pass
+        elif args[0] == 'complite':
 
-        elif args[0] == 'remove_patches_destdir_and_buildlogs_dirs':
-            pass
+            dirname = '.'
 
-        elif args[0] == 'make_checksums_for_building_site':
-            pass
+            if args_l > 1:
+                dirname = args[1]
 
-        elif args[0] == 'pack_buildingsite':
-            pass
+            ret = complite(config, dirname)
 
         else:
-            print "-e- Wrong command"
+            print "-e- Wrong pack command"
 
 
     return ret
@@ -227,16 +231,37 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
 
 def make_checksums_for_building_site(config, buildingsite):
 
-    tf = tempfile.mkstemp()
-    f = os.fdopen(tf[0], 'w')
+    ret = 0
 
-    aipsetup.utils.make_dir_checksums_fo(
+    buildingsite = os.path.abspath(buildingsite)
+
+    package_checksumms = os.path.join(
         buildingsite,
-        f)
+        'package.sha512'
+        )
 
-    f.close()
+    if os.path.exists(package_checksumms):
+        aipsetup.utils.remove_if_exists(package_checksumms)
 
-    return
+    try:
+        tf = tempfile.mkstemp()
+    except:
+        print "-e- Error creating temporary file"
+        aipsetup.utils.print_exception_info(sys.exc_info())
+        ret = 1
+    else:
+        f = os.fdopen(tf[0], 'w')
+
+        if aipsetup.utils.make_dir_checksums_fo(
+            buildingsite,
+            f) != 0:
+            print "-e- Error creating checksums for buildingsite"
+            ret = 2
+
+        f.close()
+        shutil.move(tf[1], package_checksumms)
+
+    return ret
 
 
 def pack_buildingsite(config, buildingsite):
@@ -248,17 +273,29 @@ def pack_buildingsite(config, buildingsite):
         print "-e- error getting information about package"
     else:
 
-        pack_dir = os.makedirs(
-            os.path.abspath(
-                os.path.join(
-                    buildingsite, '..', 'pack'
-                    )
+        pack_dir = os.path.abspath(
+            os.path.join(
+                buildingsite,
+                '..',
+                'pack'
                 )
             )
 
         pack_file_name = os.path.join(
             pack_dir,
-            ''
+            "%(pkgname)s-%(version)s%(versionl)s%(versionln)s-%(timestamp)s-%(archinfo)s.asp" % {
+                'pkgname': pi['pkg_nameinfo']['groups']['name'],
+                'version': pi['pkg_nameinfo']['groups']['version'],
+                'versionl': pi['pkg_nameinfo']['groups']['version_letter'],
+                'versionln': pi['pkg_nameinfo']['groups']['version_letter_number'],
+                'timestamp': aipsetup.utils.currenttime_stamp(),
+                'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
+                    'arch'  : pi['constitution']['host_arch'],
+                    'type'  : pi['constitution']['host_type'],
+                    'kernel': pi['constitution']['host_kenl'],
+                    'os'    : pi['constitution']['host_name']
+                    }
+                }
             )
 
         try:
@@ -268,20 +305,30 @@ def pack_buildingsite(config, buildingsite):
 
         aipsetup.compress.pack_dir_contents_tar(
             buildingsite,
-            "%(pkgname)s-%(version)s%(versionl)s%(versionln)s-%(timestamp)s-%(archinfo)s.asp" % {
-                'pkgname': pi['pkg_nameinfo']['groups']['name'],
-                'version': pi['pkg_nameinfo']['groups']['version'],
-                'versionl': pi['pkg_nameinfo']['groups']['version_letter'],
-                'versionln': pi['pkg_nameinfo']['groups']['version_letter_number'],
-                'timestamp': '00000000000000',
-                'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
-                    'arch': pi['constitution']['host_arch'],
-                    'type': pi['constitution']['host_type'],
-                    'kernel': pi['constitution']['host_kenl'],
-                    'os': pi['constitution']['host_name']
-                    }
-
-                }
+            pack_file_name
             )
 
-    return
+    return 0
+
+def complite(config, dirname):
+
+    ret = 0
+
+    for i in ['destdir_checksum',
+              'destdir_filelist',
+              'remove_source_and_build_dirs',
+              'compress_patches_destdir_and_logs',
+              'compress_files_in_lists_dir',
+              'remove_patches_destdir_and_buildlogs_dirs',
+              'make_checksums_for_building_site',
+              'pack_buildingsite']:
+        if eval("%(name)s(config, dirname)" % {
+                'name': i
+                }) != 0:
+            print "-e- Error on %(name)s" % {
+                'name': i
+                }
+            ret = 1
+            break
+
+    return ret

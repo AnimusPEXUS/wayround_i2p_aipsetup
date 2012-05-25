@@ -40,16 +40,6 @@ aipsetup build command
 
    install
 
-   prepack
-
-   compress
-
-   decompress
-
-   pack
-
-   unpack
-
 """
 
 def router(opts, args, config):
@@ -58,67 +48,27 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- not enough parameters"
+        print "-e- Command not given. See `aipsetup build help'"
         ret = 1
     else:
 
         if args[0] == 'help':
             print_help()
 
-        elif args[0] == 'extract':
+        elif args[0] in ['extract', 'configure',
+                         'build', 'install',
+                         'complite']:
 
             d = '.'
 
             if args_l > 1:
                 d = args[1]
 
-            extract(config, d)
-
-        elif args[0] == 'configure':
-
-            d = '.'
-
-            if args_l > 1:
-                d = args[1]
-
-            configure(config, d)
-
-        elif args[0] == 'build':
-
-            d = '.'
-
-            if args_l > 1:
-                d = args[1]
-
-            build(config, d)
-
-        elif args[0] == 'install':
-
-            d = '.'
-
-            if args_l > 1:
-                d = args[1]
-
-            install(config, d)
-
-        elif args[0] == 'prepack':
-
-            d = '.'
-
-            if args_l > 1:
-                d = args[1]
-
-            prepack(config, d)
-
-
-        elif args[0] == 'pack':
-
-            d = '.'
-
-            if args_l > 1:
-                d = args[1]
-
-            pack(config, d)
+            ret = eval(
+                "%(name)s(config, d)" % {
+                    'name': args[0]
+                    }
+                )
 
         else:
             print "-e- Wrong build command"
@@ -126,119 +76,115 @@ def router(opts, args, config):
 
     return ret
 
-def extract(config, dirname):
+def _same_function(config, dirname, actor_name, function, whatdoes, process):
 
-    print "-i- =========[extracting]========="
+    ret = 0
+
+    log = aipsetup.utils.Log(config, dirname, process)
+    # log.write("-i- Closing this log now, cause it can't be done farther")
+
+    log.write("-i- =========[%(whatdoes)s]=========" % {
+        'whatdoes': whatdoes.capitalize()
+        })
 
     pi = aipsetup.buildingsite.read_package_info(
         config, dirname, ret_on_error=None)
 
     if pi == None:
-        print "-e- Error getting information about extraction"
+        log.write("-e- Error getting information about %(process)s" % {
+                'process': process
+                })
+        ret = 1
     else:
         try:
-            extractor = pi['pkg_buildinfo']['extractor']
+            actor = pi['pkg_buildinfo'][actor_name]
         except:
-            print "-e- Error getting extractor name"
-            aipsetup.utils.print_excetption_info(sys.exc_info())
+            log.write("-e- Error getting %(actor_name)s name" % {
+                    'actor_name': actor_name
+                    })
+            log.write(aipsetup.utils.return_excetption_info(sys.exc_info()))
+            ret = 2
 
         else:
-            if not extractor in ['autotools']:
-                print "-e- Package desires extractor not supported by"
-                print "    current aipsetup system"
+            if not actor in ['autotools']:
+                log.write("-e- Package desires %(actor_name)s which is not supported by" % {
+                    'actor_name': actor_name
+                    })
+                log.write("    current aipsetup system")
+                ret = 3
             else:
-                eval("aipsetup.tools.%(toolname)s.extract(config, dirname)" % {
-                        'toolname': extractor
-                        })
+                if eval("aipsetup.tools.%(toolname)s.%(function)s(config, log, dirname)" % {
+                        'toolname': actor,
+                        'function': function
+                        }) != 0:
+                    log.write("-e- Tool %(toolname)s could not perform %(process)s" % {
+                            'toolname': actor,
+                            'process': process
+                            })
+                    ret = 4
+                else:
 
-                print "-i- extraction complited"
+                    log.write("-i- %(process)s complited" % {
+                            'process': process.capitalize()
+                            })
 
-    return
+    log.stop()
+
+    return ret
+
+def extract(config, dirname):
+    return _same_function(
+        config,
+        dirname,
+        'extractor',
+        'extract',
+        'extracting',
+        'extraction'
+        )
 
 def configure(config, dirname):
-
-    print "-i- =========[configuring]========="
-
-    pi = aipsetup.buildingsite.read_package_info(
-        config, dirname, ret_on_error=None)
-
-    if pi == None:
-        print "-e- Error getting information about configuring"
-    else:
-        try:
-            configurer = pi['pkg_buildinfo']['configurer']
-        except:
-            print "-e- Error getting configurer name"
-            aipsetup.utils.print_excetption_info(sys.exc_info())
-
-        else:
-            if not configurer in ['autotools']:
-                print "-e- Package desires configurer not supported by"
-                print "    current aipsetup system"
-            else:
-                eval("aipsetup.tools.%(toolname)s.configure(config, dirname)" % {
-                        'toolname': configurer
-                        })
-
-    return
+    return _same_function(
+        config,
+        dirname,
+        'configurer',
+        'configure',
+        'configuring',
+        'configuration'
+        )
 
 def build(config, dirname):
-
-    print "-i- =========[building]========="
-
-    pi = aipsetup.buildingsite.read_package_info(
-        config, dirname, ret_on_error=None)
-
-    if pi == None:
-        print "-e- Error getting information about making"
-    else:
-        try:
-            builder = pi['pkg_buildinfo']['builder']
-        except:
-            print "-e- Error getting builder name"
-            aipsetup.utils.print_excetption_info(sys.exc_info())
-
-        else:
-            if not builder in ['autotools']:
-                print "-e- Package desires builder not supported by"
-                print "    current aipsetup system"
-            else:
-                eval("aipsetup.tools.%(toolname)s.build(config, dirname)" % {
-                        'toolname': builder
-                        })
-
-    return
-
+    return _same_function(
+        config,
+        dirname,
+        'builder',
+        'build',
+        'building',
+        'building'
+        )
 
 def install(config, dirname):
+    return _same_function(
+        config,
+        dirname,
+        'installer',
+        'install',
+        'installing',
+        'installation'
+        )
 
-    print "-i- =========[installing]========="
 
-    pi = aipsetup.buildingsite.read_package_info(
-        config, dirname, ret_on_error=None)
+def complite(config, dirname):
+    ret = 0
+    for i in ['extract', 'configure',
+              'build', 'install']:
 
-    if pi == None:
-        print "-e- Error getting information about installing"
-    else:
-        try:
-            installer = pi['pkg_buildinfo']['installer']
-        except:
-            print "-e- Error getting installer name"
-            aipsetup.utils.print_excetption_info(sys.exc_info())
+        if eval("%(name)s(config, dirname)" % {
+                'name': i
+                }) != 0:
+            print "-e- Building error on stage %(name)s" % {
+                'name': i
+                }
+            ret = 1
+            break
 
-        else:
-            if not installer in ['autotools']:
-                print "-e- Package desires installer not supported by"
-                print "    current aipsetup system"
-            else:
-                eval("aipsetup.tools.%(toolname)s.install(config, dirname)" % {
-                        'toolname': installer
-                        })
-
-    return
-
-def postinstall(config, dirname):
-    return
-
-def pack(config, dirname):
-    return
+    return ret

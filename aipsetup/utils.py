@@ -16,7 +16,10 @@ import subprocess
 import copy
 import hashlib
 import threading
+import datetime
+import StringIO
 
+import aipsetup.buildingsite
 
 
 def show_version_message():
@@ -130,12 +133,29 @@ def get_configuration(defaults, file='/etc/aipsetup.conf'):
     del(cp)
     return ret
 
-def print_exception_info(e):
 
-    print "-e- EXCEPTION: %(type)s" % {'type': repr(e[0])}
-    print "        VALUE: %(val)s"  % {'val' : repr(e[1])}
-    print "    TRACEBACK:"
-    traceback.print_tb(e[2])
+def return_exception_info(e):
+    txt = """
+-e- EXCEPTION: %(type)s
+        VALUE: %(val)s
+    TRACEBACK:
+%(tb)s
+%(feo)s
+""" % {
+        'type': repr(e[0]),
+        'val' : repr(e[1]),
+        'tb'  : ''.join(traceback.format_list(traceback.extract_tb(e[2]))),
+        'feo' : ''.join(traceback.format_exception_only(e[0], e[1]))
+        }
+
+    return txt
+
+
+def print_exception_info(e):
+    txt = return_exception_info(e)
+    print txt
+    return
+
 
 def remove_if_exists(file_or_dir):
     if os.path.exists(file_or_dir):
@@ -285,8 +305,13 @@ def get_terminal_size(fd=1):
 def columned_list_print(lst, width=None, columns=None,
                         margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
                         fd=1):
+    print return_list_print(lst, width=None, columns=None,
+                            margin_right=u' │ ', margin_left=u' │ ',
+                            spacing=u' │ ', fd=1)
 
-
+def return_list_print(lst, width=None, columns=None,
+                      margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
+                      fd=1):
 
     if width == None:
         if (isinstance(fd, int) and os.isatty(fd)) \
@@ -329,6 +354,7 @@ def columned_list_print(lst, width=None, columns=None,
     # print "lst_l   == " + str(lst_l)
     # print "columns == " + str(columns)
 
+    ret = ''
     for i in range(0, lst_l, columns):
         # print "i == " + str(i)
         l2 = lst[i:i+columns]
@@ -340,14 +366,13 @@ def columned_list_print(lst, width=None, columns=None,
         while len(l3) != columns:
             l3.append(u''.ljust(longest))
 
-
-        print deunicodify("%(mrl)s%(row)s%(mrr)s" % {
+        ret += deunicodify("%(mrl)s%(row)s%(mrr)s" % {
                 'mrl': margin_left,
                 'mrr': margin_right,
                 'row': spacing.join(l3)
                 })
 
-    return
+    return ret
 
 
 def codify(list_or_basestring, on_wrong_type='exception',
@@ -438,35 +463,64 @@ def env_vars_edit(var_list, mode='copy'):
 
 def make_dir_checksums(dirname, output_filename):
 
+    ret = 0
+
     dirname = os.path.abspath(dirname)
-    dirname_l = len(dirname)
 
-    summs_fd = open(output_filename, 'w')
+    if not os.path.isdir(dirname):
+        print "-e- Not is dir %(name)s" % {
+            'name': dirname
+            }
+        ret = 1
 
-    res = make_dir_checksums_fo(dirname, summs_fd)
-    
-    summs_fd.close()
+    else:
 
-    return res
+        try:
+            summs_fd = open(output_filename, 'w')
+        except:
+            print "-e- Error opening output file"
+            print_exception_info(sys.exc_info())
+            ret = 2
+        else:
+            ret = make_dir_checksums_fo(dirname, summs_fd)
+
+            summs_fd.close()
+
+    return ret
 
 def make_dir_checksums_fo(dirname, output_fileobj):
 
+    ret = 0
+
     dirname = os.path.abspath(dirname)
-    dirname_l = len(dirname)
 
-    summs_fd = output_fileobj
+    if not os.path.isdir(dirname):
+        print "-e- Not a dir %(name)s" % {
+            'name': dirname
+            }
+        ret = 1
 
-    for root, dirs, files in os.walk(dirname):
-        for f in files:
-            if os.path.isfile(root+'/'+f) and not os.path.islink(root+'/'+f):
-                m = hashlib.sha512()
-                fd = open(root+'/'+f, 'r')
-                m.update(fd.read())
-                fd.close()
-                wfn = ('/' + (root+'/'+f)[1:])[dirname_l:]
-                summs_fd.write(m.hexdigest() + ' *' + wfn  + '\n')
+    else:
 
-    return
+        dirname_l = len(dirname)
+
+        if not isinstance(output_fileobj, file):
+            print "-e- Wrong output file object"
+            ret = 2
+        else:
+            summs_fd = output_fileobj
+
+            for root, dirs, files in os.walk(dirname):
+                for f in files:
+                    if os.path.isfile(root+'/'+f) and not os.path.islink(root+'/'+f):
+                        m = hashlib.sha512()
+                        fd = open(root+'/'+f, 'r')
+                        m.update(fd.read())
+                        fd.close()
+                        wfn = ('/' + (root+'/'+f)[1:])[dirname_l:]
+                        summs_fd.write(m.hexdigest() + ' *' + wfn  + '\n')
+
+    return ret
 
 
 def _list_files_recurcive(start_root, start_root_len, root_dir, fd):
@@ -550,3 +604,144 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False):
 
     # control shuld never reach this return
     return
+
+def lbl_write(stdin, stdout, threaded=False):
+
+    if threaded:
+        return threading.Thread(
+            tartget=lbl_write,
+            args=(stdin, stdout),
+            kwargs=dict(threaded=False))
+    else:
+
+        while True:
+            l = stdin.readline()
+            if l == '':
+                break
+            else:
+                l = l.rstrip(' \0\n')
+
+                stdout.write(l)
+
+        return
+
+    return
+
+def currenttime_stamp():
+    d = datetime.datetime.now()
+    return time_stamp(d)
+
+def time_stamp(dt):
+    return '%(year).4d%(month).2d%(day).2d.%(hour).2d%(minute).2d%(second).2d.%(micro).7d' % {
+        'year'  : dt.year,
+        'month' : dt.month,
+        'day'   : dt.day,
+        'hour'  : dt.hour,
+        'minute': dt.minute,
+        'second': dt.second,
+        'micro' : dt.microsecond
+        }
+
+class Log:
+
+    def __init__(self, config, building_site, logname):
+
+        ret = 0
+        self.code = 0
+        self.fileobj = None
+        self.logname = logname
+
+        log_dir = aipsetup.buildingsite.getDir_BUILD_LOGS(
+            building_site
+            )
+
+        if not os.path.exists(log_dir):
+            try:
+                os.makedirs(log_dir)
+            except:
+                print "-e- Exception while creating building logs dir"
+                aipsetup.utils.print_exception_info(sys.exc_info())
+                ret = 1
+        else:
+
+            if not os.path.isdir(log_dir) \
+                    or os.path.islink(log_dir):
+                print "-e- Current file type is not acceptable: %(name)s" % {
+                    'name': log_dir
+                    }
+                ret = 2
+
+        if ret == 0:
+            timestamp = currenttime_stamp()
+            filename = os.path.abspath(
+                os.path.join(
+                    log_dir,
+                    "%(ts)s-%(name)s.txt" % {
+                        'ts': timestamp,
+                        'name': logname
+                        }
+                    )
+                )
+            try:
+                self.fileobj = open(filename, 'w')
+            except:
+                print "-e- Error opening log file"
+                print_exception_info(sys.exc_info())
+                ret = 3
+            else:
+                print "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n" % {
+                    'ts': timestamp,
+                    'name': self.logname
+                    }
+                self.fileobj.write(
+                    "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n" % {
+                        'ts': timestamp,
+                        'name': self.logname
+                    }
+                    )
+
+        if ret != 0:
+            raise Exception
+
+        return
+
+    def stop(self):
+        if self.fileobj == None:
+            raise Exception
+
+        timestamp = currenttime_stamp()
+        print "[%(ts)s] =///////= Stopping `%(name)s' log =///////=\n" % {
+            'ts': timestamp,
+            'name': self.logname
+            }
+        self.fileobj.write("[%(ts)s] =///////= Stopping `%(name)s' log =///////=\n" % {
+                'ts': timestamp,
+                'name': self.logname
+                })
+        self.fileobj.flush()
+        self.fileobj.close()
+        return
+
+    def write(self, text, echo=True):
+        if self.fileobj == None:
+            raise Exception
+
+        timestamp = currenttime_stamp()
+        if echo:
+            print "[%(ts)s] %(text)s" % {
+                'ts': timestamp,
+                'text': deunicodify(text)
+                }
+        self.fileobj.write("[%(ts)s] %(text)s\n" % {
+                'ts': timestamp,
+                'text': deunicodify(text)
+                })
+        return
+
+
+    def __del__(self):
+        if not self.fileobj.closed:
+            try:
+                self.stop()
+            except:
+                pass
