@@ -578,7 +578,7 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False):
 
     if threaded:
         return threading.Thread(
-            tartget=dd,
+            target=dd,
             args=(stdin, stdout),
             kwargs=dict(bs=bs, count=count, threaded=False))
     else:
@@ -609,7 +609,7 @@ def lbl_write(stdin, stdout, threaded=False):
 
     if threaded:
         return threading.Thread(
-            tartget=lbl_write,
+            target=lbl_write,
             args=(stdin, stdout),
             kwargs=dict(threaded=False))
     else:

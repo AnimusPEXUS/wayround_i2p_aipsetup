@@ -218,7 +218,9 @@ def configure(config, log, buildingsite='.'):
 
         else:
 
-            aipsetup.utils.lbl_write(p.stdout, log)
+            t = aipsetup.utils.lbl_write(p.stdout, log, True)
+            t.start()
+            t.join()
 
             try:
                 p.wait()
@@ -295,7 +297,9 @@ def build(config, log, buildingsite='.'):
 
         else:
 
-            aipsetup.utils.lbl_write(p.stdout, log)
+            t = aipsetup.utils.lbl_write(p.stdout, log, True)
+            t.start()
+            t.join()
 
             try:
                 p.wait()
@@ -383,7 +387,9 @@ def install(config, log, buildingsite='.'):
 
         else:
 
-            aipsetup.utils.lbl_write(p.stdout, log)
+            t = aipsetup.utils.lbl_write(p.stdout, log, True)
+            t.start()
+            t.join()
 
             try:
                 p.wait()
