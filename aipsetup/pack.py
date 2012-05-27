@@ -34,6 +34,7 @@ def router(opts, args, config):
                          'compress_patches_destdir_and_logs',
                          'compress_files_in_lists_dir',
                          'remove_patches_destdir_and_buildlogs_dirs',
+                         'remove_decompressed_files_from_lists_dir',
                          'make_checksums_for_building_site',
                          'pack_buildingsite']:
 
@@ -228,6 +229,26 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
 
     return ret
 
+def remove_decompressed_files_from_lists_dir(config, buildingsite):
+
+    ret = 0
+
+    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+
+    for i in ['DESTDIR.lst', 'DESTDIR.sha512']:
+
+        filename = os.path.join(lists_dir, i)
+
+        if os.path.exists(filename):
+            try:
+                os.unlink(filename)
+            except:
+                print "-e- Can't remove file %(name)s" % {
+                    'name': filename
+                    }
+                ret = 1
+
+    return ret
 
 def make_checksums_for_building_site(config, buildingsite):
 
@@ -235,13 +256,13 @@ def make_checksums_for_building_site(config, buildingsite):
 
     buildingsite = os.path.abspath(buildingsite)
 
-    package_checksumms = os.path.join(
+    package_checksums = os.path.join(
         buildingsite,
         'package.sha512'
         )
 
-    if os.path.exists(package_checksumms):
-        aipsetup.utils.remove_if_exists(package_checksumms)
+    if os.path.exists(package_checksums):
+        aipsetup.utils.remove_if_exists(package_checksums)
 
     try:
         tf = tempfile.mkstemp()
@@ -259,7 +280,7 @@ def make_checksums_for_building_site(config, buildingsite):
             ret = 2
 
         f.close()
-        shutil.move(tf[1], package_checksumms)
+        shutil.move(tf[1], package_checksums)
 
     return ret
 
@@ -320,6 +341,7 @@ def complite(config, dirname):
               'compress_patches_destdir_and_logs',
               'compress_files_in_lists_dir',
               'remove_patches_destdir_and_buildlogs_dirs',
+              'remove_decompressed_files_from_lists_dir',
               'make_checksums_for_building_site',
               'pack_buildingsite']:
         if eval("%(name)s(config, dirname)" % {

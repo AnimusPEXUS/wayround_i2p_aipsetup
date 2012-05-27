@@ -75,21 +75,29 @@ def router(opts, args, config):
 
     ret = 0
 
-    if len(args) > 0:
+    args_l = len(args)
 
-        if args[0] == 'scan_repo_for_pkg_and_cat':
+    if args_l == 0:
+        print "-e- No command given"
+        ret = 1
+    else:
+
+        if args[0] == 'help':
+            print_help()
+
+        elif args[0] == 'scan_repo_for_pkg_and_cat':
             # scan repository for packages and categories. result
             # replaces data in database
             r = PackageDatabase(config)
             r.scan_repo_for_pkg_and_cat()
 
-        if args[0] == 'find_repository_package_name_collisions_in_database':
+        elif args[0] == 'find_repository_package_name_collisions_in_database':
             # search database package table for collisions: no more
             # when one package with same name can exist!
             r = PackageDatabase(config)
             r.find_repository_package_name_collisions_in_database()
 
-        if args[0] == 'find_missing_pkg_info_records':
+        elif args[0] == 'find_missing_pkg_info_records':
             t = False
             for i in opts:
                 if i[0] == '-t':
@@ -105,18 +113,18 @@ def router(opts, args, config):
             r = PackageDatabase(config)
             r.find_missing_pkg_info_records(t, f)
 
-        if args[0] == 'find_outdated_pkg_info_records':
+        elif args[0] == 'find_outdated_pkg_info_records':
             r = PackageDatabase(config)
             r.find_outdated_pkg_info_records()
 
-        if args[0] == 'update_outdated_pkg_info_records':
+        elif args[0] == 'update_outdated_pkg_info_records':
             r = PackageDatabase(config)
             r.update_outdated_pkg_info_records()
 
-        if args[0] == 'backup_package_info_to_filesystem':
+        elif args[0] == 'backup_package_info_to_filesystem':
             mask = '*'
 
-            if len(args) > 1:
+            if args_l > 1:
                 mask = args[1]
 
             f = False
@@ -128,7 +136,7 @@ def router(opts, args, config):
             r = PackageDatabase(config)
             r.backup_package_info_to_filesystem(mask, f)
 
-        if args[0] == 'load_package_info_from_filesystem':
+        elif args[0] == 'load_package_info_from_filesystem':
 
             file_list = args[1:]
 
@@ -146,11 +154,11 @@ def router(opts, args, config):
             r.load_package_info_from_filesystem(file_list, a)
 
 
-        if args[0] == 'delete_pkg_info_records':
+        elif args[0] == 'delete_pkg_info_records':
 
             mask = None
 
-            if len(args) > 1:
+            if args_l > 1:
                 mask = args[1]
 
             if mask != None:
@@ -160,11 +168,11 @@ def router(opts, args, config):
             else:
                 print "-e- Mask is not given"
 
-        if args[0] == 'list_pkg_info_records':
+        elif args[0] == 'list_pkg_info_records':
 
             mask = '*'
 
-            if len(args) > 1:
+            if args_l > 1:
                 mask = args[1]
 
 
@@ -172,10 +180,10 @@ def router(opts, args, config):
             r.list_pkg_info_records(mask)
 
 
-        if args[0] == 'print_pkg_info_record':
+        elif args[0] == 'print_pkg_info_record':
             name = None
 
-            if len(args) > 1:
+            if args_l > 1:
                 name = args[1]
 
             if name != None:
@@ -185,14 +193,9 @@ def router(opts, args, config):
             else:
                 print "-e- Name is not given"
 
-
-        if args[0] == 'help':
-            print_help()
-
-
-    else:
-        print "wrong aipsetup command. try `aipsetup database help'"
-        ret = 1
+        else:
+            print "wrong aipsetup command. try `aipsetup pkgindex help'"
+            ret = 1
 
 
     return ret

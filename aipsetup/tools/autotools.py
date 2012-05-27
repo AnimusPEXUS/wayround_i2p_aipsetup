@@ -5,7 +5,7 @@ import glob
 import shutil
 import sys
 
-import aipsetup.extractor
+import aipsetup.compress
 import aipsetup.buildingsite
 import aipsetup.utils
 # import aipsetup.name
@@ -130,7 +130,7 @@ def extract(config, log, buildingsite='.'):
 
         arch_bn = os.path.basename(arch)
 
-        extr_error = aipsetup.extractor.extract(arch, output_dir)
+        extr_error = aipsetup.compress.extract(arch, output_dir)
 
         if extr_error != 0:
             log.write("-e- Extraction error: %(num)d" % {

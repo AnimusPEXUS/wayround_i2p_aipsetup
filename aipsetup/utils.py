@@ -67,7 +67,12 @@ default_config = {
     'client_remote_proto'      : 'http',
     'client_remote_host'       : '127.0.0.1',
     'client_remote_port'       : '8005',
-    'client_remote_prefix'     : '/'
+    'client_remote_prefix'     : '/',
+
+    # thous will be used relatively to install.py destdir parameters
+    'installed_pkg_dir': '/var/log/packages',
+    'installed_pkg_dir_buildlogs': '/var/log/packages/buildlogs',
+    'installed_pkg_dir_sums': '/var/log/packages/sums'
     }
 
 actual_config = None
@@ -476,15 +481,15 @@ def make_dir_checksums(dirname, output_filename):
     else:
 
         try:
-            summs_fd = open(output_filename, 'w')
+            sums_fd = open(output_filename, 'w')
         except:
             print "-e- Error opening output file"
             print_exception_info(sys.exc_info())
             ret = 2
         else:
-            ret = make_dir_checksums_fo(dirname, summs_fd)
+            ret = make_dir_checksums_fo(dirname, sums_fd)
 
-            summs_fd.close()
+            sums_fd.close()
 
     return ret
 
@@ -508,7 +513,7 @@ def make_dir_checksums_fo(dirname, output_fileobj):
             print "-e- Wrong output file object"
             ret = 2
         else:
-            summs_fd = output_fileobj
+            sums_fd = output_fileobj
 
             for root, dirs, files in os.walk(dirname):
                 for f in files:
@@ -518,8 +523,24 @@ def make_dir_checksums_fo(dirname, output_fileobj):
                         m.update(fd.read())
                         fd.close()
                         wfn = ('/' + (root+'/'+f)[1:])[dirname_l:]
-                        summs_fd.write(m.hexdigest() + ' *' + wfn  + '\n')
+                        sums_fd.write(
+                            "%(digest)s *%(pkg_file_name)s" % {
+                                'digest': m.hexdigest(),
+                                'pkg_file_name':wfn
+                                }
+                            )
+                        del(m)
 
+    return ret
+
+
+def make_fileobj_checksum(fileobj):
+    ret = None
+    m = None
+    m = hashlib.sha512()
+    cat(fd, m, write_method_name='update')
+    ret = m.hexdigest()
+    del(m)
     return ret
 
 
@@ -570,17 +591,25 @@ def list_files_recurcive(dirname, output_filename):
     fd.close()
 
 
-def cat(stdin, stdout, threaded=False):
+def cat(stdin, stdout, threaded=False, write_method_name='write'):
     return dd(stdin, stdout, bs=(2*1024**2), count=None,
               threaded=threaded)
 
-def dd(stdin, stdout, bs=1, count=None, threaded=False):
+def dd(stdin, stdout, bs=1, count=None, threaded=False, write_method_name='write'):
+
+    if not write_method_name in ['write', 'update']:
+        raise ValueError
 
     if threaded:
         return threading.Thread(
             target=dd,
             args=(stdin, stdout),
-            kwargs=dict(bs=bs, count=count, threaded=False))
+            kwargs=dict(bs=bs,
+                        count=count,
+                        threaded=False,
+                        write_method_name=write_method_name)
+            )
+
     else:
 
         buff = ' '
@@ -593,7 +622,11 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False):
             if  len(buff) == 0:
                 break
 
-            stdout.write(buff)
+            exec(
+                "stdout.%(write_method_name)s(buff)" % {
+                    'write_method_name': write_method_name
+                    }
+                )
 
             c += 1
 
