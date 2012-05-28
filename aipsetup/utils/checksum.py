@@ -85,3 +85,27 @@ def make_fileobj_checksum(fileobj):
     ret = m.hexdigest()
     del(m)
     return ret
+
+
+def parse_checksums_text(text):
+
+    ret = 0
+
+    lines = text.splitlines()
+
+    sums = {}
+
+    for i in lines:
+        ist = i.strip(' \n\t\0')
+        re_res = re.match('(.*?) \*(.*?)', i)
+
+        if re_res == None:
+            ret = 1
+            break
+        else:
+            sums[re_res.groups(2)] = re_res.groups(1)
+
+    if ret == 0:
+        ret = sums
+
+    return ret

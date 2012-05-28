@@ -13,6 +13,7 @@ import lxml.etree
 import aipsetup.name
 import aipsetup.version
 import aipsetup.utils.error
+import aipsetup.utils.text
 
 from mako.template import Template
 from mako import exceptions
@@ -198,7 +199,7 @@ def read_from_file(name):
     tree = None
 
     try:
-        f = open(aipsetup.utils.deunicodify(name), 'r')
+        f = open(aipsetup.utils.text.deunicodify(name), 'r')
         txt = f.read()
         f.close()
     except:
@@ -208,7 +209,7 @@ def read_from_file(name):
         aipsetup.utils.error.print_exception_info(
             sys.exc_info()
             )
-        
+
 
     else:
         try:
