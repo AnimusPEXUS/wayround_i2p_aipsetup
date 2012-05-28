@@ -8,7 +8,6 @@ import copy
 import pprint
 import sys
 
-import utils
 
 def print_help():
     print """\

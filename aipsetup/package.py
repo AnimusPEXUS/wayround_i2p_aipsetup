@@ -15,9 +15,12 @@ def check_package(config, asp_name):
         ret = 1
     else:
         f = aipsetup.compress.tar_member_get_extract_file('./package.sha512')
-        sums = f.readlines()
+        sums_txt = f.read()
         f.close()
-    
+        sums = parse_checksums_text(sums_txt)
+        del(sums_txt)
+
+
 
     return ret
 
@@ -37,7 +40,7 @@ def install(config, asp_name, destdir='/'):
             f = tarf.getmember('./06.LISTS/DESTDIR.lst.xz')
         except:
             pass
-        
 
+    # TODO
 
     return ret

@@ -7,7 +7,6 @@ import os
 import shutil
 import glob
 
-import aipsetup.utils
 import aipsetup.buildingsite
 import aipsetup.tools.autotools
 
@@ -73,14 +72,14 @@ def router(opts, args, config):
         else:
             print "-e- Wrong build command"
 
-
     return ret
 
-def _same_function(config, dirname, actor_name, function, whatdoes, process):
+def _same_function(config, dirname, actor_name,
+                   function, whatdoes, process):
 
     ret = 0
 
-    log = aipsetup.utils.Log(config, dirname, process)
+    log = aipsetup.utils.log.Log(config, dirname, process)
     # log.write("-i- Closing this log now, cause it can't be done farther")
 
     log.write("-i- =========[%(whatdoes)s]=========" % {
@@ -102,7 +101,11 @@ def _same_function(config, dirname, actor_name, function, whatdoes, process):
             log.write("-e- Error getting %(actor_name)s name" % {
                     'actor_name': actor_name
                     })
-            log.write(aipsetup.utils.return_excetption_info(sys.exc_info()))
+            log.write(
+                aipsetup.utils.error.return_excetption_info(
+                    sys.exc_info()
+                    )
+                )
             ret = 2
 
         else:

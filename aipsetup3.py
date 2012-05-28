@@ -4,17 +4,14 @@
 import os
 import os.path
 import sys
-import glob
-import subprocess
 import shutil
 
 
-import aipsetup
-import aipsetup.utils
-import aipsetup.getopt2
+import aipsetup.utils.config
+import aipsetup.utils.getopt2
 
 
-config = aipsetup.utils.load_config()
+config = aipsetup.utils.config.load_config()
 if config == None:
     print "-e- configuration file error exiting"
     exit(1)
@@ -22,7 +19,7 @@ if config == None:
 ret = 0
 
 
-optilist, args = aipsetup.getopt2.getopt(sys.argv[1:])
+optilist, args = aipsetup.utils.getopt2.getopt(sys.argv[1:])
 args_l = len(args)
 
 if '--help' in [ i[0] for i in optilist ]:

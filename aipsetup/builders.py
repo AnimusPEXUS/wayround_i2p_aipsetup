@@ -3,7 +3,6 @@ import os
 import os.path
 import subprocess
 
-import utils
 
 def print_help():
     print """\
@@ -42,20 +41,22 @@ def router(opts, args, config):
                 if args_l > 1:
                     mask = args[1]
 
-                utils.list_files(config, mask, 'builders')
+                aipsetup.utils.file.list_files(
+                    config, mask, 'builders'
+                )
 
         elif args[0] == 'edit':
             if args_l != 2:
                 print "-e- builder to edit not specified"
             else:
-                utils.edit_file(config, args[1], 'builders')
+                aipsetup.utils.edit.edit_file(config, args[1], 'builders')
 
         elif args[0] == 'copy':
             if args_l != 3:
                 print "-e- wrong parameters count"
             else:
 
-                utils.copy_file(config, args[1], args[2], 'builders')
+                aipsetup.utils.file.copy_file(config, args[1], args[2], 'builders')
 
         else:
             print "-e- wrong command. try aipsetup builders help"
