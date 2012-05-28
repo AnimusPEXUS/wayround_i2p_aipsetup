@@ -1,13 +1,6 @@
+# -*- coding: utf-8 -*-
 
-import os
-import os.path
-import subprocess
-import imp
-import inspect
-import copy
-import pprint
-import sys
-
+import aipsetup.utils.file
 
 def print_help():
     print """\
@@ -51,7 +44,9 @@ def router(opts, args, config):
                 if args_l > 1:
                     mask = args[1]
 
-                utils.list_files(config, mask, 'buildinfo')
+                aipsetup.utils.file.list_files(
+                    config, mask, 'buildinfo'
+                    )
 
 
         elif args[0] == 'edit':
@@ -59,7 +54,9 @@ def router(opts, args, config):
             if args_l != 2:
                 print "-e- buildeinfo to edit not specified"
             else:
-                utils.edit_file(config, args[1], 'buildinfo')
+                aipsetup.utils.file.edit_file(
+                    config, args[1], 'buildinfo'
+                    )
 
         elif args[0] == 'copy':
 
@@ -67,9 +64,12 @@ def router(opts, args, config):
                 print "-e- wrong parameters count"
             else:
 
-                utils.copy_file(config, args[1], args[2], 'buildinfo')
+                aipsetup.utils.file.copy_file(
+                    config, args[1], args[2], 'buildinfo'
+                    )
 
         elif args[0] == 'apply':
+            # TODO: What is this?
             pass
 
         else:

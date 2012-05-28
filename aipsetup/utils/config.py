@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
+import os.path 
+import ConfigParser
+
 default_config = {
     'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
 

@@ -87,7 +87,8 @@ def _same_function(config, dirname, actor_name,
         })
 
     pi = aipsetup.buildingsite.read_package_info(
-        config, dirname, ret_on_error=None)
+        config, dirname, ret_on_error=None
+        )
 
     if pi == None:
         log.write("-e- Error getting information about %(process)s" % {

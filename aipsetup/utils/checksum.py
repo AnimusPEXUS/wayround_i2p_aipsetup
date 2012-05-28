@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+import hashlib
+
+import aipsetup.utils.stream
+import aipsetup.utils.error
+
 def make_dir_checksums(dirname, output_filename):
 
     ret = 0
@@ -18,7 +25,7 @@ def make_dir_checksums(dirname, output_filename):
             sums_fd = open(output_filename, 'w')
         except:
             print "-e- Error opening output file"
-            print_exception_info(sys.exc_info())
+            aipsetup.utils.error.print_exception_info(sys.exc_info())
             ret = 2
         else:
             ret = make_dir_checksums_fo(dirname, sums_fd)
@@ -72,7 +79,9 @@ def make_fileobj_checksum(fileobj):
     ret = None
     m = None
     m = hashlib.sha512()
-    cat(fd, m, write_method_name='update')
+    aipsetup.utils.stream.cat(
+        fileobj, m, write_method_name='update'
+        )
     ret = m.hexdigest()
     del(m)
     return ret

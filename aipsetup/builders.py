@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 
-import os
 import os.path
-import subprocess
 
+import aipsetup.utils.file
 
 def print_help():
     print """\

@@ -1,21 +1,22 @@
+# -*- coding: utf-8 -*-
 
-
-import name
-import utils
-
+import aipsetup
+import aipsetup.name
+import aipsetup.utils.config
 
 def version_comparator(name1, name2):
 
     ret = 0
 
+    d1 = aipsetup.name.source_name_parse(
+        aipsetup.utils.config.actual_config,
+        name1, mute=True, modify_info_file=False
+        )
 
-    d1 = name.source_name_parse(
-        utils.actual_config,
-        name1, mute=True, modify_info_file=False)
-
-    d2 = name.source_name_parse(
-        utils.actual_config,
-        name2, mute=True, modify_info_file=False)
+    d2 = aipsetup.name.source_name_parse(
+        aipsetup.utils.config.actual_config,
+        name2, mute=True, modify_info_file=False
+        )
 
     if d1 == None or d2 == None:
         print "-e- Can't parse filename"
@@ -26,14 +27,15 @@ def version_comparator(name1, name2):
         raise Exception
 
     else:
-        com_res = standard_comparison(d1['groups']['version'], d2['groups']['version'])
+        com_res = standard_comparison(
+            d1['groups']['version'],
+            d2['groups']['version']
+            )
+
         if com_res != 0:
-
             ret = com_res
-
         else:
             ret = 0
-
 
     return ret
 
@@ -81,6 +83,5 @@ def standard_comparison(e1, e2):
             return +1
         else:
             return -1
-
 
     return 0

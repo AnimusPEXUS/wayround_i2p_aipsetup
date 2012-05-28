@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+
+import aipsetup
+import aipsetup.buildingsite
+import aipsetup.utils.time
+import aipsetup.utils.text
+import aipsetup.utils.error
+
 class Log:
 
     def __init__(self, config, building_site, logname):
@@ -30,7 +39,7 @@ class Log:
                 ret = 2
 
         if ret == 0:
-            timestamp = currenttime_stamp()
+            timestamp = aipsetup.utils.time.currenttime_stamp()
             filename = os.path.abspath(
                 os.path.join(
                     log_dir,
@@ -44,7 +53,7 @@ class Log:
                 self.fileobj = open(filename, 'w')
             except:
                 print "-e- Error opening log file"
-                print_exception_info(sys.exc_info())
+                aipsetup.utils.error.print_exception_info(sys.exc_info())
                 ret = 3
             else:
                 print "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n" % {
@@ -67,7 +76,7 @@ class Log:
         if self.fileobj == None:
             raise Exception
 
-        timestamp = currenttime_stamp()
+        timestamp = aipsetup.utils.time.currenttime_stamp()
         print "[%(ts)s] =///////= Stopping `%(name)s' log =///////=\n" % {
             'ts': timestamp,
             'name': self.logname
@@ -84,15 +93,15 @@ class Log:
         if self.fileobj == None:
             raise Exception
 
-        timestamp = currenttime_stamp()
+        timestamp = aipsetup.utils.time.currenttime_stamp()
         if echo:
             print "[%(ts)s] %(text)s" % {
                 'ts': timestamp,
-                'text': deunicodify(text)
+                'text': aipsetup.utils.text.deunicodify(text)
                 }
         self.fileobj.write("[%(ts)s] %(text)s\n" % {
                 'ts': timestamp,
-                'text': deunicodify(text)
+                'text': aipsetup.utils.text.deunicodify(text)
                 })
         return
 

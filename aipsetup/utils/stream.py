@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import threading
+
 def cat(stdin, stdout, threaded=False, write_method_name='write'):
     return dd(stdin, stdout, bs=(2*1024**2), count=None,
               threaded=threaded)

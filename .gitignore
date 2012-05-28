@@ -1,6 +1,8 @@
 /.bzr
 /log
 /html
+/.eric4project
+/aipsetup3.e4p
 *~
 *.pyc
 *.pyo

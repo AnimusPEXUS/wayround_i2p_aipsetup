@@ -2,7 +2,8 @@
 import tarfile
 import sys
 
-import aipsetup.utils
+import aipsetup.utils.error
+import aipsetup.storage.archive
 
 def check_package(config, asp_name):
     ret = 0
@@ -14,13 +15,14 @@ def check_package(config, asp_name):
         print aipsetup.utils.return_exception_info(sys.exc_info())
         ret = 1
     else:
-        f = aipsetup.compress.tar_member_get_extract_file('./package.sha512')
+        f = aipsetup.storage.archive.tar_member_get_extract_file(
+            './package.sha512'
+            )
         sums_txt = f.read()
         f.close()
-        sums = parse_checksums_text(sums_txt)
+        sums = aipsetup.utils.checksum.parse_checksums_text(sums_txt)
         del(sums_txt)
-
-
+        # TODO: to be done
 
     return ret
 
@@ -41,6 +43,6 @@ def install(config, asp_name, destdir='/'):
         except:
             pass
 
-    # TODO
+        # TODO: to be done
 
     return ret

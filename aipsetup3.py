@@ -6,7 +6,6 @@ import os.path
 import sys
 import shutil
 
-
 import aipsetup.utils.config
 import aipsetup.utils.getopt2
 

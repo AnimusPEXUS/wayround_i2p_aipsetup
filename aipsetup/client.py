@@ -3,10 +3,9 @@ import os.path
 import sys
 import urllib
 
-import utils
-import version
-import name
-import info
+import aipsetup.version
+import aipsetup.name
+import aipsetup.info
 
 
 def print_help():

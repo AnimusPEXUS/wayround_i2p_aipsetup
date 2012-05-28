@@ -5,11 +5,8 @@ import glob
 import shutil
 import sys
 
-import aipsetup.compress
+import aipsetup.storage.archive
 import aipsetup.buildingsite
-import aipsetup.utils
-# import aipsetup.name
-
 
 def determine_source_dir(config, buildingsite, pkginfo):
 

@@ -1,3 +1,17 @@
+# -*- codepage: utf-8 -*-
+
+import os
+import sys
+import struct
+import fcntl
+import termios
+import shutil
+import glob
+
+import aipsetup
+import aipsetup.utils.text
+import aipsetup.utils.error
+
 def remove_if_exists(file_or_dir):
     if os.path.exists(file_or_dir):
         if os.path.isdir(file_or_dir):
@@ -54,7 +68,7 @@ def list_files(config, mask, what):
     for each in lst:
         bases.append(os.path.basename(each))
 
-    columned_list_print(bases, fd=sys.stdout.fileno())
+    aipsetup.utils.text.columned_list_print(bases, fd=sys.stdout.fileno())
 
     return
 
@@ -76,7 +90,7 @@ def copy_file(config, file1, file2, what):
                 shutil.copy(f1, f2)
             except:
                 print "-e- Error copying file"
-                print_exception_info(sys.exc_info())
+                aipsetup.utils.error.print_exception_info(sys.exc_info())
     else:
         print "-e- source file not exists"
 
@@ -126,7 +140,7 @@ def _list_files_recurcive(start_root, start_root_len, root_dir, fd):
 
     ld = os.listdir(root_dir)
 
-    files = unicodify(
+    files = aipsetup.utils.text.unicodify(
         ld
         )
 
@@ -149,7 +163,7 @@ def _list_files_recurcive(start_root, start_root_len, root_dir, fd):
 
             if not os.path.isdir(full_path):
                 fd.write("%(filename)s\n" % {
-                        'filename': deunicodify(
+                        'filename': aipsetup.utils.text.deunicodify(
                             "%(filename)s" % {
                                 'filename': full_path[start_root_len:]
                                 })

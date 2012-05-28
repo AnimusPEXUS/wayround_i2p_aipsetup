@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import copy
 
 def env_vars_edit(var_list, mode='copy'):

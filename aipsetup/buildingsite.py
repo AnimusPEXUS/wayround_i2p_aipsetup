@@ -8,7 +8,6 @@ import pprint
 
 import aipsetup.info
 import aipsetup.constitution
-import aipsetup.utils
 import aipsetup.name
 import aipsetup.build
 import aipsetup.pack

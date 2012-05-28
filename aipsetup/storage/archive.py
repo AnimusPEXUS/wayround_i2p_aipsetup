@@ -1,3 +1,4 @@
+# -*- codepage: utf-8 -*-
 
 import os
 import os.path
@@ -5,9 +6,10 @@ import subprocess
 import sys
 import tarfile
 
-import aipsetup.xz
-import aipsetup.tar
-import aipsetup.utils
+
+import aipsetup.utils.error
+import aipsetup.storage.xz
+import aipsetup.storage.tar
 
 
 def _extract_zip(file_name, output_dir):
@@ -105,7 +107,7 @@ def compress_file_xz(infile, outfile, verbose_xz=False):
 
         options += ['-9', '-M', str(200*1024**2), '-']
 
-        xzproc = aipsetup.xz.xz(
+        xzproc = aipsetup.storage.xz.xz(
             stdin = fi,
             stdout = fo,
             options = options,
@@ -142,7 +144,7 @@ def compress_dir_contents_tar_xz(dirname, output_filename,
 
         options += ['-9', '-M', str(200*1024**2), '-']
 
-        xzproc = aipsetup.xz.xz(
+        xzproc = aipsetup.storage.xz.xz(
             stdout = outf,
             options = options,
             bufsize = 2*1024**2,
@@ -158,7 +160,7 @@ def compress_dir_contents_tar_xz(dirname, output_filename,
 
         options += ['-c', '.']
 
-        tarproc = aipsetup.tar.tar(
+        tarproc = aipsetup.storage.tar.tar(
             options = options,
             stdin = None,
             stdout = xzproc.stdin,
@@ -198,7 +200,7 @@ def pack_dir_contents_tar(dirname, output_filename,
 
         options += ['-c', '.']
 
-        tarproc = aipsetup.tar.tar(
+        tarproc = aipsetup.storage.tar.tar(
             options = options,
             stdin = None,
             stdout = outf,
@@ -221,7 +223,7 @@ def tar_get_member(tarf, cont_name):
         ret = tarf.getmember(cont_name)
     except:
         print "-e- Can't get tar member"
-        print aipsetup.utils.return_exception_info(sys.exc_info())
+        print aipsetup.utils.error.return_exception_info(sys.exc_info())
         ret = 1
 
     return ret
@@ -234,7 +236,7 @@ def tar_member_extract_file(tarf, member):
         ret = tarf.extractfile(member)
     except:
         print "-e- Can't get tar member"
-        print aipsetup.utils.return_exception_info(sys.exc_info())
+        print aipsetup.utils.error.return_exception_info(sys.exc_info())
         ret = 1
 
     return ret

@@ -42,7 +42,7 @@ def router(opts, args, config):
         else:
             print "user --help"
 
-    return
+    return ret
 
 
 def read_constitution(config):

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 def currenttime_stamp():
     d = datetime.datetime.now()
     return time_stamp(d)

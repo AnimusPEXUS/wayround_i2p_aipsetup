@@ -3,15 +3,13 @@
 
 import os
 import os.path
-import traceback
 import sys
 import re
 import xml.sax.saxutils
 
 import cherrypy
 
-import aipsetup.getopt2
-import aipsetup.utils
+import aipsetup.utils.getopt2
 import aipsetup.pkgindex
 
 

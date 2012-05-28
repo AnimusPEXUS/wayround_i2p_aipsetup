@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import copy
+import os
+import re
+
+import aipsetup.utils.file
+
 def columned_list_print(lst, width=None, columns=None,
                         margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
                         fd=1):
@@ -15,7 +21,7 @@ def return_columned_list_print(lst, width=None, columns=None,
         if (isinstance(fd, int) and os.isatty(fd)) \
                 or (isinstance(fd, file) and fd.isatty()):
 
-            size = get_terminal_size(fd)
+            size = aipsetup.utils.file.get_terminal_size(fd)
             if size == None:
                 width = 80
             else:

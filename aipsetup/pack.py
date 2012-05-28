@@ -1,11 +1,12 @@
+# -*- config: utf-8 -*-
 
 import os.path
 import tempfile
 import shutil
+import sys
 
-import aipsetup.utils
 import aipsetup.buildingsite
-import aipsetup.compress
+import aipsetup.storage.archive
 
 
 def print_help():
@@ -180,7 +181,7 @@ def compress_patches_destdir_and_logs(config, buildingsite):
             print "-i- Compressing %(i)s" % {
                 'i': i
                 }
-            aipsetup.compress.compress_dir_contents_tar_xz(
+            aipsetup.storage.archive.compress_dir_contents_tar_xz(
                 dirname,
                 filename,
                 verbose_tar=False,
@@ -200,7 +201,7 @@ def compress_files_in_lists_dir(config, buildingsite):
         infile = os.path.join(lists_dir, i)
         outfile = infile + '.xz'
 
-        if aipsetup.compress.compress_file_xz(infile, outfile) != 0:
+        if aipsetup.storage.archive.compress_file_xz(infile, outfile) != 0:
             print "-e- Error compressing files in lists dir"
             ret = 1
             break
@@ -324,7 +325,7 @@ def pack_buildingsite(config, buildingsite):
         except:
             pass
 
-        aipsetup.compress.pack_dir_contents_tar(
+        aipsetup.storage.archive.pack_dir_contents_tar(
             buildingsite,
             pack_file_name
             )

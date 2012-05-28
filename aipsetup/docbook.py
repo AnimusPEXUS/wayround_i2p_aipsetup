@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
 
 import os
 import os.path
@@ -8,8 +8,9 @@ import re
 
 import lxml.etree
 
-import utils
-import version
+import aipsetup.version
+import aipsetup.utils.error
+
 
 def print_help():
     print """\
@@ -113,7 +114,9 @@ def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
             pass
 
         if not os.path.isdir(i):
-            print "-e-       not a dir" % {'i': i}
+            print "-e-       not a dir %(i)s" % {
+                'i': i
+                }
             return 1
 
     return 0
@@ -219,7 +222,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
         tmp_cat_lxml = lxml.etree.parse(specific_cat_file)
     except:
         e = sys.exc_info()
-        print_exception_info(e)
+        aipsetup.utils.error.print_exception_info(e)
 
     tmp_cat_lxml_ns = '{%(ns)s}' % {'ns': tmp_cat_lxml.getroot().nsmap[None]}
 
@@ -279,7 +282,8 @@ def install_docbook_zips(docbook_zip_list,
 
     for i in docbook_zip_list:
 
-        r = unpack_zip(i, base_dir, base_dir_etc_xml, base_dir_share_docbook)
+        r = unpack_zip(i, base_dir, base_dir_etc_xml,
+                       base_dir_share_docbook)
 
         if isinstance(r, int):
             print "-w- error processing file %(file)s" % {'file': i}
@@ -296,7 +300,9 @@ def install_docbook_zips(docbook_zip_list,
     print "-i- Installing DTDs:"
 
     for i in dtd_dirs:
-        import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, i)
+        import_dtd_to_docbook(
+            base_dir, base_dir_etc_xml_catalog_docbook, i
+            )
 
 
     print "-i- Installing docbook into catalog"
@@ -324,8 +330,11 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         version = name[name.rfind('-')+1:]
 
 
-        base_dir_share_docbook_name = os.path.join(base_dir_share_docbook, name)
-        base_dir_share_docbook_xsl_stylesheets = os.path.join(base_dir_share_docbook, 'xsl-stylesheets-%(version)s' % {'version': version})
+        base_dir_share_docbook_name = \
+            os.path.join(base_dir_share_docbook, name)
+
+        base_dir_share_docbook_xsl_stylesheets = \
+            os.path.join(base_dir_share_docbook, 'xsl-stylesheets-%(version)s' % {'version': version})
 
         print "-i- Installing XSL %(xsl_name)s into %(xsl_dest)s" % {
             'xsl_name': name,
@@ -334,12 +343,16 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         print '-i-    preparing dirs'
 
 
-        if 0 != utils.remove_if_exists(base_dir_share_docbook_name):
+        if 0 != aipsetup.utils.file.remove_if_exists(
+                    base_dir_share_docbook_name
+                    ):
             print "-e-       error"
             # return 10
             continue
 
-        if 0 != utils.remove_if_exists(base_dir_share_docbook_xsl_stylesheets):
+        if 0 != aipsetup.utils.file.remove_if_exists(
+                    base_dir_share_docbook_xsl_stylesheets
+                    ):
             print "-e-       error"
             # return 20
             continue
@@ -359,7 +372,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
             os.rename(base_dir_share_docbook_name,
                       base_dir_share_docbook_xsl_stylesheets)
         except:
-            print_exception_info(sys.exc_info())
+            aipsetup.utils.error.print_exception_info(sys.exc_info())
             # return 30
             continue
 
@@ -419,7 +432,7 @@ def install(files, base_dir):
     docbook_zip_list = []
     docbook_xsl_zip_list = []
 
-    for i in args:
+    for i in files:
         if re.match(r'docbook-xml-(\d\.?)*zip', os.path.basename(i)):
             docbook_zip_list.append(i)
         elif re.match(r'docbook-xsl-(\d\.?)*tar\.(.*)', os.path.basename(i)):
@@ -481,14 +494,14 @@ def install(files, base_dir):
         set_correct_modes(base_dir_etc_xml)
         set_correct_modes(base_dir_share_docbook)
     except:
-        utils.print_exception_info(sys.exc_info())
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
 
     print "-i- Setting correct owners"
     try:
         set_correct_owners(base_dir_etc_xml)
         set_correct_owners(base_dir_share_docbook)
     except:
-        utils.print_exception_info(sys.exc_info())
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
 
     print
     print "-i- All operations complited. Bye!"

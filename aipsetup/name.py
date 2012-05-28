@@ -65,18 +65,18 @@ for i in NAME_REGEXPS:
         'date'                : r'(?P<date>\d{8,16})'
         }
 
+del(i)
+
 # Ensure exception in case something missed
 for each in NAME_REGEXPS_ORDER:
-    try:
-        NAME_REGEXPS[each]
-    except:
+    if not each in NAME_REGEXPS:
         raise RegexpsError
 
 for each in NAME_REGEXPS:
     if not each in NAME_REGEXPS_ORDER:
         raise RegexpsError
 
-
+del(each)
 
 
 def print_help():
@@ -132,6 +132,9 @@ def router(opts, args, config):
 
 def test_expressions_on_sources(config):
 
+    # TODO: Add some more usability
+    # TODO: Add immediate package info files update _option_
+
     f = open(config['source_index'], 'r')
 
     lst = f.readlines()
@@ -150,7 +153,7 @@ def test_expressions_on_sources(config):
 
     for i in lst:
 
-        parse_name(i, False, False)
+        source_name_parse(config, i, False, False)
 
         print ""
         sys.stdout.flush()

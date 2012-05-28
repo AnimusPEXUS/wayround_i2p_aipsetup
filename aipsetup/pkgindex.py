@@ -10,8 +10,9 @@ import glob
 import sqlalchemy
 import sqlalchemy.orm
 
+import aipsetup
 import aipsetup.info
-import aipsetup.utils
+import aipsetup.utils.text
 
 
 def print_help():
@@ -146,7 +147,7 @@ def router(opts, args, config):
                     a = True
 
             if len(file_list) == 0:
-                file_list = aipsetup.utils.unicodify(
+                file_list = aipsetup.utils.text.unicodify(
                     glob.glob(os.path.join(config['info'], '*.xml'))
                     )
 
@@ -203,8 +204,9 @@ def router(opts, args, config):
 
 def is_package(path):
     return os.path.isdir(path) \
-        and os.path.isfile(os.path.join(path, '.package'))
-
+        and os.path.isfile(
+            os.path.join(path, '.package')
+            )
 
 
 def join_pkg_path(pkg_path):
@@ -378,7 +380,6 @@ class PackageDatabase:
         sess.add(new_cat)
         sess.commit()
 
-
         new_cat_id = new_cat.cid
 
         sess.close()
@@ -429,7 +430,6 @@ class PackageDatabase:
         else:
             lst = sess.query(Package).filter_by(cid=cid).all()
 
-
         sess.close()
 
         return lst
@@ -448,13 +448,13 @@ class PackageDatabase:
 
         ld = os.listdir(root_dir)
 
-        files = aipsetup.utils.unicodify(
-            ld
-            )
+        files = aipsetup.utils.text.unicodify(ld)
 
         files.sort()
 
         isfiles = 0
+
+        # TODO: Reduce number of flushes
 
         for each in files:
             full_path = os.path.join(root_dir, each)
@@ -464,7 +464,8 @@ class PackageDatabase:
 
         if isfiles >= 3:
             print "-w- too many non-dirs : %(path)s" % {
-                'path': root_dir}
+                'path': root_dir
+                }
             print "       skipping"
             sys.stdout.flush()
             return 1
@@ -491,7 +492,8 @@ class PackageDatabase:
                     sess, full_path, new_cat.cid)
             else:
                 print "-w- garbage file found: %(path)s" % {
-                    'path': full_path}
+                    'path': full_path
+                    }
                 sys.stdout.flush()
 
         return 0
@@ -1137,17 +1139,17 @@ Category: %(category)s
 Tags: %(tags)s
 
 """ % {
-                'name': name,
-                'homepage': r['homepage'],
-                'pkg_name_type': r['pkg_name_type'],
-                'regexp': regexp,
-                'builder': r['builder'],
-                'description': r['description'],
-                'sources': '\n'.join(r['sources']),
-                'mirrors': '\n'.join(r['mirrors']),
-                'tags': ', '.join(r['tags']),
-                'category': category
-                }
+        'name': name,
+        'homepage': r['homepage'],
+        'pkg_name_type': r['pkg_name_type'],
+        'regexp': regexp,
+        'builder': r['builder'],
+        'description': r['description'],
+        'sources': '\n'.join(r['sources']),
+        'mirrors': '\n'.join(r['mirrors']),
+        'tags': ', '.join(r['tags']),
+        'category': category
+        }
 
 
 
@@ -1205,14 +1207,12 @@ class PackageSource(object):
         self.url = url
 
 
-
 class PackageMirror(object):
 
     def __init__(self, name, url):
 
         self.name = name
         self.url = url
-
 
 
 class PackageTag(object):
