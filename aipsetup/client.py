@@ -1,7 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Client-module for searching and getting files on and from
+aipsetup package server
+"""
+
 import os
 import os.path
 import sys
 import urllib
+import subprocess
 
 import aipsetup.version
 import aipsetup.name
@@ -9,6 +17,9 @@ import aipsetup.info
 
 
 def print_help():
+    """
+    help printer
+    """
     print """\
 aipsetup client command
 
@@ -49,11 +60,63 @@ aipsetup client command
 
 """
 
-def workout_search_params(opts, args, config):
+def router(opts, args, config):
+    """
+    aipsetup control router
+    """
+    ret = 0
 
-    import pkgindex
+    if len(args) == 0:
+        print "-e- not enough parameters"
+        ret = 1
+    else:
+
+        if args[0] == 'help':
+            print_help()
+            ret = 0
+
+        elif args[0] == 'search':
+
+            wsp = workout_search_params(opts, args, config)
+
+            if not wsp['p_errors'] and not wsp['n_errors']:
+
+                ret = search(config,
+                             wsp
+                             )
+
+        elif args[0] == 'get':
+
+            wsp = workout_search_params(opts, args, config)
+
+            output = None
+
+            for i in opts:
+                if i[0] == '-o':
+                    output = i[1]
+
+            if not wsp['p_errors'] and not wsp['n_errors']:
+
+                ret = get(config,
+                          output,
+                          wsp
+                          )
+
+        else:
+            print "-e- wrong command"
+            ret = 1
+
+    return ret
+
+
+def workout_search_params(opts, args, config):
+    """
+    Parse options and parameters for `search' and/or `get'
+    """
 
     args_l = len(args)
+
+    # NOTE: Maybe those variable need tobe refactored, but not now
 
     what = ''
     how = ''
@@ -123,7 +186,7 @@ def workout_search_params(opts, args, config):
             n_errors = False
 
             if how == 'i':
-                idic = info.read_from_file(
+                idic = aipsetup.info.read_from_file(
                     os.path.join(
                         config['info'], '%(name)s.xml' % {
                             'name': value
@@ -140,7 +203,8 @@ def workout_search_params(opts, args, config):
                 else:
 
                     if what == 's':
-                        regexp = name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
+                        regexp = \
+                            aipsetup.name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
                         print "-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
                             're': regexp,
                             'name': value
@@ -198,60 +262,31 @@ def workout_search_params(opts, args, config):
         )
 
 
-def router(opts, args, config):
+def get(config, output='.', wsp={}):
+    """
+    Get files from server
+
+    @param config: aipsetup config from aipsetup.utils.config
+    @type config: dict
+    @param output: output dircetory
+    @type output: basestr
+    """
+
+    # We already using `client' here. Same as in `search'.
+    # So it's meaningless to use `search' work results!
 
     ret = 0
 
-    if len(args) == 0:
-        print "-e- not enough parameters"
-        ret = 1
+    if not os.path.exists(output):
+        print "-i- creating %(dir)s" % {
+            'dir': output
+            }
+        try:
+            os.makedirs(output)
+        except:
+            print "-e- Can't create output dir"
+            ret = 2
     else:
-
-        if args[0] == 'help':
-            print_help()
-            ret = 0
-
-        elif args[0] == 'search':
-
-            wsp = workout_search_params(opts, args, config)
-
-            if not wsp['p_errors'] and not wsp['n_errors']:
-
-                result = search(config,
-                                wsp
-                                )
-
-        elif args[0] == 'get':
-
-            wsp = workout_search_params(opts, args, config)
-
-            output = None
-
-            for i in opts:
-                if i[0] == '-o':
-                    output = i[1]
-
-
-            if not wsp['p_errors'] and not wsp['n_errors']:
-
-                result = get(config,
-                             output,
-                             wsp
-                             )
-
-
-        else:
-            print "-e- wrong command"
-            ret = 1
-
-    return ret
-
-
-def get(config, output=None, wsp={}):
-
-    ret = 0
-
-    if not output == None:
         if os.path.exists(output) and not os.path.isdir(output):
             print "-e- Destination file exists and is not dir"
             ret = 1
@@ -260,34 +295,31 @@ def get(config, output=None, wsp={}):
             print "-i- using %(dir)s for output" % {
                 'dir': output
                 }
-        elif not os.path.exists(output):
-            print "-i- creating %(dir)s" % {
-                'dir': output
-                }
-            try:
-                os.path.makedirs(output)
-            except:
-                print "-e- Can't create output dir"
-                ret = 2
+        else:
+            print "-e- Unknown location :-P"
+            raise Exception
 
     if ret != 0:
+        # We have an error here, so nothing to be done more
         pass
     else:
-
         lst = client(config, wsp)
 
         if not isinstance(lst, list):
-            ret = lst
             print "-e- Error getting response list"
-
+            ret = lst
         else:
 
             lst = fn_version_filter(config, lst, wsp)
 
-            lst.sort(version.version_comparator)
+            lst.sort(aipsetup.version.version_comparator)
 
             lst = fn_version_min_max_filter(lst, wsp)
 
+            proto = None
+            host = None
+            port = None
+            prefix = None
 
             for i in ['proto', 'host', 'port', 'prefix']:
                 exec("%(i)s = config['client_%(where)s_%(i)s']" % {
@@ -306,14 +338,14 @@ def get(config, output=None, wsp={}):
                 name = ''
                 if wsp['what'] == 'info':
                     name = '/%(v)s.xml' % {
-                        'v': value
+                        'v': wsp['value']
                         }
                 else:
                     name = i
 
                 name = urllib.quote(name)
 
-                request = "%(proto)s://%(host)s%(semi)s%(port)s%(prefix)s%(path)s%(name)s" % {
+                request = ("%(proto)s://%(host)s%(semi)s%(port)s%(prefix)s%(path)s%(name)s") % {
                     'proto'     : proto,
                     'host'      : host,
                     'semi'      : semi,
@@ -327,17 +359,18 @@ def get(config, output=None, wsp={}):
                     'req': request
                     }
 
-                bn = os.path.basename(i)
+                bname = os.path.basename(i)
 
-                os.system("wget -O '%(bn)s' '%(url)s'" % {
-                        'bn': bn,
-                        'url': request
-                        })
+                process = subprocess.Popen(['wget',  '-O',  bname, request])
+                process.wait()
 
     return ret
 
 
 def search(config, wsp):
+    """
+    Search packages on server using `client' function
+    """
 
     ret = 0
 
@@ -347,7 +380,7 @@ def search(config, wsp):
 
         lst = fn_version_filter(config, lst, wsp)
 
-        lst.sort(version.version_comparator)
+        lst.sort(aipsetup.version.version_comparator)
 
         lst = fn_version_min_max_filter(lst, wsp)
 
@@ -365,11 +398,22 @@ def search(config, wsp):
     return ret
 
 def client(config, wsp={}):
+    """
+    Central client function before `get' and `search' functions.
+    """
+
+    what = None
+    how = None
+    sensitive = None
+    value = None
+    where = None
 
     for i in wsp:
-        exec("%(i)s = wsp['%(i)s']" % {
+        exec(
+            "%(i)s = wsp['%(i)s']" % {
                 'i': i
-                })
+                }
+            )
 
     ret = 0
 
@@ -381,6 +425,11 @@ def client(config, wsp={}):
         ret = 1
 
     else:
+
+        proto = None
+        host = None
+        port = None
+        prefix = None
 
         for i in ['proto', 'host', 'port', 'prefix']:
             exec("%(i)s = config['client_%(where)s_%(i)s']" % {
@@ -417,35 +466,60 @@ def client(config, wsp={}):
 
         try:
             req_res = urllib.urlopen(request)
-        except IOError:
-            print "-e- Connection refused"
         except:
-            e = sys.exc_info()
-            utils.print_exception_info(e)
+            exception = sys.exc_info()
+            if isinstance(exception[1],  IOError):
+                print "-e- Connection refused"
+            aipsetup.utils.error.print_exception_info(
+                exception
+                )
+            ret = 1
         else:
-            code = req_res.getcode()
+            code = int(req_res.getcode())
             if code != 200:
                 print "-e- Response code: %(n)d" % {
                     'n': code
                     }
+                ret = 2
             else:
                 lst = req_res.readlines()
                 lst2 = []
                 for i in lst:
-                    s = i.strip()
-                    if s != '':
-                        lst2.append(s)
+                    stripped = i.strip()
+                    if stripped != '':
+                        lst2.append(stripped)
                 ret = lst2
 
     return ret
 
 
 def fn_version_filter(config, lst, wsp):
+    """
+    Filter list by version.
+    """
+
+    # NOTE: The problem of this function, is what:
+    #       to filter filenames by version - we need
+    #       to parse them again :-( .
+    #
+    #       Additionaly we need to keep in mind passability
+    #       of a large list before filter in client!
+    #       So we needet to separate version filter in to
+    #       different function -- to save memory, maybe
+    #       in a price on performance
+
     ret = []
     if not wsp['ver'] in ['MAX', 'MIN', 'ANY']:
 
         for i in lst:
-            if name.source_name_parse(config, i, mute=True, modify_info_file=False, acceptable_vn=wsp['ver']) != None:
+            if aipsetup.name.source_name_parse(
+                config,
+                i,
+                mute=True,
+                modify_info_file=False,
+                acceptable_vn=wsp['ver']
+                ) != None:
+
                 ret.append(i)
 
     else:
@@ -454,6 +528,12 @@ def fn_version_filter(config, lst, wsp):
     return ret
 
 def fn_version_min_max_filter(lst, wsp):
+    """
+    Return only maximal or minimal source file name from list
+
+    List must be sorted using aipsetup.version.version_comparator
+    before being passed to this function.
+    """
 
     lst2 = []
 

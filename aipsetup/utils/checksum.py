@@ -3,6 +3,7 @@
 import os
 import sys
 import hashlib
+import re
 
 import aipsetup.utils.stream
 import aipsetup.utils.error

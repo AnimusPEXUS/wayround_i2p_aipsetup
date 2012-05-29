@@ -21,6 +21,7 @@ DIR_DESTDIR    = '04.DESTDIR'
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
 DIR_LISTS      = '06.LISTS'
 
+i = None
 for i in ['TARBALL',
           'SOURCE',
           'PATCHES',
@@ -44,6 +45,7 @@ def getDir_%(name)s(directory):
             'name': i
             })
 
+del(i)
 
 DIR_ALL = [
     DIR_TARBALL,
@@ -266,7 +268,9 @@ def init(config, directory='build', source_files=None, build=False):
                             source_file, os.path.join(directory, DIR_TARBALL)
                             )
                     except:
-                        aipsetup.utils.print_exception_info(sys.exc_info())
+                        aipsetup.utils.error.print_exception_info(
+                            sys.exc_info()
+                            )
                         ret = -3
 
                 else:
@@ -313,7 +317,9 @@ def read_package_info(config, directory, ret_on_error=None):
             print "-e- Can't open `%(name)s'" % {
                 'name': pi_filename
                 }
-            aipsetup.utils.print_exception_info(sys.exc_info())
+            aipsetup.utils.error.print_exception_info(
+                sys.exc_info()
+                )
         else:
             txt = f.read()
             f.close()
@@ -327,7 +333,9 @@ def read_package_info(config, directory, ret_on_error=None):
                 print "-e- error in `%(name)s'" % {
                     'name': pi_filename
                 }
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                aipsetup.utils.error.print_exception_info(
+                    sys.exc_info()
+                    )
                 ret = ret_on_error
 
     return ret
@@ -344,14 +352,18 @@ def write_package_info(config, directory, info):
         print "-e- can't open `%(file)s' for writing" % {
             'file': pi_filename
             }
-        aipsetup.utils.print_exception_info(sys.exc_info())
+        aipsetup.utils.error.print_exception_info(
+            sys.exc_info()
+            )
     else:
         txt = ''
         try:
-            txt=pprint.pformat(info)
+            txt = pprint.pformat(info)
         except:
             print "-e- can't represent data for package info"
-            aipsetup.utils.print_exception_info(sys.exc_info())
+            aipsetup.utils.error.print_exception_info(
+                sys.exc_info()
+                )
         else:
 
             f.write("#!/usr/bin/python\n")
@@ -509,7 +521,9 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                 print "-e- Can't load buildinfo Python script `%(name)s'" % {
                     'name': buildinfo_filename
                     }
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                aipsetup.utils.error.print_exception_info(
+                    sys.exc_info()
+                    )
                 ret = 3
 
             else:
@@ -525,10 +539,13 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                     try:
                         l['build_info'](copy.copy(config), pi)
                     except:
-                        print "-e- Error while calling for build_info() from `%(name)s'" % {
+                        print ("-e- Error while calling for "
+                            +"build_info() from `%(name)s'") % {
                             'name': buildinfo_filename
                             }
-                        aipsetup.utils.print_exception_info(sys.exc_info())
+                        aipsetup.utils.error.print_exception_info(
+                            sys.exc_info()
+                            )
                         pi['pkg_buildinfo'] = {}
                         ret = 5
 
@@ -545,7 +562,9 @@ def apply_info(config, dirname='.', source_filename=None):
 
     ret = 0
 
-    if apply_pkg_nameinfo_on_buildingsite(config, dirname, source_filename) != 0:
+    if apply_pkg_nameinfo_on_buildingsite(
+            config, dirname, source_filename
+            ) != 0:
         ret = 1
     elif apply_constitution_on_buildingsite(config, dirname) != 0:
         ret = 2
@@ -559,7 +578,9 @@ def apply_info(config, dirname='.', source_filename=None):
 
 def complite(config, dirname):
 
-    log = aipsetup.utils.Log(config, dirname, 'buildingsite complite')
+    log = aipsetup.utils.log.Log(
+        config, dirname, 'buildingsite complite'
+        )
     log.write("-i- Buildingsite processes started")
     log.write("-i- Closing this log now, cause it can't be done farther")
     log.stop()

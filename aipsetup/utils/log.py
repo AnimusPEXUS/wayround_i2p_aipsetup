@@ -27,7 +27,9 @@ class Log:
                 os.makedirs(log_dir)
             except:
                 print "-e- Exception while creating building logs dir"
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                aipsetup.utils.error.print_exception_info(
+                    sys.exc_info()
+                    )
                 ret = 1
         else:
 
@@ -56,10 +58,11 @@ class Log:
                 aipsetup.utils.error.print_exception_info(sys.exc_info())
                 ret = 3
             else:
-                print "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n" % {
-                    'ts': timestamp,
-                    'name': self.logname
-                    }
+                print(
+                    "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n") % {
+                        'ts': timestamp,
+                        'name': self.logname
+                        }
                 self.fileobj.write(
                     "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n" % {
                         'ts': timestamp,

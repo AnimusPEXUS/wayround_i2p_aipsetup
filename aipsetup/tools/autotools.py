@@ -110,7 +110,7 @@ def extract(config, log, buildingsite='.'):
 
     if os.path.isdir(output_dir):
         log.write("-i- cleaningup source dir")
-        aipsetup.utils.cleanup_dir(output_dir)
+        aipsetup.utils.file.cleanup_dir(output_dir)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -196,7 +196,7 @@ def configure(config, log, buildingsite='.'):
                 })
         log.write("-i-")
 
-        env = aipsetup.utils.env_vars_edit(
+        env = aipsetup.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_configure_envs'],
             pi['pkg_buildinfo']['autotools_configure_env_opts']['mode']
             )
@@ -213,12 +213,16 @@ def configure(config, log, buildingsite='.'):
             log.write("-e- exception while starting configuration script")
             log.write("    command line was:")
             log.write("    " + repr(cmd))
-            log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
+            log.write(
+                aipsetup.utils.error.return_exception_info(
+                    sys.exc_info()
+                    )
+                )
             ret = 100
 
         else:
 
-            t = aipsetup.utils.lbl_write(p.stdout, log, True)
+            t = aipsetup.utils.stream.lbl_write(p.stdout, log, True)
             t.start()
             t.join()
 
@@ -226,7 +230,11 @@ def configure(config, log, buildingsite='.'):
                 p.wait()
             except:
                 log.write("\n-e- exception oqured while waiting for configure")
-                log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
+                log.write(
+                    aipsetup.utils.error.return_exception_info(
+                        sys.exc_info()
+                        )
+                    )
                 ret = 100
             else:
                 log.write("-i- configurer return code was: %(code)d" % {
@@ -275,7 +283,7 @@ def build(config, log, buildingsite='.'):
                 })
         log.write("-i-")
 
-        env = aipsetup.utils.env_vars_edit(
+        env = aipsetup.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_build_envs'],
             pi['pkg_buildinfo']['autotools_build_env_opts']['mode']
             )
@@ -292,12 +300,16 @@ def build(config, log, buildingsite='.'):
             log.write("-e- exception while starting make script")
             log.write("    command line was:")
             log.write("    " + repr(cmd))
-            log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
+            log.write(
+                aipsetup.utils.error.return_exception_info(
+                    sys.exc_info()
+                    )
+                )
             ret = 100
 
         else:
 
-            t = aipsetup.utils.lbl_write(p.stdout, log, True)
+            t = aipsetup.utils.stream.lbl_write(p.stdout, log, True)
             t.start()
             t.join()
 
@@ -305,7 +317,11 @@ def build(config, log, buildingsite='.'):
                 p.wait()
             except:
                 log.write("\n-e- exception oqured while waiting for builder")
-                log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
+                log.write(
+                    aipsetup.utils.error.return_exception_info(
+                        sys.exc_info()
+                        )
+                    )
                 ret = 100
             else:
                 log.write("-i- builder return code was: %(code)d" % {
@@ -365,29 +381,44 @@ def install(config, log, buildingsite='.'):
                 })
         log.write("-i-")
 
-        env = aipsetup.utils.env_vars_edit(
+        env = aipsetup.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_install_envs'],
             pi['pkg_buildinfo']['autotools_install_env_opts']['mode']
             )
 
         if len(pi['pkg_buildinfo']['autotools_install_envs']) > 0:
-            log.write("-i- Environment Modifications: %(list)s" % {
-                    'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_install_envs'])
-                    })
+            log.write(
+                "-i- Environment Modifications: %(list)s" % {
+                    'list': ' '.join(
+                        repr(i) \
+                            for i in pi['pkg_buildinfo']['autotools_install_envs']
+                        )
+                    }
+                )
 
         p = None
         try:
-            p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir)
+            p = subprocess.Popen(
+                cmd,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=building_dir
+                )
         except:
             log.write("-e- exception while starting install script")
             log.write("    command line was:")
             log.write("    " + repr(cmd))
-            log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
+            log.write(
+                aipsetup.utils.error.return_exception_info(
+                    sys.exc_info()
+                    )
+                )
             ret = 100
 
         else:
 
-            t = aipsetup.utils.lbl_write(p.stdout, log, True)
+            t = aipsetup.utils.stream.lbl_write(p.stdout, log, True)
             t.start()
             t.join()
 
@@ -395,7 +426,11 @@ def install(config, log, buildingsite='.'):
                 p.wait()
             except:
                 log.write("\n-e- exception oqured while waiting for installer")
-                log.write(aipsetup.utils.return_exception_info(sys.exc_info()))
+                log.write(
+                    aipsetup.utils.error.return_exception_info(
+                        sys.exc_info()
+                        )
+                    )
                 ret = 100
             else:
                 log.write("-i- installer return code was: %(code)d" % {

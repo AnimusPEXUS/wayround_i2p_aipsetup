@@ -1,18 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
-import os.path
-import os
-import shutil
-import glob
-
-import aipsetup.buildingsite
-import aipsetup.tools.autotools
-
-
 """
-This class is for all building methods.
+This module is for all building methods.
 
 It is initiated with some dir, which may be not a working, but this class
 must be able to check that dir, init it if required, Copy source there And
@@ -21,6 +11,13 @@ use pointed themplate for source building.
 !! Packaging and downloading routines must be on other classes !!
 """
 
+# TODO: rework above docstring
+
+import sys
+import os.path
+
+import aipsetup.buildingsite
+import aipsetup.tools.autotools
 
 def print_help():
     print """\
@@ -103,7 +100,7 @@ def _same_function(config, dirname, actor_name,
                     'actor_name': actor_name
                     })
             log.write(
-                aipsetup.utils.error.return_excetption_info(
+                aipsetup.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
@@ -111,20 +108,29 @@ def _same_function(config, dirname, actor_name,
 
         else:
             if not actor in ['autotools']:
-                log.write("-e- Package desires %(actor_name)s which is not supported by" % {
-                    'actor_name': actor_name
-                    })
+                log.write(
+                    ("-e- Package desires %(actor_name)s "\
+                    + "which is not supported by") % {
+                        'actor_name': actor_name
+                        }
+                    )
                 log.write("    current aipsetup system")
                 ret = 3
             else:
-                if eval("aipsetup.tools.%(toolname)s.%(function)s(config, log, dirname)" % {
+                if eval(
+                    ("aipsetup.tools.%(toolname)s."\
+                    +"%(function)s(config, log, dirname)") % {
                         'toolname': actor,
                         'function': function
-                        }) != 0:
-                    log.write("-e- Tool %(toolname)s could not perform %(process)s" % {
+                        }
+                    ) != 0:
+                    log.write(
+                        ("-e- Tool %(toolname)s could "
+                        +"not perform %(process)s") % {
                             'toolname': actor,
                             'process': process
-                            })
+                            }
+                        )
                     ret = 4
                 else:
 

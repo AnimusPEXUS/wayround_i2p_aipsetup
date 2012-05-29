@@ -5,7 +5,7 @@ def split(str_line):
     params = []
 
     str_line = str_line.strip()
-    str_line_len=len(str_line)
+    str_line_len = len(str_line)
 
     i = 0
     cur = 0
@@ -20,7 +20,7 @@ def split(str_line):
                 if i > 0 and str_line[i-1] == '\\':
                     i += 1
                     continue
-                
+
                 params += work_param(str_line[cur:i])
                 cur = i
                 while True:
@@ -74,7 +74,7 @@ def correct_quotes_remove(str_line):
 
     for c in ['"', "'"]:
         while True:
-            ret_len=len(ret)
+            ret_len = len(ret)
 
             cut0 = [0]
             q0 = find_chars(ret, start=0, chars=c)
@@ -84,7 +84,7 @@ def correct_quotes_remove(str_line):
 
             cut0.append(q0[1])
 
-            cut1=[cut0[1]+1]
+            cut1 = [cut0[1]+1]
 
             q1 = find_chars(ret, start=cut1[0], chars=c)
 

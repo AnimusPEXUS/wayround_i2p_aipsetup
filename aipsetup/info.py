@@ -16,7 +16,6 @@ import aipsetup.utils.error
 import aipsetup.utils.text
 
 from mako.template import Template
-from mako import exceptions
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # not required, but can be usefull
@@ -281,8 +280,12 @@ def write_to_file(name, struct):
     return ret
 
 def info_fixes(dicti, name):
+    """
+    This function is used by `mass_info_fix'
 
-    # TODO: what is this function for?
+    Sometime it will contain checks and fixes for
+    info files
+    """
 
     if dicti['pkg_name_type'] == 'standard':
 
@@ -290,10 +293,9 @@ def info_fixes(dicti, name):
 
 def mass_info_fix(config):
 
-    lst = aipsetup.utils.unicodify(
+    lst = aipsetup.utils.text.unicodify(
         glob.glob(os.path.join(config['info'], '*.xml'))
         )
-
 
     for i in lst:
 
@@ -305,7 +307,7 @@ def mass_info_fix(config):
 
         write_to_file(i, dicti)
 
-    print "-i- processed %(n)d files" % {
+    print "-i- Processed %(n)d files" % {
         'n': len(lst)
         }
 

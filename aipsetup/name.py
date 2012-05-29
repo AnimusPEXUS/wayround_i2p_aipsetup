@@ -4,7 +4,7 @@ import re
 import sys
 import fnmatch
 
-import info
+import aipsetup.info
 
 class RegexpsError(Exception):
     pass
@@ -167,6 +167,37 @@ def asp_name_parse():
 
 def source_name_parse(config, filename, mute=False,
                       modify_info_file=False, acceptable_vn=None):
+    """
+    Parse source file name. On success do some more actions.
+
+    If this function succided but not passed version check -
+    return None.
+
+    If this function succided, passeed version check and
+    `modify_info_file' is True -
+    update infofile in info directory.
+
+    If this function succided, return dict:
+
+        {
+            # original (not parsed) package name
+            'name': None,
+            # matched regular expression
+            're'  : None,
+            # matched regular expression's groups
+            'groups': {
+                'name'                 : None,
+                'version'              : None,
+                'version_letter'       : None,
+                'version_letter_number': None,
+                'statuses'             : None,
+                'patch'                : None,
+                'date'                 : None,
+                'extension'            : None
+                }
+            }
+
+    """
 
     ret = None
 
@@ -188,17 +219,18 @@ def source_name_parse(config, filename, mute=False,
 
     # Perform file name elements separation
     if re_r != None:
-
         ret = {
+            'name': None,
+            're'  : None,
             'groups': {
-                'name': None,
-                'version': None,
-                'version_letter': None,
+                'name'                 : None,
+                'version'              : None,
+                'version_letter'       : None,
                 'version_letter_number': None,
-                'statuses': None,
-                'patch': None,
-                'date': None,
-                'extension': None
+                'statuses'             : None,
+                'patch'                : None,
+                'date'                 : None,
+                'extension'            : None
                 }
             }
 
@@ -289,17 +321,17 @@ def source_name_parse(config, filename, mute=False,
                 }
 
 
-        data = info.read_from_file(
+        data = aipsetup.info.read_from_file(
             fn
             )
 
         if data == None:
             if not mute:
                 print "-i- Error reading file. Creating new."
-            data = info.SAMPLE_PACKAGE_INFO_STRUCTURE
+            data = aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE
 
         data['pkg_name_type'] = ret['re']
 
-        info.write_to_file(fn, data)
+        aipsetup.info.write_to_file(fn, data)
 
     return ret

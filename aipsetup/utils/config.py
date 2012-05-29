@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import os.path 
+import os.path
 import ConfigParser
 
 default_config = {
@@ -73,7 +73,7 @@ def load_config():
     return ret
 
 
-def get_configuration(defaults, file='/etc/aipsetup.conf'):
+def get_configuration(defaults, filename='/etc/aipsetup.conf'):
 
     ret = defaults
 
@@ -82,15 +82,15 @@ def get_configuration(defaults, file='/etc/aipsetup.conf'):
     f = None
 
     try:
-        f = open(file, 'r')
+        f = open(filename, 'r')
     except:
-        print "-e- Can't open %(file)s" % {'file': file}
+        print "-e- Can't open %(file)s" % {'file': filename}
         ret = None
 
     try:
         cp.readfp(f)
     except:
-        print "-e- Can't read %(file)s" % {'file': file}
+        print "-e- Can't read %(file)s" % {'file': filename}
         ret = None
 
     f.close()

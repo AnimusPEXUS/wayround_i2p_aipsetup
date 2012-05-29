@@ -1,4 +1,11 @@
-#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
+
+"""
+This is LUST durectory indexing tool
+
+Helps to create index of repository and packages
+info
+"""
 
 import os
 import os.path
@@ -10,7 +17,6 @@ import glob
 import sqlalchemy
 import sqlalchemy.orm
 
-import aipsetup
 import aipsetup.info
 import aipsetup.utils.text
 
@@ -222,6 +228,9 @@ def join_pkg_path(pkg_path):
 
 
 class PackageDatabase:
+    """
+    Main package index DB handling class
+    """
 
     def __init__(self, config):
 
@@ -273,20 +282,6 @@ class PackageDatabase:
                               sqlalchemy.Integer,
                               nullable=False,
                               default=0)
-            )
-
-
-        self._table_VersionPrefix = sqlalchemy.Table(
-            'version_prefix', self._db_metadata,
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              primary_key=True,
-                              default=u''),
-            sqlalchemy.Column('prefix',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              default=u'')
             )
 
         self._table_PackageInfo = sqlalchemy.Table(
@@ -364,7 +359,6 @@ class PackageDatabase:
 
         sqlalchemy.orm.mapper(Package, self._table_Package)
         sqlalchemy.orm.mapper(Category, self._table_Category)
-        sqlalchemy.orm.mapper(VersionPrefix, self._table_VersionPrefix)
         sqlalchemy.orm.mapper(PackageInfo, self._table_PackageInfo)
         sqlalchemy.orm.mapper(PackageSource, self._table_PackageSource)
         sqlalchemy.orm.mapper(PackageMirror, self._table_PackageMirror)
@@ -454,8 +448,6 @@ class PackageDatabase:
 
         isfiles = 0
 
-        # TODO: Reduce number of flushes
-
         for each in files:
             full_path = os.path.join(root_dir, each)
 
@@ -467,7 +459,7 @@ class PackageDatabase:
                 'path': root_dir
                 }
             print "       skipping"
-            sys.stdout.flush()
+
             return 1
 
         for each in files:
@@ -494,33 +486,34 @@ class PackageDatabase:
                 print "-w- garbage file found: %(path)s" % {
                     'path': full_path
                     }
-                sys.stdout.flush()
 
         return 0
 
     def scan_repo_for_pkg_and_cat(self):
-        sys.stdout.flush()
+
+        ret = 0
+
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        sys.stdout.flush()
+
         print "-i- deleting old data"
-        sys.stdout.flush()
         sess.query(Category).delete()
         sess.query(Package).delete()
-        sys.stdout.flush()
+
         print "-i- commiting"
-        sys.stdout.flush()
         sess.commit()
-        sys.stdout.flush()
+
         print "-i- scanning..."
-        sys.stdout.flush()
         self._scan_repo_for_pkg_and_cat(
             sess, self._config['repository'], 0)
-        sys.stdout.flush()
+
         count_p = sess.query(Package).count()
+
         print "-i- %(n)d packages found" % {'n': count_p}
+
         print "-i- closing."
-        sys.stdout.flush()
         sess.close()
+
+        return ret
 
     def get_package_tags(self, name):
         ret = []
@@ -670,10 +663,10 @@ class PackageDatabase:
 
         t = len(lst_dup)
         if len(lst_dup) == 0:
-            t='i'
+            t = 'i'
             t2 = '. Package locations look good!'
         else:
-            t='w'
+            t = 'w'
             t2 = ''
 
         print "-%(t)s- found %(c)s duplicated package names%(t2)s" % {
@@ -719,7 +712,7 @@ class PackageDatabase:
         if names == None:
             q = sess.query(Package).all()
             for i in q:
-                names_found.append(q.name)
+                names_found.append(i.name)
         else:
             names_found = names
 
@@ -850,7 +843,8 @@ class PackageDatabase:
         sess.close()
 
     def load_package_info_from_filesystem(
-        self, filenames=[], all_records=False):
+        self, filenames=[], all_records=False
+        ):
 
         """
         If names list is given - load only named and don't delete
@@ -867,7 +861,10 @@ class PackageDatabase:
         files.sort()
 
         for i in files:
-            name = aipsetup.utils.unicodify(os.path.basename(i))
+            name = aipsetup.utils.text.unicodify(
+                os.path.basename(i)
+                )
+
             name = name[:-4]
 
             missing = False
@@ -938,7 +935,7 @@ class PackageDatabase:
 
         sess.close()
         if not mute:
-            aipsetup.utils.columned_list_print(lst)
+            aipsetup.utils.text.columned_list_print(lst)
             print "-i- Total found %(n)d records" % {
                 'n': found
                 }
@@ -1139,21 +1136,28 @@ Category: %(category)s
 Tags: %(tags)s
 
 """ % {
-        'name': name,
-        'homepage': r['homepage'],
+        'name'         : name,
+        'homepage'     : r['homepage'],
         'pkg_name_type': r['pkg_name_type'],
-        'regexp': regexp,
-        'builder': r['builder'],
-        'description': r['description'],
-        'sources': '\n'.join(r['sources']),
-        'mirrors': '\n'.join(r['mirrors']),
-        'tags': ', '.join(r['tags']),
-        'category': category
+        'regexp'       : regexp,
+        'description'  : r['description'],
+        'sources'      : '\n'.join(r['sources']),
+        'mirrors'      : '\n'.join(r['mirrors']),
+        'tags'         : ', '.join(r['tags']),
+        'category'     : category,
+        'buildinfo'    : r['buildinfo']
         }
 
 
 
 class Package(object):
+    """
+    Package class
+
+    There can be many packages with same name, but this
+    is only for tucking down duplicates and radicate
+    them.
+    """
 
     def __init__(self, pid=None, name='', cid=None):
         if pid != None:
@@ -1163,8 +1167,12 @@ class Package(object):
         self.cid = cid
 
 
-
 class Category(object):
+    """
+    Class for package categories
+
+    There can be categories with same names
+    """
 
     def __init__(self, cid=None, name='', parent_cid=0):
         if cid != None:
@@ -1174,32 +1182,24 @@ class Category(object):
         self.parent_cid = parent_cid
 
 
+class PackageInfo(object):
+    """
+    Class for holding package information
+    """
 
-class VersionPrefix(object):
-
-    def __init__(self, name='', prefix=''):
+    def __init__(self, name, home_page, description,
+              pkg_name_type, buildinfo):
 
         self.name = name
-        self.prefix = prefix
-
-
-
-class PackageInfo(object):
-
-    # def __init__(self, name, home_page, description,
-    #              pkg_name_type, regexp):
-
-    #     self.name=name
-    #     self.home_page=home_page
-    #     self.description=description
-    #     self.pkg_name_type=pkg_name_type
-    #     self.regexp=regexp
-
-    def __init__(self):
-        pass
-
+        self.home_page = home_page
+        self.description = description
+        self.pkg_name_type = pkg_name_type
+        self.buildinfo = buildinfo
 
 class PackageSource(object):
+    """
+    Class for package's sources URLs
+    """
 
     def __init__(self, name, url):
 
@@ -1208,6 +1208,9 @@ class PackageSource(object):
 
 
 class PackageMirror(object):
+    """
+    Class for package's mirror URLs
+    """
 
     def __init__(self, name, url):
 
@@ -1216,6 +1219,9 @@ class PackageMirror(object):
 
 
 class PackageTag(object):
+    """
+    Class for package's tags
+    """
 
     def __init__(self, name, tag):
 

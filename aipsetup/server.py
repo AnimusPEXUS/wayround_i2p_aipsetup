@@ -9,12 +9,12 @@ import xml.sax.saxutils
 
 import cherrypy
 
-import aipsetup.utils.getopt2
 import aipsetup.pkgindex
+import aipsetup.utils.getopt2
+import aipsetup.utils.error
 
 
 from mako.template import Template
-from mako import exceptions
 
 def edefault(status, message, traceback, version):
 
@@ -125,7 +125,7 @@ def index_directory(dir_name, outputfilename='index.txt',
 
     print "-i- indexing %(dir)s..." % {'dir': dir_name}
 
-    f=open(outputfilename, 'w')
+    f = open(outputfilename, 'w')
 
     _index_directory(f, dir_name, dir_namel, acceptable_endings)
 
@@ -309,7 +309,8 @@ class Index:
                         ):
                         continue
 
-                    if how == 'regexp' and re.match(value, base, re_flags) != None:
+                    if how == 'regexp' \
+                        and re.match(value, base, re_flags) != None:
                         # print "-iii- RE : `%(n1)s' `%(n2)s'" % {
                         #     'n1': value,
                         #     'n2': base
@@ -437,8 +438,6 @@ class Index:
 
     info.exposed = True
 
-
-
     def default(self):
 
         raise cherrypy.HTTPRedirect('index')
@@ -499,7 +498,7 @@ def start_host(config=None):
                 )
         except:
             e = sys.exc_info()
-            aipsetup.utils.print_exception_info(e)
+            aipsetup.utils.error.print_exception_info(e)
             print "-e- Error reading template %(name)s" % {
                 'name': os.path.join(
                     config['uhtroot'],
@@ -515,3 +514,5 @@ def start_host(config=None):
             Index(config, templates),
             config['server_prefix'],
             serv_config)
+
+    return ret

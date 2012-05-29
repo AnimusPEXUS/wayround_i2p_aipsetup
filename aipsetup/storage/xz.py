@@ -2,7 +2,7 @@
 import sys
 import subprocess
 
-import aipsetup.utils
+import aipsetup.utils.error
 
 
 def xz_check():
@@ -27,7 +27,7 @@ def xz(stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         print "-e- Error starting xz subprocess"
         p = None
         e = sys.exc_info()
-        aipsetup.utils.print_exception_info(e)
+        aipsetup.utils.error.print_exception_info(e)
         raise e[1]
 
     return p

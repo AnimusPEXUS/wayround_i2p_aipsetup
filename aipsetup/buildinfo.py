@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""
+Rutines to edit buildinfo files
+"""
+
 import aipsetup.utils.file
+import aipsetup.utils.edit
 
 def print_help():
+    """
+    print help
+    """
     print """\
 aipsetup build_info command
 
@@ -12,13 +20,12 @@ aipsetup build_info command
 
    edit NAME
 
-   apply [-d=.] NAME
-
-      apply buildinfo NAME to dir pointed by -d
-
 """
 
 def router(opts, args, config):
+    """
+    aipsetup control router
+    """
 
     ret = 0
 
@@ -54,7 +61,7 @@ def router(opts, args, config):
             if args_l != 2:
                 print "-e- buildeinfo to edit not specified"
             else:
-                aipsetup.utils.file.edit_file(
+                aipsetup.utils.edit.edit_file(
                     config, args[1], 'buildinfo'
                     )
 
@@ -68,13 +75,7 @@ def router(opts, args, config):
                     config, args[1], args[2], 'buildinfo'
                     )
 
-        elif args[0] == 'apply':
-            # TODO: What is this?
-            pass
-
         else:
             print "-e- wrong command. try aipsetup buildinfo help"
 
     return ret
-
-

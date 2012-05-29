@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os.path
-
 import aipsetup.utils.file
 
 def print_help():

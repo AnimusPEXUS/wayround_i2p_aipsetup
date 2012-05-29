@@ -29,7 +29,9 @@ def router(opts, args, config):
             print_help()
 
         elif args[0] == 'edit':
-            aipsetup.utils.edit_file_direct(config, config['constitution'])
+            aipsetup.utils.edit.edit_file_direct(
+                config, config['constitution']
+                )
 
         elif args[0] == 'view':
 
@@ -56,7 +58,9 @@ def read_constitution(config):
         execfile(config['constitution'], g, l)
     except:
         print "-e- Error loading constitution script"
-        aipsetup.utils.print_exception_info(sys.exc_info())
+        aipsetup.utils.error.print_exception_info(
+            sys.exc_info()
+            )
     else:
         if not 'constitution' in l \
                 or not inspect.isfunction(l['constitution']):
@@ -70,6 +74,8 @@ def read_constitution(config):
             except:
                 ret = None
                 print "-e- Error calling for constitution dict"
-                aipsetup.utils.print_exception_info(sys.exc_info())
+                aipsetup.utils.error.print_exception_info(
+                    sys.exc_info()
+                    )
 
     return ret

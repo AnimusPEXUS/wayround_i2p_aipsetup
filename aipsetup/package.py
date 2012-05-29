@@ -26,15 +26,16 @@ def check_package(config, asp_name):
             )
         ret = 1
     else:
-        fi = aipsetup.storage.archive.tar_member_get_extract_file(
+        f = aipsetup.storage.archive.tar_member_get_extract_file(
+            tarf,
             './package.sha512'
             )
-        if not isinstance(fi,  file):
+        if not isinstance(f, file):
             print "-e- Can't get checksums from package file"
             ret = 2
         else:
-            sums_txt = fi.read()
-            fi.close()
+            sums_txt = f.read()
+            f.close()
             sums = aipsetup.utils.checksum.parse_checksums_text(sums_txt)
             del(sums_txt)
             # TODO: to be done

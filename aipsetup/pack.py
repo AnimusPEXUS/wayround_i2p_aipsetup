@@ -7,6 +7,9 @@ import sys
 
 import aipsetup.buildingsite
 import aipsetup.storage.archive
+import aipsetup.utils.time
+import aipsetup.utils.checksum
+import aipsetup.utils.error
 
 
 def print_help():
@@ -91,7 +94,7 @@ def destdir_checksum(config, buildingsite):
         print "-e- LIST dir can't be used"
         ret = 2
     else:
-        aipsetup.utils.make_dir_checksums(
+        aipsetup.utils.checksum.make_dir_checksums(
             destdir,
             output_file
             )
@@ -126,7 +129,7 @@ def destdir_filelist(config, buildingsite):
         print "-e- LIST dir can't be used"
         ret = 2
     else:
-        aipsetup.utils.list_files_recurcive(
+        aipsetup.utils.file.list_files_recurcive(
             destdir,
             output_file
             )
@@ -146,7 +149,7 @@ def remove_source_and_build_dirs(config, buildingsite):
                 )
             )
         if os.path.isdir(dirname):
-            aipsetup.utils.remove_if_exists(dirname)
+            aipsetup.utils.file.remove_if_exists(dirname)
         else:
             print "-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
@@ -222,7 +225,7 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
                 )
             )
         if os.path.isdir(dirname):
-            aipsetup.utils.remove_if_exists(dirname)
+            aipsetup.utils.file.remove_if_exists(dirname)
         else:
             print "-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
@@ -263,18 +266,18 @@ def make_checksums_for_building_site(config, buildingsite):
         )
 
     if os.path.exists(package_checksums):
-        aipsetup.utils.remove_if_exists(package_checksums)
+        aipsetup.utils.file.remove_if_exists(package_checksums)
 
     try:
         tf = tempfile.mkstemp()
     except:
         print "-e- Error creating temporary file"
-        aipsetup.utils.print_exception_info(sys.exc_info())
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
         f = os.fdopen(tf[0], 'w')
 
-        if aipsetup.utils.make_dir_checksums_fo(
+        if aipsetup.utils.checksum.make_dir_checksums_fo(
             buildingsite,
             f) != 0:
             print "-e- Error creating checksums for buildingsite"
@@ -310,7 +313,7 @@ def pack_buildingsite(config, buildingsite):
                 'version': pi['pkg_nameinfo']['groups']['version'],
                 'versionl': pi['pkg_nameinfo']['groups']['version_letter'],
                 'versionln': pi['pkg_nameinfo']['groups']['version_letter_number'],
-                'timestamp': aipsetup.utils.currenttime_stamp(),
+                'timestamp': aipsetup.utils.time.currenttime_stamp(),
                 'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
                     'arch'  : pi['constitution']['host_arch'],
                     'type'  : pi['constitution']['host_type'],
