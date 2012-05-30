@@ -258,9 +258,10 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
             'dirname': dirname
             }
     else:
+
         # compressor
         options = []
-        stderr = subprocess.PIPE
+        stderr = sys.stderr
 
         if verbose_compressor:
             options += ['-v']
@@ -271,36 +272,64 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
         comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
                 'compr': compressor
                 })(
-            stdin = input_fobj,
+            stdin = subprocess.PIPE,
             stdout = subprocess.PIPE,
             options = options,
-            bufsize = 2*1024**2,
+            #bufsize = 2*1024**2,
+            bufsize = 0,
             stderr = stderr
             )
 
         # tar
         options = []
-        stderr = subprocess.PIPE
+        stderr = sys.stderr
 
         if verbose_tar:
             options += ['-v']
             stderr = sys.stderr
 
-        options += ['-x', '.']
+        options += ['-x', '-C', dirname]
 
         tarproc = aipsetup.storage.tar.tar(
             options = options,
-            stdin = comprproc.stdout,
-            stdout = subprocess.STDOUT,
+            stdin = subprocess.PIPE,
+            stdout = sys.stdout,
             cwd = dirname,
-            bufsize=2*1024**2,
+            #bufsize=2*1024**2,
+            bufsize=0,
             stderr = stderr
             )
 
+        cat_p1 = aipsetup.utils.stream.cat(input_fobj,
+                                           comprproc.stdin,
+                                           threaded=True,
+                                           close_output_on_eof=False)
+        cat_p1.start()
+
+        cat_p2 = aipsetup.utils.stream.cat(comprproc.stdout,
+                                           tarproc.stdin,
+                                           threaded=True,
+                                           close_output_on_eof=False)
+        cat_p2.start()
+
+        print "cat_p1.join()"
+        cat_p1.join()
+
+        print "comprproc.stdin.close()"
+        comprproc.stdin.close()
+        #comprproc.stdout.close()
+
+        comprproc.terminate()
+        print "comprproc.wait()"
         comprproc.wait()
 
-        tarproc.stdin.close()
+        print "cat_p2.join()"
+        cat_p2.join()
 
+        #print "tarproc.stdin.close()"
+        #tarproc.stdin.close()
+
+        print "tarproc.wait()"
         tarproc.wait()
 
     return

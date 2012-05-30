@@ -34,8 +34,8 @@ def router(opts, args, config):
         if args[0] == 'help':
             print_help()
         elif args[0] == 'install':
-            basedir = '/'
 
+            basedir = '/'
             for i in opts:
                 if i[0] == '-b':
                     basedir = i[1]
@@ -45,7 +45,6 @@ def router(opts, args, config):
                 ret = 2
             else:
                 asp_name = args[1]
-
                 ret = install(config, asp_name, basedir)
         else:
             print "-e- Wrong command"
@@ -154,6 +153,8 @@ def install(config, asp_name, destdir='/'):
 
     ret = 0
 
+    destdir = os.path.abspath(destdir)
+
     print "-i- Performing package checks before it's installation"
     if check_package(config, asp_name) != 0:
         print "-e- Package defective - installation failed"
@@ -185,20 +186,33 @@ def install(config, asp_name, destdir='/'):
                     'what': i[2]
                     }
 
+                logs_path = ''
+                if config[i[1]][0] == '/':
+                    logs_path = config[i[1]][1:]
+                else:
+                    logs_path = config[i[1]]
+
                 out_filename = \
                     os.path.abspath(
                         os.path.join(
                             destdir,
-                            config[i[1]],
+                            logs_path,
                             package_name + '.xz'
                             )
                         )
+
+                out_filename_dir = os.path.dirname(out_filename)
+
+                if not os.path.exists(out_filename_dir):
+                    os.makedirs(out_filename_dir)
+
                 if aipsetup.storage.archive.\
                     tar_member_get_extract_file_to(
                         tarf, i[0], out_filename
                         ) != 0 :
-                    print "-e- Can't install %(what)s" % {
-                        'what': i[2]
+                    print "-e- Can't install %(what)s as %(outname)s" % {
+                        'what': i[2],
+                        'outname': out_filename
                         }
                     ret = 2
                     break

@@ -2,12 +2,14 @@
 
 import threading
 
-def cat(stdin, stdout, threaded=False, write_method_name='write'):
+def cat(stdin, stdout, threaded=False, write_method_name='write',
+        close_output_on_eof=False):
     return dd(stdin, stdout, bs=(2*1024**2), count=None,
-              threaded=threaded, write_method_name=write_method_name)
+              threaded=threaded, write_method_name=write_method_name,
+              close_output_on_eof=close_output_on_eof)
 
 def dd(stdin, stdout, bs=1, count=None, threaded=False,
-       write_method_name='write'):
+       write_method_name='write', close_output_on_eof=False):
 
     if not write_method_name in ['write', 'update']:
         raise ValueError
@@ -20,6 +22,7 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
                 bs=bs,
                 count=count,
                 threaded=False,
+                close_output_on_eof=close_output_on_eof,
                 write_method_name=write_method_name
                 )
             )
@@ -33,19 +36,23 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
         while True:
             buff = stdin.read(bs)
 
-            if  len(buff) == 0:
-                break
-
             exec(
                 "stdout.%(write_method_name)s(buff)" % {
                     'write_method_name': write_method_name
                     }
                 )
 
-            c += 1
-
-            if c == count:
+            if  len(buff) == 0:
                 break
+
+            if count != None:
+                c += 1
+
+                if c == count:
+                    break
+
+        if close_output_on_eof:
+            stdout.close()
 
         return
 
