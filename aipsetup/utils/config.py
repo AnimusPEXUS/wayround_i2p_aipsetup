@@ -86,24 +86,22 @@ def get_configuration(defaults, filename='/etc/aipsetup.conf'):
     except:
         print "-e- Can't open %(file)s" % {'file': filename}
         ret = None
+    else:
+        try:
+            cp.readfp(f)
+        except:
+            print "-e- Can't read %(file)s" % {'file': filename}
+            ret = None
+        else:
 
-    try:
-        cp.readfp(f)
-    except:
-        print "-e- Can't read %(file)s" % {'file': filename}
-        ret = None
+            if isinstance(ret, dict):
+                if cp.has_section('main'):
 
-    f.close()
+                    for i in defaults:
+                        if cp.has_option('main', i):
+                            ret[i] = cp.get('main', i)
 
-    if isinstance(ret, dict):
-
-        if cp.has_section('main'):
-
-            for i in defaults:
-
-                if cp.has_option('main', i):
-
-                    ret[i] = cp.get('main', i)
+        f.close()
 
     del(cp)
     return ret

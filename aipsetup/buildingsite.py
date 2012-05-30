@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import os
 import shutil
@@ -11,6 +12,7 @@ import aipsetup.constitution
 import aipsetup.name
 import aipsetup.build
 import aipsetup.pack
+import aipsetup.utils.log
 
 
 DIR_TARBALL    = '00.TARBALL'

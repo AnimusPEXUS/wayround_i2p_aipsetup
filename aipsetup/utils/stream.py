@@ -4,9 +4,10 @@ import threading
 
 def cat(stdin, stdout, threaded=False, write_method_name='write'):
     return dd(stdin, stdout, bs=(2*1024**2), count=None,
-              threaded=threaded)
+              threaded=threaded, write_method_name=write_method_name)
 
-def dd(stdin, stdout, bs=1, count=None, threaded=False, write_method_name='write'):
+def dd(stdin, stdout, bs=1, count=None, threaded=False,
+       write_method_name='write'):
 
     if not write_method_name in ['write', 'update']:
         raise ValueError
@@ -15,10 +16,12 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False, write_method_name='write
         return threading.Thread(
             target=dd,
             args=(stdin, stdout),
-            kwargs=dict(bs=bs,
-                        count=count,
-                        threaded=False,
-                        write_method_name=write_method_name)
+            kwargs=dict(
+                bs=bs,
+                count=count,
+                threaded=False,
+                write_method_name=write_method_name
+                )
             )
 
     else:

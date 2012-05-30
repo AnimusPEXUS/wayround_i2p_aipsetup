@@ -122,6 +122,7 @@ def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
     return 0
 
 def unpack_tar(docbook_xsl_tar, dir_name):
+    # TODO: use aipsetup.utils
     r = os.system("tar -xf '%(docbook_xsl_tar)s' -C '%(dir_name)s'" % {
             'docbook_xsl_tar': docbook_xsl_tar,
             'dir_name': dir_name
@@ -131,6 +132,7 @@ def unpack_tar(docbook_xsl_tar, dir_name):
 
 
 def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
+    # TODO: use aipsetup.utils
 
     if not os.path.isfile(docbook_zip):
         print "-e- Wrong zip file"

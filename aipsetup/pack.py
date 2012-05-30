@@ -184,11 +184,12 @@ def compress_patches_destdir_and_logs(config, buildingsite):
             print "-i- Compressing %(i)s" % {
                 'i': i
                 }
-            aipsetup.storage.archive.compress_dir_contents_tar_xz(
+            aipsetup.storage.archive.compress_dir_contents_tar_compressor(
                 dirname,
                 filename,
+                'xz',
                 verbose_tar=False,
-                verbose_xz=True
+                verbose_compressor=True
                 )
 
     return ret

@@ -66,7 +66,7 @@ def make_dir_checksums_fo(dirname, output_fileobj):
                         fd.close()
                         wfn = ('/' + (root+'/'+f)[1:])[dirname_l:]
                         sums_fd.write(
-                            "%(digest)s *%(pkg_file_name)s" % {
+                            "%(digest)s *%(pkg_file_name)s\n" % {
                                 'digest': m.hexdigest(),
                                 'pkg_file_name':wfn
                                 }
@@ -98,13 +98,14 @@ def parse_checksums_text(text):
 
     for i in lines:
         ist = i.strip(' \n\t\0')
-        re_res = re.match('(.*?) \*(.*?)', i)
+        if ist != '':
+            re_res = re.match(r'(.*?) \*(.*)', ist)
 
-        if re_res == None:
-            ret = 1
-            break
-        else:
-            sums[re_res.groups(2)] = re_res.groups(1)
+            if re_res == None:
+                ret = 1
+                break
+            else:
+                sums[re_res.group(2)] = re_res.group(1)
 
     if ret == 0:
         ret = sums

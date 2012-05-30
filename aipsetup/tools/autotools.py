@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import os.path
 import subprocess
@@ -5,9 +7,9 @@ import glob
 import shutil
 import sys
 
-import aipsetup
-import aipsetup.storage.archive
 import aipsetup.buildingsite
+import aipsetup.utils.osutils
+import aipsetup.storage.archive
 
 def determine_source_dir(config, buildingsite, pkginfo):
 

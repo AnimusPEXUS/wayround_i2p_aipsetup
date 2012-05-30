@@ -122,9 +122,35 @@ def compress_file_xz(infile, outfile, verbose_xz=False):
 
     return ret
 
+def compress_dir_contents_tar_compressor(dirname, output_filename,
+                                         compressor,
+                                         verbose_tar=False,
+                                         verbose_compressor=False):
+    ret = 0
+    try:
+        fobj = open(output_filename, 'w')
+    except:
+        print "-e- Error opening file for write"
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        ret = 1
+    else:
+        ret = compress_dir_contents_tar_compressor_fobj(
+            dirname, fobj, compressor,
+            verbose_tar, verbose_compressor
+            )
+        fobj.close()
+    return ret
 
-def compress_dir_contents_tar_xz(dirname, output_filename,
-                                 verbose_tar=False, verbose_xz=False):
+
+def compress_dir_contents_tar_compressor_fobj(dirname, output_fobj,
+                                              compressor,
+                                              verbose_tar=False,
+                                              verbose_compressor=False):
+    ret = 0
+
+    if not compressor in ['xz']:
+        print "-e- Wrong decompressor requested"
+        raise ValueError
 
     dirname = os.path.abspath(dirname)
 
@@ -133,19 +159,19 @@ def compress_dir_contents_tar_xz(dirname, output_filename,
             'dirname': dirname
             }
     else:
-        outf = open(output_filename, 'wb')
-
         options = []
         stderr = subprocess.PIPE
 
-        if verbose_xz:
+        if verbose_compressor:
             options += ['-v']
             stderr = sys.stderr
 
         options += ['-9', '-M', str(200*1024**2), '-']
 
-        xzproc = aipsetup.storage.xz.xz(
-            stdout = outf,
+        comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
+                'compr': compressor
+                })(
+            stdout = output_fobj,
             options = options,
             bufsize = 2*1024**2,
             stderr = stderr
@@ -163,7 +189,7 @@ def compress_dir_contents_tar_xz(dirname, output_filename,
         tarproc = aipsetup.storage.tar.tar(
             options = options,
             stdin = None,
-            stdout = xzproc.stdin,
+            stdout = comprproc.stdin,
             cwd = dirname,
             bufsize=2*1024**2,
             stderr = stderr
@@ -171,11 +197,111 @@ def compress_dir_contents_tar_xz(dirname, output_filename,
 
         tarproc.wait()
 
-        xzproc.stdin.close()
+        comprproc.stdin.close()
 
-        xzproc.wait()
+        comprproc.wait()
 
-        outf.close()
+    return ret
+
+def decompress_dir_contents_tar_compressor(input_filename, dirname,
+                                           compressor,
+                                           verbose_tar=False,
+                                           verbose_compressor=False):
+    ret = 0
+    try:
+        fobj = open(input_filename, 'r')
+    except:
+        print "-e- Error opening file for read"
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        ret = 1
+    else:
+        ret = decompress_dir_contents_tar_compressor_fobj(
+            fobj, dirname, compressor, verbose_tar, verbose_compressor
+            )
+        fobj.close()
+    return ret
+
+
+def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
+                                                compressor,
+                                                verbose_tar=False,
+                                                verbose_compressor=False):
+
+    ret = 0
+
+    if not compressor in ['xz']:
+        print "-e- Wrong decompressor requested"
+        raise ValueError
+
+    dirname = os.path.abspath(dirname)
+
+    if not os.path.exists(dirname):
+        try:
+            os.makedirs(dirname)
+        except:
+            print "-e- Destination dir not exists and cant's be created"
+            ret = 1
+        else:
+            ret = 0
+    else:
+        if os.path.isfile(dirname):
+            print "-e- Destination exists but is file"
+            ret = 2
+        elif os.path.islink(dirname):
+            print "-e- Destination exists but is link"
+            ret = 3
+        else:
+            ret = 0
+
+    if ret != 0:
+        print "-e- Error while checking destination dir: %(dirname)s" % {
+            'dirname': dirname
+            }
+    else:
+        # compressor
+        options = []
+        stderr = subprocess.PIPE
+
+        if verbose_compressor:
+            options += ['-v']
+            stderr = sys.stderr
+
+        options += ['-d', '-']
+
+        comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
+                'compr': compressor
+                })(
+            stdin = input_fobj,
+            stdout = subprocess.PIPE,
+            options = options,
+            bufsize = 2*1024**2,
+            stderr = stderr
+            )
+
+        # tar
+        options = []
+        stderr = subprocess.PIPE
+
+        if verbose_tar:
+            options += ['-v']
+            stderr = sys.stderr
+
+        options += ['-x', '.']
+
+        tarproc = aipsetup.storage.tar.tar(
+            options = options,
+            stdin = comprproc.stdout,
+            stdout = subprocess.STDOUT,
+            cwd = dirname,
+            bufsize=2*1024**2,
+            stderr = stderr
+            )
+
+        comprproc.wait()
+
+        tarproc.stdin.close()
+
+        tarproc.wait()
 
     return
 
@@ -245,16 +371,42 @@ def tar_member_get_extract_file(tarf, cont_name):
 
     ret = None
 
-    m = tar_get_member(tarf, cont_name)
+    member = tar_get_member(tarf, cont_name)
 
-    if not isinstance(m, tarfile.TarInfo):
+    if not isinstance(member, tarfile.TarInfo):
         ret = 1
     else:
-        fileobj = tar_member_extract_file(tarf, m)
+        fileobj = tar_member_extract_file(tarf, member)
 
-        if not isinstance(fileobj, file):
+        if not isinstance(fileobj, tarfile.ExFileObject):
             ret = 2
         else:
             ret = fileobj
+
+    return ret
+
+def tar_member_get_extract_file_to(tarf, cont_name, output_filename):
+    ret = 0
+    try:
+        fd = open(output_filename, 'w')
+    except:
+        print "-e- Error creating output file %(name)s" % {
+            'name': output_filename
+            }
+        ret = 1
+    else:
+        fobj = tar_member_get_extract_file(
+            tarf, cont_name
+            )
+        if not isinstance(fobj, tarfile.ExFileObject):
+            print "-e- Error getting %(name)s from tar" % {
+                'name': cont_name
+                }
+            ret = 2
+        else:
+            aipsetup.utils.stream.cat(fobj, fd)
+            fobj.close()
+
+        fd.close()
 
     return ret

@@ -62,7 +62,7 @@ else:
                    'build', 'server', 'client',
                    'pkgindex', 'name', 'docbook',
                    'buildingsite', 'constitution',
-                   'pack']:
+                   'pack', 'package']:
 
         exec("import aipsetup.%(name)s" % {
                 'name': args[0]
