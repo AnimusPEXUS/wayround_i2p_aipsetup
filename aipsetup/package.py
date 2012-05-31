@@ -232,12 +232,14 @@ def install(config, asp_name, destdir='/'):
                         decompress_dir_contents_tar_compressor_fobj(
                             dd_fobj, destdir, 'xz',
                             verbose_tar=True,
-                            verbose_compressor=True
+                            verbose_compressor=True,
+                            add_tar_options = ['--no-same-owner', '--no-same-permissions']
                             ) != 0:
                         print "-e- Package destdir decompression error"
                         ret = 5
                     else:
                         ret = 0
+                        print "-i- Installation look like complite :-)"
                     dd_fobj.close()
 
             tarf.close()

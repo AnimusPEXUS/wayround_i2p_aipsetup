@@ -5,6 +5,7 @@ import os.path
 import subprocess
 import sys
 import tarfile
+import time
 
 
 import aipsetup.utils.error
@@ -206,7 +207,8 @@ def compress_dir_contents_tar_compressor_fobj(dirname, output_fobj,
 def decompress_dir_contents_tar_compressor(input_filename, dirname,
                                            compressor,
                                            verbose_tar=False,
-                                           verbose_compressor=False):
+                                           verbose_compressor=False,
+                                           add_tar_options=[]):
     ret = 0
     try:
         fobj = open(input_filename, 'r')
@@ -216,7 +218,8 @@ def decompress_dir_contents_tar_compressor(input_filename, dirname,
         ret = 1
     else:
         ret = decompress_dir_contents_tar_compressor_fobj(
-            fobj, dirname, compressor, verbose_tar, verbose_compressor
+            fobj, dirname, compressor, verbose_tar, verbose_compressor,
+            add_tar_options=add_tar_options
             )
         fobj.close()
     return ret
@@ -225,7 +228,8 @@ def decompress_dir_contents_tar_compressor(input_filename, dirname,
 def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
                                                 compressor,
                                                 verbose_tar=False,
-                                                verbose_compressor=False):
+                                                verbose_compressor=False,
+                                                add_tar_options=[]):
 
     ret = 0
 
@@ -259,80 +263,86 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
             }
     else:
 
-        # compressor
-        options = []
-        stderr = sys.stderr
-
-        if verbose_compressor:
-            options += ['-v']
-            stderr = sys.stderr
-
-        options += ['-d', '-']
-
-        comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
-                'compr': compressor
-                })(
-            stdin = subprocess.PIPE,
-            stdout = subprocess.PIPE,
-            options = options,
-            #bufsize = 2*1024**2,
-            bufsize = 0,
-            stderr = stderr
-            )
-
         # tar
-        options = []
-        stderr = sys.stderr
+        options = [] + add_tar_options
 
         if verbose_tar:
             options += ['-v']
-            stderr = sys.stderr
 
-        options += ['-x', '-C', dirname]
+        options += ['-x']
 
-        tarproc = aipsetup.storage.tar.tar(
-            options = options,
-            stdin = subprocess.PIPE,
-            stdout = sys.stdout,
-            cwd = dirname,
-            #bufsize=2*1024**2,
-            bufsize=0,
-            stderr = stderr
-            )
+        util_errors = 0
 
-        cat_p1 = aipsetup.utils.stream.cat(input_fobj,
-                                           comprproc.stdin,
-                                           threaded=True,
-                                           close_output_on_eof=False)
-        cat_p1.start()
+        tarproc = None
+        try:
+            tarproc = aipsetup.storage.tar.tar(
+                options = options,
+                stdin = subprocess.PIPE,
+                stdout = sys.stdout,
+                cwd = dirname,
+                bufsize=0,
+                stderr = sys.stdout
+                )
+        except:
+            print "-e- tar error detected"
+            util_errors += 1
 
-        cat_p2 = aipsetup.utils.stream.cat(comprproc.stdout,
-                                           tarproc.stdin,
-                                           threaded=True,
-                                           close_output_on_eof=False)
-        cat_p2.start()
+        # compressor
+        options = []
 
-        print "cat_p1.join()"
-        cat_p1.join()
+        if verbose_compressor:
+            options += ['-v']
 
-        print "comprproc.stdin.close()"
-        comprproc.stdin.close()
-        #comprproc.stdout.close()
+        options += ['-d']
 
-        comprproc.terminate()
-        print "comprproc.wait()"
-        comprproc.wait()
+        comprproc = None
+        try:
+            comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
+                    'compr': compressor
+                    })(
+                stdin = subprocess.PIPE,
+                stdout = subprocess.PIPE,
+                options = options,
+                bufsize = 0,
+                stderr = sys.stderr
+                )
+        except:
+            print "-e- compressor error detected"
+            util_errors += 1
 
-        print "cat_p2.join()"
-        cat_p2.join()
+        if util_errors != 0:
+            print "-e- Errors was detected - terminating"
+            if isinstance(tarproc, subprocess.Popen):
+                tarproc.terminate()
+            if isinstance(comprproc, subprocess.Popen):
+                comprproc.terminate()
+            ret = 6
+        else:
 
-        #print "tarproc.stdin.close()"
-        #tarproc.stdin.close()
+            cat_p1 = aipsetup.utils.stream.cat(input_fobj,
+                                               comprproc.stdin,
+                                               threaded=True,
+                                               close_output_on_eof=True,
+                                               thread_name='File object -> Decompressor')
+            cat_p1.start()
 
-        print "tarproc.wait()"
-        tarproc.wait()
+            cat_p2 = aipsetup.utils.stream.cat(comprproc.stdout,
+                                               tarproc.stdin,
+                                               threaded=True,
+                                               close_output_on_eof=True,
+                                               thread_name='Decompressor -> tar')
+            cat_p2.start()
 
-    return
+            cat_p1.join()
+
+            comprproc.wait()
+
+            cat_p2.join()
+
+            tarproc.wait()
+            ret = 0
+
+    return ret
 
 def pack_dir_contents_tar(dirname, output_filename,
                           verbose_tar=False):

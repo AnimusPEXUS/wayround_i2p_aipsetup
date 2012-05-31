@@ -11,7 +11,9 @@ def xz_check():
 def xz_version():
     pass
 
-def xz(stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+def xz(stdin=subprocess.PIPE,
+       stdout=subprocess.PIPE,
+       stderr=subprocess.PIPE,
        options=[], bufsize=0, cwd=None):
 
     p = None
