@@ -7,17 +7,52 @@ It't purpuse is to check, install, uninstall package
 """
 
 import sys
+import os
 import os.path
 import tarfile
+import glob
 
+import aipsetup.name
 import aipsetup.utils.checksum
 import aipsetup.utils.error
+import aipsetup.utils.text
 import aipsetup.storage.archive
 
 def print_help():
     print """\
-aipsetup pack command
+aipsetup package command
 
+   install [-b=DIRNAME] FILE
+
+      Install package. If -b is given - it is used as root
+
+   list [-b=DIRNAME] [MASK]
+
+      List installed packages. -b is same as in install.
+      Default MASK is *.xz
+
+   names_list [-b=DIRNAME] PACKAGE_NAME
+
+      List installations with name PACKAGE_NAME.
+      -b is same as in install.
+
+   package_issues [-b=DIRNAME]
+
+      Looks for issues with already installed package names:
+         * list unparsabel names
+         * list names not in info files directory
+
+   remove [-b=DIRNAME] MASK
+
+      Removes packages matching MASK.
+
+      WARNING: no sanity checks!
+          aipsetup package remove '*'
+          will remove everything (unless system will crush
+          before is't finished)
+
+      WARNING: removes any installed config files!
+          do all necessery config backups before remove!
 
 """
 
@@ -46,6 +81,82 @@ def router(opts, args, config):
             else:
                 asp_name = args[1]
                 ret = install(config, asp_name, basedir)
+
+        elif args[0] == 'list':
+
+            basedir = '/'
+            for i in opts:
+                if i[0] == '-b':
+                    basedir = i[1]
+
+            asp_name = '*.xz'
+            if args_l > 1:
+                asp_name = args[1]
+
+            if not isinstance(basedir, basestring):
+                print "-e- given basedir name is wrong"
+                ret = 2
+
+            if ret == 0:
+                ret = list_packages(config, asp_name, basedir)
+
+        elif args[0] == 'named_list':
+
+            basedir = '/'
+            for i in opts:
+                if i[0] == '-b':
+                    basedir = i[1]
+
+            asp_name = None
+            if args_l > 1:
+                asp_name = args[1]
+
+            if not isinstance(basedir, basestring):
+                print "-e- given basedir name is wrong"
+                ret = 2
+
+            if not isinstance(asp_name, basestring):
+                print "-e- package name required"
+                ret = 3
+
+            if ret == 0:
+                ret = named_list_packages(config, asp_name, basedir)
+
+        elif args[0] == 'package_issues':
+            basedir = '/'
+            for i in opts:
+                if i[0] == '-b':
+                    basedir = i[1]
+
+            if not isinstance(basedir, basestring):
+                print "-e- given basedir name is wrong"
+                ret = 2
+
+            if ret == 0:
+                list_packages_issues(config, basedir)
+
+        elif args[0] == 'remove':
+
+            basedir = '/'
+            for i in opts:
+                if i[0] == '-b':
+                    basedir = i[1]
+
+            asp_name = None
+            if args_l > 1:
+                asp_name = args[1]
+
+            if not isinstance(basedir, basestring):
+                print "-e- given basedir name is wrong"
+                ret = 2
+
+            if not isinstance(asp_name, basestring):
+                print "-e- removing name mask must be not empty!"
+                ret = 3
+
+            if ret == 0:
+                ret = remove_packages(config, asp_name, basedir)
+
         else:
             print "-e- Wrong command"
             ret = 1
@@ -245,3 +356,191 @@ def install(config, asp_name, destdir='/'):
             tarf.close()
 
     return ret
+
+def list_packages_issues(config, destdir='/'):
+    lst = list_packages(config, '*', destdir=destdir, return_list=True)
+
+    info_dir = os.path.abspath(config['info'])
+
+    check_list = set()
+
+    issued = set()
+
+    for i in lst:
+
+        name = ''
+
+        if not i.endswith('.xz'):
+            name = i
+        else:
+            name = i[:-3]
+
+        parsed_name = aipsetup.name.package_name_parse(name)
+        if parsed_name == None:
+            print "-w- Error while parsing name `%(name)s'" % {
+                'name': name
+                }
+        else:
+            check_list.add(parsed_name['groups']['name'])
+
+    check_list = list(check_list)
+    check_list.sort()
+    for i in check_list:
+        info_file = os.path.join(
+            info_dir, i + '.xml'
+            )
+        if not isinstance(aipsetup.info.read_from_file(info_file), dict):
+            print "-w- Some issue with `%(name)s' info file" % {
+                'name': i
+                }
+            issued.add(i)
+
+    issued = list(issued)
+    issued.sort()
+    print "-i- Found issues with following (%(num)d) packages:" % {
+        'num': len(issued)
+        }
+    aipsetup.utils.text.columned_list_print(
+        issued, fd=sys.stdout.fileno()
+    )
+
+    return
+
+def named_list_packages(config, asp_name, destdir='/'):
+    lst = list_packages(config, '*', destdir=destdir, return_list=True)
+
+    out_list = []
+
+    for i in lst:
+
+        name = ''
+
+        if not i.endswith('.xz'):
+            name = i
+        else:
+            name = i[:-3]
+
+        parsed_name = aipsetup.name.package_name_parse(name)
+        if parsed_name == None:
+            pass
+        else:
+            #print repr(parsed_name)
+            if parsed_name['groups']['name'] == asp_name:
+                out_list.append(name)
+
+    aipsetup.utils.text.columned_list_print(
+        out_list, fd=sys.stdout.fileno()
+    )
+
+    return
+
+
+def list_packages(config, mask, destdir='/', return_list=False):
+    destdir = os.path.abspath(destdir)
+    listdir = os.path.abspath(destdir + config['installed_pkg_dir'])
+    listdir = listdir.replace(r'//', '/')
+    filelist = glob.glob(os.path.join(listdir, mask))
+
+    ret = 0
+
+    if not os.path.isdir(listdir):
+        print "-e- not a dir %(dir)s" % {
+            'dir': listdir
+            }
+        ret = 1
+    else:
+        bases = []
+        for each in filelist:
+            bases.append(os.path.basename(each))
+        bases.sort()
+
+        for i in ['sums', 'buildlogs']:
+            if i in bases:
+                bases.remove(i)
+
+        if not return_list:
+            aipsetup.utils.text.columned_list_print(
+                bases, fd=sys.stdout.fileno()
+            )
+        else:
+            ret = bases
+
+    return ret
+
+def remove_package(config, name, destdir='/'):
+
+    ret = 0
+
+    destdir = os.path.abspath(destdir)
+
+    listdir = os.path.abspath(destdir + '/' + config['installed_pkg_dir'])
+    listdir = listdir.replace(r'//', '/')
+
+    filename = os.path.abspath(listdir + '/' + name + '.xz')
+
+    if not os.path.isfile(filename):
+        print "-e- Not found package file list `%(name)s'" % {
+            'name': filename
+            }
+        ret = 1
+    else:
+        try:
+            f = open(filename, 'r')
+        except:
+            print "-e- Error opening file %(name)s" % {
+                'name': filename
+                }
+            ret = 2
+        else:
+            txt = aipsetup.storage.archive.xzcat(f)
+            f.close()
+            del(f)
+            lines = txt.splitlines()
+            del(txt)
+
+            lines.sort(None, None, True)
+
+            for line in lines:
+                rm_file_name = os.path.abspath(destdir + '/' + line)
+                rm_file_name = rm_file_name.replace(r'//', '/')
+                if os.path.isfile(rm_file_name):
+                    print "-i- removing %(name)s" % {
+                        'name': rm_file_name
+                        }
+                    os.unlink(rm_file_name)
+
+            for i in ['installed_pkg_dir_buildlogs',
+                      'installed_pkg_dir_sums',
+                      'installed_pkg_dir']:
+                rm_file_name = os.path.abspath(
+                    destdir + '/' + config[i] + '/' + name + '.xz'
+                    )
+                rm_file_name = rm_file_name.replace(r'//', '/')
+                if os.path.isfile(rm_file_name):
+                    print "-i- removing %(name)s" % {
+                        'name': rm_file_name
+                        }
+                    os.unlink(rm_file_name)
+    return ret
+
+def remove_packages(config, mask, destdir='/'):
+    ret = 0
+    lst = list_packages(config, mask, destdir='/', return_list=True)
+    for i in lst:
+
+        name = ''
+
+        if not i.endswith('.xz'):
+            name = i
+        else:
+            name = i[:-3]
+
+        print "-i- Removing package `%(name)s'" % {
+            'name': name
+            }
+        remove_package(config, name, destdir)
+
+    return ret
+
+def reduce_old(config, name, destdir='/'):
+    pass

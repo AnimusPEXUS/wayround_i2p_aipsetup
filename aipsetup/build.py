@@ -28,14 +28,19 @@ aipsetup build command
       Extract source in buildingsite DIRNAME. If DIRNAME not given
       assume current working dir.
 
-   patch
+   configure [SITEDIR]
+      configures SITEDIR accordingly to info
 
-   configure
+   build [SITEDIR]
+      builds SITEDIR accordingly to info
 
-   build
+   install [SITEDIR]
+      creates destdir in SITEDIR accordingly to info
 
-   install
+   complite [SITEDIR]
+      configures, builds and installs SITEDIR accordingly to info
 
+ See also aipsetup pack help
 """
 
 def router(opts, args, config):
@@ -185,16 +190,41 @@ def install(config, dirname):
 
 def complite(config, dirname):
     ret = 0
-    for i in ['extract', 'configure',
-              'build', 'install']:
 
-        if eval("%(name)s(config, dirname)" % {
-                'name': i
-                }) != 0:
-            print "-e- Building error on stage %(name)s" % {
-                'name': i
-                }
-            ret = 1
-            break
+    pi = aipsetup.buildingsite.read_package_info(
+        config, dirname, ret_on_error=None
+        )
+
+    if pi == None:
+        log.write("-e- Error getting information about %(process)s" % {
+                'process': process
+                })
+        ret = 1
+    else:
+
+        act_seq = []
+        try:
+            act_seq = pi['pkg_buildinfo']['build_sequance']
+        except:
+            print "-e- Can't get actor sequence"
+            ret = 2
+        else:
+
+            for i in act_seq:
+
+                if not i in ['extract', 'configure',
+                             'build', 'install']:
+                    print "-e- Requested actor not supported"
+                    ret = 3
+                else:
+
+                    if eval("%(name)s(config, dirname)" % {
+                            'name': i
+                            }) != 0:
+                        print "-e- Building error on stage %(name)s" % {
+                            'name': i
+                            }
+                        ret = 1
+                        break
 
     return ret

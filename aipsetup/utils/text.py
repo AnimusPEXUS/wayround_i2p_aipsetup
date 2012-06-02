@@ -9,8 +9,8 @@ def columned_list_print(lst, width=None, columns=None,
                         margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
                         fd=1):
     print return_columned_list_print(lst, width=None, columns=None,
-                                      margin_right=u' │ ', margin_left=u' │ ',
-                                      spacing=u' │ ', fd=1)
+                                     margin_right=u' │ ', margin_left=u' │ ',
+                                     spacing=u' │ ', fd=1)
 
 def return_columned_list_print(lst, width=None, columns=None,
                       margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
@@ -27,6 +27,9 @@ def return_columned_list_print(lst, width=None, columns=None,
                 width = size['ws_col']
         else:
             width = 80
+
+
+    #print "width " + str(width)
 
     longest = 0
     lst_l = len(lst)
@@ -51,11 +54,11 @@ def return_columned_list_print(lst, width=None, columns=None,
 
     rows = int(lst_l / columns)
 
-    # print "int_l   == " + str(int_l)
-    # print "longest == " + str(longest)
-    # print "width   == " + str(width)
-    # print "lst_l   == " + str(lst_l)
-    # print "columns == " + str(columns)
+    #print "int_l   == " + str(int_l)
+    #print "longest == " + str(longest)
+    #print "width   == " + str(width)
+    #print "lst_l   == " + str(lst_l)
+    #print "columns == " + str(columns)
 
     ret = ''
     for i in range(0, lst_l, columns):
@@ -69,7 +72,7 @@ def return_columned_list_print(lst, width=None, columns=None,
         while len(l3) != columns:
             l3.append(u''.ljust(longest))
 
-        ret += deunicodify("%(mrl)s%(row)s%(mrr)s" % {
+        ret += deunicodify("%(mrl)s%(row)s%(mrr)s\n" % {
                 'mrl': margin_left,
                 'mrr': margin_right,
                 'row': spacing.join(l3)

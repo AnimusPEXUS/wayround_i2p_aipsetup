@@ -199,8 +199,6 @@ def read_from_file(name):
 
     try:
         f = open(aipsetup.utils.text.deunicodify(name), 'r')
-        txt = f.read()
-        f.close()
     except:
         print "-e- Can't open file %(name)s" % {
             'name': name
@@ -208,9 +206,9 @@ def read_from_file(name):
         aipsetup.utils.error.print_exception_info(
             sys.exc_info()
             )
-
-
     else:
+        txt = f.read()
+        f.close()
         try:
             tree = lxml.etree.fromstring(txt)
         except:
@@ -247,6 +245,7 @@ def read_from_file(name):
 
             ret['tags'] = _find_list(tree, 'tag', 'name')
             ret['tags'].sort()
+            del(tree)
 
     return ret
 

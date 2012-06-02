@@ -88,7 +88,10 @@ aipsetup buildingsite command
 
          -d=DIRNAME set building dir. Defaults to current working dir.
 
+   complite [DIRNAME]
 
+      Start fullcircle building process.
+      Can be started by init -b.
 """
 
 def router(opts, args, config):
@@ -590,11 +593,11 @@ def complite(config, dirname):
     ret = 0
 
     if init(config, dirname) != 0:
-        log.write("-e- Error on initiation stage")
+        print("-e- Error on initiation stage")
     elif aipsetup.build.complite(config, dirname) != 0:
-        log.write("-e- Error on building stage")
+        print("-e- Error on building stage")
     elif aipsetup.pack.complite(config, dirname) != 0:
-        log.write("-e- Error on packaging stage")
+        print("-e- Error on packaging stage")
     else:
         pass
 

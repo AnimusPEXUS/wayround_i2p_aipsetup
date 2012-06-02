@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tarfile
 import time
+import StringIO
 
 
 import aipsetup.utils.error
@@ -447,5 +448,50 @@ def tar_member_get_extract_file_to(tarf, cont_name, output_filename):
             fobj.close()
 
         fd.close()
+
+    return ret
+
+def xzcat(stdin):
+    ret = 0
+
+    comprproc = None
+    try:
+        comprproc = aipsetup.storage.xz.xz(
+            stdin = subprocess.PIPE,
+            stdout = subprocess.PIPE,
+            options = ['-d'],
+            bufsize = 0,
+            stderr = sys.stderr
+            )
+    except:
+        ret = 1
+    else:
+        outstr = StringIO.StringIO()
+
+        cat_p1 = aipsetup.utils.stream.cat(stdin,
+                                           comprproc.stdin,
+                                           threaded=True,
+                                           close_output_on_eof=True)
+        cat_p1.start()
+
+        cat_p2 = aipsetup.utils.stream.cat(comprproc.stdout,
+                                           outstr,
+                                           threaded=True,
+                                           close_output_on_eof=False)
+        cat_p2.start()
+
+        comprproc.wait()
+        cat_p1.join()
+        cat_p2.join()
+
+        if comprproc.returncode != 0:
+            ret = comprproc.returncode
+
+        if ret == 0:
+            #outstr.seek(0)
+            ret = outstr.getvalue()
+
+        outstr.close()
+        del(outstr)
 
     return ret

@@ -91,9 +91,10 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
                 pass
 
         if close_output_on_eof:
-            print "-i-  Closing `%(name)s' thread stdout" % {
-                'name':thread_name
-                }
+            if thread_name != 'Thread':
+                print "-i-  Closing `%(name)s' thread stdout" % {
+                    'name':thread_name
+                    }
             stdout.close()
 
         if thread_name != 'Thread':

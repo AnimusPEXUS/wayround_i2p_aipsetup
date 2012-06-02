@@ -52,11 +52,10 @@ NAME_REGEXPS = {
 
     }
 
-
 for i in NAME_REGEXPS:
     NAME_REGEXPS[i] = NAME_REGEXPS[i] % {
         'statuses'            : r'pre|alpha|beta|rc|test|source|src|dist|full',
-        'standard_extensions' : r'(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2)',
+        'standard_extensions' : r'(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2|\.tbz)',
         'standard_name'       : r'(?P<name>.+?)',
         'standard_version'    : r'(?P<version>(\d+\.??)+)',
         'standard_statuses'   : r'(?P<statuses>([-\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
@@ -77,6 +76,11 @@ for each in NAME_REGEXPS:
         raise RegexpsError
 
 del(each)
+
+ASP_NAME_REGEXPS = {
+    'aipsetup2': r'(?P<name>.*?)-?(?P<version>(\d+\.??)+)?-(?P<timestamp>\d{14})-(?P<host>.*)',
+    'aipsetup3': r'(?P<name>.*?)-?(?P<version>(\d+\.??)+)?-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)'
+    }
 
 
 def print_help():
@@ -161,8 +165,27 @@ def test_expressions_on_sources(config):
     return
 
 
-def asp_name_parse():
-    pass
+def package_name_parse(filename):
+
+    ret = None
+
+    for i in ASP_NAME_REGEXPS:
+        re_res = re.match(ASP_NAME_REGEXPS[i], filename)
+        if re_res != None:
+            ret = {
+                're': i,
+                'name': filename,
+                'groups': {
+                    'name': re_res.group('name'),
+                    'version': re_res.group('version'),
+                    'timestamp': re_res.group('timestamp'),
+                    'host': re_res.group('host')
+                    }
+                }
+            break
+
+    return ret
+
 
 
 def source_name_parse(config, filename, mute=False,
@@ -182,7 +205,8 @@ def source_name_parse(config, filename, mute=False,
         {
             # original (not parsed) package name
             'name': None,
-            # matched regular expression
+            # matched soure regular expression name
+            # (NAME_REGEXPS in this module)
             're'  : None,
             # matched regular expression's groups
             'groups': {
