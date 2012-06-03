@@ -37,6 +37,9 @@ aipsetup build command
    install [SITEDIR]
       creates destdir in SITEDIR accordingly to info
 
+   postinstall [SITEDIR]
+      postinstallation processings for SITEDIR accordingly to info
+
    complite [SITEDIR]
       configures, builds and installs SITEDIR accordingly to info
 
@@ -187,6 +190,16 @@ def install(config, dirname):
         'installation'
         )
 
+def postinstall(config, dirname):
+    return _same_function(
+        config,
+        dirname,
+        'postinstaller',
+        'postinstall',
+        'postinstalling',
+        'postinstallation'
+        )
+
 
 def complite(config, dirname):
     ret = 0
@@ -213,7 +226,8 @@ def complite(config, dirname):
             for i in act_seq:
 
                 if not i in ['extract', 'configure',
-                             'build', 'install']:
+                             'build', 'install',
+                             'postinstall']:
                     print "-e- Requested actor not supported"
                     ret = 3
                 else:
@@ -224,7 +238,7 @@ def complite(config, dirname):
                         print "-e- Building error on stage %(name)s" % {
                             'name': i
                             }
-                        ret = 1
+                        ret = 5
                         break
 
     return ret

@@ -68,18 +68,9 @@ def print_help():
     print """\
 aipsetup buildingsite command
 
-   init [-b] [DIRNAME] [TARBALL1] [TARBALL2] .. [TARBALLn]
+   init DIRNAME
 
-      Initiates new buildingsite under DIRNAME.
-
-      If TARBALLs are given, they will be placed under TARBALL
-      directory in new buildingsite.
-
-      If atleast one TARBALL given, it will be used for info
-      pplication
-
-         -b - start fullcircle building process if apply_info returned
-              zero
+      Make sure all required dirs under DIRNAME exists.
 
    apply_info [-d=DIRNAME] [TARBALL]
 
@@ -87,11 +78,6 @@ aipsetup buildingsite command
       parsing and farver package buildingsite configuration.
 
          -d=DIRNAME set building dir. Defaults to current working dir.
-
-   complite [DIRNAME]
-
-      Start fullcircle building process.
-      Can be started by init -b.
 """
 
 def router(opts, args, config):
@@ -111,25 +97,12 @@ def router(opts, args, config):
 
             init_dir = '.'
 
-            src_files = None
-
-            build = False
-            for i in opts:
-                if i[0] == '-b':
-                    build = True
-
             if args_l > 1:
                 init_dir = args[1]
 
-            if args_l > 2:
-                src_files = args[2:]
-
-
             ret = init(
                 config,
-                directory = init_dir,
-                source_files = src_files,
-                build = build
+                directory = init_dir
                 )
 
 
@@ -147,15 +120,6 @@ def router(opts, args, config):
                         dirname = i[1]
 
                 apply_info(config, dirname, source_filename=name)
-
-        elif args[0] == 'complite':
-
-            dirname = '.'
-
-            if args_l > 1:
-                dirname = args[1]
-
-            ret = complite(config, dirname)
 
         else:
             print "-e- Wrong command"
@@ -193,7 +157,7 @@ def isWdDirRestricted(directory):
                 break
     return ret
 
-def init(config, directory='build', source_files=None, build=False):
+def init(config, directory='build'):
 
 
     ret = 0
@@ -252,49 +216,6 @@ def init(config, directory='build', source_files=None, build=False):
                 pass
             else:
                 os.makedirs(a)
-
-
-    if ret == 0:
-        if source_files != None and isinstance(source_files, list):
-
-            print("-i- copying sources")
-
-            for source_file in source_files:
-
-                print("-i-    %(name)s" % {
-                    'name': source_file
-                    })
-
-                if os.path.isfile(source_file) \
-                        and not os.path.islink(source_file):
-
-                    try:
-                        shutil.copy(
-                            source_file, os.path.join(directory, DIR_TARBALL)
-                            )
-                    except:
-                        aipsetup.utils.error.print_exception_info(
-                            sys.exc_info()
-                            )
-                        ret = -3
-
-                else:
-
-                    print("-e- file %(file)s - not dir and not file." % {
-                        'file': source_file
-                        })
-                    print("    skipping copy")
-
-            if ret != 0:
-                print("-e- Exception while copying one of tarballs")
-
-            print("-i- Trying to apply info")
-            if ret == 0 \
-                    and apply_info(config, directory, source_files[0]) == 0 \
-                    and build:
-                print("-i- Build requested. Initiating build process")
-                complite(config, directory)
-
 
     if ret == 0:
         print("-i- Init complite")
@@ -581,24 +502,3 @@ def apply_info(config, dirname='.', source_filename=None):
     return ret
 
 
-def complite(config, dirname):
-
-    log = aipsetup.utils.log.Log(
-        config, dirname, 'buildingsite complite'
-        )
-    log.write("-i- Buildingsite processes started")
-    log.write("-i- Closing this log now, cause it can't be done farther")
-    log.stop()
-
-    ret = 0
-
-    if init(config, dirname) != 0:
-        print("-e- Error on initiation stage")
-    elif aipsetup.build.complite(config, dirname) != 0:
-        print("-e- Error on building stage")
-    elif aipsetup.pack.complite(config, dirname) != 0:
-        print("-e- Error on packaging stage")
-    else:
-        pass
-
-    return ret

@@ -18,6 +18,7 @@ default_config = {
     'repository'         : '/mnt/sda3/home/agu/_UHT/pkg_repository',
     'source'             : '/mnt/sda3/home/agu/_UHT/pkg_source',
     'info'               : '/mnt/sda3/home/agu/_UHT/pkg_info',
+    'buildingsites'      : '/mnt/sda3/home/agu/_UHT/pkg_buildingsites',
 
     'repository_index'   : '/mnt/sda3/home/agu/_UHT/index_repository.lst',
     'source_index'       : '/mnt/sda3/home/agu/_UHT/index_source.lst',

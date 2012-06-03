@@ -375,7 +375,11 @@ def install(config, log, buildingsite='.'):
         if not os.path.isdir(destdir):
             os.makedirs(destdir)
 
-        cmd = ['make'] + ['-f', makefile] + run_parameters + ['install'] + ['DESTDIR=%(dd)s' % {'dd':destdir}]
+        cmd = ['make'] + ['-f', makefile] + run_parameters \
+            + ['install'] + ['%(dd_name)s=%(dd)s' % {
+            'dd':destdir,
+            'dd_name': pi['pkg_buildinfo']['autotools_install_opts']['DESTDIR_opt_name']
+            }]
 
         log.write("-i- Starting autotools install script with following command:")
         log.write("    %(cmd)s" % {
@@ -441,3 +445,6 @@ def install(config, log, buildingsite='.'):
                 ret = p.returncode
 
     return ret
+
+def postinstall(config, log, buildingsite='.'):
+    return 0

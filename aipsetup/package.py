@@ -11,11 +11,15 @@ import os
 import os.path
 import tarfile
 import glob
+import tempfile
+import shutil
 
 import aipsetup.name
+import aipsetup.buildingsite
 import aipsetup.utils.checksum
 import aipsetup.utils.error
 import aipsetup.utils.text
+import aipsetup.utils.time
 import aipsetup.storage.archive
 
 def print_help():
@@ -156,6 +160,29 @@ def router(opts, args, config):
 
             if ret == 0:
                 ret = remove_packages(config, asp_name, basedir)
+
+        elif args[0] == 'complite':
+
+            dirname = '.'
+
+            if args_l > 1:
+                dirname = args[1]
+
+            ret = complite(config, dirname)
+
+        elif args[0] == 'build':
+
+            sources = []
+
+            if args_l > 1:
+                sources = args[1:]
+
+            if len(sources) == 0:
+                print "-e- No source files named"
+                ret = 2
+
+            if ret == 0:
+                ret = build(config, sources)
 
         else:
             print "-e- Wrong command"
@@ -543,4 +570,106 @@ def remove_packages(config, mask, destdir='/'):
     return ret
 
 def reduce_old(config, name, destdir='/'):
+    # TODO: write or delete
     pass
+
+#   build [TARBALL1] [TARBALL2] .. [TARBALLn]
+
+def build(config, source_files):
+    ret = 0
+
+    par_res = aipsetup.name.source_name_parse(
+        config, source_files[0], mute=False
+        )
+
+    if par_res == None:
+        print "-e- Can't parse source file name"
+        ret = 1
+    else:
+
+        try:
+            os.makedirs(config['buildingsites'])
+        except:
+            pass
+
+        tmp_dir_prefix = "%(name)s-%(timestamp)s-" % {
+            'name': par_res['groups']['name'],
+            'timestamp': aipsetup.utils.time.currenttime_stamp()
+            }
+
+        build_site_dir = tempfile.mkdtemp(
+            prefix=tmp_dir_prefix,
+            dir=config['buildingsites']
+            )
+        build_site_dir = os.path.abspath(build_site_dir)
+
+        if aipsetup.buildingsite.init(config, build_site_dir) != 0:
+            print "-e- Error initiating temporary dir"
+            ret = 2
+        else:
+            if source_files != None and isinstance(source_files, list):
+
+                print("-i- copying sources")
+
+                for source_file in source_files:
+
+                    print("-i-    %(name)s" % {
+                        'name': source_file
+                        })
+
+                    if os.path.isfile(source_file) \
+                            and not os.path.islink(source_file):
+
+                        try:
+                            shutil.copy(
+                                source_file, os.path.join(
+                                    build_site_dir,
+                                    aipsetup.buildingsite.DIR_TARBALL
+                                    )
+                                )
+                        except:
+                            aipsetup.utils.error.print_exception_info(
+                                sys.exc_info()
+                                )
+                            ret = -3
+
+                    else:
+
+                        print("-e- file %(file)s - not dir and not file." % {
+                            'file': source_file
+                            })
+                        print("    skipping copy")
+
+                if ret != 0:
+                    print("-e- Exception while copying one of soruce files")
+
+            if aipsetup.buildingsite.apply_info(
+                config, build_site_dir, source_files[0]) == 0:
+
+                if complite(config, build_site_dir) != 0:
+                    print "-e- Package building failed"
+                    ret = 5
+
+    return ret
+
+def complite(config, dirname):
+
+    log = aipsetup.utils.log.Log(
+        config, dirname, 'buildingsite complite'
+        )
+    log.write("-i- Buildingsite processes started")
+    log.write("-i- Closing this log now, cause it can't be done farther")
+    log.stop()
+
+    ret = 0
+
+    if aipsetup.build.complite(config, dirname) != 0:
+        print("-e- Error on building stage")
+        ret = 1
+    elif aipsetup.pack.complite(config, dirname) != 0:
+        print("-e- Error on packaging stage")
+        ret = 2
+    else:
+        pass
+
+    return ret
