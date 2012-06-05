@@ -4,12 +4,14 @@ import os.path
 import tempfile
 import shutil
 import sys
+import pprint
 
 import aipsetup.buildingsite
 import aipsetup.storage.archive
 import aipsetup.utils.time
 import aipsetup.utils.checksum
 import aipsetup.utils.error
+import aipsetup.deps.deps_c
 
 
 def print_help():
@@ -34,6 +36,7 @@ def router(opts, args, config):
 
         elif args[0] in ['destdir_checksum',
                          'destdir_filelist',
+                         'destdir_deps_c',
                          'remove_source_and_build_dirs',
                          'compress_patches_destdir_and_logs',
                          'compress_files_in_lists_dir',
@@ -136,6 +139,61 @@ def destdir_filelist(config, buildingsite):
 
     return ret
 
+def destdir_deps_c(config, buildingsite):
+    ret = 0
+    destdir = aipsetup.buildingsite.getDir_DESTDIR(buildingsite)
+
+    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+
+    lists_file = os.path.abspath(
+        os.path.join(
+            lists_dir,
+            'DESTDIR.lst'
+            )
+        )
+
+    deps_file = os.path.abspath(
+        os.path.join(
+            lists_dir,
+            'DESTDIR.dep_c'
+            )
+        )
+
+    file_list = []
+
+    f = open(lists_file, 'r')
+    file_list_txt = f.read()
+    f.close()
+    del(f)
+    file_list = file_list_txt.splitlines()
+    del(file_list_txt)
+
+    deps = {}
+    elfs = 0
+    n_elfs = 0
+    for i in file_list:
+        filename = destdir + '/' + i
+        filename.replace(r'//', '/')
+        filename = os.path.abspath(filename)
+        dep = aipsetup.deps.deps_c.elf_deps(filename)
+        if isinstance(dep, list):
+            elfs += 1
+            deps[i]=dep
+        else:
+            #print '-e- not an elf %(name)s' % {
+                #'name': filename
+                #}
+            n_elfs += 1
+
+    print "-i- ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+        'elfs': elfs,
+        'n_elfs': n_elfs
+        }
+    f = open(deps_file, 'w')
+    f.write(pprint.pformat(deps))
+    f.close()
+    return ret
+
 def remove_source_and_build_dirs(config, buildingsite):
 
     ret = 0
@@ -200,7 +258,7 @@ def compress_files_in_lists_dir(config, buildingsite):
 
     lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
 
-    for i in ['DESTDIR.lst', 'DESTDIR.sha512']:
+    for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
         infile = os.path.join(lists_dir, i)
         outfile = infile + '.xz'
@@ -240,7 +298,7 @@ def remove_decompressed_files_from_lists_dir(config, buildingsite):
 
     lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
 
-    for i in ['DESTDIR.lst', 'DESTDIR.sha512']:
+    for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
         filename = os.path.join(lists_dir, i)
 
@@ -342,6 +400,7 @@ def complite(config, dirname):
 
     for i in ['destdir_checksum',
               'destdir_filelist',
+              'destdir_deps_c',
               'remove_source_and_build_dirs',
               'compress_patches_destdir_and_logs',
               'compress_files_in_lists_dir',

@@ -14,6 +14,9 @@ import aipsetup.storage.xz
 import aipsetup.storage.tar
 
 
+# TODO: Add safeness to streamed functions
+# TODO: Rework old functions to new tune
+
 def _extract_zip(file_name, output_dir):
     ret = os.system("unzip -qq '%(file_name)s' -d '%(output_dir)s'" % {
             'file_name': file_name,
