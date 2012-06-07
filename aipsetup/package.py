@@ -13,6 +13,7 @@ import tarfile
 import glob
 import tempfile
 import shutil
+import copy
 
 import aipsetup.name
 import aipsetup.buildingsite
@@ -58,6 +59,15 @@ aipsetup package command
       WARNING: removes any installed config files!
           do all necessery config backups before remove!
 
+   find_files [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
+
+      Looks for LOOKFOR in all installed packages using one of methods:
+
+         sub   - (default) filename contains LOOKFOR
+         re    - LOOKFOR is RegExp
+         beg   - file name starts with LOOKFOR
+         plain - Exact LOOKFOR match
+         fm    - LOOKFOR is file mask
 """
 
 def router(opts, args, config):
@@ -183,6 +193,26 @@ def router(opts, args, config):
 
             if ret == 0:
                 ret = build(config, sources)
+
+        elif args[0] == 'find_files':
+
+            basedir = '/'
+            for i in opts:
+                if i[0] == '-b':
+                    basedir = i[1]
+
+            look_meth = 'sub'
+            for i in opts:
+                if i[0] == '-m':
+                    look_meth = i[1]
+
+            lookfor = ''
+            if args_l > 1:
+                lookfor = args[1]
+
+            ret = find_files(config, basedir, lookfor, mode=look_meth,
+                             mute=False,
+                             return_dict=False)
 
         else:
             print "-e- Wrong command"
@@ -462,7 +492,7 @@ def named_list_packages(config, asp_name, destdir='/'):
     return
 
 
-def list_packages(config, mask, destdir='/', return_list=False):
+def list_packages(config, mask, destdir='/', return_list=False, mute=False):
     destdir = os.path.abspath(destdir)
     listdir = os.path.abspath(destdir + config['installed_pkg_dir'])
     listdir = listdir.replace(r'//', '/')
@@ -485,11 +515,12 @@ def list_packages(config, mask, destdir='/', return_list=False):
             if i in bases:
                 bases.remove(i)
 
-        if not return_list:
+        if not mute:
             aipsetup.utils.text.columned_list_print(
                 bases, fd=sys.stdout.fileno()
             )
-        else:
+
+        if return_list:
             ret = bases
 
     return ret
@@ -669,7 +700,175 @@ def complite(config, dirname):
     elif aipsetup.pack.complite(config, dirname) != 0:
         print("-e- Error on packaging stage")
         ret = 2
+
+    return ret
+
+def find_files(config, destdir, instr, mode=None, mute=False,
+               return_dict=True):
+
+    ret = 0
+
+    lst = list_packages(config, mask='*.xz', destdir=destdir,
+                        return_list=True,
+                        mute=True)
+    if not isinstance(lst, list):
+        print "-e- Error getting installed packages list"
+        ret = 1
     else:
-        pass
+        lst.sort()
+
+        ret_dict = dict()
+
+        for pkgname in lst:
+            if pkgname.endswith('.xz'):
+                pkgname = pkgname[:-3]
+
+            found = find_file(config, destdir, pkgname, instr=instr,
+                              mode=mode,
+                              mute=True, return_list=True)
+
+            if len(found) != 0:
+                ret_dict[pkgname] = found
+
+        if not mute:
+            rd_keys = ret_dict.keys()
+            if len(rd_keys) == 0:
+                print "-i- Not found"
+            else:
+                print "-i- Found %(num)d packages with `%(inc)s'" % {
+                    'num': len(rd_keys),
+                    'inc': instr
+                    }
+
+                print ""
+                rd_keys.sort()
+
+                for i in rd_keys:
+                    print "\t%(name)s:" % {
+                        'name': i
+                        }
+
+                    pp_lst = ret_dict[i]
+                    pp_lst.sort()
+
+                    for j in pp_lst:
+                        print "\t\t%(name)s" % {
+                            'name': j
+                            }
+
+                    print ""
+
+        if return_dict:
+            ret = ret_dict
+
+    return ret
+
+def find_file(config, destdir, pkgname, instr, mode=None, mute=False,
+              return_list=True):
+    ret = 0
+
+    destdir = os.path.abspath(destdir)
+
+    if not isinstance(instr, list):
+        instr = [instr]
+
+    if mode == None:
+        mode = 'sub'
+
+    if not mode in ['re', 'plain', 'sub', 'beg', 'fm']:
+        print "-e- wrong mode"
+        ret = 1
+    else:
+        pkg_file_list = package_files(config,  destdir, pkgname,
+                                      mute=False,
+                                      return_list=True)
+
+        if not pkg_list_file.endswith('.xz'):
+            pkg_list_file += '.xz'
+
+        if not isinstance(pkg_file_list, list):
+            print "-e- Can't get list of files"
+            ret = 2
+        else:
+
+            pkg_file_list.sort()
+
+            out_list = set()
+            for i in pkg_file_list:
+                if mode == 're':
+                    for j in instr:
+                        if re.match(j, i) != None:
+                            out_list.add(i)
+
+                elif mode == 'plain':
+                    for j in instr:
+                        if j == i:
+                            out_list.add(i)
+
+                elif mode == 'sub':
+                    for j in instr:
+                        if i.find(j) != -1:
+                            out_list.add(i)
+
+                elif mode == 'beg':
+                    for j in instr:
+                        if i.startswith(j):
+                            out_list.add(i)
+
+                elif mode == 'fm':
+                    for j in instr:
+                        if fnmatch.fnmatch(i, j):
+                            out_list.add(i)
+
+            out_list = list(out_list)
+            out_list.sort()
+            if not mute:
+                aipsetup.utils.text.columned_list_print(
+                    out_list, fd=sys.stdout.fileno()
+                )
+
+            if return_list:
+                ret = copy.copy(out_list)
+
+    return ret
+
+def package_files(config, destdir, pkgname, mute=False,
+                  return_list=True):
+    ret = 0
+
+    destdir = os.path.abspath(destdir)
+
+    list_dir = destdir + '/' + config['installed_pkg_dir']
+    list_dir = list_dir.replace(r'//', '/')
+    list_dir = os.path.abspath(list_dir)
+
+    pkg_list_file = os.path.join(list_dir, pkgname)
+
+    if not pkg_list_file.endswith('.xz'):
+        pkg_list_file += '.xz'
+
+    try:
+        f = open(pkg_list_file, 'r')
+    except:
+        print "-e- Can't open list file"
+        aipsetup.utils.print_exception_info(sys.excinfo())
+        ret = 2
+    else:
+
+        pkg_file_list = aipsetup.storage.archive.xzcat(f)
+
+        f.close()
+
+        pkg_file_list = pkg_file_list.splitlines()
+
+        pkg_file_list.sort()
+
+        if not mute:
+            aipsetup.utils.text.columned_list_print(
+                pkg_file_list, fd=sys.stdout.fileno()
+            )
+
+        if return_list:
+            ret = copy.copy(out_list)
 
     return ret
