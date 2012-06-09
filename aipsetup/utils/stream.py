@@ -23,6 +23,9 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
     if not write_method_name in ['write', 'update']:
         raise ValueError
 
+    if not hasattr(stdin, 'read'):
+        raise ValueError
+
     if threaded:
         return threading.Thread(
             target=dd,
@@ -49,15 +52,8 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
         c = 0
         bytes = 0
 
-        try:
-            stdin.seek
-        except:
-            pass
-        else:
-            try:
-                stdin.seek(0)
-            except:
-                pass
+        if hasattr(stdin, 'seek'):
+            stdin.seek(0)
 
         while True:
             buff = stdin.read(bs)
@@ -80,15 +76,8 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
                 if c == count:
                     break
 
-        try:
-            stdout.seek
-        except:
-            pass
-        else:
-            try:
-                stdout.seek(0, os.SEEK_END)
-            except:
-                pass
+        if hasattr(stdout, 'seek'):
+            stdout.seek(0, os.SEEK_END)
 
         if close_output_on_eof:
             if thread_name != 'Thread':

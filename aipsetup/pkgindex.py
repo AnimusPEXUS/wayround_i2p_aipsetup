@@ -16,6 +16,8 @@ import glob
 
 import sqlalchemy
 import sqlalchemy.orm
+import sqlalchemy.ext.declarative
+
 
 import aipsetup.info
 import aipsetup.utils.text
@@ -132,7 +134,7 @@ def router(opts, args, config):
             mask = '*'
 
             if args_l > 1:
-                mask = args[1]
+                mask = aipsetup.utils.text.unicodify(args[1])
 
             f = False
             for i in opts:
@@ -145,7 +147,7 @@ def router(opts, args, config):
 
         elif args[0] == 'load_package_info_from_filesystem':
 
-            file_list = args[1:]
+            file_list = aipsetup.utils.text.unicodify(args[1:])
 
             a = False
             for i in opts:
@@ -166,7 +168,7 @@ def router(opts, args, config):
             mask = None
 
             if args_l > 1:
-                mask = args[1]
+                mask = aipsetup.utils.text.unicodify(args[1])
 
             if mask != None:
 
@@ -180,7 +182,7 @@ def router(opts, args, config):
             mask = '*'
 
             if args_l > 1:
-                mask = args[1]
+                mask = aipsetup.utils.text.unicodify(args[1])
 
 
             r = PackageDatabase(config)
@@ -191,7 +193,7 @@ def router(opts, args, config):
             name = None
 
             if args_l > 1:
-                name = args[1]
+                name = aipsetup.utils.text.unicodify(args[1])
 
             if name != None:
 
@@ -208,11 +210,62 @@ def router(opts, args, config):
     return ret
 
 
-def is_package(path):
+def is_repo_package_dir(path):
     return os.path.isdir(path) \
         and os.path.isfile(
             os.path.join(path, '.package')
             )
+
+
+def get_package_path(config, name):
+    ret = None
+    r = PackageDatabase(config)
+    pid = r.get_package_id(name)
+    if pid == None:
+        print "-e- Can't get `%(package)s' from database" % {
+            'package': name
+            }
+        ret = None
+    else:
+        ret = r.get_package_path_string(pid)
+    del(r)
+    return ret
+
+def create_required_dirs_at_package(path):
+
+    ret = 0
+
+    for i in ['pack', 'source']:
+        full_path = path + '/' + i
+
+        if not os.path.exists(full_path):
+            try:
+                os.makedirs(full_path)
+            except:
+                print "-e- Can't make dir `%(name)s'" % {
+                    'name': full_path
+                    }
+                ret = 3
+            else:
+                ret = 0
+        else:
+            if os.path.islink(full_path):
+                print "-e- `%(name)s' is link" % {
+                    'name': full_path
+                    }
+                ret = 4
+            elif os.path.isfile(full_path):
+                print "-e- `%(name)s' is file" % {
+                    'name': full_path
+                    }
+                ret = 5
+            else:
+                ret = 0
+
+        if ret != 0:
+            break
+
+    return ret
 
 
 def join_pkg_path(pkg_path):
@@ -232,6 +285,143 @@ class PackageDatabase:
     Main package index DB handling class
     """
 
+    Base = sqlalchemy.ext.declarative.declarative_base()
+
+    class Package(Base):
+        """
+        Package class
+
+        There can be many packages with same name, but this
+        is only for tucking down duplicates and radicate
+        them.
+        """
+
+        __tablename__ = 'package'
+
+        pid = sqlalchemy.Column(sqlalchemy.Integer,
+                                primary_key=True,
+                                autoincrement=True)
+
+        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                 nullable=False,
+                                 default=u'')
+
+        cid = sqlalchemy.Column(sqlalchemy.Integer,
+                                nullable=False,
+                                default=0)
+
+
+    class Category(Base):
+        """
+        Class for package categories
+
+        There can be categories with same names
+        """
+
+        __tablename__ = 'category'
+
+        cid = sqlalchemy.Column(sqlalchemy.Integer,
+                                primary_key=True,
+                                autoincrement=True)
+
+        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                 nullable=False,
+                                 default=u'')
+
+        parent_cid = sqlalchemy.Column(sqlalchemy.Integer,
+                                       nullable=False,
+                                       default=0)
+
+    class PackageInfo(Base):
+        """
+        Class for holding package information
+        """
+        __tablename__ = 'package_info'
+
+        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                 nullable=False,
+                                 primary_key=True,
+                                 default=u'')
+
+        home_page = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                      nullable=False,
+                                      default=u'')
+
+        description = sqlalchemy.Column(sqlalchemy.UnicodeText,
+                                        nullable=False,
+                                        default=u'')
+
+        pkg_name_type = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                          nullable=False,
+                                          default=u'')
+
+        buildinfo = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                      nullable=False,
+                                      default=u'')
+
+
+    class PackageSource(Base):
+        """
+        Class for package's sources URLs
+        """
+
+        __tablename__ = 'package_source'
+
+        id = sqlalchemy.Column(sqlalchemy.Integer,
+                               nullable=False,
+                               primary_key=True,
+                               autoincrement=True)
+
+        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                 nullable=False)
+
+        url = sqlalchemy.Column(sqlalchemy.UnicodeText,
+                                nullable=False,
+                                default=u'')
+
+
+
+    class PackageMirror(Base):
+        """
+        Class for package's mirror URLs
+        """
+
+        __tablename__ = 'package_mirror'
+
+        id = sqlalchemy.Column(sqlalchemy.Integer,
+                               nullable=False,
+                               primary_key=True,
+                               autoincrement=True)
+
+        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
+                                 nullable=False)
+
+        url = sqlalchemy.Column(sqlalchemy.Text,
+                                nullable=False,
+                                default=u'')
+
+
+    class PackageTag(Base):
+        """
+        Class for package's tags
+        """
+
+        __tablename__ = 'package_tag'
+
+        id = sqlalchemy.Column(sqlalchemy.Integer,
+                               nullable=False,
+                               primary_key=True,
+                               autoincrement=True)
+
+        name = sqlalchemy.Column('name',
+                                 sqlalchemy.Unicode(256),
+                                 nullable=False)
+
+        tag = sqlalchemy.Column('tag',
+                                sqlalchemy.Unicode(256),
+                                nullable=False)
+
+
     def __init__(self, config):
 
         self._config = config
@@ -247,129 +437,19 @@ class PackageDatabase:
             echo=db_echo
             )
 
-        self._db_metadata = \
-            sqlalchemy.MetaData(bind=self._db_engine)
+        self.Base.metadata.bind = self._db_engine
 
-        self._table_Package = sqlalchemy.Table(
-            'package', self._db_metadata,
-            sqlalchemy.Column('pid',
-                              sqlalchemy.Integer,
-                              primary_key=True,
-                              autoincrement=True),
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              default=u''),
-            sqlalchemy.Column('cid',
-                              sqlalchemy.Integer,
-                              nullable=False,
-                              default=0)
-            )
+        self.Base.metadata.create_all()
 
+    #def __del__(self):
+        #del(self._db_engine)
 
-
-        self._table_Category = sqlalchemy.Table(
-            'category', self._db_metadata,
-            sqlalchemy.Column('cid',
-                              sqlalchemy.Integer,
-                              primary_key=True,
-                              autoincrement=True),
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              default=u''),
-            sqlalchemy.Column('parent_cid',
-                              sqlalchemy.Integer,
-                              nullable=False,
-                              default=0)
-            )
-
-        self._table_PackageInfo = sqlalchemy.Table(
-            'package_info', self._db_metadata,
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              primary_key=True,
-                              default=u''),
-            sqlalchemy.Column('home_page',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              default=u''),
-            sqlalchemy.Column('description',
-                              sqlalchemy.UnicodeText,
-                              nullable=False,
-                              default=u''),
-            sqlalchemy.Column('pkg_name_type',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              default=u''),
-            sqlalchemy.Column('buildinfo',
-                              sqlalchemy.Unicode(256),
-                              nullable=False,
-                              default=u'')
-            )
-
-        self._table_PackageSource = sqlalchemy.Table(
-            'package_source', self._db_metadata,
-            sqlalchemy.Column('id',
-                              sqlalchemy.Integer,
-                              nullable=False,
-                              primary_key=True,
-                              autoincrement=True),
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False),
-            sqlalchemy.Column('url',
-                              sqlalchemy.UnicodeText,
-                              nullable=False,
-                              default=u''),
-            )
-
-        self._table_PackageMirror = sqlalchemy.Table(
-            'package_mirror', self._db_metadata,
-            sqlalchemy.Column('id',
-                              sqlalchemy.Integer,
-                              nullable=False,
-                              primary_key=True,
-                              autoincrement=True),
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False),
-            sqlalchemy.Column('url',
-                              sqlalchemy.Text,
-                              nullable=False,
-                              default=u''),
-            )
-
-        self._table_PackageTag = sqlalchemy.Table(
-            'package_tag', self._db_metadata,
-            sqlalchemy.Column('id',
-                              sqlalchemy.Integer,
-                              nullable=False,
-                              primary_key=True,
-                              autoincrement=True),
-            sqlalchemy.Column('name',
-                              sqlalchemy.Unicode(256),
-                              nullable=False),
-            sqlalchemy.Column('tag',
-                              sqlalchemy.Unicode(256),
-                              nullable=False),
-            )
-
-
-        sqlalchemy.orm.mapper(Package, self._table_Package)
-        sqlalchemy.orm.mapper(Category, self._table_Category)
-        sqlalchemy.orm.mapper(PackageInfo, self._table_PackageInfo)
-        sqlalchemy.orm.mapper(PackageSource, self._table_PackageSource)
-        sqlalchemy.orm.mapper(PackageMirror, self._table_PackageMirror)
-        sqlalchemy.orm.mapper(PackageTag, self._table_PackageTag)
-        self._db_metadata.create_all()
 
     def create_category(self, name='name', parent_cid=0):
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        new_cat = Category(name=name, parent_cid=parent_cid)
+        new_cat = self.Category(name=name, parent_cid=parent_cid)
 
         sess.add(new_cat)
         sess.commit()
@@ -384,7 +464,7 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(Category).filter_by(name=name).all()
+        lst = sess.query(self.Category).filter_by(name=name).all()
 
         sess.close()
 
@@ -394,7 +474,7 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(Category).filter_by(cid=cid).all()
+        lst = sess.query(self.Category).filter_by(cid=cid).all()
 
         sess.close()
 
@@ -406,7 +486,7 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(Package).filter_by(name=name).first()
+        q = sess.query(self.Package).filter_by(name=name).first()
         if q != None:
             ret = q.pid
 
@@ -420,9 +500,9 @@ class PackageDatabase:
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
         if cid == None:
-            lst = sess.query(Package).all()
+            lst = sess.query(self.Package).all()
         else:
-            lst = sess.query(Package).filter_by(cid=cid).all()
+            lst = sess.query(self.Package).filter_by(cid=cid).all()
 
         sess.close()
 
@@ -432,7 +512,7 @@ class PackageDatabase:
     def ls_categories(self, parent_cid=0):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(Category).filter_by(parent_cid=parent_cid).all()
+        lst = sess.query(self.Category).filter_by(parent_cid=parent_cid).all()
 
         sess.close()
 
@@ -471,11 +551,11 @@ class PackageDatabase:
             if os.path.islink(full_path):
                 continue
 
-            if is_package(full_path):
-                sess.add(Package(name=each, cid=cid))
+            if is_repo_package_dir(full_path):
+                sess.add(self.Package(name=each, cid=cid))
                 sess.commit()
             elif os.path.isdir(full_path):
-                new_cat = Category(name=each, parent_cid=cid)
+                new_cat = self.Category(name=each, parent_cid=cid)
 
                 sess.add(new_cat)
                 sess.commit()
@@ -496,8 +576,8 @@ class PackageDatabase:
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
         print "-i- deleting old data"
-        sess.query(Category).delete()
-        sess.query(Package).delete()
+        sess.query(self.Category).delete()
+        sess.query(self.Package).delete()
 
         print "-i- commiting"
         sess.commit()
@@ -506,7 +586,7 @@ class PackageDatabase:
         self._scan_repo_for_pkg_and_cat(
             sess, self._config['repository'], 0)
 
-        count_p = sess.query(Package).count()
+        count_p = sess.query(self.Package).count()
 
         print "-i- %(n)d packages found" % {'n': count_p}
 
@@ -519,7 +599,7 @@ class PackageDatabase:
         ret = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageTag).filter_by(name = name).all()
+        q = sess.query(self.PackageTag).filter_by(name = name).all()
 
         for i in q:
             ret.append(i.tag)
@@ -531,7 +611,7 @@ class PackageDatabase:
         ret = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageSource).filter_by(name = name).all()
+        q = sess.query(self.PackageSource).filter_by(name = name).all()
 
         for i in q:
             ret.append(i.url)
@@ -543,7 +623,7 @@ class PackageDatabase:
         ret = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageMirror).filter_by(name = name).all()
+        q = sess.query(self.PackageMirror).filter_by(name = name).all()
 
         for i in q:
             ret.append(i.url)
@@ -554,10 +634,10 @@ class PackageDatabase:
     def set_package_tags(self, name, tags):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        sess.query(PackageTag).filter_by(name=name).delete()
+        sess.query(self.PackageTag).filter_by(name=name).delete()
 
         for i in tags:
-            n = PackageTag(name, i)
+            n = self.PackageTag(name, i)
             sess.add(n)
 
         sess.commit()
@@ -566,10 +646,10 @@ class PackageDatabase:
     def set_package_sources(self, name, sources):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        sess.query(PackageSource).filter_by(name=name).delete()
+        sess.query(self.PackageSource).filter_by(name=name).delete()
 
         for i in sources:
-            n = PackageSource(name, i)
+            n = self.PackageSource(name, i)
             sess.add(n)
 
         sess.commit()
@@ -578,10 +658,10 @@ class PackageDatabase:
     def set_package_mirrors(self, name, mirrors):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        sess.query(PackageMirror).filter_by(name=name).delete()
+        sess.query(self.PackageMirror).filter_by(name=name).delete()
 
         for i in mirrors:
-            n = PackageMirror(name, i)
+            n = self.PackageMirror(name, i)
             sess.add(n)
 
         sess.commit()
@@ -594,7 +674,7 @@ class PackageDatabase:
         pkg = None
 
         if pid != None:
-            pkg = sess.query(Package).filter_by(pid=pid).first()
+            pkg = sess.query(self.Package).filter_by(pid=pid).first()
         else:
             raise ValueError
 
@@ -607,7 +687,7 @@ class PackageDatabase:
             ret.insert(0,(pkg.pid, pkg.name))
 
             while r != 0:
-                cat = sess.query(Category).filter_by(cid=r).first()
+                cat = sess.query(self.Category).filter_by(cid=r).first()
                 ret.insert(0,(cat.cid, cat.name))
                 r = cat.parent_cid
 
@@ -629,7 +709,7 @@ class PackageDatabase:
     def find_repository_package_name_collisions_in_database(self):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(Package).all()
+        lst = sess.query(self.Package).all()
 
         lst2 = []
 
@@ -710,14 +790,14 @@ class PackageDatabase:
         names_found = []
 
         if names == None:
-            q = sess.query(Package).all()
+            q = sess.query(self.Package).all()
             for i in q:
                 names_found.append(i.name)
         else:
             names_found = names
 
         for i in names_found:
-            q = sess.query(PackageInfo).filter_by(name = i).first()
+            q = sess.query(self.PackageInfo).filter_by(name = i).first()
 
             if q == None:
                 not_found.append(q)
@@ -745,7 +825,7 @@ class PackageDatabase:
         if name != None:
             sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-            q = sess.query(PackageInfo).filter_by(name = name).first()
+            q = sess.query(self.PackageInfo).filter_by(name = name).first()
         else:
             q = record
 
@@ -779,11 +859,11 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageInfo).filter_by(name = name).first()
+        q = sess.query(Pself.ackageInfo).filter_by(name = name).first()
 
         creating_new = False
         if q == None:
-            q = PackageInfo()
+            q = self.PackageInfo()
             creating_new = True
 
         q.name          = name
@@ -811,7 +891,7 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageInfo).all()
+        q = sess.query(self.PackageInfo).all()
 
         for i in q:
             if fnmatch.fnmatch(i.name, mask):
@@ -871,7 +951,7 @@ class PackageDatabase:
             if not all_records:
                 sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-                q = sess.query(PackageInfo).filter_by(name=name).first()
+                q = sess.query(self.PackageInfo).filter_by(name=name).first()
 
                 if q == None:
                     missing = True
@@ -898,7 +978,7 @@ class PackageDatabase:
     def delete_pkg_info_records(self, mask='*'):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageInfo).all()
+        q = sess.query(self.PackageInfo).all()
 
         deleted = 0
 
@@ -923,7 +1003,7 @@ class PackageDatabase:
         lst = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageInfo).order_by(PackageInfo.name).all()
+        q = sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
 
         found = 0
 
@@ -946,7 +1026,7 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(Package).order_by(Package.name).all()
+        q = sess.query(self.Package).order_by(self.Package.name).all()
 
         pkgs_checked = 0
         pkgs_missing = 0
@@ -961,7 +1041,7 @@ class PackageDatabase:
 
             pkgs_checked += 1
 
-            q2 = sess.query(PackageInfo).filter_by(name = each.name).first()
+            q2 = sess.query(self.PackageInfo).filter_by(name = each.name).first()
 
             if q2 == None:
 
@@ -1027,7 +1107,7 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(PackageInfo).order_by(PackageInfo.name).all()
+        q = sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
 
         for i in q:
 
@@ -1103,8 +1183,8 @@ class PackageDatabase:
                 category = "< Package not indexed! >"
 
             regexp = '< Wrong regexp type name >'
-            if r['pkg_name_type'] in name.NAME_REGEXPS:
-                regexp = name.NAME_REGEXPS[r['pkg_name_type']]
+            if r['pkg_name_type'] in aipsetup.name.NAME_REGEXPS:
+                regexp = aipsetup.name.NAME_REGEXPS[r['pkg_name_type']]
 
             print """
 Name: %(name)s
@@ -1148,82 +1228,3 @@ Tags: %(tags)s
         'buildinfo'    : r['buildinfo']
         }
 
-
-
-class Package(object):
-    """
-    Package class
-
-    There can be many packages with same name, but this
-    is only for tucking down duplicates and radicate
-    them.
-    """
-
-    def __init__(self, pid=None, name='', cid=None):
-        if pid != None:
-            self.pid = pid
-
-        self.name = name
-        self.cid = cid
-
-
-class Category(object):
-    """
-    Class for package categories
-
-    There can be categories with same names
-    """
-
-    def __init__(self, cid=None, name='', parent_cid=0):
-        if cid != None:
-            self.cid = cid
-
-        self.name = name
-        self.parent_cid = parent_cid
-
-
-class PackageInfo(object):
-    """
-    Class for holding package information
-    """
-
-    def __init__(self, name, home_page, description,
-              pkg_name_type, buildinfo):
-
-        self.name = name
-        self.home_page = home_page
-        self.description = description
-        self.pkg_name_type = pkg_name_type
-        self.buildinfo = buildinfo
-
-class PackageSource(object):
-    """
-    Class for package's sources URLs
-    """
-
-    def __init__(self, name, url):
-
-        self.name = name
-        self.url = url
-
-
-class PackageMirror(object):
-    """
-    Class for package's mirror URLs
-    """
-
-    def __init__(self, name, url):
-
-        self.name = name
-        self.url = url
-
-
-class PackageTag(object):
-    """
-    Class for package's tags
-    """
-
-    def __init__(self, name, tag):
-
-        self.name = name
-        self.tag = tag

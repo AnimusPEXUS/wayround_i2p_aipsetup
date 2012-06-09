@@ -15,6 +15,7 @@ import tempfile
 import shutil
 import copy
 
+import aipsetup.pkgindex
 import aipsetup.name
 import aipsetup.buildingsite
 import aipsetup.utils.checksum
@@ -68,6 +69,8 @@ aipsetup package command
          beg   - file name starts with LOOKFOR
          plain - Exact LOOKFOR match
          fm    - LOOKFOR is file mask
+
+   put_to_index_many FILEMASK
 """
 
 def router(opts, args, config):
@@ -214,26 +217,45 @@ def router(opts, args, config):
                              mute=False,
                              return_dict=False)
 
+        elif args[0] == 'put_to_index_many':
+
+            files = []
+            if args_l > 1:
+                files = args[1:]
+
+            if len(files) == 0:
+                print '-e- File names required'
+                ret = 2
+            else:
+                ret = put_to_index_many(config, files)
+
         else:
             print "-e- Wrong command"
             ret = 1
 
     return ret
 
-def check_package(config, asp_name):
+def check_package(config, asp_name, mute=False):
     """
     Check package for errors
     """
     ret = 0
 
+    asp_name = os.path.abspath(asp_name)
+
     if not asp_name.endswith('.asp'):
-        print "-e- Wrong file extension"
+        if not mute:
+            print "-e- Wrong file extension `%(name)s'" % {
+                'name': asp_name
+                }
         ret = 3
     else:
         try:
             tarf = tarfile.open(asp_name, mode='r')
         except:
-            print "-e- Can't open file %(name)s"
+            print "-e- Can't open file `%(name)s'" % {
+                'name': asp_name
+                }
             print aipsetup.utils.error.return_exception_info(
                 sys.exc_info()
                 )
@@ -259,8 +281,6 @@ def check_package(config, asp_name):
                     sums2['.'+i]=sums[i]
                 sums = sums2
                 del(sums2)
-
-                #print repr(sums)
 
                 tar_members = tarf.getmembers()
 
@@ -870,5 +890,221 @@ def package_files(config, destdir, pkgname, mute=False,
 
         if return_list:
             ret = copy.copy(out_list)
+
+    return ret
+
+
+def check_package_aipsetup2(filename):
+
+    ret = 0
+
+    filename = os.path.abspath(filename)
+    if not filename.endswith('.tar.xz'):
+        ret = 1
+    else:
+        filename_sha512 = filename + '.sha512'
+        filename_md5 = filename + '.md5'
+
+        if not os.path.isfile(filename) \
+            or not os.path.isfile(filename_sha512) \
+            or not os.path.isfile(filename_md5):
+            ret = 2
+        else:
+
+            bn = os.path.basename(filename)
+            dbn = './' + bn
+
+            sha512 = aipsetup.utils.checksum.make_file_checksum(
+                filename, 'sha512'
+                )
+
+            md5 = aipsetup.utils.checksum.make_file_checksum(
+                filename, 'md5'
+                )
+
+            sha512s = aipsetup.utils.checksum.parse_checksums_file_text(
+                filename_sha512
+                )
+
+            md5s = aipsetup.utils.checksum.parse_checksums_file_text(
+                filename_md5
+                )
+
+            if not isinstance(sha512, basestring):
+                ret = 3
+            elif not isinstance(md5, basestring):
+                ret = 4
+            elif not isinstance(sha512s, dict):
+                ret = 5
+            elif not isinstance(md5s, dict):
+                ret = 6
+            elif not dbn in sha512s:
+                ret = 7
+            elif not dbn in md5s:
+                ret = 8
+            elif not sha512s[dbn] == sha512:
+                ret = 9
+            elif not md5s[dbn] == md5:
+                ret = 10
+            else:
+                ret = 0
+
+    return ret
+
+def put_to_index_many(config, files):
+
+    for i in files:
+        i = aipsetup.utils.text.unicodify(i)
+        if os.path.exists(i):
+            put_to_index(config, i)
+
+    return 0
+
+def put_to_index(config, filename):
+    ret = 0
+
+    # FIXME: sanity checks
+
+    sn_pres = aipsetup.name.source_name_parse(
+        config, filename, mute=True
+        )
+
+    if os.path.isdir(filename) or os.path.islink(filename):
+        print "-e- wrong file type `%(name)s'" % {
+            'name': filename
+            }
+        ret = 10
+    else:
+
+        if check_package_aipsetup2(filename) == 0:
+            filename = os.path.abspath(filename)
+            filename_sha512 = filename + '.sha512'
+            filename_md5 = filename + '.md5'
+            fbn = os.path.basename(filename)
+
+            par_res = aipsetup.name.package_name_parse(fbn)
+            if not isinstance(par_res, dict):
+                print "-e- Couldn't parse filename `%(fn)s'" % {
+                    'fn': fbn
+                    }
+                ret = 1
+            else:
+                path = aipsetup.pkgindex.get_package_path(
+                    config,
+                    par_res['groups']['name']
+                    )
+                if path == None:
+                    print "-e- Can't get `%(package)s' path from database" % {
+                        'package': par_res['groups']['name']
+                        }
+                    ret = 2
+                else:
+                    full_path = config['repository'] + '/' + path
+                    full_path = os.path.abspath(full_path.replace(r'//', '/'))
+
+                    full_path += '/pack'
+
+                    if aipsetup.pkgindex.create_required_dirs_at_package(
+                        full_path
+                        ) != 0:
+                        print "-e- Can't ensure existance of required dirs"
+                        ret = 3
+                    else:
+
+                        full_path_pack = full_path + '/pack'
+
+                        print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                            'n1': filename,
+                            'n2': full_path_pack
+                            }
+                        for i in [
+                            (filename, full_path_pack + '/' + fbn + '.tar.xz'),
+                            (filename_md5, full_path_pack + '/' + fbn + '.tar.xz.md5'),
+                            (filename_sha512, full_path_pack + '/' + fbn + '.tar.xz.sha512')
+                            ]:
+                            aipsetup.utils.file.remove_if_exists(
+                                i[1]
+                                )
+
+                            shutil.move(i[0], i[1])
+
+        elif check_package(config, filename, mute=True) == 0:
+            filename = os.path.abspath(filename)
+            fbn = os.path.basename(filename)
+            par_res = aipsetup.name.package_name_parse(fbn)
+            if not isinstance(par_res, dict):
+                print "-e- Couldn't parse filename `%(fn)s'" % {
+                    'fn': fbn
+                    }
+                ret = 1
+            else:
+                path = aipsetup.pkgindex.get_package_path(
+                    config,
+                    par_res['groups']['name']
+                    )
+                if path == None:
+                    print "-e- Can't get `%(package)s' path from database" % {
+                        'package': par_res['groups']['name']
+                        }
+                    ret = 2
+                else:
+                    full_path = config['repository'] + '/' + path
+                    full_path = os.path.abspath(full_path.replace(r'//', '/'))
+
+                    if aipsetup.pkgindex.create_required_dirs_at_package(
+                        full_path
+                        ) != 0:
+                        print "-e- Can't ensure existance of required dirs"
+                        ret = 3
+                    else:
+
+                        full_path_pack = full_path + '/pack'
+
+                        print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                            'n1': filename,
+                            'n2': full_path_pack + '/' + fbn
+                            }
+                        aipsetup.utils.file.remove_if_exists(
+                            full_path_pack + '/' + fbn
+                            )
+                        shutil.move(filename, full_path_pack + '/' + fbn)
+
+        elif isinstance(sn_pres, dict):
+            print "-i- Source name parsed"
+            fbn = os.path.basename(filename)
+            path = aipsetup.pkgindex.get_package_path(
+                config,
+                sn_pres['groups']['name']
+                )
+            if path == None:
+                print "-e- Can't get `%(package)s' path from database" % {
+                    'package': sn_pres['groups']['name']
+                    }
+                ret = 2
+            else:
+                full_path = config['repository'] + '/' + path
+                full_path = os.path.abspath(full_path.replace(r'//', '/'))
+
+                if aipsetup.pkgindex.create_required_dirs_at_package(
+                    full_path
+                    ) != 0:
+                    print "-e- Can't ensure existance of required dirs"
+                    ret = 3
+                else:
+
+                    full_path_source = full_path + '/source'
+
+                    print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                        'n1': filename,
+                        'n2': full_path_source + '/' + fbn
+                        }
+                    aipsetup.utils.file.remove_if_exists(
+                        full_path_source + '/' + fbn
+                        )
+                    shutil.move(filename, full_path_source + '/' + fbn)
+        else:
+            print "-w- File action undefined: `%(name)s'" % {
+                'name': filename
+                }
 
     return ret

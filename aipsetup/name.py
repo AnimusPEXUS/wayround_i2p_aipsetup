@@ -169,6 +169,13 @@ def package_name_parse(filename):
 
     ret = None
 
+    if filename.endswith('.tar.xz'):
+        filename = filename[:-7]
+    elif filename.endswith('.asp'):
+        filename = filename[:-4]
+    elif filename.endswith('.xz'):
+        filename = filename[:-3]
+
     for i in ASP_NAME_REGEXPS:
         re_res = re.match(ASP_NAME_REGEXPS[i], filename)
         if re_res != None:

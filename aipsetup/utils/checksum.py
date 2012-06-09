@@ -36,11 +36,8 @@ def make_dir_checksums(dirname, output_filename):
     return ret
 
 def make_dir_checksums_fo(dirname, output_fileobj):
-
     ret = 0
-
     dirname = os.path.abspath(dirname)
-
     if not os.path.isdir(dirname):
         print "-e- Not a dir %(name)s" % {
             'name': dirname
@@ -75,27 +72,77 @@ def make_dir_checksums_fo(dirname, output_fileobj):
 
     return ret
 
-
-def make_fileobj_checksum(fileobj):
-    ret = None
-    m = None
-    m = hashlib.sha512()
-    aipsetup.utils.stream.cat(
-        fileobj, m, write_method_name='update'
-        )
-    ret = m.hexdigest()
-    del(m)
+def make_file_checksum(filename, method='sha512'):
+    ret = 0
+    try:
+        f = open(filename, 'r')
+    except:
+        print "-e- Can't open file `%(name)s'" % {
+            'name': filename
+            }
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        ret = 1
+    else:
+        sum = make_fileobj_checksum(f, method)
+        if not isinstance(sum, basestring):
+            print "-e- Can't get checksum for file `%(name)s'" % {
+                'name': filename
+                }
+            ret = 2
+        else:
+            ret = sum
+        f.close()
     return ret
 
+def make_fileobj_checksum(fileobj, method='sha512'):
+    ret = None
+    m = None
+    try:
+        m = eval("hashlib.%(method)s()" % {
+            'method': method
+            })
+    except:
+        print "-e- Error calling for hashlib method `%(method)s'" % {
+            'method': method
+            }
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        ret = 1
+    else:
+        aipsetup.utils.stream.cat(
+            fileobj, m, write_method_name='update'
+            )
+        ret = m.hexdigest()
+        del(m)
+    return ret
+
+def parse_checksums_file_text(filename):
+    ret = 0
+    try:
+        f = open(filename)
+    except:
+        print "-e- Can't open file `%(name)s'" % {
+            'name': filename
+            }
+        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        ret = 1
+    else:
+        txt = f.read()
+        f.close()
+        sums = parse_checksums_text(txt)
+        if not isinstance(sums, dict):
+            print "-e- Can't get checksums from file `%(name)s'" % {
+                'name': filename
+                }
+            ret = 2
+        else:
+            ret = sums
+
+    return ret
 
 def parse_checksums_text(text):
-
     ret = 0
-
     lines = text.splitlines()
-
     sums = {}
-
     for i in lines:
         ist = i.strip(' \n\t\0')
         if ist != '':
