@@ -754,7 +754,7 @@ class PackageDatabase:
     def find_repository_package_name_collisions_in_database(self):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(self.Package).all()
+        lst = sess.query(self.Package).order_by(self.Package.name).all()
 
         lst2 = []
 
