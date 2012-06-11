@@ -212,7 +212,7 @@ def read_from_file(name):
         try:
             tree = lxml.etree.fromstring(txt)
         except:
-            print "-e- Can't parse file %(name)s" % {
+            print "-e- Can't parse file `%(name)s'" % {
                 'name': name
                 }
             aipsetup.utils.error.print_exception_info(
@@ -225,25 +225,31 @@ def read_from_file(name):
             for i in ['buildinfo']:
                 x = _find_latest(tree, i, 'value')
                 if x != None:
-                    ret[i] = x
+                    ret[i] = aipsetup.utils.text.unicodify(x)
 
             x = _find_latest(tree, 'nametype', 'value')
             if x != None:
-                ret['pkg_name_type'] = x
+                ret['pkg_name_type'] = aipsetup.utils.text.unicodify(x)
 
             x = _find_latest(tree, 'homepage', 'url')
             if x != None:
-                ret['homepage'] = x
+                ret['homepage'] = aipsetup.utils.text.unicodify(x)
 
             x = tree.findall('description')
             if len(x) > 0:
-                ret['description'] = x[-1].text
+                ret['description'] = aipsetup.utils.text.unicodify(x[-1].text)
 
-            ret['sources'] = _find_list(tree, 'source', 'url')
+            ret['sources'] = aipsetup.utils.text.unicodify(
+                _find_list(tree, 'source', 'url')
+                )
 
-            ret['mirrors'] = _find_list(tree, 'mirror', 'url')
+            ret['mirrors'] = aipsetup.utils.text.unicodify(
+                _find_list(tree, 'mirror', 'url')
+                )
 
-            ret['tags'] = _find_list(tree, 'tag', 'name')
+            ret['tags'] = aipsetup.utils.text.unicodify(
+                _find_list(tree, 'tag', 'name')
+                )
             ret['tags'].sort()
             del(tree)
 

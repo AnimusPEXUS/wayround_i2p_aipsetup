@@ -148,3 +148,8 @@ def deunicodify(list_or_basestring, on_wrong_type='exception'):
                    ftype='unicode', ttype='str', operation='encode')
 
 
+def fill(char=' ', count=80):
+    out = ''
+    for i in range(count):
+        out += char[0]
+    return out

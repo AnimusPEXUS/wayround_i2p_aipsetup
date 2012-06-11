@@ -24,31 +24,31 @@ NAME_REGEXPS_ORDER = [
 
 NAME_REGEXPS = {
     'standard': \
-        r'%(standard_name)s-%(standard_version)s%(standard_extensions)s',
+        r'^%(standard_name)s-%(standard_version)s%(standard_extensions)s$',
 
     'standard_with_date': \
-        r'%(standard_name)s-%(standard_version)s-%(date)s%(standard_extensions)s',
+        r'^%(standard_name)s-%(standard_version)s-%(date)s%(standard_extensions)s$',
 
     'underscored': \
-        r'%(standard_name)s_%(underscored_version)s%(standard_extensions)s',
+        r'^%(standard_name)s_%(underscored_version)s%(standard_extensions)s$',
 
     'underscored_with_date': \
-        r'%(standard_name)s_%(underscored_version)s_%(date)%(standard_extensions)s',
+        r'^%(standard_name)s_%(underscored_version)s_%(date)%(standard_extensions)s$',
 
     'standard_with_letter_after_version': \
-        r'%(standard_name)s-%(standard_version)s(?P<version_letter>[a-zA-Z])(?P<version_letter_number>\d*)%(standard_extensions)s',
+        r'^%(standard_name)s-%(standard_version)s(?P<version_letter>[a-zA-Z])(?P<version_letter_number>\d*)%(standard_extensions)s$',
 
     'standard_with_status': \
-        r'%(standard_name)s-%(standard_version)s%(standard_statuses)s%(standard_extensions)s',
+        r'^%(standard_name)s-%(standard_version)s%(standard_statuses)s%(standard_extensions)s$',
 
     'underscored_with_status': \
-        r'%(standard_name)s_%(underscored_version)s%(underscored_statuses)s%(standard_extensions)s',
+        r'^%(standard_name)s_%(underscored_version)s%(underscored_statuses)s%(standard_extensions)s$',
 
     'version_right_after_name': \
-        r'%(standard_name)s%(standard_version)s%(standard_extensions)s',
+        r'^%(standard_name)s%(standard_version)s%(standard_extensions)s$',
 
     'version_right_after_name_with_status': \
-        r'%(standard_name)s%(standard_version)s[-\.]?%(standard_statuses)s%(standard_extensions)s'
+        r'^%(standard_name)s%(standard_version)s[-\.]?%(standard_statuses)s%(standard_extensions)s$'
 
     }
 
@@ -78,8 +78,8 @@ for each in NAME_REGEXPS:
 del(each)
 
 ASP_NAME_REGEXPS = {
-    'aipsetup2': r'(?P<name>.*?)-?(?P<version>(\d+\.??)+)?-(?P<timestamp>\d{14})-(?P<host>.*)',
-    'aipsetup3': r'(?P<name>.*?)-?(?P<version>(\d+\.??)+)?-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)'
+    'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$',
+    'aipsetup3': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
     }
 
 

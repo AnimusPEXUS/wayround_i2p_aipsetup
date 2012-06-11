@@ -181,3 +181,21 @@ def list_files_recurcive(dirname, output_filename):
     absp = os.path.abspath(dirname)
     _list_files_recurcive(absp, len(absp), absp, fd)
     fd.close()
+
+def progress_write(line_to_write):
+
+    width = 80
+    ts = get_terminal_size(sys.stdout.fileno())
+    if ts != None:
+        width = ts['ws_col']
+
+    line_to_write_l = len(line_to_write)
+    line_to_out = "\r%(ltw)s%(spaces)s\r" % {
+        'ltw': line_to_write,
+        'spaces': aipsetup.utils.text.fill(
+            ' ', width-line_to_write_l
+            )
+        }
+    sys.stdout.write(line_to_out)
+    sys.stdout.flush()
+    return

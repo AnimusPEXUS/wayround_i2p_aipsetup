@@ -306,10 +306,11 @@ def check_package(config, asp_name, mute=False):
                     else:
                         cresult = "OK"
 
-                    print "       %(name)s - %(result)s" % {
-                        'name': i,
-                        'result': cresult
-                        }
+                    if not mute:
+                        print "       %(name)s - %(result)s" % {
+                            'name': i,
+                            'result': cresult
+                            }
 
                 if error_found:
                     print "-e- Error was found while checking package"
@@ -963,12 +964,6 @@ def put_to_index_many(config, files):
 def put_to_index(config, filename):
     ret = 0
 
-    # FIXME: sanity checks
-
-    sn_pres = aipsetup.name.source_name_parse(
-        config, filename, mute=True
-        )
-
     if os.path.isdir(filename) or os.path.islink(filename):
         print "-e- wrong file type `%(name)s'" % {
             'name': filename
@@ -1002,8 +997,6 @@ def put_to_index(config, filename):
                     full_path = config['repository'] + '/' + path
                     full_path = os.path.abspath(full_path.replace(r'//', '/'))
 
-                    full_path += '/pack'
-
                     if aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
@@ -1022,11 +1015,13 @@ def put_to_index(config, filename):
                             (filename_md5, full_path_pack + '/' + fbn + '.tar.xz.md5'),
                             (filename_sha512, full_path_pack + '/' + fbn + '.tar.xz.sha512')
                             ]:
-                            aipsetup.utils.file.remove_if_exists(
-                                i[1]
-                                )
+                            if (os.path.abspath(i[0]) != os.path.abspath(i[1])):
 
-                            shutil.move(i[0], i[1])
+                                aipsetup.utils.file.remove_if_exists(
+                                    i[1]
+                                    )
+
+                                shutil.move(i[0], i[1])
 
         elif check_package(config, filename, mute=True) == 0:
             filename = os.path.abspath(filename)
@@ -1064,47 +1059,57 @@ def put_to_index(config, filename):
                             'n1': filename,
                             'n2': full_path_pack + '/' + fbn
                             }
-                        aipsetup.utils.file.remove_if_exists(
-                            full_path_pack + '/' + fbn
-                            )
-                        shutil.move(filename, full_path_pack + '/' + fbn)
 
-        elif isinstance(sn_pres, dict):
-            print "-i- Source name parsed"
-            fbn = os.path.basename(filename)
-            path = aipsetup.pkgindex.get_package_path(
-                config,
-                sn_pres['groups']['name']
-                )
-            if path == None:
-                print "-e- Can't get `%(package)s' path from database" % {
-                    'package': sn_pres['groups']['name']
-                    }
-                ret = 2
-            else:
-                full_path = config['repository'] + '/' + path
-                full_path = os.path.abspath(full_path.replace(r'//', '/'))
+                        if (os.path.abspath(filename) != os.path.abspath(full_path_pack + '/' + fbn)):
+                            aipsetup.utils.file.remove_if_exists(
+                                full_path_pack + '/' + fbn
+                                )
+                            shutil.move(filename, full_path_pack + '/' + fbn)
 
-                if aipsetup.pkgindex.create_required_dirs_at_package(
-                    full_path
-                    ) != 0:
-                    print "-e- Can't ensure existance of required dirs"
-                    ret = 3
-                else:
-
-                    full_path_source = full_path + '/source'
-
-                    print "-i- moving `%(n1)s' to `%(n2)s'" % {
-                        'n1': filename,
-                        'n2': full_path_source + '/' + fbn
-                        }
-                    aipsetup.utils.file.remove_if_exists(
-                        full_path_source + '/' + fbn
-                        )
-                    shutil.move(filename, full_path_source + '/' + fbn)
         else:
-            print "-w- File action undefined: `%(name)s'" % {
-                'name': filename
-                }
+
+            sn_pres = aipsetup.name.source_name_parse(
+                config, filename, mute=True
+            )
+
+            if not isinstance(sn_pres, dict):
+                print "-w- File action undefined: `%(name)s'" % {
+                    'name': filename
+                    }
+            else:
+                print "-i- Source name parsed"
+                fbn = os.path.basename(filename)
+                path = aipsetup.pkgindex.get_package_path(
+                    config,
+                    sn_pres['groups']['name']
+                    )
+                if path == None:
+                    print "-e- Can't get `%(package)s' path from database" % {
+                        'package': sn_pres['groups']['name']
+                        }
+                    ret = 2
+                else:
+                    full_path = config['repository'] + '/' + path
+                    full_path = os.path.abspath(full_path.replace(r'//', '/'))
+
+                    if aipsetup.pkgindex.create_required_dirs_at_package(
+                        full_path
+                        ) != 0:
+                        print "-e- Can't ensure existance of required dirs"
+                        ret = 3
+                    else:
+
+                        full_path_source = full_path + '/source'
+
+                        print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                            'n1': filename,
+                            'n2': full_path_source + '/' + fbn
+                            }
+
+                        if (os.path.abspath(filename) != os.path.abspath(full_path_source + '/' + fbn)):
+                            aipsetup.utils.file.remove_if_exists(
+                                full_path_source + '/' + fbn
+                                )
+                            shutil.move(filename, full_path_source + '/' + fbn)
 
     return ret

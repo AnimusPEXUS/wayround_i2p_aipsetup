@@ -520,9 +520,7 @@ class PackageDatabase:
 
     def _scan_repo_for_pkg_and_cat(self, sess, root_dir, cid):
 
-        ld = os.listdir(root_dir)
-
-        files = aipsetup.utils.text.unicodify(ld)
+        files = aipsetup.utils.text.unicodify(os.listdir(root_dir))
 
         files.sort()
 
@@ -552,16 +550,29 @@ class PackageDatabase:
                 continue
 
             if is_repo_package_dir(full_path):
-                sess.add(self.Package(name=each, cid=cid))
-                sess.commit()
+                pa = self.Package(name=each, cid=cid)
+                sess.add(pa)
+                #sess.commit()
+                if sys.stdout.isatty():
+                    pcount = sess.query(self.Package).count()
+                    line_to_write = u"       %(num)d packages found: %(name)s" % {
+                        'num': pcount,
+                        'name': pa.name
+                        }
+                    aipsetup.utils.file.progress_write(line_to_write)
+                del(pa)
             elif os.path.isdir(full_path):
                 new_cat = self.Category(name=each, parent_cid=cid)
 
                 sess.add(new_cat)
                 sess.commit()
 
+                new_cat_cid = new_cat.cid
+                del(new_cat)
+
                 self._scan_repo_for_pkg_and_cat(
-                    sess, full_path, new_cat.cid)
+                    sess, full_path, new_cat_cid
+                    )
             else:
                 print "-w- garbage file found: %(path)s" % {
                     'path': full_path
@@ -575,76 +586,104 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        print "-i- deleting old data"
+        print "-i- Deleting old data"
         sess.query(self.Category).delete()
         sess.query(self.Package).delete()
 
-        print "-i- commiting"
+        print "-i- Commiting"
         sess.commit()
 
-        print "-i- scanning..."
+        print "-i- Scanning repository..."
         self._scan_repo_for_pkg_and_cat(
             sess, self._config['repository'], 0)
 
+        print ""
         count_p = sess.query(self.Package).count()
+        sess.commit()
 
-        print "-i- %(n)d packages found" % {'n': count_p}
-
-        print "-i- closing."
+        print "-i- Searching for errors"
+        self.find_repository_package_name_collisions_in_database()
+        print "-i- Search operations finished"
         sess.close()
 
         return ret
 
-    def get_package_tags(self, name):
+    def get_package_tags(self, name, pre_sess=None):
         ret = []
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
         q = sess.query(self.PackageTag).filter_by(name = name).all()
 
         for i in q:
             ret.append(i.tag)
 
-        sess.close()
+        if pre_sess == None:
+            sess.close()
         return ret
 
-    def get_package_sources(self, name):
+    def get_package_sources(self, name, pre_sess=None):
         ret = []
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
         q = sess.query(self.PackageSource).filter_by(name = name).all()
 
         for i in q:
             ret.append(i.url)
 
-        sess.close()
+        if pre_sess == None:
+            sess.close()
         return ret
 
-    def get_package_mirrors(self, name):
+    def get_package_mirrors(self, name, pre_sess=None):
         ret = []
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
         q = sess.query(self.PackageMirror).filter_by(name = name).all()
 
         for i in q:
             ret.append(i.url)
 
-        sess.close()
+        if pre_sess == None:
+            sess.close()
         return ret
 
-    def set_package_tags(self, name, tags):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+    def set_package_tags(self, name, tags, pre_sess=None):
+
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
         sess.query(self.PackageTag).filter_by(name=name).delete()
 
         for i in tags:
-            n = self.PackageTag(name, i)
+            n = self.PackageTag()
+            n.name = name
+            n.tag = i
             sess.add(n)
 
-        sess.commit()
-        sess.close()
+        if pre_sess == None:
+            sess.commit()
+            sess.close()
 
-    def set_package_sources(self, name, sources):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+    def set_package_sources(self, name, sources, pre_sess=None):
+
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
         sess.query(self.PackageSource).filter_by(name=name).delete()
 
@@ -652,11 +691,16 @@ class PackageDatabase:
             n = self.PackageSource(name, i)
             sess.add(n)
 
-        sess.commit()
-        sess.close()
+        if pre_sess == None:
+            sess.commit()
+            sess.close()
 
-    def set_package_mirrors(self, name, mirrors):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+    def set_package_mirrors(self, name, mirrors, pre_sess=None):
+
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
         sess.query(self.PackageMirror).filter_by(name=name).delete()
 
@@ -664,8 +708,9 @@ class PackageDatabase:
             n = self.PackageMirror(name, i)
             sess.add(n)
 
-        sess.commit()
-        sess.close()
+        if pre_sess == None:
+            sess.commit()
+            sess.close()
 
     def get_package_path(self, pid):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
@@ -696,7 +741,7 @@ class PackageDatabase:
 
         sess.close()
 
-        # print '-gpp- :' + repr(ret)
+        #print '-gpp- :' + repr(ret)
         return ret
 
     def get_package_path_string(self, pid):
@@ -713,10 +758,13 @@ class PackageDatabase:
 
         lst2 = []
 
+        print "-i- Scanning paths"
         for each in lst:
+            aipsetup.utils.file.progress_write('       ' + each.name)
             lst2.append(self.get_package_path(pid=each.pid))
+        print ""
 
-        print "-i- Processing %(n)s packages" % {'n': len(lst)}
+        print "-i- Processing %(n)s packages..." % {'n': len(lst)}
         sys.stdout.flush()
         sess.close()
 
@@ -726,7 +774,6 @@ class PackageDatabase:
         pkg_paths = {}
 
         for each in lst2:
-            # print repr(each)
 
             l = each[-1][1].lower()
 
@@ -734,7 +781,6 @@ class PackageDatabase:
                 pkg_paths[l] = []
 
             pkg_paths[l].append(join_pkg_path(each))
-
 
         for each in pkg_paths.keys():
             if len(pkg_paths[each]) > 1:
@@ -749,7 +795,7 @@ class PackageDatabase:
             t = 'w'
             t2 = ''
 
-        print "-%(t)s- found %(c)s duplicated package names%(t2)s" % {
+        print "-%(t)s- Found %(c)s duplicated package names%(t2)s" % {
             'c' : len(lst_dup),
             't' : t,
             't2': t2
@@ -853,13 +899,17 @@ class PackageDatabase:
         return ret
 
 
-    def package_info_dict_to_record(self, name, struct):
+    def package_info_dict_to_record(self, name, struct, pre_sess=None):
 
         # TODO: check_info_dict(struct)
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        if pre_sess == None:
+            sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        else:
+            sess = pre_sess
 
-        q = sess.query(Pself.ackageInfo).filter_by(name = name).first()
+        q = None
+        q = sess.query(self.PackageInfo).filter_by(name = name).first()
 
         creating_new = False
         if q == None:
@@ -879,12 +929,13 @@ class PackageDatabase:
             sess.add(q)
 
 
-        sess.commit()
-        sess.close()
+        if pre_sess == None:
+            sess.commit()
+            sess.close()
 
-        self.set_package_tags(name, struct['tags'])
-        self.set_package_sources(name, struct['sources'])
-        self.set_package_mirrors(name, struct['mirrors'])
+        self.set_package_tags(name, struct['tags'], pre_sess=pre_sess)
+        self.set_package_sources(name, struct['sources'], pre_sess=pre_sess)
+        self.set_package_mirrors(name, struct['mirrors'], pre_sess=pre_sess)
 
     def backup_package_info_to_filesystem(
         self, mask='*', force_rewrite=False):
@@ -940,36 +991,61 @@ class PackageDatabase:
 
         files.sort()
 
+        files = aipsetup.utils.text.unicodify(files)
+
+        missing = []
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        print "-i- searching missing records"
+        files_l = len(files)
+        num = 0
         for i in files:
-            name = aipsetup.utils.text.unicodify(
-                os.path.basename(i)
-                )
 
-            name = name[:-4]
+            if num == 0:
+                perc = 0
+            else:
+                perc = 100 / (float(files_l) / num)
+            aipsetup.utils.file.progress_write('    %(percent)d%%' % {
+                'percent': perc
+                })
+            num += 1
 
-            missing = False
+            name = os.path.basename(i)[:-4]
+
             if not all_records:
-                sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-                q = sess.query(self.PackageInfo).filter_by(name=name).first()
-
+                q = sess.query(self.PackageInfo).filter_by(
+                    name=name
+                    ).first()
                 if q == None:
-                    missing = True
+                    missing.append(i)
+            else:
+                missing.append(i)
 
-                sess.close()
+        sess.close()
 
-                if not missing:
-                    continue
+        print ""
 
+        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        for i in missing:
             struct = aipsetup.info.read_from_file(i)
+            name = os.path.basename(i)[:-4]
             if isinstance(struct, dict):
-                print "-i- loading record: %(name)s" % {'name': name}
-                self.package_info_dict_to_record(name, struct)
+                aipsetup.utils.file.progress_write(
+                    "-i- loading record: %(name)s" % {
+                        'name': name
+                        }
+                    )
+
+                self.package_info_dict_to_record(
+                    name, struct, pre_sess=sess
+                    )
                 loaded += 1
             else:
                 print "-e- can't get info from file %(name)s" % {
                     'name': i
                     }
+        print ""
+        sess.commit()
+        sess.close()
 
 
         print "-i- Total loaded %(n)d records" % {'n': loaded}
@@ -1048,7 +1124,7 @@ class PackageDatabase:
                 pkgs_missing += 1
                 missing.append(each.name)
 
-                print "-w- missing package info record: %(name)s" % {
+                print "-w- missing package DB info record: %(name)s" % {
                     'name': each.name
                     }
 
@@ -1074,7 +1150,7 @@ class PackageDatabase:
                         filename,
                         aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                         pkgs_failed += 1
-                        print "-e- failed writing template to %(name)s" % {
+                        print "-e- failed writing template to `%(name)s'" % {
                             'name': filename
                             }
                     else:
