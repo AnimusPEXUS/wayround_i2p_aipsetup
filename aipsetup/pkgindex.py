@@ -235,7 +235,7 @@ def create_required_dirs_at_package(path):
 
     ret = 0
 
-    for i in ['pack', 'source']:
+    for i in ['pack', 'source', 'aipsetup2']:
         full_path = path + '/' + i
 
         if not os.path.exists(full_path):

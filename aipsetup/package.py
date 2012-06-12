@@ -1004,16 +1004,16 @@ def put_to_index(config, filename):
                         ret = 3
                     else:
 
-                        full_path_pack = full_path + '/pack'
+                        full_path_pack = full_path + '/aipsetup2'
 
                         print "-i- moving `%(n1)s' to `%(n2)s'" % {
                             'n1': filename,
                             'n2': full_path_pack
                             }
                         for i in [
-                            (filename, full_path_pack + '/' + fbn + '.tar.xz'),
-                            (filename_md5, full_path_pack + '/' + fbn + '.tar.xz.md5'),
-                            (filename_sha512, full_path_pack + '/' + fbn + '.tar.xz.sha512')
+                            (filename, full_path_pack + '/' + fbn),
+                            (filename_md5, full_path_pack + '/' + fbn + '.md5'),
+                            (filename_sha512, full_path_pack + '/' + fbn + '.sha512')
                             ]:
                             if (os.path.abspath(i[0]) != os.path.abspath(i[1])):
 
@@ -1111,5 +1111,7 @@ def put_to_index(config, filename):
                                 full_path_source + '/' + fbn
                                 )
                             shutil.move(filename, full_path_source + '/' + fbn)
+                            if os.path.isfile(filename + '.asc'):
+                                shutil.move(filename + '.asc', full_path_source + '/' + fbn + '.asc')
 
     return ret

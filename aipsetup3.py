@@ -76,4 +76,5 @@ else:
         print "-e- Wrong command. Try aipsetup --help"
         ret = 1
 
+print "-i- done"
 exit(ret)

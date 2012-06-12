@@ -14,6 +14,7 @@ import aipsetup.name
 import aipsetup.version
 import aipsetup.utils.error
 import aipsetup.utils.text
+import aipsetup.infoeditor
 
 from mako.template import Template
 
@@ -144,6 +145,10 @@ def router(opts, args, config):
                 aipsetup.utils.edit.edit_file(
                     config, args[1], 'info'
                     )
+
+        elif args[0] == 'editor':
+
+            aipsetup.infoeditor.main()
 
         elif args[0] == 'copy':
 
