@@ -6,7 +6,7 @@ import PyQt4.uic
 import PyQt4.QtGui
 import PyQt4.QtCore
 
-#__file__ == os.path.abspath(__file__)
+__file__ == os.path.abspath(__file__)
 
 class MainWindow:
 
