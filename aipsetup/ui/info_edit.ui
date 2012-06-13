@@ -31,7 +31,7 @@
       <property name="handleWidth">
        <number>5</number>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinimumSize</enum>
@@ -98,7 +98,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -107,17 +107,27 @@
             <item>
              <widget class="QLabel" name="label">
               <property name="text">
-               <string>TextLabel</string>
+               <string>homepage</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit"/>
+             <widget class="QLineEdit" name="lineEdit">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="frame">
+               <bool>true</bool>
+              </property>
+              <property name="placeholderText">
+               <string>url</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>TextLabel</string>
+               <string>description</string>
               </property>
              </widget>
             </item>
@@ -127,7 +137,7 @@
             <item>
              <widget class="QLabel" name="label_3">
               <property name="text">
-               <string>TextLabel</string>
+               <string>sources</string>
               </property>
              </widget>
             </item>
@@ -141,7 +151,7 @@
             <item>
              <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>TextLabel</string>
+               <string>mirrors</string>
               </property>
              </widget>
             </item>
@@ -151,7 +161,7 @@
             <item>
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>TextLabel</string>
+               <string>nametype</string>
               </property>
              </widget>
             </item>
@@ -161,7 +171,7 @@
             <item>
              <widget class="QLabel" name="label_6">
               <property name="text">
-               <string>TextLabel</string>
+               <string>tags</string>
               </property>
              </widget>
             </item>
@@ -171,7 +181,7 @@
             <item>
              <widget class="QLabel" name="label_7">
               <property name="text">
-               <string>TextLabel</string>
+               <string>buildinfo</string>
               </property>
              </widget>
             </item>
@@ -179,16 +189,16 @@
              <widget class="QLineEdit" name="lineEdit_3"/>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_6">
+             <widget class="QPushButton" name="pushButton_5">
               <property name="text">
-               <string>Restore</string>
+               <string>Save</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_5">
+             <widget class="QPushButton" name="pushButton_6">
               <property name="text">
-               <string>Save</string>
+               <string>Revert</string>
               </property>
              </widget>
             </item>
@@ -202,12 +212,6 @@
     </item>
    </layout>
   </widget>
-  <zorder></zorder>
-  <zorder></zorder>
-  <zorder></zorder>
-  <zorder>verticalLayoutWidget_3</zorder>
-  <zorder>splitter</zorder>
-  <zorder>verticalLayoutWidget_3</zorder>
  </widget>
  <resources/>
  <connections/>

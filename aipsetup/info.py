@@ -76,23 +76,6 @@ pkg_info_file_template = Template(text="""\
 </package>
 """)
 
-def _find_latest(tree, tag, field):
-    y = None
-    x = tree.findall(tag)
-    if len(x) > 0:
-        y = x[-1].get(field)
-    return y
-
-def _find_list(tree, tag, field):
-    y = []
-    x = tree.findall(tag)
-    lx = len(x)
-    for i in range(lx):
-        z = x[i].get(field)
-        if isinstance(z, basestring):
-            y.append(z)
-    return y
-
 def print_help():
     print """\
 aipsetup info command
@@ -148,7 +131,7 @@ def router(opts, args, config):
 
         elif args[0] == 'editor':
 
-            aipsetup.infoeditor.main()
+            aipsetup.infoeditor.main(config)
 
         elif args[0] == 'copy':
 
@@ -165,6 +148,25 @@ def router(opts, args, config):
             ret = 1
 
     return ret
+
+
+def _find_latest(tree, tag, field):
+    y = None
+    x = tree.findall(tag)
+    if len(x) > 0:
+        y = x[-1].get(field)
+    return y
+
+def _find_list(tree, tag, field):
+    y = []
+    x = tree.findall(tag)
+    lx = len(x)
+    for i in range(lx):
+        z = x[i].get(field)
+        if isinstance(z, basestring):
+            y.append(z)
+    return y
+
 
 def is_dicts_equal(d1, d2):
 
