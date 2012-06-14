@@ -53,7 +53,10 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
         bytes = 0
 
         if hasattr(stdin, 'seek'):
-            stdin.seek(0)
+            try:
+                stdin.seek(0)
+            except:
+                pass
 
         while True:
             buff = stdin.read(bs)
@@ -77,7 +80,10 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
                     break
 
         if hasattr(stdout, 'seek'):
-            stdout.seek(0, os.SEEK_END)
+            try:
+                stdout.seek(0, os.SEEK_END)
+            except:
+                pass
 
         if close_output_on_eof:
             if thread_name != 'Thread':

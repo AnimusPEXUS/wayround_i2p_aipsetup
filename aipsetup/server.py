@@ -423,8 +423,6 @@ class Index:
                 regexp = regexp,
                 buildinfo = r['buildinfo'],
                 description = r['description'],
-                sources = r['sources'],
-                mirrors = r['mirrors'],
                 tags = r['tags'],
                 category = category
                 )

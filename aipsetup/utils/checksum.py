@@ -7,6 +7,7 @@ import re
 
 import aipsetup.utils.stream
 import aipsetup.utils.error
+import aipsetup.utils.file
 
 def make_dir_checksums(dirname, output_filename):
 
@@ -53,9 +54,13 @@ def make_dir_checksums_fo(dirname, output_fileobj):
             ret = 2
         else:
             sums_fd = output_fileobj
-
+            print "-i- Creating checksums"
             for root, dirs, files in os.walk(dirname):
                 for f in files:
+                    aipsetup.utils.file.progress_write("    %(dir)s/%(file)s" % {
+                        'dir': root,
+                        'file': f
+                        })
                     if os.path.isfile(root+'/'+f) and not os.path.islink(root+'/'+f):
                         m = hashlib.sha512()
                         fd = open(root+'/'+f, 'r')
@@ -69,7 +74,7 @@ def make_dir_checksums_fo(dirname, output_fileobj):
                                 }
                             )
                         del(m)
-
+    print ""
     return ret
 
 def make_file_checksum(filename, method='sha512'):

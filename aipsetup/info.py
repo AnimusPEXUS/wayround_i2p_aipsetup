@@ -14,21 +14,16 @@ import aipsetup.name
 import aipsetup.version
 import aipsetup.utils.error
 import aipsetup.utils.text
-import aipsetup.infoeditor
 
 from mako.template import Template
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # not required, but can be usefull
-    homepage="http://example.net",
+    homepage="",
     # description
-    description="write something here, please",
-    # this can be used for finding newer software versions (url list)
-    sources=[],
-    # url list
-    mirrors = [],
+    description="",
     # 'standard', 'local' or other package name
-    pkg_name_type = 'standard',
+    pkg_name_type = "",
     # string list
     tags = [],
     # string
@@ -46,22 +41,6 @@ pkg_info_file_template = Template(text="""\
 
   <description>${ description | x}</description>
   <homepage url="${ homepage | x}" />
-
-  % if len(sources) == 0:
-  <!-- Use <source url="" /> constructions for listing
-       possible sources -->
-  % endif
-  % for i in sources:
-  <source url="${ i | x}" />
-  % endfor
-
-  % if len(mirrors) == 0:
-  <!-- Use <mirror url="" /> constructions for listing
-       possible mirrors -->
-  % endif
-  % for i in mirrors:
-  <mirror url="${ i | x}" />
-  % endfor
 
   % if len(tags) == 0:
   <!-- Use <tag name="" /> constructions for listing
@@ -130,6 +109,7 @@ def router(opts, args, config):
                     )
 
         elif args[0] == 'editor':
+            import aipsetup.infoeditor
 
             aipsetup.infoeditor.main(config)
 
@@ -179,7 +159,7 @@ def is_dicts_equal(d1, d2):
             break
 
     if ret:
-        for i in ['sources', 'mirrors', 'tags']:
+        for i in ['tags']:
 
             if ret:
                 for each in d1[i]:
@@ -246,14 +226,6 @@ def read_from_file(name):
             if len(x) > 0:
                 ret['description'] = aipsetup.utils.text.unicodify(x[-1].text)
 
-            ret['sources'] = aipsetup.utils.text.unicodify(
-                _find_list(tree, 'source', 'url')
-                )
-
-            ret['mirrors'] = aipsetup.utils.text.unicodify(
-                _find_list(tree, 'mirror', 'url')
-                )
-
             ret['tags'] = aipsetup.utils.text.unicodify(
                 _find_list(tree, 'tag', 'name')
                 )
@@ -272,8 +244,6 @@ def write_to_file(name, struct):
         pkg_name_type = struct['pkg_name_type'],
         description   = struct['description'],
         homepage      = struct['homepage'],
-        sources       = struct['sources'],
-        mirrors       = struct['mirrors'],
         tags          = struct['tags'],
         buildinfo     = struct['buildinfo']
         )

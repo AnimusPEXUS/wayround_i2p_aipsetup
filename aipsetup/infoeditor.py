@@ -37,10 +37,6 @@ class MainWindow:
             self.onRevertButtonActivated
             )
 
-        self.window.setLayout(
-            self.window.verticalLayout_5
-            )
-
         self.window.show()
         self.load_list()
 
@@ -78,12 +74,6 @@ class MainWindow:
                 self.window.lineEdit.setText(data['homepage'])
                 self.window.plainTextEdit.setPlainText(data['description'])
                 self.window.lineEdit_2.setText(data['pkg_name_type'])
-                self.window.plainTextEdit_2.setPlainText(
-                    u'\n'.join(data['sources']) + u'\n'
-                    )
-                self.window.plainTextEdit_3.setPlainText(
-                    u'\n'.join(data['mirrors']) + u'\n'
-                    )
                 self.window.plainTextEdit_4.setPlainText(
                     u'\n'.join(data['tags']) + u'\n'
                     )
@@ -106,14 +96,6 @@ class MainWindow:
         data['description'] = unicode(self.window.plainTextEdit.toPlainText())
         data['pkg_name_type'] = unicode(self.window.lineEdit_2.text()).strip()
         data['buildinfo'] = unicode(self.window.lineEdit_3.text()).strip()
-
-        data['sources'] = aipsetup.utils.text.strip_remove_empty_remove_duplicated_lines(
-            unicode(self.window.plainTextEdit_2.toPlainText()).splitlines()
-            )
-
-        data['mirrors'] = aipsetup.utils.text.strip_remove_empty_remove_duplicated_lines(
-            unicode(self.window.plainTextEdit_3.toPlainText()).splitlines()
-            )
 
         data['tags'] = aipsetup.utils.text.strip_remove_empty_remove_duplicated_lines(
             unicode(self.window.plainTextEdit_4.toPlainText()).splitlines()

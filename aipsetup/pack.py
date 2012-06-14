@@ -18,6 +18,27 @@ def print_help():
     print """\
 aipsetup pack command
 
+    destdir_checksum
+
+        create checksums for files in destdir
+
+    destdir_filelist
+
+    destdir_deps_c
+
+    remove_source_and_build_dirs
+
+    compress_patches_destdir_and_logs
+
+    compress_files_in_lists_dir
+
+    remove_patches_destdir_and_buildlogs_dirs
+
+    remove_decompressed_files_from_lists_dir
+
+    make_checksums_for_building_site
+
+    pack_buildingsite
 
 """
 
@@ -171,7 +192,16 @@ def destdir_deps_c(config, buildingsite):
     deps = {}
     elfs = 0
     n_elfs = 0
+    print "-i- Generating C deps lists"
+    file_list_l = len(file_list)
+    file_list_i = 1
     for i in file_list:
+        file_list_i += 1
+        aipsetup.utils.file.progress_write("    (%(perc).2f%%) ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+            'perc': 100 / (float(file_list_l) / file_list_i),
+            'elfs': elfs,
+            'n_elfs': n_elfs
+            })
         filename = destdir + '/' + i
         filename.replace(r'//', '/')
         filename = os.path.abspath(filename)
@@ -184,7 +214,7 @@ def destdir_deps_c(config, buildingsite):
                 #'name': filename
                 #}
             n_elfs += 1
-
+    print ""
     print "-i- ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
         'elfs': elfs,
         'n_elfs': n_elfs

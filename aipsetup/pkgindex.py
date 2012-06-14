@@ -359,48 +359,6 @@ class PackageDatabase:
                                       nullable=False,
                                       default=u'')
 
-
-    class PackageSource(Base):
-        """
-        Class for package's sources URLs
-        """
-
-        __tablename__ = 'package_source'
-
-        id = sqlalchemy.Column(sqlalchemy.Integer,
-                               nullable=False,
-                               primary_key=True,
-                               autoincrement=True)
-
-        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                 nullable=False)
-
-        url = sqlalchemy.Column(sqlalchemy.UnicodeText,
-                                nullable=False,
-                                default=u'')
-
-
-
-    class PackageMirror(Base):
-        """
-        Class for package's mirror URLs
-        """
-
-        __tablename__ = 'package_mirror'
-
-        id = sqlalchemy.Column(sqlalchemy.Integer,
-                               nullable=False,
-                               primary_key=True,
-                               autoincrement=True)
-
-        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                 nullable=False)
-
-        url = sqlalchemy.Column(sqlalchemy.Text,
-                                nullable=False,
-                                default=u'')
-
-
     class PackageTag(Base):
         """
         Class for package's tags
@@ -625,40 +583,6 @@ class PackageDatabase:
             sess.close()
         return ret
 
-    def get_package_sources(self, name, pre_sess=None):
-        ret = []
-
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        q = sess.query(self.PackageSource).filter_by(name = name).all()
-
-        for i in q:
-            ret.append(i.url)
-
-        if pre_sess == None:
-            sess.close()
-        return ret
-
-    def get_package_mirrors(self, name, pre_sess=None):
-        ret = []
-
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        q = sess.query(self.PackageMirror).filter_by(name = name).all()
-
-        for i in q:
-            ret.append(i.url)
-
-        if pre_sess == None:
-            sess.close()
-        return ret
-
     def set_package_tags(self, name, tags, pre_sess=None):
 
         if pre_sess == None:
@@ -672,40 +596,6 @@ class PackageDatabase:
             n = self.PackageTag()
             n.name = name
             n.tag = i
-            sess.add(n)
-
-        if pre_sess == None:
-            sess.commit()
-            sess.close()
-
-    def set_package_sources(self, name, sources, pre_sess=None):
-
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        sess.query(self.PackageSource).filter_by(name=name).delete()
-
-        for i in sources:
-            n = self.PackageSource(name, i)
-            sess.add(n)
-
-        if pre_sess == None:
-            sess.commit()
-            sess.close()
-
-    def set_package_mirrors(self, name, mirrors, pre_sess=None):
-
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        sess.query(self.PackageMirror).filter_by(name=name).delete()
-
-        for i in mirrors:
-            n = self.PackageMirror(name, i)
             sess.add(n)
 
         if pre_sess == None:
@@ -880,16 +770,12 @@ class PackageDatabase:
         else:
 
             tags = self.get_package_tags(q.name)
-            sources = self.get_package_sources(q.name)
-            mirrors = self.get_package_mirrors(q.name)
 
             ret = {
                 'homepage'     : q.home_page,
                 'description'  : q.description,
                 'pkg_name_type': q.pkg_name_type,
                 'tags'         : tags,
-                'sources'      : sources,
-                'mirrors'      : mirrors,
                 'buildinfo'    : q.buildinfo
                 }
 
@@ -934,8 +820,6 @@ class PackageDatabase:
             sess.close()
 
         self.set_package_tags(name, struct['tags'], pre_sess=pre_sess)
-        self.set_package_sources(name, struct['sources'], pre_sess=pre_sess)
-        self.set_package_mirrors(name, struct['mirrors'], pre_sess=pre_sess)
 
     def backup_package_info_to_filesystem(
         self, mask='*', force_rewrite=False):
@@ -1277,14 +1161,6 @@ Buildinfo: %(buildinfo)s
 
 Home Page: %(homepage)s
 
-== Sources ==
-
-%(sources)s
-
-== Mirrors ==
-
-%(mirrors)s
-
 ----
 
 Category: %(category)s
@@ -1297,8 +1173,6 @@ Tags: %(tags)s
         'pkg_name_type': r['pkg_name_type'],
         'regexp'       : regexp,
         'description'  : r['description'],
-        'sources'      : '\n'.join(r['sources']),
-        'mirrors'      : '\n'.join(r['mirrors']),
         'tags'         : ', '.join(r['tags']),
         'category'     : category,
         'buildinfo'    : r['buildinfo']
