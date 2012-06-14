@@ -19,11 +19,11 @@ def version_comparator(name1, name2):
         )
 
     if d1 == None or d2 == None:
-        print "-e- Can't parse filename"
+        print("-e- Can't parse filename")
         raise Exception
 
     if d1['groups']['name'] != d2['groups']['name']:
-        print "-e- Different names"
+        print("-e- Different names")
         raise Exception
 
     else:

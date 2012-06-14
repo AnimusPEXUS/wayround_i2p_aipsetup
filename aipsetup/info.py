@@ -56,12 +56,12 @@ pkg_info_file_template = Template(text="""\
 """)
 
 def print_help():
-    print """\
+    print("""\
 aipsetup info command
 
    mass_info_fix  applayes fixes to info files
 
-"""
+""")
 
 
 def router(opts, args, config):
@@ -71,7 +71,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- command not given"
+        print("-e- command not given")
         ret = 1
     else:
 
@@ -88,7 +88,7 @@ def router(opts, args, config):
             mask = '*'
 
             if args_l > 2:
-                print '-e- Too many parameters'
+                print('-e- Too many parameters')
             else:
 
                 if args_l > 1:
@@ -102,7 +102,7 @@ def router(opts, args, config):
         elif args[0] == 'edit':
 
             if args_l != 2:
-                print "-e- builder to edit not specified"
+                print("-e- builder to edit not specified")
             else:
                 aipsetup.utils.edit.edit_file(
                     config, args[1], 'info'
@@ -116,7 +116,7 @@ def router(opts, args, config):
         elif args[0] == 'copy':
 
             if args_l != 3:
-                print "-e- wrong parameters count"
+                print("-e- wrong parameters count")
             else:
 
                 aipsetup.utils.file.copy_file(
@@ -124,7 +124,7 @@ def router(opts, args, config):
                     )
 
         else:
-            print "-e- wrong command"
+            print("-e- wrong command")
             ret = 1
 
     return ret
@@ -143,7 +143,7 @@ def _find_list(tree, tag, field):
     lx = len(x)
     for i in range(lx):
         z = x[i].get(field)
-        if isinstance(z, basestring):
+        if isinstance(z, str):
             y.append(z)
     return y
 
@@ -187,9 +187,9 @@ def read_from_file(name):
     try:
         f = open(aipsetup.utils.text.deunicodify(name), 'r')
     except:
-        print "-e- Can't open file %(name)s" % {
+        print("-e- Can't open file %(name)s" % {
             'name': name
-            }
+            })
         aipsetup.utils.error.print_exception_info(
             sys.exc_info()
             )
@@ -199,9 +199,9 @@ def read_from_file(name):
         try:
             tree = lxml.etree.fromstring(txt)
         except:
-            print "-e- Can't parse file `%(name)s'" % {
+            print("-e- Can't parse file `%(name)s'" % {
                 'name': name
-                }
+                })
             aipsetup.utils.error.print_exception_info(
                 sys.exc_info()
                 )
@@ -253,9 +253,9 @@ def write_to_file(name, struct):
         f.write(txt)
         f.close()
     except:
-        print "-e- Can't rewrite file %(name)s" % {
+        print("-e- Can't rewrite file %(name)s" % {
             'name': name
-            }
+            })
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
 
@@ -289,8 +289,8 @@ def mass_info_fix(config):
 
         write_to_file(i, dicti)
 
-    print "-i- Processed %(n)d files" % {
+    print("-i- Processed %(n)d files" % {
         'n': len(lst)
-        }
+        })
 
     return

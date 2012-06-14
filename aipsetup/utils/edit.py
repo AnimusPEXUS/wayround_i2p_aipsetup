@@ -21,15 +21,15 @@ def edit_file_direct(config, filename):
                                                 }]
                                             )
     except:
-        print '-e- error starting editor'
+        print('-e- error starting editor')
         aipsetup.utils.error.print_exception_info(sys.exc_info())
     else:
         try:
             p.wait()
         except:
-            print '-e- error waiting for editor'
+            print('-e- error waiting for editor')
 
-        print '-i- editor exited'
+        print('-i- editor exited')
 
     del(p)
 

@@ -26,7 +26,7 @@ class Log:
             try:
                 os.makedirs(log_dir)
             except:
-                print "-e- Exception while creating building logs dir"
+                print("-e- Exception while creating building logs dir")
                 aipsetup.utils.error.print_exception_info(
                     sys.exc_info()
                     )
@@ -35,9 +35,9 @@ class Log:
 
             if not os.path.isdir(log_dir) \
                     or os.path.islink(log_dir):
-                print "-e- Current file type is not acceptable: %(name)s" % {
+                print("-e- Current file type is not acceptable: %(name)s" % {
                     'name': log_dir
-                    }
+                    })
                 ret = 2
 
         if ret == 0:
@@ -54,15 +54,15 @@ class Log:
             try:
                 self.fileobj = open(filename, 'w')
             except:
-                print "-e- Error opening log file"
+                print("-e- Error opening log file")
                 aipsetup.utils.error.print_exception_info(sys.exc_info())
                 ret = 3
             else:
-                print(
+                print((
                     "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n") % {
                         'ts': timestamp,
                         'name': self.logname
-                        }
+                        })
                 self.fileobj.write(
                     "[%(ts)s] =///////= Starting `%(name)s' log =///////=\n" % {
                         'ts': timestamp,
@@ -80,10 +80,10 @@ class Log:
             raise Exception
 
         timestamp = aipsetup.utils.time.currenttime_stamp()
-        print "[%(ts)s] =///////= Stopping `%(name)s' log =///////=\n" % {
+        print("[%(ts)s] =///////= Stopping `%(name)s' log =///////=\n" % {
             'ts': timestamp,
             'name': self.logname
-            }
+            })
         self.fileobj.write("[%(ts)s] =///////= Stopping `%(name)s' log =///////=\n" % {
                 'ts': timestamp,
                 'name': self.logname
@@ -98,10 +98,10 @@ class Log:
 
         timestamp = aipsetup.utils.time.currenttime_stamp()
         if echo:
-            print "[%(ts)s] %(text)s" % {
+            print("[%(ts)s] %(text)s" % {
                 'ts': timestamp,
                 'text': aipsetup.utils.text.deunicodify(text)
-                }
+                })
         self.fileobj.write("[%(ts)s] %(text)s\n" % {
                 'ts': timestamp,
                 'text': aipsetup.utils.text.deunicodify(text)

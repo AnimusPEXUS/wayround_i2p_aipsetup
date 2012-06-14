@@ -75,7 +75,7 @@ class MainWindow:
                 self.window.plainTextEdit.setPlainText(data['description'])
                 self.window.lineEdit_2.setText(data['pkg_name_type'])
                 self.window.plainTextEdit_4.setPlainText(
-                    u'\n'.join(data['tags']) + u'\n'
+                    '\n'.join(data['tags']) + '\n'
                     )
 
         return ret
@@ -92,13 +92,13 @@ class MainWindow:
             )
 
         data = {}
-        data['homepage'] = unicode(self.window.lineEdit.text()).strip()
-        data['description'] = unicode(self.window.plainTextEdit.toPlainText())
-        data['pkg_name_type'] = unicode(self.window.lineEdit_2.text()).strip()
-        data['buildinfo'] = unicode(self.window.lineEdit_3.text()).strip()
+        data['homepage'] = str(self.window.lineEdit.text()).strip()
+        data['description'] = str(self.window.plainTextEdit.toPlainText())
+        data['pkg_name_type'] = str(self.window.lineEdit_2.text()).strip()
+        data['buildinfo'] = str(self.window.lineEdit_3.text()).strip()
 
         data['tags'] = aipsetup.utils.text.strip_remove_empty_remove_duplicated_lines(
-            unicode(self.window.plainTextEdit_4.toPlainText()).splitlines()
+            str(self.window.plainTextEdit_4.toPlainText()).splitlines()
             )
 
         if aipsetup.info.write_to_file(filename, data) != 0:

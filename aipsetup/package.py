@@ -25,7 +25,7 @@ import aipsetup.utils.time
 import aipsetup.storage.archive
 
 def print_help():
-    print """\
+    print("""\
 aipsetup package command
 
    install [-b=DIRNAME] FILE
@@ -71,7 +71,7 @@ aipsetup package command
          fm    - LOOKFOR is file mask
 
    put_to_index_many FILEMASK
-"""
+""")
 
 def router(opts, args, config):
 
@@ -79,7 +79,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- command not given"
+        print("-e- command not given")
         ret = 1
     else:
 
@@ -93,7 +93,7 @@ def router(opts, args, config):
                     basedir = i[1]
 
             if args_l == 1:
-                print "-e- Pacakge name required!"
+                print("-e- Pacakge name required!")
                 ret = 2
             else:
                 asp_name = args[1]
@@ -110,8 +110,8 @@ def router(opts, args, config):
             if args_l > 1:
                 asp_name = args[1]
 
-            if not isinstance(basedir, basestring):
-                print "-e- given basedir name is wrong"
+            if not isinstance(basedir, str):
+                print("-e- given basedir name is wrong")
                 ret = 2
 
             if ret == 0:
@@ -128,12 +128,12 @@ def router(opts, args, config):
             if args_l > 1:
                 asp_name = args[1]
 
-            if not isinstance(basedir, basestring):
-                print "-e- given basedir name is wrong"
+            if not isinstance(basedir, str):
+                print("-e- given basedir name is wrong")
                 ret = 2
 
-            if not isinstance(asp_name, basestring):
-                print "-e- package name required"
+            if not isinstance(asp_name, str):
+                print("-e- package name required")
                 ret = 3
 
             if ret == 0:
@@ -145,8 +145,8 @@ def router(opts, args, config):
                 if i[0] == '-b':
                     basedir = i[1]
 
-            if not isinstance(basedir, basestring):
-                print "-e- given basedir name is wrong"
+            if not isinstance(basedir, str):
+                print("-e- given basedir name is wrong")
                 ret = 2
 
             if ret == 0:
@@ -163,12 +163,12 @@ def router(opts, args, config):
             if args_l > 1:
                 asp_name = args[1]
 
-            if not isinstance(basedir, basestring):
-                print "-e- given basedir name is wrong"
+            if not isinstance(basedir, str):
+                print("-e- given basedir name is wrong")
                 ret = 2
 
-            if not isinstance(asp_name, basestring):
-                print "-e- removing name mask must be not empty!"
+            if not isinstance(asp_name, str):
+                print("-e- removing name mask must be not empty!")
                 ret = 3
 
             if ret == 0:
@@ -191,7 +191,7 @@ def router(opts, args, config):
                 sources = args[1:]
 
             if len(sources) == 0:
-                print "-e- No source files named"
+                print("-e- No source files named")
                 ret = 2
 
             if ret == 0:
@@ -224,13 +224,13 @@ def router(opts, args, config):
                 files = args[1:]
 
             if len(files) == 0:
-                print '-e- File names required'
+                print('-e- File names required')
                 ret = 2
             else:
                 ret = put_to_index_many(config, files)
 
         else:
-            print "-e- Wrong command"
+            print("-e- Wrong command")
             ret = 1
 
     return ret
@@ -245,20 +245,20 @@ def check_package(config, asp_name, mute=False):
 
     if not asp_name.endswith('.asp'):
         if not mute:
-            print "-e- Wrong file extension `%(name)s'" % {
+            print("-e- Wrong file extension `%(name)s'" % {
                 'name': asp_name
-                }
+                })
         ret = 3
     else:
         try:
             tarf = tarfile.open(asp_name, mode='r')
         except:
-            print "-e- Can't open file `%(name)s'" % {
+            print("-e- Can't open file `%(name)s'" % {
                 'name': asp_name
-                }
-            print aipsetup.utils.error.return_exception_info(
+                })
+            print(aipsetup.utils.error.return_exception_info(
                 sys.exc_info()
-                )
+                ))
             ret = 1
         else:
             f = aipsetup.storage.archive.tar_member_get_extract_file(
@@ -266,7 +266,7 @@ def check_package(config, asp_name, mute=False):
                 './package.sha512'
                 )
             if not isinstance(f, tarfile.ExFileObject):
-                print "-e- Can't get checksums from package file"
+                print("-e- Can't get checksums from package file")
                 ret = 2
             else:
                 sums_txt = f.read()
@@ -307,13 +307,13 @@ def check_package(config, asp_name, mute=False):
                         cresult = "OK"
 
                     if not mute:
-                        print "       %(name)s - %(result)s" % {
+                        print("       %(name)s - %(result)s" % {
                             'name': i,
                             'result': cresult
-                            }
+                            })
 
                 if error_found:
-                    print "-e- Error was found while checking package"
+                    print("-e- Error was found while checking package")
                     ret = 3
                 else:
                     ret = 0
@@ -344,15 +344,15 @@ def install(config, asp_name, destdir='/'):
 
     destdir = os.path.abspath(destdir)
 
-    print "-i- Performing package checks before it's installation"
+    print("-i- Performing package checks before it's installation")
     if check_package(config, asp_name) != 0:
-        print "-e- Package defective - installation failed"
+        print("-e- Package defective - installation failed")
         ret = 1
     else:
         try:
             tarf = tarfile.open(asp_name, mode='r')
         except:
-            print "-e- Can't open file %(name)s"
+            print("-e- Can't open file %(name)s")
             aipsetup.utils.error.print_exception_info(sys.exc_info())
             ret = 1
         else:
@@ -371,9 +371,9 @@ def install(config, asp_name, destdir='/'):
                  "package's buildlogs")
                 ]:
 
-                print "-i- Installing %(what)s" % {
+                print("-i- Installing %(what)s" % {
                     'what': i[2]
-                    }
+                    })
 
                 logs_path = ''
                 if config[i[1]][0] == '/':
@@ -399,22 +399,22 @@ def install(config, asp_name, destdir='/'):
                     tar_member_get_extract_file_to(
                         tarf, i[0], out_filename
                         ) != 0 :
-                    print "-e- Can't install %(what)s as %(outname)s" % {
+                    print("-e- Can't install %(what)s as %(outname)s" % {
                         'what': i[2],
                         'outname': out_filename
-                        }
+                        })
                     ret = 2
                     break
 
             if ret == 0:
-                print "-i- Installing package's destdir"
+                print("-i- Installing package's destdir")
 
                 dd_fobj = aipsetup.storage.archive.\
                     tar_member_get_extract_file(
                         tarf, './04.DESTDIR.tar.xz'
                         )
                 if not isinstance(dd_fobj, tarfile.ExFileObject):
-                    print "-e- Can't get package's destdir"
+                    print("-e- Can't get package's destdir")
                     ret = 4
                 else:
                     if aipsetup.storage.archive.\
@@ -424,11 +424,11 @@ def install(config, asp_name, destdir='/'):
                             verbose_compressor=True,
                             add_tar_options = ['--no-same-owner', '--no-same-permissions']
                             ) != 0:
-                        print "-e- Package destdir decompression error"
+                        print("-e- Package destdir decompression error")
                         ret = 5
                     else:
                         ret = 0
-                        print "-i- Installation look like complite :-)"
+                        print("-i- Installation look like complite :-)")
                     dd_fobj.close()
 
             tarf.close()
@@ -455,9 +455,9 @@ def list_packages_issues(config, destdir='/'):
 
         parsed_name = aipsetup.name.package_name_parse(name)
         if parsed_name == None:
-            print "-w- Error while parsing name `%(name)s'" % {
+            print("-w- Error while parsing name `%(name)s'" % {
                 'name': name
-                }
+                })
         else:
             check_list.add(parsed_name['groups']['name'])
 
@@ -468,16 +468,16 @@ def list_packages_issues(config, destdir='/'):
             info_dir, i + '.xml'
             )
         if not isinstance(aipsetup.info.read_from_file(info_file), dict):
-            print "-w- Some issue with `%(name)s' info file" % {
+            print("-w- Some issue with `%(name)s' info file" % {
                 'name': i
-                }
+                })
             issued.add(i)
 
     issued = list(issued)
     issued.sort()
-    print "-i- Found issues with following (%(num)d) packages:" % {
+    print("-i- Found issues with following (%(num)d) packages:" % {
         'num': len(issued)
-        }
+        })
     aipsetup.utils.text.columned_list_print(
         issued, fd=sys.stdout.fileno()
     )
@@ -522,9 +522,9 @@ def list_packages(config, mask, destdir='/', return_list=False, mute=False):
     ret = 0
 
     if not os.path.isdir(listdir):
-        print "-e- not a dir %(dir)s" % {
+        print("-e- not a dir %(dir)s" % {
             'dir': listdir
-            }
+            })
         ret = 1
     else:
         bases = []
@@ -558,17 +558,17 @@ def remove_package(config, name, destdir='/'):
     filename = os.path.abspath(listdir + '/' + name + '.xz')
 
     if not os.path.isfile(filename):
-        print "-e- Not found package file list `%(name)s'" % {
+        print("-e- Not found package file list `%(name)s'" % {
             'name': filename
-            }
+            })
         ret = 1
     else:
         try:
             f = open(filename, 'r')
         except:
-            print "-e- Error opening file %(name)s" % {
+            print("-e- Error opening file %(name)s" % {
                 'name': filename
-                }
+                })
             ret = 2
         else:
             txt = aipsetup.storage.archive.xzcat(f)
@@ -583,9 +583,9 @@ def remove_package(config, name, destdir='/'):
                 rm_file_name = os.path.abspath(destdir + '/' + line)
                 rm_file_name = rm_file_name.replace(r'//', '/')
                 if os.path.isfile(rm_file_name):
-                    print "-i- removing %(name)s" % {
+                    print("-i- removing %(name)s" % {
                         'name': rm_file_name
-                        }
+                        })
                     os.unlink(rm_file_name)
 
             for i in ['installed_pkg_dir_buildlogs',
@@ -596,9 +596,9 @@ def remove_package(config, name, destdir='/'):
                     )
                 rm_file_name = rm_file_name.replace(r'//', '/')
                 if os.path.isfile(rm_file_name):
-                    print "-i- removing %(name)s" % {
+                    print("-i- removing %(name)s" % {
                         'name': rm_file_name
-                        }
+                        })
                     os.unlink(rm_file_name)
     return ret
 
@@ -614,9 +614,9 @@ def remove_packages(config, mask, destdir='/'):
         else:
             name = i[:-3]
 
-        print "-i- Removing package `%(name)s'" % {
+        print("-i- Removing package `%(name)s'" % {
             'name': name
-            }
+            })
         remove_package(config, name, destdir)
 
     return ret
@@ -635,7 +635,7 @@ def build(config, source_files):
         )
 
     if par_res == None:
-        print "-e- Can't parse source file name"
+        print("-e- Can't parse source file name")
         ret = 1
     else:
 
@@ -656,7 +656,7 @@ def build(config, source_files):
         build_site_dir = os.path.abspath(build_site_dir)
 
         if aipsetup.buildingsite.init(config, build_site_dir) != 0:
-            print "-e- Error initiating temporary dir"
+            print("-e- Error initiating temporary dir")
             ret = 2
         else:
             if source_files != None and isinstance(source_files, list):
@@ -665,9 +665,9 @@ def build(config, source_files):
 
                 for source_file in source_files:
 
-                    print("-i-    %(name)s" % {
+                    print(("-i-    %(name)s" % {
                         'name': source_file
-                        })
+                        }))
 
                     if os.path.isfile(source_file) \
                             and not os.path.islink(source_file):
@@ -687,9 +687,9 @@ def build(config, source_files):
 
                     else:
 
-                        print("-e- file %(file)s - not dir and not file." % {
+                        print(("-e- file %(file)s - not dir and not file." % {
                             'file': source_file
-                            })
+                            }))
                         print("    skipping copy")
 
                 if ret != 0:
@@ -699,7 +699,7 @@ def build(config, source_files):
                 config, build_site_dir, source_files[0]) == 0:
 
                 if complite(config, build_site_dir) != 0:
-                    print "-e- Package building failed"
+                    print("-e- Package building failed")
                     ret = 5
 
     return ret
@@ -733,7 +733,7 @@ def find_files(config, destdir, instr, mode=None, mute=False,
                         return_list=True,
                         mute=True)
     if not isinstance(lst, list):
-        print "-e- Error getting installed packages list"
+        print("-e- Error getting installed packages list")
         ret = 1
     else:
         lst.sort()
@@ -752,32 +752,32 @@ def find_files(config, destdir, instr, mode=None, mute=False,
                 ret_dict[pkgname] = found
 
         if not mute:
-            rd_keys = ret_dict.keys()
+            rd_keys = list(ret_dict.keys())
             if len(rd_keys) == 0:
-                print "-i- Not found"
+                print("-i- Not found")
             else:
-                print "-i- Found %(num)d packages with `%(inc)s'" % {
+                print("-i- Found %(num)d packages with `%(inc)s'" % {
                     'num': len(rd_keys),
                     'inc': instr
-                    }
+                    })
 
-                print ""
+                print("")
                 rd_keys.sort()
 
                 for i in rd_keys:
-                    print "\t%(name)s:" % {
+                    print("\t%(name)s:" % {
                         'name': i
-                        }
+                        })
 
                     pp_lst = ret_dict[i]
                     pp_lst.sort()
 
                     for j in pp_lst:
-                        print "\t\t%(name)s" % {
+                        print("\t\t%(name)s" % {
                             'name': j
-                            }
+                            })
 
-                    print ""
+                    print("")
 
         if return_dict:
             ret = ret_dict
@@ -797,7 +797,7 @@ def find_file(config, destdir, pkgname, instr, mode=None, mute=False,
         mode = 'sub'
 
     if not mode in ['re', 'plain', 'sub', 'beg', 'fm']:
-        print "-e- wrong mode"
+        print("-e- wrong mode")
         ret = 1
     else:
         pkg_file_list = package_files(config,  destdir, pkgname,
@@ -808,7 +808,7 @@ def find_file(config, destdir, pkgname, instr, mode=None, mute=False,
             pkg_list_file += '.xz'
 
         if not isinstance(pkg_file_list, list):
-            print "-e- Can't get list of files"
+            print("-e- Can't get list of files")
             ret = 2
         else:
 
@@ -871,7 +871,7 @@ def package_files(config, destdir, pkgname, mute=False,
     try:
         f = open(pkg_list_file, 'r')
     except:
-        print "-e- Can't open list file"
+        print("-e- Can't open list file")
         aipsetup.utils.print_exception_info(sys.excinfo())
         ret = 2
     else:
@@ -931,9 +931,9 @@ def check_package_aipsetup2(filename):
                 filename_md5
                 )
 
-            if not isinstance(sha512, basestring):
+            if not isinstance(sha512, str):
                 ret = 3
-            elif not isinstance(md5, basestring):
+            elif not isinstance(md5, str):
                 ret = 4
             elif not isinstance(sha512s, dict):
                 ret = 5
@@ -965,9 +965,9 @@ def put_to_index(config, filename):
     ret = 0
 
     if os.path.isdir(filename) or os.path.islink(filename):
-        print "-e- wrong file type `%(name)s'" % {
+        print("-e- wrong file type `%(name)s'" % {
             'name': filename
-            }
+            })
         ret = 10
     else:
 
@@ -979,9 +979,9 @@ def put_to_index(config, filename):
 
             par_res = aipsetup.name.package_name_parse(fbn)
             if not isinstance(par_res, dict):
-                print "-e- Couldn't parse filename `%(fn)s'" % {
+                print("-e- Couldn't parse filename `%(fn)s'" % {
                     'fn': fbn
-                    }
+                    })
                 ret = 1
             else:
                 path = aipsetup.pkgindex.get_package_path(
@@ -989,9 +989,9 @@ def put_to_index(config, filename):
                     par_res['groups']['name']
                     )
                 if path == None:
-                    print "-e- Can't get `%(package)s' path from database" % {
+                    print("-e- Can't get `%(package)s' path from database" % {
                         'package': par_res['groups']['name']
-                        }
+                        })
                     ret = 2
                 else:
                     full_path = config['repository'] + '/' + path
@@ -1000,16 +1000,16 @@ def put_to_index(config, filename):
                     if aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
-                        print "-e- Can't ensure existance of required dirs"
+                        print("-e- Can't ensure existance of required dirs")
                         ret = 3
                     else:
 
                         full_path_pack = full_path + '/aipsetup2'
 
-                        print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                        print("-i- moving `%(n1)s' to `%(n2)s'" % {
                             'n1': filename,
                             'n2': full_path_pack
-                            }
+                            })
                         for i in [
                             (filename, full_path_pack + '/' + fbn),
                             (filename_md5, full_path_pack + '/' + fbn + '.md5'),
@@ -1028,9 +1028,9 @@ def put_to_index(config, filename):
             fbn = os.path.basename(filename)
             par_res = aipsetup.name.package_name_parse(fbn)
             if not isinstance(par_res, dict):
-                print "-e- Couldn't parse filename `%(fn)s'" % {
+                print("-e- Couldn't parse filename `%(fn)s'" % {
                     'fn': fbn
-                    }
+                    })
                 ret = 1
             else:
                 path = aipsetup.pkgindex.get_package_path(
@@ -1038,9 +1038,9 @@ def put_to_index(config, filename):
                     par_res['groups']['name']
                     )
                 if path == None:
-                    print "-e- Can't get `%(package)s' path from database" % {
+                    print("-e- Can't get `%(package)s' path from database" % {
                         'package': par_res['groups']['name']
-                        }
+                        })
                     ret = 2
                 else:
                     full_path = config['repository'] + '/' + path
@@ -1049,16 +1049,16 @@ def put_to_index(config, filename):
                     if aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
-                        print "-e- Can't ensure existance of required dirs"
+                        print("-e- Can't ensure existance of required dirs")
                         ret = 3
                     else:
 
                         full_path_pack = full_path + '/pack'
 
-                        print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                        print("-i- moving `%(n1)s' to `%(n2)s'" % {
                             'n1': filename,
                             'n2': full_path_pack + '/' + fbn
-                            }
+                            })
 
                         if (os.path.abspath(filename) != os.path.abspath(full_path_pack + '/' + fbn)):
                             aipsetup.utils.file.remove_if_exists(
@@ -1073,20 +1073,20 @@ def put_to_index(config, filename):
             )
 
             if not isinstance(sn_pres, dict):
-                print "-w- File action undefined: `%(name)s'" % {
+                print("-w- File action undefined: `%(name)s'" % {
                     'name': filename
-                    }
+                    })
             else:
-                print "-i- Source name parsed"
+                print("-i- Source name parsed")
                 fbn = os.path.basename(filename)
                 path = aipsetup.pkgindex.get_package_path(
                     config,
                     sn_pres['groups']['name']
                     )
                 if path == None:
-                    print "-e- Can't get `%(package)s' path from database" % {
+                    print("-e- Can't get `%(package)s' path from database" % {
                         'package': sn_pres['groups']['name']
-                        }
+                        })
                     ret = 2
                 else:
                     full_path = config['repository'] + '/' + path
@@ -1095,16 +1095,16 @@ def put_to_index(config, filename):
                     if aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
-                        print "-e- Can't ensure existance of required dirs"
+                        print("-e- Can't ensure existance of required dirs")
                         ret = 3
                     else:
 
                         full_path_source = full_path + '/source'
 
-                        print "-i- moving `%(n1)s' to `%(n2)s'" % {
+                        print("-i- moving `%(n1)s' to `%(n2)s'" % {
                             'n1': filename,
                             'n2': full_path_source + '/' + fbn
-                            }
+                            })
 
                         if (os.path.abspath(filename) != os.path.abspath(full_path_source + '/' + fbn)):
                             aipsetup.utils.file.remove_if_exists(

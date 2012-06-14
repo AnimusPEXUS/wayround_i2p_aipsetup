@@ -6,14 +6,14 @@ import os
 import aipsetup.utils.file
 
 def columned_list_print(lst, width=None, columns=None,
-                        margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
+                        margin_right=' │ ', margin_left=' │ ', spacing=' │ ',
                         fd=1):
-    print return_columned_list_print(lst, width=None, columns=None,
-                                     margin_right=u' │ ', margin_left=u' │ ',
-                                     spacing=u' │ ', fd=1)
+    print(return_columned_list_print(lst, width=None, columns=None,
+                                     margin_right=' │ ', margin_left=' │ ',
+                                     spacing=' │ ', fd=1))
 
 def return_columned_list_print(lst, width=None, columns=None,
-                      margin_right=u' │ ', margin_left=u' │ ', spacing=u' │ ',
+                      margin_right=' │ ', margin_left=' │ ', spacing=' │ ',
                       fd=1):
 
     if width == None:
@@ -70,7 +70,7 @@ def return_columned_list_print(lst, width=None, columns=None,
             l3.append(j.ljust(longest))
 
         while len(l3) != columns:
-            l3.append(u''.ljust(longest))
+            l3.append(''.ljust(longest))
 
         ret += deunicodify("%(mrl)s%(row)s%(mrr)s\n" % {
                 'mrl': margin_left,

@@ -20,7 +20,7 @@ import aipsetup.buildingsite
 import aipsetup.tools.autotools
 
 def print_help():
-    print """\
+    print("""\
 aipsetup build command
 
    extract [DIRNAME]
@@ -44,7 +44,7 @@ aipsetup build command
       configures, builds and installs SITEDIR accordingly to info
 
  See also aipsetup pack help
-"""
+""")
 
 def router(opts, args, config):
 
@@ -52,7 +52,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- Command not given. See `aipsetup build help'"
+        print("-e- Command not given. See `aipsetup build help'")
         ret = 1
     else:
 
@@ -75,7 +75,7 @@ def router(opts, args, config):
                 )
 
         else:
-            print "-e- Wrong build command"
+            print("-e- Wrong build command")
 
     return ret
 
@@ -219,7 +219,7 @@ def complite(config, dirname):
         try:
             act_seq = pi['pkg_buildinfo']['build_sequance']
         except:
-            print "-e- Can't get actor sequence"
+            print("-e- Can't get actor sequence")
             ret = 2
         else:
 
@@ -228,16 +228,16 @@ def complite(config, dirname):
                 if not i in ['extract', 'configure',
                              'build', 'install',
                              'postinstall']:
-                    print "-e- Requested actor not supported"
+                    print("-e- Requested actor not supported")
                     ret = 3
                 else:
 
                     if eval("%(name)s(config, dirname)" % {
                             'name': i
                             }) != 0:
-                        print "-e- Building error on stage %(name)s" % {
+                        print("-e- Building error on stage %(name)s" % {
                             'name': i
-                            }
+                            })
                         ret = 5
                         break
 

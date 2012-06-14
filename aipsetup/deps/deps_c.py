@@ -2,7 +2,7 @@
 import os
 import sys
 import subprocess
-import StringIO
+import io
 import copy
 import re
 
@@ -24,11 +24,11 @@ def elf_deps(filename, mute=True):
     if not os.path.isfile(filename):
         #or os.path.islink(filename):
         if not mute:
-            print "-e- Not a file"
+            print("-e- Not a file")
         ret = 1
     else:
 
-        str_file = StringIO.StringIO()
+        str_file = io.StringIO()
 
         lddproc = ldd(
             options=[filename]
@@ -57,7 +57,7 @@ def elf_deps(filename, mute=True):
             ret = copy.copy(dep_lst)
         else:
             if not mute:
-                print "-e- ldd returned error"
+                print("-e- ldd returned error")
             ret = 2
 
         del(lddproc)
@@ -98,9 +98,9 @@ def parse_ldd_output(text):
                 break
 
         if re_res == None:
-            print "-e- Couldn't parse line `%(txt)s'" % {
+            print("-e- Couldn't parse line `%(txt)s'" % {
                 'txt': i
-                }
+                })
             raise Exception
 
     ret = dep_lst
@@ -122,7 +122,7 @@ def ldd(stdin=subprocess.PIPE,
             cwd=cwd
             )
     except:
-        print "-e- Error starting ldd subprocess"
+        print("-e- Error starting ldd subprocess")
         p = None
         e = sys.exc_info()
         aipsetup.utils.error.print_exception_info(e)

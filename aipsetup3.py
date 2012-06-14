@@ -12,7 +12,7 @@ import aipsetup.utils.getopt2
 
 config = aipsetup.utils.config.load_config()
 if config == None:
-    print "-e- configuration file error exiting"
+    print("-e- configuration file error exiting")
     exit(1)
 
 ret = 0
@@ -22,7 +22,7 @@ optilist, args = aipsetup.utils.getopt2.getopt(sys.argv[1:])
 args_l = len(args)
 
 if '--help' in [ i[0] for i in optilist ]:
-    print """\
+    print("""\
    Usage: %(basename)s [command] [command_parameters]
 
    Commands:
@@ -47,13 +47,13 @@ if '--help' in [ i[0] for i in optilist ]:
       --version     Version Info
 """ % {
         'basename': os.path.basename(__file__)
-        }
+        })
 
 elif '--version' in [ i[0] for i in optilist ]:
-    print aipsetup.AIPSETUP_VERSION
+    print(aipsetup.AIPSETUP_VERSION)
 
 elif args_l == 0:
-    print "-e- No commands or parameters passed. Try aipsetup --help"
+    print("-e- No commands or parameters passed. Try aipsetup --help")
     ret = 1
 
 else:
@@ -73,8 +73,8 @@ else:
                 })
 
     else:
-        print "-e- Wrong command. Try aipsetup --help"
+        print("-e- Wrong command. Try aipsetup --help")
         ret = 1
 
-print "-i- done"
+print("-i- done")
 exit(ret)

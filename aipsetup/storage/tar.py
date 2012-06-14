@@ -24,7 +24,7 @@ def tar(stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             cwd=cwd
             )
     except:
-        print "-e- Error starting tar subprocess"
+        print("-e- Error starting tar subprocess")
         p = None
         e = sys.exc_info()
         aipsetup.utils.error.print_exception_info(e)

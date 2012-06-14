@@ -43,9 +43,9 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
     else:
 
         if thread_name != 'Thread':
-            print "-i- Starting `%(name)s' thread" % {
+            print("-i- Starting `%(name)s' thread" % {
                 'name':thread_name
-                }
+                })
 
         buff = ' '
 
@@ -87,27 +87,27 @@ def dd(stdin, stdout, bs=1, count=None, threaded=False,
 
         if close_output_on_eof:
             if thread_name != 'Thread':
-                print "-i-  Closing `%(name)s' thread stdout" % {
+                print("-i-  Closing `%(name)s' thread stdout" % {
                     'name':thread_name
-                    }
+                    })
             stdout.close()
 
         if thread_name != 'Thread':
-            print "-i-   Ending `%(name)s' thread" % {
+            print("-i-   Ending `%(name)s' thread" % {
                 'name':thread_name
-                }
-            print "        {"
-            print "           %(num)d cycles worked," % {
-                'num' : c                }
-            print "           %(size)d bytes (%(sizem)s MiB) transferred," % {
+                })
+            print("        {")
+            print("           %(num)d cycles worked," % {
+                'num' : c                })
+            print("           %(size)d bytes (%(sizem)s MiB) transferred," % {
                 'size': bytes,
                 'sizem': (float(bytes) / 1024 / 1024)
-                }
-            print "           with buffer size %(bufs)s bytes (%(bufm)s MiB)" % {
+                })
+            print("           with buffer size %(bufs)s bytes (%(bufm)s MiB)" % {
                 'bufs': bs,
                 'bufm': (float(bs) / 1024 / 1024)
-                }
-            print "        }"
+                })
+            print("        }")
         return
 
     # control shuld never reach this return
@@ -150,7 +150,7 @@ def unix_cat(stdin=subprocess.PIPE,
             cwd=cwd
             )
     except:
-        print "-e- Error starting cat subprocess"
+        print("-e- Error starting cat subprocess")
         p = None
         e = sys.exc_info()
         aipsetup.utils.error.print_exception_info(e)

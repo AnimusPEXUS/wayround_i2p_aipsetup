@@ -19,8 +19,8 @@ PPWD = os.path.dirname(__file__)
 files = glob.glob(aipsetup.build.DIR_TARBALL + '/*')
 
 if len(files) != 1:
-    print "-e- There must be exactly one sorce tarball"
+    print("-e- There must be exactly one sorce tarball")
 
-print "-i- found %(file)s, trying to extract..." % {'file': files[0]}
+print("-i- found %(file)s, trying to extract..." % {'file': files[0]})
 
 aipsetup.extractor.extract(files[0], aipsetup.build.DIR_SOURCE)

@@ -84,7 +84,7 @@ ASP_NAME_REGEXPS = {
 
 
 def print_help():
-    print """\
+    print("""\
 
    test_expressions_on_sources
 
@@ -94,7 +94,7 @@ def print_help():
      if -w is set - change <name>.xml info file nametype value to
      result
 
-"""
+""")
 
 def router(opts, args, config):
     ret = 0
@@ -102,7 +102,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- not enough parameters"
+        print("-e- not enough parameters")
         ret = 1
     else:
 
@@ -116,7 +116,7 @@ def router(opts, args, config):
         elif args[0] == 'parse_name':
 
             if args_l != 2:
-                print "-e- file name required"
+                print("-e- file name required")
             else:
 
                 filename = args[1]
@@ -130,7 +130,7 @@ def router(opts, args, config):
                                   modify_info_file=write)
 
         else:
-            print "-e- Wrong command"
+            print("-e- Wrong command")
 
     return ret
 
@@ -159,7 +159,7 @@ def test_expressions_on_sources(config):
 
         source_name_parse(config, i, False, False)
 
-        print ""
+        print("")
         sys.stdout.flush()
 
     return
@@ -240,9 +240,9 @@ def source_name_parse(config, filename, mute=False,
     for j in NAME_REGEXPS_ORDER:
 
         if not mute:
-            print "-i- Matching `%(re)s'" % {
+            print("-i- Matching `%(re)s'" % {
                 're': j
-                }
+                })
         re_r = re.match(NAME_REGEXPS[j], bn)
 
         if re_r != None:
@@ -277,13 +277,13 @@ def source_name_parse(config, filename, mute=False,
 
 
         fnmatched = False
-        if isinstance(acceptable_vn, basestring):
+        if isinstance(acceptable_vn, str):
             if fnmatch.fnmatch(ret['groups']['version'], acceptable_vn):
                 fnmatched = True
 
 
         if acceptable_vn == None or \
-                (isinstance(acceptable_vn, basestring) and fnmatched):
+                (isinstance(acceptable_vn, str) and fnmatched):
 
             ret['groups']['version'] = \
                 ret['groups']['version'].replace('_', '.')
@@ -318,9 +318,9 @@ def source_name_parse(config, filename, mute=False,
 
     if not mute:
         if ret == None:
-            print "-e- No match `%(i)s'" % {
+            print("-e- No match `%(i)s'" % {
                 'i': bn
-                }
+                })
 
         else:
 
@@ -331,11 +331,11 @@ def source_name_parse(config, filename, mute=False,
                     'value': repr(ret['groups'][i])
                     }
 
-            print "-i- Match `%(bn)s' `%(re)s'\n%(groups)s" % {
+            print("-i- Match `%(bn)s' `%(re)s'\n%(groups)s" % {
                 'bn': bn,
                 're': j,
                 'groups': groups
-                }
+                })
 
 
     if ret != None and modify_info_file:
@@ -347,9 +347,9 @@ def source_name_parse(config, filename, mute=False,
             )
 
         if not mute:
-            print "-i- Updating info file %(name)s" % {
+            print("-i- Updating info file %(name)s" % {
                 'name': fn
-                }
+                })
 
 
         data = aipsetup.info.read_from_file(
@@ -358,7 +358,7 @@ def source_name_parse(config, filename, mute=False,
 
         if data == None:
             if not mute:
-                print "-i- Error reading file. Creating new."
+                print("-i- Error reading file. Creating new.")
             data = aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE
 
         data['pkg_name_type'] = ret['re']

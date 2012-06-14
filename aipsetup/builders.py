@@ -3,7 +3,7 @@
 import aipsetup.utils.file
 
 def print_help():
-    print """\
+    print("""\
 aipsetup builders command
 
    list [MASK]
@@ -12,7 +12,7 @@ aipsetup builders command
 
    edit NAME
 
-"""
+""")
 
 def router(opts, args, config):
 
@@ -21,7 +21,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- command not given"
+        print("-e- command not given")
         ret = 1
 
     else:
@@ -33,7 +33,7 @@ def router(opts, args, config):
             mask = '*'
 
             if args_l > 2:
-                print '-e- Too many parameters'
+                print('-e- Too many parameters')
             else:
 
                 if args_l > 1:
@@ -45,19 +45,19 @@ def router(opts, args, config):
 
         elif args[0] == 'edit':
             if args_l != 2:
-                print "-e- builder to edit not specified"
+                print("-e- builder to edit not specified")
             else:
                 aipsetup.utils.edit.edit_file(config, args[1], 'builders')
 
         elif args[0] == 'copy':
             if args_l != 3:
-                print "-e- wrong parameters count"
+                print("-e- wrong parameters count")
             else:
 
                 aipsetup.utils.file.copy_file(config, args[1], args[2], 'builders')
 
         else:
-            print "-e- wrong command. try aipsetup builders help"
+            print("-e- wrong command. try aipsetup builders help")
 
     return ret
 

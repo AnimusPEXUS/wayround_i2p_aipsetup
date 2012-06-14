@@ -24,7 +24,7 @@ def edefault(status, message, traceback, version):
         }
 
 def print_help():
-    print """\
+    print("""\
 aipsetup server command
 
    index_uht
@@ -35,14 +35,14 @@ aipsetup server command
 
       all settings taken from aipsetup.conf
 
-"""
+""")
 
 def router(opts, args, config):
 
     ret = 0
 
     if len(args) == 0:
-        print "-e- not enough parameters"
+        print("-e- not enough parameters")
         ret = 1
     else:
 
@@ -59,7 +59,7 @@ def router(opts, args, config):
             start_host(config)
 
         else:
-            print "-e- wrong command"
+            print("-e- wrong command")
             ret = 1
 
     return ret
@@ -123,7 +123,7 @@ def index_directory(dir_name, outputfilename='index.txt',
     dir_name = os.path.abspath(dir_name)
     dir_namel = len(dir_name)
 
-    print "-i- indexing %(dir)s..." % {'dir': dir_name}
+    print("-i- indexing %(dir)s..." % {'dir': dir_name})
 
     f = open(outputfilename, 'w')
 
@@ -155,7 +155,7 @@ class Index:
 
     def reload_indexes(self):
 
-        print "-i- loading indexes"
+        print("-i- loading indexes")
 
         if not self.index_reloading:
 
@@ -268,7 +268,7 @@ class Index:
                 or not how in ['regexp', 'begins', 'exac', 'contains'] \
                 or not view in ['html', 'list'] \
                 or not sensitive in [None, 'on'] \
-                or not isinstance(value, basestring):
+                or not isinstance(value, str):
             raise cherrypy.HTTPError(400, "Wrong parameter")
         else:
 
@@ -497,13 +497,13 @@ def start_host(config=None):
         except:
             e = sys.exc_info()
             aipsetup.utils.error.print_exception_info(e)
-            print "-e- Error reading template %(name)s" % {
+            print("-e- Error reading template %(name)s" % {
                 'name': os.path.join(
                     config['uhtroot'],
                     'templates',
                     '%(name)s.html' % {'name': i}
                     )
-            }
+            })
 
             templates_error = True
 

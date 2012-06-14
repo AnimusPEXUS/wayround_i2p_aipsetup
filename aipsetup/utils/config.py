@@ -2,7 +2,7 @@
 
 import os
 import os.path
-import ConfigParser
+import configparser
 
 default_config = {
     'aipsetup_dir': '/mnt/sda3/home/agu/p/aipsetup/aipsetup-3',
@@ -78,20 +78,20 @@ def get_configuration(defaults, filename='/etc/aipsetup.conf'):
 
     ret = defaults
 
-    cp = ConfigParser.RawConfigParser()
+    cp = configparser.RawConfigParser()
 
     f = None
 
     try:
         f = open(filename, 'r')
     except:
-        print "-e- Can't open %(file)s" % {'file': filename}
+        print("-e- Can't open %(file)s" % {'file': filename})
         ret = None
     else:
         try:
             cp.readfp(f)
         except:
-            print "-e- Can't read %(file)s" % {'file': filename}
+            print("-e- Can't read %(file)s" % {'file': filename})
             ret = None
         else:
 

@@ -24,7 +24,7 @@ import aipsetup.utils.text
 
 
 def print_help():
-    print """\
+    print("""\
 aipsetup pkgindex command
 
 Where command is one of:
@@ -78,7 +78,7 @@ Where command is one of:
    print_pkg_info_record NAME
 
        Print package info record information
-"""
+""")
 
 def router(opts, args, config):
 
@@ -87,7 +87,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- No command given"
+        print("-e- No command given")
         ret = 1
     else:
 
@@ -175,7 +175,7 @@ def router(opts, args, config):
                 r = PackageDatabase(config)
                 r.delete_pkg_info_records(mask)
             else:
-                print "-e- Mask is not given"
+                print("-e- Mask is not given")
 
         elif args[0] == 'list_pkg_info_records':
 
@@ -200,10 +200,10 @@ def router(opts, args, config):
                 r = PackageDatabase(config)
                 r.print_pkg_info_record(name)
             else:
-                print "-e- Name is not given"
+                print("-e- Name is not given")
 
         else:
-            print "wrong aipsetup command. try `aipsetup pkgindex help'"
+            print("wrong aipsetup command. try `aipsetup pkgindex help'")
             ret = 1
 
 
@@ -222,9 +222,9 @@ def get_package_path(config, name):
     r = PackageDatabase(config)
     pid = r.get_package_id(name)
     if pid == None:
-        print "-e- Can't get `%(package)s' from database" % {
+        print("-e- Can't get `%(package)s' from database" % {
             'package': name
-            }
+            })
         ret = None
     else:
         ret = r.get_package_path_string(pid)
@@ -242,22 +242,22 @@ def create_required_dirs_at_package(path):
             try:
                 os.makedirs(full_path)
             except:
-                print "-e- Can't make dir `%(name)s'" % {
+                print("-e- Can't make dir `%(name)s'" % {
                     'name': full_path
-                    }
+                    })
                 ret = 3
             else:
                 ret = 0
         else:
             if os.path.islink(full_path):
-                print "-e- `%(name)s' is link" % {
+                print("-e- `%(name)s' is link" % {
                     'name': full_path
-                    }
+                    })
                 ret = 4
             elif os.path.isfile(full_path):
-                print "-e- `%(name)s' is file" % {
+                print("-e- `%(name)s' is file" % {
                     'name': full_path
-                    }
+                    })
                 ret = 5
             else:
                 ret = 0
@@ -304,7 +304,7 @@ class PackageDatabase:
 
         name = sqlalchemy.Column(sqlalchemy.Unicode(256),
                                  nullable=False,
-                                 default=u'')
+                                 default='')
 
         cid = sqlalchemy.Column(sqlalchemy.Integer,
                                 nullable=False,
@@ -326,7 +326,7 @@ class PackageDatabase:
 
         name = sqlalchemy.Column(sqlalchemy.Unicode(256),
                                  nullable=False,
-                                 default=u'')
+                                 default='')
 
         parent_cid = sqlalchemy.Column(sqlalchemy.Integer,
                                        nullable=False,
@@ -341,23 +341,23 @@ class PackageDatabase:
         name = sqlalchemy.Column(sqlalchemy.Unicode(256),
                                  nullable=False,
                                  primary_key=True,
-                                 default=u'')
+                                 default='')
 
         home_page = sqlalchemy.Column(sqlalchemy.Unicode(256),
                                       nullable=False,
-                                      default=u'')
+                                      default='')
 
         description = sqlalchemy.Column(sqlalchemy.UnicodeText,
                                         nullable=False,
-                                        default=u'')
+                                        default='')
 
         pkg_name_type = sqlalchemy.Column(sqlalchemy.Unicode(256),
                                           nullable=False,
-                                          default=u'')
+                                          default='')
 
         buildinfo = sqlalchemy.Column(sqlalchemy.Unicode(256),
                                       nullable=False,
-                                      default=u'')
+                                      default='')
 
     class PackageTag(Base):
         """
@@ -491,10 +491,10 @@ class PackageDatabase:
                 isfiles += 1
 
         if isfiles >= 3:
-            print "-w- too many non-dirs : %(path)s" % {
+            print("-w- too many non-dirs : %(path)s" % {
                 'path': root_dir
-                }
-            print "       skipping"
+                })
+            print("       skipping")
 
             return 1
 
@@ -513,7 +513,7 @@ class PackageDatabase:
                 #sess.commit()
                 if sys.stdout.isatty():
                     pcount = sess.query(self.Package).count()
-                    line_to_write = u"       %(num)d packages found: %(name)s" % {
+                    line_to_write = "       %(num)d packages found: %(name)s" % {
                         'num': pcount,
                         'name': pa.name
                         }
@@ -532,9 +532,9 @@ class PackageDatabase:
                     sess, full_path, new_cat_cid
                     )
             else:
-                print "-w- garbage file found: %(path)s" % {
+                print("-w- garbage file found: %(path)s" % {
                     'path': full_path
-                    }
+                    })
 
         return 0
 
@@ -544,24 +544,24 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        print "-i- Deleting old data"
+        print("-i- Deleting old data")
         sess.query(self.Category).delete()
         sess.query(self.Package).delete()
 
-        print "-i- Commiting"
+        print("-i- Commiting")
         sess.commit()
 
-        print "-i- Scanning repository..."
+        print("-i- Scanning repository...")
         self._scan_repo_for_pkg_and_cat(
             sess, self._config['repository'], 0)
 
-        print ""
+        print("")
         count_p = sess.query(self.Package).count()
         sess.commit()
 
-        print "-i- Searching for errors"
+        print("-i- Searching for errors")
         self.find_repository_package_name_collisions_in_database()
-        print "-i- Search operations finished"
+        print("-i- Search operations finished")
         sess.close()
 
         return ret
@@ -648,13 +648,13 @@ class PackageDatabase:
 
         lst2 = []
 
-        print "-i- Scanning paths"
+        print("-i- Scanning paths")
         for each in lst:
             aipsetup.utils.file.progress_write('       ' + each.name)
             lst2.append(self.get_package_path(pid=each.pid))
-        print ""
+        print("")
 
-        print "-i- Processing %(n)s packages..." % {'n': len(lst)}
+        print("-i- Processing %(n)s packages..." % {'n': len(lst)})
         sys.stdout.flush()
         sess.close()
 
@@ -672,7 +672,7 @@ class PackageDatabase:
 
             pkg_paths[l].append(join_pkg_path(each))
 
-        for each in pkg_paths.keys():
+        for each in list(pkg_paths.keys()):
             if len(pkg_paths[each]) > 1:
                 lst_dup[each] = pkg_paths[each]
 
@@ -685,29 +685,29 @@ class PackageDatabase:
             t = 'w'
             t2 = ''
 
-        print "-%(t)s- Found %(c)s duplicated package names%(t2)s" % {
+        print("-%(t)s- Found %(c)s duplicated package names%(t2)s" % {
             'c' : len(lst_dup),
             't' : t,
             't2': t2
-            }
+            })
 
         if len(lst_dup) > 0:
-            print "       listing:"
+            print("       listing:")
 
-            sorted_keys = lst_dup.keys()
+            sorted_keys = list(lst_dup.keys())
             sorted_keys.sort()
 
             for each in sorted_keys:
-                print "          %(key)s:" % {
+                print("          %(key)s:" % {
                     'key': each
-                    }
+                    })
 
                 lst_dup[each].sort()
 
                 for each2 in lst_dup[each]:
-                    print "             %(path)s" % {
+                    print("             %(path)s" % {
                         'path': each2
-                        }
+                        })
 
         return 0
 
@@ -835,25 +835,25 @@ class PackageDatabase:
                         'name': i.name
                         })
                 if not force_rewrite and os.path.exists(filename):
-                    print "-w- File exists - skipping: %(name)s" % {
+                    print("-w- File exists - skipping: %(name)s" % {
                         'name': filename
-                        }
+                        })
                     continue
                 if force_rewrite and os.path.exists(filename):
-                    print "-i- File exists - rewriting: %(name)s" % {
+                    print("-i- File exists - rewriting: %(name)s" % {
                         'name': filename
-                        }
+                        })
                 if not os.path.exists(filename):
-                    print "-i- Writing: %(name)s" % {
+                    print("-i- Writing: %(name)s" % {
                         'name': filename
-                        }
+                        })
 
                 r = self.package_info_record_to_dict(record=i)
                 if isinstance(r, dict):
                     if aipsetup.info.write_to_file(filename, r) != 0:
-                        print "-e- can't write file %(name)s" % {
+                        print("-e- can't write file %(name)s" % {
                             'name': filename
-                            }
+                            })
 
         sess.close()
 
@@ -879,7 +879,7 @@ class PackageDatabase:
 
         missing = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        print "-i- searching missing records"
+        print("-i- searching missing records")
         files_l = len(files)
         num = 0
         for i in files:
@@ -906,7 +906,7 @@ class PackageDatabase:
 
         sess.close()
 
-        print ""
+        print("")
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
         for i in missing:
@@ -924,15 +924,15 @@ class PackageDatabase:
                     )
                 loaded += 1
             else:
-                print "-e- can't get info from file %(name)s" % {
+                print("-e- can't get info from file %(name)s" % {
                     'name': i
-                    }
-        print ""
+                    })
+        print("")
         sess.commit()
         sess.close()
 
 
-        print "-i- Total loaded %(n)d records" % {'n': loaded}
+        print("-i- Total loaded %(n)d records" % {'n': loaded})
         return
 
     def delete_pkg_info_records(self, mask='*'):
@@ -947,16 +947,16 @@ class PackageDatabase:
             if fnmatch.fnmatch(i.name, mask):
                 sess.delete(i)
                 deleted += 1
-                print "-i- deleted pkg info: %(name)s" % {
+                print("-i- deleted pkg info: %(name)s" % {
                     'name': i.name
-                    }
+                    })
                 sys.stdout.flush()
 
         sess.commit()
         sess.close()
-        print "-i- Total deleted %(n)d records" % {
+        print("-i- Total deleted %(n)d records" % {
             'n': deleted
-            }
+            })
         return
 
     def list_pkg_info_records(self, mask='*', mute=False):
@@ -976,9 +976,9 @@ class PackageDatabase:
         sess.close()
         if not mute:
             aipsetup.utils.text.columned_list_print(lst)
-            print "-i- Total found %(n)d records" % {
+            print("-i- Total found %(n)d records" % {
                 'n': found
-                }
+                })
         return lst
 
     def find_missing_pkg_info_records(
@@ -1008,9 +1008,9 @@ class PackageDatabase:
                 pkgs_missing += 1
                 missing.append(each.name)
 
-                print "-w- missing package DB info record: %(name)s" % {
+                print("-w- missing package DB info record: %(name)s" % {
                     'name': each.name
-                    }
+                    })
 
                 if create_templates:
 
@@ -1021,28 +1021,28 @@ class PackageDatabase:
 
                     if os.path.exists(filename):
                         if not force_rewrite:
-                            print "-i- xml info file already exists"
+                            print("-i- xml info file already exists")
                             pkgs_exists += 1
                             continue
                         else:
                             pkgs_forced += 1
 
                     if force_rewrite:
-                        print "-i- forced template rewriting"
+                        print("-i- forced template rewriting")
 
                     if aipsetup.info.write_to_file(
                         filename,
                         aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                         pkgs_failed += 1
-                        print "-e- failed writing template to `%(name)s'" % {
+                        print("-e- failed writing template to `%(name)s'" % {
                             'name': filename
-                            }
+                            })
                     else:
                         pkgs_written += 1
 
         sess.close()
 
-        print """\
+        print("""\
 -i- Total records checked     : %(n1)d
     Missing records           : %(n2)d
     Missing but present on FS : %(n3)d
@@ -1056,7 +1056,7 @@ class PackageDatabase:
             'n4': pkgs_written,
             'n5': pkgs_failed,
             'n6': pkgs_forced
-}
+})
 
         missing.sort()
         return missing
@@ -1079,30 +1079,30 @@ class PackageDatabase:
             if not os.path.exists(filename):
                 ret.append(i.name)
                 if not mute:
-                    print "-w- file missing: %(name)s" % {
+                    print("-w- file missing: %(name)s" % {
                         'name': filename
-                        }
+                        })
                 continue
 
             d1 = aipsetup.info.read_from_file(filename)
 
             if not isinstance(d1, dict):
-                print "-i- Error parsing file: %(name)s" % {
+                print("-i- Error parsing file: %(name)s" % {
                     'name': filename
-                    }
+                    })
             else:
                 d2 = self.package_info_record_to_dict(record=i)
                 if not aipsetup.info.is_dicts_equal(d1, d2):
                     ret.append(i.name)
                     if not mute:
-                        print "-w- xml init file differs for: %(name)s" % {
+                        print("-w- xml init file differs for: %(name)s" % {
                             'name': i.name
-                            }
+                            })
 
         sess.close()
 
         if not mute:
-            print "-i- Total %(n)d warnings" % {'n': len(ret)}
+            print("-i- Total %(n)d warnings" % {'n': len(ret)})
 
         return ret
 
@@ -1133,7 +1133,7 @@ class PackageDatabase:
     def print_pkg_info_record(self, name):
         r = self.package_info_record_to_dict(name = name)
         if r == None:
-            print "-e- Not found named info record"
+            print("-e- Not found named info record")
         else:
 
             pid = self.get_package_id(name)
@@ -1146,7 +1146,7 @@ class PackageDatabase:
             if r['pkg_name_type'] in aipsetup.name.NAME_REGEXPS:
                 regexp = aipsetup.name.NAME_REGEXPS[r['pkg_name_type']]
 
-            print """
+            print("""
 Name: %(name)s
 
 File Name Type: %(pkg_name_type)s
@@ -1176,5 +1176,5 @@ Tags: %(tags)s
         'tags'         : ', '.join(r['tags']),
         'category'     : category,
         'buildinfo'    : r['buildinfo']
-        }
+        })
 

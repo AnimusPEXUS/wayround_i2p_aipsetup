@@ -21,5 +21,5 @@ def return_exception_info(e):
 
 def print_exception_info(e):
     txt = return_exception_info(e)
-    print txt
+    print(txt)
     return

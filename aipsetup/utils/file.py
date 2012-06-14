@@ -18,15 +18,15 @@ def remove_if_exists(file_or_dir):
             try:
                 shutil.rmtree(file_or_dir)
             except:
-                print "-e-       can't remove dir %(dir)s" % {
-                    'dir': file_or_dir}
+                print("-e-       can't remove dir %(dir)s" % {
+                    'dir': file_or_dir})
                 return 1
         else:
             try:
                 os.unlink(file_or_dir)
             except:
-                print "-e-       can't remove file %(file)s" % {
-                    'file': file_or_dir}
+                print("-e-       can't remove file %(file)s" % {
+                    'file': file_or_dir})
                 return 1
     return 0
 
@@ -59,10 +59,10 @@ def list_files(config, mask, what):
     if len(lst) > 0:
         semi = ':'
 
-    print 'found %(n)s file(s)%(s)s' % {
+    print('found %(n)s file(s)%(s)s' % {
         'n': len(lst),
         's': semi
-        }
+        })
 
     bases = []
     for each in lst:
@@ -80,19 +80,19 @@ def copy_file(config, file1, file2, what):
 
     if os.path.isfile(f1):
         if os.path.exists(f2):
-            print "-e- destination file or dir already exists"
+            print("-e- destination file or dir already exists")
         else:
-            print "-i- copying %(f1)s to %(f2)s" % {
+            print("-i- copying %(f1)s to %(f2)s" % {
                 'f1': f1,
                 'f2': f2
-                }
+                })
             try:
                 shutil.copy(f1, f2)
             except:
-                print "-e- Error copying file"
+                print("-e- Error copying file")
                 aipsetup.utils.error.print_exception_info(sys.exc_info())
     else:
-        print "-e- source file not exists"
+        print("-e- source file not exists")
 
 
     return

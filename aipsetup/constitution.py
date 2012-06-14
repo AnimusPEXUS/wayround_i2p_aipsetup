@@ -6,14 +6,14 @@ import aipsetup.utils
 
 
 def print_help():
-    print """\
+    print("""\
 aipsetup build command
 
    edit   edit constitution file
 
    view   view constitution file
 
-"""
+""")
 
 def router(opts, args, config):
 
@@ -21,7 +21,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- not enough parameters"
+        print("-e- not enough parameters")
         ret = 1
     else:
 
@@ -39,10 +39,10 @@ def router(opts, args, config):
             txt = f.read()
             f.close()
 
-            print txt
+            print(txt)
 
         else:
-            print "user --help"
+            print("user --help")
 
     return ret
 
@@ -55,25 +55,25 @@ def read_constitution(config):
     g = {}
 
     try:
-        execfile(config['constitution'], g, l)
+        exec(compile(open(config['constitution']).read(), config['constitution'], 'exec'), g, l)
     except:
-        print "-e- Error loading constitution script"
+        print("-e- Error loading constitution script")
         aipsetup.utils.error.print_exception_info(
             sys.exc_info()
             )
     else:
         if not 'constitution' in l \
                 or not inspect.isfunction(l['constitution']):
-            print "-e- `%(name)s' has no `constitution' function" % {
+            print("-e- `%(name)s' has no `constitution' function" % {
                 'name': config['constitution']
-                }
+                })
 
         else:
             try:
                 ret = l['constitution'](config)
             except:
                 ret = None
-                print "-e- Error calling for constitution dict"
+                print("-e- Error calling for constitution dict")
                 aipsetup.utils.error.print_exception_info(
                     sys.exc_info()
                     )

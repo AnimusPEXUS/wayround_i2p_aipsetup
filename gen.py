@@ -21,13 +21,13 @@ def walk_package(name):
         try:
             exec("import %(name)s" % {'name': name2})
         except:
-            print "-e- Can't import %(name)s" % {'name': name2}
+            print("-e- Can't import %(name)s" % {'name': name2})
         else:
             if fnmatch.fnmatch(os.path.basename(eval("%(name)s.__file__" % {'name': name2})), '__init__.py?'):
-                print "-i- Found package %(name)s" % {'name': name2}
+                print("-i- Found package %(name)s" % {'name': name2})
                 packages.append(name2)
             else:
-                print "-i- Found module %(name)s" % {'name': name2}
+                print("-i- Found module %(name)s" % {'name': name2})
                 modules.append(name2)
 #            exec("del(%(name)s)" % {'name': name2})
 
@@ -44,7 +44,7 @@ def walk_iter(ready_modules, package_list):
         try:
             p, m = walk_package(i)
         except:
-            print "-e- Error walking package %(name)s" % {'name': i}
+            print("-e- Error walking package %(name)s" % {'name': i})
         else:
             package_list += p
 
@@ -69,7 +69,7 @@ while len(package_list) > 0:
 ready_modules = list(set(ready_modules))
 ready_modules.sort()
 
-print "Creating doc for: %(list)s ." % {'list': ', '.join(ready_modules)}
+print("Creating doc for: %(list)s ." % {'list': ', '.join(ready_modules)})
 
 modules_str = " "
 

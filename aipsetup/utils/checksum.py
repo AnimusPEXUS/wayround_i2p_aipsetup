@@ -16,9 +16,9 @@ def make_dir_checksums(dirname, output_filename):
     dirname = os.path.abspath(dirname)
 
     if not os.path.isdir(dirname):
-        print "-e- Not is dir %(name)s" % {
+        print("-e- Not is dir %(name)s" % {
             'name': dirname
-            }
+            })
         ret = 1
 
     else:
@@ -26,7 +26,7 @@ def make_dir_checksums(dirname, output_filename):
         try:
             sums_fd = open(output_filename, 'w')
         except:
-            print "-e- Error opening output file"
+            print("-e- Error opening output file")
             aipsetup.utils.error.print_exception_info(sys.exc_info())
             ret = 2
         else:
@@ -40,9 +40,9 @@ def make_dir_checksums_fo(dirname, output_fileobj):
     ret = 0
     dirname = os.path.abspath(dirname)
     if not os.path.isdir(dirname):
-        print "-e- Not a dir %(name)s" % {
+        print("-e- Not a dir %(name)s" % {
             'name': dirname
-            }
+            })
         ret = 1
 
     else:
@@ -50,11 +50,11 @@ def make_dir_checksums_fo(dirname, output_fileobj):
         dirname_l = len(dirname)
 
         if not isinstance(output_fileobj, file):
-            print "-e- Wrong output file object"
+            print("-e- Wrong output file object")
             ret = 2
         else:
             sums_fd = output_fileobj
-            print "-i- Creating checksums"
+            print("-i- Creating checksums")
             for root, dirs, files in os.walk(dirname):
                 for f in files:
                     aipsetup.utils.file.progress_write("    %(dir)s/%(file)s" % {
@@ -74,7 +74,7 @@ def make_dir_checksums_fo(dirname, output_fileobj):
                                 }
                             )
                         del(m)
-    print ""
+    print("")
     return ret
 
 def make_file_checksum(filename, method='sha512'):
@@ -82,17 +82,17 @@ def make_file_checksum(filename, method='sha512'):
     try:
         f = open(filename, 'r')
     except:
-        print "-e- Can't open file `%(name)s'" % {
+        print("-e- Can't open file `%(name)s'" % {
             'name': filename
-            }
+            })
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
         sum = make_fileobj_checksum(f, method)
-        if not isinstance(sum, basestring):
-            print "-e- Can't get checksum for file `%(name)s'" % {
+        if not isinstance(sum, str):
+            print("-e- Can't get checksum for file `%(name)s'" % {
                 'name': filename
-                }
+                })
             ret = 2
         else:
             ret = sum
@@ -107,9 +107,9 @@ def make_fileobj_checksum(fileobj, method='sha512'):
             'method': method
             })
     except:
-        print "-e- Error calling for hashlib method `%(method)s'" % {
+        print("-e- Error calling for hashlib method `%(method)s'" % {
             'method': method
-            }
+            })
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
@@ -125,9 +125,9 @@ def parse_checksums_file_text(filename):
     try:
         f = open(filename)
     except:
-        print "-e- Can't open file `%(name)s'" % {
+        print("-e- Can't open file `%(name)s'" % {
             'name': filename
-            }
+            })
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
@@ -135,9 +135,9 @@ def parse_checksums_file_text(filename):
         f.close()
         sums = parse_checksums_text(txt)
         if not isinstance(sums, dict):
-            print "-e- Can't get checksums from file `%(name)s'" % {
+            print("-e- Can't get checksums from file `%(name)s'" % {
                 'name': filename
-                }
+                })
             ret = 2
         else:
             ret = sums

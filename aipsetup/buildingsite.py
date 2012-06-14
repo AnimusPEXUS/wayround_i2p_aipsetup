@@ -65,7 +65,7 @@ DIR_LIST = DIR_ALL
 
 
 def print_help():
-    print """\
+    print("""\
 aipsetup buildingsite command
 
    init DIRNAME
@@ -78,7 +78,7 @@ aipsetup buildingsite command
       parsing and farver package buildingsite configuration.
 
          -d=DIRNAME set building dir. Defaults to current working dir.
-"""
+""")
 
 def router(opts, args, config):
 
@@ -86,7 +86,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- not enough parameters"
+        print("-e- not enough parameters")
         ret = 1
     else:
 
@@ -108,7 +108,7 @@ def router(opts, args, config):
 
         elif args[0] == 'apply_info':
             if args_l != 2:
-                print "-e- tarball name to analize not specified"
+                print("-e- tarball name to analize not specified")
             else:
 
                 name = args[1]
@@ -122,7 +122,7 @@ def router(opts, args, config):
                 apply_info(config, dirname, source_filename=name)
 
         else:
-            print "-e- Wrong command"
+            print("-e- Wrong command")
 
 
     return ret
@@ -164,18 +164,18 @@ def init(config, directory='build'):
 
     directory = os.path.abspath(directory)
 
-    print(
+    print((
         "-i- Initiating building site %(dir)s" % {
             'dir': directory
             }
-        )
+        ))
 
     print("-i- Checking dir name safety")
 
     if isWdDirRestricted(directory):
-        print("-e- %(dir_str)s is restricted working dir" % {
+        print(("-e- %(dir_str)s is restricted working dir" % {
             'dir_str': directory
-            })
+            }))
         print("    won't init")
         ret = -1
 
@@ -207,10 +207,10 @@ def init(config, directory='build'):
             else:
                 resh = 'exists'
 
-            print("       %(dirname)s - %(resh)s" % {
+            print(("       %(dirname)s - %(resh)s" % {
                 'dirname': i,
                 'resh': resh
-                })
+                }))
 
             if os.path.exists(a):
                 pass
@@ -231,18 +231,18 @@ def read_package_info(config, directory, ret_on_error=None):
     pi_filename = os.path.join(directory, 'package_info.py')
 
     if not os.path.isfile(pi_filename):
-        print "-e- `%(name)s' not found" % {
+        print("-e- `%(name)s' not found" % {
             'name': pi_filename
-            }
+            })
     else:
         txt = ''
         f = None
         try:
             f = open(pi_filename, 'r')
         except:
-            print "-e- Can't open `%(name)s'" % {
+            print("-e- Can't open `%(name)s'" % {
                 'name': pi_filename
-                }
+                })
             aipsetup.utils.error.print_exception_info(
                 sys.exc_info()
                 )
@@ -256,9 +256,9 @@ def read_package_info(config, directory, ret_on_error=None):
             try:
                 ret = eval(txt, g, l)
             except:
-                print "-e- error in `%(name)s'" % {
+                print("-e- error in `%(name)s'" % {
                     'name': pi_filename
-                }
+                })
                 aipsetup.utils.error.print_exception_info(
                     sys.exc_info()
                     )
@@ -275,9 +275,9 @@ def write_package_info(config, directory, info):
     try:
         f = open(pi_filename, 'w')
     except:
-        print "-e- can't open `%(file)s' for writing" % {
+        print("-e- can't open `%(file)s' for writing" % {
             'file': pi_filename
-            }
+            })
         aipsetup.utils.error.print_exception_info(
             sys.exc_info()
             )
@@ -286,7 +286,7 @@ def write_package_info(config, directory, info):
         try:
             txt = pprint.pformat(info)
         except:
-            print "-e- can't represent data for package info"
+            print("-e- can't represent data for package info")
             aipsetup.utils.error.print_exception_info(
                 sys.exc_info()
                 )
@@ -321,7 +321,7 @@ def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
         )
 
     if parse_result == None:
-        print "-e- Can't correctly parse file name"
+        print("-e- Can't correctly parse file name")
         ret = 1
     else:
         d['pkg_nameinfo'] = parse_result
@@ -370,10 +370,10 @@ def apply_pkg_info_on_buildingsite(config, dirname):
             or not isinstance(d['pkg_nameinfo']['groups'], dict) \
             or not 'name' in d['pkg_nameinfo']['groups'] \
             or not isinstance(d['pkg_nameinfo']['groups']['name'],
-                              basestring):
+                              str):
 
 
-        print "-e- info undetermined"
+        print("-e- info undetermined")
         d['pkg_info'] = {}
         ret = 1
 
@@ -384,14 +384,14 @@ def apply_pkg_info_on_buildingsite(config, dirname):
                 'name': infoname
                 })
 
-        print "-i- Reading info file `%(name)s'" % {
+        print("-i- Reading info file `%(name)s'" % {
             'name': info_filename
-            }
+            })
         info = aipsetup.info.read_from_file(info_filename)
         if not isinstance(info, dict):
-            print "-e- Can't read info from %(filename)s" % {
+            print("-e- Can't read info from %(filename)s" % {
                 'filename': info_filename
-                }
+                })
             d['pkg_info'] = {}
             ret = 2
         else:
@@ -416,8 +416,8 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
             or not 'pkg_info' in pi \
             or not isinstance(pi['pkg_info'], dict) \
             or not 'buildinfo' in pi['pkg_info'] \
-            or not isinstance(pi['pkg_info']['buildinfo'], basestring):
-        print "-e- buildinfo undetermined"
+            or not isinstance(pi['pkg_info']['buildinfo'], str):
+        print("-e- buildinfo undetermined")
         pi['pkg_buildinfo'] = {}
         ret = 1
 
@@ -431,9 +431,9 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
 
         if not os.path.exists(buildinfo_filename) \
                 or not os.path.isfile(buildinfo_filename):
-            print "-e- Can't find buildinfo Python script `%(name)s'" % {
+            print("-e- Can't find buildinfo Python script `%(name)s'" % {
                 'name': buildinfo_filename
-                }
+                })
             ret = 2
 
         else:
@@ -442,11 +442,11 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
             l = {}
 
             try:
-                execfile(buildinfo_filename, g, l)
+                exec(compile(open(buildinfo_filename).read(), buildinfo_filename, 'exec'), g, l)
             except:
-                print "-e- Can't load buildinfo Python script `%(name)s'" % {
+                print("-e- Can't load buildinfo Python script `%(name)s'" % {
                     'name': buildinfo_filename
-                    }
+                    })
                 aipsetup.utils.error.print_exception_info(
                     sys.exc_info()
                     )
@@ -457,7 +457,7 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                 if not 'build_info' in l \
                         or not inspect.isfunction(l['build_info']):
 
-                    print "-e- Named module doesn't have 'build_info' function"
+                    print("-e- Named module doesn't have 'build_info' function")
                     ret = 4
 
                 else:
@@ -465,10 +465,10 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                     try:
                         l['build_info'](copy.copy(config), pi)
                     except:
-                        print ("-e- Error while calling for "
+                        print(("-e- Error while calling for "
                             +"build_info() from `%(name)s'") % {
                             'name': buildinfo_filename
-                            }
+                            })
                         aipsetup.utils.error.print_exception_info(
                             sys.exc_info()
                             )

@@ -8,7 +8,7 @@ aipsetup package server
 import os
 import os.path
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import subprocess
 
 import aipsetup.version
@@ -20,7 +20,7 @@ def print_help():
     """
     help printer
     """
-    print """\
+    print("""\
 aipsetup client command
 
    search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [-v=VER]
@@ -58,7 +58,7 @@ aipsetup client command
       -o - Place requested files in pointed (by default current)
            directory
 
-"""
+""")
 
 def router(opts, args, config):
     """
@@ -67,7 +67,7 @@ def router(opts, args, config):
     ret = 0
 
     if len(args) == 0:
-        print "-e- not enough parameters"
+        print("-e- not enough parameters")
         ret = 1
     else:
 
@@ -103,7 +103,7 @@ def router(opts, args, config):
                           )
 
         else:
-            print "-e- wrong command"
+            print("-e- wrong command")
             ret = 1
 
     return ret
@@ -127,7 +127,7 @@ def workout_search_params(opts, args, config):
     p_errors = False
 
     if args_l != 2:
-        print "-e- can be one parameter"
+        print("-e- can be one parameter")
         p_errors = True
     else:
 
@@ -163,19 +163,19 @@ def workout_search_params(opts, args, config):
 
 
         if not how in 'breic':
-            print "-e- `how' error"
+            print("-e- `how' error")
             p_errors = True
 
         if not where in 'rl':
-            print "-e- `where' error"
+            print("-e- `where' error")
             p_errors = True
 
         if not what in 'sri':
-            print "-e- `what' error"
+            print("-e- `what' error")
             p_errors = True
 
         if how != 'i' and ver != 'ANY':
-            print "-e- VERSION can only be used with --how=i"
+            print("-e- VERSION can only be used with --how=i")
             p_errors = True
 
 
@@ -195,9 +195,9 @@ def workout_search_params(opts, args, config):
                     )
 
                 if not isinstance(idic, dict):
-                    print "-e- Can't find info for %(name)s" % {
+                    print("-e- Can't find info for %(name)s" % {
                         'name': value
-                        }
+                        })
                     n_errors = True
 
                 else:
@@ -205,10 +205,10 @@ def workout_search_params(opts, args, config):
                     if what == 's':
                         regexp = \
                             aipsetup.name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
-                        print "-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
+                        print("-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
                             're': regexp,
                             'name': value
-                            }
+                            })
 
                         value = regexp
                         how = 'r'
@@ -218,17 +218,17 @@ def workout_search_params(opts, args, config):
                         regexp = r"%(name)s-(?P<version>.*?)-(?P<date>[\d]*).asp" % {
                             'name': value
                             }
-                        print "-i- Using regexp `%(re)s' for pkg name `%(name)s'" % {
+                        print("-i- Using regexp `%(re)s' for pkg name `%(name)s'" % {
                             'name': value,
                             're': regexp
-                            }
+                            })
 
                         value = regexp
                         how = 'r'
                         sensitive = True
 
                     elif what == 'i':
-                        print "-e- Invalid parameters combination"
+                        print("-e- Invalid parameters combination")
                         p_errors = True
 
                     else:
@@ -278,25 +278,25 @@ def get(config, output='.', wsp={}):
     ret = 0
 
     if not os.path.exists(output):
-        print "-i- creating %(dir)s" % {
+        print("-i- creating %(dir)s" % {
             'dir': output
-            }
+            })
         try:
             os.makedirs(output)
         except:
-            print "-e- Can't create output dir"
+            print("-e- Can't create output dir")
             ret = 2
     else:
         if os.path.exists(output) and not os.path.isdir(output):
-            print "-e- Destination file exists and is not dir"
+            print("-e- Destination file exists and is not dir")
             ret = 1
 
         elif os.path.exists(output) and os.path.isdir(output):
-            print "-i- using %(dir)s for output" % {
+            print("-i- using %(dir)s for output" % {
                 'dir': output
-                }
+                })
         else:
-            print "-e- Unknown location :-P"
+            print("-e- Unknown location :-P")
             raise Exception
 
     if ret != 0:
@@ -306,7 +306,7 @@ def get(config, output='.', wsp={}):
         lst = client(config, wsp)
 
         if not isinstance(lst, list):
-            print "-e- Error getting response list"
+            print("-e- Error getting response list")
             ret = lst
         else:
 
@@ -343,7 +343,7 @@ def get(config, output='.', wsp={}):
                 else:
                     name = i
 
-                name = urllib.quote(name)
+                name = urllib.parse.quote(name)
 
                 request = ("%(proto)s://%(host)s%(semi)s%(port)s%(prefix)s%(path)s%(name)s") % {
                     'proto'     : proto,
@@ -355,9 +355,9 @@ def get(config, output='.', wsp={}):
                     'name'      : name
                     }
 
-                print "-i- Requesting: %(req)s" % {
+                print("-i- Requesting: %(req)s" % {
                     'req': request
-                    }
+                    })
 
                 bname = os.path.basename(i)
 
@@ -385,14 +385,14 @@ def search(config, wsp):
         lst = fn_version_min_max_filter(lst, wsp)
 
         for i in lst:
-            print i
+            print(i)
 
-        print "count: %(n)s" % {
+        print("count: %(n)s" % {
             'n': len(lst)
-            }
+            })
 
     else:
-        print "-e- Error getting response list"
+        print("-e- Error getting response list")
         ret = lst
 
     return ret
@@ -420,8 +420,8 @@ def client(config, wsp={}):
     if not what in ['info', 'source', 'repository'] \
             or not how in ['regexp', 'begins', 'exac', 'contains'] \
             or not isinstance(sensitive, bool) \
-            or not isinstance(value, basestring):
-        print "-e- Wrong parameters"
+            or not isinstance(value, str):
+        print("-e- Wrong parameters")
         ret = 1
 
     else:
@@ -457,19 +457,19 @@ def client(config, wsp={}):
             'what'      : what,
             'how'       : how,
             'sensitive' : sens,
-            'value'     : urllib.quote(unicode(value))
+            'value'     : urllib.parse.quote(str(value))
             }
 
-        print "-i- Requesting: %(req)s" % {
+        print("-i- Requesting: %(req)s" % {
             'req': request
-            }
+            })
 
         try:
-            req_res = urllib.urlopen(request)
+            req_res = urllib.request.urlopen(request)
         except:
             exception = sys.exc_info()
             if isinstance(exception[1],  IOError):
-                print "-e- Connection refused"
+                print("-e- Connection refused")
             aipsetup.utils.error.print_exception_info(
                 exception
                 )
@@ -477,9 +477,9 @@ def client(config, wsp={}):
         else:
             code = int(req_res.getcode())
             if code != 200:
-                print "-e- Response code: %(n)d" % {
+                print("-e- Response code: %(n)d" % {
                     'n': code
-                    }
+                    })
                 ret = 2
             else:
                 lst = req_res.readlines()

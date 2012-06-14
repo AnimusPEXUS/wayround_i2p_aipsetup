@@ -26,7 +26,7 @@ def xz(stdin=subprocess.PIPE,
             cwd=cwd
             )
     except:
-        print "-e- Error starting xz subprocess"
+        print("-e- Error starting xz subprocess")
         p = None
         e = sys.exc_info()
         aipsetup.utils.error.print_exception_info(e)

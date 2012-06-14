@@ -15,7 +15,7 @@ import aipsetup.deps.deps_c
 
 
 def print_help():
-    print """\
+    print("""\
 aipsetup pack command
 
     destdir_checksum
@@ -40,7 +40,7 @@ aipsetup pack command
 
     pack_buildingsite
 
-"""
+""")
 
 def router(opts, args, config):
 
@@ -48,7 +48,7 @@ def router(opts, args, config):
     args_l = len(args)
 
     if args_l == 0:
-        print "-e- not enough parameters"
+        print("-e- not enough parameters")
         ret = 1
     else:
 
@@ -85,7 +85,7 @@ def router(opts, args, config):
             ret = complite(config, dirname)
 
         else:
-            print "-e- Wrong pack command"
+            print("-e- Wrong pack command")
 
 
     return ret
@@ -112,10 +112,10 @@ def destdir_checksum(config, buildingsite):
         pass
 
     if not os.path.isdir(destdir):
-        print "-e- DESTDIR not found"
+        print("-e- DESTDIR not found")
         ret = 1
     elif not os.path.isdir(lists_dir):
-        print "-e- LIST dir can't be used"
+        print("-e- LIST dir can't be used")
         ret = 2
     else:
         aipsetup.utils.checksum.make_dir_checksums(
@@ -147,10 +147,10 @@ def destdir_filelist(config, buildingsite):
         pass
 
     if not os.path.isdir(destdir):
-        print "-e- DESTDIR not found"
+        print("-e- DESTDIR not found")
         ret = 1
     elif not os.path.isdir(lists_dir):
-        print "-e- LIST dir can't be used"
+        print("-e- LIST dir can't be used")
         ret = 2
     else:
         aipsetup.utils.file.list_files_recurcive(
@@ -192,7 +192,7 @@ def destdir_deps_c(config, buildingsite):
     deps = {}
     elfs = 0
     n_elfs = 0
-    print "-i- Generating C deps lists"
+    print("-i- Generating C deps lists")
     file_list_l = len(file_list)
     file_list_i = 1
     for i in file_list:
@@ -214,11 +214,11 @@ def destdir_deps_c(config, buildingsite):
                 #'name': filename
                 #}
             n_elfs += 1
-    print ""
-    print "-i- ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+    print("")
+    print("-i- ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
         'elfs': elfs,
         'n_elfs': n_elfs
-        }
+        })
     f = open(deps_file, 'w')
     f.write(pprint.pformat(deps))
     f.close()
@@ -239,9 +239,9 @@ def remove_source_and_build_dirs(config, buildingsite):
         if os.path.isdir(dirname):
             aipsetup.utils.file.remove_if_exists(dirname)
         else:
-            print "-w- Dir not exists: %(dirname)s" % {
+            print("-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
-                }
+                })
 
     return ret
 
@@ -263,15 +263,15 @@ def compress_patches_destdir_and_logs(config, buildingsite):
             }
 
         if not os.path.isdir(dirname):
-            print "-w- Dir not exists: %(dirname)s" % {
+            print("-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
-                }
+                })
             ret = 1
             break
         else:
-            print "-i- Compressing %(i)s" % {
+            print("-i- Compressing %(i)s" % {
                 'i': i
-                }
+                })
             aipsetup.storage.archive.compress_dir_contents_tar_compressor(
                 dirname,
                 filename,
@@ -294,7 +294,7 @@ def compress_files_in_lists_dir(config, buildingsite):
         outfile = infile + '.xz'
 
         if aipsetup.storage.archive.compress_file_xz(infile, outfile) != 0:
-            print "-e- Error compressing files in lists dir"
+            print("-e- Error compressing files in lists dir")
             ret = 1
             break
 
@@ -316,9 +316,9 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
         if os.path.isdir(dirname):
             aipsetup.utils.file.remove_if_exists(dirname)
         else:
-            print "-w- Dir not exists: %(dirname)s" % {
+            print("-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
-                }
+                })
 
     return ret
 
@@ -336,9 +336,9 @@ def remove_decompressed_files_from_lists_dir(config, buildingsite):
             try:
                 os.unlink(filename)
             except:
-                print "-e- Can't remove file %(name)s" % {
+                print("-e- Can't remove file %(name)s" % {
                     'name': filename
-                    }
+                    })
                 ret = 1
 
     return ret
@@ -360,7 +360,7 @@ def make_checksums_for_building_site(config, buildingsite):
     try:
         tf = tempfile.mkstemp()
     except:
-        print "-e- Error creating temporary file"
+        print("-e- Error creating temporary file")
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
@@ -369,7 +369,7 @@ def make_checksums_for_building_site(config, buildingsite):
         if aipsetup.utils.checksum.make_dir_checksums_fo(
             buildingsite,
             f) != 0:
-            print "-e- Error creating checksums for buildingsite"
+            print("-e- Error creating checksums for buildingsite")
             ret = 2
 
         f.close()
@@ -384,7 +384,7 @@ def pack_buildingsite(config, buildingsite):
         config, buildingsite, ret_on_error=None)
 
     if pi == None:
-        print "-e- error getting information about package"
+        print("-e- error getting information about package")
     else:
 
         pack_dir = os.path.abspath(
@@ -441,9 +441,9 @@ def complite(config, dirname):
         if eval("%(name)s(config, dirname)" % {
                 'name': i
                 }) != 0:
-            print "-e- Error on %(name)s" % {
+            print("-e- Error on %(name)s" % {
                 'name': i
-                }
+                })
             ret = 1
             break
 

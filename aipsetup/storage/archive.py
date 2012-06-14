@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tarfile
 import time
-import StringIO
+import io
 
 
 import aipsetup.utils.error
@@ -81,10 +81,10 @@ def extract(file_name, output_dir):
         pass
 
     else:
-        print "-e- unsupported extension"
+        print("-e- unsupported extension")
 
     if ret == None:
-        print "-e- Not implemented"
+        print("-e- Not implemented")
         raise Exception
 
     return ret
@@ -95,9 +95,9 @@ def compress_file_xz(infile, outfile, verbose_xz=False):
     ret = 0
 
     if not os.path.isfile(infile):
-        print "-e- Input file not exists: %(name)s" % {
+        print("-e- Input file not exists: %(name)s" % {
             'name': infile
-            }
+            })
         ret = 1
     else:
         fi = open(infile, 'rb')
@@ -135,7 +135,7 @@ def compress_dir_contents_tar_compressor(dirname, output_filename,
     try:
         fobj = open(output_filename, 'w')
     except:
-        print "-e- Error opening file for write"
+        print("-e- Error opening file for write")
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
@@ -154,15 +154,15 @@ def compress_dir_contents_tar_compressor_fobj(dirname, output_fobj,
     ret = 0
 
     if not compressor in ['xz']:
-        print "-e- Wrong decompressor requested"
+        print("-e- Wrong decompressor requested")
         raise ValueError
 
     dirname = os.path.abspath(dirname)
 
     if not os.path.isdir(dirname):
-        print "-e- Not a directory: %(dirname)s" % {
+        print("-e- Not a directory: %(dirname)s" % {
             'dirname': dirname
-            }
+            })
     else:
         options = []
         stderr = subprocess.PIPE
@@ -217,7 +217,7 @@ def decompress_dir_contents_tar_compressor(input_filename, dirname,
     try:
         fobj = open(input_filename, 'r')
     except:
-        print "-e- Error opening file for read"
+        print("-e- Error opening file for read")
         aipsetup.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
@@ -238,7 +238,7 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
     ret = 0
 
     if not compressor in ['xz']:
-        print "-e- Wrong decompressor requested"
+        print("-e- Wrong decompressor requested")
         raise ValueError
 
     dirname = os.path.abspath(dirname)
@@ -247,24 +247,24 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
         try:
             os.makedirs(dirname)
         except:
-            print "-e- Destination dir not exists and cant's be created"
+            print("-e- Destination dir not exists and cant's be created")
             ret = 1
         else:
             ret = 0
     else:
         if os.path.isfile(dirname):
-            print "-e- Destination exists but is file"
+            print("-e- Destination exists but is file")
             ret = 2
         elif os.path.islink(dirname):
-            print "-e- Destination exists but is link"
+            print("-e- Destination exists but is link")
             ret = 3
         else:
             ret = 0
 
     if ret != 0:
-        print "-e- Error while checking destination dir: %(dirname)s" % {
+        print("-e- Error while checking destination dir: %(dirname)s" % {
             'dirname': dirname
-            }
+            })
     else:
 
         # tar
@@ -288,7 +288,7 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
                 stderr = sys.stdout
                 )
         except:
-            print "-e- tar error detected"
+            print("-e- tar error detected")
             util_errors += 1
 
         # compressor
@@ -311,11 +311,11 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
                 stderr = sys.stderr
                 )
         except:
-            print "-e- compressor error detected"
+            print("-e- compressor error detected")
             util_errors += 1
 
         if util_errors != 0:
-            print "-e- Errors was detected - terminating"
+            print("-e- Errors was detected - terminating")
             if isinstance(tarproc, subprocess.Popen):
                 tarproc.terminate()
             if isinstance(comprproc, subprocess.Popen):
@@ -354,9 +354,9 @@ def pack_dir_contents_tar(dirname, output_filename,
     dirname = os.path.abspath(dirname)
 
     if not os.path.isdir(dirname):
-        print "-e- Not a directory: %(dirname)s" % {
+        print("-e- Not a directory: %(dirname)s" % {
             'dirname': dirname
-            }
+            })
     else:
         outf = open(output_filename, 'wb')
 
@@ -391,8 +391,8 @@ def tar_get_member(tarf, cont_name):
     try:
         ret = tarf.getmember(cont_name)
     except:
-        print "-e- Can't get tar member"
-        print aipsetup.utils.error.return_exception_info(sys.exc_info())
+        print("-e- Can't get tar member")
+        print(aipsetup.utils.error.return_exception_info(sys.exc_info()))
         ret = 1
 
     return ret
@@ -404,8 +404,8 @@ def tar_member_extract_file(tarf, member):
     try:
         ret = tarf.extractfile(member)
     except:
-        print "-e- Can't get tar member"
-        print aipsetup.utils.error.return_exception_info(sys.exc_info())
+        print("-e- Can't get tar member")
+        print(aipsetup.utils.error.return_exception_info(sys.exc_info()))
         ret = 1
 
     return ret
@@ -433,18 +433,18 @@ def tar_member_get_extract_file_to(tarf, cont_name, output_filename):
     try:
         fd = open(output_filename, 'w')
     except:
-        print "-e- Error creating output file %(name)s" % {
+        print("-e- Error creating output file %(name)s" % {
             'name': output_filename
-            }
+            })
         ret = 1
     else:
         fobj = tar_member_get_extract_file(
             tarf, cont_name
             )
         if not isinstance(fobj, tarfile.ExFileObject):
-            print "-e- Error getting %(name)s from tar" % {
+            print("-e- Error getting %(name)s from tar" % {
                 'name': cont_name
-                }
+                })
             ret = 2
         else:
             aipsetup.utils.stream.cat(fobj, fd)
@@ -469,7 +469,7 @@ def xzcat(stdin):
     except:
         ret = 1
     else:
-        outstr = StringIO.StringIO()
+        outstr = io.StringIO()
 
         cat_p1 = aipsetup.utils.stream.cat(stdin,
                                            comprproc.stdin,

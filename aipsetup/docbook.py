@@ -13,13 +13,13 @@ import aipsetup.utils.error
 
 
 def print_help():
-    print """\
+    print("""\
 
     install [-b=DIR] FILES
 
        -b - Change basedir. Default is /
 
-"""
+""")
 
 def router(opts, args, config):
     ret = 0
@@ -28,7 +28,7 @@ def router(opts, args, config):
 
 
     if args_l == 0:
-        print "-e- command not given"
+        print("-e- command not given")
         ret = 1
     else:
 
@@ -40,7 +40,7 @@ def router(opts, args, config):
         elif args[0] == 'install':
 
             if args_l == 1:
-                print '-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments'
+                print('-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments')
                 ret = 10
             else:
 
@@ -53,7 +53,7 @@ def router(opts, args, config):
                 install(args[1:], base_dir)
 
         else:
-            print "-e- Wrong command"
+            print("-e- Wrong command")
 
 
         ret = 0
@@ -104,19 +104,19 @@ def set_correct_owners(directory):
 
 def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
-    print "-i- Preparing base dir: %(dir)s" % {'dir': base_dir}
+    print("-i- Preparing base dir: %(dir)s" % {'dir': base_dir})
 
     for i in [base_dir_etc_xml, base_dir_share_docbook]:
-        print "-i-    checking: %(dir)s" % {'dir': i}
+        print("-i-    checking: %(dir)s" % {'dir': i})
         try:
             os.makedirs(i)
         except:
             pass
 
         if not os.path.isdir(i):
-            print "-e-       not a dir %(i)s" % {
+            print("-e-       not a dir %(i)s" % {
                 'i': i
-                }
+                })
             return 1
 
     return 0
@@ -135,15 +135,15 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     # TODO: use aipsetup.utils
 
     if not os.path.isfile(docbook_zip):
-        print "-e- Wrong zip file"
+        print("-e- Wrong zip file")
         return 10
 
     if len(docbook_zip) == 0:
-        print "-e- Wrong zip file"
+        print("-e- Wrong zip file")
         return 20
 
     if not docbook_zip.endswith('.zip'):
-        print '-e- Not a zip file: %(file)s' % {'file': docbook_zip}
+        print('-e- Not a zip file: %(file)s' % {'file': docbook_zip})
         return 30
 
     docbook_no_zip = ''
@@ -151,7 +151,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     try:
         docbook_no_zip = docbook_zip[:-4]
     except:
-        print "-e- Wrong zip file"
+        print("-e- Wrong zip file")
         return 40
 
     version = ''
@@ -159,7 +159,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     try:
         version = docbook_no_zip[docbook_no_zip.rfind('-')+1:]
     except:
-        print "-e- Wrong zip file version"
+        print("-e- Wrong zip file version")
         return 50
 
     if version == '':
@@ -168,7 +168,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
     base_dir_share_docbook_dtd = os.path.abspath(os.path.join(base_dir_share_docbook, 'xml-dtd-%(ver)s' % {'ver': version}))
 
-    print "-i- making dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd}
+    print("-i- making dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
 
     try:
         os.makedirs(base_dir_share_docbook_dtd)
@@ -176,18 +176,18 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         pass
 
     if not os.path.isdir(base_dir_share_docbook_dtd):
-        print "-e-    can not create dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd}
+        print("-e-    can not create dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
         return 70
 
-    print '-i-    unzipping...'
+    print('-i-    unzipping...')
 
     e = os.system("7z -o'%(dir)s' x '%(file)s'" % {'file': docbook_zip, 'dir': base_dir_share_docbook_dtd} )
 
     if e != 0:
-        print "-e-    error unzipping %(file)s" % {'file': docbook_zip}
+        print("-e-    error unzipping %(file)s" % {'file': docbook_zip})
         return 80
 
-    print '-i-    ok'
+    print('-i-    ok')
 
     return base_dir_share_docbook_dtd
 
@@ -197,25 +197,25 @@ def prepare_catalog(base_dir_etc_xml_catalog):
 
     r = 0
 
-    print "-i- Checking for catalog %(cat)s" % {'cat': base_dir_etc_xml_catalog}
+    print("-i- Checking for catalog %(cat)s" % {'cat': base_dir_etc_xml_catalog})
     if not os.path.isfile(base_dir_etc_xml_catalog):
-        print "-i-    creating new"
+        print("-i-    creating new")
         r = os.system("xmlcatalog --noout --create '%(cat)s'" % {'cat': base_dir_etc_xml_catalog})
     else:
-        print "-i-    already exists"
+        print("-i-    already exists")
 
     return r
 
 
 def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
 
-    print "-i-    Importing into docbook: %(dir)s" % {'dir': os.path.basename(dtd_dir)}
+    print("-i-    Importing into docbook: %(dir)s" % {'dir': os.path.basename(dtd_dir)})
 
     specific_cat_file = os.path.join(dtd_dir, 'catalog.xml')
 
 
     if not os.path.isfile(specific_cat_file):
-        print "-e-    %(file)s not found" % {'file': specific_cat_file}
+        print("-e-    %(file)s not found" % {'file': specific_cat_file})
         return 10
 
     tmp_cat_lxml = None
@@ -233,7 +233,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
         for each in tmp_cat_lxml.findall(tmp_cat_lxml_ns + tag):
 
             if each.tag == tmp_cat_lxml_ns + tag:
-                print "-i-       %(tag)s - %(Id)s"  % {'Id': each.get(tag + 'Id'), 'tag': tag}
+                print("-i-       %(tag)s - %(Id)s"  % {'Id': each.get(tag + 'Id'), 'tag': tag})
 
                 src_uri = each.get('uri')
                 dst_uri = ''
@@ -254,7 +254,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
                         'tag': tag
                         })
                 if r != 0:
-                    print "-e-          error"
+                    print("-e-          error")
 
     return 0
 
@@ -268,7 +268,7 @@ def import_docbook_to_catalog(base_dir_etc_xml_catalog):
         each1 = each.format(base_dir_etc_xml_catalog)
 
         if 0 != os.system(each1):
-            print "-e- error doing %(cmd)s" % {'cmd': each1}
+            print("-e- error doing %(cmd)s" % {'cmd': each1})
 
     return 0
 
@@ -288,7 +288,7 @@ def install_docbook_zips(docbook_zip_list,
                        base_dir_share_docbook)
 
         if isinstance(r, int):
-            print "-w- error processing file %(file)s" % {'file': i}
+            print("-w- error processing file %(file)s" % {'file': i})
             continue
 
         dtd_dirs.append(r)
@@ -296,10 +296,10 @@ def install_docbook_zips(docbook_zip_list,
     dtd_dirs.sort()
 
     if len(dtd_dirs) == 0:
-        print "-e- no DTD directories created. Nothing to do farther..."
+        print("-e- no DTD directories created. Nothing to do farther...")
         return 10
 
-    print "-i- Installing DTDs:"
+    print("-i- Installing DTDs:")
 
     for i in dtd_dirs:
         import_dtd_to_docbook(
@@ -307,7 +307,7 @@ def install_docbook_zips(docbook_zip_list,
             )
 
 
-    print "-i- Installing docbook into catalog"
+    print("-i- Installing docbook into catalog")
     import_docbook_to_catalog(base_dir_etc_xml_catalog)
 
     return 0
@@ -320,7 +320,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
                              base_dir_share_docbook
                              ):
 
-    print "-i- Installing XSLs"
+    print("-i- Installing XSLs")
 
     installed_versions = []
 
@@ -338,38 +338,38 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         base_dir_share_docbook_xsl_stylesheets = \
             os.path.join(base_dir_share_docbook, 'xsl-stylesheets-%(version)s' % {'version': version})
 
-        print "-i- Installing XSL %(xsl_name)s into %(xsl_dest)s" % {
+        print("-i- Installing XSL %(xsl_name)s into %(xsl_dest)s" % {
             'xsl_name': name,
-            'xsl_dest': base_dir_share_docbook_xsl_stylesheets}
+            'xsl_dest': base_dir_share_docbook_xsl_stylesheets})
 
-        print '-i-    preparing dirs'
+        print('-i-    preparing dirs')
 
 
         if 0 != aipsetup.utils.file.remove_if_exists(
                     base_dir_share_docbook_name
                     ):
-            print "-e-       error"
+            print("-e-       error")
             # return 10
             continue
 
         if 0 != aipsetup.utils.file.remove_if_exists(
                     base_dir_share_docbook_xsl_stylesheets
                     ):
-            print "-e-       error"
+            print("-e-       error")
             # return 20
             continue
 
-        print "-i- Extracting into %(name)s" % {'name': base_dir_share_docbook_name}
+        print("-i- Extracting into %(name)s" % {'name': base_dir_share_docbook_name})
 
         if 0 != unpack_tar(docbook_xsl_zip, base_dir_share_docbook):
-            print "-e-    Extraction error"
+            print("-e-    Extraction error")
 
 
-        print "-i- extracted"
+        print("-i- extracted")
 
-        print "-i- renaming %(one)s to %(another)s" % {
+        print("-i- renaming %(one)s to %(another)s" % {
             'one':     base_dir_share_docbook_name,
-            'another': base_dir_share_docbook_xsl_stylesheets}
+            'another': base_dir_share_docbook_xsl_stylesheets})
         try:
             os.rename(base_dir_share_docbook_name,
                       base_dir_share_docbook_xsl_stylesheets)
@@ -378,27 +378,27 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
             # return 30
             continue
 
-        print "-i- XSL extraction complited"
-        print "-i-"
+        print("-i- XSL extraction complited")
+        print("-i-")
 
         installed_versions.append(version)
 
     installed_versions.sort(version.standard_comparison)
 
-    print "-i- Installed XSL: %(versions)s" % {'versions': ', '.join(installed_versions)}
+    print("-i- Installed XSL: %(versions)s" % {'versions': ', '.join(installed_versions)})
 
 
     iv_l = len(installed_versions)
 
     if iv_l == 0:
-        print "-e- no versions"
+        print("-e- no versions")
         return 40
 
     current = installed_versions[iv_l-1]
 
-    print "-i- Presuming current XSL: %(version)s" % {'version': current}
+    print("-i- Presuming current XSL: %(version)s" % {'version': current})
 
-    print "-i- Updating XML catalog"
+    print("-i- Updating XML catalog")
 
     for i in installed_versions:
         os.system(
@@ -440,14 +440,14 @@ def install(files, base_dir):
         elif re.match(r'docbook-xsl-(\d\.?)*tar\.(.*)', os.path.basename(i)):
             docbook_xsl_zip_list.append(i)
         else:
-            print "-w- %(i)s is not a correct package" % {'i': i}
+            print("-w- %(i)s is not a correct package" % {'i': i})
 
     docbook_zip_list.sort()
     docbook_xsl_zip_list.sort()
 
 
-    print "-i- XMLs: %(xml)s;" % {'xml': ', '.join(docbook_zip_list)}
-    print "-i- XSLs: %(xsl)s." % {'xsl': ', '.join(docbook_xsl_zip_list)}
+    print("-i- XMLs: %(xml)s;" % {'xml': ', '.join(docbook_zip_list)})
+    print("-i- XSLs: %(xsl)s." % {'xsl': ', '.join(docbook_xsl_zip_list)})
 
     base_dir = os.path.abspath(base_dir)
 
@@ -464,13 +464,13 @@ def install(files, base_dir):
 
 
     if 0 != prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
-        print "-e- Error preparing base dir"
+        print("-e- Error preparing base dir")
         exit(20)
 
 
     for i in [base_dir_etc_xml_catalog_docbook, base_dir_etc_xml_catalog]:
         if 0 != prepare_catalog(i):
-            print "-e- Error creating catalog"
+            print("-e- Error creating catalog")
             exit (25)
 
 
@@ -480,7 +480,7 @@ def install(files, base_dir):
                                  base_dir_etc_xml_catalog,
                                  base_dir_etc_xml_catalog_docbook,
                                  base_dir_share_docbook):
-        print "-e- Error installing XML"
+        print("-e- Error installing XML")
         exit(30)
 
 
@@ -488,25 +488,25 @@ def install(files, base_dir):
                                      base_dir,
                                      base_dir_etc_xml_catalog,
                                      base_dir_share_docbook):
-        print "-e- Error installing XSL"
+        print("-e- Error installing XSL")
         exit(40)
 
-    print "-i- Setting correct modes"
+    print("-i- Setting correct modes")
     try:
         set_correct_modes(base_dir_etc_xml)
         set_correct_modes(base_dir_share_docbook)
     except:
         aipsetup.utils.error.print_exception_info(sys.exc_info())
 
-    print "-i- Setting correct owners"
+    print("-i- Setting correct owners")
     try:
         set_correct_owners(base_dir_etc_xml)
         set_correct_owners(base_dir_share_docbook)
     except:
         aipsetup.utils.error.print_exception_info(sys.exc_info())
 
-    print
-    print "-i- All operations complited. Bye!"
+    print()
+    print("-i- All operations complited. Bye!")
 
 
     return 0
