@@ -14,6 +14,8 @@ import glob
 import tempfile
 import shutil
 import copy
+import re
+import fnmatch
 
 import aipsetup.pkgindex
 import aipsetup.name
@@ -800,12 +802,13 @@ def find_file(config, destdir, pkgname, instr, mode=None, mute=False,
         print("-e- wrong mode")
         ret = 1
     else:
+
+        if not pkgname.endswith('.xz'):
+            pkgname += '.xz'
+
         pkg_file_list = package_files(config,  destdir, pkgname,
                                       mute=False,
                                       return_list=True)
-
-        if not pkg_list_file.endswith('.xz'):
-            pkg_list_file += '.xz'
 
         if not isinstance(pkg_file_list, list):
             print("-e- Can't get list of files")
@@ -890,7 +893,7 @@ def package_files(config, destdir, pkgname, mute=False,
             )
 
         if return_list:
-            ret = copy.copy(out_list)
+            ret = copy.copy(pkg_file_list)
 
     return ret
 
