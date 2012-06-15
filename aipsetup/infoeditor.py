@@ -146,8 +146,6 @@ class MainWindow:
 
         files = glob.glob(mask)
 
-        files = aipsetup.utils.text.unicodify(files)
-
         files.sort()
 
         for i in files:

@@ -185,7 +185,7 @@ def read_from_file(name):
     tree = None
 
     try:
-        f = open(aipsetup.utils.text.deunicodify(name), 'r')
+        f = open(name, 'r')
     except:
         print("-e- Can't open file %(name)s" % {
             'name': name
@@ -212,23 +212,22 @@ def read_from_file(name):
             for i in ['buildinfo']:
                 x = _find_latest(tree, i, 'value')
                 if x != None:
-                    ret[i] = aipsetup.utils.text.unicodify(x)
+                    ret[i] = x
 
             x = _find_latest(tree, 'nametype', 'value')
             if x != None:
-                ret['pkg_name_type'] = aipsetup.utils.text.unicodify(x)
+                ret['pkg_name_type'] = x
 
             x = _find_latest(tree, 'homepage', 'url')
             if x != None:
-                ret['homepage'] = aipsetup.utils.text.unicodify(x)
+                ret['homepage'] = x
 
             x = tree.findall('description')
             if len(x) > 0:
-                ret['description'] = aipsetup.utils.text.unicodify(x[-1].text)
+                ret['description'] = x[-1].text
 
-            ret['tags'] = aipsetup.utils.text.unicodify(
-                _find_list(tree, 'tag', 'name')
-                )
+            ret['tags'] = _find_list(tree, 'tag', 'name')
+
             ret['tags'].sort()
             del(tree)
 
@@ -249,7 +248,7 @@ def write_to_file(name, struct):
         )
 
     try:
-        f = open(aipsetup.utils.text.deunicodify(name), 'w')
+        f = open(name, 'w')
         f.write(txt)
         f.close()
     except:
@@ -275,9 +274,7 @@ def info_fixes(dicti, name):
 
 def mass_info_fix(config):
 
-    lst = aipsetup.utils.text.unicodify(
-        glob.glob(os.path.join(config['info'], '*.xml'))
-        )
+    lst = glob.glob(os.path.join(config['info'], '*.xml'))
 
     for i in lst:
 

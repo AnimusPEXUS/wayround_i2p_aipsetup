@@ -100,11 +100,11 @@ class Log:
         if echo:
             print("[%(ts)s] %(text)s" % {
                 'ts': timestamp,
-                'text': aipsetup.utils.text.deunicodify(text)
+                'text': text
                 })
         self.fileobj.write("[%(ts)s] %(text)s\n" % {
                 'ts': timestamp,
-                'text': aipsetup.utils.text.deunicodify(text)
+                'text': text
                 })
         return
 

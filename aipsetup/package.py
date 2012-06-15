@@ -955,7 +955,6 @@ def check_package_aipsetup2(filename):
 def put_to_index_many(config, files):
 
     for i in files:
-        i = aipsetup.utils.text.unicodify(i)
         if os.path.exists(i):
             put_to_index(config, i)
 

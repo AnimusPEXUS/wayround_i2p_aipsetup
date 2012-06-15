@@ -138,11 +138,7 @@ def get_terminal_size(fd=1):
 
 def _list_files_recurcive(start_root, start_root_len, root_dir, fd):
 
-    ld = os.listdir(root_dir)
-
-    files = aipsetup.utils.text.unicodify(
-        ld
-        )
+    files = os.listdir(root_dir)
 
     files.sort()
 
@@ -163,10 +159,9 @@ def _list_files_recurcive(start_root, start_root_len, root_dir, fd):
 
             if not os.path.isdir(full_path):
                 fd.write("%(filename)s\n" % {
-                        'filename': aipsetup.utils.text.deunicodify(
-                            "%(filename)s" % {
-                                'filename': full_path[start_root_len:]
-                                })
+                        'filename': "%(filename)s" % {
+                            'filename': full_path[start_root_len:]
+                            }
                         }
                     )
             else:

@@ -134,7 +134,7 @@ def router(opts, args, config):
             mask = '*'
 
             if args_l > 1:
-                mask = aipsetup.utils.text.unicodify(args[1])
+                mask = args[1]
 
             f = False
             for i in opts:
@@ -147,7 +147,7 @@ def router(opts, args, config):
 
         elif args[0] == 'load_package_info_from_filesystem':
 
-            file_list = aipsetup.utils.text.unicodify(args[1:])
+            file_list = args[1:]
 
             a = False
             for i in opts:
@@ -155,9 +155,7 @@ def router(opts, args, config):
                     a = True
 
             if len(file_list) == 0:
-                file_list = aipsetup.utils.text.unicodify(
-                    glob.glob(os.path.join(config['info'], '*.xml'))
-                    )
+                file_list = glob.glob(os.path.join(config['info'], '*.xml'))
 
             r = PackageDatabase(config)
             r.load_package_info_from_filesystem(file_list, a)
@@ -168,7 +166,7 @@ def router(opts, args, config):
             mask = None
 
             if args_l > 1:
-                mask = aipsetup.utils.text.unicodify(args[1])
+                mask = args[1]
 
             if mask != None:
 
@@ -182,7 +180,7 @@ def router(opts, args, config):
             mask = '*'
 
             if args_l > 1:
-                mask = aipsetup.utils.text.unicodify(args[1])
+                mask = args[1]
 
 
             r = PackageDatabase(config)
@@ -193,7 +191,7 @@ def router(opts, args, config):
             name = None
 
             if args_l > 1:
-                name = aipsetup.utils.text.unicodify(args[1])
+                name = args[1]
 
             if name != None:
 
@@ -478,7 +476,7 @@ class PackageDatabase:
 
     def _scan_repo_for_pkg_and_cat(self, sess, root_dir, cid):
 
-        files = aipsetup.utils.text.unicodify(os.listdir(root_dir))
+        files = os.listdir(root_dir)
 
         files.sort()
 
@@ -556,7 +554,6 @@ class PackageDatabase:
             sess, self._config['repository'], 0)
 
         print("")
-        count_p = sess.query(self.Package).count()
         sess.commit()
 
         print("-i- Searching for errors")
@@ -874,8 +871,6 @@ class PackageDatabase:
                 files.append(i)
 
         files.sort()
-
-        files = aipsetup.utils.text.unicodify(files)
 
         missing = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
