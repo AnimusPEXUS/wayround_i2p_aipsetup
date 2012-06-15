@@ -1,6 +1,5 @@
 
 import os.path
-import sys
 import glob
 
 import PyQt4.uic

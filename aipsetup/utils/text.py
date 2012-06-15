@@ -18,7 +18,7 @@ def return_columned_list_print(lst, width=None, columns=None,
 
     if width == None:
         if (isinstance(fd, int) and os.isatty(fd)) \
-                or (isinstance(fd, file) and fd.isatty()):
+                or (hasattr(fd, 'isatty') and fd.isatty()):
 
             size = aipsetup.utils.file.get_terminal_size(fd)
             if size == None:
@@ -51,9 +51,6 @@ def return_columned_list_print(lst, width=None, columns=None,
     if columns < 1:
         columns = 1
 
-
-    rows = int(lst_l / columns)
-
     #print "int_l   == " + str(int_l)
     #print "longest == " + str(longest)
     #print "width   == " + str(width)
@@ -81,7 +78,7 @@ def return_columned_list_print(lst, width=None, columns=None,
     return ret
 
 def codify(list_or_basestring, on_wrong_type='exception',
-           ftype='str', ttype='unicode', operation='decode',
+           ftype='bin', ttype='str', operation='decode',
            coding='utf-8'):
 
     ret = None
@@ -125,8 +122,8 @@ def unicodify(list_or_basestring, on_wrong_type='exception'):
 
     """
 
-    return codify(list_or_basestring, on_wrong_type='exception',
-                  ftype='str', ttype='unicode', operation='decode')
+    return codify(list_or_basestring, on_wrong_type=on_wrong_type,
+                  ftype='bin', ttype='str', operation='decode')
 
 def deunicodify(list_or_basestring, on_wrong_type='exception'):
 
@@ -144,8 +141,8 @@ def deunicodify(list_or_basestring, on_wrong_type='exception'):
 
     """
 
-    return codify(list_or_basestring, on_wrong_type='exception',
-                   ftype='unicode', ttype='str', operation='encode')
+    return codify(list_or_basestring, on_wrong_type=on_wrong_type,
+                   ftype='str', ttype='bin', operation='encode')
 
 
 def fill(char=' ', count=80):
