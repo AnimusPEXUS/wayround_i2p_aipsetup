@@ -30,6 +30,26 @@ def remove_if_exists(file_or_dir):
                 return 1
     return 0
 
+def create_if_not_exists_dir(file_or_dir):
+    ret = 0
+    if not os.path.exists(file_or_dir):
+        try:
+            os.makedirs(file_or_dir)
+        except:
+            ret = 1
+        else:
+            ret = 0
+    else:
+        if os.path.isfile(file_or_dir):
+            ret = 2
+        elif os.path.islink(file_or_dir):
+            ret = 3
+        elif not os.path.isdir(file_or_dir):
+            ret = 4
+        else:
+            ret = 0
+    return ret
+
 def cleanup_dir(dirname):
     files = glob.glob(os.path.join(dirname, '*'))
     for i in files:
@@ -188,7 +208,7 @@ def progress_write(line_to_write):
     line_to_out = "\r%(ltw)s%(spaces)s\r" % {
         'ltw': line_to_write,
         'spaces': aipsetup.utils.text.fill(
-            ' ', width-line_to_write_l
+            ' ', width - line_to_write_l
             )
         }
     sys.stdout.write(line_to_out)

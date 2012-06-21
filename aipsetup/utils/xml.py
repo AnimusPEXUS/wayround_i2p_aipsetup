@@ -2,6 +2,7 @@
 import copy
 import xml.sax.saxutils
 
+from . import file
 from . import text
 
 
@@ -44,11 +45,11 @@ def check_dictatorship_unit(indict, debug=False):
                 print("-e- Dictatorship unit type missing")
             ret = 2
 
-        # 'type' must be one of folloving
+        # 'type' must be one of following
         if ret == 0:
             if not indict['type'] in [
                 'tag', 'dtd', 'comment', 'cdata', 'static',
-                'pi'
+                'pi', 'char'
                 ]:
                 if debug:
                     print("-e- Wrong dictatorship unit type")
@@ -200,13 +201,13 @@ def check_dictatorship_unit(indict, debug=False):
                                             break
 
 
-            for i in ['new_line_before_start',
-                'new_line_before_content',
-                'new_line_after_content',
-                'new_line_after_end'
-                ]:
+            if ret == 0:
+                for i in ['new_line_before_start',
+                    'new_line_before_content',
+                    'new_line_after_content',
+                    'new_line_after_end'
+                    ]:
 
-                if ret == 0:
                     if i in indict:
                         if not isinstance(indict[i], bool):
                             if debug:
@@ -284,13 +285,52 @@ def _check_dictatorship_range(indict, debug=False, address=[]):
 def dictatorship_tree_check(indict, debug=False):
     return _check_dictatorship_range(indict, debug, address=[])
 
+def generate_attributes(indict, args=[], kvargs={}, debug=False, indaddr=[]):
+    ret = ''
+
+    for i in list(indict.keys()):
+
+        if ret != '':
+            ret += ' ';
+
+        value = ''
+        if callable(indict[i]):
+            try:
+                value = indict[i](indict, args=[], kvargs={}, debug=False,
+                                  indaddr=indict)
+            except:
+                ret = 1
+        elif isinstance(indict[i], str):
+            value = indict[i]
+        else:
+            raise ValueError
+
+        if isinstance(ret, str):
+            try:
+                ret += '%(name)s="%(value)s"' % {
+                    'name': i,
+                    'value': xml.sax.saxutils.escape(value)
+                    }
+            except:
+                ret = 1
+                break
+
+    return ret
+
 
 class XMLDictator:
 
     def __init__(self,
-                 static_files_dir=None,
-                 css_cache_dir=None,
-                 xml_cache_dir=None):
+                 static_files_dir,
+                 css_cache_dir,
+                 xml_cache_dir):
+
+        for i in [static_files_dir,
+                  css_cache_dir,
+                  xml_cache_dir]:
+
+            if file.create_if_not_exists_dir(i) != 0:
+                raise Exception
 
         self.xml_files = {}
         self.css_files = {}
@@ -336,29 +376,72 @@ class XMLDictator:
                 elif isinstance(indict[i]['content'], str):
                     content = indict[i]['content']
 
+                # NOTE: May be next line need to be reworked
                 content = content.replace('--', '-')
 
                 end = ' -->'
 
             elif indict[i]['type'] == 'pi':
                 start = '<?'
-                content = xml.sax.saxutils.escape(indict[i]['content'])
+                if callable(indict[i]['content']):
+                    content = indict[i]['content'](
+                        indict, args=[], kvargs={}, debug=False, indaddr=[]
+                        )
+                elif isinstance(indict[i]['content'], str):
+                    content = indict[i]['content']
                 end = ' -->'
 
             elif indict[i]['type'] == 'cdata':
                 start = '<![CDATA['
+                # NOTE: May be next line need to be reworked
                 content = indict[i]['content'].replace(']]>', '')
                 end = ']]>'
 
-            elif indict[i]['type'] == 'cdata':
-                start = '<![CDATA['
-                content = indict[i]['content'].replace(']]>', '')
-                end = ']]>'
+            elif indict[i]['type'] == 'char':
+                start = ''
+                if callable(indict[i]['content']):
+                    content = indict[i]['content'](
+                        indict, args=[], kvargs={}, debug=False, indaddr=[]
+                        )
+                elif isinstance(indict[i]['content'], str):
+                    content = indict[i]['content']
+                content = xml.sax.saxutils.escape(content)
+                end = ''
 
             elif indict[i]['type'] == 'static':
                 start = ''
                 content = indict[i]['content']
                 end = ''
+
+            elif indict[i]['type'] == 'tag':
+
+                if indict[i]['tag_info']['attributes'] != None:
+                    attributes = generate_attributes()
+
+                    if not isinstance(attributes, str):
+                        ret = 1
+
+                if isinstance(ret, str):
+
+                    closing_slash = ''
+                    if indict[i]['tag_info']['closed']:
+                        closing_slash = '/'
+
+                    start = '<%(tagname)s %(attributes)s %(closing_slash)s>' % {
+                        'tagname': indict[i]['tag_info']['name'],
+                        'attributes': attributes,
+                        'closing_slash': closing_slash
+                        }
+
+                    if not indict[i]['tag_info']['closed']:
+                        content = indict[i]['content']
+                        end = ''
+                    else:
+                        content = ''
+                        end = ''
+
+            else:
+                raise ValueError
 
 
             text = ("" \
@@ -400,7 +483,7 @@ class XMLDictator:
                 print("-e- Some dictatorship errors found")
             ret = 1
         else:
-            pass
+            ret = self._generate(indict, args, kvargs, debug, indaddr=[])
 
         return ret
 
@@ -495,14 +578,27 @@ def test():
             # None or bool. if is bool, then 'uuid' is required
             'cache': False,
 
-            'content': ''          # str, dict, None, callable
-                                   # None - exchenged to empty string
-                                   # string - used as is
-                                   # dict - assumed tobe new
-                                   # `dictatorship range'
-                                   # callable - must return string
+            # str, dict, None, callable
+            # None - exchenged to empty string
+            # string - used as is
+            # dict - assumed tobe new
+            # `dictatorship range'
+            # callable - must return string
+            'content': ''
 
             }
         }
 
-    return dictatorship_tree_check(a, True)
+    dtc = dictatorship_tree_check(a, True)
+    if dtc != 0:
+        print("DTC test error: %(num)d" % {
+            'num': dtc
+            })
+    else:
+        print("Dictator test")
+        b = XMLDictator(static_files_dir='/mnt/sda3/home/agu/p/aipsetup/tests/static',
+                        css_cache_dir='/mnt/sda3/home/agu/p/aipsetup/tests/css-c',
+                        xml_cache_dir='/mnt/sda3/home/agu/p/aipsetup/tests/xml-c')
+        ret = b.generate(a, [], {}, True)
+
+    return ret
