@@ -10,4 +10,5 @@
 *.pyo
 #*#
 /.pydevproject
-.project
+/.project
+/.settings
