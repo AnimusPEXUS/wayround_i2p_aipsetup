@@ -9,3 +9,5 @@
 *.pyc
 *.pyo
 #*#
+/.pydevproject
+.project
