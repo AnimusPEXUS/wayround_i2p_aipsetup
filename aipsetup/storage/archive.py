@@ -1,4 +1,4 @@
-# -*- codepage: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import os
 import os.path
@@ -110,14 +110,14 @@ def compress_file_xz(infile, outfile, verbose_xz=False):
             options += ['-v']
             stderr = sys.stderr
 
-        options += ['-9', '-M', str(200*1024**2), '-']
+        options += ['-9', '-M', str(200 * 1024 ** 2), '-']
 
         xzproc = aipsetup.storage.xz.xz(
-            stdin = fi,
-            stdout = fo,
-            options = options,
-            bufsize = 2*1024**2,
-            stderr = stderr
+            stdin=fi,
+            stdout=fo,
+            options=options,
+            bufsize=2 * 1024 ** 2,
+            stderr=stderr
             )
 
         xzproc.wait()
@@ -171,15 +171,15 @@ def compress_dir_contents_tar_compressor_fobj(dirname, output_fobj,
             options += ['-v']
             stderr = sys.stderr
 
-        options += ['-9', '-M', str(200*1024**2), '-']
+        options += ['-9', '-M', str(200 * 1024 ** 2), '-']
 
         comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
                 'compr': compressor
                 })(
-            stdout = output_fobj,
-            options = options,
-            bufsize = 2*1024**2,
-            stderr = stderr
+            stdout=output_fobj,
+            options=options,
+            bufsize=2 * 1024 ** 2,
+            stderr=stderr
             )
 
         options = []
@@ -192,12 +192,12 @@ def compress_dir_contents_tar_compressor_fobj(dirname, output_fobj,
         options += ['-c', '.']
 
         tarproc = aipsetup.storage.tar.tar(
-            options = options,
-            stdin = None,
-            stdout = comprproc.stdin,
-            cwd = dirname,
-            bufsize=2*1024**2,
-            stderr = stderr
+            options=options,
+            stdin=None,
+            stdout=comprproc.stdin,
+            cwd=dirname,
+            bufsize=2 * 1024 ** 2,
+            stderr=stderr
             )
 
         tarproc.wait()
@@ -280,12 +280,12 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
         tarproc = None
         try:
             tarproc = aipsetup.storage.tar.tar(
-                options = options,
-                stdin = subprocess.PIPE,
-                stdout = sys.stdout,
-                cwd = dirname,
+                options=options,
+                stdin=subprocess.PIPE,
+                stdout=sys.stdout,
+                cwd=dirname,
                 bufsize=0,
-                stderr = sys.stdout
+                stderr=sys.stdout
                 )
         except:
             print("-e- tar error detected")
@@ -304,11 +304,11 @@ def decompress_dir_contents_tar_compressor_fobj(input_fobj, dirname,
             comprproc = eval("aipsetup.storage.%(compr)s.%(compr)s" % {
                     'compr': compressor
                     })(
-                stdin = subprocess.PIPE,
-                stdout = subprocess.PIPE,
-                options = options,
-                bufsize = 0,
-                stderr = sys.stderr
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                options=options,
+                bufsize=0,
+                stderr=sys.stderr
                 )
         except:
             print("-e- compressor error detected")
@@ -370,12 +370,12 @@ def pack_dir_contents_tar(dirname, output_filename,
         options += ['-c', '.']
 
         tarproc = aipsetup.storage.tar.tar(
-            options = options,
-            stdin = None,
-            stdout = outf,
-            cwd = dirname,
-            bufsize=2*1024**2,
-            stderr = stderr
+            options=options,
+            stdin=None,
+            stdout=outf,
+            cwd=dirname,
+            bufsize=2 * 1024 ** 2,
+            stderr=stderr
             )
 
         tarproc.wait()
@@ -460,11 +460,11 @@ def xzcat(stdin):
     comprproc = None
     try:
         comprproc = aipsetup.storage.xz.xz(
-            stdin = subprocess.PIPE,
-            stdout = subprocess.PIPE,
-            options = ['-d'],
-            bufsize = 0,
-            stderr = sys.stderr
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            options=['-d'],
+            bufsize=0,
+            stderr=sys.stderr
             )
     except:
         ret = 1

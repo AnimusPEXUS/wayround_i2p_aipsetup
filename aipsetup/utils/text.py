@@ -43,10 +43,10 @@ def return_columned_list_print(lst, width=None, columns=None,
     mrl_l = len(margin_left)
     spc_l = len(spacing)
 
-    int_l = width-mrr_l-mrl_l
+    int_l = width - mrr_l - mrl_l
 
     if columns == None:
-        columns = (int_l / (longest+spc_l))
+        columns = (int_l / (longest + spc_l))
 
     if columns < 1:
         columns = 1
@@ -60,7 +60,7 @@ def return_columned_list_print(lst, width=None, columns=None,
     ret = ''
     for i in range(0, lst_l, columns):
         # print "i == " + str(i)
-        l2 = lst[i:i+columns]
+        l2 = lst[i:i + columns]
 
         l3 = []
         for j in l2:
@@ -76,74 +76,6 @@ def return_columned_list_print(lst, width=None, columns=None,
                 }
 
     return ret
-
-#def codify(list_or_basestring, on_wrong_type='exception',
-           #ftype='bytearray', ttype='str', operation='decode',
-           #coding='utf-8'):
-#
-    #ret = None
-    #if isinstance(list_or_basestring, eval(ftype)):
-        #ret = eval("list_or_basestring.%(opname)s('%(coding)s', 'strict')" % {
-                #'opname': operation,
-                #'coding': coding
-                #})
-#
-    #elif isinstance(list_or_basestring, eval(ttype)):
-        #ret = copy.copy(list_or_basestring)
-#
-    #elif isinstance(list_or_basestring, list):
-        #l2 = []
-        #for i in list_or_basestring:
-            #l2.append(unicodify(i))
-        #ret = l2
-    #else:
-        #if on_wrong_type == 'exception':
-            #raise TypeError
-        #elif on_wrong_type == 'copy':
-            #ret = copy.copy(list_or_basestring)
-        #else:
-            #raise Exception
-#
-    #return ret
-#
-#def unicodify(list_or_basestring, on_wrong_type='exception'):
-#
-    #"""
-    #Convert str or list of strs to unicode or list of unicode
-#
-    #WARNING: (Python >3 `bin' and Python <3 `str') strings all assumed
-    #to be in UTF-8. decoding will be based only on UTF-8!!!
-#
-    #dict convertion is not supported
-#
-    #if on_wrong_type == 'exception' - exception is raised if wrong
-    #type given, else if on_wrong_type == 'copy' - wrong data just
-    #copyed
-#
-    #"""
-#
-    #return codify(list_or_basestring, on_wrong_type=on_wrong_type,
-                  #ftype='bytearray', ttype='str', operation='decode')
-#
-#def deunicodify(list_or_basestring, on_wrong_type='exception'):
-#
-    #"""
-    #Convert unicode or list of unicodes to str or list of strs
-#
-    #WARNING: (Python >3 `bin' and Python <3 `str') strings all assumed
-    #to be in UTF-8. encoding will be based only on UTF-8!!!
-#
-    #dict convertion is not supported
-#
-    #if on_wrong_type == 'exception' - exception is raised if wrong
-    #type given, else if on_wrong_type == 'copy' - wrong data just
-    #copyed
-#
-    #"""
-#
-    #return codify(list_or_basestring, on_wrong_type=on_wrong_type,
-                   #ftype='str', ttype='bytearray', operation='encode')
-
 
 def fill(char=' ', count=80):
     out = ''
