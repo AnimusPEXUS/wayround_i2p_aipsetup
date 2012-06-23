@@ -3,6 +3,8 @@ import copy
 import os.path
 import sys
 import xml.sax.saxutils
+import shutil
+import re
 
 
 from . import file
@@ -31,15 +33,23 @@ def check_dictatorship_range(indict, debug=False):
 
     return ret
 
-def check_dictatorship_unit(indict, debug=False):
+def check_dictatorship_unit(indict, debug=False, path=[]):
 
     ret = 0
 
-    # Supplied data defenetly must be a dict, othervice - error
-    if not isinstance(indict, dict):
+    if len(path) >= 255:
         if debug:
-            print("-e- Supplied data is not a dict")
-        ret = 1
+            print("-e- Dictatorship tree recursion limit reached `%(path)s'" % {
+                'path': '/'.join(path)
+                })
+        ret = 25
+
+    # Supplied data defenetly must be a dict, othervice - error
+    if ret == 0:
+        if not isinstance(indict, dict):
+            if debug:
+                print("-e- Supplied data is not a dict")
+            ret = 1
 
     if ret == 0:
 
@@ -129,39 +139,25 @@ def check_dictatorship_unit(indict, debug=False):
                         else:
                             # 'css' MUST have a 'type'
                             if not 'type' in indict['tag_info']['css']:
-                                if debug:
-                                    print("-e- wrong tag `css' must have `type' attribute")
-                                ret = 15
+                                indict['tag_info']['css']['type'] = 'dynamic'
                             else:
-                                # 'css' 'type' can be None
-                                if indict['tag_info']['css']['type'] == None:
-                                    ret = 0
-                                else:
 
-                                    # 'css' 'type' can be on of folloving
-                                    if not indict['tag_info']['css']['type'] in ['static', 'dynamic', 'inline']:
-                                        if debug:
-                                            print("-e- wrong tag `css' `type' value")
-                                        ret = 16
-                                    else:
-                                        # if 'css' 'type' is 'static', then it MUST be supplied
-                                        # by 'css' 'contents'
-                                        if indict['tag_info']['css']['type'] == 'static':
-                                            if not 'contents' in indict['tag_info']['css']:
-                                                if debug:
-                                                    print("-e- `scc' `contents' must be supplied if `css' `type' is `static'")
-                                                ret = 17
-                                            else:
-                                                if indict['tag_info']['css']['contents'] == None:
-                                                    ret = 0
-                                                elif isinstance(indict['tag_info']['css']['contents'], str):
-                                                    ret = 0
-                                                elif callable(indict['tag_info']['css']['contents']):
-                                                    ret = 0
-                                                else:
-                                                    if debug:
-                                                        print("-e- wrong `scc' `contents' value type")
-                                                    ret = 18
+                                # 'css' 'type' can be on of following
+                                if not indict['tag_info']['css']['type'] in ['static', 'dynamic']:
+                                    if debug:
+                                        print("-e- wrong tag `css' `type' value")
+                                    ret = 16
+
+                            if not 'mode' in indict['tag_info']['css']:
+                                indict['tag_info']['css']['mode'] = 'block'
+                            else:
+
+                                # 'css' 'type' can be on of following
+                                if not indict['tag_info']['css']['mode'] in ['block', 'inline']:
+                                    if debug:
+                                        print("-e- wrong tag `css' `mode' value")
+                                    ret = 17
+
 
                             # 'css' can have 'cache' attribute which
                             # must be bool
@@ -200,6 +196,22 @@ def check_dictatorship_unit(indict, debug=False):
                                                 break
 
         if ret == 0:
+            if 'module' in indict:
+                if not re.match(r'[a-zA-Z]\w*-', indict['module']):
+                    if debug:
+                        print("-e- Wrong `module' name at `%(path)s'" % {
+                            'path': '/'.join(path)
+                            })
+
+        if ret == 0:
+            if 'uid' in indict:
+                if not re.match(r'[a-zA-Z][\w-]*', indict['module']):
+                    if debug:
+                        print("-e- Wrong `module' name at `%(path)s'" % {
+                            'path': '/'.join(path)
+                            })
+
+        if ret == 0:
             if 'cache' in indict:
                 if not isinstance(indict['cache'], bool):
                     if debug:
@@ -209,9 +221,9 @@ def check_dictatorship_unit(indict, debug=False):
                 indict['cache'] = False
 
         if ret == 0:
-            if indict['cache'] and not 'uuid' in indict:
+            if indict['cache'] and not 'uid' in indict:
                 if debug:
-                    print("-e- cache requested, but not uuid defined")
+                    print("-e- cache requested, but not uid defined")
                 ret = 23
 
 
@@ -268,14 +280,14 @@ def check_dictatorship_unit(indict, debug=False):
 
     return ret
 
-def _check_dictatorship_range(indict, debug=False, address=[]):
+def _check_dictatorship_range(indict, debug=False, path=[]):
 
     ret = 0
 
     if check_dictatorship_range(indict, debug) != 0:
         if debug:
             print("-e- Range error at `%(path)s'" % {
-                'path': '/'.join(address)
+                'path': '/'.join(path)
                 })
         ret = 1
     else:
@@ -284,10 +296,10 @@ def _check_dictatorship_range(indict, debug=False, address=[]):
         keys.sort()
 
         for i in keys:
-            if check_dictatorship_unit(indict[i], debug) != 0:
+            if check_dictatorship_unit(indict[i], debug, path=path + [i]) != 0:
                 if debug:
                     print("-e- Unit error at `%(path)s'" % {
-                        'path': '/'.join(address)
+                        'path': '/'.join(path)
                         })
                 ret = 2
                 break
@@ -297,7 +309,7 @@ def _check_dictatorship_range(indict, debug=False, address=[]):
                         if _check_dictatorship_range(
                             indict[i]['content'],
                             debug=debug,
-                            address=copy.copy(address) + [i]
+                            path=copy.copy(path) + [i]
                             ) != 0:
                             ret = 3
                             break
@@ -305,13 +317,13 @@ def _check_dictatorship_range(indict, debug=False, address=[]):
     return ret
 
 def dictatorship_tree_check(indict, debug=False):
-    return _check_dictatorship_range(indict, debug, address=[])
+    return _check_dictatorship_range(indict, debug, path=[])
 
-def generate_attributes(indict, args=[], kvargs={}, debug=False, indaddr=[],
+def generate_attributes(indict, debug=False, path=[],
                         indent_size=2, tagname=''):
     ret = ''
 
-    inaddr_l = len(indaddr)
+    inaddr_l = len(path)
 
     indent = text.fill(' ', inaddr_l * indent_size)
     nameindent = text.fill(' ', len(tagname))
@@ -325,13 +337,7 @@ def generate_attributes(indict, args=[], kvargs={}, debug=False, indaddr=[],
             ret += ' ';
 
         value = ''
-        if callable(indict[i]):
-            try:
-                value = indict[i](indict, args=[], kvargs={}, debug=False,
-                                  indaddr=indict)
-            except:
-                ret = 1
-        elif isinstance(indict[i], str):
+        if isinstance(indict[i], str):
             value = indict[i]
         else:
             raise ValueError
@@ -388,7 +394,8 @@ class XMLDictator:
         self.css_cache_dir = css_cache_dir
         self.xml_cache_dir = xml_cache_dir
 
-        self.uuids = {}
+        self.uids = {}
+        self.missing_static_css = []
 
         for i in [css_static_dir,
                   css_cache_dir,
@@ -397,23 +404,67 @@ class XMLDictator:
             if file.create_if_not_exists_dir(i) != 0:
                 raise Exception
 
+        return
 
 
-        #        self.xml_files = {}
-        #        self.css_files = {}
-
-
-    def generate_css_from_dict(self, indict, uuid, pseudo,
-                               cache=False, typ='dinamic',
-                               mode='block', debug=False):
-
-        if not typ in ['static', 'dynamic']:
-            raise ValueError
-
-        if not mode in ['block', 'inline']:
-            raise ValueError
+    def _generate_uid_map(self, indict, already_added, debug=False, path=[]):
 
         ret = 0
+
+        keys = list(indict.keys())
+        keys.sort()
+
+        for i in keys:
+
+            if check_dictatorship_unit(indict[i], debug) != 0:
+                if debug:
+                    print("-e- Dictatorshi check error at `%(path)s'" % {
+                        'path': '/'.join(path)
+                        })
+                ret = 1
+
+            if ret == 0:
+
+                if 'uid' in indict[i]:
+                    if not indict[i]['uid'] in self.uids:
+                        self.uids[indict[i]['uid']] = []
+
+                    if not id(indict[i]) in already_added:
+                        self.uids[indict[i]['uid']].append(indict[i])
+                        already_added.add(id(indict[i]))
+
+
+                if isinstance(indict[i]['content'], dict):
+                    if self._generate_uid_map(
+                        indict[i]['content'], already_added, debug, path=path + [i]
+                        ) != 0:
+                        if debug:
+                            print("-e- Inner uid mapper error at `%(path)s'" % {
+                                'path': '/'.join(path)
+                                })
+                            ret = 2
+
+        return ret
+
+    def generate_uid_map(self, indict, debug=False):
+        self.uids = {}
+        already_added = set()
+        return self._generate_uid_map(indict, debug, already_added, path=[])
+
+
+
+    def generate_css(self, indict, uid, pseudo,
+                      cache=False, typ='dinamic',
+                      mode='block', debug=False):
+
+        ret = 0
+
+        for i in self.uids:
+
+#            for j in self.uids[i]:
+#                pass
+
+
 
         if mode == 'inline':
             pseudo = 'inline'
@@ -421,78 +472,105 @@ class XMLDictator:
         if pseudo == '':
             pseudo = 'default'
 
-        uuid_mode_pseudo_css_filename = 'uuid-%(uuid)s.%(mode)s.%(pseudo)s.css' % {
-            'uuid': uuid,
+        uid_mode_pseudo_css_filename = 'uid-%(uid)s.%(mode)s.%(pseudo)s.css' % {
+            'uid': uid,
             'mode': mode,
             'pseudo': pseudo
             }
 
         css_cache_file_name = os.path.join(
             self.css_cache_dir,
-            uuid_mode_pseudo_css_filename
+            uid_mode_pseudo_css_filename
             )
 
         css_static_file_name = os.path.join(
             self.css_static_dir,
-            uuid_mode_pseudo_css_filename
+            uid_mode_pseudo_css_filename
             )
 
 
-        if typ == 'static':
-
+        css_txt = ''
 
         if cache and os.path.exists(css_cache_file_name):
             try:
                 f = open(css_cache_file_name, 'r')
-                rendered = f.read()
-                f.close()
             except:
                 if debug:
-                    print("-e- Can't load cache XML file `%(name)s'" % {
+                    print("-e- Can't read cache CSS file `%(name)s'" % {
                         'name': css_cache_file_name
                         })
                     error.print_exception_info(sys.exc_info())
                 ret = 2
                 break
-
-        css_txt = ''
-
-        if mode == 'block':
-
-            keys = list(indict.keys())
-            keys.sort()
-
-            css_txt = '.css-%(uuid)s {\n' % {
-                'uuid': uuid
-                }
-
-            for i in keys:
-                css_txt += '%(indent)s%(property)s: %(value)s;\n' % {
-                    'indent': '    ',
-                    'property': i,
-                    'value': indict[i]
-                    }
-
-            css_txt += '}\n'
-
-        elif typ == '':
-            css_txt = ''
-
-            for i in keys:
-                css_txt += '%(property)s: %(value)s;' % {
-                    'property': i,
-                    'value': indict[i]
-                    }
+            else:
+                css_txt = f.read()
+                f.close()
 
         else:
-            # else is only for sake of complitteness :-) 
-            pass
 
+            if typ == 'static':
+                if not os.path.isfile(css_static_file_name):
+                    self.missing_static_css.append(uid_mode_pseudo_css_filename)
+                else:
+                    shutil.copy(css_static_file_name, css_cache_file_name)
+
+            elif typ == 'dynamic':
+
+                css_txt = ''
+
+                if mode == 'block':
+
+                    keys = list(indict.keys())
+                    keys.sort()
+
+                    css_txt = '.css-%(uid)s {\n' % {
+                        'uid': uid
+                        }
+
+                    for i in keys:
+                        css_txt += '%(indent)s%(property)s: %(value)s;\n' % {
+                            'indent': '    ',
+                            'property': i,
+                            'value': indict[i]
+                            }
+
+                    css_txt += '}\n'
+
+                elif mode == 'inline':
+                    css_txt = ''
+
+                    for i in keys:
+                        css_txt += '%(property)s: %(value)s;' % {
+                            'property': i,
+                            'value': indict[i]
+                            }
+
+
+                if cache:
+                    try:
+                        f = open(css_cache_file_name, 'w')
+                    except:
+                        if debug:
+                            print("-e- Can't write cache CSS file `%(name)s'" % {
+                                'name': css_cache_file_name
+                                })
+                            error.print_exception_info(sys.exc_info())
+                        ret = 3
+                        break
+                    else:
+                        f.write(css_txt)
+                        f.close()
+
+                if mode == 'inline':
+                    self.uids[uid]['tag_info']['attributes']['style'] = css_txt
+
+
+        return ret
 
     def _generate(self, root, indict,
                   args=[], kvargs={},
                   debug=False, indaddr=[],
-                  indent_size=2, current_css_uuid=None):
+                  indent_size=2):
 
         ret = ''
 
@@ -505,13 +583,13 @@ class XMLDictator:
 
         for i in keys:
 
-            if 'uuid' in indict[i]:
-                self.uuids[indict[i]['uuid']] = indict[i]
+            if 'uid' in indict[i]:
+                self.uids[indict[i]['uid']] = indict[i]
 
             if indict[i]['cache']:
                 xml_cache_file_name = os.path.join(
                     self.xml_cache_dir,
-                    indict[i]['uuid'] + '.xml'
+                    indict[i]['uid'] + '.xml'
                     )
 
             rendered = ''
@@ -558,12 +636,8 @@ class XMLDictator:
 
                 if indict[i]['type'] == 'comment':
                     start = '<!-- '
-                    if callable(indict[i]['content']):
-                        content = indict[i]['content'](
-                            indict, args=[], kvargs={}, debug=False, indaddr=[]
-                            )
-                    elif isinstance(indict[i]['content'], str):
-                        content = indict[i]['content']
+
+                    content = str(indict[i]['content'])
 
                     # NOTE: May be next line need to be reworked
                     content = content.replace('--', '-')
@@ -572,39 +646,23 @@ class XMLDictator:
 
                 elif indict[i]['type'] == 'pi':
                     start = '<?'
-                    if callable(indict[i]['content']):
-                        content = indict[i]['content'](
-                            indict, args=[], kvargs={}, debug=False, indaddr=[]
-                            )
-                    elif isinstance(indict[i]['content'], str):
-                        content = indict[i]['content']
+                    content = str(indict[i]['content'])
                     end = '?>'
 
                 elif indict[i]['type'] == 'dtd':
                     start = '<!DOCTYPE '
-                    if callable(indict[i]['content']):
-                        content = indict[i]['content'](
-                            indict, args=[], kvargs={}, debug=False, indaddr=[]
-                            )
-                    elif isinstance(indict[i]['content'], str):
-                        content = indict[i]['content']
+                    content = str(indict[i]['content'])
                     end = '>'
 
                 elif indict[i]['type'] == 'cdata':
                     start = '<![CDATA['
                     # NOTE: May be next line need to be reworked
-                    content = indict[i]['content'].replace(']]>', '')
+                    content = str(indict[i]['content']).replace(']]>', '')
                     end = ']]>'
 
                 elif indict[i]['type'] == 'char':
                     start = ''
-                    if callable(indict[i]['content']):
-                        content = indict[i]['content'](
-                            indict, args=[], kvargs={}, debug=False, indaddr=[]
-                            )
-                    elif isinstance(indict[i]['content'], str):
-                        content = indict[i]['content']
-                    content = xml.sax.saxutils.escape(content)
+                    content = xml.sax.saxutils.escape(str(indict[i]['content']))
                     end = ''
 
                 elif indict[i]['type'] == 'static':
@@ -614,16 +672,20 @@ class XMLDictator:
 
                 elif indict[i]['type'] == 'tag':
 
-                    css_uuid = current_css_uuid
-
                     if 'css' in indict[i] \
                         and isinstance(indict[i]['css'], dict) \
                         and indict[i]['css']['type'] != None:
-                            if indict[i]['css']['separate']:
-                                # TODO: ensure uuid existance 
-                                css_uuid = indict[i]['uuid']
 
-
+                            for i in indict[i]['css']['styles']:
+                                self.generate_css_from_dict(
+                                    indict[i]['css']['styles'][i],
+                                    indict[i]['uid'],
+                                    i,
+                                    indict[i]['css']['cache'],
+                                    indict[i]['css']['dynamic'],
+                                    indict[i]['css']['mode'],
+                                    debug
+                                    )
 
                     attributes = ''
                     if indict[i]['tag_info']['attributes'] != None:
@@ -636,9 +698,9 @@ class XMLDictator:
                         if not isinstance(attributes, str):
                             ret = 1
 
-                    if 'uuid' in indict[i]:
-                        indict[i]['tag_info']['attributes']['class'] += ' .uuid-%(uuid)s' % {
-                            'uuid': indict[i]['uuid']
+                    if 'uid' in indict[i]:
+                        indict[i]['tag_info']['attributes']['class'] += ' .uid-%(uid)s' % {
+                            'uid': indict[i]['uid']
                             }
 
                     if isinstance(ret, str):
@@ -664,22 +726,16 @@ class XMLDictator:
                             }
 
                         if not indict[i]['tag_info']['closed']:
-                            c = None
-                            if callable(indict[i]['content']):
-                                c = indict[i]['content'](args, kvargs, debug)
-                            else:
-                                c = indict[i]['content']
 
-                            if isinstance(c, str):
-                                content = c
-                            elif isinstance(c, dict):
+                            if isinstance(indict[i]['content'], str):
+                                content = indict[i]['content']
+                            elif isinstance(indict[i]['content'], dict):
                                 content = self._generate(
-                                    root, c, args, kvargs, debug, indaddr=indaddr + [i],
-                                    indent_size=indent_size,
-                                    current_css_uuid=current_css_uuid
+                                    root, indict[i]['content'], args, kvargs, debug, indaddr=indaddr + [i],
+                                    indent_size=indent_size
                                     )
                             else:
-                                content = str(c)
+                                content = str(indict[i]['content'])
 
                             end = '</%(tagname)s>' % {
                                 'tagname': indict[i]['tag_info']['name']
@@ -731,7 +787,12 @@ class XMLDictator:
 
         return ret
 
-    def generate(self, indict, args=[], kvargs={}, debug=False,
+    def generate(self,
+                 indict,
+                 cont_call_args=[],
+                 css_call_args=[],
+                 attr_call_args=[],
+                 debug=False,
                  indent_size=2):
 
         ret = 0
@@ -741,12 +802,29 @@ class XMLDictator:
                 print("-e- Some dictatorship errors found")
             ret = 1
         else:
-            ret = self._generate(
-                indict, indict, args, kvargs, debug,
-                indaddr=[],
-                indent_size=indent_size,
-                current_css_uuid=None
-                )
+
+            if isinstance(ret, str):
+                if self.generate_uid_map(
+                    indict, debug
+                    ) != 0:
+                    if debug:
+                        print("-e- Some errors generating uid map")
+                    ret = 3
+
+            if isinstance(ret, str):
+                if self.generate_uid_map(
+                    indict, debug
+                    ) != 0:
+                    if debug:
+                        print("-e- Some errors generating uid map")
+                    ret = 4
+
+            if isinstance(ret, str):
+                ret = self._generate(
+                    indict, indict, args, kvargs, debug,
+                    indaddr=[],
+                    indent_size=indent_size
+                    )
 
         return ret
 
@@ -761,13 +839,13 @@ def test():
             'type': 'pi',
             'content': 'xml version="1.1" encoding="UTF-8"',
             'cache': True,
-            'uuid': '4c890ca0-66fb-42ad-b519-d87811b695b3'
+            'uid': '4c890ca0-66fb-42ad-b519-d87811b695b3'
             },
         '010_xhtml_doctype': {
             'type': 'dtd',
             'content': 'html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"',
             'cache': True,
-            'uuid': 'e156ce9f-eaf4-4f24-96ca-594b3af0944b'
+            'uid': 'e156ce9f-eaf4-4f24-96ca-594b3af0944b'
             },
         '100_html_tag': {
             # Dictatorship gange pointet dicts (like this)
@@ -781,10 +859,10 @@ def test():
 
             # This can be required by other current dict elements or
             # settings like cache or css.
-            # The uuid is not required in every dict.
-            # If uuid is used by css, then "uuid-%(uuid)s" class
+            # The uid is not required in every dict.
+            # If uid is used by css, then "uid-%(uid)s" class
             # will be added to the tag.
-            'uuid': '55aeee15-ba79-4e78-a848-2c65c2e0d6a0',
+            'uid': '55aeee15-ba79-4e78-a848-2c65c2e0d6a0',
 
             # inserts new lines
             # 'new_line_before_start': False,
@@ -817,7 +895,7 @@ def test():
                 # None or dict
                 'css': {
                         # None, 'static', 'dynamic'
-                        # if 'static', uuid-named file
+                        # if 'static', uid-named file
                         # from 'static_css' dir will be
                         # used;
                         # if 'dynamic', css will be
@@ -853,7 +931,7 @@ def test():
                     }
                 },
 
-            # None or bool. if is bool, then 'uuid' is required
+            # None or bool. if is bool, then 'uid' is required
             'cache': True,
 
             # str, dict, None, callable
