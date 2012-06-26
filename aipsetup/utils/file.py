@@ -214,3 +214,13 @@ def progress_write(line_to_write):
     sys.stdout.write(line_to_out)
     sys.stdout.flush()
     return
+
+def null_file(filename):
+    ret = 0
+    try:
+        f = open(filename, 'w')
+    except:
+        ret = 1
+    else:
+        f.close()
+    return ret

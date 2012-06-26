@@ -408,25 +408,48 @@ class XMLDictator:
                     }
                 )
 
+        # path to dir with modules dirs
         self.modules_dir = os.path.abspath(modules_dir)
 
+        # if cache_dir is differs from modules_dir, use cache_dir instead
+        # of modules_dir for cache storage
         self.cache_dir = None
         if cache_dir == None:
             self.cache_dir = self.modules_dir
         else:
             self.cache_dir = os.path.abspath(cache_dir)
 
+        # list of missing static css files
         self.missing_static_css = []
 
+        # here linedup modules are listed. key is path
         self.units = {}
 
+        # here will be stored
         self.tree_dict = {}
+
+        # here are stored list of modules. keys are 
+        # module names. eash module is dict of uid keys.
+        # each uid key value is list of dictatorship 
+        # unist
         self.modules = {}
-        self.unit_mapping = {}
+
+        # those four attributes are for code formatting
+        # purposes
+        self.xml_indent_size = xml_indent_size
+        self.xml_indent = text.fill(' ', xml_indent_size)
+
+        self.css_indent_size = css_indent_size
+        self.css_indent = text.fill(' ', css_indent_size)
+
+        # this flag is for indicating new parsing 
+        # procidure requirement
+        self.checked = False
 
         return
 
-    def set_dict(self, indict):
+    def set_tree(self, indict):
+        self.checked = False
         self.tree_dict = indict
 
 
@@ -485,8 +508,8 @@ class XMLDictator:
 
                     tmp = '/'.join(path + [i])
 
-                    if not tmp in self.unit:
-                        self.unit[tmp] = indict[i]
+                    if not tmp in self.units:
+                        self.units[tmp] = indict[i]
 
                     del(tmp)
 
@@ -517,14 +540,16 @@ class XMLDictator:
 
         ret = 0
 
-        self.modules = {}
+        self.units = {}
 
         keys = list(self.tree_dict.keys())
         keys.sort()
 
         for i in keys:
 
-            if check_dictatorship_unit(self.tree_dict[i], debug) != 0:
+            if check_dictatorship_unit(
+                self.tree_dict[i], debug, path=i.split('/')
+                ) != 0:
                 if debug:
                     print("-e- Dictatorshi check error at `%(path)s'" % {
                         'path': i
@@ -534,12 +559,12 @@ class XMLDictator:
             if ret == 0:
 
                 if 'module' in self.tree_dict[i]:
-                    if not self.tree_dict[i]['module'] in self.modules:
-                        self.modules[self.tree_dict[i]['module']] = {}
+                    if not self.tree_dict[i]['module'] in self.units:
+                        self.units[self.tree_dict[i]['module']] = {}
 
                 if 'uid' in self.tree_dict[i]:
-                    if not self.tree_dict[i]['uid'] in self.modules[self.tree_dict[i]['module']]:
-                        self.modules[self.tree_dict[i]['module']][self.tree_dict[i]['uid']] = self.tree_dict[i]
+                    if not self.tree_dict[i]['uid'] in self.units[self.tree_dict[i]['module']]:
+                        self.units[self.tree_dict[i]['module']][self.tree_dict[i]['uid']] = self.tree_dict[i]
 
         return ret
 
@@ -547,49 +572,59 @@ class XMLDictator:
 
         ret = 0
 
-        keys = list(self.tree_dict.keys())
+        keys = list(self.units.keys())
         keys.sort()
 
         for path in keys:
 
-            if 'uid' in self.tree_dict[path] \
-                and 'module' in self.tree_dict[path] \
-                and 'css' in self.tree_dict[path] \
-                and isinstance(self.tree_dict[path]['css'], dict) \
-                and 'style' in self.tree_dict[path]['css']:
+            if 'uid' in self.units[path] \
+                and 'module' in self.units[path] \
+                and 'css' in self.units[path] \
+                and isinstance(self.units[path]['css'], dict) \
+                and 'style' in self.units[path]['css']:
 
-                mode = self.tree_dict[path]['css']['mode']
-                cache = self.tree_dict[path]['css']['cache']
+                mode = self.units[path]['css']['mode']
+                cache = self.units[path]['css']['cache']
 
                 # TODO: Presice thinking required!
 
-                for pseudo in self.tree_dict[path]['css']['style']:
+                for pseudo in self.units[path]['css']['style']:
+
+                    pseudo_fn_part = ''
 
                     if mode == 'inline':
-                        pseudo = 'inline'
+                        if pseudo != '':
+                            continue
+                        else:
+                            pseudo_fn_part = 'inline'
+                    else:
+                        if pseudo == '':
+                            pseudo_fn_part = 'default'
+                        else:
+                            pseudo_fn_part = pseudo
 
-                    if pseudo == '':
-                        pseudo = 'default'
 
                     uid_mode_pseudo_css_filename = '%(uid)s.%(mode)s.%(pseudo)s.css' % {
-                        'uid': self.tree_dict[path]['uid'],
+                        'uid': self.units[path]['uid'],
                         'mode': mode,
-                        'pseudo': pseudo
+                        'pseudo': pseudo_fn_part
                         }
 
+                    del pseudo_fn_part
+
                     css_cache_file_name = os.path.join(
-                        self._get_module_css_cache_dir(self.tree_dict[path]['module']),
+                        self._get_module_css_cache_dir(self.units[path]['module']),
                         uid_mode_pseudo_css_filename
                         )
 
                     css_static_file_name = os.path.join(
-                        self._get_module_css_static_dir(self.tree_dict[path]['module']),
+                        self._get_module_css_static_dir(self.units[path]['module']),
                         uid_mode_pseudo_css_filename
                         )
 
                     css_txt = ''
 
-                    if cache and os.path.exists(css_cache_file_name):
+                    if cache and os.path.isfile(css_cache_file_name):
                         try:
                             f = open(css_cache_file_name, 'r')
                         except:
@@ -606,30 +641,37 @@ class XMLDictator:
 
                     else:
 
-                        if self.tree_dict[path]['css']['style'][pseudo] == 'static':
+                        if self.units[path]['css']['style'][pseudo] == 'static':
                             if not os.path.isfile(css_static_file_name):
                                 self.missing_static_css.append(uid_mode_pseudo_css_filename)
+                                if file.null_file(css_cache_file_name) != 0:
+                                    if debug:
+                                        print("-e- Can't touch cache CSS file `%(name)s'" % {
+                                            'name': css_cache_file_name
+                                            })
+                                    ret = 3
+
                             else:
                                 shutil.copy(css_static_file_name, css_cache_file_name)
 
-                        elif isinstance(self.tree_dict[path]['css']['style'][pseudo], dict):
+                        elif isinstance(self.units[path]['css']['style'][pseudo], dict):
 
                             css_txt = ''
 
                             if mode == 'block':
 
-                                keys = list(self.tree_dict.keys())
+                                keys = list(self.units.keys())
                                 keys.sort()
 
                                 css_txt = '.css-%(uid)s {\n' % {
-                                    'uid': self.tree_dict[path]['uid']
+                                    'uid': self.units[path]['uid']
                                     }
 
                                 for i in keys:
                                     css_txt += '%(indent)s%(property)s: %(value)s;\n' % {
-                                        'indent': '    ',
+                                        'indent': self.css_indent,
                                         'property': i,
-                                        'value': self.tree_dict[i]
+                                        'value': self.units[i]
                                         }
 
                                 css_txt += '}\n'
@@ -640,7 +682,7 @@ class XMLDictator:
                                 for i in keys:
                                     css_txt += '%(property)s: %(value)s;' % {
                                         'property': i,
-                                        'value': self.tree_dict[i]
+                                        'value': self.units[i]
                                         }
 
 
@@ -662,9 +704,7 @@ class XMLDictator:
         return ret
 
     def _generate(self, root, indict,
-                  args=[], kvargs={},
-                  debug=False, indaddr=[],
-                  indent_size=2):
+                  debug=False, indaddr=[]):
 
         ret = ''
 
@@ -673,7 +713,7 @@ class XMLDictator:
 
         inaddr_l = len(indaddr)
 
-        indent = text.fill(' ', inaddr_l * indent_size)
+        indent = text.fill(' ', inaddr_l * self.xml_indent_size)
 
         for i in keys:
 
@@ -784,8 +824,7 @@ class XMLDictator:
                     attributes = ''
                     if indict[i]['tag_info']['attributes'] != None:
                         attributes = generate_attributes(
-                            indict[i]['tag_info']['attributes'], args,
-                            kvargs, debug, indaddr,
+                            indict[i]['tag_info']['attributes'], debug, indaddr,
                             tagname=indict[i]['tag_info']['name']
                             )
 
@@ -825,8 +864,7 @@ class XMLDictator:
                                 content = indict[i]['content']
                             elif isinstance(indict[i]['content'], dict):
                                 content = self._generate(
-                                    root, indict[i]['content'], args, kvargs, debug, indaddr=indaddr + [i],
-                                    indent_size=indent_size
+                                    root, indict[i]['content'], debug, indaddr=indaddr + [i]
                                     )
                             else:
                                 content = str(indict[i]['content'])
@@ -881,17 +919,9 @@ class XMLDictator:
 
         return ret
 
-    def generate(self,
-                 cont_call_args=[],
-                 css_call_args=[],
-                 attr_call_args=[],
-                 debug=False
-                 ):
+    def generate(self, debug=False):
 
         ret = 0
-
-        xml_indent_size = self.xml_indent_size
-        css_indent_size = self.css_indent_size
 
         indict = self.indict
 
@@ -902,15 +932,13 @@ class XMLDictator:
         else:
 
             if isinstance(ret, str):
-                if self.generate_uid_map(
-                    indict, debug
-                    ) != 0:
+                if self._lineup_tree1(debug) != 0:
                     if debug:
                         print("-e- Some errors generating uid map")
                     ret = 3
 
             if isinstance(ret, str):
-                if self.generate_uid_map(
+                if self._generate_module_map(
                     indict, debug
                     ) != 0:
                     if debug:
