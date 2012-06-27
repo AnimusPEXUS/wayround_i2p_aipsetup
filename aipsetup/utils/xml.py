@@ -1,9 +1,7 @@
 
-import copy
 import os.path
 import sys
 import xml.sax.saxutils
-import shutil
 import re
 
 
@@ -32,6 +30,7 @@ def check_dictatorship_range(indict, debug=False):
                 break
 
     return ret
+
 
 def check_dictatorship_unit(indict, debug=False, path=[]):
 
@@ -124,71 +123,51 @@ def check_dictatorship_unit(indict, debug=False, path=[]):
                         else:
                             indict['tag_info']['closed'] = False
 
-                    # Process 'css', which CAN be, and if it is, then it
-                    # MUST be a dict or None
+
                     if ret == 0:
-                        if not 'css' in indict['tag_info']:
-                            ret = 0
-                        elif indict['tag_info']['css'] == None:
-                            ret = 0
-                        elif not isinstance(indict['tag_info']['css'], dict):
-                            if debug:
-                                print("-e- wrong tag `css' attribute")
-                            ret = 14
+                        if 'css_placer' in indict['tag_info']:
+                            if not isinstance(indict['tag_info']['css_placer'], bool):
+                                if debug:
+                                    print("-e- wrong `css_placer' type")
+                                ret = 30
                         else:
-                            if not 'mode' in indict['tag_info']['css']:
-                                indict['tag_info']['css']['mode'] = 'block'
-                            else:
+                            indict['tag_info']['css_placer'] = False
 
-                                # 'css' 'type' can be on of following
-                                if not indict['tag_info']['css']['mode'] in ['block', 'inline']:
-                                    if debug:
-                                        print("-e- wrong tag `css' `mode' value")
-                                    ret = 17
+                    if ret == 0:
+                        if 'js_placer' in indict['tag_info']:
+                            if not isinstance(indict['tag_info']['js_placer'], bool):
+                                if debug:
+                                    print("-e- wrong `js_placer' type")
+                                ret = 31
+                        else:
+                            indict['tag_info']['js_placer'] = False
 
+        if ret == 0:
+            for i in ['required_css', 'required_js']:
+                if i in indict:
+                    if indict[i] == None:
+                        ret = 0
+                    elif not isinstance(indict[i], list):
+                        if debug:
+                            print("-e- `%(i)s' can be list or None" % {
+                                'i': i
+                                })
+                        ret = 32
+                    else:
+                        for j in indict[i]:
+                            if not isinstance(indict[i][j], str):
+                                if debug:
+                                    print("-e- All `%(i)s' values must be strings" % {
+                                        'i': i
+                                        })
+                                ret = 33
+                                break
 
-                            # 'css' can have 'cache' attribute which
-                            # must be bool
-                            if ret == 0:
-                                if 'cache' in indict['tag_info']['css']:
-                                    if not isinstance(indict['tag_info']['css']['cache'], bool):
-                                        if debug:
-                                            print("-e- wrong `cache' `separate' value type")
-                                        ret = 20
-                                else:
-                                    indict['tag_info']['css']['cache'] = False
+                else:
+                    indict[i] = None
 
-                            if ret == 0:
-                                if 'style' in indict['tag_info']['css']:
-                                    if indict['tag_info']['css']['style'] == None:
-                                        ret = 0
-                                    elif not isinstance(indict['tag_info']['css']['style'], dict):
-                                        if debug:
-                                            print("-e- `css' `style' attribute must be a dict")
-                                        ret = 21
-                                    else:
-                                        for i in indict['tag_info']['css']['style']:
-                                            if indict['tag_info']['css']['style'][i] == 'static':
-                                                ret = 0
-                                            elif isinstance(indict['tag_info']['css']['style'][i], dict):
-
-                                                for j in indict['tag_info']['css']['style'][i]:
-                                                    if isinstance(indict['tag_info']['css']['style'][i][j], str):
-                                                        ret = 0
-                                                    else:
-                                                        if debug:
-                                                            print("-e- wrong style value")
-
-                                                        ret = 22
-                                                        break
-
-                                                if ret != 0:
-                                                    break
-                                            else:
-                                                if debug:
-                                                    print("-e- wrong style type")
-                                                ret = 27
-
+            if ret != 0:
+                break
 
         if ret == 0:
             if 'module' in indict:
@@ -288,44 +267,6 @@ def check_dictatorship_unit(indict, debug=False, path=[]):
 
     return ret
 
-def _check_dictatorship_range(indict, debug=False, path=[]):
-
-    ret = 0
-
-    if check_dictatorship_range(indict, debug) != 0:
-        if debug:
-            print("-e- Range error at `%(path)s'" % {
-                'path': '/'.join(path)
-                })
-        ret = 1
-    else:
-
-        keys = list(indict.keys())
-        keys.sort()
-
-        for i in keys:
-            if check_dictatorship_unit(indict[i], debug, path=path + [i]) != 0:
-                if debug:
-                    print("-e- Unit error at `%(path)s'" % {
-                        'path': '/'.join(path)
-                        })
-                ret = 2
-                break
-            else:
-                if indict[i]['type'] == 'tag':
-                    if isinstance(indict[i]['content'], dict):
-                        if _check_dictatorship_range(
-                            indict[i]['content'],
-                            debug=debug,
-                            path=copy.copy(path) + [i]
-                            ) != 0:
-                            ret = 3
-                            break
-
-    return ret
-
-def dictatorship_tree_check(indict, debug=False):
-    return _check_dictatorship_range(indict, debug, path=[])
 
 def generate_attributes(indict, debug=False, path=[],
                         indent_size=2, tagname=''):
@@ -397,9 +338,7 @@ class XMLDictator:
 
     def __init__(self,
                  modules_dir,
-                 cache_dir=None,
-                 xml_indent_size=2,
-                 css_indent_size=4):
+                 xml_indent_size=2):
 
         if not os.path.isdir(modules_dir):
             raise XMLDictatorModulesDirError(
@@ -410,17 +349,6 @@ class XMLDictator:
 
         # path to dir with modules dirs
         self.modules_dir = os.path.abspath(modules_dir)
-
-        # if cache_dir is differs from modules_dir, use cache_dir instead
-        # of modules_dir for cache storage
-        self.cache_dir = None
-        if cache_dir == None:
-            self.cache_dir = self.modules_dir
-        else:
-            self.cache_dir = os.path.abspath(cache_dir)
-
-        # list of missing static css files
-        self.missing_static_css = []
 
         # here linedup modules are listed. key is path
         self.units = {}
@@ -442,43 +370,25 @@ class XMLDictator:
         self.css_indent_size = css_indent_size
         self.css_indent = text.fill(' ', css_indent_size)
 
-        # this flag is for indicating new parsing 
-        # procidure requirement
-        self.checked = False
+        self.css_placer = None
+        self.js_placer = None
 
         return
 
     def set_tree(self, indict):
-        self.checked = False
         self.tree_dict = indict
 
 
-    def _get_module_dir(self, modulename):
-        ret = os.path.join(self.cache_dir, modulename)
+    def get_module_dir(self, modulename):
+        ret = os.path.join(self.modules_dir, modulename)
 
         if file.create_if_not_exists_dir(ret) != 0:
             ret = 1
 
         return ret
 
-    def _get_module_css_static_dir(self, modulename):
-        ret = os.path.join(self.cache_dir, modulename, 'css')
-
-        if file.create_if_not_exists_dir(ret) != 0:
-            ret = 1
-
-        return ret
-
-    def _get_module_css_cache_dir(self, modulename):
-        ret = os.path.join(self.cache_dir, modulename, 'css_cache')
-
-        if file.create_if_not_exists_dir(ret) != 0:
-            ret = 1
-
-        return ret
-
-    def _get_module_xml_cache_dir(self, modulename):
-        ret = os.path.join(self.cache_dir, modulename, 'xml_cache')
+    def get_module_css_dir(self, modulename):
+        ret = os.path.join(self.modules_dir, modulename, 'css')
 
         if file.create_if_not_exists_dir(ret) != 0:
             ret = 1
@@ -486,7 +396,7 @@ class XMLDictator:
         return ret
 
 
-    def _lineup_tree2(self, indict, already_added, debug=False, path=[]):
+    def _lineup_tree(self, indict, already_added, debug=False, path=[]):
 
         ret = 0
 
@@ -495,60 +405,60 @@ class XMLDictator:
 
         for i in keys:
 
-            if check_dictatorship_unit(indict[i], debug) != 0:
-                if debug:
-                    print("-e- Dictatorshi check error at `%(path)s'" % {
-                        'path': '/'.join(path)
-                        })
-                ret = 1
+            if not id(indict[i]) in already_added:
 
-            if ret == 0:
+                tmp = '/'.join(path + [i])
 
-                if not id(indict[i]) in already_added:
+                if not tmp in self.units:
+                    self.units[tmp] = indict[i]
 
-                    tmp = '/'.join(path + [i])
+                del(tmp)
 
-                    if not tmp in self.units:
-                        self.units[tmp] = indict[i]
-
-                    del(tmp)
-
-                    already_added.add(id(indict[i]))
+                already_added.add(id(indict[i]))
 
 
-                if isinstance(indict[i]['content'], dict):
-                    if self._lineup_tree2(
-                        indict[i]['content'], already_added, debug, path=path + [i]
-                        ) != 0:
-                        if debug:
-                            print("-e- Inner tree lineup error error at `%(path)s'" % {
-                                'path': '/'.join(path)
-                                })
-                        ret = 2
+            if isinstance(indict[i]['content'], dict):
+                if self._lineup_tree2(
+                    indict[i]['content'], already_added, debug, path=path + [i]
+                    ) != 0:
+                    if debug:
+                        print("-e- Inner tree lineup error error at `%(path)s'" % {
+                            'path': '/'.join(path)
+                            })
+                    ret = 2
 
         return ret
 
-    def _lineup_tree1(self, debug=False):
+    def lineup_tree(self, debug=False):
         self.units = {}
         already_added = set()
-        return self._lineup_tree2(
+        return self._lineup_tree(
             self.tree_dict, already_added, debug, path=[]
             )
 
+    def check_tree(self, debug=False):
+        ret = 0
+        for i in list(self.units.keys()).sort():
+            if check_dictatorship_unit(self.units[i], debug, i.split('/')) != 0:
+                if debug:
+                    print("-e- Error while checking `%(path)s'" % {
+                        'path': i
+                        })
+                ret = 1
 
-    def _generate_module_map(self, debug=False):
+        return ret
+
+
+    def generate_module_map(self, debug=False):
 
         ret = 0
 
         self.units = {}
 
-        keys = list(self.tree_dict.keys())
-        keys.sort()
-
-        for i in keys:
+        for i in list(self.units.keys()).sort():
 
             if check_dictatorship_unit(
-                self.tree_dict[i], debug, path=i.split('/')
+                self.units[i], debug, path=i.split('/')
                 ) != 0:
                 if debug:
                     print("-e- Dictatorshi check error at `%(path)s'" % {
@@ -558,160 +468,50 @@ class XMLDictator:
 
             if ret == 0:
 
-                if 'module' in self.tree_dict[i]:
-                    if not self.tree_dict[i]['module'] in self.units:
-                        self.units[self.tree_dict[i]['module']] = {}
+                if 'module' in self.units[i]:
+                    if not self.units[i]['module'] in self.units:
+                        self.units[self.units[i]['module']] = {}
 
-                if 'uid' in self.tree_dict[i]:
-                    if not self.tree_dict[i]['uid'] in self.units[self.tree_dict[i]['module']]:
-                        self.units[self.tree_dict[i]['module']][self.tree_dict[i]['uid']] = self.tree_dict[i]
-
-        return ret
-
-    def _generate_css(self, debug=False):
-
-        ret = 0
-
-        keys = list(self.units.keys())
-        keys.sort()
-
-        for path in keys:
-
-            if 'uid' in self.units[path] \
-                and 'module' in self.units[path] \
-                and 'css' in self.units[path] \
-                and isinstance(self.units[path]['css'], dict) \
-                and 'style' in self.units[path]['css']:
-
-                mode = self.units[path]['css']['mode']
-                cache = self.units[path]['css']['cache']
-
-                # TODO: Presice thinking required!
-
-                for pseudo in self.units[path]['css']['style']:
-
-                    pseudo_fn_part = ''
-
-                    if mode == 'inline':
-                        if pseudo != '':
-                            continue
-                        else:
-                            pseudo_fn_part = 'inline'
-                    else:
-                        if pseudo == '':
-                            pseudo_fn_part = 'default'
-                        else:
-                            pseudo_fn_part = pseudo
-
-
-                    uid_mode_pseudo_css_filename = '%(uid)s.%(mode)s.%(pseudo)s.css' % {
-                        'uid': self.units[path]['uid'],
-                        'mode': mode,
-                        'pseudo': pseudo_fn_part
-                        }
-
-                    del pseudo_fn_part
-
-                    css_cache_file_name = os.path.join(
-                        self._get_module_css_cache_dir(self.units[path]['module']),
-                        uid_mode_pseudo_css_filename
-                        )
-
-                    css_static_file_name = os.path.join(
-                        self._get_module_css_static_dir(self.units[path]['module']),
-                        uid_mode_pseudo_css_filename
-                        )
-
-                    css_txt = ''
-
-                    if cache and os.path.isfile(css_cache_file_name):
-                        try:
-                            f = open(css_cache_file_name, 'r')
-                        except:
-                            if debug:
-                                print("-e- Can't read cache CSS file `%(name)s'" % {
-                                    'name': css_cache_file_name
-                                    })
-                                error.print_exception_info(sys.exc_info())
-                            ret = 2
-                            break
-                        else:
-                            css_txt = f.read()
-                            f.close()
-
-                    else:
-
-                        if self.units[path]['css']['style'][pseudo] == 'static':
-                            if not os.path.isfile(css_static_file_name):
-                                self.missing_static_css.append(uid_mode_pseudo_css_filename)
-                                if file.null_file(css_cache_file_name) != 0:
-                                    if debug:
-                                        print("-e- Can't touch cache CSS file `%(name)s'" % {
-                                            'name': css_cache_file_name
-                                            })
-                                    ret = 3
-
-                            else:
-                                shutil.copy(css_static_file_name, css_cache_file_name)
-
-                        elif isinstance(self.units[path]['css']['style'][pseudo], dict):
-
-                            css_txt = ''
-
-                            if mode == 'block':
-
-                                keys = list(self.units.keys())
-                                keys.sort()
-
-                                css_txt = '.css-%(uid)s {\n' % {
-                                    'uid': self.units[path]['uid']
-                                    }
-
-                                for i in keys:
-                                    css_txt += '%(indent)s%(property)s: %(value)s;\n' % {
-                                        'indent': self.css_indent,
-                                        'property': i,
-                                        'value': self.units[i]
-                                        }
-
-                                css_txt += '}\n'
-
-                            elif mode == 'inline':
-                                css_txt = ''
-
-                                for i in keys:
-                                    css_txt += '%(property)s: %(value)s;' % {
-                                        'property': i,
-                                        'value': self.units[i]
-                                        }
-
-
-                            if cache:
-                                try:
-                                    f = open(css_cache_file_name, 'w')
-                                except:
-                                    if debug:
-                                        print("-e- Can't write cache CSS file `%(name)s'" % {
-                                            'name': css_cache_file_name
-                                            })
-                                        error.print_exception_info(sys.exc_info())
-                                    ret = 3
-                                    break
-                                else:
-                                    f.write(css_txt)
-                                    f.close()
+                if 'uid' in self.units[i]:
+                    if not self.units[i]['uid'] in self.units[self.units[i]['module']]:
+                        self.units[self.units[i]['module']][self.units[i]['uid']] = self.units[i]
 
         return ret
 
-    def _generate(self, root, indict,
-                  debug=False, indaddr=[]):
+    def find_placers(self, debug=False):
+
+        self.css_placer = None
+        self.js_placer = None
+
+        for i in list(self.units.keys()).sort():
+
+            if self.css_placer != None and self.js_placer != None:
+                break
+
+            if self.css_placer == None:
+                if 'tag_info' in self.units[i] \
+                    and 'css_placer' in self.units[i]['tag_info']:
+                    self.css_placer = self.units[i]
+
+            if self.js_placer == None:
+                if 'tag_info' in self.units[i] \
+                    and 'js_placer' in self.units[i]['tag_info']:
+                    self.js_placer = self.units[i]
+
+        return
+
+    def place_css(self, debug=False):
+        pass
+
+
+    def _generate(self, root, indict, debug=False, path=[]):
 
         ret = ''
 
         keys = list(indict.keys())
         keys.sort()
 
-        inaddr_l = len(indaddr)
+        inaddr_l = len(path)
 
         indent = text.fill(' ', inaddr_l * self.xml_indent_size)
 
@@ -806,35 +606,15 @@ class XMLDictator:
 
                 elif indict[i]['type'] == 'tag':
 
-                    if 'css' in indict[i] \
-                        and isinstance(indict[i]['css'], dict) \
-                        and indict[i]['css']['type'] != None:
-
-                            for i in indict[i]['css']['styles']:
-                                self.generate_css_from_dict(
-                                    indict[i]['css']['styles'][i],
-                                    indict[i]['uid'],
-                                    i,
-                                    indict[i]['css']['cache'],
-                                    indict[i]['css']['dynamic'],
-                                    indict[i]['css']['mode'],
-                                    debug
-                                    )
-
                     attributes = ''
                     if indict[i]['tag_info']['attributes'] != None:
                         attributes = generate_attributes(
-                            indict[i]['tag_info']['attributes'], debug, indaddr,
+                            indict[i]['tag_info']['attributes'], debug, path,
                             tagname=indict[i]['tag_info']['name']
                             )
 
                         if not isinstance(attributes, str):
                             ret = 1
-
-                    if 'uid' in indict[i]:
-                        indict[i]['tag_info']['attributes']['class'] += ' .uid-%(uid)s' % {
-                            'uid': indict[i]['uid']
-                            }
 
                     if isinstance(ret, str):
 
@@ -864,7 +644,7 @@ class XMLDictator:
                                 content = indict[i]['content']
                             elif isinstance(indict[i]['content'], dict):
                                 content = self._generate(
-                                    root, indict[i]['content'], debug, indaddr=indaddr + [i]
+                                    root, indict[i]['content'], debug, path=path + [i]
                                     )
                             else:
                                 content = str(indict[i]['content'])
@@ -919,13 +699,11 @@ class XMLDictator:
 
         return ret
 
-    def generate(self, debug=False):
+    def generate(self, debug=False, generate_css=False, generate_js=False):
 
         ret = 0
 
-        indict = self.indict
-
-        if dictatorship_tree_check(indict, debug) != 0:
+        if self._check_tree(debug) != 0:
             if debug:
                 print("-e- Some dictatorship errors found")
             ret = 1
@@ -938,18 +716,14 @@ class XMLDictator:
                     ret = 3
 
             if isinstance(ret, str):
-                if self._generate_module_map(
-                    indict, debug
-                    ) != 0:
+                if self._generate_module_map(debug) != 0:
                     if debug:
-                        print("-e- Some errors generating uid map")
+                        print("-e- Some errors generating module map")
                     ret = 4
 
             if isinstance(ret, str):
                 ret = self._generate(
-                    indict, indict, debug,
-                    indaddr=[],
-                    indent_size=2
+                    self.tree_dict, self.tree_dict, debug, path=[]
                     )
 
         return ret
@@ -1015,29 +789,7 @@ def test():
                 # (bool) if True - no contents is
                 # passible and any info supplied in 'contents'
                 # will be omited. Default is False.
-                'closed': False,
-
-                # None or dict
-                'css': {
-                        # 'block' or 'inline'.
-                        # if 'inline', only '' style is used
-                        'mode': 'block',
-
-                        # is will be generated evey time or cache will
-                        # be used, Default is False
-                        'cache': True,
-
-                        # styles to apply.
-                        'styles': {
-                            '': {
-                                    # value must be string
-                                    'border': '1px black solid'
-                                },
-                            'hover': {
-                                }
-                            # etc.
-                            }
-                    }
+                'closed': False
                 },
 
             # None or bool. if is bool, then 'uid' is required
@@ -1053,7 +805,9 @@ def test():
                 '10_head': {
                     'type': 'tag',
                     'tag_info': {
-                        'name': 'head'
+                        'name': 'head',
+                        'css_placer': True,
+                        'js_placer': True
                         },
                     'content': {
                         'title': {
@@ -1069,24 +823,19 @@ def test():
                     'type': 'tag',
                     'tag_info': {
                         'name': 'body'
-                        }
+                        },
+                    'required_css': [],
+                    'required_js': [],
                     }
                 }
 
             }
         }
 
-    dtc = dictatorship_tree_check(a, True)
-    if dtc != 0:
-        print("DTC test error: %(num)d" % {
-            'num': dtc
-            })
-        ret = 1
-    else:
-        print("Dictator test")
-        b = XMLDictator(static_files_dir='/mnt/sda3/home/agu/p/aipsetup/tests/static',
-                        css_cache_dir='/mnt/sda3/home/agu/p/aipsetup/tests/css-c',
-                        xml_cache_dir='/mnt/sda3/home/agu/p/aipsetup/tests/xml-c')
-        ret = b.generate(a, [], {}, True)
+    print("Dictator test")
+    b = XMLDictator(static_files_dir='/mnt/sda3/home/agu/p/aipsetup/tests/static',
+                    css_cache_dir='/mnt/sda3/home/agu/p/aipsetup/tests/css-c',
+                    xml_cache_dir='/mnt/sda3/home/agu/p/aipsetup/tests/xml-c')
+    ret = b.generate(a, [], {}, True)
 
     return ret
