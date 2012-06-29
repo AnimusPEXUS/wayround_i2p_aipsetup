@@ -1,206 +1,23 @@
 # -*- coding: utf-8 -*-
 
 
-import os.path
 import sys
 import xml.sax.saxutils
 import re
 import urllib.parse
 
-
-from . import file
 from . import text
 from . import error
 
+class DictatorshipUnitTooDeep(Exception): pass
+class MissingDictatorshipUnitAttribute(Exception): pass
+class ModulesDirError(Exception): pass
+
+class DictTreeToXMLRenderer:
 
 
-def check_dictatorship_range(indict, debug=False):
-    ret = 0
-
-    if not isinstance(indict, dict):
-        if debug:
-            print("-e- Supplied data is not a dict")
-        ret = 1
-    else:
-
-        for i in indict:
-            if not isinstance(indict[i], dict):
-                if debug:
-                    print("-e- Dictatorship `%(name)s' element value is not a dict" % {
-                        'name': i
-                        })
-                ret = 2
-                break
-
-    return ret
-
-class ExceptionDictatorshipUnitTooDeep(Exception): pass
-class ExceptionMissingDictatorshipUnitAttribute(Exception): pass
-
-def check_dictatorship_unit(indict, path=[]):
-
-    if len(path) >= 255:
-        raise ExceptionDictatorshipUnitTooDeep("Dictatorship tree recursion limit reached `%(path)s'" % {
-                'path': '/'.join(path)
-                })
-
-    # Supplied data defenetly must be a dict, othervice - error
-    if not isinstance(indict, dict):
-        raise ValueError("Supplied data is not a dict")
-
-    # 'type' must be supplied
-    if not 'type' in indict:
-        raise ExceptionMissingDictatorshipUnitAttribute("Dictatorship unit type missing")
-
-    # 'type' must be one of following
-    if not indict['type'] in [
-        'tag', 'dtd', 'comment', 'cdata', 'static',
-        'pi', 'char'
-        ]:
-        raise ValueError("Wrong dictatorship unit type")
-
-    # If 'type' is 'tag', then check 'tag_info' and everything,
-    # what underlie
-    if indict['type'] == 'tag':
-        if not 'tag_info' in indict \
-            or not isinstance(indict['tag_info'], dict):
-            raise ExceptionMissingDictatorshipUnitAttribute(
-                "Dictatorship unit type is `tag', but not `tag_info' supplied"
-                )
-
-        else:
-            # tag name MUST be supplied and must be a string!
-            if not 'name' in indict['tag_info']:
-                raise ExceptionMissingDictatorshipUnitAttribute(
-                    "`name' not supplied in dictatorship unit `tag_info'"
-                    )
-            else:
-                if not isinstance(indict['tag_info']['name'], str):
-                    raise TypeError("tag `name' must be a string")
-
-            # attributes CAN be supplied or CAN be a None or a dict
-            if 'attributes' in indict['tag_info']:
-                if indict['tag_info']['attributes'] == None:
-                    indict['tag_info']['attributes'] = {}
-                else:
-                    if not isinstance(indict['tag_info']['attributes'], dict):
-                        raise TypeError("tag `attributes' must be dict")
-                    else:
-                        # attribute values can be a strings or callabels
-                        for i in indict['tag_info']['attributes']:
-                            if not isinstance(indict['tag_info']['attributes'][i], str):
-                                raise TypeError("tag `attributes' dict values must be strings")
-            else:
-                indict['tag_info']['attributes'] = {}
-
-            # 'tag_info' 'closed' attribute CAN be supplied and CAN be
-            #  None or bool.
-            if 'closed' in indict['tag_info']:
-                if not isinstance(indict['tag_info']['closed'], bool):
-                    raise TypeError("tag `closed' attribute can be only bool")
-            else:
-                indict['tag_info']['closed'] = False
-
-
-            if 'placer' in indict['tag_info']:
-                if not isinstance(indict['tag_info']['placer'], bool):
-                    raise TypeError("wrong `placer' type")
-            else:
-                indict['tag_info']['placer'] = False
-
-
-    for i in ['required_css', 'required_js']:
-        if i in indict:
-            if indict[i] == None:
-                pass
-            elif not isinstance(indict[i], list):
-                raise TypeError("`%(i)s' can be list or None" % {
-                    'i': i
-                    })
-            else:
-                for j in indict[i]:
-                    if not isinstance(indict[i][j], str):
-                        raise TypeError("All `%(i)s' values must be strings" % {
-                            'i': i
-                            })
-
-        else:
-            indict[i] = None
-
-
-    for i in ['module', 'uid']:
-        if i in indict:
-            if not re.match(r'[a-zA-Z][\w-]*', indict[i]):
-                raise ValueError("Wrong `%(i)s' value at `%(path)s'" % {
-                    'path': '/'.join(path),
-                    'i': i
-                    })
-        else:
-            raise ExceptionMissingDictatorshipUnitAttribute(
-                "`%(i)s' required to be in unit!" % {
-                    'i': i
-                    }
-                )
-
-    if not 'content' in indict:
-        indict['content'] = ''
-    elif indict['content'] == None:
-        indict['content'] = ''
-    elif isinstance(indict['content'], str):
-        pass
-    elif isinstance(indict['content'], dict):
-        pass
-    else:
-        raise ValueError("wrong unit content value")
-
-    if indict['tag_info']['placer'] == True:
-        if not isinstance(indict['content'], dict):
-            raise ValueError("`placer' is True, so `content' MUST be dict")
-
-    default_new_line_before_start = False
-    default_new_line_before_content = False
-    default_new_line_after_content = False
-    default_new_line_after_end = False
-
-    if indict['type'] == 'tag':
-        default_new_line_before_start = True
-        if indict['tag_info']['closed']:
-            default_new_line_after_content = True
-        else:
-            if isinstance(indict['content'], dict):
-                default_new_line_after_content = True
-
-    elif indict['type'] in ['tag', 'comment', 'dtd',
-                            'pi']:
-        default_new_line_after_end = True
-
-
-    for i in [
-        ('new_line_before_start', default_new_line_before_start),
-        ('new_line_before_content', default_new_line_before_content),
-        ('new_line_after_content', default_new_line_after_content),
-        ('new_line_after_end', default_new_line_after_end)
-        ]:
-        if i[0] in indict:
-            if not isinstance(indict[i[0]], bool):
-                raise TypeError("-e- wrong `%(name)s' value type" % {
-                    'name': i[0]
-                    })
-        else:
-            indict[i[0]] = i[1]
-
-    return
-
-
-
-
-class XMLDictatorModulesDirError(Exception): pass
-
-
-class XMLDictator:
-
-
-    def __init__(self, xml_indent_size=2, generate_css=False, generate_js=False):
+    def __init__(self, xml_indent_size=2, generate_css=False, generate_js=False,
+                 log_size=100):
 
         # here linedup modules are listed. key is path
         self.units = {}
@@ -213,14 +30,14 @@ class XMLDictator:
         self.xml_indent_size = xml_indent_size
         self.xml_indent = text.fill(' ', xml_indent_size)
 
-        self.placer = None
+        self.css_and_js_holder = None
 
         self.css_placeables = []
         self.js_placeables = []
 
         self.log = []
 
-        self.log_size = 100
+        self.log_size = log_size
 
         self.generate_css = generate_css
         self.generate_js = generate_js
@@ -237,6 +54,10 @@ class XMLDictator:
         self.log.append(text)
 
 
+    def print_log(self):
+        for i in self.log:
+            print(i)
+
     def set_tree(self, indict):
         self.tree_dict = indict
 
@@ -245,33 +66,34 @@ class XMLDictator:
 
         ret = 0
 
-        keys = list(indict.keys())
-        keys.sort()
+        if self.check_range(indict) != 0:
+            self.do_log("_lineup_tree wrong input dict at path %(path)s" % {
+                'path': '/'.join(path)
+                })
+        else:
 
-        if check_dictatorship_range(indict):
+            keys = list(indict.keys())
+            keys.sort()
 
-        for i in keys:
+            for i in keys:
 
-            if not id(indict[i]) in already_added:
+                if not id(indict[i]) in already_added:
 
-                tmp = '/'.join(path + [i])
+                    tmp = '/'.join(path + [i])
 
-                if not tmp in self.units:
-                    self.units[tmp] = indict[i]
+                    if not tmp in self.units:
+                        self.units[tmp] = indict[i]
 
-                del(tmp)
+                    del(tmp)
 
-                already_added.add(id(indict[i]))
+                    already_added.add(id(indict[i]))
 
-
-            if isinstance(indict[i]['content'], dict):
-                if self._lineup_tree(
-                    indict[i]['content'], already_added, path=path + [i]
-                    ) != 0:
-                    self.do_log("-e- Inner tree lineup error error at `%(path)s'" % {
-                        'path': '/'.join(path)
-                        })
-                    ret = 2
+                if 'content' in indict[i]:
+                    if isinstance(indict[i]['content'], dict):
+                        if self._lineup_tree(
+                            indict[i]['content'], already_added, path=path + [i]
+                            ) != 0:
+                            ret = 2
 
         return ret
 
@@ -279,9 +101,12 @@ class XMLDictator:
     def lineup_tree(self):
         self.units = {}
         already_added = set()
-        return self._lineup_tree(
+        ret = self._lineup_tree(
             self.tree_dict, already_added, path=[]
             )
+        print(repr(list(self.units.keys())))
+
+        return ret
 
 
     def check_tree(self):
@@ -292,20 +117,25 @@ class XMLDictator:
 
         for i in keys:
             try:
-                check_dictatorship_unit(self.units[i], i.split('/'))
+                self.check_unit(
+                    self.units[i], i.split('/')
+                    )
             except:
-                self.do_log("-e- Error while checking `%(path)s'\n%(exc_info)s" % {
-                    'path': i,
-                    'exc_info': error.return_exception_info(sys.exc_info())
-                    })
+                self.do_log(
+                    "-e- Error while checking `%(path)s'\n%(exc_info)s" % {
+                        'path': i,
+                        'exc_info': error.return_exception_info(sys.exc_info())
+                        }
+                    )
                 ret = 1
+                break
 
         return ret
 
 
-    def find_placer(self):
+    def find_css_and_js_holder(self):
 
-        self.placer = None
+        self.css_and_js_holder = None
 
         keys = list(self.units.keys())
         keys.sort()
@@ -313,15 +143,16 @@ class XMLDictator:
         for i in keys:
 
             if 'tag_info' in self.units[i] \
-                and 'placer' in self.units[i]['tag_info']:
+                and 'css_and_js_holder' in self.units[i]['tag_info'] \
+                and self.units[i]['tag_info']['css_and_js_holder']:
 
-                self.placer = self.units[i]
+                self.css_and_js_holder = self.units[i]
                 break
 
         return
 
 
-    def find_placeables(self):
+    def find_required_css_and_js(self):
 
         self.css_placeables = []
         self.js_placeables = []
@@ -329,38 +160,44 @@ class XMLDictator:
         keys = list(self.units.keys())
         keys.sort()
 
+
         for i in keys:
+
+            if not self.generate_css and not self.generate_js:
+                break
 
             if not 'module' in self.units[i] \
                 or not 'uid' in self.units[i]:
                 continue
 
 
-            if 'required_css' in self.units[i]:
-                for j in self.units[i]['required_css']:
-                    placeable_name = "%(module)s/%(uid)s/%(required)s" % {
-                        'module': self.units[i]['module'],
-                        'uid': self.units[i]['uid'],
-                        'required': j,
-                        }
-                    if not placeable_name in self.css_placeables:
-                        self.css_placeables.append()
+            if self.generate_css:
+                if 'required_css' in self.units[i]:
+                    for j in self.units[i]['required_css']:
+                        placeable_name = "%(module)s/%(uid)s/%(required)s" % {
+                            'module': self.units[i]['module'],
+                            'uid': self.units[i]['uid'],
+                            'required': j,
+                            }
+                        if not placeable_name in self.css_placeables:
+                            self.css_placeables.append(placeable_name)
 
-            if 'required_js' in self.units[i]:
-                for j in self.units[i]['required_js']:
-                    placeable_name = "%(module)s/%(uid)s/%(required)s" % {
-                        'module': self.units[i]['module'],
-                        'uid': self.units[i]['uid'],
-                        'required': j,
-                        }
-                    if not placeable_name in self.js_placeables:
-                        self.js_placeables.append()
+            if self.generate_js:
+                if 'required_js' in self.units[i]:
+                    for j in self.units[i]['required_js']:
+                        placeable_name = "%(module)s/%(uid)s/%(required)s" % {
+                            'module': self.units[i]['module'],
+                            'uid': self.units[i]['uid'],
+                            'required': j,
+                            }
+                        if not placeable_name in self.js_placeables:
+                            self.js_placeables.append(placeable_name)
 
         return
 
 
     def css_path_renderer(self, inname):
-        module, uid, file = inname.split('/')[0:2]
+        module, uid, file = inname.split('/')[0:3]
 
         return "/css?module=%(module)s&uid=%(uid)s&file=%(file)s" % {
             'module': urllib.parse.quote(module, encoding='utf-8', errors='strict'),
@@ -370,7 +207,7 @@ class XMLDictator:
 
 
     def js_path_renderer(self, inname):
-        module, uid = inname.split('/')[0:2]
+        module, uid, file = inname.split('/')[0:3]
 
         return "/js?module=%(module)s&uid=%(uid)s&file=%(file)s" % {
             'module': urllib.parse.quote(module, encoding='utf-8', errors='strict'),
@@ -379,62 +216,70 @@ class XMLDictator:
             }
 
 
-    def place(self,
+    def place_found_css_and_js(self,
               css_path_renderer=css_path_renderer,
               js_path_renderer=js_path_renderer):
 
-
-
-        last_placer_child_name = max(self.placer['content'])
+        last_placer_child_name = max(self.css_and_js_holder['content'])
 
         placement_i = 0
 
-        for i in self.css_placeables:
+        if self.generate_css:
+            for i in self.css_placeables:
 
-            new_key = '%(last_placer_child_name)s-%(num)10d' % {
-                'last_placer_child_name': last_placer_child_name,
-                'num': placement_i
-                }
-
-            placement_i += 1
-
-            self.placer['content'][new_key] = {
-                'type': 'tag',
-                'tag_info': {
-                    'name': 'style',
-                    'attributes': {
-                        'type': 'text/css',
-                        'src': css_path_renderer(i)
-                        },
-                    'closed': False
+                new_key = '%(last_placer_child_name)s-%(num)010d' % {
+                    'last_placer_child_name': last_placer_child_name,
+                    'num': placement_i
                     }
-                }
 
-        for i in self.js_placeables:
+                placement_i += 1
 
-            new_key = '%(last_placer_child_name)s-%(num)10d' % {
-                'last_placer_child_name': last_placer_child_name,
-                'num': placement_i
-                }
-
-            placement_i += 1
-
-            self.placer['content'][new_key] = {
-                'type': 'tag',
-                'tag_info': {
-                    'name': 'script',
-                    'attributes': {
-                        'type': 'text/javascript',
-                        'src': js_path_renderer(i)
-                        },
-                    'closed': False
+                new_val = {
+                    'type': 'tag',
+                    'tag_info': {
+                        'name': 'style',
+                        'attributes': {
+                            'type': 'text/css',
+                            'src': css_path_renderer(self, i)
+                            },
+                        'closed': False
+                        }
                     }
-                }
+
+                self.check_unit(new_val)
+
+                self.css_and_js_holder['content'][new_key] = new_val
+
+        if self.generate_js:
+            for i in self.js_placeables:
+
+                new_key = '%(last_placer_child_name)s-%(num)010d' % {
+                    'last_placer_child_name': last_placer_child_name,
+                    'num': placement_i
+                    }
+
+                placement_i += 1
+
+                new_val = {
+                    'type': 'tag',
+                    'tag_info': {
+                        'name': 'script',
+                        'attributes': {
+                            'type': 'text/javascript',
+                            'src': js_path_renderer(self, i)
+                            },
+                        'closed': False
+                        }
+                    }
+
+                self.check_unit(new_val)
+
+                self.css_and_js_holder['content'][new_key] = new_val
 
         return
 
 
-    def _generate(self, root, indict, path=[]):
+    def _render(self, root, indict, path=[]):
 
         ret = ''
 
@@ -446,9 +291,6 @@ class XMLDictator:
         indent = text.fill(' ', inaddr_l * self.xml_indent_size)
 
         for i in keys:
-
-            if 'uid' in indict[i]:
-                self.uids[indict[i]['uid']] = indict[i]
 
             rendered = ''
 
@@ -517,7 +359,7 @@ class XMLDictator:
 
                 attributes = ''
                 if indict[i]['tag_info']['attributes'] != None:
-                    attributes = self.generate_attributes(
+                    attributes = self.render_attributes(
                         indict[i]['tag_info']['attributes'], path,
                         tagname=indict[i]['tag_info']['name']
                         )
@@ -552,7 +394,7 @@ class XMLDictator:
                         if isinstance(indict[i]['content'], str):
                             content = indict[i]['content']
                         elif isinstance(indict[i]['content'], dict):
-                            content = self._generate(
+                            content = self._render(
                                 root, indict[i]['content'], path=path + [i]
                                 )
                         else:
@@ -591,34 +433,34 @@ class XMLDictator:
         return ret
 
 
-    def generate(self):
+    def render(self):
 
-        ret = 0
+        ret = ''
 
         if self.lineup_tree() != 0:
             self.do_log("-e- Some errors liningup dict tree")
-            ret = 3
+            ret = 1
 
         if isinstance(ret, str):
-
             if self.check_tree() != 0:
-                self.do_log("-e- Some dictatorship errors found")
-                ret = 1
+                ret = 2
 
         if isinstance(ret, str):
 
-            self.find_placer()
-            if self.placer != None:
-                self.find_placeables()
-                self.place()
+            self.find_css_and_js_holder()
+            if self.css_and_js_holder == None:
+                self.do_log('WARNING: css/js css_and_js_holder not located!')
+            else:
+                self.find_required_css_and_js()
+                self.place_found_css_and_js()
 
 
         if isinstance(ret, str):
-            ret = self._generate(self.tree_dict, self.tree_dict, path=[])
+            ret = self._render(self.tree_dict, self.tree_dict, path=[])
 
         return ret
 
-    def generate_attributes(self, indict, path=[], tagname=''):
+    def render_attributes(self, indict, path=[], tagname=''):
         ret = ''
 
         inaddr_l = len(path)
@@ -627,8 +469,10 @@ class XMLDictator:
         nameindent = text.fill(' ', len(tagname))
 
         attrs = []
+
         keys = list(indict.keys())
         keys.sort()
+
         for i in keys:
 
             if ret != '':
@@ -661,6 +505,10 @@ class XMLDictator:
 
 
             first = True
+
+            curr_attr_i = 0
+            attrs_l = len(attrs)
+
             for i in attrs:
                 ind = ''
                 if ind_req and not first:
@@ -673,11 +521,196 @@ class XMLDictator:
                     'ind': ind,
                     'new_attr': i
                     }
+
+                if curr_attr_i < attrs_l - 1:
+                    ret += ' '
+
                 if first:
                     first = False
 
+
+                curr_attr_i += 1
+
         return ret
 
+    def check_range(self, indict):
+        ret = 0
+
+        if not isinstance(indict, dict):
+            self.do_log("-e- Supplied data is not a dict")
+            ret = 1
+
+        else:
+
+            for i in indict:
+
+                if not isinstance(indict[i], dict):
+                    self.do_log("-e- Dictatorship `%(name)s' element value is not a dict" % {
+                        'name': i
+                        })
+
+                    ret = 2
+                    break
+
+        return ret
+
+    def check_unit(self, indict, path=[]):
+
+        if len(path) >= 255:
+            raise DictatorshipUnitTooDeep("Dictatorship tree recursion limit reached `%(path)s'" % {
+                    'path': '/'.join(path)
+                    })
+
+        # Supplied data defenetly must be a dict, othervice - error
+        if not isinstance(indict, dict):
+            raise ValueError("Supplied data is not a dict")
+
+        # 'type' must be supplied
+        if not 'type' in indict:
+            raise MissingDictatorshipUnitAttribute("Dictatorship unit type missing")
+
+        # 'type' must be one of following
+        if not indict['type'] in [
+            'tag', 'dtd', 'comment', 'cdata', 'static',
+            'pi', 'char'
+            ]:
+            raise ValueError("Wrong dictatorship unit type")
+
+        # If 'type' is 'tag', then check 'tag_info' and everything,
+        # what underlie
+        if indict['type'] == 'tag':
+            if not 'tag_info' in indict \
+                or not isinstance(indict['tag_info'], dict):
+                raise MissingDictatorshipUnitAttribute(
+                    "Dictatorship unit type is `tag', but not `tag_info' supplied"
+                    )
+
+            else:
+                # tag name MUST be supplied and must be a string!
+                if not 'name' in indict['tag_info']:
+                    raise MissingDictatorshipUnitAttribute(
+                        "`name' not supplied in dictatorship unit `tag_info'"
+                        )
+                else:
+                    if not isinstance(indict['tag_info']['name'], str):
+                        raise TypeError("tag `name' must be a string")
+
+                # attributes CAN be supplied or CAN be a None or a dict
+                if 'attributes' in indict['tag_info']:
+                    if indict['tag_info']['attributes'] == None:
+                        indict['tag_info']['attributes'] = {}
+                    else:
+                        if not isinstance(indict['tag_info']['attributes'], dict):
+                            raise TypeError("tag `attributes' must be dict")
+                        else:
+                            # attribute values can be a strings or callabels
+                            for i in indict['tag_info']['attributes']:
+                                if not isinstance(indict['tag_info']['attributes'][i], str):
+                                    raise TypeError("tag `attributes' dict values must be strings")
+                else:
+                    indict['tag_info']['attributes'] = {}
+
+                # 'tag_info' 'closed' attribute CAN be supplied and CAN be
+                #  None or bool.
+                if 'closed' in indict['tag_info']:
+                    if not isinstance(indict['tag_info']['closed'], bool):
+                        raise TypeError("tag `closed' attribute can be only bool")
+                else:
+                    indict['tag_info']['closed'] = False
+
+
+                if 'css_and_js_holder' in indict['tag_info']:
+                    if not isinstance(indict['tag_info']['css_and_js_holder'], bool):
+                        raise TypeError("wrong `css_and_js_holder' type")
+                else:
+                    indict['tag_info']['css_and_js_holder'] = False
+
+
+        for i in ['required_css', 'required_js']:
+            if i in indict:
+                if indict[i] == None:
+                    pass
+                elif not isinstance(indict[i], list):
+                    raise TypeError("`%(i)s' can be list or None" % {
+                        'i': i
+                        })
+                else:
+                    for j in indict[i]:
+                        if not isinstance(j, str):
+                            raise TypeError("All `%(i)s' values must be strings" % {
+                                'i': i
+                                })
+
+            else:
+                indict[i] = None
+
+
+        for i in ['module', 'uid']:
+            if i in indict:
+                if not re.match(r'[a-zA-Z][\w-]*', indict[i]):
+                    raise ValueError("Wrong `%(i)s' value at `%(path)s'" % {
+                        'path': '/'.join(path),
+                        'i': i
+                        })
+            else:
+                if ('required_css' in indict) and (indict['required_css'] != None) \
+                    or ('required_js' in indict) and (indict['required_js'] != None):
+                    raise MissingDictatorshipUnitAttribute(
+                        "`%(i)s' required to be in unit!" % {
+                            'i': i
+                            }
+                        )
+
+        if not 'content' in indict:
+            indict['content'] = ''
+        elif indict['content'] == None:
+            indict['content'] = ''
+        elif isinstance(indict['content'], str):
+            pass
+        elif isinstance(indict['content'], dict):
+            pass
+        else:
+            raise ValueError("wrong unit content value")
+
+        if 'tag_info' in indict:
+            if isinstance(indict['tag_info'], dict):
+                if 'css_and_js_holder' in indict['tag_info']:
+                    if indict['tag_info']['css_and_js_holder'] == True:
+                        if not isinstance(indict['content'], dict):
+                            raise ValueError("`css_and_js_holder' is True, so `content' MUST be dict")
+
+        default_new_line_before_start = False
+        default_new_line_before_content = False
+        default_new_line_after_content = False
+        default_new_line_after_end = False
+
+        if indict['type'] == 'tag':
+            default_new_line_before_start = True
+            if indict['tag_info']['closed']:
+                default_new_line_after_content = True
+            else:
+                if isinstance(indict['content'], dict):
+                    default_new_line_after_content = True
+
+        elif indict['type'] in ['tag', 'comment', 'dtd', 'pi']:
+            default_new_line_after_end = True
+
+
+        for i in [
+            ('new_line_before_start', default_new_line_before_start),
+            ('new_line_before_content', default_new_line_before_content),
+            ('new_line_after_content', default_new_line_after_content),
+            ('new_line_after_end', default_new_line_after_end)
+            ]:
+            if i[0] in indict:
+                if not isinstance(indict[i[0]], bool):
+                    raise TypeError("-e- wrong `%(name)s' value type" % {
+                        'name': i[0]
+                        })
+            else:
+                indict[i[0]] = i[1]
+
+        return
 
 
 def test():
@@ -685,17 +718,14 @@ def test():
     # `dictatorship range'.
     # Dictatorship range's keys must point only on dict-s,
     # othervice it is an error.
-    ret = ''
     a = {
         '000_xml_pi': {
             'type': 'pi',
             'content': 'xml version="1.1" encoding="UTF-8"',
-            'uid': '4c890ca0-66fb-42ad-b519-d87811b695b3'
             },
         '010_xhtml_doctype': {
             'type': 'dtd',
-            'content': 'html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"',
-            'uid': 'e156ce9f-eaf4-4f24-96ca-594b3af0944b'
+            'content': 'html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"'
             },
         '100_html_tag': {
             # Dictatorship gange pointet dicts (like this)
@@ -706,13 +736,6 @@ def test():
             # 'pi' (Processing instructions).
             # If type is 'tag',then 'tag_info' subdict is required
             'type': 'tag',
-
-            # This can be required by other current dict elements or
-            # settings like cache or css.
-            # The uid is not required in every dict.
-            # If uid is used by css, then "uid-%(uid)s" class
-            # will be added to the tag.
-            'uid': '55aeee15-ba79-4e78-a848-2c65c2e0d6a0',
 
             # inserts new lines
             # 'new_line_before_start': False,
@@ -753,8 +776,7 @@ def test():
                     'type': 'tag',
                     'tag_info': {
                         'name': 'head',
-                        'css_placer': True,
-                        'js_placer': True
+                        'css_and_js_holder': True
                         },
                     'content': {
                         'title': {
@@ -771,8 +793,10 @@ def test():
                     'tag_info': {
                         'name': 'body'
                         },
-                    'required_css': [],
-                    'required_js': [],
+                    'module': 'core',
+                    'uid': 'body',
+                    'required_css': ['main.css', 'body.css'],
+                    'required_js': ['main.js'],
                     }
                 }
 
@@ -780,8 +804,10 @@ def test():
         }
 
     print("Dictator test")
-    b = XMLDictator()
+    b = DictTreeToXMLRenderer(2, True, True)
     b.set_tree(a)
-    ret = b.generate(True, True)
-
-    return ret
+    ret = b.render()
+    print(repr(b.units))
+    b.print_log()
+    print(ret)
+    return
