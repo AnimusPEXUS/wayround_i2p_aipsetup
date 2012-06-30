@@ -7,7 +7,7 @@ setup(name='aipsetup',
       description='aipsetup software packaging system',
       author='Alexey V Gorshkov',
       author_email='animus@wayround.org',
-      url='http://wayround.org/wiki/aipsetup',
-      packages=['aipsetup'],
+      url='http://wiki.wayround.org/soft/aipsetup',
+      packages=['wayroundaipsetup'],
       scripts=['aipsetup3']
       )
