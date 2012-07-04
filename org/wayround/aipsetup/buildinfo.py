@@ -4,8 +4,8 @@
 Rutines to edit buildinfo files
 """
 
-import aipsetup.utils.file
-import aipsetup.utils.edit
+import org.wayround.utils.file
+import org.wayround.utils.edit
 
 def print_help():
     """
@@ -51,7 +51,7 @@ def router(opts, args, config):
                 if args_l > 1:
                     mask = args[1]
 
-                aipsetup.utils.file.list_files(
+                org.wayround.utils.file.list_files(
                     config, mask, 'buildinfo'
                     )
 
@@ -61,7 +61,7 @@ def router(opts, args, config):
             if args_l != 2:
                 print("-e- buildeinfo to edit not specified")
             else:
-                aipsetup.utils.edit.edit_file(
+                org.wayround.utils.edit.edit_file(
                     config, args[1], 'buildinfo'
                     )
 
@@ -71,7 +71,7 @@ def router(opts, args, config):
                 print("-e- wrong parameters count")
             else:
 
-                aipsetup.utils.file.copy_file(
+                org.wayround.utils.file.copy_file(
                     config, args[1], args[2], 'buildinfo'
                     )
 

@@ -5,15 +5,16 @@ Client-module for searching and getting files on and from
 aipsetup package server
 """
 
-import os
 import os.path
 import sys
-import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.parse
 import subprocess
 
-import aipsetup.version
-import aipsetup.name
-import aipsetup.info
+import org.wayround.utils
+
+import org.wayround.aipsetup.version
+import org.wayround.aipsetup.name
+import org.wayround.aipsetup.info
 
 
 def print_help():
@@ -186,7 +187,7 @@ def workout_search_params(opts, args, config):
             n_errors = False
 
             if how == 'i':
-                idic = aipsetup.info.read_from_file(
+                idic = org.wayround.aipsetup.info.read_from_file(
                     os.path.join(
                         config['info'], '%(name)s.xml' % {
                             'name': value
@@ -204,7 +205,7 @@ def workout_search_params(opts, args, config):
 
                     if what == 's':
                         regexp = \
-                            aipsetup.name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
+                            org.wayround.aipsetup.name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
                         print("-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
                             're': regexp,
                             'name': value
@@ -237,7 +238,7 @@ def workout_search_params(opts, args, config):
             if not n_errors and not p_errors:
 
                 hows = {'b': 'begins', 'r': 'regexp',
-                        'e': 'exac',   'c': 'contains'}
+                        'e': 'exac', 'c': 'contains'}
 
                 whats = {'s': 'source',
                          'r': 'repository',
@@ -251,11 +252,11 @@ def workout_search_params(opts, args, config):
                 where = wheres[where]
 
     return dict(
-        what = what,
-        how = how,
-        where = where,
-        sensitive = sensitive,
-        ver = ver,
+        what=what,
+        how=how,
+        where=where,
+        sensitive=sensitive,
+        ver=ver,
         value=value,
         p_errors=p_errors,
         n_errors=n_errors
@@ -266,7 +267,7 @@ def get(config, output='.', wsp={}):
     """
     Get files from server
 
-    @param config: aipsetup config from aipsetup.utils.config
+    @param config: aipsetup config from utils.config
     @type config: dict
     @param output: output dircetory
     @type output: basestr
@@ -312,7 +313,7 @@ def get(config, output='.', wsp={}):
 
             lst = fn_version_filter(config, lst, wsp)
 
-            lst.sort(aipsetup.version.version_comparator)
+            lst.sort(org.wayround.aipsetup.version.version_comparator)
 
             lst = fn_version_min_max_filter(lst, wsp)
 
@@ -325,7 +326,7 @@ def get(config, output='.', wsp={}):
                 exec("%(i)s = config['client_%(where)s_%(i)s']" % {
                         'where': wsp['where'],
                         'i': i
-                        } )
+                        })
 
             semi = ''
             if port != None and port != '':
@@ -361,7 +362,7 @@ def get(config, output='.', wsp={}):
 
                 bname = os.path.basename(i)
 
-                process = subprocess.Popen(['wget',  '-O',  bname, request])
+                process = subprocess.Popen(['wget', '-O', bname, request])
                 process.wait()
 
     return ret
@@ -380,7 +381,7 @@ def search(config, wsp):
 
         lst = fn_version_filter(config, lst, wsp)
 
-        lst.sort(aipsetup.version.version_comparator)
+        lst.sort(org.wayround.aipsetup.version.version_comparator)
 
         lst = fn_version_min_max_filter(lst, wsp)
 
@@ -435,7 +436,7 @@ def client(config, wsp={}):
             exec("%(i)s = config['client_%(where)s_%(i)s']" % {
                     'where': where,
                     'i': i
-                    } )
+                    })
 
         semi = ''
         if port != None and port != '':
@@ -468,9 +469,9 @@ def client(config, wsp={}):
             req_res = urllib.request.urlopen(request)
         except:
             exception = sys.exc_info()
-            if isinstance(exception[1],  IOError):
+            if isinstance(exception[1], IOError):
                 print("-e- Connection refused")
-            aipsetup.utils.error.print_exception_info(
+            org.wayround.utils.error.print_exception_info(
                 exception
                 )
             ret = 1
@@ -512,7 +513,7 @@ def fn_version_filter(config, lst, wsp):
     if not wsp['ver'] in ['MAX', 'MIN', 'ANY']:
 
         for i in lst:
-            if aipsetup.name.source_name_parse(
+            if org.wayround.aipsetup.name.source_name_parse(
                 config,
                 i,
                 mute=True,
@@ -531,7 +532,7 @@ def fn_version_min_max_filter(lst, wsp):
     """
     Return only maximal or minimal source file name from list
 
-    List must be sorted using aipsetup.version.version_comparator
+    List must be sorted using version.version_comparator
     before being passed to this function.
     """
 

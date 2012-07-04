@@ -7,21 +7,22 @@ import inspect
 import copy
 import pprint
 
-import aipsetup.info
-import aipsetup.constitution
-import aipsetup.name
-import aipsetup.build
-import aipsetup.pack
-import aipsetup.utils.log
+import org.wayround.utils.log
+
+import org.wayround.aipsetup.info
+import org.wayround.aipsetup.constitution
+import org.wayround.aipsetup.name
+import org.wayround.aipsetup.build
+import org.wayround.aipsetup.pack
 
 
-DIR_TARBALL    = '00.TARBALL'
-DIR_SOURCE     = '01.SOURCE'
-DIR_PATCHES    = '02.PATCHES'
-DIR_BUILDING   = '03.BUILDING'
-DIR_DESTDIR    = '04.DESTDIR'
+DIR_TARBALL = '00.TARBALL'
+DIR_SOURCE = '01.SOURCE'
+DIR_PATCHES = '02.PATCHES'
+DIR_BUILDING = '03.BUILDING'
+DIR_DESTDIR = '04.DESTDIR'
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
-DIR_LISTS      = '06.LISTS'
+DIR_LISTS = '06.LISTS'
 
 i = None
 for i in ['TARBALL',
@@ -102,7 +103,7 @@ def router(opts, args, config):
 
             ret = init(
                 config,
-                directory = init_dir
+                directory=init_dir
                 )
 
 
@@ -135,9 +136,9 @@ def isWdDirRestricted(directory):
     ret = False
 
     dirs_begining_with = [
-        '/bin',     '/boot' ,    '/daemons',
-        '/dev',     '/etc',      '/lib',     '/proc',
-        '/sbin',    '/sys',
+        '/bin', '/boot' , '/daemons',
+        '/dev', '/etc', '/lib', '/proc',
+        '/sbin', '/sys',
         '/usr'
     ]
 
@@ -243,7 +244,7 @@ def read_package_info(config, directory, ret_on_error=None):
             print("-e- Can't open `%(name)s'" % {
                 'name': pi_filename
                 })
-            aipsetup.utils.error.print_exception_info(
+            org.wayround.utils.error.print_exception_info(
                 sys.exc_info()
                 )
         else:
@@ -259,7 +260,7 @@ def read_package_info(config, directory, ret_on_error=None):
                 print("-e- error in `%(name)s'" % {
                     'name': pi_filename
                 })
-                aipsetup.utils.error.print_exception_info(
+                org.wayround.utils.error.print_exception_info(
                     sys.exc_info()
                     )
                 ret = ret_on_error
@@ -278,7 +279,7 @@ def write_package_info(config, directory, info):
         print("-e- can't open `%(file)s' for writing" % {
             'file': pi_filename
             })
-        aipsetup.utils.error.print_exception_info(
+        org.wayround.utils.error.print_exception_info(
             sys.exc_info()
             )
     else:
@@ -287,7 +288,7 @@ def write_package_info(config, directory, info):
             txt = pprint.pformat(info)
         except:
             print("-e- can't represent data for package info")
-            aipsetup.utils.error.print_exception_info(
+            org.wayround.utils.error.print_exception_info(
                 sys.exc_info()
                 )
         else:
@@ -315,7 +316,7 @@ def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
 
     base = os.path.basename(filename)
 
-    parse_result = aipsetup.name.source_name_parse(
+    parse_result = org.wayround.aipsetup.name.source_name_parse(
         config, base,
         mute=False, modify_info_file=False
         )
@@ -340,7 +341,7 @@ def apply_constitution_on_buildingsite(config, dirname):
 
     d = read_package_info(config, dirname, ret_on_error={})
 
-    const = aipsetup.constitution.read_constitution(config)
+    const = org.wayround.aipsetup.constitution.read_constitution(config)
 
     if const == None:
 
@@ -387,7 +388,7 @@ def apply_pkg_info_on_buildingsite(config, dirname):
         print("-i- Reading info file `%(name)s'" % {
             'name': info_filename
             })
-        info = aipsetup.info.read_from_file(info_filename)
+        info = org.wayround.aipsetup.info.read_from_file(info_filename)
         if not isinstance(info, dict):
             print("-e- Can't read info from %(filename)s" % {
                 'filename': info_filename
@@ -447,7 +448,7 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                 print("-e- Can't load buildinfo Python script `%(name)s'" % {
                     'name': buildinfo_filename
                     })
-                aipsetup.utils.error.print_exception_info(
+                org.wayround.utils.error.print_exception_info(
                     sys.exc_info()
                     )
                 ret = 3
@@ -466,10 +467,10 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                         l['build_info'](copy.copy(config), pi)
                     except:
                         print(("-e- Error while calling for "
-                            +"build_info() from `%(name)s'") % {
+                            + "build_info() from `%(name)s'") % {
                             'name': buildinfo_filename
                             })
-                        aipsetup.utils.error.print_exception_info(
+                        org.wayround.utils.error.print_exception_info(
                             sys.exc_info()
                             )
                         pi['pkg_buildinfo'] = {}

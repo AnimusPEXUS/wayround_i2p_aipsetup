@@ -1,23 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
-This module is for all building methods.
-
-It is initiated with some dir, which may be not a working, but this class
-must be able to check that dir, init it if required, Copy source there And
-use pointed themplate for source building.
-
-!! Packaging and downloading routines must be on other classes !!
-"""
-
-# TODO: rework above docstring
 
 import sys
 import os.path
 
-import aipsetup.buildingsite
-import aipsetup.tools.autotools
+import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.tools.autotools
+
+import org.wayround.utils.log
 
 def print_help():
     print("""\
@@ -84,14 +75,14 @@ def _same_function(config, dirname, actor_name,
 
     ret = 0
 
-    log = aipsetup.utils.log.Log(config, dirname, process)
+    log = org.wayround.utils.log.Log(config, dirname, process)
     # log.write("-i- Closing this log now, cause it can't be done farther")
 
     log.write("-i- =========[%(whatdoes)s]=========" % {
         'whatdoes': whatdoes.capitalize()
         })
 
-    pi = aipsetup.buildingsite.read_package_info(
+    pi = org.wayround.aipsetup.buildingsite.read_package_info(
         config, dirname, ret_on_error=None
         )
 
@@ -108,7 +99,7 @@ def _same_function(config, dirname, actor_name,
                     'actor_name': actor_name
                     })
             log.write(
-                aipsetup.utils.error.return_exception_info(
+                org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
@@ -127,14 +118,14 @@ def _same_function(config, dirname, actor_name,
             else:
                 if eval(
                     ("aipsetup.tools.%(toolname)s."\
-                    +"%(function)s(config, log, dirname)") % {
+                    + "%(function)s(config, log, dirname)") % {
                         'toolname': actor,
                         'function': function
                         }
                     ) != 0:
                     log.write(
                         ("-e- Tool %(toolname)s could "
-                        +"not perform %(process)s") % {
+                        + "not perform %(process)s") % {
                             'toolname': actor,
                             'process': process
                             }
@@ -204,14 +195,12 @@ def postinstall(config, dirname):
 def complite(config, dirname):
     ret = 0
 
-    pi = aipsetup.buildingsite.read_package_info(
+    pi = org.wayround.aipsetup.buildingsite.read_package_info(
         config, dirname, ret_on_error=None
         )
 
     if pi == None:
-        log.write("-e- Error getting information about %(process)s" % {
-                'process': process
-                })
+        # FIXME: inform user about error using logging
         ret = 1
     else:
 

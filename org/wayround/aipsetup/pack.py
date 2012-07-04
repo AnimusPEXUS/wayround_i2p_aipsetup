@@ -1,17 +1,14 @@
-# -*- config: utf-8 -*-
-
 import os.path
 import tempfile
 import shutil
 import sys
 import pprint
 
-import aipsetup.buildingsite
-import aipsetup.storage.archive
-import aipsetup.utils.time
-import aipsetup.utils.checksum
-import aipsetup.utils.error
-import aipsetup.deps.deps_c
+import org.wayround.utils.time
+import org.wayround.utils.checksum
+import org.wayround.utils.error
+import org.wayround.utils.archive
+import org.wayround.utils.deps_c
 
 
 def print_help():
@@ -95,9 +92,9 @@ def destdir_checksum(config, buildingsite):
 
     ret = 0
 
-    destdir = aipsetup.buildingsite.getDir_DESTDIR(buildingsite)
+    destdir = buildingsite.getDir_DESTDIR(buildingsite)
 
-    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = buildingsite.getDir_LISTS(buildingsite)
 
     output_file = os.path.abspath(
         os.path.join(
@@ -118,7 +115,7 @@ def destdir_checksum(config, buildingsite):
         print("-e- LIST dir can't be used")
         ret = 2
     else:
-        aipsetup.utils.checksum.make_dir_checksums(
+        org.wayround.utils.checksum.make_dir_checksums(
             destdir,
             output_file
             )
@@ -130,9 +127,9 @@ def destdir_filelist(config, buildingsite):
 
     ret = 0
 
-    destdir = aipsetup.buildingsite.getDir_DESTDIR(buildingsite)
+    destdir = buildingsite.getDir_DESTDIR(buildingsite)
 
-    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = buildingsite.getDir_LISTS(buildingsite)
 
     output_file = os.path.abspath(
         os.path.join(
@@ -153,7 +150,7 @@ def destdir_filelist(config, buildingsite):
         print("-e- LIST dir can't be used")
         ret = 2
     else:
-        aipsetup.utils.file.list_files_recurcive(
+        org.wayround.utils.file.list_files_recurcive(
             destdir,
             output_file
             )
@@ -162,9 +159,9 @@ def destdir_filelist(config, buildingsite):
 
 def destdir_deps_c(config, buildingsite):
     ret = 0
-    destdir = aipsetup.buildingsite.getDir_DESTDIR(buildingsite)
+    destdir = buildingsite.getDir_DESTDIR(buildingsite)
 
-    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = buildingsite.getDir_LISTS(buildingsite)
 
     lists_file = os.path.abspath(
         os.path.join(
@@ -179,8 +176,6 @@ def destdir_deps_c(config, buildingsite):
             'DESTDIR.dep_c'
             )
         )
-
-    file_list = []
 
     f = open(lists_file, 'r')
     file_list_txt = f.read()
@@ -197,7 +192,7 @@ def destdir_deps_c(config, buildingsite):
     file_list_i = 1
     for i in file_list:
         file_list_i += 1
-        aipsetup.utils.file.progress_write("    (%(perc).2f%%) ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+        org.wayround.utils.file.progress_write("    (%(perc).2f%%) ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
             'perc': 100 / (float(file_list_l) / file_list_i),
             'elfs': elfs,
             'n_elfs': n_elfs
@@ -205,10 +200,10 @@ def destdir_deps_c(config, buildingsite):
         filename = destdir + '/' + i
         filename.replace(r'//', '/')
         filename = os.path.abspath(filename)
-        dep = aipsetup.deps.deps_c.elf_deps(filename)
+        dep = org.wayround.utils.deps_c.elf_deps(filename)
         if isinstance(dep, list):
             elfs += 1
-            deps[i]=dep
+            deps[i] = dep
         else:
             #print '-e- not an elf %(name)s' % {
                 #'name': filename
@@ -228,8 +223,8 @@ def remove_source_and_build_dirs(config, buildingsite):
 
     ret = 0
 
-    for i in [aipsetup.buildingsite.DIR_SOURCE,
-              aipsetup.buildingsite.DIR_BUILDING]:
+    for i in [buildingsite.DIR_SOURCE,
+              buildingsite.DIR_BUILDING]:
         dirname = os.path.abspath(
             os.path.join(
                 buildingsite,
@@ -237,7 +232,7 @@ def remove_source_and_build_dirs(config, buildingsite):
                 )
             )
         if os.path.isdir(dirname):
-            aipsetup.utils.file.remove_if_exists(dirname)
+            org.wayround.utils.file.remove_if_exists(dirname)
         else:
             print("-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
@@ -249,9 +244,9 @@ def compress_patches_destdir_and_logs(config, buildingsite):
 
     ret = 0
 
-    for i in [aipsetup.buildingsite.DIR_PATCHES,
-              aipsetup.buildingsite.DIR_DESTDIR,
-              aipsetup.buildingsite.DIR_BUILD_LOGS]:
+    for i in [buildingsite.DIR_PATCHES,
+              buildingsite.DIR_DESTDIR,
+              buildingsite.DIR_BUILD_LOGS]:
         dirname = os.path.abspath(
             os.path.join(
                 buildingsite,
@@ -272,7 +267,7 @@ def compress_patches_destdir_and_logs(config, buildingsite):
             print("-i- Compressing %(i)s" % {
                 'i': i
                 })
-            aipsetup.storage.archive.compress_dir_contents_tar_compressor(
+            org.wayround.utils.archive.compress_dir_contents_tar_compressor(
                 dirname,
                 filename,
                 'xz',
@@ -286,14 +281,14 @@ def compress_files_in_lists_dir(config, buildingsite):
 
     ret = 0
 
-    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = buildingsite.getDir_LISTS(buildingsite)
 
     for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
         infile = os.path.join(lists_dir, i)
         outfile = infile + '.xz'
 
-        if aipsetup.storage.archive.compress_file_xz(infile, outfile) != 0:
+        if org.wayround.utils.archive.compress_file_xz(infile, outfile) != 0:
             print("-e- Error compressing files in lists dir")
             ret = 1
             break
@@ -304,9 +299,9 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
 
     ret = 0
 
-    for i in [aipsetup.buildingsite.DIR_PATCHES,
-              aipsetup.buildingsite.DIR_DESTDIR,
-              aipsetup.buildingsite.DIR_BUILD_LOGS]:
+    for i in [buildingsite.DIR_PATCHES,
+              buildingsite.DIR_DESTDIR,
+              buildingsite.DIR_BUILD_LOGS]:
         dirname = os.path.abspath(
             os.path.join(
                 buildingsite,
@@ -314,7 +309,7 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
                 )
             )
         if os.path.isdir(dirname):
-            aipsetup.utils.file.remove_if_exists(dirname)
+            org.wayround.utils.file.remove_if_exists(dirname)
         else:
             print("-w- Dir not exists: %(dirname)s" % {
                 'dirname': dirname
@@ -326,7 +321,7 @@ def remove_decompressed_files_from_lists_dir(config, buildingsite):
 
     ret = 0
 
-    lists_dir = aipsetup.buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = buildingsite.getDir_LISTS(buildingsite)
 
     for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
@@ -355,18 +350,18 @@ def make_checksums_for_building_site(config, buildingsite):
         )
 
     if os.path.exists(package_checksums):
-        aipsetup.utils.file.remove_if_exists(package_checksums)
+        org.wayround.utils.file.remove_if_exists(package_checksums)
 
     try:
         tf = tempfile.mkstemp()
     except:
         print("-e- Error creating temporary file")
-        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        org.wayround.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
         f = os.fdopen(tf[0], 'w')
 
-        if aipsetup.utils.checksum.make_dir_checksums_fo(
+        if org.wayround.utils.checksum.make_dir_checksums_fo(
             buildingsite,
             f) != 0:
             print("-e- Error creating checksums for buildingsite")
@@ -380,7 +375,7 @@ def make_checksums_for_building_site(config, buildingsite):
 
 def pack_buildingsite(config, buildingsite):
 
-    pi = aipsetup.buildingsite.read_package_info(
+    pi = buildingsite.read_package_info(
         config, buildingsite, ret_on_error=None)
 
     if pi == None:
@@ -402,7 +397,7 @@ def pack_buildingsite(config, buildingsite):
                 'version': pi['pkg_nameinfo']['groups']['version'],
                 'versionl': pi['pkg_nameinfo']['groups']['version_letter'],
                 'versionln': pi['pkg_nameinfo']['groups']['version_letter_number'],
-                'timestamp': aipsetup.utils.time.currenttime_stamp(),
+                'timestamp': org.wayround.utils.time.currenttime_stamp(),
                 'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
                     'arch'  : pi['constitution']['host_arch'],
                     'type'  : pi['constitution']['host_type'],
@@ -417,7 +412,7 @@ def pack_buildingsite(config, buildingsite):
         except:
             pass
 
-        aipsetup.storage.archive.pack_dir_contents_tar(
+        org.wayround.utils.archive.pack_dir_contents_tar(
             buildingsite,
             pack_file_name
             )

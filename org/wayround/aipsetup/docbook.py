@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import os.path
 import sys
 import stat
@@ -8,8 +7,8 @@ import re
 
 import lxml.etree
 
-import aipsetup.version
-import aipsetup.utils.error
+
+import org.wayround.utils.error
 
 
 def print_help():
@@ -20,6 +19,7 @@ def print_help():
        -b - Change basedir. Default is /
 
 """)
+
 
 def router(opts, args, config):
     ret = 0
@@ -71,8 +71,8 @@ def set_correct_modes(directory):
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
-                     stat.S_IRGRP |                stat.S_IXGRP |
-                     stat.S_IROTH |                stat.S_IXOTH )
+                     stat.S_IRGRP | stat.S_IXGRP |
+                     stat.S_IROTH | stat.S_IXOTH)
 
         for f in each[2]:
             fd = os.path.abspath(os.path.join(each[0], f))
@@ -157,7 +157,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     version = ''
 
     try:
-        version = docbook_no_zip[docbook_no_zip.rfind('-')+1:]
+        version = docbook_no_zip[docbook_no_zip.rfind('-') + 1:]
     except:
         print("-e- Wrong zip file version")
         return 50
@@ -181,7 +181,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
     print('-i-    unzipping...')
 
-    e = os.system("7z -o'%(dir)s' x '%(file)s'" % {'file': docbook_zip, 'dir': base_dir_share_docbook_dtd} )
+    e = os.system("7z -o'%(dir)s' x '%(file)s'" % {'file': docbook_zip, 'dir': base_dir_share_docbook_dtd})
 
     if e != 0:
         print("-e-    error unzipping %(file)s" % {'file': docbook_zip})
@@ -224,7 +224,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
         tmp_cat_lxml = lxml.etree.parse(specific_cat_file)
     except:
         e = sys.exc_info()
-        aipsetup.utils.error.print_exception_info(e)
+        org.wayround.utils.error.print_exception_info(e)
 
     tmp_cat_lxml_ns = '{%(ns)s}' % {'ns': tmp_cat_lxml.getroot().nsmap[None]}
 
@@ -233,7 +233,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
         for each in tmp_cat_lxml.findall(tmp_cat_lxml_ns + tag):
 
             if each.tag == tmp_cat_lxml_ns + tag:
-                print("-i-       %(tag)s - %(Id)s"  % {'Id': each.get(tag + 'Id'), 'tag': tag})
+                print("-i-       %(tag)s - %(Id)s" % {'Id': each.get(tag + 'Id'), 'tag': tag})
 
                 src_uri = each.get('uri')
                 dst_uri = ''
@@ -243,11 +243,11 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
                 else:
                     t_joined_path = os.path.join(dtd_dir, src_uri)
                     if os.path.isfile(t_joined_path):
-                        dst_uri = os.path.normpath('/'+ os.path.relpath(t_joined_path, base_dir))
+                        dst_uri = os.path.normpath('/' + os.path.relpath(t_joined_path, base_dir))
                     else:
                         dst_uri = src_uri
 
-                r = os.system("xmlcatalog --noout --add '%(tag)s' '%(Id)s' '%(uri)s' '%(catalog)s'"  % {
+                r = os.system("xmlcatalog --noout --add '%(tag)s' '%(Id)s' '%(uri)s' '%(catalog)s'" % {
                         'Id': each.get(tag + 'Id'),
                         'uri': 'file://%(uri)s' % {'uri': dst_uri},
                         'catalog': base_dir_etc_xml_catalog_docbook,
@@ -329,7 +329,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         bn = os.path.basename(docbook_xsl_zip)
         r_res = re.match(r'(docbook-xsl-(\d\.?)*)tar\.(.*)', bn)
         name = r_res.group(1)[:-1]
-        version = name[name.rfind('-')+1:]
+        version = name[name.rfind('-') + 1:]
 
 
         base_dir_share_docbook_name = \
@@ -345,14 +345,14 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         print('-i-    preparing dirs')
 
 
-        if 0 != aipsetup.utils.file.remove_if_exists(
+        if 0 != org.wayround.utils.file.remove_if_exists(
                     base_dir_share_docbook_name
                     ):
             print("-e-       error")
             # return 10
             continue
 
-        if 0 != aipsetup.utils.file.remove_if_exists(
+        if 0 != org.wayround.utils.file.remove_if_exists(
                     base_dir_share_docbook_xsl_stylesheets
                     ):
             print("-e-       error")
@@ -374,7 +374,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
             os.rename(base_dir_share_docbook_name,
                       base_dir_share_docbook_xsl_stylesheets)
         except:
-            aipsetup.utils.error.print_exception_info(sys.exc_info())
+            org.wayround.utils.error.print_exception_info(sys.exc_info())
             # return 30
             continue
 
@@ -394,7 +394,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         print("-e- no versions")
         return 40
 
-    current = installed_versions[iv_l-1]
+    current = installed_versions[iv_l - 1]
 
     print("-i- Presuming current XSL: %(version)s" % {'version': current})
 
@@ -496,14 +496,14 @@ def install(files, base_dir):
         set_correct_modes(base_dir_etc_xml)
         set_correct_modes(base_dir_share_docbook)
     except:
-        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        org.wayround.utils.error.print_exception_info(sys.exc_info())
 
     print("-i- Setting correct owners")
     try:
         set_correct_owners(base_dir_etc_xml)
         set_correct_owners(base_dir_share_docbook)
     except:
-        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        org.wayround.utils.error.print_exception_info(sys.exc_info())
 
     print()
     print("-i- All operations complited. Bye!")

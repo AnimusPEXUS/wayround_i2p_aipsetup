@@ -2,7 +2,8 @@
 import inspect
 import sys
 
-import aipsetup.utils
+import org.wayround.utils.error
+import org.wayround.utils.edit
 
 
 def print_help():
@@ -29,7 +30,7 @@ def router(opts, args, config):
             print_help()
 
         elif args[0] == 'edit':
-            aipsetup.utils.edit.edit_file_direct(
+            org.wayround.utils.edit.edit_file_direct(
                 config, config['constitution']
                 )
 
@@ -58,7 +59,7 @@ def read_constitution(config):
         exec(compile(open(config['constitution']).read(), config['constitution'], 'exec'), g, l)
     except:
         print("-e- Error loading constitution script")
-        aipsetup.utils.error.print_exception_info(
+        org.wayround.utils.error.print_exception_info(
             sys.exc_info()
             )
     else:
@@ -74,7 +75,7 @@ def read_constitution(config):
             except:
                 ret = None
                 print("-e- Error calling for constitution dict")
-                aipsetup.utils.error.print_exception_info(
+                org.wayround.utils.error.print_exception_info(
                     sys.exc_info()
                     )
 

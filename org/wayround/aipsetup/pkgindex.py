@@ -19,8 +19,9 @@ import sqlalchemy.orm
 import sqlalchemy.ext.declarative
 
 
-import aipsetup.info
-import aipsetup.utils.text
+import org.wayround.aipsetup.info
+
+import org.wayround.utils.text
 
 
 def print_help():
@@ -515,7 +516,7 @@ class PackageDatabase:
                         'num': pcount,
                         'name': pa.name
                         }
-                    aipsetup.utils.file.progress_write(line_to_write)
+                    org.wayround.utils.file.progress_write(line_to_write)
                 del(pa)
             elif os.path.isdir(full_path):
                 new_cat = self.Category(name=each, parent_cid=cid)
@@ -571,7 +572,7 @@ class PackageDatabase:
         else:
             sess = pre_sess
 
-        q = sess.query(self.PackageTag).filter_by(name = name).all()
+        q = sess.query(self.PackageTag).filter_by(name=name).all()
 
         for i in q:
             ret.append(i.tag)
@@ -616,11 +617,11 @@ class PackageDatabase:
 
             r = pkg.cid
             # print 'r: '+str(r)
-            ret.insert(0,(pkg.pid, pkg.name))
+            ret.insert(0, (pkg.pid, pkg.name))
 
             while r != 0:
                 cat = sess.query(self.Category).filter_by(cid=r).first()
-                ret.insert(0,(cat.cid, cat.name))
+                ret.insert(0, (cat.cid, cat.name))
                 r = cat.parent_cid
 
             # This is _presumed_. NOT inserted
@@ -647,7 +648,7 @@ class PackageDatabase:
 
         print("-i- Scanning paths")
         for each in lst:
-            aipsetup.utils.file.progress_write('       ' + each.name)
+            org.wayround.utils.file.progress_write('       ' + each.name)
             lst2.append(self.get_package_path(pid=each.pid))
         print("")
 
@@ -730,7 +731,7 @@ class PackageDatabase:
             names_found = names
 
         for i in names_found:
-            q = sess.query(self.PackageInfo).filter_by(name = i).first()
+            q = sess.query(self.PackageInfo).filter_by(name=i).first()
 
             if q == None:
                 not_found.append(q)
@@ -758,7 +759,7 @@ class PackageDatabase:
         if name != None:
             sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-            q = sess.query(self.PackageInfo).filter_by(name = name).first()
+            q = sess.query(self.PackageInfo).filter_by(name=name).first()
         else:
             q = record
 
@@ -792,18 +793,18 @@ class PackageDatabase:
             sess = pre_sess
 
         q = None
-        q = sess.query(self.PackageInfo).filter_by(name = name).first()
+        q = sess.query(self.PackageInfo).filter_by(name=name).first()
 
         creating_new = False
         if q == None:
             q = self.PackageInfo()
             creating_new = True
 
-        q.name          = name
-        q.description   = struct['description']
-        q.home_page     = struct['homepage']
+        q.name = name
+        q.description = struct['description']
+        q.home_page = struct['homepage']
         q.pkg_name_type = struct['pkg_name_type']
-        q.buildinfo     = struct['buildinfo']
+        q.buildinfo = struct['buildinfo']
 
         # category set only through pkg_repository
         # q.category    = category
@@ -847,7 +848,7 @@ class PackageDatabase:
 
                 r = self.package_info_record_to_dict(record=i)
                 if isinstance(r, dict):
-                    if aipsetup.info.write_to_file(filename, r) != 0:
+                    if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
                         print("-e- can't write file %(name)s" % {
                             'name': filename
                             })
@@ -883,7 +884,7 @@ class PackageDatabase:
                 perc = 0
             else:
                 perc = 100 / (float(files_l) / num)
-            aipsetup.utils.file.progress_write('    %(percent)d%%' % {
+            org.wayround.utils.file.progress_write('    %(percent)d%%' % {
                 'percent': perc
                 })
             num += 1
@@ -905,10 +906,10 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
         for i in missing:
-            struct = aipsetup.info.read_from_file(i)
+            struct = org.wayround.aipsetup.info.read_from_file(i)
             name = os.path.basename(i)[:-4]
             if isinstance(struct, dict):
-                aipsetup.utils.file.progress_write(
+                org.wayround.utils.file.progress_write(
                     "-i- loading record: %(name)s" % {
                         'name': name
                         }
@@ -970,7 +971,7 @@ class PackageDatabase:
 
         sess.close()
         if not mute:
-            aipsetup.utils.text.columned_list_print(lst)
+            org.wayround.utils.text.columned_list_print(lst)
             print("-i- Total found %(n)d records" % {
                 'n': found
                 })
@@ -986,9 +987,9 @@ class PackageDatabase:
         pkgs_checked = 0
         pkgs_missing = 0
         pkgs_written = 0
-        pkgs_exists  = 0
-        pkgs_failed  = 0
-        pkgs_forced  = 0
+        pkgs_exists = 0
+        pkgs_failed = 0
+        pkgs_forced = 0
 
         missing = []
 
@@ -996,7 +997,7 @@ class PackageDatabase:
 
             pkgs_checked += 1
 
-            q2 = sess.query(self.PackageInfo).filter_by(name = each.name).first()
+            q2 = sess.query(self.PackageInfo).filter_by(name=each.name).first()
 
             if q2 == None:
 
@@ -1025,9 +1026,9 @@ class PackageDatabase:
                     if force_rewrite:
                         print("-i- forced template rewriting")
 
-                    if aipsetup.info.write_to_file(
+                    if org.wayround.aipsetup.info.write_to_file(
                         filename,
-                        aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
+                        org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                         pkgs_failed += 1
                         print("-e- failed writing template to `%(name)s'" % {
                             'name': filename
@@ -1079,7 +1080,7 @@ class PackageDatabase:
                         })
                 continue
 
-            d1 = aipsetup.info.read_from_file(filename)
+            d1 = org.wayround.aipsetup.info.read_from_file(filename)
 
             if not isinstance(d1, dict):
                 print("-i- Error parsing file: %(name)s" % {
@@ -1087,7 +1088,7 @@ class PackageDatabase:
                     })
             else:
                 d2 = self.package_info_record_to_dict(record=i)
-                if not aipsetup.info.is_dicts_equal(d1, d2):
+                if not org.wayround.aipsetup.info.is_dicts_equal(d1, d2):
                     ret.append(i.name)
                     if not mute:
                         print("-w- xml init file differs for: %(name)s" % {
@@ -1126,7 +1127,7 @@ class PackageDatabase:
 
 
     def print_pkg_info_record(self, name):
-        r = self.package_info_record_to_dict(name = name)
+        r = self.package_info_record_to_dict(name=name)
         if r == None:
             print("-e- Not found named info record")
         else:
@@ -1138,8 +1139,8 @@ class PackageDatabase:
                 category = "< Package not indexed! >"
 
             regexp = '< Wrong regexp type name >'
-            if r['pkg_name_type'] in aipsetup.name.NAME_REGEXPS:
-                regexp = aipsetup.name.NAME_REGEXPS[r['pkg_name_type']]
+            if r['pkg_name_type'] in org.wayround.aipsetup.name.NAME_REGEXPS:
+                regexp = org.wayround.aipsetup.name.NAME_REGEXPS[r['pkg_name_type']]
 
             print("""
 Name: %(name)s

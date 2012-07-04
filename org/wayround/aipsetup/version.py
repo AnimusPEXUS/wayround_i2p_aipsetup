@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import aipsetup
-import aipsetup.name
-import aipsetup.utils.config
+import org.wayround.aipsetup.name
+import org.wayround.aipsetup.config
 
 def version_comparator(name1, name2):
 
     ret = 0
 
-    d1 = aipsetup.name.source_name_parse(
-        aipsetup.utils.config.actual_config,
+    d1 = org.wayround.aipsetup.name.source_name_parse(
+        org.wayround.aipsetup.config.actual_config,
         name1, mute=True, modify_info_file=False
         )
 
-    d2 = aipsetup.name.source_name_parse(
-        aipsetup.utils.config.actual_config,
+    d2 = org.wayround.aipsetup.name.source_name_parse(
+        org.wayround.aipsetup.config.actual_config,
         name2, mute=True, modify_info_file=False
         )
 

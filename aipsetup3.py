@@ -1,23 +1,41 @@
 #!/usr/bin/python3.2
-# -*- coding: utf-8 -*-
 
-import os
 import os.path
 import sys
+import logging
 
-import aipsetup.utils.config
-import aipsetup.utils.getopt2
+for i in [
+    (logging.CRITICAL, '-c-'),
+    (logging.ERROR   , '-e-'),
+    (logging.WARN    , '-w-'),
+    (logging.WARNING , '-w-'),
+    (logging.INFO    , '-i-'),
+    (logging.DEBUG   , '-d-')
+    ]:
+    logging.addLevelName(i[0], i[1])
+del i
 
+logging.basicConfig(format="%(levelname)s %(message)s")
 
-config = aipsetup.utils.config.load_config()
-if config == None:
-    print("-e- configuration file error exiting")
-    exit(1)
+import org.wayround.utils.getopt2
+
+import org.wayround.aipsetup
+import org.wayround.aipsetup.config
+
+try:
+    config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
+except:
+    logging.warning("""\
+Some errors was spotted while reading config file.
+    aipsetup will work as far as it can without config.
+    (use `aipsetup config' to create new config or diagnose existing!)
+""")
+    config = {}
 
 ret = 0
 
 
-optilist, args = aipsetup.utils.getopt2.getopt(sys.argv[1:])
+optilist, args = org.wayround.utils.getopt2.getopt(sys.argv[1:])
 args_l = len(args)
 
 if '--help' in [ i[0] for i in optilist ]:
@@ -31,7 +49,7 @@ if '--help' in [ i[0] for i in optilist ]:
       builders      builder files Actions
 
       constitution  View or Edit Constitution
-      buildingsite  Building Site Manuvers
+      buildingsite  Building Site Maneuvers
       build         Building Actions
       pack          Packaging Actions
       server        UHT Server Related Actions
@@ -49,7 +67,7 @@ if '--help' in [ i[0] for i in optilist ]:
         })
 
 elif '--version' in [ i[0] for i in optilist ]:
-    print(aipsetup.AIPSETUP_VERSION)
+    print(org.wayround.aipsetup.AIPSETUP_VERSION)
 
 elif args_l == 0:
     print("-e- No commands or parameters passed. Try aipsetup --help")
@@ -61,15 +79,17 @@ else:
                    'build', 'server', 'client',
                    'pkgindex', 'name', 'docbook',
                    'buildingsite', 'constitution',
-                   'pack', 'package']:
+                   'pack', 'package', 'config']:
 
-        exec("import aipsetup.%(name)s" % {
-                'name': args[0]
-                })
+        exec("import org.wayround.aipsetup.{name!s}".format(
+                name=args[0]
+                )
+             )
 
-        exec("ret = aipsetup.%(name)s.router(optilist, args[1:], config)" % {
-                'name': args[0]
-                })
+        exec("ret = org.wayround.aipsetup.{name!s}.router(optilist, args[1:], config)".format(
+                name=args[0]
+                )
+             )
 
     else:
         print("-e- Wrong command. Try aipsetup --help")

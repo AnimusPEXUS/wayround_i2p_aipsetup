@@ -4,7 +4,7 @@ import re
 import sys
 import fnmatch
 
-import aipsetup.info
+import org.wayround.aipsetup.info
 
 class RegexpsError(Exception):
     pass
@@ -352,17 +352,17 @@ def source_name_parse(config, filename, mute=False,
                 })
 
 
-        data = aipsetup.info.read_from_file(
+        data = org.wayround.aipsetup.info.read_from_file(
             fn
             )
 
         if data == None:
             if not mute:
                 print("-i- Error reading file. Creating new.")
-            data = aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE
+            data = org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE
 
         data['pkg_name_type'] = ret['re']
 
-        aipsetup.info.write_to_file(fn, data)
+        org.wayround.aipsetup.info.write_to_file(fn, data)
 
     return ret

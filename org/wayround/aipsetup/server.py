@@ -9,9 +9,10 @@ import xml.sax.saxutils
 
 import cherrypy
 
-import aipsetup.pkgindex
-import aipsetup.utils.getopt2
-import aipsetup.utils.error
+import org.wayround.aipsetup.pkgindex
+
+import org.wayround.utils.getopt2
+import org.wayround.utils.error
 
 
 from mako.template import Template
@@ -139,7 +140,7 @@ class Index:
 
         self.config = config
         self.templates = templates
-        self.pdb = aipsetup.pkgindex.PackageDatabase(self.config)
+        self.pdb = org.wayround.aipsetup.pkgindex.PackageDatabase(self.config)
 
         self.index_reloading = False
         self.index_indexing = False
@@ -204,9 +205,9 @@ class Index:
         # if not cherrypy.lib.auth.check_auth(users, realm='UHT_admin'):
 
         cherrypy.lib.auth.digest_auth(
-            realm = 'UHT_admin',
-            users = users,
-            debug = True
+            realm='UHT_admin',
+            users=users,
+            debug=True
             )
 
     def control(self, action=None):
@@ -233,8 +234,8 @@ class Index:
         control = self.templates['control'].render()
 
         html = self.templates['html'].render(
-            title = 'UHT Server - Index Control',
-            body = control
+            title='UHT Server - Index Control',
+            body=control
             )
 
         return html
@@ -249,8 +250,8 @@ class Index:
             )
 
         html = self.templates['html'].render(
-            title = 'UHT Server - Welcome!',
-            body = index
+            title='UHT Server - Welcome!',
+            body=index
             )
 
         return html
@@ -346,13 +347,13 @@ class Index:
 
             if view == 'html':
                 search_html = self.templates['search'].render(
-                    what = what,
-                    results = lst
+                    what=what,
+                    results=lst
                     )
 
                 out = self.templates['html'].render(
-                    title = 'UHT Server',
-                    body = search_html
+                    title='UHT Server',
+                    body=search_html
                     )
             elif view == 'list':
                 cherrypy.response.headers['Content-Type'] = 'text/plain'
@@ -380,13 +381,13 @@ class Index:
         lst.sort()
 
         info_list = self.templates['infolist'].render(
-            infos = lst,
-            toc_sl = toc_sl
+            infos=lst,
+            toc_sl=toc_sl
             )
 
         html = self.templates['html'].render(
-            title = 'UHT Server - Info List',
-            body = info_list
+            title='UHT Server - Info List',
+            body=info_list
             )
 
         return html
@@ -400,7 +401,7 @@ class Index:
 
         out = ''
 
-        r = self.pdb.package_info_record_to_dict(name = name)
+        r = self.pdb.package_info_record_to_dict(name=name)
         if r == None:
             out = "Not found named info record"
         else:
@@ -417,19 +418,19 @@ class Index:
 
 
             out = self.templates['info'].render(
-                name = name,
-                homepage = r['homepage'],
-                pkg_name_type = r['pkg_name_type'],
-                regexp = regexp,
-                buildinfo = r['buildinfo'],
-                description = r['description'],
-                tags = r['tags'],
-                category = category
+                name=name,
+                homepage=r['homepage'],
+                pkg_name_type=r['pkg_name_type'],
+                regexp=regexp,
+                buildinfo=r['buildinfo'],
+                description=r['description'],
+                tags=r['tags'],
+                category=category
                 )
 
         html = self.templates['html'].render(
-            title = name,
-            body = out
+            title=name,
+            body=out
             )
 
         return html
@@ -488,7 +489,7 @@ def start_host(config=None):
               'search', 'control']:
         try:
             templates[i] = Template(
-                filename = os.path.join(
+                filename=os.path.join(
                     tpldir,
                     'templates',
                     '%(name)s.html' % {'name': i}
@@ -496,7 +497,7 @@ def start_host(config=None):
                 )
         except:
             e = sys.exc_info()
-            aipsetup.utils.error.print_exception_info(e)
+            org.wayround.utils.error.print_exception_info(e)
             print("-e- Error reading template %(name)s" % {
                 'name': os.path.join(
                     config['uhtroot'],

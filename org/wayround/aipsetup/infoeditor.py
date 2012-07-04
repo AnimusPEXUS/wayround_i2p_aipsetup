@@ -6,8 +6,9 @@ import PyQt4.uic
 import PyQt4.QtGui
 import PyQt4.QtCore
 
-import aipsetup.utils.text
-import aipsetup.info
+import org.wayround.utils.text
+
+import org.wayround.aipsetup.info
 
 __file__ == os.path.abspath(__file__)
 
@@ -62,7 +63,7 @@ class MainWindow:
                 )
             ret = 1
         else:
-            data = aipsetup.info.read_from_file(filename)
+            data = org.wayround.aipsetup.info.read_from_file(filename)
 
             if not isinstance(data, dict):
                 PyQt4.QtGui.QMessageBox.critical(
@@ -96,11 +97,11 @@ class MainWindow:
         data['pkg_name_type'] = str(self.window.lineEdit_2.text()).strip()
         data['buildinfo'] = str(self.window.lineEdit_3.text()).strip()
 
-        data['tags'] = aipsetup.utils.text.strip_remove_empty_remove_duplicated_lines(
+        data['tags'] = org.wayround.utils.text.strip_remove_empty_remove_duplicated_lines(
             str(self.window.plainTextEdit_4.toPlainText()).splitlines()
             )
 
-        if aipsetup.info.write_to_file(filename, data) != 0:
+        if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
             PyQt4.QtGui.QMessageBox.critical(
                 self.window, 'Error',
                 "Can't save to file %(name)s" % {

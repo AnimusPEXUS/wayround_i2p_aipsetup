@@ -7,7 +7,6 @@ It't purpuse is to check, install, uninstall package
 """
 
 import sys
-import os
 import os.path
 import tarfile
 import glob
@@ -17,14 +16,15 @@ import copy
 import re
 import fnmatch
 
-import aipsetup.pkgindex
-import aipsetup.name
-import aipsetup.buildingsite
-import aipsetup.utils.checksum
-import aipsetup.utils.error
-import aipsetup.utils.text
-import aipsetup.utils.time
-import aipsetup.storage.archive
+import org.wayround.utils.checksum
+import org.wayround.utils.error
+import org.wayround.utils.text
+import org.wayround.utils.time
+import org.wayround.utils.archive
+
+import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.name
+import org.wayround.aipsetup.buildingsite
 
 def print_help():
     print("""\
@@ -258,12 +258,12 @@ def check_package(config, asp_name, mute=False):
             print("-e- Can't open file `%(name)s'" % {
                 'name': asp_name
                 })
-            print(aipsetup.utils.error.return_exception_info(
+            print(org.wayround.utils.error.return_exception_info(
                 sys.exc_info()
                 ))
             ret = 1
         else:
-            f = aipsetup.storage.archive.tar_member_get_extract_file(
+            f = org.wayround.utils.archive.tar_member_get_extract_file(
                 tarf,
                 './package.sha512'
                 )
@@ -273,14 +273,14 @@ def check_package(config, asp_name, mute=False):
             else:
                 sums_txt = f.read()
                 f.close()
-                sums = aipsetup.utils.checksum.parse_checksums_text(
+                sums = org.wayround.utils.checksum.parse_checksums_text(
                     sums_txt
                     )
                 del(sums_txt)
 
                 sums2 = {}
                 for i in sums:
-                    sums2['.'+i]=sums[i]
+                    sums2['.' + i] = sums[i]
                 sums = sums2
                 del(sums2)
 
@@ -289,7 +289,7 @@ def check_package(config, asp_name, mute=False):
                 check_list = ['./04.DESTDIR.tar.xz', './05.BUILD_LOGS.tar.xz',
                               './package_info.py', './02.PATCHES.tar.xz']
 
-                for i in ['./00.TARBALL',  './06.LISTS']:
+                for i in ['./00.TARBALL', './06.LISTS']:
                     for j in tar_members:
                         if ((j.name.startswith(i) \
                             and j.name != i)):
@@ -325,15 +325,15 @@ def check_package(config, asp_name, mute=False):
 
 def tarobj_check_member_sum(tarobj, sums, member_name):
     ret = True
-    fobj = aipsetup.storage.archive.tar_member_get_extract_file(
+    fobj = org.wayround.utils.archive.tar_member_get_extract_file(
         tarobj,
         member_name
         )
     if not isinstance(fobj, tarfile.ExFileObject):
         ret = False
     else:
-        sum = aipsetup.utils.checksum.make_fileobj_checksum(fobj)
-        if sum == sums[member_name]:
+        summ = org.wayround.utils.checksum.make_fileobj_checksum(fobj)
+        if summ == sums[member_name]:
             ret = True
         else:
             ret = False
@@ -355,7 +355,7 @@ def install(config, asp_name, destdir='/'):
             tarf = tarfile.open(asp_name, mode='r')
         except:
             print("-e- Can't open file %(name)s")
-            aipsetup.utils.error.print_exception_info(sys.exc_info())
+            org.wayround.utils.error.print_exception_info(sys.exc_info())
             ret = 1
         else:
 
@@ -397,7 +397,7 @@ def install(config, asp_name, destdir='/'):
                 if not os.path.exists(out_filename_dir):
                     os.makedirs(out_filename_dir)
 
-                if aipsetup.storage.archive.\
+                if org.wayround.utils.archive.\
                     tar_member_get_extract_file_to(
                         tarf, i[0], out_filename
                         ) != 0 :
@@ -411,7 +411,7 @@ def install(config, asp_name, destdir='/'):
             if ret == 0:
                 print("-i- Installing package's destdir")
 
-                dd_fobj = aipsetup.storage.archive.\
+                dd_fobj = org.wayround.utils.archive.\
                     tar_member_get_extract_file(
                         tarf, './04.DESTDIR.tar.xz'
                         )
@@ -419,12 +419,12 @@ def install(config, asp_name, destdir='/'):
                     print("-e- Can't get package's destdir")
                     ret = 4
                 else:
-                    if aipsetup.storage.archive.\
+                    if org.wayround.utils.archive.\
                         decompress_dir_contents_tar_compressor_fobj(
                             dd_fobj, destdir, 'xz',
                             verbose_tar=True,
                             verbose_compressor=True,
-                            add_tar_options = ['--no-same-owner', '--no-same-permissions']
+                            add_tar_options=['--no-same-owner', '--no-same-permissions']
                             ) != 0:
                         print("-e- Package destdir decompression error")
                         ret = 5
@@ -455,7 +455,7 @@ def list_packages_issues(config, destdir='/'):
         else:
             name = i[:-3]
 
-        parsed_name = aipsetup.name.package_name_parse(name)
+        parsed_name = org.wayround.aipsetup.name.package_name_parse(name)
         if parsed_name == None:
             print("-w- Error while parsing name `%(name)s'" % {
                 'name': name
@@ -469,7 +469,7 @@ def list_packages_issues(config, destdir='/'):
         info_file = os.path.join(
             info_dir, i + '.xml'
             )
-        if not isinstance(aipsetup.info.read_from_file(info_file), dict):
+        if not isinstance(org.wayround.aipsetup.info.read_from_file(info_file), dict):
             print("-w- Some issue with `%(name)s' info file" % {
                 'name': i
                 })
@@ -480,7 +480,7 @@ def list_packages_issues(config, destdir='/'):
     print("-i- Found issues with following (%(num)d) packages:" % {
         'num': len(issued)
         })
-    aipsetup.utils.text.columned_list_print(
+    org.wayround.utils.text.columned_list_print(
         issued, fd=sys.stdout.fileno()
     )
 
@@ -500,7 +500,7 @@ def named_list_packages(config, asp_name, destdir='/'):
         else:
             name = i[:-3]
 
-        parsed_name = aipsetup.name.package_name_parse(name)
+        parsed_name = org.wayround.aipsetup.name.package_name_parse(name)
         if parsed_name == None:
             pass
         else:
@@ -508,7 +508,7 @@ def named_list_packages(config, asp_name, destdir='/'):
             if parsed_name['groups']['name'] == asp_name:
                 out_list.append(name)
 
-    aipsetup.utils.text.columned_list_print(
+    org.wayround.utils.text.columned_list_print(
         out_list, fd=sys.stdout.fileno()
     )
 
@@ -539,7 +539,7 @@ def list_packages(config, mask, destdir='/', return_list=False, mute=False):
                 bases.remove(i)
 
         if not mute:
-            aipsetup.utils.text.columned_list_print(
+            org.wayround.utils.text.columned_list_print(
                 bases, fd=sys.stdout.fileno()
             )
 
@@ -573,7 +573,7 @@ def remove_package(config, name, destdir='/'):
                 })
             ret = 2
         else:
-            txt = aipsetup.storage.archive.xzcat(f)
+            txt = org.wayround.utils.archive.xzcat(f)
             f.close()
             del(f)
             lines = txt.splitlines()
@@ -632,7 +632,7 @@ def reduce_old(config, name, destdir='/'):
 def build(config, source_files):
     ret = 0
 
-    par_res = aipsetup.name.source_name_parse(
+    par_res = org.wayround.aipsetup.name.source_name_parse(
         config, source_files[0], mute=False
         )
 
@@ -648,7 +648,7 @@ def build(config, source_files):
 
         tmp_dir_prefix = "%(name)s-%(timestamp)s-" % {
             'name': par_res['groups']['name'],
-            'timestamp': aipsetup.utils.time.currenttime_stamp()
+            'timestamp': org.wayround.utils.time.currenttime_stamp()
             }
 
         build_site_dir = tempfile.mkdtemp(
@@ -657,7 +657,7 @@ def build(config, source_files):
             )
         build_site_dir = os.path.abspath(build_site_dir)
 
-        if aipsetup.buildingsite.init(config, build_site_dir) != 0:
+        if org.wayround.aipsetup.buildingsite.init(config, build_site_dir) != 0:
             print("-e- Error initiating temporary dir")
             ret = 2
         else:
@@ -678,11 +678,11 @@ def build(config, source_files):
                             shutil.copy(
                                 source_file, os.path.join(
                                     build_site_dir,
-                                    aipsetup.buildingsite.DIR_TARBALL
+                                    org.wayround.aipsetup.buildingsite.DIR_TARBALL
                                     )
                                 )
                         except:
-                            aipsetup.utils.error.print_exception_info(
+                            org.wayround.utils.error.print_exception_info(
                                 sys.exc_info()
                                 )
                             ret = -3
@@ -697,7 +697,7 @@ def build(config, source_files):
                 if ret != 0:
                     print("-e- Exception while copying one of soruce files")
 
-            if aipsetup.buildingsite.apply_info(
+            if org.wayround.aipsetup.buildingsite.apply_info(
                 config, build_site_dir, source_files[0]) == 0:
 
                 if complite(config, build_site_dir) != 0:
@@ -708,7 +708,7 @@ def build(config, source_files):
 
 def complite(config, dirname):
 
-    log = aipsetup.utils.log.Log(
+    log = org.wayround.utils.log.Log(
         config, dirname, 'buildingsite complite'
         )
     log.write("-i- Buildingsite processes started")
@@ -717,10 +717,10 @@ def complite(config, dirname):
 
     ret = 0
 
-    if aipsetup.build.complite(config, dirname) != 0:
+    if org.wayround.aipsetup.build.complite(config, dirname) != 0:
         print("-e- Error on building stage")
         ret = 1
-    elif aipsetup.pack.complite(config, dirname) != 0:
+    elif org.wayround.aipsetup.pack.complite(config, dirname) != 0:
         print("-e- Error on packaging stage")
         ret = 2
 
@@ -806,7 +806,7 @@ def find_file(config, destdir, pkgname, instr, mode=None, mute=False,
         if not pkgname.endswith('.xz'):
             pkgname += '.xz'
 
-        pkg_file_list = package_files(config,  destdir, pkgname,
+        pkg_file_list = package_files(config, destdir, pkgname,
                                       mute=False,
                                       return_list=True)
 
@@ -847,7 +847,7 @@ def find_file(config, destdir, pkgname, instr, mode=None, mute=False,
             out_list = list(out_list)
             out_list.sort()
             if not mute:
-                aipsetup.utils.text.columned_list_print(
+                org.wayround.utils.text.columned_list_print(
                     out_list, fd=sys.stdout.fileno()
                 )
 
@@ -875,11 +875,11 @@ def package_files(config, destdir, pkgname, mute=False,
         f = open(pkg_list_file, 'r')
     except:
         print("-e- Can't open list file")
-        aipsetup.utils.print_exception_info(sys.excinfo())
+        org.wayround.utils.error.print_exception_info(sys.exc_info())
         ret = 2
     else:
 
-        pkg_file_list = aipsetup.storage.archive.xzcat(f)
+        pkg_file_list = org.wayround.utils.archive.xzcat(f)
 
         f.close()
 
@@ -888,7 +888,7 @@ def package_files(config, destdir, pkgname, mute=False,
         pkg_file_list.sort()
 
         if not mute:
-            aipsetup.utils.text.columned_list_print(
+            org.wayround.utils.text.columned_list_print(
                 pkg_file_list, fd=sys.stdout.fileno()
             )
 
@@ -918,19 +918,19 @@ def check_package_aipsetup2(filename):
             bn = os.path.basename(filename)
             dbn = './' + bn
 
-            sha512 = aipsetup.utils.checksum.make_file_checksum(
+            sha512 = org.wayround.utils.checksum.make_file_checksum(
                 filename, 'sha512'
                 )
 
-            md5 = aipsetup.utils.checksum.make_file_checksum(
+            md5 = org.wayround.utils.checksum.make_file_checksum(
                 filename, 'md5'
                 )
 
-            sha512s = aipsetup.utils.checksum.parse_checksums_file_text(
+            sha512s = org.wayround.utils.checksum.parse_checksums_file_text(
                 filename_sha512
                 )
 
-            md5s = aipsetup.utils.checksum.parse_checksums_file_text(
+            md5s = org.wayround.utils.checksum.parse_checksums_file_text(
                 filename_md5
                 )
 
@@ -979,14 +979,14 @@ def put_to_index(config, filename):
             filename_md5 = filename + '.md5'
             fbn = os.path.basename(filename)
 
-            par_res = aipsetup.name.package_name_parse(fbn)
+            par_res = org.wayround.aipsetup.name.package_name_parse(fbn)
             if not isinstance(par_res, dict):
                 print("-e- Couldn't parse filename `%(fn)s'" % {
                     'fn': fbn
                     })
                 ret = 1
             else:
-                path = aipsetup.pkgindex.get_package_path(
+                path = org.wayround.aipsetup.pkgindex.get_package_path(
                     config,
                     par_res['groups']['name']
                     )
@@ -999,7 +999,7 @@ def put_to_index(config, filename):
                     full_path = config['repository'] + '/' + path
                     full_path = os.path.abspath(full_path.replace(r'//', '/'))
 
-                    if aipsetup.pkgindex.create_required_dirs_at_package(
+                    if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
                         print("-e- Can't ensure existance of required dirs")
@@ -1019,7 +1019,7 @@ def put_to_index(config, filename):
                             ]:
                             if (os.path.abspath(i[0]) != os.path.abspath(i[1])):
 
-                                aipsetup.utils.file.remove_if_exists(
+                                org.wayround.utils.file.remove_if_exists(
                                     i[1]
                                     )
 
@@ -1028,14 +1028,14 @@ def put_to_index(config, filename):
         elif check_package(config, filename, mute=True) == 0:
             filename = os.path.abspath(filename)
             fbn = os.path.basename(filename)
-            par_res = aipsetup.name.package_name_parse(fbn)
+            par_res = org.wayround.aipsetup.name.package_name_parse(fbn)
             if not isinstance(par_res, dict):
                 print("-e- Couldn't parse filename `%(fn)s'" % {
                     'fn': fbn
                     })
                 ret = 1
             else:
-                path = aipsetup.pkgindex.get_package_path(
+                path = org.wayround.aipsetup.pkgindex.get_package_path(
                     config,
                     par_res['groups']['name']
                     )
@@ -1048,7 +1048,7 @@ def put_to_index(config, filename):
                     full_path = config['repository'] + '/' + path
                     full_path = os.path.abspath(full_path.replace(r'//', '/'))
 
-                    if aipsetup.pkgindex.create_required_dirs_at_package(
+                    if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
                         print("-e- Can't ensure existance of required dirs")
@@ -1063,14 +1063,14 @@ def put_to_index(config, filename):
                             })
 
                         if (os.path.abspath(filename) != os.path.abspath(full_path_pack + '/' + fbn)):
-                            aipsetup.utils.file.remove_if_exists(
+                            org.wayround.utils.file.remove_if_exists(
                                 full_path_pack + '/' + fbn
                                 )
                             shutil.move(filename, full_path_pack + '/' + fbn)
 
         else:
 
-            sn_pres = aipsetup.name.source_name_parse(
+            sn_pres = org.wayround.aipsetup.name.source_name_parse(
                 config, filename, mute=True
             )
 
@@ -1081,7 +1081,7 @@ def put_to_index(config, filename):
             else:
                 print("-i- Source name parsed")
                 fbn = os.path.basename(filename)
-                path = aipsetup.pkgindex.get_package_path(
+                path = org.wayround.aipsetup.pkgindex.get_package_path(
                     config,
                     sn_pres['groups']['name']
                     )
@@ -1094,7 +1094,7 @@ def put_to_index(config, filename):
                     full_path = config['repository'] + '/' + path
                     full_path = os.path.abspath(full_path.replace(r'//', '/'))
 
-                    if aipsetup.pkgindex.create_required_dirs_at_package(
+                    if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
                         print("-e- Can't ensure existance of required dirs")
@@ -1109,7 +1109,7 @@ def put_to_index(config, filename):
                             })
 
                         if (os.path.abspath(filename) != os.path.abspath(full_path_source + '/' + fbn)):
-                            aipsetup.utils.file.remove_if_exists(
+                            org.wayround.utils.file.remove_if_exists(
                                 full_path_source + '/' + fbn
                                 )
                             shutil.move(filename, full_path_source + '/' + fbn)

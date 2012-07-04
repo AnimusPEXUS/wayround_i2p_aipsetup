@@ -1,19 +1,15 @@
 #!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
 
-import os
 import os.path
 import copy
 import glob
 import sys
 
-import lxml
 import lxml.etree
 
-import aipsetup.name
-import aipsetup.version
-import aipsetup.utils.error
-import aipsetup.utils.text
+import org.wayround.utils.error
+
 
 from mako.template import Template
 
@@ -23,11 +19,11 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # description
     description="",
     # 'standard', 'local' or other package name
-    pkg_name_type = "",
+    pkg_name_type="",
     # string list
-    tags = [],
+    tags=[],
     # string
-    buildinfo = ''
+    buildinfo=''
     )
 
 pkg_info_file_template = Template(text="""\
@@ -94,7 +90,7 @@ def router(opts, args, config):
                 if args_l > 1:
                     mask = args[1]
 
-                aipsetup.utils.file.list_files(
+                org.wayround.utils.file.list_files(
                     config, mask, 'info'
                     )
 
@@ -104,14 +100,14 @@ def router(opts, args, config):
             if args_l != 2:
                 print("-e- builder to edit not specified")
             else:
-                aipsetup.utils.edit.edit_file(
+                org.wayround.utils.edit.edit_file(
                     config, args[1], 'info'
                     )
 
         elif args[0] == 'editor':
-            import aipsetup.infoeditor
+            from . import infoeditor
 
-            aipsetup.infoeditor.main(config)
+            infoeditor.main(config)
 
         elif args[0] == 'copy':
 
@@ -119,7 +115,7 @@ def router(opts, args, config):
                 print("-e- wrong parameters count")
             else:
 
-                aipsetup.utils.file.copy_file(
+                org.wayround.utils.file.copy_file(
                     config, args[1], args[2], 'info'
                     )
 
@@ -190,7 +186,7 @@ def read_from_file(name):
         print("-e- Can't open file %(name)s" % {
             'name': name
             })
-        aipsetup.utils.error.print_exception_info(
+        org.wayround.utils.error.print_exception_info(
             sys.exc_info()
             )
     else:
@@ -202,7 +198,7 @@ def read_from_file(name):
             print("-e- Can't parse file `%(name)s'" % {
                 'name': name
                 })
-            aipsetup.utils.error.print_exception_info(
+            org.wayround.utils.error.print_exception_info(
                 sys.exc_info()
                 )
             ret = 2
@@ -240,11 +236,11 @@ def write_to_file(name, struct):
     struct['tags'].sort()
 
     txt = pkg_info_file_template.render(
-        pkg_name_type = struct['pkg_name_type'],
-        description   = struct['description'],
-        homepage      = struct['homepage'],
-        tags          = struct['tags'],
-        buildinfo     = struct['buildinfo']
+        pkg_name_type=struct['pkg_name_type'],
+        description=struct['description'],
+        homepage=struct['homepage'],
+        tags=struct['tags'],
+        buildinfo=struct['buildinfo']
         )
 
     try:
@@ -255,7 +251,7 @@ def write_to_file(name, struct):
         print("-e- Can't rewrite file %(name)s" % {
             'name': name
             })
-        aipsetup.utils.error.print_exception_info(sys.exc_info())
+        org.wayround.utils.error.print_exception_info(sys.exc_info())
         ret = 1
 
     return ret
