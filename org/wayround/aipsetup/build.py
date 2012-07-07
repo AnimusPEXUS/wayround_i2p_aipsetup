@@ -1,16 +1,31 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 
 import sys
 import os.path
+import logging
 
 import org.wayround.aipsetup.buildingsite
-import org.wayround.aipsetup.tools.autotools
 
 import org.wayround.utils.log
 
-def print_help():
+
+FUNCTIONS = frozenset([
+    'extract',
+    'configure',
+    'build',
+    'distribute',
+    'prepack'
+    ])
+
+FUNCTIONS_TEXTS_SET = {
+    'extract': ('extractor', 'extract', 'extracting', 'extraction'),
+    'configure': ('configurer', 'configure', 'configuring', 'configuration'),
+    'build': ('builder', 'build', 'building', 'building'),
+    'distribute': ('distributer', 'distribute', 'distributing', 'distribution'),
+    'prepack': ('prepackager', 'prepack', 'prepackaging', 'prepackaging')
+    }
+
+
+def print_help(opts, args):
     print("""\
 aipsetup build command
 
@@ -37,53 +52,62 @@ aipsetup build command
  See also aipsetup pack help
 """)
 
-def router(opts, args, config):
+
+
+
+def router(opts, args):
 
     ret = 0
     args_l = len(args)
 
     if args_l == 0:
-        print("-e- Command not given. See `aipsetup build help'")
+        print("-e- Command not given.")
         ret = 1
     else:
 
         if args[0] == 'help':
             print_help()
 
-        elif args[0] in ['extract', 'configure',
-                         'build', 'install',
-                         'complite']:
+        elif args[0] in list(FUNCTIONS):
 
             d = '.'
 
             if args_l > 1:
                 d = args[1]
 
-            ret = eval(
-                "%(name)s(config, d)" % {
-                    'name': args[0]
-                    }
+            ret = general_tool_function(
+                args[0], d, FUNCTIONS_TEXTS_SET[args[0]]
                 )
+
+        elif args[0] == 'complete':
+
+            d = '.'
+
+            if args_l > 1:
+                d = args[1]
+
+            ret = complete(d)
 
         else:
             print("-e- Wrong build command")
 
     return ret
 
-def _same_function(config, dirname, actor_name,
-                   function, whatdoes, process):
+def general_tool_function(tool_name, dirname, texts):
+
+    process = texts[3]
+    whatdoes = texts[2]
+    function = texts[1]
 
     ret = 0
 
-    log = org.wayround.utils.log.Log(config, dirname, process)
+    log = org.wayround.utils.log.Log(dirname, process)
     # log.write("-i- Closing this log now, cause it can't be done farther")
 
-    log.write("-i- =========[%(whatdoes)s]=========" % {
-        'whatdoes': whatdoes.capitalize()
-        })
+    log.write("-i- =========[{}]=========".format(whatdoes.capitalize()))
 
     pi = org.wayround.aipsetup.buildingsite.read_package_info(
-        config, dirname, ret_on_error=None
+        dirname, ret_on_error=None
         )
 
     if pi == None:
@@ -93,10 +117,10 @@ def _same_function(config, dirname, actor_name,
         ret = 1
     else:
         try:
-            actor = pi['pkg_buildinfo'][actor_name]
+            actor = pi['pkg_buildinfo'][tool_name]
         except:
-            log.write("-e- Error getting %(actor_name)s name" % {
-                    'actor_name': actor_name
+            log.write("-e- Error getting %(tool_name)s name" % {
+                    'tool_name': tool_name
                     })
             log.write(
                 org.wayround.utils.error.return_exception_info(
@@ -108,9 +132,9 @@ def _same_function(config, dirname, actor_name,
         else:
             if not actor in ['autotools']:
                 log.write(
-                    ("-e- Package desires %(actor_name)s "\
+                    ("-e- Package desires %(tool_name)s "\
                     + "which is not supported by") % {
-                        'actor_name': actor_name
+                        'tool_name': tool_name
                         }
                     )
                 log.write("    current aipsetup system")
@@ -118,7 +142,7 @@ def _same_function(config, dirname, actor_name,
             else:
                 if eval(
                     ("aipsetup.tools.%(toolname)s."\
-                    + "%(function)s(config, log, dirname)") % {
+                    + "%(function)s(log, dirname)") % {
                         'toolname': actor,
                         'function': function
                         }
@@ -141,66 +165,16 @@ def _same_function(config, dirname, actor_name,
 
     return ret
 
-def extract(config, dirname):
-    return _same_function(
-        config,
-        dirname,
-        'extractor',
-        'extract',
-        'extracting',
-        'extraction'
-        )
 
-def configure(config, dirname):
-    return _same_function(
-        config,
-        dirname,
-        'configurer',
-        'configure',
-        'configuring',
-        'configuration'
-        )
-
-def build(config, dirname):
-    return _same_function(
-        config,
-        dirname,
-        'builder',
-        'build',
-        'building',
-        'building'
-        )
-
-def install(config, dirname):
-    return _same_function(
-        config,
-        dirname,
-        'installer',
-        'install',
-        'installing',
-        'installation'
-        )
-
-def postinstall(config, dirname):
-    return _same_function(
-        config,
-        dirname,
-        'postinstaller',
-        'postinstall',
-        'postinstalling',
-        'postinstallation'
-        )
-
-
-def complite(config, dirname):
+def complete(dirname):
     ret = 0
 
     pi = org.wayround.aipsetup.buildingsite.read_package_info(
-        config, dirname, ret_on_error=None
+        dirname, ret_on_error=None
         )
 
     if pi == None:
-        # FIXME: inform user about error using logging
+        logging.error("Error reading package info in dir {}".format(dirname))
         ret = 1
     else:
 

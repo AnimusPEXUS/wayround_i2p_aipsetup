@@ -23,14 +23,15 @@ import org.wayround.aipsetup
 import org.wayround.aipsetup.config
 
 try:
-    config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
+    org.wayround.aipsetup.config.config = \
+        org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
 except:
     logging.warning("""\
 Some errors was spotted while reading config file.
     aipsetup will work as far as it can without config.
     (use `aipsetup config' to create new config or diagnose existing!)
 """)
-    config = {}
+    org.wayround.aipsetup.config.config = {}
 
 ret = 0
 
@@ -75,7 +76,7 @@ elif args_l == 0:
 
 else:
 
-    if args[0] in ['info', 'buildinfo', 'builders',
+    if args[0] in ['info', 'buildinfo',
                    'build', 'server', 'client',
                    'pkgindex', 'name', 'docbook',
                    'buildingsite', 'constitution',
@@ -86,7 +87,7 @@ else:
                 )
              )
 
-        exec("ret = org.wayround.aipsetup.{name!s}.router(optilist, args[1:], config)".format(
+        exec("ret = org.wayround.aipsetup.{name!s}.router(optilist, args[1:])".format(
                 name=args[0]
                 )
              )

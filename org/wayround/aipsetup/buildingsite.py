@@ -226,7 +226,7 @@ def init(config, directory='build'):
     return ret
 
 
-def read_package_info(config, directory, ret_on_error=None):
+def read_package_info(directory, ret_on_error=None):
     ret = ret_on_error
 
     pi_filename = os.path.join(directory, 'package_info.py')

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-def build_info(config, package_info):
+def build_info(package_info):
 
     constitution = package_info['constitution']
 

@@ -9,6 +9,7 @@ import PyQt4.QtCore
 import org.wayround.utils.text
 
 import org.wayround.aipsetup.info
+import org.wayround.aipsetup.config
 
 __file__ == os.path.abspath(__file__)
 
@@ -157,6 +158,6 @@ class MainWindow:
     def wait(self):
         return self.app.exec_()
 
-def main(config):
-    mw = MainWindow(config)
+def main():
+    mw = MainWindow(org.wayround.aipsetup.config.config)
     return mw.wait()

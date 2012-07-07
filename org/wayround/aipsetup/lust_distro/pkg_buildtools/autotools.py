@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import os
 import os.path
@@ -7,23 +6,23 @@ import glob
 import shutil
 import sys
 
-import aipsetup.buildingsite
-import aipsetup.utils.osutils
-import aipsetup.storage.archive
+import org.wayround.aipsetup.buildingsite
+import org.wayround.utils.osutils
+import org.wayround.utils.archive
 
-def determine_source_dir(config, buildingsite, pkginfo):
+def determine_source_dir(buildingsite, pkginfo):
 
     source_dir = os.path.abspath(
         os.path.join(
             buildingsite,
-            aipsetup.buildingsite.DIR_SOURCE,
+            org.wayround.aipsetup.buildingsite.DIR_SOURCE,
             pkginfo['pkg_buildinfo']['autotools_configure_opts']['config_dir']
             )
         )
 
     return source_dir
 
-def determine_building_dir(config, buildingsite, source_dir, pkginfo):
+def determine_building_dir(buildingsite, source_dir, pkginfo):
     building_dir = ''
 
     if pkginfo['pkg_buildinfo']['autotools_configure_opts']['separate_build_dir'] == True:
@@ -31,7 +30,7 @@ def determine_building_dir(config, buildingsite, source_dir, pkginfo):
         building_dir = os.path.abspath(
             os.path.join(
                 buildingsite,
-                aipsetup.buildingsite.DIR_BUILDING,
+                org.wayround.aipsetup.buildingsite.DIR_BUILDING,
                 pkginfo['pkg_buildinfo']['autotools_configure_opts']['config_dir']
                 )
             )
@@ -42,7 +41,7 @@ def determine_building_dir(config, buildingsite, source_dir, pkginfo):
 
     return building_dir
 
-def determine_configurer_parameters(config, pkginfo):
+def determine_configurer_parameters(pkginfo):
 
     run_parameters = []
 
@@ -60,7 +59,7 @@ def determine_configurer_parameters(config, pkginfo):
     return run_parameters
 
 
-def determine_builder_parameters(config, pkginfo):
+def determine_builder_parameters(pkginfo):
 
     run_parameters = []
 
@@ -78,7 +77,7 @@ def determine_builder_parameters(config, pkginfo):
     return run_parameters
 
 
-def determine_installer_parameters(config, pkginfo):
+def determine_installer_parameters(pkginfo):
 
     run_parameters = []
 
@@ -96,23 +95,23 @@ def determine_installer_parameters(config, pkginfo):
     return run_parameters
 
 
-def extract(config, log, buildingsite='.'):
+def extract(log, buildingsite='.'):
 
     ret = 0
 
     tarball_dir = os.path.join(
         buildingsite,
-        aipsetup.buildingsite.DIR_TARBALL
+        org.wayround.aipsetup.buildingsite.DIR_TARBALL
         )
 
     output_dir = os.path.join(
         buildingsite,
-        aipsetup.buildingsite.DIR_SOURCE
+        org.wayround.aipsetup.buildingsite.DIR_SOURCE
         )
 
     if os.path.isdir(output_dir):
         log.write("-i- cleaningup source dir")
-        aipsetup.utils.file.cleanup_dir(output_dir)
+        org.wayround.utils.file.cleanup_dir(output_dir)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -130,7 +129,7 @@ def extract(config, log, buildingsite='.'):
 
         arch_bn = os.path.basename(arch)
 
-        extr_error = aipsetup.storage.archive.extract(
+        extr_error = org.wayround.utils.archive.extract(
             arch, output_dir
             )
 
@@ -156,12 +155,12 @@ def extract(config, log, buildingsite='.'):
     return ret
 
 
-def configure(config, log, buildingsite='.'):
+def configure(log, buildingsite='.'):
 
     ret = 0
 
-    pi = aipsetup.buildingsite.read_package_info(
-        config, buildingsite, ret_on_error=None)
+    pi = org.wayround.aipsetup.buildingsite.read_package_info(
+        buildingsite, ret_on_error=None)
 
     if pi == None:
         log.write("-e- error getting information about package")
@@ -169,18 +168,18 @@ def configure(config, log, buildingsite='.'):
     else:
 
         source_dir = determine_source_dir(
-            config, buildingsite, pi
+            buildingsite, pi
             )
 
         building_dir = determine_building_dir(
-            config, buildingsite, source_dir, pi
+            buildingsite, source_dir, pi
             )
 
         if not os.path.isdir(building_dir):
             os.makedirs(building_dir)
 
         run_parameters = determine_configurer_parameters(
-            config, pi
+            pi
             )
 
         config_script = os.path.abspath(
@@ -198,7 +197,7 @@ def configure(config, log, buildingsite='.'):
                 })
         log.write("-i-")
 
-        env = aipsetup.utils.osutils.env_vars_edit(
+        env = org.wayround.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_configure_envs'],
             pi['pkg_buildinfo']['autotools_configure_env_opts']['mode']
             )
@@ -216,7 +215,7 @@ def configure(config, log, buildingsite='.'):
             log.write("    command line was:")
             log.write("    " + repr(cmd))
             log.write(
-                aipsetup.utils.error.return_exception_info(
+                org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
@@ -224,7 +223,7 @@ def configure(config, log, buildingsite='.'):
 
         else:
 
-            t = aipsetup.utils.stream.lbl_write(p.stdout, log, True)
+            t = org.wayround.utils.stream.lbl_write(p.stdout, log, True)
             t.start()
             t.join()
 
@@ -233,7 +232,7 @@ def configure(config, log, buildingsite='.'):
             except:
                 log.write("\n-e- exception oqured while waiting for configure")
                 log.write(
-                    aipsetup.utils.error.return_exception_info(
+                    org.wayround.utils.error.return_exception_info(
                         sys.exc_info()
                         )
                     )
@@ -246,12 +245,12 @@ def configure(config, log, buildingsite='.'):
 
     return ret
 
-def build(config, log, buildingsite='.'):
+def build(log, buildingsite='.'):
 
     ret = 0
 
-    pi = aipsetup.buildingsite.read_package_info(
-        config, buildingsite, ret_on_error=None)
+    pi = org.wayround.aipsetup.buildingsite.read_package_info(
+        buildingsite, ret_on_error=None)
 
     if pi == None:
         log.write("-e- error getting information about package")
@@ -259,15 +258,15 @@ def build(config, log, buildingsite='.'):
     else:
 
         source_dir = determine_source_dir(
-            config, buildingsite, pi
+            buildingsite, pi
             )
 
         building_dir = determine_building_dir(
-            config, buildingsite, source_dir, pi
+            buildingsite, source_dir, pi
             )
 
         run_parameters = determine_builder_parameters(
-            config, pi
+            pi
             )
 
         makefile = os.path.abspath(
@@ -285,7 +284,7 @@ def build(config, log, buildingsite='.'):
                 })
         log.write("-i-")
 
-        env = aipsetup.utils.osutils.env_vars_edit(
+        env = org.wayround.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_build_envs'],
             pi['pkg_buildinfo']['autotools_build_env_opts']['mode']
             )
@@ -303,7 +302,7 @@ def build(config, log, buildingsite='.'):
             log.write("    command line was:")
             log.write("    " + repr(cmd))
             log.write(
-                aipsetup.utils.error.return_exception_info(
+                org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
@@ -311,7 +310,7 @@ def build(config, log, buildingsite='.'):
 
         else:
 
-            t = aipsetup.utils.stream.lbl_write(p.stdout, log, True)
+            t = org.wayround.utils.stream.lbl_write(p.stdout, log, True)
             t.start()
             t.join()
 
@@ -320,7 +319,7 @@ def build(config, log, buildingsite='.'):
             except:
                 log.write("\n-e- exception oqured while waiting for builder")
                 log.write(
-                    aipsetup.utils.error.return_exception_info(
+                    org.wayround.utils.error.return_exception_info(
                         sys.exc_info()
                         )
                     )
@@ -334,12 +333,12 @@ def build(config, log, buildingsite='.'):
     return ret
 
 
-def install(config, log, buildingsite='.'):
+def install(log, buildingsite='.'):
 
     ret = 0
 
-    pi = aipsetup.buildingsite.read_package_info(
-        config, buildingsite, ret_on_error=None)
+    pi = org.wayround.aipsetup.buildingsite.read_package_info(
+        buildingsite, ret_on_error=None)
 
     if pi == None:
         log.write("-e- error getting information about package")
@@ -347,15 +346,15 @@ def install(config, log, buildingsite='.'):
     else:
 
         source_dir = determine_source_dir(
-            config, buildingsite, pi
+            buildingsite, pi
             )
 
         building_dir = determine_building_dir(
-            config, buildingsite, source_dir, pi
+            buildingsite, source_dir, pi
             )
 
         run_parameters = determine_installer_parameters(
-            config, pi
+            pi
             )
 
         makefile = os.path.abspath(
@@ -368,7 +367,7 @@ def install(config, log, buildingsite='.'):
         destdir = os.path.abspath(
             os.path.join(
                 buildingsite,
-                aipsetup.buildingsite.DIR_DESTDIR
+                org.wayround.aipsetup.buildingsite.DIR_DESTDIR
                 )
             )
 
@@ -387,7 +386,7 @@ def install(config, log, buildingsite='.'):
                 })
         log.write("-i-")
 
-        env = aipsetup.utils.osutils.env_vars_edit(
+        env = org.wayround.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_install_envs'],
             pi['pkg_buildinfo']['autotools_install_env_opts']['mode']
             )
@@ -416,7 +415,7 @@ def install(config, log, buildingsite='.'):
             log.write("    command line was:")
             log.write("    " + repr(cmd))
             log.write(
-                aipsetup.utils.error.return_exception_info(
+                org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
@@ -424,7 +423,7 @@ def install(config, log, buildingsite='.'):
 
         else:
 
-            t = aipsetup.utils.stream.lbl_write(p.stdout, log, True)
+            t = org.wayround.utils.stream.lbl_write(p.stdout, log, True)
             t.start()
             t.join()
 
@@ -433,7 +432,7 @@ def install(config, log, buildingsite='.'):
             except:
                 log.write("\n-e- exception oqured while waiting for installer")
                 log.write(
-                    aipsetup.utils.error.return_exception_info(
+                    org.wayround.utils.error.return_exception_info(
                         sys.exc_info()
                         )
                     )
@@ -446,5 +445,5 @@ def install(config, log, buildingsite='.'):
 
     return ret
 
-def postinstall(config, log, buildingsite='.'):
+def postinstall(log, buildingsite='.'):
     return 0

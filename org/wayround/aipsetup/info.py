@@ -1,5 +1,3 @@
-#!/usr/bin/python2.6
-# -*- coding: utf-8 -*-
 
 import os.path
 import copy
@@ -9,6 +7,10 @@ import sys
 import lxml.etree
 
 import org.wayround.utils.error
+import org.wayround.utils.file
+
+import org.wayround.aipsetup.config
+import org.wayround.aipsetup.router
 
 
 from mako.template import Template
@@ -51,80 +53,82 @@ pkg_info_file_template = Template(text="""\
 </package>
 """)
 
-def print_help():
-    print("""\
-aipsetup info command
+def router(opts, args):
 
-   mass_info_fix  applayes fixes to info files
-
-""")
-
-
-def router(opts, args, config):
-
-    ret = 0
-
-    args_l = len(args)
-
-    if args_l == 0:
-        print("-e- command not given")
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-            ret = 0
-
-        elif args[0] == 'mass_info_fix':
-
-            mass_info_fix(config)
-
-        elif args[0] == 'list':
-
-            mask = '*'
-
-            if args_l > 2:
-                print('-e- Too many parameters')
-            else:
-
-                if args_l > 1:
-                    mask = args[1]
-
-                org.wayround.utils.file.list_files(
-                    config, mask, 'info'
-                    )
-
-
-        elif args[0] == 'edit':
-
-            if args_l != 2:
-                print("-e- builder to edit not specified")
-            else:
-                org.wayround.utils.edit.edit_file(
-                    config, args[1], 'info'
-                    )
-
-        elif args[0] == 'editor':
-            from . import infoeditor
-
-            infoeditor.main(config)
-
-        elif args[0] == 'copy':
-
-            if args_l != 3:
-                print("-e- wrong parameters count")
-            else:
-
-                org.wayround.utils.file.copy_file(
-                    config, args[1], args[2], 'info'
-                    )
-
-        else:
-            print("-e- wrong command")
-            ret = 1
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'help': print_help,
+            'mass_info_fix': mass_info_fix,
+            'list': list_files,
+            'edit': edit_file,
+            'editor': editor,
+            'copy': copy
+            }
+        )
 
     return ret
 
+def print_help(opts, args):
+    print("""\
+aipsetup info command
+
+    list            List xml files in info directory
+    edit            Edit xml file from info directory with configured editor
+    editor          Edit xml file with special editor
+    copy            Make a copy of one xml file to new xml file name
+
+    mass_info_fix   applayes fixes to info files
+
+""")
+
+def list_files(opts, args, typ='info'):
+    mask = '*'
+
+    args_l = len(args)
+
+    if args_l > 2:
+        print('-e- Too many parameters')
+    else:
+
+        if args_l > 1:
+            mask = args[1]
+
+        org.wayround.utils.file.list_files(
+            org.wayround.aipsetup.config.config[typ], mask
+            )
+
+    return 0
+
+def edit_file(opts, args, typ='info'):
+    ret = 0
+    if len(args) != 2:
+        print("-e- builder to edit not specified")
+        ret = 1
+    else:
+        ret = org.wayround.utils.edit.edit_file(
+            '{}/{}'.format(
+                org.wayround.aipsetup.config.config[typ],
+                args[1]
+                ),
+            org.wayround.aipsetup.config.config['editor']
+            )
+    return ret
+
+def editor(opts, args):
+    import org.wayround.aipsetup.infoeditor
+
+    org.wayround.aipsetup.infoeditor.main()
+
+def copy(opts, args):
+    if len(args) != 3:
+        print("-e- wrong parameters count")
+    else:
+
+        org.wayround.utils.file.inderictory_copy_file(
+            org.wayround.aipsetup.config.config['info'],
+            args[1],
+            args[2]
+            )
 
 def _find_latest(tree, tag, field):
     y = None
@@ -268,9 +272,9 @@ def info_fixes(dicti, name):
 
         pass
 
-def mass_info_fix(config):
+def mass_info_fix(opts, args):
 
-    lst = glob.glob(os.path.join(config['info'], '*.xml'))
+    lst = glob.glob(os.path.join(org.wayround.aipsetup.config['info'], '*.xml'))
 
     for i in lst:
 

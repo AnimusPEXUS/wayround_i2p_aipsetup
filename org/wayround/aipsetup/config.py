@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import os.path
 import sys
@@ -17,8 +16,8 @@ CONFIG_FULL_SAMPLE = {
     # non-configurable parameters -- always in lust root!!
     # also, lust root must be writable for aipsetup
     'constitution'       : '/mnt/sda3/home/agu/_LUST/system_constitution.py',
-    'builders'           : '/mnt/sda3/home/agu/_LUST/pkg_builders',
     'buildinfo'          : '/mnt/sda3/home/agu/_LUST/pkg_buildinfo',
+    'buildtools'         : '/mnt/sda3/home/agu/_LUST/pkg_buildtools',
     'info'               : '/mnt/sda3/home/agu/_LUST/pkg_info',
     'repository_index'   : '/mnt/sda3/home/agu/_LUST/index_repository.lst',
     'source_index'       : '/mnt/sda3/home/agu/_LUST/index_source.lst',
@@ -81,11 +80,16 @@ CONFIG_ALLOWED_PARAMETERS = frozenset([
 
 CONFIG_REQUIRED_PARAMETERS = CONFIG_ALLOWED_PARAMETERS
 
-ret = {}
+config = {}
+
 
 class ConfigParameterMissing(Exception): pass
 class ConfigWrongParameter(Exception): pass
 class ConfigCheckProgrammingError(Exception): pass
+class ConfigSaveError(Exception): pass
+class ConfigLoadError(Exception): pass
+
+
 
 def print_help():
     print("""\
@@ -230,8 +234,8 @@ def config_check_after_load(indict):
 
     for i, j in [
         ('constitution'    , 'system_constitution.py'),
-        ('builders'        , 'pkg_builders'),
         ('buildinfo'       , 'pkg_buildinfo'),
+        ('buildtools'      , 'pkg_buildtools'),
         ('info'            , 'pkg_info'),
         ('repository_index', 'index_repository.lst'),
         ('source_index'    , 'index_source.lst')
@@ -288,8 +292,6 @@ def config_check_before_saving(indict):
             del indict[i]
 
 
-class ConfigLoadError(Exception): pass
-
 def load_config(filename):
     ret = {}
 
@@ -334,10 +336,10 @@ def load_config(filename):
 
     return ret
 
-class ConfigSaveError(Exception): pass
+
+
 
 def save_config(filename, config):
-
 
     try:
         config_check_before_saving(config)
@@ -354,6 +356,5 @@ def save_config(filename, config):
         except:
             raise
         else:
-            f.write(format_config(config)
-)
+            f.write(format_config(config))
 
