@@ -3,9 +3,10 @@ import sys
 import os.path
 import logging
 
-import org.wayround.aipsetup.buildingsite
-
 import org.wayround.utils.log
+
+import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.buildtools
 
 
 FUNCTIONS = frozenset([
@@ -17,11 +18,11 @@ FUNCTIONS = frozenset([
     ])
 
 FUNCTIONS_TEXTS_SET = {
-    'extract': ('extractor', 'extract', 'extracting', 'extraction'),
-    'configure': ('configurer', 'configure', 'configuring', 'configuration'),
-    'build': ('builder', 'build', 'building', 'building'),
-    'distribute': ('distributer', 'distribute', 'distributing', 'distribution'),
-    'prepack': ('prepackager', 'prepack', 'prepackaging', 'prepackaging')
+    'extract': ('extractor', 'extracting', 'extraction'),
+    'configure': ('configurer', 'configuring', 'configuration'),
+    'build': ('builder', 'building', 'building'),
+    'distribute': ('distributer', 'distributing', 'distribution'),
+    'prepack': ('prepackager', 'prepackaging', 'prepackaging')
     }
 
 
@@ -76,7 +77,7 @@ def router(opts, args):
                 d = args[1]
 
             ret = general_tool_function(
-                args[0], d, FUNCTIONS_TEXTS_SET[args[0]]
+                args[0], d
                 )
 
         elif args[0] == 'complete':
@@ -93,35 +94,29 @@ def router(opts, args):
 
     return ret
 
-def general_tool_function(tool_name, dirname, texts):
+def general_tool_function(action_name, dirname):
 
-    process = texts[3]
-    whatdoes = texts[2]
-    function = texts[1]
+    process = FUNCTIONS_TEXTS_SET[action_name][2]
+    whatdoes = FUNCTIONS_TEXTS_SET[action_name][1]
 
     ret = 0
 
     log = org.wayround.utils.log.Log(dirname, process)
-    # log.write("-i- Closing this log now, cause it can't be done farther")
 
-    log.write("-i- =========[{}]=========".format(whatdoes.capitalize()))
+    log.info("=========[{}]=========".format(whatdoes.capitalize()))
 
     pi = org.wayround.aipsetup.buildingsite.read_package_info(
         dirname, ret_on_error=None
         )
 
     if pi == None:
-        log.write("-e- Error getting information about %(process)s" % {
-                'process': process
-                })
+        log.error("Error getting information about `{}'".format(process))
         ret = 1
     else:
         try:
-            actor = pi['pkg_buildinfo'][tool_name]
+            tool = pi['pkg_buildinfo'][action_name]
         except:
-            log.write("-e- Error getting %(tool_name)s name" % {
-                    'tool_name': tool_name
-                    })
+            log.error("Error getting tool name for action `{}'".format(action_name))
             log.write(
                 org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
@@ -130,36 +125,27 @@ def general_tool_function(tool_name, dirname, texts):
             ret = 2
 
         else:
-            if not actor in ['autotools']:
-                log.write(
-                    ("-e- Package desires %(tool_name)s "\
-                    + "which is not supported by") % {
-                        'tool_name': tool_name
-                        }
+
+            tool_list = org.wayround.aipsetup.buildtools.list_build_tools()
+            if not tool in tool_list:
+                log.error(
+                    ("Package desires `{}' tool which is not found by current aipsetup system".format(tool))
                     )
-                log.write("    current aipsetup system")
                 ret = 3
             else:
-                if eval(
-                    ("aipsetup.tools.%(toolname)s."\
-                    + "%(function)s(log, dirname)") % {
-                        'toolname': actor,
-                        'function': function
-                        }
-                    ) != 0:
-                    log.write(
-                        ("-e- Tool %(toolname)s could "
-                        + "not perform %(process)s") % {
-                            'toolname': actor,
-                            'process': process
-                            }
-                        )
-                    ret = 4
+                tool_actions = org.wayround.aipsetup.buildtools.get_tool_functions(tool)
+                if not action_name in tool_actions or not callable(tool_actions[action_name]):
+                    log.error("`{}' action is not exported by `{}' tool".format(action_name, tool))
+                    ret = 5
                 else:
 
-                    log.write("-i- %(process)s complited" % {
-                            'process': process.capitalize()
-                            })
+                    if tool_actions[action_name](log, dirname) != 0:
+                        log.error(
+                            ("Tool {} could not perform {}".format(tool, process))
+                            )
+                        ret = 4
+                    else:
+                        log.info("{} complited".format(process.capitalize()))
 
     log.stop()
 
@@ -182,25 +168,24 @@ def complete(dirname):
         try:
             act_seq = pi['pkg_buildinfo']['build_sequance']
         except:
-            print("-e- Can't get actor sequence")
+            logging.error("Can't get action sequence")
             ret = 2
         else:
 
             for i in act_seq:
 
                 if not i in ['extract', 'configure',
-                             'build', 'install',
-                             'postinstall']:
-                    print("-e- Requested actor not supported")
+                             'build', 'destribut',
+                             'prepack']:
+                    logging.error("Requested action not supported")
                     ret = 3
                 else:
 
-                    if eval("%(name)s(config, dirname)" % {
+                    general_tool_function(i, dirname)
+                    if eval("%(name)s(dirname)" % {
                             'name': i
                             }) != 0:
-                        print("-e- Building error on stage %(name)s" % {
-                            'name': i
-                            })
+                        logging.error("Building error on stage {}".format(i))
                         ret = 5
                         break
 

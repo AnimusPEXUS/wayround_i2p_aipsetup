@@ -1,19 +1,20 @@
-# -*- coding: utf-8 -*-
 
 import os
-import shutil
+#import shutil
 import sys
 import inspect
 import copy
 import pprint
 
-import org.wayround.utils.log
+#import org.wayround.utils.log
+import org.wayround.utils.error
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
-import org.wayround.aipsetup.build
-import org.wayround.aipsetup.pack
+#import org.wayround.aipsetup.build
+#import org.wayround.aipsetup.pack
+import org.wayround.aipsetup.config
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -24,31 +25,26 @@ DIR_DESTDIR = '04.DESTDIR'
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
 DIR_LISTS = '06.LISTS'
 
-i = None
-for i in ['TARBALL',
-          'SOURCE',
-          'PATCHES',
-          'BUILDING',
-          'DESTDIR',
-          'BUILD_LOGS',
-          'LISTS']:
-    exec("""\
-def getDir_%(name)s(directory):
+def _getDir_x(directory, _x='TARBALL'):
     '''
-    Returns absolute path to DIR_%(name)s
+    Returns absolute path to DIR_{_x}
 
     note: this method is generated dinamicly
     '''
     return os.path.abspath(
         os.path.join(
             directory,
-            DIR_%(name)s)
+            eval('DIR_{}'.format(_x)))
         )
-""" % {
-            'name': i
-            })
 
-del(i)
+def getDIR_TARBALL   (directory): return _getDir_x(directory, 'TARBALL')
+def getDIR_SOURCE    (directory): return _getDir_x(directory, 'SOURCE')
+def getDIR_PATCHES   (directory): return _getDir_x(directory, 'PATCHES')
+def getDIR_BUILDING  (directory): return _getDir_x(directory, 'BUILDING')
+def getDIR_DESTDIR   (directory): return _getDir_x(directory, 'DESTDIR')
+def getDIR_BUILD_LOGS(directory): return _getDir_x(directory, 'BUILD_LOGS')
+def getDIR_LISTS     (directory): return _getDir_x(directory, 'LISTS')
+
 
 DIR_ALL = [
     DIR_TARBALL,
@@ -81,50 +77,47 @@ aipsetup buildingsite command
          -d=DIRNAME set building dir. Defaults to current working dir.
 """)
 
-def router(opts, args, config):
+def rt_init(opts, args):
 
+    init_dir = '.'
+
+    if len(args) > 1:
+        init_dir = args[1]
+
+    ret = init(directory=init_dir)
+
+    return ret
+
+def rt_apply_info(opts, args):
     ret = 0
-    args_l = len(args)
 
-    if args_l == 0:
-        print("-e- not enough parameters")
+    if len(args) != 2:
+        print("-e- tarball name to analize not specified")
         ret = 1
     else:
 
-        if args[0] == 'help':
-            print_help()
+        name = args[1]
 
-        elif args[0] == 'init':
+        dirname = '.'
 
-            init_dir = '.'
+        for i in opts:
+            if i[0] == '-d':
+                dirname = i[1]
 
-            if args_l > 1:
-                init_dir = args[1]
+        ret = apply_info(dirname, source_filename=name)
 
-            ret = init(
-                config,
-                directory=init_dir
-                )
+    return ret
 
 
-        elif args[0] == 'apply_info':
-            if args_l != 2:
-                print("-e- tarball name to analize not specified")
-            else:
+def router(opts, args):
 
-                name = args[1]
-
-                dirname = '.'
-
-                for i in opts:
-                    if i[0] == '-d':
-                        dirname = i[1]
-
-                apply_info(config, dirname, source_filename=name)
-
-        else:
-            print("-e- Wrong command")
-
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'help': print_help,
+            'init': init,
+            'apply_info': rt_apply_info
+            }
+        )
 
     return ret
 
@@ -158,7 +151,7 @@ def isWdDirRestricted(directory):
                 break
     return ret
 
-def init(config, directory='build'):
+def init(directory='build'):
 
 
     ret = 0
@@ -267,7 +260,7 @@ def read_package_info(directory, ret_on_error=None):
 
     return ret
 
-def write_package_info(config, directory, info):
+def write_package_info(directory, info):
 
     pi_filename = os.path.join(directory, 'package_info.py')
 
@@ -306,18 +299,18 @@ def write_package_info(config, directory, info):
     return
 
 
-def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
+def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
 
     ret = 0
 
-    d = read_package_info(config, dirname, ret_on_error={})
+    d = read_package_info(dirname, ret_on_error={})
 
     d['pkg_nameinfo'] = None
 
     base = os.path.basename(filename)
 
     parse_result = org.wayround.aipsetup.name.source_name_parse(
-        config, base,
+        base,
         mute=False, modify_info_file=False
         )
 
@@ -327,7 +320,7 @@ def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
     else:
         d['pkg_nameinfo'] = parse_result
 
-        write_package_info(config, dirname, d)
+        write_package_info(dirname, d)
 
         ret = 0
 
@@ -335,13 +328,13 @@ def apply_pkg_nameinfo_on_buildingsite(config, dirname, filename):
 
 
 
-def apply_constitution_on_buildingsite(config, dirname):
+def apply_constitution_on_buildingsite(dirname):
 
     ret = 0
 
-    d = read_package_info(config, dirname, ret_on_error={})
+    d = read_package_info(dirname, ret_on_error={})
 
-    const = org.wayround.aipsetup.constitution.read_constitution(config)
+    const = org.wayround.aipsetup.constitution.read_constitution()
 
     if const == None:
 
@@ -351,18 +344,18 @@ def apply_constitution_on_buildingsite(config, dirname):
 
         d['constitution'] = const
 
-        write_package_info(config, dirname, d)
+        write_package_info(dirname, d)
 
         ret = 0
 
     return ret
 
 
-def apply_pkg_info_on_buildingsite(config, dirname):
+def apply_pkg_info_on_buildingsite(dirname):
 
     ret = 0
 
-    d = read_package_info(config, dirname, ret_on_error={})
+    d = read_package_info(dirname, ret_on_error={})
 
     if not isinstance(d, dict) \
             or not 'pkg_nameinfo' in d \
@@ -381,9 +374,10 @@ def apply_pkg_info_on_buildingsite(config, dirname):
     else:
         infoname = d['pkg_nameinfo']['groups']['name']
 
-        info_filename = os.path.join(config['info'], '%(name)s.xml' % {
-                'name': infoname
-                })
+        info_filename = os.path.join(
+            org.wayround.aipsetup.config.config['info'],
+            '{}.xml'.format(infoname)
+            )
 
         print("-i- Reading info file `%(name)s'" % {
             'name': info_filename
@@ -400,18 +394,18 @@ def apply_pkg_info_on_buildingsite(config, dirname):
             d['pkg_info'] = info
             # print repr(info)
 
-            write_package_info(config, dirname, d)
+            write_package_info(dirname, d)
 
             ret = 0
 
     return ret
 
 
-def apply_pkg_buildinfo_on_buildingsite(config, dirname):
+def apply_pkg_buildinfo_on_buildingsite(dirname):
 
     ret = 0
 
-    pi = read_package_info(config, dirname, ret_on_error={})
+    pi = read_package_info(dirname, ret_on_error={})
 
     if not isinstance(pi, dict) \
             or not 'pkg_info' in pi \
@@ -425,7 +419,7 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
     else:
 
         buildinfo_filename = os.path.join(
-            config['buildinfo'], '%(name)s.py' % {
+            org.wayround.aipsetup.config.config['buildinfo'], '%(name)s.py' % {
                 'name': pi['pkg_info']['buildinfo']
                 }
             )
@@ -464,7 +458,7 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
                 else:
 
                     try:
-                        l['build_info'](copy.copy(config), pi)
+                        l['build_info'](copy.copy(org.wayround.aipsetup.config.config), pi)
                     except:
                         print(("-e- Error while calling for "
                             + "build_info() from `%(name)s'") % {
@@ -478,26 +472,26 @@ def apply_pkg_buildinfo_on_buildingsite(config, dirname):
 
                     else:
 
-                        write_package_info(config, dirname, pi)
+                        write_package_info(dirname, pi)
 
                         ret = 0
 
     return ret
 
 
-def apply_info(config, dirname='.', source_filename=None):
+def apply_info(dirname='.', source_filename=None):
 
     ret = 0
 
     if apply_pkg_nameinfo_on_buildingsite(
-            config, dirname, source_filename
+            dirname, source_filename
             ) != 0:
         ret = 1
-    elif apply_constitution_on_buildingsite(config, dirname) != 0:
+    elif apply_constitution_on_buildingsite(dirname) != 0:
         ret = 2
-    elif apply_pkg_info_on_buildingsite(config, dirname) != 0:
+    elif apply_pkg_info_on_buildingsite(dirname) != 0:
         ret = 3
-    elif apply_pkg_buildinfo_on_buildingsite(config, dirname) != 0:
+    elif apply_pkg_buildinfo_on_buildingsite(dirname) != 0:
         ret = 4
 
     return ret

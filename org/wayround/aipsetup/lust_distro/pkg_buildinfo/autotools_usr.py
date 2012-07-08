@@ -10,15 +10,15 @@ def build_info(package_info):
         'patcher'      : 'autotools',
         'configurer'   : 'autotools',
         'builder'      : 'autotools',
-        'installer'    : 'autotools',
-        'postinstaller': 'autotools',
+        'distributor'  : 'autotools',
+        'prepackager'  : 'autotools',
 
         'build_sequance': [
             'extract',
             'configure',
             'build',
-            'install',
-            'postinstall'
+            'distribute',
+            'prepack'
             ],
 
         # Do not remove this, as it's used on also with configure less

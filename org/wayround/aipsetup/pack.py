@@ -39,7 +39,7 @@ aipsetup pack command
 
 """)
 
-def router(opts, args, config):
+def router(opts, args):
 
     ret = 0
     args_l = len(args)
@@ -68,7 +68,7 @@ def router(opts, args, config):
             if args_l > 1:
                 dirname = args[1]
 
-            ret = eval("%(name)s(config, dirname)" % {
+            ret = eval("%(name)s(dirname)" % {
                     'name': args[0]
                     })
 
@@ -79,7 +79,7 @@ def router(opts, args, config):
             if args_l > 1:
                 dirname = args[1]
 
-            ret = complite(config, dirname)
+            ret = complete(dirname)
 
         else:
             print("-e- Wrong pack command")
@@ -88,7 +88,7 @@ def router(opts, args, config):
     return ret
 
 
-def destdir_checksum(config, buildingsite):
+def destdir_checksum(buildingsite):
 
     ret = 0
 
@@ -123,7 +123,7 @@ def destdir_checksum(config, buildingsite):
     return ret
 
 
-def destdir_filelist(config, buildingsite):
+def destdir_filelist(buildingsite):
 
     ret = 0
 
@@ -157,7 +157,7 @@ def destdir_filelist(config, buildingsite):
 
     return ret
 
-def destdir_deps_c(config, buildingsite):
+def destdir_deps_c(buildingsite):
     ret = 0
     destdir = buildingsite.getDir_DESTDIR(buildingsite)
 
@@ -219,7 +219,7 @@ def destdir_deps_c(config, buildingsite):
     f.close()
     return ret
 
-def remove_source_and_build_dirs(config, buildingsite):
+def remove_source_and_build_dirs(buildingsite):
 
     ret = 0
 
@@ -240,7 +240,7 @@ def remove_source_and_build_dirs(config, buildingsite):
 
     return ret
 
-def compress_patches_destdir_and_logs(config, buildingsite):
+def compress_patches_destdir_and_logs(buildingsite):
 
     ret = 0
 
@@ -277,7 +277,7 @@ def compress_patches_destdir_and_logs(config, buildingsite):
 
     return ret
 
-def compress_files_in_lists_dir(config, buildingsite):
+def compress_files_in_lists_dir(buildingsite):
 
     ret = 0
 
@@ -295,7 +295,7 @@ def compress_files_in_lists_dir(config, buildingsite):
 
     return ret
 
-def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
+def remove_patches_destdir_and_buildlogs_dirs(buildingsite):
 
     ret = 0
 
@@ -317,7 +317,7 @@ def remove_patches_destdir_and_buildlogs_dirs(config, buildingsite):
 
     return ret
 
-def remove_decompressed_files_from_lists_dir(config, buildingsite):
+def remove_decompressed_files_from_lists_dir(buildingsite):
 
     ret = 0
 
@@ -338,7 +338,7 @@ def remove_decompressed_files_from_lists_dir(config, buildingsite):
 
     return ret
 
-def make_checksums_for_building_site(config, buildingsite):
+def make_checksums_for_building_site(buildingsite):
 
     ret = 0
 
@@ -373,10 +373,11 @@ def make_checksums_for_building_site(config, buildingsite):
     return ret
 
 
-def pack_buildingsite(config, buildingsite):
+def pack_buildingsite(buildingsite):
 
     pi = buildingsite.read_package_info(
-        config, buildingsite, ret_on_error=None)
+        buildingsite, ret_on_error=None
+        )
 
     if pi == None:
         print("-e- error getting information about package")
@@ -419,7 +420,7 @@ def pack_buildingsite(config, buildingsite):
 
     return 0
 
-def complite(config, dirname):
+def complete(dirname):
 
     ret = 0
 
@@ -433,7 +434,7 @@ def complite(config, dirname):
               'remove_decompressed_files_from_lists_dir',
               'make_checksums_for_building_site',
               'pack_buildingsite']:
-        if eval("%(name)s(config, dirname)" % {
+        if eval("%(name)s(dirname)" % {
                 'name': i
                 }) != 0:
             print("-e- Error on %(name)s" % {

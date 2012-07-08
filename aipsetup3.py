@@ -41,37 +41,35 @@ args_l = len(args)
 
 if '--help' in [ i[0] for i in optilist ]:
     print("""\
-   Usage: %(basename)s [command] [command_parameters]
+    Usage: {basename} [command] [command_parameters]
 
-   Commands:
+    Commands:
 
-      info          Pkg info files Actions
-      buildinfo     Build info files Actions
-      builders      builder files Actions
+        info            Pkg info files Actions
+        buildinfo       Build info files Actions
+        builders        Builder files Actions
 
-      constitution  View or Edit Constitution
-      buildingsite  Building Site Maneuvers
-      build         Building Actions
-      pack          Packaging Actions
-      server        UHT Server Related Actions
-      client        Download Actions
-      pkgindex      Package Index Actions
+        constitution    View or Edit Constitution
+        buildingsite    Building Site Maneuvers
+        build           Building Actions
+        pack            Packaging Actions
+        server          LUST Server Related Actions
+        client          Download Actions
+        pkgindex        Package Index Actions
 
-      name          Tools for Parsing File Names
-      docbook       Docbook Tools
+        name            Tools for Parsing File Names
+        docbook         Docbook Tools
 
 
-      --help        See this Help
-      --version     Version Info
-""" % {
-        'basename': os.path.basename(__file__)
-        })
+        --help          See this Help
+        --version       Version Info
+""".format(basename=os.path.basename(__file__)))
 
 elif '--version' in [ i[0] for i in optilist ]:
     print(org.wayround.aipsetup.AIPSETUP_VERSION)
 
 elif args_l == 0:
-    print("-e- No commands or parameters passed. Try aipsetup --help")
+    logging.error("No commands or parameters passed. Try aipsetup --help")
     ret = 1
 
 else:
@@ -93,8 +91,8 @@ else:
              )
 
     else:
-        print("-e- Wrong command. Try aipsetup --help")
+        logging.error("Wrong command. Try aipsetup --help")
         ret = 1
 
-print("-i- done")
+print("done")
 exit(ret)

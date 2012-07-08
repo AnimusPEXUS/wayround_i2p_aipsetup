@@ -1,5 +1,4 @@
 
-import os
 import os.path
 import subprocess
 import glob
@@ -9,6 +8,15 @@ import sys
 import org.wayround.aipsetup.buildingsite
 import org.wayround.utils.osutils
 import org.wayround.utils.archive
+
+def export_functions():
+    return {
+        'extract': extract,
+        'configure': configure,
+        'build': build,
+        'distribute': distribute,
+        'prepack': prepack
+        }
 
 def determine_source_dir(buildingsite, pkginfo):
 
@@ -126,8 +134,6 @@ def extract(log, buildingsite='.'):
     else:
 
         arch = arch[0]
-
-        arch_bn = os.path.basename(arch)
 
         extr_error = org.wayround.utils.archive.extract(
             arch, output_dir
@@ -333,7 +339,7 @@ def build(log, buildingsite='.'):
     return ret
 
 
-def install(log, buildingsite='.'):
+def distribute(log, buildingsite='.'):
 
     ret = 0
 
@@ -445,5 +451,5 @@ def install(log, buildingsite='.'):
 
     return ret
 
-def postinstall(log, buildingsite='.'):
+def prepack(log, buildingsite='.'):
     return 0
