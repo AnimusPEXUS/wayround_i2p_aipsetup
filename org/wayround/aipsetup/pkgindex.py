@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 This is LUST durectory indexing tool
@@ -7,206 +6,207 @@ Helps to create index of repository and packages
 info
 """
 
-import os
 import os.path
 import sys
 import fnmatch
-import glob
+import logging
 
 
-import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.declarative
 
 
-import org.wayround.aipsetup.info
-
 import org.wayround.utils.text
 
+import org.wayround.aipsetup.info
 
-def print_help():
-    print("""\
-aipsetup pkgindex command
+
+def help_text():
+    return """\
+{aipsetup} {command} command
 
 Where command is one of:
 
-   scan_repo_for_pkg_and_cat
+    scan_repo_for_pkg_and_cat
 
-       Scan repository and save it's categories and packages indexes
-       to database
+        Scan repository and save it's categories and packages indexes
+        to database
 
-   find_repository_package_name_collisions_in_database
+    find_repository_package_name_collisions_in_database
 
-       Scan index for equal package names
+        Scan index for equal package names
 
-   find_missing_pkg_info_records [-t] [-f]
+    find_missing_pkg_info_records [-t] [-f]
 
-       Search packages which have no corresponding info records
+        Search packages which have no corresponding info records
 
-       -t creates non-existing .xml file templates in info dir
+        -t creates non-existing .xml file templates in info dir
 
-       -f forces rewrite existing .xml files
+        -f forces rewrite existing .xml files
 
-   load_package_info_from_filesystem [-a] [file names]
+    load_package_info_from_filesystem [-a] [file names]
 
-       Load missing package information from named files. If no files
-       listed - assume all files in info dir
+        Load missing package information from named files. If no files
+        listed - assume all files in info dir
 
-       -a force load all records, not only missing.
+        -a force load all records, not only missing.
 
-   find_outdated_pkg_info_records
+    find_outdated_pkg_info_records
 
-       Finds pkg info records which differs to FS .xml files
+        Finds pkg info records which differs to FS .xml files
 
-   update_outdated_pkg_info_records
+    update_outdated_pkg_info_records
 
-       Loads pkg info records which differs to FS .xml files
+        Loads pkg info records which differs to FS .xml files
 
-   backup_package_info_to_filesystem [-f] [MASK]
+    backup_package_info_to_filesystem [-f] [MASK]
 
-       Save package information from database to info directory.
+        Save package information from database to info directory.
 
-       Existing files are skipped, unless -f is set
+        Existing files are skipped, unless -f is set
 
-   delete_pkg_info_records MASK
+    delete_pkg_info_records MASK
 
-       If mask must be given or operation will fail
+        If mask must be given or operation will fail
 
-   list_pkg_info_records [MASK]
+    list_pkg_info_records [MASK]
 
-       Default MASK is *
+        Default MASK is *
 
-   print_pkg_info_record NAME
+    print_pkg_info_record NAME
 
-       Print package info record information
-""")
+        Print package info record information
+"""
 
-def router(opts, args, config):
+def router(opts, args):
 
-    ret = 0
-
-    args_l = len(args)
-
-    if args_l == 0:
-        print("-e- No command given")
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-
-        elif args[0] == 'scan_repo_for_pkg_and_cat':
-            # scan repository for packages and categories. result
-            # replaces data in database
-            r = PackageDatabase(config)
-            r.scan_repo_for_pkg_and_cat()
-
-        elif args[0] == 'find_repository_package_name_collisions_in_database':
-            # search database package table for collisions: no more
-            # when one package with same name can exist!
-            r = PackageDatabase(config)
-            r.find_repository_package_name_collisions_in_database()
-
-        elif args[0] == 'find_missing_pkg_info_records':
-            t = False
-            for i in opts:
-                if i[0] == '-t':
-                    t = True
-                    break
-
-            f = False
-            for i in opts:
-                if i[0] == '-f':
-                    f = True
-                    break
-
-            r = PackageDatabase(config)
-            r.find_missing_pkg_info_records(t, f)
-
-        elif args[0] == 'find_outdated_pkg_info_records':
-            r = PackageDatabase(config)
-            r.find_outdated_pkg_info_records()
-
-        elif args[0] == 'update_outdated_pkg_info_records':
-            r = PackageDatabase(config)
-            r.update_outdated_pkg_info_records()
-
-        elif args[0] == 'backup_package_info_to_filesystem':
-            mask = '*'
-
-            if args_l > 1:
-                mask = args[1]
-
-            f = False
-            for i in opts:
-                if i[0] == '-f':
-                    f = True
-                    break
-
-            r = PackageDatabase(config)
-            r.backup_package_info_to_filesystem(mask, f)
-
-        elif args[0] == 'load_package_info_from_filesystem':
-
-            file_list = args[1:]
-
-            a = False
-            for i in opts:
-                if i[0] == '-a':
-                    a = True
-
-            if len(file_list) == 0:
-                file_list = glob.glob(os.path.join(config['info'], '*.xml'))
-
-            r = PackageDatabase(config)
-            r.load_package_info_from_filesystem(file_list, a)
-
-
-        elif args[0] == 'delete_pkg_info_records':
-
-            mask = None
-
-            if args_l > 1:
-                mask = args[1]
-
-            if mask != None:
-
-                r = PackageDatabase(config)
-                r.delete_pkg_info_records(mask)
-            else:
-                print("-e- Mask is not given")
-
-        elif args[0] == 'list_pkg_info_records':
-
-            mask = '*'
-
-            if args_l > 1:
-                mask = args[1]
-
-
-            r = PackageDatabase(config)
-            r.list_pkg_info_records(mask)
-
-
-        elif args[0] == 'print_pkg_info_record':
-            name = None
-
-            if args_l > 1:
-                name = args[1]
-
-            if name != None:
-
-                r = PackageDatabase(config)
-                r.print_pkg_info_record(name)
-            else:
-                print("-e- Name is not given")
-
-        else:
-            print("wrong aipsetup command. try `aipsetup pkgindex help'")
-            ret = 1
-
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'scan_repo_for_pkg_and_cat': scan_repo_for_pkg_and_cat,
+            'find_repository_package_name_collisions_in_database': \
+                find_repository_package_name_collisions_in_database,
+            'find_missing_pkg_info_records': find_missing_pkg_info_records,
+            'find_outdated_pkg_info_records': find_outdated_pkg_info_records,
+            'update_outdated_pkg_info_records': update_outdated_pkg_info_records,
+            'delete_pkg_info_records': delete_pkg_info_records,
+            'backup_package_info_to_filesystem': backup_package_info_to_filesystem,
+            'load_package_info_from_filesystem': load_package_info_from_filesystem,
+            'list_pkg_info_records': list_pkg_info_records,
+            'print_pkg_info_record': print_pkg_info_record
+            }
+        )
 
     return ret
+
+def scan_repo_for_pkg_and_cat(opts, args):
+    # scan repository for packages and categories. result
+    # replaces data in database
+    r = PackageDatabase()
+    r.scan_repo_for_pkg_and_cat()
+
+    return 0
+
+def find_repository_package_name_collisions_in_database(opts, args):
+    # search database package table for collisions: no more
+    # when one package with same name can exist!
+    r = PackageDatabase()
+    r.find_repository_package_name_collisions_in_database()
+
+    return 0
+
+def find_missing_pkg_info_records(opts, args):
+
+    t = '-t' in opts
+
+    f = '-f' in opts
+
+    r = PackageDatabase()
+    r.find_missing_pkg_info_records(t, f)
+
+    return 0
+
+def find_outdated_pkg_info_records(opts, args):
+    r = PackageDatabase()
+    r.find_outdated_pkg_info_records()
+
+    return 0
+
+def update_outdated_pkg_info_records(opts, args):
+    r = PackageDatabase()
+    r.update_outdated_pkg_info_records()
+
+    return 0
+
+def delete_pkg_info_records(opts, args):
+    mask = None
+
+    if len(args) > 1:
+        mask = args[1]
+
+    if mask != None:
+        r = PackageDatabase()
+        r.delete_pkg_info_records(mask)
+    else:
+        logging.error("Mask is not given")
+
+    return 0
+
+def backup_package_info_to_filesystem(opts, args):
+    mask = '*'
+
+    if len(args) > 1:
+        mask = args[1]
+
+    f = '-f' in opts
+
+    r = PackageDatabase()
+    r.backup_package_info_to_filesystem(mask, f)
+
+    return 0
+
+def load_package_info_from_filesystem(opts, args):
+
+    mask = None
+
+    if len(args) > 1:
+        mask = args[1]
+
+    if mask != None:
+
+        r = PackageDatabase()
+        r.delete_pkg_info_records(mask)
+    else:
+        logging.error("Mask is not given")
+
+    return 0
+
+def list_pkg_info_records(opts, args):
+
+    mask = '*'
+
+    if len(args) > 1:
+        mask = args[1]
+
+
+    r = PackageDatabase()
+    r.list_pkg_info_records(mask)
+
+    return 0
+
+def print_pkg_info_record(opts, args):
+    name = None
+
+    if len(args) > 1:
+        name = args[1]
+
+    if name != None:
+
+        r = PackageDatabase()
+        r.print_pkg_info_record(name)
+    else:
+        logging.error("Name is not given")
+
+    return 0
 
 
 def is_repo_package_dir(path):
@@ -216,14 +216,12 @@ def is_repo_package_dir(path):
             )
 
 
-def get_package_path(config, name):
+def get_package_path(name):
     ret = None
-    r = PackageDatabase(config)
+    r = PackageDatabase()
     pid = r.get_package_id(name)
     if pid == None:
-        print("-e- Can't get `%(package)s' from database" % {
-            'package': name
-            })
+        logging.error("Can't get `{}' from database".format(name))
         ret = None
     else:
         ret = r.get_package_path_string(pid)
@@ -241,7 +239,7 @@ def create_required_dirs_at_package(path):
             try:
                 os.makedirs(full_path)
             except:
-                print("-e- Can't make dir `%(name)s'" % {
+                logging.error("Can't make dir `%(name)s'" % {
                     'name': full_path
                     })
                 ret = 3
@@ -249,12 +247,12 @@ def create_required_dirs_at_package(path):
                 ret = 0
         else:
             if os.path.islink(full_path):
-                print("-e- `%(name)s' is link" % {
+                logging.error("`%(name)s' is link" % {
                     'name': full_path
                     })
                 ret = 4
             elif os.path.isfile(full_path):
-                print("-e- `%(name)s' is file" % {
+                logging.error("`%(name)s' is file" % {
                     'name': full_path
                     })
                 ret = 5
@@ -268,7 +266,6 @@ def create_required_dirs_at_package(path):
 
 
 def join_pkg_path(pkg_path):
-    ret = ''
     lst = []
 
     for i in pkg_path:
@@ -398,6 +395,7 @@ class PackageDatabase:
 
         self.Base.metadata.create_all()
 
+    # TODO: Do I need this?
     #def __del__(self):
         #del(self._db_engine)
 
@@ -490,7 +488,7 @@ class PackageDatabase:
                 isfiles += 1
 
         if isfiles >= 3:
-            print("-w- too many non-dirs : %(path)s" % {
+            logging.warning("too many non-dirs : %(path)s" % {
                 'path': root_dir
                 })
             print("       skipping")
@@ -531,7 +529,7 @@ class PackageDatabase:
                     sess, full_path, new_cat_cid
                     )
             else:
-                print("-w- garbage file found: %(path)s" % {
+                logging.warning("garbage file found: %(path)s" % {
                     'path': full_path
                     })
 
@@ -543,23 +541,23 @@ class PackageDatabase:
 
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        print("-i- Deleting old data")
+        logging.info("Deleting old data")
         sess.query(self.Category).delete()
         sess.query(self.Package).delete()
 
-        print("-i- Commiting")
+        logging.info("Commiting")
         sess.commit()
 
-        print("-i- Scanning repository...")
+        logging.info("Scanning repository...")
         self._scan_repo_for_pkg_and_cat(
             sess, self._config['repository'], 0)
 
         print("")
         sess.commit()
 
-        print("-i- Searching for errors")
+        logging.info("Searching for errors")
         self.find_repository_package_name_collisions_in_database()
-        print("-i- Search operations finished")
+        logging.info("Search operations finished")
         sess.close()
 
         return ret
@@ -646,13 +644,13 @@ class PackageDatabase:
 
         lst2 = []
 
-        print("-i- Scanning paths")
+        logging.info("Scanning paths")
         for each in lst:
             org.wayround.utils.file.progress_write('       ' + each.name)
             lst2.append(self.get_package_path(pid=each.pid))
         print("")
 
-        print("-i- Processing %(n)s packages..." % {'n': len(lst)})
+        logging.info("Processing %(n)s packages..." % {'n': len(lst)})
         sys.stdout.flush()
         sess.close()
 
@@ -675,21 +673,15 @@ class PackageDatabase:
                 lst_dup[each] = pkg_paths[each]
 
 
-        t = len(lst_dup)
         if len(lst_dup) == 0:
-            t = 'i'
-            t2 = '. Package locations look good!'
+            logging.info("-%(t)s- Found %(c)s duplicated package names. Package locations look good!" % {
+                'c' : len(lst_dup)
+                })
         else:
-            t = 'w'
-            t2 = ''
+            logging.warning("-%(t)s- Found %(c)s duplicated package names" % {
+                'c' : len(lst_dup)
+                })
 
-        print("-%(t)s- Found %(c)s duplicated package names%(t2)s" % {
-            'c' : len(lst_dup),
-            't' : t,
-            't2': t2
-            })
-
-        if len(lst_dup) > 0:
             print("       listing:")
 
             sorted_keys = list(lst_dup.keys())
@@ -792,7 +784,6 @@ class PackageDatabase:
         else:
             sess = pre_sess
 
-        q = None
         q = sess.query(self.PackageInfo).filter_by(name=name).first()
 
         creating_new = False
@@ -833,23 +824,23 @@ class PackageDatabase:
                         'name': i.name
                         })
                 if not force_rewrite and os.path.exists(filename):
-                    print("-w- File exists - skipping: %(name)s" % {
+                    logging.warning("File exists - skipping: %(name)s" % {
                         'name': filename
                         })
                     continue
                 if force_rewrite and os.path.exists(filename):
-                    print("-i- File exists - rewriting: %(name)s" % {
+                    logging.info("File exists - rewriting: %(name)s" % {
                         'name': filename
                         })
                 if not os.path.exists(filename):
-                    print("-i- Writing: %(name)s" % {
+                    logging.info("Writing: %(name)s" % {
                         'name': filename
                         })
 
                 r = self.package_info_record_to_dict(record=i)
                 if isinstance(r, dict):
                     if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
-                        print("-e- can't write file %(name)s" % {
+                        logging.error("can't write file %(name)s" % {
                             'name': filename
                             })
 
@@ -875,7 +866,7 @@ class PackageDatabase:
 
         missing = []
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        print("-i- searching missing records")
+        logging.info("searching missing records")
         files_l = len(files)
         num = 0
         for i in files:
@@ -910,7 +901,7 @@ class PackageDatabase:
             name = os.path.basename(i)[:-4]
             if isinstance(struct, dict):
                 org.wayround.utils.file.progress_write(
-                    "-i- loading record: %(name)s" % {
+                    "    loading record: %(name)s" % {
                         'name': name
                         }
                     )
@@ -920,7 +911,7 @@ class PackageDatabase:
                     )
                 loaded += 1
             else:
-                print("-e- can't get info from file %(name)s" % {
+                logging.error("can't get info from file %(name)s" % {
                     'name': i
                     })
         print("")
@@ -928,7 +919,7 @@ class PackageDatabase:
         sess.close()
 
 
-        print("-i- Total loaded %(n)d records" % {'n': loaded})
+        logging.info("Total loaded %(n)d records" % {'n': loaded})
         return
 
     def delete_pkg_info_records(self, mask='*'):
@@ -943,14 +934,14 @@ class PackageDatabase:
             if fnmatch.fnmatch(i.name, mask):
                 sess.delete(i)
                 deleted += 1
-                print("-i- deleted pkg info: %(name)s" % {
+                logging.info("deleted pkg info: %(name)s" % {
                     'name': i.name
                     })
                 sys.stdout.flush()
 
         sess.commit()
         sess.close()
-        print("-i- Total deleted %(n)d records" % {
+        logging.info("Total deleted %(n)d records" % {
             'n': deleted
             })
         return
@@ -972,7 +963,7 @@ class PackageDatabase:
         sess.close()
         if not mute:
             org.wayround.utils.text.columned_list_print(lst)
-            print("-i- Total found %(n)d records" % {
+            logging.info("Total found %(n)d records" % {
                 'n': found
                 })
         return lst
@@ -1004,7 +995,7 @@ class PackageDatabase:
                 pkgs_missing += 1
                 missing.append(each.name)
 
-                print("-w- missing package DB info record: %(name)s" % {
+                logging.warning("missing package DB info record: %(name)s" % {
                     'name': each.name
                     })
 
@@ -1017,20 +1008,20 @@ class PackageDatabase:
 
                     if os.path.exists(filename):
                         if not force_rewrite:
-                            print("-i- xml info file already exists")
+                            logging.info("xml info file already exists")
                             pkgs_exists += 1
                             continue
                         else:
                             pkgs_forced += 1
 
                     if force_rewrite:
-                        print("-i- forced template rewriting")
+                        logging.info("forced template rewriting")
 
                     if org.wayround.aipsetup.info.write_to_file(
                         filename,
                         org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                         pkgs_failed += 1
-                        print("-e- failed writing template to `%(name)s'" % {
+                        logging.error("failed writing template to `%(name)s'" % {
                             'name': filename
                             })
                     else:
@@ -1038,8 +1029,8 @@ class PackageDatabase:
 
         sess.close()
 
-        print("""\
--i- Total records checked     : %(n1)d
+        logging.info("""\
+Total records checked     : %(n1)d
     Missing records           : %(n2)d
     Missing but present on FS : %(n3)d
     Written                   : %(n4)d
@@ -1075,7 +1066,7 @@ class PackageDatabase:
             if not os.path.exists(filename):
                 ret.append(i.name)
                 if not mute:
-                    print("-w- file missing: %(name)s" % {
+                    logging.warning("file missing: %(name)s" % {
                         'name': filename
                         })
                 continue
@@ -1083,7 +1074,7 @@ class PackageDatabase:
             d1 = org.wayround.aipsetup.info.read_from_file(filename)
 
             if not isinstance(d1, dict):
-                print("-i- Error parsing file: %(name)s" % {
+                logging.info("Error parsing file: %(name)s" % {
                     'name': filename
                     })
             else:
@@ -1091,14 +1082,14 @@ class PackageDatabase:
                 if not org.wayround.aipsetup.info.is_dicts_equal(d1, d2):
                     ret.append(i.name)
                     if not mute:
-                        print("-w- xml init file differs for: %(name)s" % {
+                        logging.warning("xml init file differs for: %(name)s" % {
                             'name': i.name
                             })
 
         sess.close()
 
         if not mute:
-            print("-i- Total %(n)d warnings" % {'n': len(ret)})
+            logging.info("Total %(n)d warnings" % {'n': len(ret)})
 
         return ret
 
@@ -1129,7 +1120,7 @@ class PackageDatabase:
     def print_pkg_info_record(self, name):
         r = self.package_info_record_to_dict(name=name)
         if r == None:
-            print("-e- Not found named info record")
+            logging.error("Not found named info record")
         else:
 
             pid = self.get_package_id(name)

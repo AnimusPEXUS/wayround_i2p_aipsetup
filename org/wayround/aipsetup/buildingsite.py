@@ -1,19 +1,16 @@
 
 import os
-#import shutil
 import sys
 import inspect
 import copy
 import pprint
+import logging
 
-#import org.wayround.utils.log
 import org.wayround.utils.error
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
-#import org.wayround.aipsetup.build
-#import org.wayround.aipsetup.pack
 import org.wayround.aipsetup.config
 
 
@@ -61,21 +58,21 @@ DIR_LIST = DIR_ALL
 'DIR_ALL copy'
 
 
-def print_help():
-    print("""\
-aipsetup buildingsite command
+def help_text():
+    return """\
+{aipsetup} {command} command
 
-   init DIRNAME
+    init DIRNAME
 
-      Make sure all required dirs under DIRNAME exists.
+        Make sure all required dirs under DIRNAME exists.
 
-   apply_info [-d=DIRNAME] [TARBALL]
+    apply_info [-d=DIRNAME] [TARBALL]
 
-      Apply package info to DIRNAME directory. Use TARBALL as name for
-      parsing and farver package buildingsite configuration.
+        Apply package info to DIRNAME directory. Use TARBALL as name for
+        parsing and farver package buildingsite configuration.
 
-         -d=DIRNAME set building dir. Defaults to current working dir.
-""")
+            -d=DIRNAME set building dir. Defaults to current working dir.
+"""
 
 def rt_init(opts, args):
 
@@ -92,7 +89,7 @@ def rt_apply_info(opts, args):
     ret = 0
 
     if len(args) != 2:
-        print("-e- tarball name to analize not specified")
+        logging.error("tarball name to analize not specified")
         ret = 1
     else:
 
@@ -113,7 +110,6 @@ def router(opts, args):
 
     ret = org.wayround.aipsetup.router.router(
         opts, args, commands={
-            'help': print_help,
             'init': init,
             'apply_info': rt_apply_info
             }
@@ -123,8 +119,10 @@ def router(opts, args):
 
 
 def isWdDirRestricted(directory):
-    """This function is a rutine to check supplied dir is it suitable
-    to be a working dir"""
+    """
+    This function is a rutine to check supplied dir is it suitable
+    to be a working dir
+    """
 
     ret = False
 
@@ -158,19 +156,14 @@ def init(directory='build'):
 
     directory = os.path.abspath(directory)
 
-    print((
-        "-i- Initiating building site %(dir)s" % {
-            'dir': directory
-            }
-        ))
+    logging.info("Initiating building site `{}'".format(directory))
 
-    print("-i- Checking dir name safety")
+    logging.info("Checking dir name safety")
 
     if isWdDirRestricted(directory):
-        print(("-e- %(dir_str)s is restricted working dir" % {
-            'dir_str': directory
-            }))
-        print("    won't init")
+        logging.error(
+            "`{}' is restricted working dir -- won't init".format(directory)
+            )
         ret = -1
 
 
@@ -179,16 +172,16 @@ def init(directory='build'):
 
         if ((os.path.exists(directory))
             and not os.path.isdir(directory)):
-            print("-e- File already exists and it is not a directory")
+            logging.error("File already exists and it is not a directory")
             ret = -2
 
     if ret == 0:
 
         if not os.path.exists(directory):
-            print("-i- Building site not exists - creating")
+            logging.info("Building site not exists - creating")
             os.mkdir(directory)
 
-        print("-i- Create all subdirs")
+        logging.info("Create all subdirs")
         for i in DIR_ALL:
             a = os.path.abspath(os.path.join(directory, i))
 
@@ -201,10 +194,11 @@ def init(directory='build'):
             else:
                 resh = 'exists'
 
-            print(("       %(dirname)s - %(resh)s" % {
+            print("       {dirname} - {resh}".format_map({
                 'dirname': i,
                 'resh': resh
-                }))
+                })
+                )
 
             if os.path.exists(a):
                 pass
@@ -212,9 +206,9 @@ def init(directory='build'):
                 os.makedirs(a)
 
     if ret == 0:
-        print("-i- Init complite")
+        logging.info("Init complite")
     else:
-        print("-e- Init error")
+        logging.error("Init error")
 
     return ret
 
@@ -225,18 +219,14 @@ def read_package_info(directory, ret_on_error=None):
     pi_filename = os.path.join(directory, 'package_info.py')
 
     if not os.path.isfile(pi_filename):
-        print("-e- `%(name)s' not found" % {
-            'name': pi_filename
-            })
+        logging.error("`{}' not found".format(pi_filename))
     else:
         txt = ''
         f = None
         try:
             f = open(pi_filename, 'r')
         except:
-            print("-e- Can't open `%(name)s'" % {
-                'name': pi_filename
-                })
+            logging.error("Can't open `{}'".format(pi_filename))
             org.wayround.utils.error.print_exception_info(
                 sys.exc_info()
                 )
@@ -250,9 +240,7 @@ def read_package_info(directory, ret_on_error=None):
             try:
                 ret = eval(txt, g, l)
             except:
-                print("-e- error in `%(name)s'" % {
-                    'name': pi_filename
-                })
+                logging.error("error in `{}'".format(pi_filename))
                 org.wayround.utils.error.print_exception_info(
                     sys.exc_info()
                     )
@@ -269,7 +257,7 @@ def write_package_info(directory, info):
     try:
         f = open(pi_filename, 'w')
     except:
-        print("-e- can't open `%(file)s' for writing" % {
+        logging.error("can't open `%(file)s' for writing" % {
             'file': pi_filename
             })
         org.wayround.utils.error.print_exception_info(
@@ -280,7 +268,7 @@ def write_package_info(directory, info):
         try:
             txt = pprint.pformat(info)
         except:
-            print("-e- can't represent data for package info")
+            logging.error("can't represent data for package info")
             org.wayround.utils.error.print_exception_info(
                 sys.exc_info()
                 )
@@ -311,11 +299,11 @@ def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
 
     parse_result = org.wayround.aipsetup.name.source_name_parse(
         base,
-        mute=False, modify_info_file=False
+        modify_info_file=False
         )
 
     if parse_result == None:
-        print("-e- Can't correctly parse file name")
+        logging.error("Can't correctly parse file name")
         ret = 1
     else:
         d['pkg_nameinfo'] = parse_result
@@ -367,7 +355,7 @@ def apply_pkg_info_on_buildingsite(dirname):
                               str):
 
 
-        print("-e- info undetermined")
+        logging.error("info undetermined")
         d['pkg_info'] = {}
         ret = 1
 
@@ -379,12 +367,12 @@ def apply_pkg_info_on_buildingsite(dirname):
             '{}.xml'.format(infoname)
             )
 
-        print("-i- Reading info file `%(name)s'" % {
+        logging.info("Reading info file `%(name)s'" % {
             'name': info_filename
             })
         info = org.wayround.aipsetup.info.read_from_file(info_filename)
         if not isinstance(info, dict):
-            print("-e- Can't read info from %(filename)s" % {
+            logging.error("Can't read info from %(filename)s" % {
                 'filename': info_filename
                 })
             d['pkg_info'] = {}
@@ -412,7 +400,7 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
             or not isinstance(pi['pkg_info'], dict) \
             or not 'buildinfo' in pi['pkg_info'] \
             or not isinstance(pi['pkg_info']['buildinfo'], str):
-        print("-e- buildinfo undetermined")
+        logging.error("buildinfo undetermined")
         pi['pkg_buildinfo'] = {}
         ret = 1
 
@@ -426,7 +414,7 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
 
         if not os.path.exists(buildinfo_filename) \
                 or not os.path.isfile(buildinfo_filename):
-            print("-e- Can't find buildinfo Python script `%(name)s'" % {
+            logging.error("Can't find buildinfo Python script `%(name)s'" % {
                 'name': buildinfo_filename
                 })
             ret = 2
@@ -439,7 +427,7 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
             try:
                 exec(compile(open(buildinfo_filename).read(), buildinfo_filename, 'exec'), g, l)
             except:
-                print("-e- Can't load buildinfo Python script `%(name)s'" % {
+                logging.error("Can't load buildinfo Python script `%(name)s'" % {
                     'name': buildinfo_filename
                     })
                 org.wayround.utils.error.print_exception_info(
@@ -452,7 +440,7 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
                 if not 'build_info' in l \
                         or not inspect.isfunction(l['build_info']):
 
-                    print("-e- Named module doesn't have 'build_info' function")
+                    logging.error("Named module doesn't have 'build_info' function")
                     ret = 4
 
                 else:
@@ -460,10 +448,7 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
                     try:
                         l['build_info'](copy.copy(org.wayround.aipsetup.config.config), pi)
                     except:
-                        print(("-e- Error while calling for "
-                            + "build_info() from `%(name)s'") % {
-                            'name': buildinfo_filename
-                            })
+                        logging.error("Error while calling for build_info() from `{}'".format(buildinfo_filename))
                         org.wayround.utils.error.print_exception_info(
                             sys.exc_info()
                             )

@@ -9,12 +9,12 @@ def version_comparator(name1, name2):
 
     d1 = org.wayround.aipsetup.name.source_name_parse(
         org.wayround.aipsetup.config.actual_config,
-        name1, mute=True, modify_info_file=False
+        name1, modify_info_file=False
         )
 
     d2 = org.wayround.aipsetup.name.source_name_parse(
         org.wayround.aipsetup.config.actual_config,
-        name2, mute=True, modify_info_file=False
+        name2, modify_info_file=False
         )
 
     if d1 == None or d2 == None:

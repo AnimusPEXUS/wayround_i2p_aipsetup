@@ -516,7 +516,6 @@ def fn_version_filter(config, lst, wsp):
             if org.wayround.aipsetup.name.source_name_parse(
                 config,
                 i,
-                mute=True,
                 modify_info_file=False,
                 acceptable_vn=wsp['ver']
                 ) != None:

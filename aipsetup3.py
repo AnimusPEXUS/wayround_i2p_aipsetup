@@ -4,6 +4,20 @@ import os.path
 import sys
 import logging
 
+import org.wayround.utils.getopt2
+
+import org.wayround.aipsetup
+import org.wayround.aipsetup.config
+
+AIPSETUP_SUBMODULES = frozenset(
+    ['info', 'buildinfo',
+     'build', 'server', 'client',
+     'pkgindex', 'name', 'docbook',
+     'buildingsite', 'constitution',
+     'pack', 'package', 'config']
+    )
+
+# Logging settings
 for i in [
     (logging.CRITICAL, '-c-'),
     (logging.ERROR   , '-e-'),
@@ -15,13 +29,28 @@ for i in [
     logging.addLevelName(i[0], i[1])
 del i
 
-logging.basicConfig(format="%(levelname)s %(message)s")
+# Parse parameters
+optilist, args = org.wayround.utils.getopt2.getopt_keyed(sys.argv[1:])
+args_l = len(args)
 
-import org.wayround.utils.getopt2
+# Setup logging level and format
+log_level = 'INFO'
 
-import org.wayround.aipsetup
-import org.wayround.aipsetup.config
+if '--log' in optilist:
+    log_level_u = i[1].upper()
 
+    if not log_level_u in list(logging._levelNames):
+        print("-e- Wrong --log parameter")
+    else:
+        log_level = log_level_u
+
+    del(optilist['--log'])
+    del(log_level_u)
+
+logging.basicConfig(format="%(levelname)s %(message)s", level=log_level)
+
+
+# Try load config
 try:
     org.wayround.aipsetup.config.config = \
         org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
@@ -36,11 +65,11 @@ Some errors was spotted while reading config file.
 ret = 0
 
 
-optilist, args = org.wayround.utils.getopt2.getopt(sys.argv[1:])
-args_l = len(args)
 
-if '--help' in [ i[0] for i in optilist ]:
-    print("""\
+if '--help' in optilist:
+    if args_l == 0:
+
+        print("""\
     Usage: {basename} [command] [command_parameters]
 
     Commands:
@@ -65,7 +94,27 @@ if '--help' in [ i[0] for i in optilist ]:
         --version       Version Info
 """.format(basename=os.path.basename(__file__)))
 
-elif '--version' in [ i[0] for i in optilist ]:
+    else:
+        if not args[0] in AIPSETUP_SUBMODULES:
+            logging.error("Have no module named `{}'".format(args[0]))
+        else:
+            try:
+                exec("import org.wayround.aipsetup.{}".format(args[0]))
+            except:
+                logging.critical("Error importing submodule `{}'".format(args[0]))
+            else:
+                try:
+                    help_text = eval("org.wayround.aipsetup.{}.help_text()".format(args[0]))
+                except:
+                    logging.error("help text for submodule `{}' not available".format(args[0]))
+
+                else:
+                    print(help_text.format_map({
+                        'aipsetup': os.path.basename(__file__),
+                        'command': args[0]
+                        }))
+
+elif '--version' in optilist:
     print(org.wayround.aipsetup.AIPSETUP_VERSION)
 
 elif args_l == 0:
@@ -74,25 +123,20 @@ elif args_l == 0:
 
 else:
 
-    if args[0] in ['info', 'buildinfo',
-                   'build', 'server', 'client',
-                   'pkgindex', 'name', 'docbook',
-                   'buildingsite', 'constitution',
-                   'pack', 'package', 'config']:
-
-        exec("import org.wayround.aipsetup.{name!s}".format(
-                name=args[0]
-                )
-             )
-
-        exec("ret = org.wayround.aipsetup.{name!s}.router(optilist, args[1:])".format(
-                name=args[0]
-                )
-             )
-
-    else:
-        logging.error("Wrong command. Try aipsetup --help")
+    if not args[0] in AIPSETUP_SUBMODULES:
+        logging.error("Have no module named `{}'".format(args[0]))
         ret = 1
+    else:
+        try:
+            exec("import org.wayround.aipsetup.{}".format(args[0]))
+        except:
+            logging.critical("Error importing submodule `{}'".format(args[0]))
+        else:
+            try:
+                exec("ret = org.wayround.aipsetup.{}.router(optilist, args[1:])".format(args[0]))
+            except:
+                logging.critical("Can't call router from submodule `{}'".format(args[0]))
 
-print("done")
+            else:
+                print("done")
 exit(ret)

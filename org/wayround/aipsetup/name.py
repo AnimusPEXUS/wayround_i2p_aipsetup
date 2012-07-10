@@ -3,11 +3,11 @@ import os.path
 import re
 import sys
 import fnmatch
+import logging
 
 import org.wayround.aipsetup.info
-
-class RegexpsError(Exception):
-    pass
+import org.wayround.aipsetup.config
+import org.wayround.aipsetup.router
 
 
 NAME_REGEXPS_ORDER = [
@@ -24,36 +24,37 @@ NAME_REGEXPS_ORDER = [
 
 NAME_REGEXPS = {
     'standard': \
-        r'^%(standard_name)s-%(standard_version)s%(standard_extensions)s$',
+        r'^{standard_name}-{standard_version}{standard_extensions}$',
 
     'standard_with_date': \
-        r'^%(standard_name)s-%(standard_version)s-%(date)s%(standard_extensions)s$',
+        r'^{standard_name}-{standard_version}-{date}{standard_extensions}$',
 
     'underscored': \
-        r'^%(standard_name)s_%(underscored_version)s%(standard_extensions)s$',
+        r'^{standard_name}_{underscored_version}{standard_extensions}$',
 
     'underscored_with_date': \
-        r'^%(standard_name)s_%(underscored_version)s_%(date)%(standard_extensions)s$',
+        r'^{standard_name}_{underscored_version}_{date}{standard_extensions}$',
 
     'standard_with_letter_after_version': \
-        r'^%(standard_name)s-%(standard_version)s(?P<version_letter>[a-zA-Z])(?P<version_letter_number>\d*)%(standard_extensions)s$',
+        r'^{standard_name}-{standard_version}(?P<version_letter>[a-zA-Z])(?P<version_letter_number>\d*){standard_extensions}$',
 
     'standard_with_status': \
-        r'^%(standard_name)s-%(standard_version)s%(standard_statuses)s%(standard_extensions)s$',
+        r'^{standard_name}-{standard_version}{standard_statuses}{standard_extensions}$',
 
     'underscored_with_status': \
-        r'^%(standard_name)s_%(underscored_version)s%(underscored_statuses)s%(standard_extensions)s$',
+        r'^{standard_name}_{underscored_version}{underscored_statuses}{standard_extensions}$',
 
     'version_right_after_name': \
-        r'^%(standard_name)s%(standard_version)s%(standard_extensions)s$',
+        r'^{standard_name}{standard_version}{standard_extensions}$',
 
     'version_right_after_name_with_status': \
-        r'^%(standard_name)s%(standard_version)s[-\.]?%(standard_statuses)s%(standard_extensions)s$'
+        r'^{standard_name}{standard_version}[-\.]?{standard_statuses}{standard_extensions}$'
 
     }
 
 for i in NAME_REGEXPS:
-    NAME_REGEXPS[i] = NAME_REGEXPS[i] % {
+    logging.debug("Expending {}".format(i))
+    NAME_REGEXPS[i] = NAME_REGEXPS[i].format_map({
         'statuses'            : r'pre|alpha|beta|rc|test|source|src|dist|full',
         'standard_extensions' : r'(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2|\.tbz)',
         'standard_name'       : r'(?P<name>.+?)',
@@ -62,9 +63,11 @@ for i in NAME_REGEXPS:
         'underscored_version' : r'(?P<version>(\d+_??)+)',
         'underscored_statuses': r'(?P<statuses>([_\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
         'date'                : r'(?P<date>\d{8,16})'
-        }
+        })
 
 del(i)
+
+class RegexpsError(Exception): pass
 
 # Ensure exception in case something missed
 for each in NAME_REGEXPS_ORDER:
@@ -82,90 +85,102 @@ ASP_NAME_REGEXPS = {
     'aipsetup3': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
     }
 
+def help_text():
+    return """\
 
-def print_help():
-    print("""\
+{aipsetup} {command} command
 
-   test_expressions_on_sources
+    test_expressions_on_sources
 
 
-   parse_name [-w] NAME
+    parse_name [-w] NAME
 
-     if -w is set - change <name>.xml info file nametype value to
-     result
+        if -w is set - change <name>.xml info file nametype value to
+        result
+"""
 
-""")
+def router(opts, args):
 
-def router(opts, args, config):
-    ret = 0
-
-    args_l = len(args)
-
-    if args_l == 0:
-        print("-e- not enough parameters")
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-            ret = 0
-
-        elif args[0] == 'test_expressions_on_sources':
-            test_expressions_on_sources(config)
-
-        elif args[0] == 'parse_name':
-
-            if args_l != 2:
-                print("-e- file name required")
-            else:
-
-                filename = args[1]
-
-                write = False
-                for i in opts:
-                    if i[0] == '-w':
-                        write = True
-
-                source_name_parse(config, filename, mute=False,
-                                  modify_info_file=write)
-
-        else:
-            print("-e- Wrong command")
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'test_expressions_on_sources': test_expressions_on_sources,
+            'parse_name': parse_name
+            }
+        )
 
     return ret
 
-def test_expressions_on_sources(config):
+def parse_name(opts, args):
+
+    ret = 0
+
+    if len(args) != 2:
+        print("-e- file name required")
+        ret = 1
+    else:
+
+        filename = args[1]
+
+        write = False
+        if '-w' in opts:
+            write = True
+
+        source_name_parse(filename, modify_info_file=write)
+
+    return ret
+
+
+def test_expressions_on_sources(opts, args):
+
+    ret = 0
 
     # TODO: Add some more usability
     # TODO: Add immediate package info files update _option_
 
-    f = open(config['source_index'], 'r')
+    logging.info("Testing expressions on sources")
+    logging.debug("Looking for source index file")
+    try:
+        f = open(org.wayround.aipsetup.config.config['source_index'], 'r')
+    except:
+        logging.error(
+            "Can't open file {}".format(
+                org.wayround.aipsetup.config.config['source_index']
+                )
+            )
+        ret = 1
 
-    lst = f.readlines()
+    else:
+        lst = f.readlines()
 
-    f.close()
+        f.close()
 
-    lst2 = []
+        logging.debug("Stripping lines")
+        lst2 = []
 
-    for i in lst:
-        lst2.append(i.strip())
+        for i in lst:
+            lst2.append(i.strip())
 
-    lst = lst2
-    del(lst2)
+        lst = lst2
+        del(lst2)
 
-    lst.sort()
+        logging.debug("Sorting lines")
+        lst.sort()
 
-    for i in lst:
+        logging.debug("Parsing found filenames")
+        for i in lst:
 
-        source_name_parse(config, i, False, False)
+            logging.debug("Parsing file name {}".format(i))
 
-        print("")
-        sys.stdout.flush()
+            # TODO: do I need return value?
+            source_name_parse(i, False)
 
-    return
+
+    return ret
 
 
 def package_name_parse(filename):
+
+    logging.debug("Parsing package file name {}".format(filename))
 
     ret = None
 
@@ -191,12 +206,13 @@ def package_name_parse(filename):
                 }
             break
 
+    logging.debug("Parsing package file name {} result\n{}".format(filename, repr(ret)))
+
     return ret
 
 
 
-def source_name_parse(config, filename, mute=False,
-                      modify_info_file=False, acceptable_vn=None):
+def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
     """
     Parse source file name. On success do some more actions.
 
@@ -230,6 +246,8 @@ def source_name_parse(config, filename, mute=False,
 
     """
 
+    logging.debug("Parsing source file name {}".format(filename))
+
     ret = None
 
     bn = os.path.basename(filename)
@@ -239,10 +257,8 @@ def source_name_parse(config, filename, mute=False,
     # Find matching regular expression
     for j in NAME_REGEXPS_ORDER:
 
-        if not mute:
-            print("-i- Matching `%(re)s'" % {
-                're': j
-                })
+        logging.info("Matching `{}'".format(j))
+
         re_r = re.match(NAME_REGEXPS[j], bn)
 
         if re_r != None:
@@ -316,49 +332,40 @@ def source_name_parse(config, filename, mute=False,
     del(re_r)
 
 
-    if not mute:
-        if ret == None:
-            print("-e- No match `%(i)s'" % {
-                'i': bn
-                })
+    if ret == None:
+        logging.debug("No match `{}'".format(bn))
 
-        else:
+    else:
 
-            groups = ''
-            for i in ret['groups']:
-                groups += "       %(group)s: %(value)s\n" % {
-                    'group': i,
-                    'value': repr(ret['groups'][i])
-                    }
+        groups = ''
+        for i in ret['groups']:
+            groups += "       %(group)s: %(value)s\n" % {
+                'group': i,
+                'value': repr(ret['groups'][i])
+                }
 
-            print("-i- Match `%(bn)s' `%(re)s'\n%(groups)s" % {
-                'bn': bn,
-                're': j,
-                'groups': groups
-                })
+        logging.info("Match `{bn}' `{re}'\n{groups}".format_map({
+            'bn': bn,
+            're': j,
+            'groups': groups
+            })
+            )
 
 
     if ret != None and modify_info_file:
         fn = os.path.join(
-            config['info'],
+            org.wayround.aipsetup.config.config['info'],
             '%(name)s.xml' % {
                 'name': ret['groups']['name']
                 }
             )
 
-        if not mute:
-            print("-i- Updating info file %(name)s" % {
-                'name': fn
-                })
+        logging.info("Updating info file {}".format(fn))
 
-
-        data = org.wayround.aipsetup.info.read_from_file(
-            fn
-            )
+        data = org.wayround.aipsetup.info.read_from_file(fn)
 
         if data == None:
-            if not mute:
-                print("-i- Error reading file. Creating new.")
+            logging.warning("Error reading file. Creating new. {}".format(fn))
             data = org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE
 
         data['pkg_name_type'] = ret['re']

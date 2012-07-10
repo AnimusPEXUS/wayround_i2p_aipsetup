@@ -1,6 +1,5 @@
 
 import sys
-import os.path
 import logging
 
 import org.wayround.utils.log
@@ -26,32 +25,33 @@ FUNCTIONS_TEXTS_SET = {
     }
 
 
-def print_help(opts, args):
-    print("""\
-aipsetup build command
+def help_text():
+    return """\
+{aipsetup} {command} command
 
-   extract [DIRNAME]
+    extract [DIRNAME]
 
-      Extract source in buildingsite DIRNAME. If DIRNAME not given
-      assume current working dir.
+        Extract source in buildingsite which is baseo on DIRNAME.
+        If DIRNAME not given assume current working dir.
 
-   configure [SITEDIR]
-      configures SITEDIR accordingly to info
 
-   build [SITEDIR]
-      builds SITEDIR accordingly to info
+    configure [SITEDIR]
+       configures SITEDIR accordingly to info
 
-   install [SITEDIR]
-      creates destdir in SITEDIR accordingly to info
+    build [SITEDIR]
+       builds SITEDIR accordingly to info
 
-   postinstall [SITEDIR]
-      postinstallation processings for SITEDIR accordingly to info
+    install [SITEDIR]
+       creates destdir in SITEDIR accordingly to info
 
-   complite [SITEDIR]
-      configures, builds and installs SITEDIR accordingly to info
+    postinstall [SITEDIR]
+       postinstallation processings for SITEDIR accordingly to info
+
+    complite [SITEDIR]
+       configures, builds and installs SITEDIR accordingly to info
 
  See also aipsetup pack help
-""")
+"""
 
 
 
@@ -62,23 +62,19 @@ def router(opts, args):
     args_l = len(args)
 
     if args_l == 0:
-        print("-e- Command not given.")
+        logging.error("Command Not Given")
         ret = 1
     else:
 
-        if args[0] == 'help':
-            print_help()
 
-        elif args[0] in list(FUNCTIONS):
+        if args[0] in list(FUNCTIONS):
 
             d = '.'
 
             if args_l > 1:
                 d = args[1]
 
-            ret = general_tool_function(
-                args[0], d
-                )
+            ret = general_tool_function(args[0], d)
 
         elif args[0] == 'complete':
 
@@ -90,7 +86,7 @@ def router(opts, args):
             ret = complete(d)
 
         else:
-            print("-e- Wrong build command")
+            logging.error("Wrong Command")
 
     return ret
 

@@ -1,18 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import os
 import os.path
 import sys
 import re
 import xml.sax.saxutils
+import logging
 
-import cherrypy
+import cherrypy.lib
+
+import org.wayround.utils.error
 
 import org.wayround.aipsetup.pkgindex
-
-import org.wayround.utils.getopt2
-import org.wayround.utils.error
+import org.wayround.aipsetup.config
 
 
 from mako.template import Template
@@ -24,55 +22,40 @@ def edefault(status, message, traceback, version):
         'status': str(status)
         }
 
-def print_help():
-    print("""\
-aipsetup server command
+def help_text():
+    return """\
+{aipsetup} {command} command
 
-   index_uht
+    index_uht
 
-      create all required indexes for UHT project
+        create all required indexes for UHT project
 
-   start
+    start
 
-      all settings taken from aipsetup.conf
+        all settings taken from aipsetup.conf
+"""
 
-""")
+def router(opts, args):
 
-def router(opts, args, config):
-
-    ret = 0
-
-    if len(args) == 0:
-        print("-e- not enough parameters")
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-            ret = 0
-
-        elif args[0] == 'index_uht':
-
-            index_uht(config)
-
-        elif args[0] == 'start':
-
-            start_host(config)
-
-        else:
-            print("-e- wrong command")
-            ret = 1
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'index_uht': index_uht,
+            'start': start_host
+            }
+        )
 
     return ret
 
-def index_uht(config):
-    index_directory(config['source'],
-                    config['source_index'],
+
+def index_uht(opts, args):
+    index_directory(org.wayround.aipsetup.config.config['source'],
+                    org.wayround.aipsetup.config.config['source_index'],
+                    # TODO: move this list to config
                     ['.tar.gz', '.tar.bz2', '.zip',
                      '.7z', '.tgz', '.tar.xz', '.tar.lzma',
                      '.tbz2'])
-    index_directory(config['repository'],
-                    config['repository_index'],
+    index_directory(org.wayround.aipsetup.config.config['repository'],
+                    org.wayround.aipsetup.config.config['repository_index'],
                     ['.asp'])
 
 
@@ -83,7 +66,6 @@ def _index_directory(f, root_dir, root_dirl, acceptable_endings=None):
     files = os.listdir(root_dir)
     files.sort()
 
-    isfiles = 0
 
     for each in files:
         if each in ['.', '..']:
@@ -124,7 +106,7 @@ def index_directory(dir_name, outputfilename='index.txt',
     dir_name = os.path.abspath(dir_name)
     dir_namel = len(dir_name)
 
-    print("-i- indexing %(dir)s..." % {'dir': dir_name})
+    logging.info("indexing %(dir)s..." % {'dir': dir_name})
 
     f = open(outputfilename, 'w')
 
@@ -136,9 +118,9 @@ def index_directory(dir_name, outputfilename='index.txt',
 
 class Index:
 
-    def __init__(self, config, templates):
+    def __init__(self, templates):
 
-        self.config = config
+        self.config = org.wayround.aipsetup.config.config
         self.templates = templates
         self.pdb = org.wayround.aipsetup.pkgindex.PackageDatabase(self.config)
 
@@ -156,7 +138,7 @@ class Index:
 
     def reload_indexes(self):
 
-        print("-i- loading indexes")
+        logging.info("loading indexes")
 
         if not self.index_reloading:
 
@@ -445,7 +427,7 @@ class Index:
 
 
 
-def start_host(config=None):
+def start_host():
 
     ret = 0
 
@@ -453,23 +435,23 @@ def start_host(config=None):
 
     serv_config = {
         'global': {
-            'server.bind_addr' : (config['server_ip'],
-                                  int(config['server_port'])),
+            'server.bind_addr' : (org.wayround.aipsetup.config.config['server_ip'],
+                                  int(org.wayround.aipsetup.config.config['server_port'])),
             # 'server.socket_port' : port,
             'global.server.thread_pool' : 10,
             'error_page.default': edefault
             },
         '/files_info' :{
             'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : config['info']
+            'tools.staticdir.dir' : org.wayround.aipsetup.config.config['info']
             },
         '/files_repository' :{
             'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : config['repository']
+            'tools.staticdir.dir' : org.wayround.aipsetup.config.config['repository']
             },
         '/files_source' :{
             'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : config['source']
+            'tools.staticdir.dir' : org.wayround.aipsetup.config.config['source']
             }
         # ,
         # '/css': {
@@ -498,9 +480,9 @@ def start_host(config=None):
         except:
             e = sys.exc_info()
             org.wayround.utils.error.print_exception_info(e)
-            print("-e- Error reading template %(name)s" % {
+            logging.error("Error reading template %(name)s" % {
                 'name': os.path.join(
-                    config['uhtroot'],
+                    org.wayround.aipsetup.config.config['lustroot'],
                     'templates',
                     '%(name)s.html' % {'name': i}
                     )
@@ -510,8 +492,8 @@ def start_host(config=None):
 
     if not templates_error:
         cherrypy.quickstart(
-            Index(config, templates),
-            config['server_prefix'],
+            Index(templates),
+            org.wayround.aipsetup.config.config['server_prefix'],
             serv_config)
 
     return ret

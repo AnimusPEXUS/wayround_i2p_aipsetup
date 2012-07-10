@@ -633,7 +633,7 @@ def build(config, source_files):
     ret = 0
 
     par_res = org.wayround.aipsetup.name.source_name_parse(
-        config, source_files[0], mute=False
+        config, source_files[0]
         )
 
     if par_res == None:
@@ -1071,7 +1071,7 @@ def put_to_index(config, filename):
         else:
 
             sn_pres = org.wayround.aipsetup.name.source_name_parse(
-                config, filename, mute=True
+                config, filename
             )
 
             if not isinstance(sn_pres, dict):
