@@ -26,8 +26,8 @@ import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.buildingsite
 
-def print_help():
-    print("""\
+def help_text():
+    return """\
 aipsetup package command
 
    install [-b=DIRNAME] FILE
@@ -73,169 +73,184 @@ aipsetup package command
          fm    - LOOKFOR is file mask
 
    put_to_index_many FILEMASK
-""")
+"""
 
-def router(opts, args, config):
+def exported_functions():
 
-    ret = 0
-    args_l = len(args)
+    return {
+        'install'       : package_install,
+        'list'          : package_list,
+        'named_list'    : package_named_list,
+        'issues'        : package_issues,
+        'remove'        : package_remove,
+        'complete'      : package_complete,
+        'build'         : package_build,
+        'find_files'    : package_find_files,
+        'put_to_index'  : package_put_to_index_many
+        }
 
-    if args_l == 0:
-        print("-e- command not given")
-        ret = 1
+def package_install(opts, args):
+
+    basedir = '/'
+    for i in opts:
+        if i[0] == '-b':
+            basedir = i[1]
+
+    if args_l == 1:
+        print("-e- Pacakge name required!")
+        ret = 2
     else:
+        asp_name = args[1]
+        ret = install(config, asp_name, basedir)
 
-        if args[0] == 'help':
-            print_help()
-        elif args[0] == 'install':
+    return 0
 
-            basedir = '/'
-            for i in opts:
-                if i[0] == '-b':
-                    basedir = i[1]
+def package_list(opts, args):
 
-            if args_l == 1:
-                print("-e- Pacakge name required!")
-                ret = 2
-            else:
-                asp_name = args[1]
-                ret = install(config, asp_name, basedir)
+    basedir = '/'
+    for i in opts:
+        if i[0] == '-b':
+            basedir = i[1]
 
-        elif args[0] == 'list':
+    asp_name = '*.xz'
+    if args_l > 1:
+        asp_name = args[1]
 
-            basedir = '/'
-            for i in opts:
-                if i[0] == '-b':
-                    basedir = i[1]
+    if not isinstance(basedir, str):
+        print("-e- given basedir name is wrong")
+        ret = 2
 
-            asp_name = '*.xz'
-            if args_l > 1:
-                asp_name = args[1]
+    if ret == 0:
+        ret = list_packages(config, asp_name, basedir)
 
-            if not isinstance(basedir, str):
-                print("-e- given basedir name is wrong")
-                ret = 2
+    return 0
 
-            if ret == 0:
-                ret = list_packages(config, asp_name, basedir)
+def package_named_list(opts, args):
 
-        elif args[0] == 'named_list':
+    basedir = '/'
+    for i in opts:
+        if i[0] == '-b':
+            basedir = i[1]
 
-            basedir = '/'
-            for i in opts:
-                if i[0] == '-b':
-                    basedir = i[1]
+    asp_name = None
+    if args_l > 1:
+        asp_name = args[1]
 
-            asp_name = None
-            if args_l > 1:
-                asp_name = args[1]
+    if not isinstance(basedir, str):
+        print("-e- given basedir name is wrong")
+        ret = 2
 
-            if not isinstance(basedir, str):
-                print("-e- given basedir name is wrong")
-                ret = 2
+    if not isinstance(asp_name, str):
+        print("-e- package name required")
+        ret = 3
 
-            if not isinstance(asp_name, str):
-                print("-e- package name required")
-                ret = 3
+    if ret == 0:
+        ret = named_list_packages(config, asp_name, basedir)
 
-            if ret == 0:
-                ret = named_list_packages(config, asp_name, basedir)
+    return 0
 
-        elif args[0] == 'package_issues':
-            basedir = '/'
-            for i in opts:
-                if i[0] == '-b':
-                    basedir = i[1]
+def package_issues(opts, args):
 
-            if not isinstance(basedir, str):
-                print("-e- given basedir name is wrong")
-                ret = 2
+    basedir = '/'
+    for i in opts:
+        if i[0] == '-b':
+            basedir = i[1]
 
-            if ret == 0:
-                list_packages_issues(config, basedir)
+    if not isinstance(basedir, str):
+        print("-e- given basedir name is wrong")
+        ret = 2
 
-        elif args[0] == 'remove':
+    if ret == 0:
+        list_packages_issues(config, basedir)
 
-            basedir = '/'
-            for i in opts:
-                if i[0] == '-b':
-                    basedir = i[1]
 
-            asp_name = None
-            if args_l > 1:
-                asp_name = args[1]
+    return 0
 
-            if not isinstance(basedir, str):
-                print("-e- given basedir name is wrong")
-                ret = 2
+def package_remove(opts, args):
 
-            if not isinstance(asp_name, str):
-                print("-e- removing name mask must be not empty!")
-                ret = 3
+    basedir = '/'
+    for i in opts:
+        if i[0] == '-b':
+            basedir = i[1]
 
-            if ret == 0:
-                ret = remove_packages(config, asp_name, basedir)
+    asp_name = None
+    if args_l > 1:
+        asp_name = args[1]
 
-        elif args[0] == 'complite':
+    if not isinstance(basedir, str):
+        print("-e- given basedir name is wrong")
+        ret = 2
 
-            dirname = '.'
+    if not isinstance(asp_name, str):
+        print("-e- removing name mask must be not empty!")
+        ret = 3
 
-            if args_l > 1:
-                dirname = args[1]
+    if ret == 0:
+        ret = remove_packages(config, asp_name, basedir)
 
-            ret = complite(config, dirname)
+    return 0
 
-        elif args[0] == 'build':
+def package_complete(opts, args):
 
-            sources = []
+    dirname = '.'
 
-            if args_l > 1:
-                sources = args[1:]
+    if args_l > 1:
+        dirname = args[1]
 
-            if len(sources) == 0:
-                print("-e- No source files named")
-                ret = 2
+    ret = complete(config, dirname)
 
-            if ret == 0:
-                ret = build(config, sources)
+    return 0
 
-        elif args[0] == 'find_files':
+def package_build(opts, args):
 
-            basedir = '/'
-            for i in opts:
-                if i[0] == '-b':
-                    basedir = i[1]
+    sources = []
 
-            look_meth = 'sub'
-            for i in opts:
-                if i[0] == '-m':
-                    look_meth = i[1]
+    if args_l > 1:
+        sources = args[1:]
 
-            lookfor = ''
-            if args_l > 1:
-                lookfor = args[1]
+    if len(sources) == 0:
+        print("-e- No source files named")
+        ret = 2
 
-            ret = find_files(config, basedir, lookfor, mode=look_meth,
-                             mute=False,
-                             return_dict=False)
+    if ret == 0:
+        ret = build(config, sources)
 
-        elif args[0] == 'put_to_index_many':
+    return 0
 
-            files = []
-            if args_l > 1:
-                files = args[1:]
+def package_find_files(opts, args):
 
-            if len(files) == 0:
-                print('-e- File names required')
-                ret = 2
-            else:
-                ret = put_to_index_many(config, files)
+    basedir = '/'
+    for i in opts:
+        if i[0] == '-b':
+            basedir = i[1]
 
-        else:
-            print("-e- Wrong command")
-            ret = 1
+    look_meth = 'sub'
+    for i in opts:
+        if i[0] == '-m':
+            look_meth = i[1]
 
-    return ret
+    lookfor = ''
+    if args_l > 1:
+        lookfor = args[1]
+
+    ret = find_files(config, basedir, lookfor, mode=look_meth,
+                     mute=False,
+                     return_dict=False)
+
+def package_put_to_index_many(opts, args):
+
+    files = []
+    if args_l > 1:
+        files = args[1:]
+
+    if len(files) == 0:
+        print('-e- File names required')
+        ret = 2
+    else:
+        ret = put_to_index_many(config, files)
+
+    return 0
+
 
 def check_package(config, asp_name, mute=False):
     """
@@ -706,7 +721,7 @@ def build(config, source_files):
 
     return ret
 
-def complite(config, dirname):
+def complete(config, dirname):
 
     log = org.wayround.utils.log.Log(
         config, dirname, 'buildingsite complite'
@@ -717,10 +732,10 @@ def complite(config, dirname):
 
     ret = 0
 
-    if org.wayround.aipsetup.build.complite(config, dirname) != 0:
+    if org.wayround.aipsetup.build.complete(config, dirname) != 0:
         print("-e- Error on building stage")
         ret = 1
-    elif org.wayround.aipsetup.pack.complite(config, dirname) != 0:
+    elif org.wayround.aipsetup.pack.complete(config, dirname) != 0:
         print("-e- Error on packaging stage")
         ret = 2
 

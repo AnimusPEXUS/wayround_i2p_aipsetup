@@ -1,5 +1,4 @@
-def constitution(config):
-    return {
+{
         'system_title': 'Lovely Universal Software Tool',
         'system_version': '2.0',
 

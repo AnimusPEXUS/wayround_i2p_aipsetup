@@ -1,62 +1,50 @@
-# -*- coding: utf-8 -*-
 
 import os.path
 import sys
 import stat
 import re
+import logging
 
 import lxml.etree
 
-
 import org.wayround.utils.error
 
+import org.wayround.aipsetup.router
 
-def print_help():
-    print("""\
+def help_text():
+    return """\
 
     install [-b=DIR] FILES
 
        -b - Change basedir. Default is /
 
-""")
+"""
+
+def router(opts, args):
+
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'install': install_files
+            }
+        )
+
+    return ret
 
 
-def router(opts, args, config):
-    ret = 0
+def install_files(opts, args):
 
-    args_l = len(args)
-
-
-    if args_l == 0:
-        print("-e- command not given")
-        ret = 1
+    if len(args) == 1:
+        logging.error("-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments")
+        ret = 10
     else:
 
-        if args[0] == 'help':
-            print_help()
-            ret = 0
+        base_dir = '/'
 
+        if '-b' in opts:
+            base_dir = opts['-b']
 
-        elif args[0] == 'install':
+        install(args[1:], base_dir)
 
-            if args_l == 1:
-                print('-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments')
-                ret = 10
-            else:
-
-                base_dir = '/'
-
-                for i in opts:
-                    if i[0] == '-b':
-                        base_dir = i[1]
-
-                install(args[1:], base_dir)
-
-        else:
-            print("-e- Wrong command")
-
-
-        ret = 0
 
     return ret
 
@@ -104,17 +92,17 @@ def set_correct_owners(directory):
 
 def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
-    print("-i- Preparing base dir: %(dir)s" % {'dir': base_dir})
+    logging.info("Preparing base dir: %(dir)s" % {'dir': base_dir})
 
     for i in [base_dir_etc_xml, base_dir_share_docbook]:
-        print("-i-    checking: %(dir)s" % {'dir': i})
+        logging.info("   checking: %(dir)s" % {'dir': i})
         try:
             os.makedirs(i)
         except:
             pass
 
         if not os.path.isdir(i):
-            print("-e-       not a dir %(i)s" % {
+            logging.error("      not a dir %(i)s" % {
                 'i': i
                 })
             return 1
@@ -135,11 +123,11 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     # TODO: use aipsetup.utils
 
     if not os.path.isfile(docbook_zip):
-        print("-e- Wrong zip file")
+        logging.error("Wrong zip file")
         return 10
 
     if len(docbook_zip) == 0:
-        print("-e- Wrong zip file")
+        logging.error("Wrong zip file")
         return 20
 
     if not docbook_zip.endswith('.zip'):
@@ -151,7 +139,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     try:
         docbook_no_zip = docbook_zip[:-4]
     except:
-        print("-e- Wrong zip file")
+        logging.error("Wrong zip file")
         return 40
 
     version = ''
@@ -159,7 +147,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     try:
         version = docbook_no_zip[docbook_no_zip.rfind('-') + 1:]
     except:
-        print("-e- Wrong zip file version")
+        logging.error("Wrong zip file version")
         return 50
 
     if version == '':
@@ -168,7 +156,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
     base_dir_share_docbook_dtd = os.path.abspath(os.path.join(base_dir_share_docbook, 'xml-dtd-%(ver)s' % {'ver': version}))
 
-    print("-i- making dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
+    logging.info("making dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
 
     try:
         os.makedirs(base_dir_share_docbook_dtd)
@@ -176,7 +164,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         pass
 
     if not os.path.isdir(base_dir_share_docbook_dtd):
-        print("-e-    can not create dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
+        logging.error("   can not create dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
         return 70
 
     print('-i-    unzipping...')
@@ -184,7 +172,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
     e = os.system("7z -o'%(dir)s' x '%(file)s'" % {'file': docbook_zip, 'dir': base_dir_share_docbook_dtd})
 
     if e != 0:
-        print("-e-    error unzipping %(file)s" % {'file': docbook_zip})
+        logging.error("   error unzipping %(file)s" % {'file': docbook_zip})
         return 80
 
     print('-i-    ok')
@@ -197,25 +185,25 @@ def prepare_catalog(base_dir_etc_xml_catalog):
 
     r = 0
 
-    print("-i- Checking for catalog %(cat)s" % {'cat': base_dir_etc_xml_catalog})
+    logging.info("Checking for catalog %(cat)s" % {'cat': base_dir_etc_xml_catalog})
     if not os.path.isfile(base_dir_etc_xml_catalog):
-        print("-i-    creating new")
+        logging.info("   creating new")
         r = os.system("xmlcatalog --noout --create '%(cat)s'" % {'cat': base_dir_etc_xml_catalog})
     else:
-        print("-i-    already exists")
+        logging.info("   already exists")
 
     return r
 
 
 def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
 
-    print("-i-    Importing into docbook: %(dir)s" % {'dir': os.path.basename(dtd_dir)})
+    logging.info("   Importing into docbook: %(dir)s" % {'dir': os.path.basename(dtd_dir)})
 
     specific_cat_file = os.path.join(dtd_dir, 'catalog.xml')
 
 
     if not os.path.isfile(specific_cat_file):
-        print("-e-    %(file)s not found" % {'file': specific_cat_file})
+        logging.error("   %(file)s not found" % {'file': specific_cat_file})
         return 10
 
     tmp_cat_lxml = None
@@ -223,8 +211,9 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
     try:
         tmp_cat_lxml = lxml.etree.parse(specific_cat_file)
     except:
-        e = sys.exc_info()
-        org.wayround.utils.error.print_exception_info(e)
+        logging.exception(
+            org.wayround.utils.error.return_exception_info(sys.exc_info())
+            )
 
     tmp_cat_lxml_ns = '{%(ns)s}' % {'ns': tmp_cat_lxml.getroot().nsmap[None]}
 
@@ -233,7 +222,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
         for each in tmp_cat_lxml.findall(tmp_cat_lxml_ns + tag):
 
             if each.tag == tmp_cat_lxml_ns + tag:
-                print("-i-       %(tag)s - %(Id)s" % {'Id': each.get(tag + 'Id'), 'tag': tag})
+                logging.info("      %(tag)s - %(Id)s" % {'Id': each.get(tag + 'Id'), 'tag': tag})
 
                 src_uri = each.get('uri')
                 dst_uri = ''
@@ -254,7 +243,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
                         'tag': tag
                         })
                 if r != 0:
-                    print("-e-          error")
+                    logging.error("         error")
 
     return 0
 
@@ -268,7 +257,7 @@ def import_docbook_to_catalog(base_dir_etc_xml_catalog):
         each1 = each.format(base_dir_etc_xml_catalog)
 
         if 0 != os.system(each1):
-            print("-e- error doing %(cmd)s" % {'cmd': each1})
+            logging.error("error doing %(cmd)s" % {'cmd': each1})
 
     return 0
 
@@ -296,10 +285,10 @@ def install_docbook_zips(docbook_zip_list,
     dtd_dirs.sort()
 
     if len(dtd_dirs) == 0:
-        print("-e- no DTD directories created. Nothing to do farther...")
+        logging.error("no DTD directories created. Nothing to do farther...")
         return 10
 
-    print("-i- Installing DTDs:")
+    logging.info("Installing DTDs:")
 
     for i in dtd_dirs:
         import_dtd_to_docbook(
@@ -307,7 +296,7 @@ def install_docbook_zips(docbook_zip_list,
             )
 
 
-    print("-i- Installing docbook into catalog")
+    logging.info("Installing docbook into catalog")
     import_docbook_to_catalog(base_dir_etc_xml_catalog)
 
     return 0
@@ -320,7 +309,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
                              base_dir_share_docbook
                              ):
 
-    print("-i- Installing XSLs")
+    logging.info("Installing XSLs")
 
     installed_versions = []
 
@@ -338,7 +327,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         base_dir_share_docbook_xsl_stylesheets = \
             os.path.join(base_dir_share_docbook, 'xsl-stylesheets-%(version)s' % {'version': version})
 
-        print("-i- Installing XSL %(xsl_name)s into %(xsl_dest)s" % {
+        logging.info("Installing XSL %(xsl_name)s into %(xsl_dest)s" % {
             'xsl_name': name,
             'xsl_dest': base_dir_share_docbook_xsl_stylesheets})
 
@@ -348,57 +337,59 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         if 0 != org.wayround.utils.file.remove_if_exists(
                     base_dir_share_docbook_name
                     ):
-            print("-e-       error")
+            logging.error("      error")
             # return 10
             continue
 
         if 0 != org.wayround.utils.file.remove_if_exists(
                     base_dir_share_docbook_xsl_stylesheets
                     ):
-            print("-e-       error")
+            logging.error("      error")
             # return 20
             continue
 
-        print("-i- Extracting into %(name)s" % {'name': base_dir_share_docbook_name})
+        logging.info("Extracting into %(name)s" % {'name': base_dir_share_docbook_name})
 
         if 0 != unpack_tar(docbook_xsl_zip, base_dir_share_docbook):
-            print("-e-    Extraction error")
+            logging.error("   Extraction error")
 
 
-        print("-i- extracted")
+        logging.info("extracted")
 
-        print("-i- renaming %(one)s to %(another)s" % {
+        logging.info("renaming %(one)s to %(another)s" % {
             'one':     base_dir_share_docbook_name,
             'another': base_dir_share_docbook_xsl_stylesheets})
         try:
             os.rename(base_dir_share_docbook_name,
                       base_dir_share_docbook_xsl_stylesheets)
         except:
-            org.wayround.utils.error.print_exception_info(sys.exc_info())
+            logging.exception(
+                org.wayround.utils.error.return_exception_info(sys.exc_info())
+                )
             # return 30
             continue
 
-        print("-i- XSL extraction complited")
+        logging.info("XSL extraction complited")
         print("-i-")
 
         installed_versions.append(version)
 
     installed_versions.sort(version.standard_comparison)
 
-    print("-i- Installed XSL: %(versions)s" % {'versions': ', '.join(installed_versions)})
+    logging.info("Installed XSL: %(versions)s" % {'versions': ', '.join(installed_versions)})
 
 
     iv_l = len(installed_versions)
 
     if iv_l == 0:
-        print("-e- no versions")
+        logging.error("no versions")
         return 40
 
     current = installed_versions[iv_l - 1]
 
-    print("-i- Presuming current XSL: %(version)s" % {'version': current})
+    logging.info("Presuming current XSL: %(version)s" % {'version': current})
 
-    print("-i- Updating XML catalog")
+    logging.info("Updating XML catalog")
 
     for i in installed_versions:
         os.system(
@@ -446,8 +437,8 @@ def install(files, base_dir):
     docbook_xsl_zip_list.sort()
 
 
-    print("-i- XMLs: %(xml)s;" % {'xml': ', '.join(docbook_zip_list)})
-    print("-i- XSLs: %(xsl)s." % {'xsl': ', '.join(docbook_xsl_zip_list)})
+    logging.info("XMLs: %(xml)s;" % {'xml': ', '.join(docbook_zip_list)})
+    logging.info("XSLs: %(xsl)s." % {'xsl': ', '.join(docbook_xsl_zip_list)})
 
     base_dir = os.path.abspath(base_dir)
 
@@ -459,18 +450,20 @@ def install(files, base_dir):
 
     base_dir_share_docbook = os.path.join(base_dir, 'usr', 'share', 'xml', 'docbook')
 
-    base_dir_share_docbook_xsl_stylesheets = os.path.join(base_dir_share_docbook, 'xsl-stylesheets')
+    # leave next comment line for visibility
+    # base_dir_share_docbook_xsl_stylesheets = \
+    #     os.path.join(base_dir_share_docbook, 'xsl-stylesheets')
 
 
 
     if 0 != prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
-        print("-e- Error preparing base dir")
+        logging.error("Error preparing base dir")
         exit(20)
 
 
     for i in [base_dir_etc_xml_catalog_docbook, base_dir_etc_xml_catalog]:
         if 0 != prepare_catalog(i):
-            print("-e- Error creating catalog")
+            logging.error("Error creating catalog")
             exit (25)
 
 
@@ -480,7 +473,7 @@ def install(files, base_dir):
                                  base_dir_etc_xml_catalog,
                                  base_dir_etc_xml_catalog_docbook,
                                  base_dir_share_docbook):
-        print("-e- Error installing XML")
+        logging.error("Error installing XML")
         exit(30)
 
 
@@ -488,25 +481,29 @@ def install(files, base_dir):
                                      base_dir,
                                      base_dir_etc_xml_catalog,
                                      base_dir_share_docbook):
-        print("-e- Error installing XSL")
+        logging.error("Error installing XSL")
         exit(40)
 
-    print("-i- Setting correct modes")
+    logging.info("Setting correct modes")
     try:
         set_correct_modes(base_dir_etc_xml)
         set_correct_modes(base_dir_share_docbook)
     except:
-        org.wayround.utils.error.print_exception_info(sys.exc_info())
+        logging.exception(
+            org.wayround.utils.error.return_exception_info(sys.exc_info())
+            )
 
-    print("-i- Setting correct owners")
+    logging.info("Setting correct owners")
     try:
         set_correct_owners(base_dir_etc_xml)
         set_correct_owners(base_dir_share_docbook)
     except:
-        org.wayround.utils.error.print_exception_info(sys.exc_info())
+        logging.exception(
+            org.wayround.utils.error.return_exception_info(sys.exc_info())
+            )
 
     print()
-    print("-i- All operations complited. Bye!")
+    logging.info("All operations complited. Bye!")
 
 
     return 0

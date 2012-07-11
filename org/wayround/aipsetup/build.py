@@ -54,39 +54,62 @@ def help_text():
 """
 
 
+def exported_commands():
 
+    commands = {}
 
-def router(opts, args):
+    for i in FUNCTIONS:
+        commands[i] = eval("build_{}".format(i))
+
+    commands[complete] = build_complete
+
+    return commands
+
+def _build_x(opts, args, action):
 
     ret = 0
+
+    dir_name = '.'
     args_l = len(args)
 
-    if args_l == 0:
-        logging.error("Command Not Given")
-        ret = 1
+
+    if args_l > 1:
+        logging.error("Too many parameters")
+
     else:
+        if args_l == 1:
+            dir_name = args[0]
+
+        ret = general_tool_function(action, dir_name)
+
+    return ret
+
+for i in FUNCTIONS:
+    exec("""\
+def build_{}(opts, args):
+    \"""
+    Perform `{}' action on building site
+
+        -d DIRNAME - set building site. default is current.
+    \"""
+    return _build_x(opts, args, '{}')
+""".format(i))
+
+def build_complete(opts, args):
+    ret = 0
+
+    dir_name = '.'
+    args_l = len(args)
 
 
-        if args[0] in list(FUNCTIONS):
+    if args_l > 1:
+        logging.error("Too many parameters")
 
-            d = '.'
+    else:
+        if args_l == 1:
+            dir_name = args[0]
 
-            if args_l > 1:
-                d = args[1]
-
-            ret = general_tool_function(args[0], d)
-
-        elif args[0] == 'complete':
-
-            d = '.'
-
-            if args_l > 1:
-                d = args[1]
-
-            ret = complete(d)
-
-        else:
-            logging.error("Wrong Command")
+        ret = complete(dir_name)
 
     return ret
 
@@ -146,7 +169,6 @@ def general_tool_function(action_name, dirname):
     log.stop()
 
     return ret
-
 
 def complete(dirname):
     ret = 0

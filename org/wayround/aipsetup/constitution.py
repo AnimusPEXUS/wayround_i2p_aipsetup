@@ -1,82 +1,66 @@
 
-import inspect
-import sys
+import logging
 
-import org.wayround.utils.error
 import org.wayround.utils.edit
 
+import org.wayround.aipsetup.config
 
-def print_help():
-    print("""\
-aipsetup build command
+def help_text():
+    return """\
+{aipsetup} {command} command
 
-   edit   edit constitution file
+    edit   edit constitution file
 
-   view   view constitution file
+    view   view constitution file
+"""
 
-""")
+def router(opts, args):
 
-def router(opts, args, config):
-
-    ret = 0
-    args_l = len(args)
-
-    if args_l == 0:
-        print("-e- not enough parameters")
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-
-        elif args[0] == 'edit':
-            org.wayround.utils.edit.edit_file_direct(
-                config, config['constitution']
-                )
-
-        elif args[0] == 'view':
-
-            f = open(config['constitution'], 'r')
-            txt = f.read()
-            f.close()
-
-            print(txt)
-
-        else:
-            print("user --help")
+    ret = org.wayround.aipsetup.router.router(
+        opts, args, commands={
+            'edit': edit,
+            'cat': cat
+            }
+        )
 
     return ret
 
 
-def read_constitution(config):
+def edit(opts, args):
+    org.wayround.utils.edit.edit_file_direct(
+        org.wayround.aipsetup.config.config['constitution'],
+        org.wayround.aipsetup.config.config['editor']
+        )
+
+    return 0
+
+
+def cat(opts, args):
+    f = open(org.wayround.aipsetup.config.config['constitution'], 'r')
+    txt = f.read()
+    f.close()
+
+    print(txt)
+    return 0
+
+
+def read_constitution():
 
     ret = None
 
-    l = {}
-    g = {}
-
     try:
-        exec(compile(open(config['constitution']).read(), config['constitution'], 'exec'), g, l)
+        f = open(org.wayround.aipsetup.config.config['constitution'])
     except:
-        print("-e- Error loading constitution script")
-        org.wayround.utils.error.print_exception_info(
-            sys.exc_info()
-            )
+        logging.exception("Can't read constitution `{}'".format(org.wayround.aipsetup.config.config['constitution']))
+        ret = None
     else:
-        if not 'constitution' in l \
-                or not inspect.isfunction(l['constitution']):
-            print("-e- `%(name)s' has no `constitution' function" % {
-                'name': config['constitution']
-                })
-
+        t = f.read()
+        try:
+            constitution = eval(t, {}, {})
+        except:
+            logging.exception("-e- Error loading constitution script")
+            ret = None
         else:
-            try:
-                ret = l['constitution'](config)
-            except:
-                ret = None
-                print("-e- Error calling for constitution dict")
-                org.wayround.utils.error.print_exception_info(
-                    sys.exc_info()
-                    )
+            ret = constitution
 
     return ret

@@ -43,9 +43,6 @@ class MainWindow:
 
         self.currently_opened = ''
 
-        #PyQt4.QtGui.QMessageBox.information(
-            #self.window, 'About', 'This is cool program'
-            #)
 
     def load_data(self, name):
 

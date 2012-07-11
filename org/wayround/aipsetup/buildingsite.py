@@ -74,7 +74,13 @@ def help_text():
             -d=DIRNAME set building dir. Defaults to current working dir.
 """
 
-def rt_init(opts, args):
+def exported_commands():
+    return {
+        'init': buildingsite_init,
+        'apply_info': buildingsite_apply_info
+        }
+
+def buildingsite_init(opts, args):
 
     init_dir = '.'
 
@@ -85,7 +91,7 @@ def rt_init(opts, args):
 
     return ret
 
-def rt_apply_info(opts, args):
+def buildingsite_apply_info(opts, args):
     ret = 0
 
     if len(args) != 2:
@@ -104,19 +110,6 @@ def rt_apply_info(opts, args):
         ret = apply_info(dirname, source_filename=name)
 
     return ret
-
-
-def router(opts, args):
-
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'init': init,
-            'apply_info': rt_apply_info
-            }
-        )
-
-    return ret
-
 
 def isWdDirRestricted(directory):
     """

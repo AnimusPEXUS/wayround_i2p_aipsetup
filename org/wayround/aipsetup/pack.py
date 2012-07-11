@@ -11,8 +11,8 @@ import org.wayround.utils.archive
 import org.wayround.utils.deps_c
 
 
-def print_help():
-    print("""\
+def help_text():
+    return """\
 aipsetup pack command
 
     destdir_checksum
@@ -37,7 +37,9 @@ aipsetup pack command
 
     pack_buildingsite
 
-""")
+    complete
+
+"""
 
 def router(opts, args):
 
@@ -72,7 +74,7 @@ def router(opts, args):
                     'name': args[0]
                     })
 
-        elif args[0] == 'complite':
+        elif args[0] == 'complete':
 
             dirname = '.'
 

@@ -10,13 +10,12 @@ import org.wayround.utils.error
 import org.wayround.utils.file
 
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.router
 
 
 from mako.template import Template
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
-    # not required, but can be usefull
+    # not required, but can be useful
     homepage="",
     # description
     description="",
