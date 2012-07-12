@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.config
@@ -8,12 +7,12 @@ def version_comparator(name1, name2):
     ret = 0
 
     d1 = org.wayround.aipsetup.name.source_name_parse(
-        org.wayround.aipsetup.config.actual_config,
+        org.wayround.aipsetup.config.config,
         name1, modify_info_file=False
         )
 
     d2 = org.wayround.aipsetup.name.source_name_parse(
-        org.wayround.aipsetup.config.actual_config,
+        org.wayround.aipsetup.config.config,
         name2, modify_info_file=False
         )
 

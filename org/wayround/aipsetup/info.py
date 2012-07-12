@@ -52,33 +52,30 @@ pkg_info_file_template = Template(text="""\
 </package>
 """)
 
-def router(opts, args):
 
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'help': print_help,
-            'mass_info_fix': mass_info_fix,
-            'list': list_files,
-            'edit': edit_file,
-            'editor': editor,
-            'copy': copy
-            }
-        )
 
-    return ret
+def exported_commands():
 
-def print_help(opts, args):
-    print("""\
-aipsetup info command
+    return {
+        'mass_info_fix': mass_info_fix,
+        'list': list_files,
+        'edit': edit_file,
+        'editor': editor,
+        'copy': copy
+        }
+
+def help_text():
+    return """\
+{aipsetup} {command} command
 
     list            List xml files in info directory
     edit            Edit xml file from info directory with configured editor
     editor          Edit xml file with special editor
     copy            Make a copy of one xml file to new xml file name
 
-    mass_info_fix   applayes fixes to info files
+    mass_info_fix   applies fixes to info files
 
-""")
+"""
 
 def list_files(opts, args, typ='info'):
     mask = '*'

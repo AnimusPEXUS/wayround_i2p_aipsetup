@@ -14,19 +14,15 @@ def help_text():
     view   view constitution file
 """
 
-def router(opts, args):
+def exported_commands():
 
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'edit': edit,
-            'cat': cat
-            }
-        )
-
-    return ret
+    return {
+        'edit': constitution_edit,
+        'cat': constitution_cat
+        }
 
 
-def edit(opts, args):
+def constitution_edit(opts, args):
     org.wayround.utils.edit.edit_file_direct(
         org.wayround.aipsetup.config.config['constitution'],
         org.wayround.aipsetup.config.config['editor']
@@ -35,7 +31,7 @@ def edit(opts, args):
     return 0
 
 
-def cat(opts, args):
+def constitution_cat(opts, args):
     f = open(org.wayround.aipsetup.config.config['constitution'], 'r')
     txt = f.read()
     f.close()

@@ -9,7 +9,6 @@ import lxml.etree
 
 import org.wayround.utils.error
 
-import org.wayround.aipsetup.router
 
 def help_text():
     return """\
@@ -20,21 +19,18 @@ def help_text():
 
 """
 
-def router(opts, args):
 
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'install': install_files
-            }
-        )
+def exported_commands():
 
-    return ret
+    return {
+        'install': docbook_install_files
+        }
 
 
-def install_files(opts, args):
+def docbook_install_files(opts, args):
 
     if len(args) == 1:
-        logging.error("-e- docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments")
+        logging.error("docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments")
         ret = 10
     else:
 
@@ -131,7 +127,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         return 20
 
     if not docbook_zip.endswith('.zip'):
-        print('-e- Not a zip file: %(file)s' % {'file': docbook_zip})
+        logging.error("Not a zip file: %(file)s" % {'file': docbook_zip})
         return 30
 
     docbook_no_zip = ''
@@ -151,7 +147,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         return 50
 
     if version == '':
-        "-e- Wrong zip file version"
+        logging.error("Wrong zip file version")
         return 60
 
     base_dir_share_docbook_dtd = os.path.abspath(os.path.join(base_dir_share_docbook, 'xml-dtd-%(ver)s' % {'ver': version}))

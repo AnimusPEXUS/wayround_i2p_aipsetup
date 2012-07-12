@@ -67,6 +67,9 @@ def exported_commands():
 
 def _build_x(opts, args, action):
 
+    if not action in FUNCTIONS:
+        raise ValueError("Wrong action parameter")
+
     ret = 0
 
     dir_name = '.'

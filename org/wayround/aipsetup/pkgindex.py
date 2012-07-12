@@ -1,11 +1,4 @@
 
-"""
-This is LUST durectory indexing tool
-
-Helps to create index of repository and packages
-info
-"""
-
 import os.path
 import sys
 import fnmatch
@@ -78,25 +71,20 @@ Where command is one of:
         Print package info record information
 """
 
-def router(opts, args):
-
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'scan_repo_for_pkg_and_cat': scan_repo_for_pkg_and_cat,
-            'find_repository_package_name_collisions_in_database': \
-                find_repository_package_name_collisions_in_database,
-            'find_missing_pkg_info_records': find_missing_pkg_info_records,
-            'find_outdated_pkg_info_records': find_outdated_pkg_info_records,
-            'update_outdated_pkg_info_records': update_outdated_pkg_info_records,
-            'delete_pkg_info_records': delete_pkg_info_records,
-            'backup_package_info_to_filesystem': backup_package_info_to_filesystem,
-            'load_package_info_from_filesystem': load_package_info_from_filesystem,
-            'list_pkg_info_records': list_pkg_info_records,
-            'print_pkg_info_record': print_pkg_info_record
-            }
-        )
-
-    return ret
+def exported_commands():
+    return {
+        'scan_repo_for_pkg_and_cat': scan_repo_for_pkg_and_cat,
+        'find_repository_package_name_collisions_in_database': \
+            find_repository_package_name_collisions_in_database,
+        'find_missing_pkg_info_records': find_missing_pkg_info_records,
+        'find_outdated_pkg_info_records': find_outdated_pkg_info_records,
+        'update_outdated_pkg_info_records': update_outdated_pkg_info_records,
+        'delete_pkg_info_records': delete_pkg_info_records,
+        'backup_package_info_to_filesystem': backup_package_info_to_filesystem,
+        'load_package_info_from_filesystem': load_package_info_from_filesystem,
+        'list_pkg_info_records': list_pkg_info_records,
+        'print_pkg_info_record': print_pkg_info_record
+        }
 
 def scan_repo_for_pkg_and_cat(opts, args):
     # scan repository for packages and categories. result

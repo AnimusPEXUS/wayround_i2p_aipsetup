@@ -1,13 +1,11 @@
 
 import os.path
 import re
-import sys
 import fnmatch
 import logging
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.router
 
 
 NAME_REGEXPS_ORDER = [
@@ -99,18 +97,13 @@ def help_text():
         result
 """
 
-def router(opts, args):
+def exported_commands():
+    return {
+        'test_expressions_on_sources': name_test_expressions_on_sources,
+        'parse_name': name_parse_name
+        }
 
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'test_expressions_on_sources': test_expressions_on_sources,
-            'parse_name': parse_name
-            }
-        )
-
-    return ret
-
-def parse_name(opts, args):
+def name_parse_name(opts, args):
 
     ret = 0
 
@@ -130,7 +123,7 @@ def parse_name(opts, args):
     return ret
 
 
-def test_expressions_on_sources(opts, args):
+def name_test_expressions_on_sources(opts, args):
 
     ret = 0
 

@@ -4,7 +4,6 @@ import glob
 
 import PyQt4.uic
 import PyQt4.QtGui
-import PyQt4.QtCore
 
 import org.wayround.utils.text
 
@@ -19,8 +18,9 @@ class MainWindow:
 
         self.config = config
 
-        dir = os.path.dirname(__file__)
-        ui_file = os.path.join(dir, 'ui', 'info_edit.ui')
+        ui_file = os.path.join(
+            os.path.dirname(__file__), 'ui', 'info_edit.ui'
+            )
 
         self.app = PyQt4.QtGui.QApplication([])
 

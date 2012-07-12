@@ -267,13 +267,12 @@ def write_package_info(directory, info):
                 )
         else:
 
-            f.write("#!/usr/bin/python\n")
-            f.write("# -*- coding: utf-8 -*-\n")
+            f.write("""\
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-            f.write("\n")
-            f.write("\n")
-
-            f.write(txt)
+{text}
+""".format(text=txt))
 
         f.close()
 

@@ -3,12 +3,87 @@ import tempfile
 import shutil
 import sys
 import pprint
+import logging
 
 import org.wayround.utils.time
 import org.wayround.utils.checksum
 import org.wayround.utils.error
 import org.wayround.utils.archive
 import org.wayround.utils.deps_c
+
+FUNCTIONS = frozenset([
+    'destdir_checksum',
+    'destdir_filelist',
+    'destdir_deps_c',
+    'remove_source_and_build_dirs',
+    'compress_patches_destdir_and_logs',
+    'compress_files_in_lists_dir',
+    'remove_patches_destdir_and_buildlogs_dirs',
+    'remove_decompressed_files_from_lists_dir',
+    'make_checksums_for_building_site',
+    'pack_buildingsite'
+    ])
+
+def exported_commands():
+
+    commands = {}
+
+    for i in FUNCTIONS:
+        commands[i] = eval("pack_{}".format(i))
+
+    commands[complete] = pack_complete
+
+    return commands
+
+def _pack_x(opts, args, action):
+
+    if not action in FUNCTIONS:
+        raise ValueError("Wrong action parameter")
+
+    ret = 0
+
+    dir_name = '.'
+    args_l = len(args)
+
+    if args_l > 1:
+        logging.error("Too many parameters")
+
+    else:
+        if args_l == 1:
+            dir_name = args[0]
+
+        ret = eval("{}(action, dir_name)".format(action))
+
+    return ret
+
+for i in FUNCTIONS:
+    exec("""\
+def pack_{}(opts, args):
+    \"""
+    Perform `{}' action on building site
+
+        -d DIRNAME - set building site. default is current.
+    \"""
+    return _pack_x(opts, args, '{}')
+""".format(i))
+
+def pack_complete(opts, args):
+    ret = 0
+
+    dir_name = '.'
+    args_l = len(args)
+
+
+    if args_l > 1:
+        logging.error("Too many parameters")
+
+    else:
+        if args_l == 1:
+            dir_name = args[0]
+
+        ret = complete(dir_name)
+
+    return ret
 
 
 def help_text():
@@ -41,55 +116,6 @@ aipsetup pack command
 
 """
 
-def router(opts, args):
-
-    ret = 0
-    args_l = len(args)
-
-    if args_l == 0:
-        print("-e- not enough parameters")
-        ret = 1
-    else:
-
-        if args[0] == 'help':
-            print_help()
-
-        elif args[0] in ['destdir_checksum',
-                         'destdir_filelist',
-                         'destdir_deps_c',
-                         'remove_source_and_build_dirs',
-                         'compress_patches_destdir_and_logs',
-                         'compress_files_in_lists_dir',
-                         'remove_patches_destdir_and_buildlogs_dirs',
-                         'remove_decompressed_files_from_lists_dir',
-                         'make_checksums_for_building_site',
-                         'pack_buildingsite']:
-
-            dirname = '.'
-
-            if args_l > 1:
-                dirname = args[1]
-
-            ret = eval("%(name)s(dirname)" % {
-                    'name': args[0]
-                    })
-
-        elif args[0] == 'complete':
-
-            dirname = '.'
-
-            if args_l > 1:
-                dirname = args[1]
-
-            ret = complete(dirname)
-
-        else:
-            print("-e- Wrong pack command")
-
-
-    return ret
-
-
 def destdir_checksum(buildingsite):
 
     ret = 0
@@ -111,10 +137,10 @@ def destdir_checksum(buildingsite):
         pass
 
     if not os.path.isdir(destdir):
-        print("-e- DESTDIR not found")
+        logging.error("DESTDIR not found")
         ret = 1
     elif not os.path.isdir(lists_dir):
-        print("-e- LIST dir can't be used")
+        logging.error("LIST dir can't be used")
         ret = 2
     else:
         org.wayround.utils.checksum.make_dir_checksums(
@@ -146,10 +172,10 @@ def destdir_filelist(buildingsite):
         pass
 
     if not os.path.isdir(destdir):
-        print("-e- DESTDIR not found")
+        logging.error("DESTDIR not found")
         ret = 1
     elif not os.path.isdir(lists_dir):
-        print("-e- LIST dir can't be used")
+        logging.error("LIST dir can't be used")
         ret = 2
     else:
         org.wayround.utils.file.list_files_recurcive(
@@ -189,7 +215,7 @@ def destdir_deps_c(buildingsite):
     deps = {}
     elfs = 0
     n_elfs = 0
-    print("-i- Generating C deps lists")
+    logging.info("Generating C deps lists")
     file_list_l = len(file_list)
     file_list_i = 1
     for i in file_list:
@@ -212,7 +238,7 @@ def destdir_deps_c(buildingsite):
                 #}
             n_elfs += 1
     print("")
-    print("-i- ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+    logging.info("ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
         'elfs': elfs,
         'n_elfs': n_elfs
         })
@@ -236,7 +262,7 @@ def remove_source_and_build_dirs(buildingsite):
         if os.path.isdir(dirname):
             org.wayround.utils.file.remove_if_exists(dirname)
         else:
-            print("-w- Dir not exists: %(dirname)s" % {
+            logging.warning("Dir not exists: %(dirname)s" % {
                 'dirname': dirname
                 })
 
@@ -260,13 +286,13 @@ def compress_patches_destdir_and_logs(buildingsite):
             }
 
         if not os.path.isdir(dirname):
-            print("-w- Dir not exists: %(dirname)s" % {
+            logging.warning("Dir not exists: %(dirname)s" % {
                 'dirname': dirname
                 })
             ret = 1
             break
         else:
-            print("-i- Compressing %(i)s" % {
+            logging.info("Compressing %(i)s" % {
                 'i': i
                 })
             org.wayround.utils.archive.compress_dir_contents_tar_compressor(
@@ -291,7 +317,7 @@ def compress_files_in_lists_dir(buildingsite):
         outfile = infile + '.xz'
 
         if org.wayround.utils.archive.compress_file_xz(infile, outfile) != 0:
-            print("-e- Error compressing files in lists dir")
+            logging.error("Error compressing files in lists dir")
             ret = 1
             break
 
@@ -313,7 +339,7 @@ def remove_patches_destdir_and_buildlogs_dirs(buildingsite):
         if os.path.isdir(dirname):
             org.wayround.utils.file.remove_if_exists(dirname)
         else:
-            print("-w- Dir not exists: %(dirname)s" % {
+            logging.warning("Dir not exists: %(dirname)s" % {
                 'dirname': dirname
                 })
 
@@ -333,7 +359,7 @@ def remove_decompressed_files_from_lists_dir(buildingsite):
             try:
                 os.unlink(filename)
             except:
-                print("-e- Can't remove file %(name)s" % {
+                logging.error("Can't remove file %(name)s" % {
                     'name': filename
                     })
                 ret = 1
@@ -357,7 +383,7 @@ def make_checksums_for_building_site(buildingsite):
     try:
         tf = tempfile.mkstemp()
     except:
-        print("-e- Error creating temporary file")
+        logging.error("Error creating temporary file")
         org.wayround.utils.error.print_exception_info(sys.exc_info())
         ret = 1
     else:
@@ -366,7 +392,7 @@ def make_checksums_for_building_site(buildingsite):
         if org.wayround.utils.checksum.make_dir_checksums_fo(
             buildingsite,
             f) != 0:
-            print("-e- Error creating checksums for buildingsite")
+            logging.error("Error creating checksums for buildingsite")
             ret = 2
 
         f.close()
@@ -382,7 +408,7 @@ def pack_buildingsite(buildingsite):
         )
 
     if pi == None:
-        print("-e- error getting information about package")
+        logging.error("error getting information about package")
     else:
 
         pack_dir = os.path.abspath(
@@ -439,7 +465,7 @@ def complete(dirname):
         if eval("%(name)s(dirname)" % {
                 'name': i
                 }) != 0:
-            print("-e- Error on %(name)s" % {
+            logging.error("Error on %(name)s" % {
                 'name': i
                 })
             ret = 1

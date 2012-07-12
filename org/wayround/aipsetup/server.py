@@ -35,16 +35,11 @@ def help_text():
         all settings taken from aipsetup.conf
 """
 
-def router(opts, args):
-
-    ret = org.wayround.aipsetup.router.router(
-        opts, args, commands={
-            'index_uht': index_uht,
-            'start': start_host
-            }
-        )
-
-    return ret
+def exported_commands():
+    return {
+        'index_uht': index_uht,
+        'start': start_host
+        }
 
 
 def index_uht(opts, args):

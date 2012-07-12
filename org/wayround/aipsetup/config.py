@@ -91,62 +91,55 @@ class ConfigLoadError(Exception): pass
 
 
 
-def print_help():
-    print("""\
+def help_text():
+    return """\
+{aipsetup} {command} command
 
-create_example
-check_config
-print_config
+    create_example
 
-""")
+    check_config
 
-def router(opts, args, config):
-    """
-    aipsetup control router
-    """
-    ret = 0
+    print_config
+"""
 
-    args_l = len(args)
+def exported_commands():
+    return {
+        'create_example': config_create_example,
+        'check_config': config_check_config,
+        'print_config': config_print_config
+        }
 
-    if args_l == 0:
-        logging.error("not enough parameters")
-        ret = 1
-    else:
-        if args[0] == 'help':
-            print_help()
-            ret = 0
 
-        elif args[0] == 'create_example':
+def config_create_example(opts, args):
+    filename = '/etc/aipsetup.conf.example'
 
-            filename = '/etc/aipsetup.conf.example'
+    if len(args) == 1:
+        filename = args[0]
 
-            if args_l == 2:
-                filename = args[1]
-
-            ret = create_example_config(filename)
-
-        elif args[0] == 'check_config':
-
-            filename = '/etc/aipsetup.conf'
-
-            if args_l == 2:
-                filename = args[1]
-
-            ret = check_config(filename)
-
-        elif args[0] == 'print_config':
-
-            filename = '/etc/aipsetup.conf'
-
-            if args_l == 2:
-                filename = args[1]
-
-            ret = print_config(filename)
-
-        else:
-            logging.error("wrong command")
+    ret = create_example_config(filename)
 
     return ret
+
+def config_check_config(opts, args):
+    filename = '/etc/aipsetup.conf'
+
+    if len(args) == 1:
+        filename = args[0]
+
+    ret = check_config(filename)
+
+    return ret
+
+def config_print_config(opts, args):
+    filename = '/etc/aipsetup.conf'
+
+    if len(args) == 1:
+        filename = args[0]
+
+    ret = print_config(filename)
+
+    return ret
+
 
 def check_config(filename):
     load_config(filename)
@@ -158,8 +151,9 @@ def print_config(filename):
     for i in CONFIG_ALL_PARAMETERS - CONFIG_ALLOWED_PARAMETERS:
         cc[i] = c[i]
 
-    print("Additionaly {} non-configurable parameters:".format(len(cc)))
+    print("Additionally {} non-configurable parameters:".format(len(cc)))
     print(pprint.pformat(cc))
+
 
 def format_config(config):
     return """\
@@ -298,13 +292,10 @@ def load_config(filename):
     try:
         f = open(filename, 'r')
     except:
-        raise ConfigLoadError(
-            "Can't read config file {filename!s}\n{exception!s}".format(
-                filename=filename,
-                exception=org.wayround.utils.error.return_exception_info(sys.exc_info())
-                )
+        logging.exception(
+            "Can't read config file {}".format(filename)
             )
-
+        raise
     else:
         text = f.read()
         f.close()
@@ -314,23 +305,18 @@ def load_config(filename):
         try:
             conf_dict = eval(text, {}, {})
         except:
-            raise ConfigLoadError(
-                "Can't load config file contents {filename!s}\n{exception!s}".format(
-                    filename=filename,
-                    exception=org.wayround.utils.error.return_exception_info(sys.exc_info())
-                    )
+            logging.exception(
+                "Can't load config file contents {}".format(filename)
                 )
+            raise
         else:
             try:
                 config_check_after_load(conf_dict)
             except:
-                raise ConfigLoadError(
-                    "Errors found while checking loadable config {filename!s}\n{exception!s}".format(
-                        filename=filename,
-                        exception=org.wayround.utils.error.return_exception_info(sys.exc_info())
-                        )
+                logging.exception(
+                    "Errors found while checking loadable config {}".format(filename)
                     )
-                ret = {}
+                raise
             else:
                 ret = conf_dict
 

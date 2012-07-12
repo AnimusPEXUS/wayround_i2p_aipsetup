@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 Client-module for searching and getting files on and from
@@ -9,174 +8,138 @@ import os.path
 import sys
 import urllib.request, urllib.parse
 import subprocess
+import logging
 
 import org.wayround.utils
 
 import org.wayround.aipsetup.version
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.info
+import org.wayround.aipsetup.config
 
 
-def print_help():
-    """
-    help printer
-    """
-    print("""\
-aipsetup client command
+def help_text():
+    return """\
+{aipsetup} {command} command
 
-   search [-i] [--how=b|r|e|i|c] [--where=r|l] [--what=s|r|i] [-v=VER]
-          NAME
+    search [-i] [--how=b|r|e|i|c] [--what=s|r|i] [-v=VER]
+           NAME
 
-      Search files on remote or local UHT server
+        Search files on LUST server
 
-      -i - NAME is case insensitive
+        -i - NAME is case insensitive
 
-      --how values:
+        --how values:
 
-      b - package name begins with NAME
-      r - NAME is regular expression
-      e - NAME is exact name
-      i - assume NAME tobe package info name and get RE for it
-      c - NAME is package name substring
+        b - package name begins with NAME
+        r - NAME is regular expression
+        e - NAME is exact name
+        i - assume NAME to be package info name and get RE for it
+        c - NAME is package name substring
 
-      --where values: 'r' or 'l' - is for remote or local access
+        --what  values: 's', 'r' or 'i' - is for source, repository or
+                        info access
 
-      --what  values: 's', 'r' or 'i' - is for source, repository or
-                      info access
+        VER can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default is
+            'ANY'
 
-      VER can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default is
-          'ANY'
+        VER works only with --how=i
 
-      VER works only with --how=i
+    get [-o=DIRNAME] [-i] [--how=b|r|e|i|c]
+        [--what=s|r|i] [-v=VER] NAME
 
-   get [-o=DIRNAME] [-i] [--how=b|r|e|i|c] [--where=r|l]
-       [--what=s|r|i] [-v=VER] NAME
+        Get files from LUST server
 
-      Get files from remote or local UHT server
+        All options and parameters same as in search, plus -o option
 
-      All options and parameters same as in search, plus -o option
+        -o - Place requested files in pointed (by default current)
+             directory
+"""
 
-      -o - Place requested files in pointed (by default current)
-           directory
+def exported_commands():
+    return {
+        'search': client_search,
+        'get': client_get
+        }
 
-""")
+def client_search(opts, args):
 
-def router(opts, args, config):
-    """
-    aipsetup control router
-    """
+    ret = 0
+    wsp = workout_search_params(opts, args)
+
+    if not wsp['p_errors'] and not wsp['n_errors']:
+
+        ret = search(wsp)
+
+    return ret
+
+def client_get(opts, args):
     ret = 0
 
-    if len(args) == 0:
-        print("-e- not enough parameters")
-        ret = 1
-    else:
+    wsp = workout_search_params(opts, args)
 
-        if args[0] == 'help':
-            print_help()
-            ret = 0
+    output = None
 
-        elif args[0] == 'search':
+    if '-o' in opts:
+        output = opts['-o']
 
-            wsp = workout_search_params(opts, args, config)
+    if not wsp['p_errors'] and not wsp['n_errors']:
 
-            if not wsp['p_errors'] and not wsp['n_errors']:
-
-                ret = search(config,
-                             wsp
-                             )
-
-        elif args[0] == 'get':
-
-            wsp = workout_search_params(opts, args, config)
-
-            output = None
-
-            for i in opts:
-                if i[0] == '-o':
-                    output = i[1]
-
-            if not wsp['p_errors'] and not wsp['n_errors']:
-
-                ret = get(config,
-                          output,
-                          wsp
-                          )
-
-        else:
-            print("-e- wrong command")
-            ret = 1
+        ret = get(output, wsp)
 
     return ret
 
 
-def workout_search_params(opts, args, config):
+
+def workout_search_params(opts, args):
     """
     Parse options and parameters for `search' and/or `get'
     """
 
     args_l = len(args)
 
-    # NOTE: Maybe those variable need tobe refactored, but not now
+    # NOTE: Maybe those variable need to be refactored, but not now
 
     what = ''
     how = ''
-    where = ''
     sensitive = ''
     value = ''
     n_errors = False
     p_errors = False
 
-    if args_l != 2:
-        print("-e- can be one parameter")
+    if args_l != 1:
+        logging.error("can be only one argument")
         p_errors = True
     else:
 
         how = 'i'
-
-        for i in opts:
-            if i[0] == '--how':
-                how = i[1]
-
-        where = 'r'
-
-        for i in opts:
-            if i[0] == '--where':
-                where = i[1]
-
         what = 'r'
-
-        for i in opts:
-            if i[0] == '--what':
-                what = i[1]
-
         ver = 'ANY'
-
-        for i in opts:
-            if i[0] == '-v':
-                ver = i[1]
-
         sensitive = True
 
-        for i in opts:
-            if i[0] == '-i':
-                sensitive = False
+        if '--how' in opts:
+            how = opts['--how']
+
+        if '--what' in opts:
+            what = opts['--what']
+
+        if '-v' in opts:
+            ver = opts['-v']
+
+        if '-i' in opts:
+            sensitive = False
 
 
         if not how in 'breic':
-            print("-e- `how' error")
-            p_errors = True
-
-        if not where in 'rl':
-            print("-e- `where' error")
+            logging.error("`how' wrong value")
             p_errors = True
 
         if not what in 'sri':
-            print("-e- `what' error")
+            logging.error("`what' wrong value")
             p_errors = True
 
         if how != 'i' and ver != 'ANY':
-            print("-e- VERSION can only be used with --how=i")
+            logging.error("`VERSION' can only be used with --how=i")
             p_errors = True
 
 
@@ -189,14 +152,15 @@ def workout_search_params(opts, args, config):
             if how == 'i':
                 idic = org.wayround.aipsetup.info.read_from_file(
                     os.path.join(
-                        config['info'], '%(name)s.xml' % {
+                        org.wayround.aipsetup.config.config['info'],
+                        '%(name)s.xml' % {
                             'name': value
                             }
                         )
                     )
 
                 if not isinstance(idic, dict):
-                    print("-e- Can't find info for %(name)s" % {
+                    logging.error("Can't find info for %(name)s" % {
                         'name': value
                         })
                     n_errors = True
@@ -206,7 +170,7 @@ def workout_search_params(opts, args, config):
                     if what == 's':
                         regexp = \
                             org.wayround.aipsetup.name.NAME_REGEXPS[idic['pkg_name_type']].replace('(?P<name>.+?)', value)
-                        print("-i- Using regexp `%(re)s' from `%(name)s' pkg info" % {
+                        logging.info("Using regexp `%(re)s' from `%(name)s' pkg info" % {
                             're': regexp,
                             'name': value
                             })
@@ -219,7 +183,7 @@ def workout_search_params(opts, args, config):
                         regexp = r"%(name)s-(?P<version>.*?)-(?P<date>[\d]*).asp" % {
                             'name': value
                             }
-                        print("-i- Using regexp `%(re)s' for pkg name `%(name)s'" % {
+                        logging.info("Using regexp `%(re)s' for pkg name `%(name)s'" % {
                             'name': value,
                             're': regexp
                             })
@@ -229,7 +193,7 @@ def workout_search_params(opts, args, config):
                         sensitive = True
 
                     elif what == 'i':
-                        print("-e- Invalid parameters combination")
+                        logging.error("Invalid parameters combination")
                         p_errors = True
 
                     else:
@@ -244,17 +208,13 @@ def workout_search_params(opts, args, config):
                          'r': 'repository',
                          'i': 'info'}
 
-                wheres = {'r': 'remote',
-                          'l': 'local'}
 
                 how = hows[how]
                 what = whats[what]
-                where = wheres[where]
 
     return dict(
         what=what,
         how=how,
-        where=where,
         sensitive=sensitive,
         ver=ver,
         value=value,
@@ -263,7 +223,7 @@ def workout_search_params(opts, args, config):
         )
 
 
-def get(config, output='.', wsp={}):
+def get(output='.', wsp={}):
     """
     Get files from server
 
@@ -279,39 +239,39 @@ def get(config, output='.', wsp={}):
     ret = 0
 
     if not os.path.exists(output):
-        print("-i- creating %(dir)s" % {
+        logging.info("creating %(dir)s" % {
             'dir': output
             })
         try:
             os.makedirs(output)
         except:
-            print("-e- Can't create output dir")
+            logging.error("Can't create output dir")
             ret = 2
     else:
         if os.path.exists(output) and not os.path.isdir(output):
-            print("-e- Destination file exists and is not dir")
+            logging.error("Destination file exists and is not dir")
             ret = 1
 
         elif os.path.exists(output) and os.path.isdir(output):
-            print("-i- using %(dir)s for output" % {
+            logging.info("using %(dir)s for output" % {
                 'dir': output
                 })
         else:
-            print("-e- Unknown location :-P")
+            logging.error("Unknown location :-P")
             raise Exception
 
     if ret != 0:
         # We have an error here, so nothing to be done more
         pass
     else:
-        lst = client(config, wsp)
+        lst = client(wsp)
 
         if not isinstance(lst, list):
-            print("-e- Error getting response list")
+            logging.error("Error getting response list")
             ret = lst
         else:
 
-            lst = fn_version_filter(config, lst, wsp)
+            lst = fn_version_filter(lst, wsp)
 
             lst.sort(org.wayround.aipsetup.version.version_comparator)
 
@@ -323,8 +283,7 @@ def get(config, output='.', wsp={}):
             prefix = None
 
             for i in ['proto', 'host', 'port', 'prefix']:
-                exec("%(i)s = config['client_%(where)s_%(i)s']" % {
-                        'where': wsp['where'],
+                exec("%(i)s = config['client_%(i)s']" % {
                         'i': i
                         })
 
@@ -356,7 +315,7 @@ def get(config, output='.', wsp={}):
                     'name'      : name
                     }
 
-                print("-i- Requesting: %(req)s" % {
+                logging.info("Requesting: %(req)s" % {
                     'req': request
                     })
 
@@ -368,18 +327,18 @@ def get(config, output='.', wsp={}):
     return ret
 
 
-def search(config, wsp):
+def search(wsp):
     """
     Search packages on server using `client' function
     """
 
     ret = 0
 
-    lst = client(config, wsp)
+    lst = client(wsp)
 
     if isinstance(lst, list):
 
-        lst = fn_version_filter(config, lst, wsp)
+        lst = fn_version_filter(lst, wsp)
 
         lst.sort(org.wayround.aipsetup.version.version_comparator)
 
@@ -393,12 +352,12 @@ def search(config, wsp):
             })
 
     else:
-        print("-e- Error getting response list")
+        logging.error("Error getting response list")
         ret = lst
 
     return ret
 
-def client(config, wsp={}):
+def client(wsp):
     """
     Central client function before `get' and `search' functions.
     """
@@ -407,7 +366,6 @@ def client(config, wsp={}):
     how = None
     sensitive = None
     value = None
-    where = None
 
     for i in wsp:
         exec(
@@ -422,7 +380,7 @@ def client(config, wsp={}):
             or not how in ['regexp', 'begins', 'exac', 'contains'] \
             or not isinstance(sensitive, bool) \
             or not isinstance(value, str):
-        print("-e- Wrong parameters")
+        logging.error("Wrong parameters")
         ret = 1
 
     else:
@@ -433,8 +391,7 @@ def client(config, wsp={}):
         prefix = None
 
         for i in ['proto', 'host', 'port', 'prefix']:
-            exec("%(i)s = config['client_%(where)s_%(i)s']" % {
-                    'where': where,
+            exec("%(i)s = config['client_%(i)s']" % {
                     'i': i
                     })
 
@@ -461,7 +418,7 @@ def client(config, wsp={}):
             'value'     : urllib.parse.quote(str(value))
             }
 
-        print("-i- Requesting: %(req)s" % {
+        logging.info("Requesting: %(req)s" % {
             'req': request
             })
 
@@ -470,7 +427,7 @@ def client(config, wsp={}):
         except:
             exception = sys.exc_info()
             if isinstance(exception[1], IOError):
-                print("-e- Connection refused")
+                logging.error("Connection refused")
             org.wayround.utils.error.print_exception_info(
                 exception
                 )
@@ -478,7 +435,7 @@ def client(config, wsp={}):
         else:
             code = int(req_res.getcode())
             if code != 200:
-                print("-e- Response code: %(n)d" % {
+                logging.error("Response code: %(n)d" % {
                     'n': code
                     })
                 ret = 2
@@ -494,7 +451,7 @@ def client(config, wsp={}):
     return ret
 
 
-def fn_version_filter(config, lst, wsp):
+def fn_version_filter(lst, wsp):
     """
     Filter list by version.
     """
@@ -503,9 +460,9 @@ def fn_version_filter(config, lst, wsp):
     #       to filter filenames by version - we need
     #       to parse them again :-( .
     #
-    #       Additionaly we need to keep in mind passability
+    #       Additionally we need to keep in mind possibility
     #       of a large list before filter in client!
-    #       So we needet to separate version filter in to
+    #       So we needed to separate version filter in to
     #       different function -- to save memory, maybe
     #       in a price on performance
 
@@ -514,7 +471,6 @@ def fn_version_filter(config, lst, wsp):
 
         for i in lst:
             if org.wayround.aipsetup.name.source_name_parse(
-                config,
                 i,
                 modify_info_file=False,
                 acceptable_vn=wsp['ver']
