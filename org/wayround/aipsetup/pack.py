@@ -58,14 +58,14 @@ def _pack_x(opts, args, action):
 
 for i in FUNCTIONS:
     exec("""\
-def pack_{}(opts, args):
+def pack_{name}(opts, args):
     \"""
-    Perform `{}' action on building site
+    Perform `{name}' action on building site
 
         -d DIRNAME - set building site. default is current.
     \"""
-    return _pack_x(opts, args, '{}')
-""".format(i))
+    return _pack_x(opts, args, '{name}')
+""".format(name=i))
 
 def pack_complete(opts, args):
     ret = 0

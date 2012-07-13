@@ -16,6 +16,7 @@ import org.wayround.utils.error
 import org.wayround.utils.text
 import org.wayround.utils.time
 import org.wayround.utils.archive
+import org.wayround.utils.helprenderer
 
 
 import org.wayround.aipsetup.pkgindex
@@ -24,58 +25,7 @@ import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
 
 
-
-def help_text():
-    return """\
-aipsetup package command
-
-   install [-b=DIRNAME] FILE
-
-      Install package. If -b is given - it is used as root
-
-   list [-b=DIRNAME] [MASK]
-
-      List installed packages. -b is same as in install.
-      Default MASK is *.xz
-
-   names_list [-b=DIRNAME] PACKAGE_NAME
-
-      List installations with name PACKAGE_NAME.
-      -b is same as in install.
-
-   package_issues [-b=DIRNAME]
-
-      Looks for issues with already installed package names:
-         * list unparsabel names
-         * list names not in info files directory
-
-   remove [-b=DIRNAME] MASK
-
-      Removes packages matching MASK.
-
-      WARNING: no sanity checks!
-          aipsetup package remove '*'
-          will remove everything (unless system will crush
-          before is't finished)
-
-      WARNING: removes any installed config files!
-          do all necessery config backups before remove!
-
-   find_files [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
-
-      Looks for LOOKFOR in all installed packages using one of methods:
-
-         sub   - (default) filename contains LOOKFOR
-         re    - LOOKFOR is RegExp
-         beg   - file name starts with LOOKFOR
-         plain - Exact LOOKFOR match
-         fm    - LOOKFOR is file mask
-
-   put_to_index_many FILEMASK
-"""
-
-def exported_functions():
-
+def exported_commands():
     return {
         'install'       : package_install,
         'list'          : package_list,
@@ -88,7 +38,25 @@ def exported_functions():
         'put_to_index'  : package_put_to_index_many
         }
 
+def commands_order():
+    return [
+        'install',
+        'list',
+        'named_list',
+        'issues',
+        'remove',
+        'complete',
+        'build',
+        'find_files',
+        'put_to_index'
+        ]
+
 def package_install(opts, args):
+    """
+    [-b=DIRNAME] FILE
+
+    Install package. If -b is given - it is used as root
+    """
 
     ret = 0
 
@@ -106,6 +74,12 @@ def package_install(opts, args):
     return ret
 
 def package_list(opts, args):
+    """
+    [-b=DIRNAME] [MASK]
+
+    List installed packages. -b is same as in install.
+    Default MASK is *.xz
+    """
 
     ret = 0
 
@@ -127,6 +101,12 @@ def package_list(opts, args):
     return ret
 
 def package_named_list(opts, args):
+    """
+    [-b=DIRNAME] PACKAGE_NAME
+
+    List installations with name PACKAGE_NAME.
+    -b is same as in install.
+    """
 
     basedir = '/'
     if '-b' in opts:
@@ -150,6 +130,13 @@ def package_named_list(opts, args):
     return 0
 
 def package_issues(opts, args):
+    """
+    [-b=DIRNAME]
+
+    Looks for issues with already installed package names:
+        * list unparsabel names
+        * list names not in info files directory
+    """
 
     basedir = '/'
     if '-b' in opts:
@@ -166,6 +153,19 @@ def package_issues(opts, args):
     return 0
 
 def package_remove(opts, args):
+    """
+    [-b=DIRNAME] MASK
+
+    Removes packages matching MASK.
+
+    WARNING: no sanity checks!
+        aipsetup package remove '*'
+        will remove everything (unless system will crushes
+        before is't finished)
+
+    WARNING: removes any installed config files!
+        do all necessary config backups before remove!
+    """
 
     basedir = '/'
     if '-b' in opts:
@@ -216,7 +216,16 @@ def package_build(opts, args):
     return 0
 
 def package_find_files(opts, args):
+    """
+    [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
 
+    Looks for LOOKFOR in all installed packages using one of methods:
+       sub   - (default) filename contains LOOKFOR
+       re    - LOOKFOR is RegExp
+       beg   - file name starts with LOOKFOR
+       plain - Exact LOOKFOR match
+       fm    - LOOKFOR is file mask
+    """
     basedir = '/'
     for i in opts:
         if i[0] == '-b':

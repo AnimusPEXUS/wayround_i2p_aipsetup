@@ -1,4 +1,10 @@
 
+"""
+XML info files manipulations.
+
+Print, read, write, fix info files.
+"""
+
 import os.path
 import copy
 import glob

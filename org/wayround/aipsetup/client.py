@@ -1,7 +1,6 @@
 
 """
-Client-module for searching and getting files on and from
-aipsetup package server
+Client for searching and getting files on and from aipsetup package server
 """
 
 import os.path
@@ -17,43 +16,13 @@ import org.wayround.aipsetup.name
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
-
 def help_text():
     return """\
 {aipsetup} {command} command
 
-    search [-i] [--how=b|r|e|i|c] [--what=s|r|i] [-v=VER]
-           NAME
+    search
 
-        Search files on LUST server
-
-        -i - NAME is case insensitive
-
-        --how values:
-
-        b - package name begins with NAME
-        r - NAME is regular expression
-        e - NAME is exact name
-        i - assume NAME to be package info name and get RE for it
-        c - NAME is package name substring
-
-        --what  values: 's', 'r' or 'i' - is for source, repository or
-                        info access
-
-        VER can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default is
-            'ANY'
-
-        VER works only with --how=i
-
-    get [-o=DIRNAME] [-i] [--how=b|r|e|i|c]
-        [--what=s|r|i] [-v=VER] NAME
-
-        Get files from LUST server
-
-        All options and parameters same as in search, plus -o option
-
-        -o - Place requested files in pointed (by default current)
-             directory
+    get
 """
 
 def exported_commands():
@@ -62,7 +31,35 @@ def exported_commands():
         'get': client_get
         }
 
+def commands_order():
+    return ['search', 'get']
+
+
 def client_search(opts, args):
+    """
+    [-i] [--how=b|r|e|i|c] [--what=s|r|i] [-v=VER]
+           NAME
+
+    Search files on LUST server
+
+    -i - NAME is case insensitive
+
+    --how values:
+
+    b - package name begins with NAME
+    r - NAME is regular expression
+    e - NAME is exact name
+    i - assume NAME to be package info name and get RE for it
+    c - NAME is package name substring
+
+    --what  values: 's', 'r' or 'i' - is for source, repository or
+                    info access
+
+    VER can be 'MAX', 'MIN' or mask '3.2.*', '3.*' etc. default is
+        'ANY'
+
+    VER works only with --how=i
+    """
 
     ret = 0
     wsp = workout_search_params(opts, args)
@@ -74,6 +71,18 @@ def client_search(opts, args):
     return ret
 
 def client_get(opts, args):
+    """
+    [-o=DIRNAME] [-i] [--how=b|r|e|i|c]
+    [--what=s|r|i] [-v=VER] NAME
+
+    Get files from LUST server
+
+    All options and parameters same as in search, plus -o option
+
+    -o - Place requested files in pointed (by default current)
+         directory
+    """
+
     ret = 0
 
     wsp = workout_search_params(opts, args)

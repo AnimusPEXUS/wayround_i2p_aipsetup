@@ -1,6 +1,5 @@
 #!/usr/bin/python3.2
 
-import os.path
 import sys
 import logging
 
@@ -8,14 +7,8 @@ import org.wayround.utils.getopt2
 
 import org.wayround.aipsetup
 import org.wayround.aipsetup.config
+import org.wayround.aipsetup.help
 
-AIPSETUP_SUBMODULES = frozenset(
-    ['info', 'buildinfo',
-     'build', 'server', 'client',
-     'pkgindex', 'name', 'docbook',
-     'buildingsite', 'constitution',
-     'pack', 'package', 'config']
-    )
 
 # Logging settings
 for i in [
@@ -30,13 +23,13 @@ for i in [
 del i
 
 # Parse parameters
-optilist, args = org.wayround.utils.getopt2.getopt_keyed(sys.argv[1:])
+opts, args = org.wayround.utils.getopt2.getopt_keyed(sys.argv[1:])
 args_l = len(args)
 
 # Setup logging level and format
 log_level = 'INFO'
 
-if '--log' in optilist:
+if '--log' in opts:
     log_level_u = i[1].upper()
 
     if not log_level_u in list(logging._levelNames):
@@ -44,7 +37,7 @@ if '--log' in optilist:
     else:
         log_level = log_level_u
 
-    del(optilist['--log'])
+    del(opts['--log'])
     del(log_level_u)
 
 logging.basicConfig(format="%(levelname)s %(message)s", level=log_level)
@@ -66,55 +59,9 @@ ret = 0
 
 
 
-if '--help' in optilist:
-    if args_l == 0:
-
-        print("""\
-    Usage: {basename} [command] [command_parameters]
-
-    Commands:
-
-        info            Pkg info files Actions
-        buildinfo       Build info files Actions
-        builders        Builder files Actions
-
-        constitution    View or Edit Constitution
-        buildingsite    Building Site Maneuvers
-        build           Building Actions
-        pack            Packaging Actions
-        server          LUST Server Related Actions
-        client          Download Actions
-        pkgindex        Package Index Actions
-
-        name            Tools for Parsing File Names
-        docbook         Docbook Tools
-
-
-        --help          See this Help
-        --version       Version Info
-""".format(basename=os.path.basename(__file__)))
-
-    else:
-        if not args[0] in AIPSETUP_SUBMODULES:
-            logging.error("Have no module named `{}'".format(args[0]))
-        else:
-            try:
-                exec("import org.wayround.aipsetup.{}".format(args[0]))
-            except:
-                logging.critical("Error importing submodule `{}'".format(args[0]))
-            else:
-                try:
-                    help_text = eval("org.wayround.aipsetup.{}.help_text()".format(args[0]))
-                except:
-                    logging.error("help text for submodule `{}' not available".format(args[0]))
-
-                else:
-                    print(help_text.format_map({
-                        'aipsetup': os.path.basename(__file__),
-                        'command': args[0]
-                        }))
-
-elif '--version' in optilist:
+if '--help' in opts:
+    org.wayround.aipsetup.help.aipsetup_help(opts, args)
+elif '--version' in opts:
     print(org.wayround.aipsetup.AIPSETUP_VERSION)
 
 elif args_l == 0:
@@ -123,10 +70,11 @@ elif args_l == 0:
 
 else:
 
-    if not args[0] in AIPSETUP_SUBMODULES:
+    if not args[0] in org.wayround.aipsetup.AIPSETUP_MODULES_LIST:
         logging.error("Have no module named `{}'".format(args[0]))
         ret = 1
     else:
+
         try:
             exec("import org.wayround.aipsetup.{}".format(args[0]))
         except:
@@ -143,5 +91,5 @@ else:
                     logging.error("Function `{}' not exported by module `{}'".format(args[1], args[0]))
                 else:
 
-                    ret = commands[args[1]](optilist, args[2:])
+                    ret = commands[args[1]](opts, args[2:])
 exit(ret)

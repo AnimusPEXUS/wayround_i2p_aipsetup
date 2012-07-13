@@ -89,14 +89,14 @@ def _build_x(opts, args, action):
 
 for i in FUNCTIONS:
     exec("""\
-def build_{}(opts, args):
+def build_{name}(opts, args):
     \"""
-    Perform `{}' action on building site
+    Perform `{name}' action on building site
 
         -d DIRNAME - set building site. default is current.
     \"""
-    return _build_x(opts, args, '{}')
-""".format(i))
+    return _build_x(opts, args, '{name}')
+""".format(name=i))
 
 def build_complete(opts, args):
     ret = 0
