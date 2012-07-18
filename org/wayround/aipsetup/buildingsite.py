@@ -1,4 +1,8 @@
 
+"""
+Module for initiating building site, which required to farver package build.
+"""
+
 import os
 import sys
 import inspect
@@ -58,54 +62,56 @@ DIR_LIST = DIR_ALL
 'DIR_ALL copy'
 
 
-def help_text():
-    return """\
-{aipsetup} {command} command
-
-    init DIRNAME
-
-        Make sure all required dirs under DIRNAME exists.
-
-    apply_info [-d=DIRNAME] [TARBALL]
-
-        Apply package info to DIRNAME directory. Use TARBALL as name for
-        parsing and farver package buildingsite configuration.
-
-            -d=DIRNAME set building dir. Defaults to current working dir.
-"""
-
 def exported_commands():
     return {
         'init': buildingsite_init,
         'apply_info': buildingsite_apply_info
         }
 
+def commands_order():
+    return [
+        'init',
+        'apply_info'
+        ]
+
 def buildingsite_init(opts, args):
+    """
+    Initiate new building site dir
+
+    [DIRNAME]
+
+    One optional argument is dir in which initiation need to be done.
+    Default is current dir
+    """
 
     init_dir = '.'
 
-    if len(args) > 1:
-        init_dir = args[1]
+    if len(args) > 0:
+        init_dir = args[0]
 
     ret = init(directory=init_dir)
 
     return ret
 
 def buildingsite_apply_info(opts, args):
+    """
+    Apply info to building dir
+
+    [-d=DIRNAME] SOURCE_FILE_NAME
+    """
     ret = 0
 
-    if len(args) != 2:
-        logging.error("tarball name to analize not specified")
+    if len(args) != 1:
+        logging.error("tarball name to analyze not specified")
         ret = 1
     else:
 
-        name = args[1]
+        name = args[0]
 
         dirname = '.'
 
-        for i in opts:
-            if i[0] == '-d':
-                dirname = i[1]
+        if '-d' in opts:
+            dirname = opts['-d']
 
         ret = apply_info(dirname, source_filename=name)
 
@@ -113,7 +119,7 @@ def buildingsite_apply_info(opts, args):
 
 def isWdDirRestricted(directory):
     """
-    This function is a rutine to check supplied dir is it suitable
+    This function is a routine to check supplied dir is it suitable
     to be a working dir
     """
 
@@ -143,7 +149,9 @@ def isWdDirRestricted(directory):
     return ret
 
 def init(directory='build'):
-
+    """
+    Initiates building site dir for farcer package build
+    """
 
     ret = 0
 
@@ -199,7 +207,7 @@ def init(directory='build'):
                 os.makedirs(a)
 
     if ret == 0:
-        logging.info("Init complite")
+        logging.info("Init complete")
     else:
         logging.error("Init error")
 

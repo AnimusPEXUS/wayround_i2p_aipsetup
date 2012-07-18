@@ -1,4 +1,15 @@
 
+"""
+Module for system related package actions
+
+ * install into system;
+ * list installed;
+ * find issues;
+ * remove from system;
+ * completely build new package from source...
+ etc.
+"""
+
 import sys
 import os.path
 import tarfile
@@ -16,7 +27,6 @@ import org.wayround.utils.error
 import org.wayround.utils.text
 import org.wayround.utils.time
 import org.wayround.utils.archive
-import org.wayround.utils.helprenderer
 
 
 import org.wayround.aipsetup.pkgindex
@@ -40,11 +50,11 @@ def exported_commands():
 
 def commands_order():
     return [
-        'install',
         'list',
         'named_list',
-        'issues',
+        'install',
         'remove',
+        'issues',
         'complete',
         'build',
         'find_files',
@@ -89,7 +99,7 @@ def package_list(opts, args):
 
     asp_name = '*.xz'
     if len(args) > 0:
-        asp_name = args[1]
+        asp_name = args[0]
 
     if not isinstance(basedir, str):
         logging.error("given basedir name is wrong")
@@ -114,7 +124,7 @@ def package_named_list(opts, args):
 
     asp_name = None
     if len(args) > 0:
-        asp_name = args[1]
+        asp_name = args[0]
 
     if not isinstance(basedir, str):
         logging.error("given basedir name is wrong")
@@ -173,7 +183,7 @@ def package_remove(opts, args):
 
     asp_name = None
     if len(args) > 1:
-        asp_name = args[1]
+        asp_name = args[0]
 
     if not isinstance(basedir, str):
         logging.error("given basedir name is wrong")
@@ -189,6 +199,13 @@ def package_remove(opts, args):
     return 0
 
 def package_complete(opts, args):
+    """
+    Complete package building process: build complete; pack complete
+
+    [DIRNAME]
+
+    DIRNAME defaults to current dir
+    """
 
     dirname = '.'
 
@@ -200,11 +217,18 @@ def package_complete(opts, args):
     return ret
 
 def package_build(opts, args):
+    """
+    Place named source files in new building site and build new package from them.
+
+    TARBALL
+    """
+
+    # TODO: rework to support multiple files
 
     sources = []
 
-    if len(args) > 1:
-        sources = args[1:]
+    if len(args) > 0:
+        sources = [args[0]]
 
     if len(sources) == 0:
         logging.error("No source files named")
@@ -691,9 +715,9 @@ def build(source_files):
 
                 for source_file in source_files:
 
-                    print(("-i-    %(name)s" % {
+                    logging.info("%(name)s" % {
                         'name': source_file
-                        }))
+                        })
 
                     if os.path.isfile(source_file) \
                             and not os.path.islink(source_file):
@@ -706,23 +730,21 @@ def build(source_files):
                                     )
                                 )
                         except:
-                            org.wayround.utils.error.print_exception_info(
-                                sys.exc_info()
-                                )
+                            logging.exception("Couldn't copy sources")
                             ret = -3
 
                     else:
 
-                        print(("-e- file %(file)s - not dir and not file." % {
+                        logging.error("file %(file)s - not dir and not file. skipping copy" % {
                             'file': source_file
-                            }))
-                        print("    skipping copy")
+                            })
 
                 if ret != 0:
                     logging.error("Exception while copying one of soruce files")
 
             if org.wayround.aipsetup.buildingsite.apply_info(
-                build_site_dir, source_files[0]) == 0:
+                build_site_dir, source_files[0]
+                ) == 0:
 
                 if complete(build_site_dir) != 0:
                     logging.error("Package building failed")
@@ -735,8 +757,8 @@ def complete(dirname):
     log = org.wayround.utils.log.Log(
         dirname, 'buildingsite complete'
         )
-    log.write("-i- Buildingsite processes started")
-    log.write("-i- Closing this log now, cause it can't be done farther")
+    log.info("Buildingsite processes started")
+    log.info("Closing this log now, cause it can't be done farther")
     log.stop()
 
     ret = 0
@@ -1075,7 +1097,7 @@ def put_to_index(filename):
                     if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
-                        logging.error("Can't ensure existance of required dirs")
+                        logging.error("Can't ensure existence of required dirs")
                         ret = 3
                     else:
 

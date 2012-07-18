@@ -10,7 +10,8 @@ import org.wayround.utils.text
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
-__file__ == os.path.abspath(__file__)
+# this is for special cases
+# __file__ == os.path.abspath(__file__)
 
 class MainWindow:
 

@@ -1,9 +1,23 @@
 AIPSETUP_VERSION = '3.0'
 
 AIPSETUP_MODULES_LIST = frozenset(
-    ['info', 'buildinfo',
-     'build', 'server', 'client',
-     'pkgindex', 'name', 'docbook',
-     'buildingsite', 'constitution',
-     'pack', 'package', 'config']
+    [
+    'info',
+    'buildinfo',
+    'constitution',
+
+    'buildingsite',
+    'build',
+    'pack',
+    'package',
+    'server',
+    'client',
+    'pkgindex',
+
+    'name',
+    'docbook',
+
+    'config',
+    'unicorn'
+     ]
     )

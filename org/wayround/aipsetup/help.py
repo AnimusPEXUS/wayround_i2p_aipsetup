@@ -14,9 +14,9 @@ def aipsetup_help(opts, args):
             exec("import org.wayround.aipsetup.{}".format(i))
 
         print("""\
-Usage: {basename} [command] [command_parameters]
+Usage: aipsetup3 [module] [module_command] [command_parameters]
 
-Commands:
+modules:
 
 {g1}
 
@@ -24,42 +24,61 @@ Commands:
 
 {g3}
 
+{g4}
+
     --help          See this help or help for module or command
     --version       Version Info
 """.format(
-    basename=os.path.basename(__file__),
     g1=org.wayround.utils.helprenderer.render_help(
         {
          'info': org.wayround.aipsetup.info,
-         'buildinfo': org.wayround.aipsetup.buildinfo
-        }, ['info', 'buildinfo']
+         'buildinfo': org.wayround.aipsetup.buildinfo,
+        'constitution': org.wayround.aipsetup.constitution,
+        },
+        ['info',
+         'buildinfo',
+         'constitution', ],
+        only_synopsis=True
         ),
     g2=org.wayround.utils.helprenderer.render_help(
         {
-        'constitution': org.wayround.aipsetup.constitution,
         'buildingsite': org.wayround.aipsetup.buildingsite,
         'build': org.wayround.aipsetup.build,
         'pack': org.wayround.aipsetup.pack,
-        'server': org.wayround.aipsetup.server,
-        'client': org.wayround.aipsetup.client,
-        'pkgindex': org.wayround.aipsetup.pkgindex
-        }, ['constitution',
-            'buildingsite',
-            'build',
-            'pack',
-            'server',
-            'client',
-            'pkgindex']
+        'package': org.wayround.aipsetup.package,
+        },
+        [
+
+        'buildingsite',
+        'build',
+        'pack',
+        'package',
+        ],
+        only_synopsis=True
         ),
     g3=org.wayround.utils.helprenderer.render_help(
         {
          'name': org.wayround.aipsetup.name,
-         'docbook': org.wayround.aipsetup.docbook
-        }, ['name',
-            'docbook']
+         'docbook': org.wayround.aipsetup.docbook,
+         'config': org.wayround.aipsetup.config
+        },
+        ['name',
+        'docbook',
+        'config'],
+        only_synopsis=True
+        ),
+    g4=org.wayround.utils.helprenderer.render_help(
+        {
+        'server': org.wayround.aipsetup.server,
+        'client': org.wayround.aipsetup.client,
+        'pkgindex': org.wayround.aipsetup.pkgindex
+        },
+       ['server',
+        'client',
+        'pkgindex']
         )
-    )
-    )
+   )
+)
 
     else:
         if not args[0].isidentifier():
@@ -100,15 +119,17 @@ Commands:
                         commands_order
                         )
                     print("""\
-{aipsetup} {module} command
+Usage: aipsetup3 {module} command
+
+{doc}
 
 Commands:
 
 {text}
 """.format_map({
-    'aipsetup': os.path.basename(__file__),
     'module': args[0],
-    'text': help_text
+    'text': help_text,
+    'doc': eval("org.wayround.aipsetup.{}.__doc__".format(args[0]))
     })
     )
 

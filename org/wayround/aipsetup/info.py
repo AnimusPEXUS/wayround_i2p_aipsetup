@@ -9,11 +9,13 @@ import os.path
 import copy
 import glob
 import sys
+import logging
 
 import lxml.etree
 
 import org.wayround.utils.error
 import org.wayround.utils.file
+import org.wayround.utils.edit
 
 import org.wayround.aipsetup.config
 
@@ -61,39 +63,43 @@ pkg_info_file_template = Template(text="""\
 
 
 def exported_commands():
-
     return {
-        'mass_info_fix': mass_info_fix,
-        'list': list_files,
-        'edit': edit_file,
-        'editor': editor,
-        'copy': copy
+        'mass_info_fix': info_mass_info_fix,
+        'list': info_list_files,
+        'edit': info_edit_file,
+        'editor': info_editor,
+        'copy': info_copy
         }
 
-def help_text():
-    return """\
-{aipsetup} {command} command
+def commands_order():
+    return [
+        'editor',
+        'list',
+        'edit',
+        'copy',
+        'mass_info_fix'
+        ]
 
-    list            List xml files in info directory
-    edit            Edit xml file from info directory with configured editor
-    editor          Edit xml file with special editor
-    copy            Make a copy of one xml file to new xml file name
+def info_list_files(opts, args, typ='info', mask='*.xml'):
+    """
+    List XML files in pkg_info dir of UNICORN dir
 
-    mass_info_fix   applies fixes to info files
+    [FILEMASK]
 
-"""
+    One argument is allowed - FILEMASK, which defaults to '*.xml'
 
-def list_files(opts, args, typ='info'):
-    mask = '*'
+    example:
+    aipsetup info list '*doc*.xml'
+    """
 
     args_l = len(args)
 
-    if args_l > 2:
-        print('-e- Too many parameters')
+    if args_l > 1:
+        logging.error("Too many arguments")
     else:
 
-        if args_l > 1:
-            mask = args[1]
+        if args_l == 1:
+            mask = args[0]
 
         org.wayround.utils.file.list_files(
             org.wayround.aipsetup.config.config[typ], mask
@@ -101,36 +107,55 @@ def list_files(opts, args, typ='info'):
 
     return 0
 
-def edit_file(opts, args, typ='info'):
+def info_edit_file(opts, args, typ='info'):
+    """
+    Edit selected info-file in editor designated in aipsetup.conf
+
+    FILENAME
+
+    One argument required - FILENAME
+    """
     ret = 0
-    if len(args) != 2:
-        print("-e- builder to edit not specified")
+    if len(args) != 1:
+        logging.error("file to edit not specified")
         ret = 1
     else:
         ret = org.wayround.utils.edit.edit_file(
-            '{}/{}'.format(
+            os.path.join(
                 org.wayround.aipsetup.config.config[typ],
-                args[1]
+                args[0]
                 ),
             org.wayround.aipsetup.config.config['editor']
             )
     return ret
 
-def editor(opts, args):
+def info_editor(opts, args):
+    """
+    Start special info-file editor
+    """
     import org.wayround.aipsetup.infoeditor
 
     org.wayround.aipsetup.infoeditor.main()
 
-def copy(opts, args):
-    if len(args) != 3:
-        print("-e- wrong parameters count")
+    return 0
+
+def info_copy(opts, args):
+    """
+    Creates a copy of one info file into another
+
+    OLDNAME NEWNAME
+    """
+    if len(args) != 2:
+        logging.error("wrong argument count")
     else:
 
         org.wayround.utils.file.inderictory_copy_file(
             org.wayround.aipsetup.config.config['info'],
-            args[1],
-            args[2]
+            args[0],
+            args[1]
             )
+
+    return 0
 
 def _find_latest(tree, tag, field):
     y = None
@@ -189,7 +214,7 @@ def read_from_file(name):
     try:
         f = open(name, 'r')
     except:
-        print("-e- Can't open file %(name)s" % {
+        logging.error("Can't open file %(name)s" % {
             'name': name
             })
         org.wayround.utils.error.print_exception_info(
@@ -201,7 +226,7 @@ def read_from_file(name):
         try:
             tree = lxml.etree.fromstring(txt)
         except:
-            print("-e- Can't parse file `%(name)s'" % {
+            logging.error("Can't parse file `%(name)s'" % {
                 'name': name
                 })
             org.wayround.utils.error.print_exception_info(
@@ -254,7 +279,7 @@ def write_to_file(name, struct):
         f.write(txt)
         f.close()
     except:
-        print("-e- Can't rewrite file %(name)s" % {
+        logging.error("Can't rewrite file %(name)s" % {
             'name': name
             })
         org.wayround.utils.error.print_exception_info(sys.exc_info())
@@ -264,7 +289,7 @@ def write_to_file(name, struct):
 
 def info_fixes(dicti, name):
     """
-    This function is used by `mass_info_fix'
+    This function is used by `info_mass_info_fix'
 
     Sometime it will contain checks and fixes for
     info files
@@ -274,7 +299,7 @@ def info_fixes(dicti, name):
 
         pass
 
-def mass_info_fix(opts, args):
+def info_mass_info_fix(opts, args):
 
     lst = glob.glob(os.path.join(org.wayround.aipsetup.config['info'], '*.xml'))
 
@@ -288,7 +313,7 @@ def mass_info_fix(opts, args):
 
         write_to_file(i, dicti)
 
-    print("-i- Processed %(n)d files" % {
+    logging.info("Processed %(n)d files" % {
         'n': len(lst)
         })
 

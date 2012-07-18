@@ -78,18 +78,21 @@ else:
         try:
             exec("import org.wayround.aipsetup.{}".format(args[0]))
         except:
-            logging.critical("Error importing submodule `{}'".format(args[0]))
+            logging.exception("Error importing submodule `{}'".format(args[0]))
         else:
             commands = {}
             try:
                 exec("commands = org.wayround.aipsetup.{}.exported_commands()".format(args[0]))
             except:
-                logging.critical("Can't get `{}' module exported commands".format(args[0]))
+                logging.exception("Can't get `{}' module exported commands".format(args[0]))
 
             else:
-                if not args[1] in commands:
-                    logging.error("Function `{}' not exported by module `{}'".format(args[1], args[0]))
+                if args_l == 1:
+                    logging.error("module command is required. see aipsetup {} --help".format(args[0]))
                 else:
+                    if not args[1] in commands:
+                        logging.error("Function `{}' not exported by module `{}'".format(args[1], args[0]))
+                    else:
 
-                    ret = commands[args[1]](opts, args[2:])
+                        ret = commands[args[1]](opts, args[2:])
 exit(ret)

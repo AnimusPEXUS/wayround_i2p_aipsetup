@@ -1,4 +1,8 @@
 
+"""
+Build software before packaging
+"""
+
 import sys
 import logging
 
@@ -8,13 +12,15 @@ import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildtools
 
 
-FUNCTIONS = frozenset([
+FUNCTIONS_LIST = [
     'extract',
     'configure',
     'build',
     'distribute',
     'prepack'
-    ])
+    ]
+
+FUNCTIONS_SET = frozenset(FUNCTIONS_LIST)
 
 FUNCTIONS_TEXTS_SET = {
     'extract': ('extractor', 'extracting', 'extraction'),
@@ -24,50 +30,65 @@ FUNCTIONS_TEXTS_SET = {
     'prepack': ('prepackager', 'prepackaging', 'prepackaging')
     }
 
+def help_texts(name):
 
-def help_text():
-    return """\
-{aipsetup} {command} command
+    ret = None
 
-    extract [DIRNAME]
-
-        Extract source in buildingsite which is baseo on DIRNAME.
-        If DIRNAME not given assume current working dir.
-
-
-    configure [SITEDIR]
-       configures SITEDIR accordingly to info
-
-    build [SITEDIR]
-       builds SITEDIR accordingly to info
-
-    install [SITEDIR]
-       creates destdir in SITEDIR accordingly to info
-
-    postinstall [SITEDIR]
-       postinstallation processings for SITEDIR accordingly to info
-
-    complite [SITEDIR]
-       configures, builds and installs SITEDIR accordingly to info
-
- See also aipsetup pack help
+    if name == 'extract':
+        ret = """\
+Extract software source
 """
+
+    if name == 'configure':
+        ret = """\
+Configures software accordingly to info
+"""
+
+    if name == 'build':
+        ret = """\
+Builds software accordingly to info
+"""
+
+    if name == 'distribute':
+        ret = """\
+Creates normal software distribution
+"""
+
+    if name == 'prepack':
+        ret = """\
+Do prepackaging actions
+"""
+
+
+
+    if isinstance(ret, str):
+        ret = """\
+{text}
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+""".format(text=ret)
+
+    return ret
 
 
 def exported_commands():
 
     commands = {}
 
-    for i in FUNCTIONS:
+    for i in FUNCTIONS_SET:
         commands[i] = eval("build_{}".format(i))
 
-    commands[complete] = build_complete
+    commands['complete'] = build_complete
 
     return commands
 
+def commands_order():
+    return ['complete'] + FUNCTIONS_LIST
+
 def _build_x(opts, args, action):
 
-    if not action in FUNCTIONS:
+    if not action in FUNCTIONS_SET:
         raise ValueError("Wrong action parameter")
 
     ret = 0
@@ -87,18 +108,23 @@ def _build_x(opts, args, action):
 
     return ret
 
-for i in FUNCTIONS:
+for i in FUNCTIONS_SET:
     exec("""\
 def build_{name}(opts, args):
-    \"""
-    Perform `{name}' action on building site
-
-        -d DIRNAME - set building site. default is current.
-    \"""
     return _build_x(opts, args, '{name}')
+
+build_{name}.__doc__ = help_texts('{name}')
 """.format(name=i))
 
 def build_complete(opts, args):
+    """
+    Configures, builds, distributes and prepares software accordingly to info
+
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+    """
+
     ret = 0
 
     dir_name = '.'

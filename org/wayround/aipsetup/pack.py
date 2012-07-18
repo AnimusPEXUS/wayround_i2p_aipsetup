@@ -1,3 +1,11 @@
+
+"""
+Set of commands to perform package creation sequence
+
+This module creates checksums, removes garbage, packs file and
+all other preparations and actions needed to build final package
+"""
+
 import os.path
 import tempfile
 import shutil
@@ -11,7 +19,8 @@ import org.wayround.utils.error
 import org.wayround.utils.archive
 import org.wayround.utils.deps_c
 
-FUNCTIONS = frozenset([
+
+FUNCTIONS_LIST = [
     'destdir_checksum',
     'destdir_filelist',
     'destdir_deps_c',
@@ -22,22 +31,91 @@ FUNCTIONS = frozenset([
     'remove_decompressed_files_from_lists_dir',
     'make_checksums_for_building_site',
     'pack_buildingsite'
-    ])
+    ]
+
+FUNCTIONS_SET = frozenset(FUNCTIONS_LIST)
+
+def help_texts(name):
+
+    ret = None
+
+    if name == 'destdir_checksum':
+        ret = """\
+Create checksums of distribution files
+"""
+
+    if name == 'destdir_filelist':
+        ret = """\
+Create list of distribution files
+"""
+
+    if name == 'destdir_deps_c':
+        ret = """\
+Create list of ELF dependencies
+"""
+
+    if name == 'remove_source_and_build_dirs':
+        ret = """\
+Removes source dir and build dir (one of cleanups stages)
+"""
+
+    if name == 'compress_patches_destdir_and_logs':
+        ret = """\
+Compress patches, distribution and logs.
+"""
+
+    if name == 'compress_files_in_lists_dir':
+        ret = """\
+Compress files found in lists dir
+"""
+
+    if name == 'remove_patches_destdir_and_buildlogs_dirs':
+        ret = """\
+Removes patches, destdir and logs (one of cleanups stages)
+"""
+
+    if name == 'remove_decompressed_files_from_lists_dir':
+        ret = """\
+Remove decompressed files from lists dir (one of cleanups stages)
+"""
+
+    if name == 'make_checksums_for_building_site':
+        ret = """\
+Make checksums for installers to check package integrity.
+"""
+
+    if name == 'pack_buildingsite':
+        ret = """\
+Makes final packaging and creates UNICORN software package
+"""
+
+    if isinstance(ret, str):
+        ret = """\
+{text}
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+""".format(text=ret)
+
+    return ret
 
 def exported_commands():
 
     commands = {}
 
-    for i in FUNCTIONS:
+    for i in FUNCTIONS_SET:
         commands[i] = eval("pack_{}".format(i))
 
-    commands[complete] = pack_complete
+    commands['complete'] = pack_complete
 
     return commands
 
+def commands_order():
+    return ['complete'] + FUNCTIONS_LIST
+
 def _pack_x(opts, args, action):
 
-    if not action in FUNCTIONS:
+    if not action in FUNCTIONS_SET:
         raise ValueError("Wrong action parameter")
 
     ret = 0
@@ -52,22 +130,26 @@ def _pack_x(opts, args, action):
         if args_l == 1:
             dir_name = args[0]
 
-        ret = eval("{}(action, dir_name)".format(action))
+        ret = eval("{}(dir_name)".format(action))
 
     return ret
 
-for i in FUNCTIONS:
+for i in FUNCTIONS_SET:
     exec("""\
 def pack_{name}(opts, args):
-    \"""
-    Perform `{name}' action on building site
-
-        -d DIRNAME - set building site. default is current.
-    \"""
     return _pack_x(opts, args, '{name}')
+
+pack_{name}.__doc__ = help_texts('{name}')
 """.format(name=i))
 
 def pack_complete(opts, args):
+    """
+    Fullcircle action set for creating package
+
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+    """
     ret = 0
 
     dir_name = '.'
@@ -85,36 +167,6 @@ def pack_complete(opts, args):
 
     return ret
 
-
-def help_text():
-    return """\
-aipsetup pack command
-
-    destdir_checksum
-
-        create checksums for files in destdir
-
-    destdir_filelist
-
-    destdir_deps_c
-
-    remove_source_and_build_dirs
-
-    compress_patches_destdir_and_logs
-
-    compress_files_in_lists_dir
-
-    remove_patches_destdir_and_buildlogs_dirs
-
-    remove_decompressed_files_from_lists_dir
-
-    make_checksums_for_building_site
-
-    pack_buildingsite
-
-    complete
-
-"""
 
 def destdir_checksum(buildingsite):
 

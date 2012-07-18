@@ -1,15 +1,10 @@
 
+"""
+Perform actions on buildinfo scripts
+"""
+
 import org.wayround.aipsetup.info
 
-
-def help_text():
-    return """\
-{aipsetup} {command} command
-
-    list [MASK]
-
-    edit NAME
-"""
 
 def exported_commands():
     return {
@@ -17,8 +12,25 @@ def exported_commands():
         'edit': buildinfo_edit_file
         }
 
+def commands_order():
+    return ['list', 'edit']
+
 def buildinfo_list_files(opts, args):
-    return org.wayround.aipsetup.info.list_files(opts, args, 'buildinfo')
+    """
+    List buildinfo files
+
+    [FILEMASK]
+
+    Default FILEMASK is *.py
+    """
+    return org.wayround.aipsetup.info.info_list_files(
+        opts, args, 'buildinfo', mask='*.py'
+        )
 
 def buildinfo_edit_file(opts, args):
-    return org.wayround.aipsetup.info.edit_file(opts, args, 'buildinfo')
+    """
+    Edit buildinfo script
+
+    FILENAME
+    """
+    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildinfo')

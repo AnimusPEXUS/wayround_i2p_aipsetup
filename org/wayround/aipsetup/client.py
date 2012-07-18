@@ -40,7 +40,7 @@ def client_search(opts, args):
     [-i] [--how=b|r|e|i|c] [--what=s|r|i] [-v=VER]
            NAME
 
-    Search files on LUST server
+    Search files on UNICORN server
 
     -i - NAME is case insensitive
 
@@ -75,7 +75,7 @@ def client_get(opts, args):
     [-o=DIRNAME] [-i] [--how=b|r|e|i|c]
     [--what=s|r|i] [-v=VER] NAME
 
-    Get files from LUST server
+    Get files from UNICORN server
 
     All options and parameters same as in search, plus -o option
 

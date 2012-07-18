@@ -477,7 +477,7 @@ def start_host():
             org.wayround.utils.error.print_exception_info(e)
             logging.error("Error reading template %(name)s" % {
                 'name': os.path.join(
-                    org.wayround.aipsetup.config.config['lustroot'],
+                    org.wayround.aipsetup.config.config['unicorn_root'],
                     'templates',
                     '%(name)s.html' % {'name': i}
                     )
