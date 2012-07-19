@@ -8,12 +8,10 @@ Print, read, write, fix info files.
 import os.path
 import copy
 import glob
-import sys
 import logging
 
 import lxml.etree
 
-import org.wayround.utils.error
 import org.wayround.utils.file
 import org.wayround.utils.edit
 
@@ -214,24 +212,18 @@ def read_from_file(name):
     try:
         f = open(name, 'r')
     except:
-        logging.error("Can't open file %(name)s" % {
+        logging.exception("Can't open file %(name)s" % {
             'name': name
             })
-        org.wayround.utils.error.print_exception_info(
-            sys.exc_info()
-            )
     else:
         txt = f.read()
         f.close()
         try:
             tree = lxml.etree.fromstring(txt)
         except:
-            logging.error("Can't parse file `%(name)s'" % {
+            logging.exception("Can't parse file `%(name)s'" % {
                 'name': name
                 })
-            org.wayround.utils.error.print_exception_info(
-                sys.exc_info()
-                )
             ret = 2
         else:
             ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
@@ -279,10 +271,9 @@ def write_to_file(name, struct):
         f.write(txt)
         f.close()
     except:
-        logging.error("Can't rewrite file %(name)s" % {
+        logging.exception("Can't rewrite file %(name)s" % {
             'name': name
             })
-        org.wayround.utils.error.print_exception_info(sys.exc_info())
         ret = 1
 
     return ret

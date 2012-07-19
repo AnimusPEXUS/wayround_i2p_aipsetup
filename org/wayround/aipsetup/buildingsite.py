@@ -10,8 +10,6 @@ import copy
 import pprint
 import logging
 
-import org.wayround.utils.error
-
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
@@ -226,11 +224,10 @@ def read_package_info(directory, ret_on_error=None):
         f = None
         try:
             f = open(pi_filename, 'r')
+
         except:
-            logging.error("Can't open `{}'".format(pi_filename))
-            org.wayround.utils.error.print_exception_info(
-                sys.exc_info()
-                )
+            logging.exception("Can't open `{}'".format(pi_filename))
+
         else:
             txt = f.read()
             f.close()
@@ -241,10 +238,7 @@ def read_package_info(directory, ret_on_error=None):
             try:
                 ret = eval(txt, g, l)
             except:
-                logging.error("error in `{}'".format(pi_filename))
-                org.wayround.utils.error.print_exception_info(
-                    sys.exc_info()
-                    )
+                logging.exception("error in `{}'".format(pi_filename))
                 ret = ret_on_error
 
     return ret
@@ -258,21 +252,15 @@ def write_package_info(directory, info):
     try:
         f = open(pi_filename, 'w')
     except:
-        logging.error("can't open `%(file)s' for writing" % {
+        logging.exception("can't open `%(file)s' for writing" % {
             'file': pi_filename
             })
-        org.wayround.utils.error.print_exception_info(
-            sys.exc_info()
-            )
     else:
         txt = ''
         try:
             txt = pprint.pformat(info)
         except:
-            logging.error("can't represent data for package info")
-            org.wayround.utils.error.print_exception_info(
-                sys.exc_info()
-                )
+            logging.exception("can't represent data for package info")
         else:
 
             f.write("""\
@@ -427,12 +415,9 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
             try:
                 exec(compile(open(buildinfo_filename).read(), buildinfo_filename, 'exec'), g, l)
             except:
-                logging.error("Can't load buildinfo Python script `%(name)s'" % {
+                logging.exception("Can't load buildinfo Python script `%(name)s'" % {
                     'name': buildinfo_filename
                     })
-                org.wayround.utils.error.print_exception_info(
-                    sys.exc_info()
-                    )
                 ret = 3
 
             else:
@@ -448,10 +433,7 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
                     try:
                         l['build_info'](copy.copy(org.wayround.aipsetup.config.config), pi)
                     except:
-                        logging.error("Error while calling for build_info() from `{}'".format(buildinfo_filename))
-                        org.wayround.utils.error.print_exception_info(
-                            sys.exc_info()
-                            )
+                        logging.exception("Error while calling for build_info() from `{}'".format(buildinfo_filename))
                         pi['pkg_buildinfo'] = {}
                         ret = 5
 

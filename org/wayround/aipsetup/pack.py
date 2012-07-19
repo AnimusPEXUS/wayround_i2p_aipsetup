@@ -9,13 +9,11 @@ all other preparations and actions needed to build final package
 import os.path
 import tempfile
 import shutil
-import sys
 import pprint
 import logging
 
 import org.wayround.utils.time
 import org.wayround.utils.checksum
-import org.wayround.utils.error
 import org.wayround.utils.archive
 import org.wayround.utils.deps_c
 
@@ -44,47 +42,47 @@ def help_texts(name):
 Create checksums of distribution files
 """
 
-    if name == 'destdir_filelist':
+    elif name == 'destdir_filelist':
         ret = """\
 Create list of distribution files
 """
 
-    if name == 'destdir_deps_c':
+    elif name == 'destdir_deps_c':
         ret = """\
 Create list of ELF dependencies
 """
 
-    if name == 'remove_source_and_build_dirs':
+    elif name == 'remove_source_and_build_dirs':
         ret = """\
 Removes source dir and build dir (one of cleanups stages)
 """
 
-    if name == 'compress_patches_destdir_and_logs':
+    elif name == 'compress_patches_destdir_and_logs':
         ret = """\
 Compress patches, distribution and logs.
 """
 
-    if name == 'compress_files_in_lists_dir':
+    elif name == 'compress_files_in_lists_dir':
         ret = """\
 Compress files found in lists dir
 """
 
-    if name == 'remove_patches_destdir_and_buildlogs_dirs':
+    elif name == 'remove_patches_destdir_and_buildlogs_dirs':
         ret = """\
 Removes patches, destdir and logs (one of cleanups stages)
 """
 
-    if name == 'remove_decompressed_files_from_lists_dir':
+    elif name == 'remove_decompressed_files_from_lists_dir':
         ret = """\
 Remove decompressed files from lists dir (one of cleanups stages)
 """
 
-    if name == 'make_checksums_for_building_site':
+    elif name == 'make_checksums_for_building_site':
         ret = """\
 Make checksums for installers to check package integrity.
 """
 
-    if name == 'pack_buildingsite':
+    elif name == 'pack_buildingsite':
         ret = """\
 Makes final packaging and creates UNICORN software package
 """
@@ -411,7 +409,7 @@ def remove_decompressed_files_from_lists_dir(buildingsite):
             try:
                 os.unlink(filename)
             except:
-                logging.error("Can't remove file %(name)s" % {
+                logging.exception("Can't remove file `%(name)s'" % {
                     'name': filename
                     })
                 ret = 1
@@ -435,8 +433,7 @@ def make_checksums_for_building_site(buildingsite):
     try:
         tf = tempfile.mkstemp()
     except:
-        logging.error("Error creating temporary file")
-        org.wayround.utils.error.print_exception_info(sys.exc_info())
+        logging.exception("Error creating temporary file")
         ret = 1
     else:
         f = os.fdopen(tf[0], 'w')

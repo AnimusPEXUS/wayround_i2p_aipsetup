@@ -1,4 +1,8 @@
 
+"""
+Install docbook data into current (or selected) system
+"""
+
 import os.path
 import sys
 import stat
@@ -7,17 +11,7 @@ import logging
 
 import lxml.etree
 
-import org.wayround.utils.error
 
-
-def help_text():
-    return """\
-
-    install [-b=DIR] FILES
-
-       -b - Change basedir. Default is /
-
-"""
 
 
 def exported_commands():
@@ -26,8 +20,18 @@ def exported_commands():
         'install': docbook_install_files
         }
 
+def commands_order():
+    return ['install']
+
 
 def docbook_install_files(opts, args):
+    """
+    Analyze supplied archives and install them if they are correct
+
+    [-b=DIR] [FILE1] [FILE2] .. [FILEn]
+
+    -b - Change basedir. Default is `/'
+    """
 
     if len(args) == 1:
         logging.error("docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments")
@@ -163,7 +167,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         logging.error("   can not create dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
         return 70
 
-    print('-i-    unzipping...')
+    logging.info("   unzipping...")
 
     e = os.system("7z -o'%(dir)s' x '%(file)s'" % {'file': docbook_zip, 'dir': base_dir_share_docbook_dtd})
 
@@ -171,7 +175,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         logging.error("   error unzipping %(file)s" % {'file': docbook_zip})
         return 80
 
-    print('-i-    ok')
+    logging.info("   ok")
 
     return base_dir_share_docbook_dtd
 
@@ -207,9 +211,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
     try:
         tmp_cat_lxml = lxml.etree.parse(specific_cat_file)
     except:
-        logging.exception(
-            org.wayround.utils.error.return_exception_info(sys.exc_info())
-            )
+        logging.exception("Can't parse catalog file")
 
     tmp_cat_lxml_ns = '{%(ns)s}' % {'ns': tmp_cat_lxml.getroot().nsmap[None]}
 
@@ -273,7 +275,7 @@ def install_docbook_zips(docbook_zip_list,
                        base_dir_share_docbook)
 
         if isinstance(r, int):
-            print("-w- error processing file %(file)s" % {'file': i})
+            logging.warning("error processing file %(file)s" % {'file': i})
             continue
 
         dtd_dirs.append(r)
@@ -327,7 +329,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
             'xsl_name': name,
             'xsl_dest': base_dir_share_docbook_xsl_stylesheets})
 
-        print('-i-    preparing dirs')
+        logging.info("   preparing dirs")
 
 
         if 0 != org.wayround.utils.file.remove_if_exists(
@@ -360,13 +362,15 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
                       base_dir_share_docbook_xsl_stylesheets)
         except:
             logging.exception(
-                org.wayround.utils.error.return_exception_info(sys.exc_info())
+                "Can't rename file `{}' to `{}'".format(
+                    base_dir_share_docbook_name,
+                    base_dir_share_docbook_xsl_stylesheets
+                    )
                 )
             # return 30
             continue
 
         logging.info("XSL extraction complited")
-        print("-i-")
 
         installed_versions.append(version)
 
@@ -485,18 +489,14 @@ def install(files, base_dir):
         set_correct_modes(base_dir_etc_xml)
         set_correct_modes(base_dir_share_docbook)
     except:
-        logging.exception(
-            org.wayround.utils.error.return_exception_info(sys.exc_info())
-            )
+        logging.exception("Can't set correct file modes")
 
     logging.info("Setting correct owners")
     try:
         set_correct_owners(base_dir_etc_xml)
         set_correct_owners(base_dir_share_docbook)
     except:
-        logging.exception(
-            org.wayround.utils.error.return_exception_info(sys.exc_info())
-            )
+        logging.exception("Can't set correct file owner")
 
     print()
     logging.info("All operations complited. Bye!")

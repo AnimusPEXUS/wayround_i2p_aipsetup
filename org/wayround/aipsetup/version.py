@@ -1,4 +1,6 @@
 
+import logging
+
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.config
 
@@ -17,11 +19,11 @@ def version_comparator(name1, name2):
         )
 
     if d1 == None or d2 == None:
-        print("-e- Can't parse filename")
+        logging.error("Can't parse filename")
         raise Exception
 
     if d1['groups']['name'] != d2['groups']['name']:
-        print("-e- Different names")
+        logging.error("Different names")
         raise Exception
 
     else:

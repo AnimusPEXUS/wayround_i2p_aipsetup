@@ -1,4 +1,8 @@
 
+"""
+Facility for indexing and analyzing sources and packages repository
+"""
+
 import os.path
 import sys
 import fnmatch
@@ -14,132 +18,121 @@ import org.wayround.utils.text
 import org.wayround.aipsetup.info
 
 
-def help_text():
-    return """\
-{aipsetup} {command} command
-
-Where command is one of:
-
-    scan_repo_for_pkg_and_cat
-
-        Scan repository and save it's categories and packages indexes
-        to database
-
-    find_repository_package_name_collisions_in_database
-
-        Scan index for equal package names
-
-    find_missing_pkg_info_records [-t] [-f]
-
-        Search packages which have no corresponding info records
-
-        -t creates non-existing .xml file templates in info dir
-
-        -f forces rewrite existing .xml files
-
-    load_package_info_from_filesystem [-a] [file names]
-
-        Load missing package information from named files. If no files
-        listed - assume all files in info dir
-
-        -a force load all records, not only missing.
-
-    find_outdated_pkg_info_records
-
-        Finds pkg info records which differs to FS .xml files
-
-    update_outdated_pkg_info_records
-
-        Loads pkg info records which differs to FS .xml files
-
-    backup_package_info_to_filesystem [-f] [MASK]
-
-        Save package information from database to info directory.
-
-        Existing files are skipped, unless -f is set
-
-    delete_pkg_info_records MASK
-
-        If mask must be given or operation will fail
-
-    list_pkg_info_records [MASK]
-
-        Default MASK is *
-
-    print_pkg_info_record NAME
-
-        Print package info record information
-"""
-
 def exported_commands():
     return {
-        'scan_repo_for_pkg_and_cat': scan_repo_for_pkg_and_cat,
+        'scan_repo_for_pkg_and_cat': pkgindex_scan_repo_for_pkg_and_cat,
         'find_repository_package_name_collisions_in_database': \
-            find_repository_package_name_collisions_in_database,
-        'find_missing_pkg_info_records': find_missing_pkg_info_records,
-        'find_outdated_pkg_info_records': find_outdated_pkg_info_records,
-        'update_outdated_pkg_info_records': update_outdated_pkg_info_records,
-        'delete_pkg_info_records': delete_pkg_info_records,
-        'backup_package_info_to_filesystem': backup_package_info_to_filesystem,
-        'load_package_info_from_filesystem': load_package_info_from_filesystem,
-        'list_pkg_info_records': list_pkg_info_records,
-        'print_pkg_info_record': print_pkg_info_record
+            pkgindex_find_repository_package_name_collisions_in_database,
+        'find_missing_pkg_info_records': pkgindex_find_missing_pkg_info_records,
+        'find_outdated_pkg_info_records': pkgindex_find_outdated_pkg_info_records,
+        'update_outdated_pkg_info_records': pkgindex_update_outdated_pkg_info_records,
+        'delete_pkg_info_records': pkgindex_delete_pkg_info_records,
+        'backup_package_info_to_filesystem': pkgindex_backup_package_info_to_filesystem,
+        'load_package_info_from_filesystem': pkgindex_load_package_info_from_filesystem,
+        'list_pkg_info_records': pkgindex_list_pkg_info_records,
+        'print_pkg_info_record': pkgindex_print_pkg_info_record
         }
 
-def scan_repo_for_pkg_and_cat(opts, args):
-    # scan repository for packages and categories. result
-    # replaces data in database
+def commands_order():
+    return [
+        'scan_repo_for_pkg_and_cat',
+        'find_repository_package_name_collisions_in_database',
+        'find_missing_pkg_info_records',
+        'find_outdated_pkg_info_records',
+        'update_outdated_pkg_info_records',
+        'delete_pkg_info_records',
+        'backup_package_info_to_filesystem',
+        'load_package_info_from_filesystem',
+        'list_pkg_info_records',
+        'print_pkg_info_record'
+        ]
+
+def pkgindex_scan_repo_for_pkg_and_cat(opts, args):
+    """
+    Scan repository and save it's categories and packages indexes
+    to database
+    """
+
     r = PackageDatabase()
-    r.scan_repo_for_pkg_and_cat()
+    ret = r.scan_repo_for_pkg_and_cat()
 
-    return 0
+    return ret
 
-def find_repository_package_name_collisions_in_database(opts, args):
-    # search database package table for collisions: no more
-    # when one package with same name can exist!
+def pkgindex_find_repository_package_name_collisions_in_database(opts, args):
+    """
+    Scan index for equal package names
+    """
     r = PackageDatabase()
-    r.find_repository_package_name_collisions_in_database()
+    ret = r.find_repository_package_name_collisions_in_database()
 
-    return 0
+    return ret
 
-def find_missing_pkg_info_records(opts, args):
+def pkgindex_find_missing_pkg_info_records(opts, args):
+    """
+    Search packages which have no corresponding info records
+
+    [-t] [-f]
+
+    -t creates non-existing .xml file templates in info dir
+
+    -f forces rewrite existing .xml files
+    """
 
     t = '-t' in opts
 
     f = '-f' in opts
 
     r = PackageDatabase()
-    r.find_missing_pkg_info_records(t, f)
+    ret = r.find_missing_pkg_info_records(t, f)
 
-    return 0
+    return ret
 
-def find_outdated_pkg_info_records(opts, args):
+def pkgindex_find_outdated_pkg_info_records(opts, args):
+    """
+    Finds pkg info records which differs to FS .xml files
+    """
     r = PackageDatabase()
-    r.find_outdated_pkg_info_records()
+    ret = r.find_outdated_pkg_info_records()
 
-    return 0
+    return ret
 
-def update_outdated_pkg_info_records(opts, args):
+def pkgindex_update_outdated_pkg_info_records(opts, args):
+    """
+    Loads pkg info records which differs to FS .xml files
+    """
     r = PackageDatabase()
-    r.update_outdated_pkg_info_records()
+    ret = r.update_outdated_pkg_info_records()
 
-    return 0
+    return ret
 
-def delete_pkg_info_records(opts, args):
+def pkgindex_delete_pkg_info_records(opts, args):
+    """
+    If mask must be given or operation will fail
+    """
     mask = None
+
+    ret = 0
 
     if len(args) > 1:
         mask = args[1]
 
     if mask != None:
         r = PackageDatabase()
-        r.delete_pkg_info_records(mask)
+        ret = r.delete_pkg_info_records(mask)
     else:
         logging.error("Mask is not given")
+        ret = 1
 
-    return 0
+    return ret
 
-def backup_package_info_to_filesystem(opts, args):
+def pkgindex_backup_package_info_to_filesystem(opts, args):
+    """
+    Save package information from database to info directory.
+
+    [-f] [MASK]
+
+    Existing files are skipped, unless -f is set
+    """
     mask = '*'
 
     if len(args) > 1:
@@ -148,11 +141,22 @@ def backup_package_info_to_filesystem(opts, args):
     f = '-f' in opts
 
     r = PackageDatabase()
-    r.backup_package_info_to_filesystem(mask, f)
+    ret = r.backup_package_info_to_filesystem(mask, f)
 
-    return 0
+    return ret
 
-def load_package_info_from_filesystem(opts, args):
+def pkgindex_load_package_info_from_filesystem(opts, args):
+    """
+    Load missing package information from named files
+
+    [-a] [file names]
+
+    If no files listed - assume all files in info dir
+
+    -a force load all records, not only missing.
+    """
+
+    ret = 0
 
     mask = None
 
@@ -162,14 +166,22 @@ def load_package_info_from_filesystem(opts, args):
     if mask != None:
 
         r = PackageDatabase()
-        r.delete_pkg_info_records(mask)
+        ret = r.delete_pkg_info_records(mask)
     else:
         logging.error("Mask is not given")
+        ret = 1
 
-    return 0
+    return ret
 
-def list_pkg_info_records(opts, args):
+def pkgindex_list_pkg_info_records(opts, args):
+    """
+    List records containing in index
 
+    [FILEMASK]
+
+    Default MASK is *
+    """
+    # TODO: clarification for help needed
     mask = '*'
 
     if len(args) > 1:
@@ -177,11 +189,17 @@ def list_pkg_info_records(opts, args):
 
 
     r = PackageDatabase()
-    r.list_pkg_info_records(mask)
+    ret = r.list_pkg_info_records(mask)
 
-    return 0
+    return ret
 
-def print_pkg_info_record(opts, args):
+def pkgindex_print_pkg_info_record(opts, args):
+    """
+    Print package info record information
+    """
+
+    ret = 0
+
     name = None
 
     if len(args) > 1:
@@ -190,11 +208,12 @@ def print_pkg_info_record(opts, args):
     if name != None:
 
         r = PackageDatabase()
-        r.print_pkg_info_record(name)
+        ret = r.print_pkg_info_record(name)
     else:
         logging.error("Name is not given")
+        ret = 1
 
-    return 0
+    return ret
 
 
 def is_repo_package_dir(path):
@@ -227,7 +246,7 @@ def create_required_dirs_at_package(path):
             try:
                 os.makedirs(full_path)
             except:
-                logging.error("Can't make dir `%(name)s'" % {
+                logging.exception("Can't make dir `%(name)s'" % {
                     'name': full_path
                     })
                 ret = 3
@@ -276,7 +295,7 @@ class PackageDatabase:
         Package class
 
         There can be many packages with same name, but this
-        is only for tucking down duplicates and radicate
+        is only for tucking down duplicates and eradicate
         them.
         """
 
@@ -533,7 +552,7 @@ class PackageDatabase:
         sess.query(self.Category).delete()
         sess.query(self.Package).delete()
 
-        logging.info("Commiting")
+        logging.info("Committing")
         sess.commit()
 
         logging.info("Scanning repository...")
@@ -585,6 +604,8 @@ class PackageDatabase:
         if pre_sess == None:
             sess.commit()
             sess.close()
+
+        return
 
     def get_package_path(self, pid):
         sess = sqlalchemy.orm.Session(bind=self._db_engine)
@@ -798,6 +819,8 @@ class PackageDatabase:
 
         self.set_package_tags(name, struct['tags'], pre_sess=pre_sess)
 
+        return
+
     def backup_package_info_to_filesystem(
         self, mask='*', force_rewrite=False):
 
@@ -833,6 +856,8 @@ class PackageDatabase:
                             })
 
         sess.close()
+
+        return
 
     def load_package_info_from_filesystem(
         self, filenames=[], all_records=False
@@ -907,7 +932,7 @@ class PackageDatabase:
         sess.close()
 
 
-        logging.info("Total loaded %(n)d records" % {'n': loaded})
+        logging.info("Totally loaded %(n)d records" % {'n': loaded})
         return
 
     def delete_pkg_info_records(self, mask='*'):
@@ -929,7 +954,7 @@ class PackageDatabase:
 
         sess.commit()
         sess.close()
-        logging.info("Total deleted %(n)d records" % {
+        logging.info("Totally deleted %(n)d records" % {
             'n': deleted
             })
         return

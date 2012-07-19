@@ -23,7 +23,6 @@ import logging
 
 
 import org.wayround.utils.checksum
-import org.wayround.utils.error
 import org.wayround.utils.text
 import org.wayround.utils.time
 import org.wayround.utils.archive
@@ -85,9 +84,11 @@ def package_install(opts, args):
 
 def package_list(opts, args):
     """
+    List installed packages.
+
     [-b=DIRNAME] [MASK]
 
-    List installed packages. -b is same as in install.
+    -b is same as in install.
     Default MASK is *.xz
     """
 
@@ -112,10 +113,11 @@ def package_list(opts, args):
 
 def package_named_list(opts, args):
     """
+    List installations with name PACKAGE_NAME
+
     [-b=DIRNAME] PACKAGE_NAME
 
-    List installations with name PACKAGE_NAME.
-    -b is same as in install.
+    -b is same as in install
     """
 
     basedir = '/'
@@ -141,9 +143,10 @@ def package_named_list(opts, args):
 
 def package_issues(opts, args):
     """
+    Looks for issues with already installed package names
+
     [-b=DIRNAME]
 
-    Looks for issues with already installed package names:
         * list unparsabel names
         * list names not in info files directory
     """
@@ -164,9 +167,9 @@ def package_issues(opts, args):
 
 def package_remove(opts, args):
     """
-    [-b=DIRNAME] MASK
-
     Removes packages matching MASK.
+
+    [-b=DIRNAME] MASK
 
     WARNING: no sanity checks!
         aipsetup package remove '*'
@@ -182,7 +185,7 @@ def package_remove(opts, args):
         basedir = opts['-b']
 
     asp_name = None
-    if len(args) > 1:
+    if len(args) > 0:
         asp_name = args[0]
 
     if not isinstance(basedir, str):
@@ -241,9 +244,10 @@ def package_build(opts, args):
 
 def package_find_files(opts, args):
     """
+    Looks for LOOKFOR in all installed packages using one of methods:
+
     [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
 
-    Looks for LOOKFOR in all installed packages using one of methods:
        sub   - (default) filename contains LOOKFOR
        re    - LOOKFOR is RegExp
        beg   - file name starts with LOOKFOR
@@ -251,18 +255,16 @@ def package_find_files(opts, args):
        fm    - LOOKFOR is file mask
     """
     basedir = '/'
-    for i in opts:
-        if i[0] == '-b':
-            basedir = i[1]
+    if '-b' in opts:
+        basedir = opts['-b']
 
     look_meth = 'sub'
-    for i in opts:
-        if i[0] == '-m':
-            look_meth = i[1]
+    if '-m' in opts:
+        look_meth = opts['-m']
 
     lookfor = ''
-    if len(args) > 1:
-        lookfor = args[1]
+    if len(args) > 0:
+        lookfor = args[0]
 
     ret = find_files(basedir, lookfor, mode=look_meth,
                      mute=False,
@@ -271,15 +273,21 @@ def package_find_files(opts, args):
     return ret
 
 def package_put_to_index_many(opts, args):
+    """
+    Put package to repository and add it to index
+    """
+
+    # TODO: add addition to index, not only to repo, but also to file list.
+    # TODO: but first make file lists not plain but sqlite
 
     ret = 0
 
     files = []
-    if len(args) > 1:
-        files = args[1:]
+    if len(args) > 0:
+        files = args[:]
 
     if len(files) == 0:
-        print('-e- File names required')
+        logging.error("Filenames required")
         ret = 2
     else:
         ret = put_to_index_many(files)
@@ -305,12 +313,9 @@ def check_package(asp_name, mute=False):
         try:
             tarf = tarfile.open(asp_name, mode='r')
         except:
-            logging.error("Can't open file `%(name)s'" % {
+            logging.exception("Can't open file `%(name)s'" % {
                 'name': asp_name
                 })
-            print(org.wayround.utils.error.return_exception_info(
-                sys.exc_info()
-                ))
             ret = 1
         else:
             f = org.wayround.utils.archive.tar_member_get_extract_file(
@@ -404,8 +409,7 @@ def install(asp_name, destdir='/'):
         try:
             tarf = tarfile.open(asp_name, mode='r')
         except:
-            logging.error("Can't open file %(name)s")
-            org.wayround.utils.error.print_exception_info(sys.exc_info())
+            logging.exception("Can't open file %(name)s")
             ret = 1
         else:
 
@@ -920,8 +924,7 @@ def package_files(destdir, pkgname,
     try:
         f = open(pkg_list_file, 'r')
     except:
-        logging.error("Can't open list file")
-        org.wayround.utils.error.print_exception_info(sys.exc_info())
+        logging.exception("Can't open list file")
         ret = 2
     else:
 

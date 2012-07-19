@@ -39,22 +39,22 @@ def help_texts(name):
 Extract software source
 """
 
-    if name == 'configure':
+    elif name == 'configure':
         ret = """\
 Configures software accordingly to info
 """
 
-    if name == 'build':
+    elif name == 'build':
         ret = """\
 Builds software accordingly to info
 """
 
-    if name == 'distribute':
+    elif name == 'distribute':
         ret = """\
 Creates normal software distribution
 """
 
-    if name == 'prepack':
+    elif name == 'prepack':
         ret = """\
 Do prepackaging actions
 """
@@ -215,7 +215,7 @@ def complete(dirname):
         try:
             act_seq = pi['pkg_buildinfo']['build_sequance']
         except:
-            logging.error("Can't get action sequence")
+            logging.exception("Can't get action sequence")
             ret = 2
         else:
 

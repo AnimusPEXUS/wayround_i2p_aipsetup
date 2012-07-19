@@ -57,7 +57,7 @@ def read_constitution():
         try:
             constitution = eval(t, {}, {})
         except:
-            logging.exception("-e- Error loading constitution script")
+            logging.exception("Error loading constitution script")
             ret = None
         else:
             ret = constitution

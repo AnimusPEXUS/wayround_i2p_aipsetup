@@ -16,14 +16,6 @@ import org.wayround.aipsetup.name
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
-def help_text():
-    return """\
-{aipsetup} {command} command
-
-    search
-
-    get
-"""
 
 def exported_commands():
     return {
@@ -106,8 +98,6 @@ def workout_search_params(opts, args):
     """
 
     args_l = len(args)
-
-    # NOTE: Maybe those variable need to be refactored, but not now
 
     what = ''
     how = ''
@@ -254,7 +244,7 @@ def get(output='.', wsp={}):
         try:
             os.makedirs(output)
         except:
-            logging.error("Can't create output dir")
+            logging.exception("Can't create output dir")
             ret = 2
     else:
         if os.path.exists(output) and not os.path.isdir(output):
@@ -437,9 +427,6 @@ def client(wsp):
             exception = sys.exc_info()
             if isinstance(exception[1], IOError):
                 logging.error("Connection refused")
-            org.wayround.utils.error.print_exception_info(
-                exception
-                )
             ret = 1
         else:
             code = int(req_res.getcode())
@@ -472,7 +459,7 @@ def fn_version_filter(lst, wsp):
     #       Additionally we need to keep in mind possibility
     #       of a large list before filter in client!
     #       So we needed to separate version filter in to
-    #       different function -- to save memory, maybe
+    #       different function(this function) -- to save memory, maybe
     #       in a price on performance
 
     ret = []

@@ -1,4 +1,8 @@
 
+"""
+Module with package names parsing facilities
+"""
+
 import os.path
 import re
 import fnmatch
@@ -83,32 +87,31 @@ ASP_NAME_REGEXPS = {
     'aipsetup3': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
     }
 
-def help_text():
-    return """\
-
-{aipsetup} {command} command
-
-    test_expressions_on_sources
-
-
-    parse_name [-w] NAME
-
-        if -w is set - change <name>.xml info file nametype value to
-        result
-"""
-
 def exported_commands():
     return {
         'test_expressions_on_sources': name_test_expressions_on_sources,
         'parse_name': name_parse_name
         }
 
+def commands_order():
+    return ['test_expressions_on_sources', 'parse_name']
+
 def name_parse_name(opts, args):
+    """
+    Parse name
+
+    [-w] NAME
+
+    if -w is set - change <name>.xml info file nametype value to
+    result
+    """
+
+    # TODO: help clarification required
 
     ret = 0
 
     if len(args) != 2:
-        print("-e- file name required")
+        logging.error("File name required")
         ret = 1
     else:
 
@@ -118,12 +121,16 @@ def name_parse_name(opts, args):
         if '-w' in opts:
             write = True
 
-        source_name_parse(filename, modify_info_file=write)
+        if source_name_parse(filename, modify_info_file=write) != 0:
+            ret = 2
 
     return ret
 
 
 def name_test_expressions_on_sources(opts, args):
+    """
+    Run parsing tests on available source package file names
+    """
 
     ret = 0
 
@@ -135,8 +142,8 @@ def name_test_expressions_on_sources(opts, args):
     try:
         f = open(org.wayround.aipsetup.config.config['source_index'], 'r')
     except:
-        logging.error(
-            "Can't open file {}".format(
+        logging.exception(
+            "Can't open file `{}'".format(
                 org.wayround.aipsetup.config.config['source_index']
                 )
             )

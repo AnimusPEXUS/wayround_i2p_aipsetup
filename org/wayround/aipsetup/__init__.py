@@ -21,3 +21,5 @@ AIPSETUP_MODULES_LIST = frozenset(
     'unicorn'
      ]
     )
+
+AIPSETUP_MODULES_LIST_FUSED = AIPSETUP_MODULES_LIST - set(['config'])

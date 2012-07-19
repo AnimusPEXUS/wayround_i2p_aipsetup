@@ -1,13 +1,15 @@
 
+"""
+UNICORN distro serving related stuff
+"""
+
 import os.path
-import sys
 import re
 import xml.sax.saxutils
 import logging
 
 import cherrypy.lib
 
-import org.wayround.utils.error
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.config
@@ -22,27 +24,31 @@ def edefault(status, message, traceback, version):
         'status': str(status)
         }
 
-def help_text():
-    return """\
-{aipsetup} {command} command
-
-    index_uht
-
-        create all required indexes for UHT project
-
-    start
-
-        all settings taken from aipsetup.conf
-"""
-
 def exported_commands():
     return {
-        'index_uht': index_uht,
-        'start': start_host
+        'index_uht': server_index_uht,
+        'start': server_start_host
         }
 
+def commands_order():
+    return ['index_uht', 'start']
 
-def index_uht(opts, args):
+
+
+def server_start_host(opts, args):
+    """
+    Start serving UNICORN Web Host
+    """
+    return start_host()
+
+
+def server_index_uht(opts, args):
+    """
+    Create all required indexes for UHT project
+    """
+    index_uht()
+
+def index_uht():
     index_directory(org.wayround.aipsetup.config.config['source'],
                     org.wayround.aipsetup.config.config['source_index'],
                     # TODO: move this list to config
@@ -202,7 +208,7 @@ class Index:
         if action == 'reindex':
             self.index_indexing = True
 
-            index_uht(self.config)
+            index_uht()
 
             self.reload_indexes()
             self.index_indexing = False
@@ -473,9 +479,7 @@ def start_host():
                     )
                 )
         except:
-            e = sys.exc_info()
-            org.wayround.utils.error.print_exception_info(e)
-            logging.error("Error reading template %(name)s" % {
+            logging.exception("Error reading template `%(name)s'" % {
                 'name': os.path.join(
                     org.wayround.aipsetup.config.config['unicorn_root'],
                     'templates',

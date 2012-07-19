@@ -1,6 +1,9 @@
 
+"""
+aipsetup configuration manipulations
+"""
+
 import os.path
-import sys
 import copy
 import logging
 import pprint
@@ -91,17 +94,6 @@ class ConfigLoadError(Exception): pass
 
 
 
-def help_text():
-    return """\
-{aipsetup} {command} command
-
-    create_example
-
-    check_config
-
-    print_config
-"""
-
 def exported_commands():
     return {
         'create_example': config_create_example,
@@ -131,6 +123,9 @@ def config_create_example(opts, args):
     return ret
 
 def config_check_config(opts, args):
+    """
+    Check current configuration and report errors
+    """
     filename = '/etc/aipsetup.conf'
 
     if len(args) == 1:
@@ -141,6 +136,9 @@ def config_check_config(opts, args):
     return ret
 
 def config_print_config(opts, args):
+    """
+    Print current configuration
+    """
     filename = '/etc/aipsetup.conf'
 
     if len(args) == 1:
@@ -152,7 +150,16 @@ def config_print_config(opts, args):
 
 
 def check_config(filename):
-    load_config(filename)
+    ret = 0
+    try:
+        load_config(filename)
+    except:
+        logging.exception("Configuration errors found")
+        ret = 1
+    else:
+        logging.info("No configuration errors found")
+        ret = 0
+    return ret
 
 def print_config(filename):
     c = load_config(filename)
@@ -164,6 +171,15 @@ def print_config(filename):
     print("Additionally {} non-configurable parameters:".format(len(cc)))
     print(pprint.pformat(cc))
 
+def execution_fuse():
+    ret = 0
+
+    filename = '/etc/aipsetup.conf'
+
+    if check_config(filename) != 0:
+        ret = 1
+
+    return ret
 
 def format_config(config):
     return """\
@@ -214,7 +230,6 @@ def format_config(config):
 def create_example_config(filename):
     logging.info("Saving example to `{}'".format(filename))
     save_config(filename, copy.copy(CONFIG_FULL_SAMPLE))
-
 
 def config_check_after_load(indict):
     """
@@ -346,12 +361,8 @@ def save_config(filename, config):
     try:
         config_check_before_saving(config)
     except:
-        raise ConfigSaveError(
-            "Errors found while checking loadable config {filename!s}\n{exception!s}".format(
-                filename=filename,
-                exception=org.wayround.utils.error.return_exception_info(sys.exc_info())
-                )
-            )
+        logging.exception("Errors found while checking loadable config {}".format(filename))
+        raise
     else:
         try:
             f = open(filename, 'w')
