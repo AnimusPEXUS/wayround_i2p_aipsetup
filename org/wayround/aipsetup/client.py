@@ -320,8 +320,13 @@ def get(output='.', wsp={}):
 
                 bname = os.path.basename(i)
 
-                process = subprocess.Popen(['wget', '-O', bname, request])
-                process.wait()
+                try:
+                    process = subprocess.Popen(['wget', '-O', bname, request])
+                except:
+                    logging.exception("Can't start wget")
+                    raise
+                else
+                    process.wait()
 
     return ret
 

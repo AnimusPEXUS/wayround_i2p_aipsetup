@@ -318,64 +318,66 @@ def check_package(asp_name, mute=False):
                 })
             ret = 1
         else:
-            f = org.wayround.utils.archive.tar_member_get_extract_file(
-                tarf,
-                './package.sha512'
-                )
-            if not isinstance(f, tarfile.ExFileObject):
-                logging.error("Can't get checksums from package file")
-                ret = 2
-            else:
-                sums_txt = f.read()
-                f.close()
-                sums = org.wayround.utils.checksum.parse_checksums_text(
-                    sums_txt
+            try:
+                f = org.wayround.utils.archive.tar_member_get_extract_file(
+                    tarf,
+                    './package.sha512'
                     )
-                del(sums_txt)
-
-                sums2 = {}
-                for i in sums:
-                    sums2['.' + i] = sums[i]
-                sums = sums2
-                del(sums2)
-
-                tar_members = tarf.getmembers()
-
-                check_list = ['./04.DESTDIR.tar.xz', './05.BUILD_LOGS.tar.xz',
-                              './package_info.py', './02.PATCHES.tar.xz']
-
-                for i in ['./00.TARBALL', './06.LISTS']:
-                    for j in tar_members:
-                        if ((j.name.startswith(i) \
-                            and j.name != i)):
-                            check_list.append(j.name)
-
-                check_list.sort()
-
-                error_found = False
-
-                for i in check_list:
-                    cresult = ''
-                    if not i in sums \
-                        or tarobj_check_member_sum(tarf, sums, i) == False:
-                        error_found = True
-                        cresult = "FAIL"
-                    else:
-                        cresult = "OK"
-
-                    if not mute:
-                        print("       %(name)s - %(result)s" % {
-                            'name': i,
-                            'result': cresult
-                            })
-
-                if error_found:
-                    logging.error("Error was found while checking package")
-                    ret = 3
+                if not isinstance(f, tarfile.ExFileObject):
+                    logging.error("Can't get checksums from package file")
+                    ret = 2
                 else:
-                    ret = 0
+                    sums_txt = f.read()
+                    f.close()
+                    sums = org.wayround.utils.checksum.parse_checksums_text(
+                        sums_txt
+                        )
+                    del(sums_txt)
 
-            tarf.close()
+                    sums2 = {}
+                    for i in sums:
+                        sums2['.' + i] = sums[i]
+                    sums = sums2
+                    del(sums2)
+
+                    tar_members = tarf.getmembers()
+
+                    check_list = ['./04.DESTDIR.tar.xz', './05.BUILD_LOGS.tar.xz',
+                                  './package_info.py', './02.PATCHES.tar.xz']
+
+                    for i in ['./00.TARBALL', './06.LISTS']:
+                        for j in tar_members:
+                            if ((j.name.startswith(i) \
+                                and j.name != i)):
+                                check_list.append(j.name)
+
+                    check_list.sort()
+
+                    error_found = False
+
+                    for i in check_list:
+                        cresult = ''
+                        if not i in sums \
+                            or tarobj_check_member_sum(tarf, sums, i) == False:
+                            error_found = True
+                            cresult = "FAIL"
+                        else:
+                            cresult = "OK"
+
+                        if not mute:
+                            print("       %(name)s - %(result)s" % {
+                                'name': i,
+                                'result': cresult
+                                })
+
+                    if error_found:
+                        logging.error("Error was found while checking package")
+                        ret = 3
+                    else:
+                        ret = 0
+            finally:
+                tarf.close()
+
     return ret
 
 def tarobj_check_member_sum(tarobj, sums, member_name):
@@ -474,7 +476,7 @@ def install(asp_name, destdir='/'):
                     ret = 4
                 else:
                     if org.wayround.utils.archive.\
-                        decompress_dir_contents_tar_compressor_fobj(
+                        extract_tar_canonical_fobj(
                             dd_fobj, destdir, 'xz',
                             verbose_tar=True,
                             verbose_compressor=True,

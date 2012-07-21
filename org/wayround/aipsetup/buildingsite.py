@@ -256,21 +256,24 @@ def write_package_info(directory, info):
             'file': pi_filename
             })
     else:
-        txt = ''
         try:
-            txt = pprint.pformat(info)
-        except:
-            logging.exception("can't represent data for package info")
-        else:
+            txt = ''
+            try:
+                txt = pprint.pformat(info)
+            except:
+                logging.exception("can't represent data for package info")
+            else:
 
-            f.write("""\
+                f.write("""\
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 {text}
 """.format(text=txt))
 
-        f.close()
+        finally:
+            f.close()
+
 
     return
 

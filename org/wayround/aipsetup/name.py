@@ -150,29 +150,32 @@ def name_test_expressions_on_sources(opts, args):
         ret = 1
 
     else:
-        lst = f.readlines()
+        try:
+            lst = f.readlines()
 
-        f.close()
+            f.close()
 
-        logging.debug("Stripping lines")
-        lst2 = []
+            logging.debug("Stripping lines")
+            lst2 = []
 
-        for i in lst:
-            lst2.append(i.strip())
+            for i in lst:
+                lst2.append(i.strip())
 
-        lst = lst2
-        del(lst2)
+            lst = lst2
+            del(lst2)
 
-        logging.debug("Sorting lines")
-        lst.sort()
+            logging.debug("Sorting lines")
+            lst.sort()
 
-        logging.debug("Parsing found filenames")
-        for i in lst:
+            logging.debug("Parsing found filenames")
+            for i in lst:
 
-            logging.debug("Parsing file name {}".format(i))
+                logging.debug("Parsing file name {}".format(i))
 
-            # TODO: do I need return value?
-            source_name_parse(i, False)
+                # TODO: do I need return value?
+                source_name_parse(i, False)
+        finally:
+            f.close()
 
 
     return ret

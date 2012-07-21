@@ -1,6 +1,7 @@
 
 import os.path
 import glob
+import logging
 
 import org.wayround.aipsetup.config
 
@@ -26,9 +27,18 @@ def get_tool_functions(toolname):
     g = {}
     l = {}
 
-    f = open(tools_dir + '/' + toolname + '.py', 'r')
-    module_text = f.read()
-    f.close()
-    module = exec(module_text, g, l)
+    fn = tools_dir + '/' + toolname
+
+    try:
+        f = open(fn + '.py', 'r')
+    except:
+        logging.exception("Can't open `{}'".format(fn))
+        raise
+    else:
+        try:
+            module_text = f.read()
+            module = exec(module_text, g, l)
+        finally:
+            f.close()
 
     return module.export_functions()

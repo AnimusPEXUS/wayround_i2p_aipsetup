@@ -109,11 +109,17 @@ def index_directory(dir_name, outputfilename='index.txt',
 
     logging.info("indexing %(dir)s..." % {'dir': dir_name})
 
-    f = open(outputfilename, 'w')
+    try:
+        f = open(outputfilename, 'w')
+    except:
+        logging("Can't open file `{}'".format(outputfilename))
+        raise
+    else:
 
-    _index_directory(f, dir_name, dir_namel, acceptable_endings)
-
-    f.close()
+        try:
+            _index_directory(f, dir_name, dir_namel, acceptable_endings)
+        finally:
+            f.close()
 
     return 0
 

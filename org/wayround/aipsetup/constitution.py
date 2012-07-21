@@ -35,9 +35,20 @@ def constitution_cat(opts, args):
     """
     cat contents of constitution.py file
     """
-    f = open(org.wayround.aipsetup.config.config['constitution'], 'r')
-    txt = f.read()
-    f.close()
+    try:
+        f = open(org.wayround.aipsetup.config.config['constitution'], 'r')
+    except:
+        logging.exception(
+            "Can't open `{}'".format(
+                org.wayround.aipsetup.config.config['constitution']
+                )
+            )
+    else:
+
+        try:
+            txt = f.read()
+        finally:
+            f.close()
 
     print(txt)
     return 0
@@ -53,13 +64,16 @@ def read_constitution():
         logging.exception("Can't read constitution `{}'".format(org.wayround.aipsetup.config.config['constitution']))
         ret = None
     else:
-        t = f.read()
         try:
-            constitution = eval(t, {}, {})
-        except:
-            logging.exception("Error loading constitution script")
-            ret = None
-        else:
-            ret = constitution
+            t = f.read()
+            try:
+                constitution = eval(t, {}, {})
+            except:
+                logging.exception("Error loading constitution script")
+                ret = None
+            else:
+                ret = constitution
+        finally:
+            f.close()
 
     return ret

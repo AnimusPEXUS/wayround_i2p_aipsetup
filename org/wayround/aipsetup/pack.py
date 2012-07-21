@@ -255,46 +255,60 @@ def destdir_deps_c(buildingsite):
             )
         )
 
-    f = open(lists_file, 'r')
-    file_list_txt = f.read()
-    f.close()
-    del(f)
-    file_list = file_list_txt.splitlines()
-    del(file_list_txt)
+    try:
+        f = open(lists_file, 'r')
+    except:
+        logging.exception("Can't open file list")
+    else:
+        try:
+            file_list_txt = f.read()
+            file_list = file_list_txt.splitlines()
+            del(file_list_txt)
 
-    deps = {}
-    elfs = 0
-    n_elfs = 0
-    logging.info("Generating C deps lists")
-    file_list_l = len(file_list)
-    file_list_i = 1
-    for i in file_list:
-        file_list_i += 1
-        org.wayround.utils.file.progress_write("    (%(perc).2f%%) ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
-            'perc': 100 / (float(file_list_l) / file_list_i),
-            'elfs': elfs,
-            'n_elfs': n_elfs
-            })
-        filename = destdir + '/' + i
-        filename.replace(r'//', '/')
-        filename = os.path.abspath(filename)
-        dep = org.wayround.utils.deps_c.elf_deps(filename)
-        if isinstance(dep, list):
-            elfs += 1
-            deps[i] = dep
-        else:
-            #print '-e- not an elf %(name)s' % {
-                #'name': filename
-                #}
-            n_elfs += 1
-    print("")
-    logging.info("ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
-        'elfs': elfs,
-        'n_elfs': n_elfs
-        })
-    f = open(deps_file, 'w')
-    f.write(pprint.pformat(deps))
-    f.close()
+            deps = {}
+            elfs = 0
+            n_elfs = 0
+            logging.info("Generating C deps lists")
+            file_list_l = len(file_list)
+            file_list_i = 1
+            for i in file_list:
+                file_list_i += 1
+                org.wayround.utils.file.progress_write("    (%(perc).2f%%) ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+                    'perc': 100 / (float(file_list_l) / file_list_i),
+                    'elfs': elfs,
+                    'n_elfs': n_elfs
+                    })
+                filename = destdir + '/' + i
+                filename.replace(r'//', '/')
+                filename = os.path.abspath(filename)
+                dep = org.wayround.utils.deps_c.elf_deps(filename)
+                if isinstance(dep, list):
+                    elfs += 1
+                    deps[i] = dep
+                else:
+                    n_elfs += 1
+
+            print("")
+
+            logging.info("ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+                'elfs': elfs,
+                'n_elfs': n_elfs
+                })
+
+            try:
+                f2 = open(deps_file, 'w')
+            except:
+                logging.exception("Can't create file for dependencies text")
+                raise
+            else:
+                try:
+                    f2.write(pprint.pformat(deps))
+                finally:
+                    f2.close()
+
+        finally:
+            f.close()
+
     return ret
 
 def remove_source_and_build_dirs(buildingsite):

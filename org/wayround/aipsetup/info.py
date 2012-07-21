@@ -216,39 +216,42 @@ def read_from_file(name):
             'name': name
             })
     else:
-        txt = f.read()
-        f.close()
         try:
-            tree = lxml.etree.fromstring(txt)
-        except:
-            logging.exception("Can't parse file `%(name)s'" % {
-                'name': name
-                })
-            ret = 2
-        else:
-            ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
+            txt = f.read()
 
-            for i in ['buildinfo']:
-                x = _find_latest(tree, i, 'value')
+            try:
+                tree = lxml.etree.fromstring(txt)
+            except:
+                logging.exception("Can't parse file `%(name)s'" % {
+                    'name': name
+                    })
+                ret = 2
+            else:
+                ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
+
+                for i in ['buildinfo']:
+                    x = _find_latest(tree, i, 'value')
+                    if x != None:
+                        ret[i] = x
+
+                x = _find_latest(tree, 'nametype', 'value')
                 if x != None:
-                    ret[i] = x
+                    ret['pkg_name_type'] = x
 
-            x = _find_latest(tree, 'nametype', 'value')
-            if x != None:
-                ret['pkg_name_type'] = x
+                x = _find_latest(tree, 'homepage', 'url')
+                if x != None:
+                    ret['homepage'] = x
 
-            x = _find_latest(tree, 'homepage', 'url')
-            if x != None:
-                ret['homepage'] = x
+                x = tree.findall('description')
+                if len(x) > 0:
+                    ret['description'] = x[-1].text
 
-            x = tree.findall('description')
-            if len(x) > 0:
-                ret['description'] = x[-1].text
+                ret['tags'] = _find_list(tree, 'tag', 'name')
 
-            ret['tags'] = _find_list(tree, 'tag', 'name')
-
-            ret['tags'].sort()
-            del(tree)
+                ret['tags'].sort()
+                del(tree)
+        finally:
+            f.close()
 
     return ret
 

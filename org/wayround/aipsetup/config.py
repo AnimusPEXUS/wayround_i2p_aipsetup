@@ -328,28 +328,31 @@ def load_config(filename):
             )
         raise
     else:
-        text = f.read()
-        f.close()
-
-        conf_dict = {}
-
         try:
-            conf_dict = eval(text, {}, {})
-        except:
-            logging.exception(
-                "Can't load config file contents {}".format(filename)
-                )
-            raise
-        else:
+            text = f.read()
+
+            conf_dict = {}
+
             try:
-                config_check_after_load(conf_dict)
+                conf_dict = eval(text, {}, {})
             except:
                 logging.exception(
-                    "Errors found while checking loadable config {}".format(filename)
+                    "Can't load config file contents {}".format(filename)
                     )
                 raise
             else:
-                ret = conf_dict
+                try:
+                    config_check_after_load(conf_dict)
+                except:
+                    logging.exception(
+                        "Errors found while checking loadable config {}".format(filename)
+                        )
+                    raise
+                else:
+                    ret = conf_dict
+
+        finally:
+            f.close()
 
     return ret
 
