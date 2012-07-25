@@ -10,12 +10,13 @@ import logging
 
 import cherrypy.lib
 
+from mako.template import Template
+
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.config
+import org.wayround.utils.fileindex
 
-
-from mako.template import Template
 
 def edefault(status, message, traceback, version):
 
@@ -101,7 +102,7 @@ def _index_directory(f, root_dir, root_dirl, acceptable_endings=None):
                     })
 
 
-def index_directory(dir_name, outputfilename='index.txt',
+def index_directory(dir_name, db_connection,
                     acceptable_endings=None):
 
     dir_name = os.path.abspath(dir_name)
@@ -110,7 +111,7 @@ def index_directory(dir_name, outputfilename='index.txt',
     logging.info("indexing %(dir)s..." % {'dir': dir_name})
 
     try:
-        f = open(outputfilename, 'w')
+        f = org.wayround.utils.fileindex.FileIndexer(db_connection)
     except:
         logging("Can't open file `{}'".format(outputfilename))
         raise

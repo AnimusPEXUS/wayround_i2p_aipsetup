@@ -1054,7 +1054,7 @@ def put_to_index(filename):
                     if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
                         ) != 0:
-                        logging.error("Can't ensure existance of required dirs")
+                        logging.error("Can't ensure existence of required dirs")
                         ret = 3
                     else:
 

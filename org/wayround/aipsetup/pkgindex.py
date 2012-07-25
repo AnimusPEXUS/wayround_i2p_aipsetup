@@ -9,6 +9,7 @@ import fnmatch
 import logging
 
 
+import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.declarative
 
@@ -301,17 +302,23 @@ class PackageDatabase:
 
         __tablename__ = 'package'
 
-        pid = sqlalchemy.Column(sqlalchemy.Integer,
-                                primary_key=True,
-                                autoincrement=True)
+        pid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            primary_key=True,
+            autoincrement=True
+            )
 
-        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                 nullable=False,
-                                 default='')
+        name = sqlalchemy.Column(
+            sqlalchemy.Unicode(256),
+            nullable=False,
+            default=''
+            )
 
-        cid = sqlalchemy.Column(sqlalchemy.Integer,
-                                nullable=False,
-                                default=0)
+        cid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            default=0
+            )
 
 
     class Category(Base):
@@ -323,17 +330,23 @@ class PackageDatabase:
 
         __tablename__ = 'category'
 
-        cid = sqlalchemy.Column(sqlalchemy.Integer,
-                                primary_key=True,
-                                autoincrement=True)
+        cid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            primary_key=True,
+            autoincrement=True
+            )
 
-        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                 nullable=False,
-                                 default='')
+        name = sqlalchemy.Column(
+            sqlalchemy.Unicode(256),
+            nullable=False,
+            default=''
+            )
 
-        parent_cid = sqlalchemy.Column(sqlalchemy.Integer,
-                                       nullable=False,
-                                       default=0)
+        parent_cid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            default=0
+            )
 
     class PackageInfo(Base):
         """
@@ -341,26 +354,36 @@ class PackageDatabase:
         """
         __tablename__ = 'package_info'
 
-        name = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                 nullable=False,
-                                 primary_key=True,
-                                 default='')
+        name = sqlalchemy.Column(
+            sqlalchemy.Unicode(256),
+            nullable=False,
+            primary_key=True,
+            default=''
+            )
 
-        home_page = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                      nullable=False,
-                                      default='')
+        home_page = sqlalchemy.Column(
+            sqlalchemy.Unicode(256),
+            nullable=False,
+            default=''
+            )
 
-        description = sqlalchemy.Column(sqlalchemy.UnicodeText,
-                                        nullable=False,
-                                        default='')
+        description = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
 
-        pkg_name_type = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                          nullable=False,
-                                          default='')
+        pkg_name_type = sqlalchemy.Column(
+            sqlalchemy.Unicode(256),
+            nullable=False,
+            default=''
+            )
 
-        buildinfo = sqlalchemy.Column(sqlalchemy.Unicode(256),
-                                      nullable=False,
-                                      default='')
+        buildinfo = sqlalchemy.Column(
+            sqlalchemy.Unicode(256),
+            nullable=False,
+            default=''
+            )
 
     class PackageTag(Base):
         """
@@ -369,18 +392,24 @@ class PackageDatabase:
 
         __tablename__ = 'package_tag'
 
-        id = sqlalchemy.Column(sqlalchemy.Integer,
-                               nullable=False,
-                               primary_key=True,
-                               autoincrement=True)
+        id = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            primary_key=True,
+            autoincrement=True
+            )
 
-        name = sqlalchemy.Column('name',
-                                 sqlalchemy.Unicode(256),
-                                 nullable=False)
+        name = sqlalchemy.Column(
+            'name',
+            sqlalchemy.Unicode(256),
+            nullable=False
+            )
 
-        tag = sqlalchemy.Column('tag',
-                                sqlalchemy.Unicode(256),
-                                nullable=False)
+        tag = sqlalchemy.Column(
+            'tag',
+            sqlalchemy.Unicode(256),
+            nullable=False
+            )
 
 
     def __init__(self, config):
@@ -388,7 +417,7 @@ class PackageDatabase:
         self._config = config
 
         if not os.path.isdir(self._config['repository']):
-            raise Exception
+            raise Exception("No repository to serve configured")
 
         db_echo = False
 
