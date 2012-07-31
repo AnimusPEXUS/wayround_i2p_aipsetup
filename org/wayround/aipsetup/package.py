@@ -107,7 +107,7 @@ def package_list(opts, args):
         ret = 2
 
     if ret == 0:
-        ret = list_packages(asp_name, basedir)
+        ret = list_installed_packages(asp_name, basedir)
 
     return ret
 
@@ -494,7 +494,7 @@ def install(asp_name, destdir='/'):
     return ret
 
 def list_packages_issues(destdir='/'):
-    lst = list_packages('*', destdir=destdir, return_list=True)
+    installed_packages_list = list_installed_packages('*', destdir=destdir, return_list=True)
 
     info_dir = os.path.abspath(org.wayround.aipsetup.config.config['info'])
 
@@ -502,7 +502,7 @@ def list_packages_issues(destdir='/'):
 
     issued = set()
 
-    for i in lst:
+    for i in installed_packages_list:
 
         name = ''
 
@@ -543,7 +543,7 @@ def list_packages_issues(destdir='/'):
     return
 
 def named_list_packages(asp_name, destdir='/'):
-    lst = list_packages('*', destdir=destdir, return_list=True)
+    lst = list_installed_packages('*', destdir=destdir, return_list=True)
 
     out_list = []
 
@@ -571,7 +571,7 @@ def named_list_packages(asp_name, destdir='/'):
     return
 
 
-def list_packages(mask, destdir='/', return_list=False, mute=False):
+def list_installed_packages(mask, destdir='/', return_list=False, mute=False):
     destdir = os.path.abspath(destdir)
     listdir = os.path.abspath(destdir + org.wayround.aipsetup.config.config['installed_pkg_dir'])
     listdir = listdir.replace(r'//', '/')
@@ -662,7 +662,7 @@ def remove_package(name, destdir='/'):
 
 def remove_packages(mask, destdir='/'):
     ret = 0
-    lst = list_packages(mask, destdir='/', return_list=True)
+    lst = list_installed_packages(mask, destdir='/', return_list=True)
     for i in lst:
 
         name = ''
@@ -783,7 +783,7 @@ def find_files(destdir, instr, mode=None, mute=False,
 
     ret = 0
 
-    lst = list_packages(mask='*.xz', destdir=destdir,
+    lst = list_installed_packages(mask='*.xz', destdir=destdir,
                         return_list=True,
                         mute=True)
     if not isinstance(lst, list):

@@ -1,603 +1,235 @@
 
-import urllib
+import logging
 
 import org.wayround.utils.xml
+import org.wayround.utils.dict
 
 
-#org.wayround.utils.xml.html()
+import org.wayround.aipsetup.pkgindex
+
 
 def page_index():
 
-    a = org.wayround.utils.xml.DictTreeToXMLRenderer(
-        xml_indent_size=2,
-        generate_css=True,
-        generate_js=True
+    tree = org.wayround.utils.xml.html(
+        title="Unicorn distribution server",
+        content=[]
         )
-
-    a.set_tree(
-        org.wayround.utils.xml.html(title="Unicorn distribution server",
-             content={
-                 'a': search()
-                 }
-             )
-        )
-
-    txt = a.render()
-
-    return txt
-
-def page_search_results(results, which):
 
     a = org.wayround.utils.xml.DictTreeToXMLRenderer(
         xml_indent_size=2,
         generate_css=True,
-        generate_js=True
+        generate_js=True,
+        css_and_js_holder=tree['00020_html']['content']['00010_head']
         )
 
-    a.set_tree(
-        org.wayround.utils.xml.html(title="Search Results",
-             content={
-                 'a': search_results(results, which)
-                 }
-             )
-        )
+    a.set_tree(tree)
 
     txt = a.render()
 
-    return txt
-
-def page_infolist(lst):
-    a = org.wayround.utils.xml.DictTreeToXMLRenderer(
-        xml_indent_size=2,
-        generate_css=True,
-        generate_js=True
-        )
-
-    a.set_tree(
-        org.wayround.utils.xml.html(title="Search Results",
-             content={
-                 'a': infolist(lst)
-                 }
-             )
-        )
-
-    txt = a.render()
+    if len(a.log) != 0:
+        # TODO: rework this
+        for i in a.log:
+            print(i)
+        txt = 'Error'
 
     return txt
 
 
+def page_pkg_list(db_connection):
+
+#    db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+#    lst = db.ls_packages()
+#    del db
 
 
-def search_test():
+#    pack_sel = pkg_select(lst, lst)
+
+    tree = org.wayround.utils.xml.html(
+        title="Unicorn distribution server",
+        content=[category_tree(db_connection)]
+        )
+
     a = org.wayround.utils.xml.DictTreeToXMLRenderer(
         xml_indent_size=2,
         generate_css=True,
-        generate_js=True
+        generate_js=True,
+        css_and_js_holder=tree['00020_html']['content']['00010_head']
         )
-    a.set_tree(org.wayround.utils.xml.html(content={'a': search() }))
+
+    a.set_tree(tree)
+
     txt = a.render()
-    print(txt)
 
-def search():
-    module = 'search'
-    return org.wayround.utils.xml.tag(
-        'div',
-        module=module,
-        uid='search-root-div',
-        required_css=['search.css'],
-        content={
-            'form': org.wayround.utils.xml.tag(
-                'form',
-                attributes={'action': 'search'},
-                content={
-                    'table': org.wayround.utils.xml.tag(
-                        'table',
-                        content={
-                            'tr0': org.wayround.utils.xml.tag(
-                                'tr',
-                                content={
-                                    'td0': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content="Search For What?"
-                                        ),
-                                    'td1': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content={
-                                            'select': org.wayround.utils.xml.tag(
-                                                'select',
-                                                attributes={'name':'what'},
-                                                content={
-                                                    'option1': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'info'},
-                                                        content='info'
-                                                        ),
-                                                    'option2': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'source'},
-                                                        content='source'
-                                                        ),
-                                                    'option3': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={
-                                                            'value': 'repository',
-                                                            'selected': 'selected'
-                                                            },
-                                                        content='repository'
-                                                        )
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    }
-                                ),
-                            'tr1': org.wayround.utils.xml.tag(
-                                'tr',
-                                content={
-                                    'td0': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content="How to search?"
-                                        ),
-                                    'td1': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content={
-                                            'select': org.wayround.utils.xml.tag(
-                                                'select',
-                                                attributes={'name':'how'},
-                                                content={
-                                                    'option1': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'regexp'},
-                                                        content='regexp'
-                                                        ),
-                                                    'option2': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'begins'},
-                                                        content='begins'
-                                                        ),
-                                                    'option3': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'exac'},
-                                                        content='exac'
-                                                        ),
-                                                    'option4': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'contains'},
-                                                        content='contains'
-                                                        )
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    }
-                                ),
-                            'tr2': org.wayround.utils.xml.tag(
-                                'tr',
-                                content={
-                                    'td0': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content="View"
-                                        ),
-                                    'td1': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content={
-                                            'select': org.wayround.utils.xml.tag(
-                                                'select',
-                                                attributes={'name':'view'},
-                                                content={
-                                                    'option1': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'html', 'selected':'selected'},
-                                                        content='html'
-                                                        ),
-                                                    'option2': org.wayround.utils.xml.tag(
-                                                        'option',
-                                                        attributes={'value': 'list'},
-                                                        content='list'
-                                                        )
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    }
-                                ),
-                            'tr3': org.wayround.utils.xml.tag(
-                                'tr',
-                                content={
-                                    'td0': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content="Case Sensitive"
-                                        ),
-                                    'td1': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content={
-                                            'input': org.wayround.utils.xml.tag(
-                                                'input',
-                                                closed=True,
-                                                attributes={
-                                                    'type': 'checkbox',
-                                                    'name': 'sensitive'
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    }
-                                ),
-                            'tr4': org.wayround.utils.xml.tag(
-                                'tr',
-                                content={
-                                    'td0': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content="Query"
-                                        ),
-                                    'td1': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content={
-                                            'input': org.wayround.utils.xml.tag(
-                                                'input',
-                                                closed=True,
-                                                attributes={
-                                                    'type': 'text',
-                                                    'name': 'value'
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    }
-                                ),
-                            'tr5': org.wayround.utils.xml.tag(
-                                'tr',
-                                content={
-                                    'td0': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content=""
-                                        ),
-                                    'td1': org.wayround.utils.xml.tag(
-                                        'td',
-                                        content={
-                                            'button': org.wayround.utils.xml.tag(
-                                                'button',
-                                                closed=False,
-                                                attributes={
-                                                        'type': 'submit'
-                                                    },
-                                                content='Go!'
-                                                )
-                                            }
-                                        )
-                                    }
-                                )
-                            }
-                        )
-                    }
-                )
-            }
-        )
+    if len(a.log) != 0:
+        # TODO: rework this
+        for i in a.log:
+            print(i)
+        txt = 'Error'
 
-def control():
-    return org.wayround.utils.xml.tag(
-        'div',
-        content={
-            'form1': org.wayround.utils.xml.tag(
-                'form',
-                attributes={
-                    'action': 'control'
-                    },
-                content={
-                    'button': org.wayround.utils.xml.tag(
-                        'button',
-                        attributes={
-                            'type': 'submit',
-                            'name': 'action',
-                            'value': 'reload'
-                            },
-                        content="Reload Indexes"
-                        )
-                    }
-                ),
-            'form2': org.wayround.utils.xml.tag(
-                'form',
-                attributes={
-                    'action': 'control'
-                    },
-                content={
-                    'button': org.wayround.utils.xml.tag(
-                        'button',
-                        attributes={
-                            'type': 'submit',
-                            'name': 'action',
-                            'value': 'reindex'
-                            },
-                        content="Reindex Sources And Repository, after what Reload Indexes"
-                        )
-                    }
-                )
-            }
-        )
+    return txt
 
 
-def info_card(
-    name,
-    pkg_name_type,
-    regexp,
-    buildinfo,
-    description,
-    homepage,
-    category,
-    tags
-    ):
+def _category_tree(start_cat_id=0, db=None):
 
-    return org.wayround.utils.xml.tag(
-        'div',
-        module='info',
-        uid='card',
-        content={
-            '01_header': org.wayround.utils.xml.tag(
-                'h2',
-                content=name
-                ),
-            '02_link': org.wayround.utils.xml.tag(
-                'em',
-                content={
-                    '1_(': org.wayround.utils.xml.char('('),
-                    '2_a': org.wayround.utils.xml.tag(
-                        'a',
-                        attributes={
-                            'href': 'files_info/{}'.format(name)
-                            },
-                        content='xml'
-                        ),
-                    '3_)': org.wayround.utils.xml.char(')')
-                    }
-                ),
-            '03_table': org.wayround.utils.xml.tag(
-                'table',
-                content={
-                    'tr_01': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='File Name Type'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content=pkg_name_type
-                                )
-                            }
-                        ),
-                    'tr_02': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='Regular Expression'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content={
-                                    'pre': org.wayround.utils.xml.tag(
-                                        'pre',
-                                        content=regexp
-                                        )
-                                    }
-                                )
-                            }
-                        ),
-                    'tr_03': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='Builder'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content=buildinfo
-                                )
-                            }
-                        ),
-                    'tr_04': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='Description'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content={
-                                    'pre': org.wayround.utils.xml.tag(
-                                        'pre',
-                                        content=description
-                                        )
-                                    }
-                                )
-                            }
-                        ),
-                    'tr_05': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='Home Page'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content={
-                                    'a': org.wayround.utils.xml.tag(
-                                        'a',
-                                        attributes={
-                                            'hreaf': homepage
-                                            },
-                                        content=homepage
-                                        )
-                                    }
-                                )
-                            }
-                        ),
-                    'tr_06': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='Category'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content=category
-                                )
-                            }
-                        ),
-                    'tr_07': org.wayround.utils.xml.tag(
-                        'tr',
-                        content={
-                            'td_0': org.wayround.utils.xml.tag(
-                                'td',
-                                content='Tags'
-                                ),
-                            'td_1': org.wayround.utils.xml.tag(
-                                'td',
-                                content=', '.join(tags)
-                                )
-                            }
-                        )
-                    }
-                )
-            }
-        )
+    logging.debug("Getting package ids in cat {}".format(start_cat_id))
+    pack_ids = db.ls_package_ids(start_cat_id)
+    logging.debug("Getting cat ids in cat {}".format(start_cat_id))
+    cats_ids = db.ls_category_ids(start_cat_id)
 
-def search_results(results, which):
+    cats_tags = []
+    pack_tags = []
 
-    if not which in ['source', 'repository', 'info']:
-        raise ValueError("Wrong `which' value")
+    logging.debug("Formatting cats in cat {}".format(start_cat_id))
 
-    count = len(results)
-    length = len(str(count))
+    for i in cats_ids:
 
-    res_dict = {}
+        cat_path = db.get_category_path_string(i)
 
-    if which in ['source', 'repository']:
-        for i in range(count):
-            res_dict[('{:#0' + str(length) + '}').format(i)] = org.wayround.utils.xml.tag(
-                'a',
-                attributes={
-                    'href': 'files_{}'.format(results[i])
-                    },
-                content=results[i]
-                )
-    elif which == 'info':
-        for i in range(count):
-            res_dict[('{:#0' + str(length) + '}').format(i)] = org.wayround.utils.xml.tag(
-                'a',
-                attributes={
-                    'href': 'info?name={}'.format(urllib.parse.quote(str(results[i])))
-                    },
-                content=results[i]
-                )
-    else:
-        res_dict = None
-
-
-    ret = org.wayround.utils.xml.tag(
-        'div',
-        content={
-            '001_count_div': org.wayround.utils.xml.tag(
+        cats_tags.append(
+            org.wayround.utils.xml.tag(
                 'div',
-                content={
-                    '01_caption': org.wayround.utils.xml.char('Count: '),
-                    '02_strong': org.wayround.utils.xml.tag(
-                        'strong',
-                        content=str(len(results))
+                attributes={
+                    'class': 'dir_entry',
+                    'style': 'border: 3px blue solid;'
+                    },
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'div',
+                        attributes={
+                            'class': 'dir_title',
+                            'style': 'padding-left: 10px; border: 3px green solid;'
+                            },
+                        content=cat_path
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'div',
+                        attributes={
+                            'class': 'dir_title_entries',
+                            'style': 'border: 3px black solid;'
+                            },
+                        content=_category_tree(i, db)
                         )
-                    }
-                ),
-            '002_results_div': org.wayround.utils.xml.tag(
-                'div',
-                content=res_dict
+                    ]
                 )
-            }
-        )
+            )
+
+    logging.debug("Formatting packs in cat {}".format(start_cat_id))
+
+    for i in pack_ids:
+        pack_tags.append(
+            org.wayround.utils.xml.tag(
+                'div',
+                attributes={
+                    'class': 'pack_entry',
+                    'style': 'padding-left: 10px; border: 3px red solid;'
+                    },
+                content=db.get_package_by_id(i)
+                )
+            )
+
+
+    ret = cats_tags + pack_tags
 
     return ret
 
 
-def infolist(lst):
 
-    lst_c = len(lst)
-    lst_l = len(str(lst_c))
+def category_tree(db):
 
-    toc_sl = []
-    cc = ''
-    for i in lst:
-        if cc != i[0]:
-            toc_sl.append(i[0])
-            cc = i[0]
-
-    toc_sl.sort()
-    toc_sl_c = len(toc_sl)
-    toc_sl_l = len(str(toc_sl_c))
-
-    lst.sort()
-
-
-    toc = {}
-    for i in range(toc_sl_c):
-        toc[('{:#0' + str(toc_sl_l) + '}').format(i)] = org.wayround.utils.xml.tag(
-            'a',
-            attributes={
-                'href': '#{}'.format(urllib.parse.quote(toc_sl[i]))
-                },
-            content=toc_sl[i]
-            )
-
-    infolist_letter = {}
-
-    for i in range(toc_sl_c):
-
-        infos = {}
-
-        for j in lst:
-            if j[0] == toc_sl[i]:
-                infos[('{:#0' + str(lst_l) + '}').format(j)] = org.wayround.utils.xml.tag(
-                    'div',
-                    content={
-                        'a': org.wayround.utils.xml.tag(
-                            'a',
-                            attribute={
-                                'href': "info?name={}".format(j)
-                                },
-                            content=j
-                            )
-                        }
-                    )
-
-        infolist_letter[('{:#0' + str(toc_sl_l) + '}').format(i)] = org.wayround.utils.xml.tag(
-            'div',
-            # class infolist-letter
-            content={
-                '01_h2': org.wayround.utils.xml.tag(
-                    'h2',
-                    attributes={
-                        'id': toc_sl[i]
-                        },
-                    content=toc_sl[i]
-                    ),
-                '02_div': org.wayround.utils.xml.tag(
-                    'div',
-                    content=infos
-                    )
-                }
-            )
-
-    info_list = org.wayround.utils.xml.tag(
+    ret = org.wayround.utils.xml.tag(
         'div',
-        content={
-            '001_toc': org.wayround.utils.xml.tag(
-                'div',
-                content=toc
-                )
-            }
+        content=_category_tree(0, db)
         )
 
-    return info_list
+    return ret
+
+def pkg_select(pkg_list, category_list):
+    lst1 = []
+    lst2 = []
+
+    for i in pkg_list:
+        lst1.append(
+            org.wayround.utils.xml.tag(
+                'option',
+                attributes={
+                    'value': i
+                    },
+                content=i
+                )
+            )
+
+    for i in category_list:
+        lst2.append(
+            org.wayround.utils.xml.tag(
+                'option',
+                attributes={
+                    'value': i
+                    },
+                content=i
+                )
+            )
+
+    return org.wayround.utils.xml.tag(
+        'div',
+        content=[
+            org.wayround.utils.xml.tag(
+                'table',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'tr',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'td',
+                                content='Select Package'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'tr',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'td',
+                                content=category_tree()
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'tr',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'td',
+                                content=[
+                                        org.wayround.utils.xml.tag(
+                                            'input',
+                                            attributes={
+                                                'name': 'pkgname',
+                                                'type': 'text'
+                                                },
+                                            closed=True
+                                            )
+                                    ]
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'tr',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'td',
+                                content=[
+                                        org.wayround.utils.xml.tag(
+                                            'button',
+                                            attributes={
+                                                'type': 'submit'
+                                                },
+                                            content="Go to package page"
+                                            )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+

@@ -30,7 +30,7 @@ args_l = len(args)
 log_level = 'INFO'
 
 if '--log' in opts:
-    log_level_u = i[1].upper()
+    log_level_u = opts['--log'].upper()
 
     if not log_level_u in list(logging._levelNames):
         print("-e- Wrong --log parameter")

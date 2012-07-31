@@ -5,7 +5,9 @@ Facility for indexing and analyzing sources and packages repository
 
 import os.path
 import sys
+import glob
 import fnmatch
+import copy
 import logging
 
 
@@ -15,8 +17,11 @@ import sqlalchemy.ext.declarative
 
 
 import org.wayround.utils.text
+import org.wayround.utils.fileindex
 
 import org.wayround.aipsetup.info
+import org.wayround.aipsetup.config
+import org.wayround.aipsetup.name
 
 
 def exported_commands():
@@ -31,7 +36,8 @@ def exported_commands():
         'backup_package_info_to_filesystem': pkgindex_backup_package_info_to_filesystem,
         'load_package_info_from_filesystem': pkgindex_load_package_info_from_filesystem,
         'list_pkg_info_records': pkgindex_list_pkg_info_records,
-        'print_pkg_info_record': pkgindex_print_pkg_info_record
+        'print_pkg_info_record': pkgindex_print_pkg_info_record,
+        'index_sources': pkgindex_index_unicorn,
         }
 
 def commands_order():
@@ -45,7 +51,8 @@ def commands_order():
         'backup_package_info_to_filesystem',
         'load_package_info_from_filesystem',
         'list_pkg_info_records',
-        'print_pkg_info_record'
+        'print_pkg_info_record',
+        'index_sources'
         ]
 
 def pkgindex_scan_repo_for_pkg_and_cat(opts, args):
@@ -79,12 +86,20 @@ def pkgindex_find_missing_pkg_info_records(opts, args):
     -f forces rewrite existing .xml files
     """
 
+    ret = 0
+
     t = '-t' in opts
 
     f = '-f' in opts
 
-    r = PackageDatabase()
-    ret = r.find_missing_pkg_info_records(t, f)
+    try:
+        r = PackageDatabase()
+        ret = r.find_missing_pkg_info_records(t, f)
+    except:
+        logging.exception("Error while searching for missing records")
+        ret = 1
+    finally:
+        ret = 0
 
     return ret
 
@@ -114,8 +129,8 @@ def pkgindex_delete_pkg_info_records(opts, args):
 
     ret = 0
 
-    if len(args) > 1:
-        mask = args[1]
+    if len(args) > 0:
+        mask = args[0]
 
     if mask != None:
         r = PackageDatabase()
@@ -136,8 +151,8 @@ def pkgindex_backup_package_info_to_filesystem(opts, args):
     """
     mask = '*'
 
-    if len(args) > 1:
-        mask = args[1]
+    if len(args) > 0:
+        mask = args[0]
 
     f = '-f' in opts
 
@@ -159,18 +174,16 @@ def pkgindex_load_package_info_from_filesystem(opts, args):
 
     ret = 0
 
-    mask = None
-
-    if len(args) > 1:
-        mask = args[1]
-
-    if mask != None:
-
-        r = PackageDatabase()
-        ret = r.delete_pkg_info_records(mask)
+    filenames = []
+    if len(args) == 0:
+        filenames = glob.glob(org.wayround.aipsetup.config.config['info'] + os.path.sep + '*')
     else:
-        logging.error("Mask is not given")
-        ret = 1
+        filenames = copy.copy(args)
+
+    rewrite_all = '-a' in opts
+
+    r = PackageDatabase()
+    r.load_package_info_from_filesystem(filenames, rewrite_all)
 
     return ret
 
@@ -185,8 +198,8 @@ def pkgindex_list_pkg_info_records(opts, args):
     # TODO: clarification for help needed
     mask = '*'
 
-    if len(args) > 1:
-        mask = args[1]
+    if len(args) > 0:
+        mask = args[0]
 
 
     r = PackageDatabase()
@@ -203,8 +216,8 @@ def pkgindex_print_pkg_info_record(opts, args):
 
     name = None
 
-    if len(args) > 1:
-        name = args[1]
+    if len(args) > 0:
+        name = args[0]
 
     if name != None:
 
@@ -215,6 +228,13 @@ def pkgindex_print_pkg_info_record(opts, args):
         ret = 1
 
     return ret
+
+
+def pkgindex_index_unicorn(opts, args):
+    """
+    Create sources and repositories indexes
+    """
+    index_unicorn()
 
 
 def is_repo_package_dir(path):
@@ -283,6 +303,113 @@ def join_pkg_path(pkg_path):
 
     return ret
 
+def index_unicorn():
+    index_directory(org.wayround.aipsetup.config.config['source'],
+                    org.wayround.aipsetup.config.config['source_index'],
+                    # TODO: move this list to config
+                    ['.tar.gz', '.tar.bz2', '.zip',
+                     '.7z', '.tgz', '.tar.xz', '.tar.lzma',
+                     '.tbz2'])
+
+    # I came to conclusion, what whe don't need package indexing
+    # because package repository can be too big.
+    # Better to use pkgindex database and search on user action
+    #
+    #    index_directory(org.wayround.aipsetup.config.config['repository'],
+    #                    org.wayround.aipsetup.config.config['repository_index'],
+    #                    ['.asp'])
+
+
+
+
+def _index_directory(f, root_dir, root_dirl, acceptable_endings=None):
+
+    files = os.listdir(root_dir)
+    files.sort()
+
+    org.wayround.utils.file.progress_write("Scanning: {}".format(root_dir))
+
+    for each in files:
+        if each in ['.', '..']:
+            continue
+
+        full_path = os.path.join(root_dir, each)
+
+        if os.path.islink(full_path):
+            continue
+
+        if not each[0] == '.' and os.path.isdir(full_path):
+            _index_directory(f, full_path, root_dirl, acceptable_endings)
+
+        elif not each[0] == '.' and os.path.isfile(full_path):
+
+            if isinstance(acceptable_endings, list):
+
+                match_found = False
+
+                for i in acceptable_endings:
+                    if each.endswith(i):
+                        match_found = True
+                        break
+
+                if not match_found:
+                    continue
+
+
+            p = full_path[root_dirl:]
+            f.add('%(name)s' % {
+                    'name': p
+                    })
+
+
+
+def index_directory(
+    dir_name,
+    db_connection,
+    acceptable_endings=None
+    ):
+
+    dir_name = os.path.abspath(dir_name)
+    dir_namel = len(dir_name)
+
+    logging.info("indexing %(dir)s..." % {'dir': dir_name})
+
+    try:
+        f = org.wayround.utils.fileindex.FileIndexer(db_connection)
+    except:
+        logging.exception("Can't open db `{}'".format(db_connection))
+        raise
+    else:
+
+        try:
+            _index_directory(f, dir_name, dir_namel, acceptable_endings)
+
+            f.delete_missing(dir_name)
+
+            f.commit()
+
+            logging.info(
+                "Records: added {added}; remained {skipped}; deleted {deleted}".format(
+                    added=f.added_count,
+                    skipped=f.exists_count,
+                    deleted=f.deleted_count,
+                    )
+                )
+            logging.info("DB Size: {}".format(f.get_size()))
+        finally:
+            f.close()
+
+    return 0
+
+
+def get_package_info(name):
+
+    db = PackageDatabase()
+    ret = db.package_info_record_to_dict(name)
+
+    return ret
+
+class PackageDatabaseConfigError(Exception): pass
 
 class PackageDatabase:
     """
@@ -412,18 +539,20 @@ class PackageDatabase:
             )
 
 
-    def __init__(self, config):
+    def __init__(self):
 
-        self._config = config
+        self._config = org.wayround.aipsetup.config.config
 
         if not os.path.isdir(self._config['repository']):
-            raise Exception("No repository to serve configured")
+            raise PackageDatabaseConfigError(
+                "No repository to service configured"
+                )
 
         db_echo = False
 
         self._db_engine = \
             sqlalchemy.create_engine(
-            self._config['sqlalchemy_engine_string'],
+            self._config['package_index_db_config'],
             echo=db_echo
             )
 
@@ -431,43 +560,52 @@ class PackageDatabase:
 
         self.Base.metadata.create_all()
 
+        self.sess = None
+        self.start_session()
+
     # TODO: Do I need this?
     #def __del__(self):
         #del(self._db_engine)
 
+    def __del__(self):
+        logging.debug("PKG Index DB cleaning")
+        self.close_session()
+
+
+    def start_session(self):
+        if not self.sess:
+            self.sess = sqlalchemy.orm.Session(bind=self._db_engine)
+
+    def commit_session(self):
+        if self.sess:
+            self.sess.commit()
+
+    def close_session(self):
+        if self.sess:
+            self.sess.commit()
+            self.sess.close()
+            self.sess = None
+
 
     def create_category(self, name='name', parent_cid=0):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
         new_cat = self.Category(name=name, parent_cid=parent_cid)
 
-        sess.add(new_cat)
-        sess.commit()
+        self.sess.add(new_cat)
 
         new_cat_id = new_cat.cid
-
-        sess.close()
 
         return new_cat_id
 
     def get_category_by_name(self, name='name'):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-        lst = sess.query(self.Category).filter_by(name=name).all()
-
-        sess.close()
+        lst = self.sess.query(self.Category).filter_by(name=name).all()
 
         return lst
 
     def get_category_by_id(self, cid=0):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-        lst = sess.query(self.Category).filter_by(cid=cid).all()
-
-        sess.close()
+        lst = self.sess.query(self.Category).filter_by(cid=cid).all()
 
         return lst
 
@@ -475,41 +613,98 @@ class PackageDatabase:
 
         ret = None
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-        q = sess.query(self.Package).filter_by(name=name).first()
+        q = self.sess.query(self.Package).filter_by(name=name).first()
         if q != None:
             ret = q.pid
 
-        sess.close()
+        return ret
+
+    def get_package_by_id(self, pid):
+
+        ret = None
+
+        q = self.sess.query(self.Package).filter_by(pid=pid).first()
+        if q != None:
+            ret = q.name
 
         return ret
 
 
     def ls_packages(self, cid=None):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
+        if cid == None:
+            lst = self.sess.query(self.Package).all()
+        else:
+            lst = self.sess.query(self.Package).filter_by(cid=cid).all()
+
+        lst_names = []
+        for i in lst:
+            lst_names.append(i.name)
+
+        del(lst)
+
+        lst_names.sort()
+
+        return lst_names
+
+    def ls_package_ids(self, cid=None):
 
         if cid == None:
-            lst = sess.query(self.Package).all()
+            lst = self.sess.query(self.Package).all()
         else:
-            lst = sess.query(self.Package).filter_by(cid=cid).all()
+            lst = self.sess.query(self.Package).filter_by(cid=cid).all()
 
-        sess.close()
+        ids = []
+        for i in lst:
+            ids.append(i.pid)
 
-        return lst
+        del(lst)
 
+        return ids
+
+    def ls_package_dict(self, cid=None):
+
+        if cid == None:
+            lst = self.sess.query(self.Package).all()
+        else:
+            lst = self.sess.query(self.Package).filter_by(cid=cid).all()
+
+        dic = {}
+        for i in lst:
+            dic[int(i.pid)] = i.name
+
+        del(lst)
+
+        return dic
 
     def ls_categories(self, parent_cid=0):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(self.Category).filter_by(parent_cid=parent_cid).all()
+        lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
 
-        sess.close()
+        lst_names = []
+        for i in lst:
+            lst_names.append(i.name)
 
-        return lst
+        del(lst)
 
-    def _scan_repo_for_pkg_and_cat(self, sess, root_dir, cid):
+        lst_names.sort()
+
+        return lst_names
+
+    def ls_category_ids(self, parent_cid=0):
+
+        lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
+
+        ids = []
+        for i in lst:
+            ids.append(i.cid)
+
+        del(lst)
+
+        return ids
+
+
+    def _scan_repo_for_pkg_and_cat(self, root_dir, cid):
 
         files = os.listdir(root_dir)
 
@@ -542,10 +737,11 @@ class PackageDatabase:
 
             if is_repo_package_dir(full_path):
                 pa = self.Package(name=each, cid=cid)
-                sess.add(pa)
-                #sess.commit()
+                self.sess.add(pa)
+                # TODO: May be comment this commit?
+                # self.sess.commit()
                 if sys.stdout.isatty():
-                    pcount = sess.query(self.Package).count()
+                    pcount = self.sess.query(self.Package).count()
                     line_to_write = "       %(num)d packages found: %(name)s" % {
                         'num': pcount,
                         'name': pa.name
@@ -555,14 +751,14 @@ class PackageDatabase:
             elif os.path.isdir(full_path):
                 new_cat = self.Category(name=each, parent_cid=cid)
 
-                sess.add(new_cat)
-                sess.commit()
+                self.sess.add(new_cat)
+                self.sess.commit()
 
                 new_cat_cid = new_cat.cid
                 del(new_cat)
 
                 self._scan_repo_for_pkg_and_cat(
-                    sess, full_path, new_cat_cid
+                    full_path, new_cat_cid
                     )
             else:
                 logging.warning("garbage file found: %(path)s" % {
@@ -575,77 +771,57 @@ class PackageDatabase:
 
         ret = 0
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
         logging.info("Deleting old data")
-        sess.query(self.Category).delete()
-        sess.query(self.Package).delete()
+        self.sess.query(self.Category).delete()
+        self.sess.query(self.Package).delete()
 
         logging.info("Committing")
-        sess.commit()
+        self.sess.commit()
 
         logging.info("Scanning repository...")
         self._scan_repo_for_pkg_and_cat(
-            sess, self._config['repository'], 0)
+            self._config['repository'], 0)
 
         print("")
-        sess.commit()
+        self.sess.commit()
 
         logging.info("Searching for errors")
         self.find_repository_package_name_collisions_in_database()
         logging.info("Search operations finished")
-        sess.close()
 
         return ret
 
-    def get_package_tags(self, name, pre_sess=None):
+    def get_package_tags(self, name):
         ret = []
 
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        q = sess.query(self.PackageTag).filter_by(name=name).all()
+        q = self.sess.query(self.PackageTag).filter_by(name=name).all()
 
         for i in q:
             ret.append(i.tag)
 
-        if pre_sess == None:
-            sess.close()
         return ret
 
-    def set_package_tags(self, name, tags, pre_sess=None):
+    def set_package_tags(self, name, tags):
 
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        sess.query(self.PackageTag).filter_by(name=name).delete()
+        self.sess.query(self.PackageTag).filter_by(name=name).delete()
 
         for i in tags:
             n = self.PackageTag()
             n.name = name
             n.tag = i
-            sess.add(n)
-
-        if pre_sess == None:
-            sess.commit()
-            sess.close()
+            self.sess.add(n)
 
         return
 
     def get_package_path(self, pid):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
         ret = []
         pkg = None
 
         if pid != None:
-            pkg = sess.query(self.Package).filter_by(pid=pid).first()
+            pkg = self.sess.query(self.Package).filter_by(pid=pid).first()
         else:
-            raise ValueError
+            raise ValueError("Error getting package data from DB")
 
         # print "pkg: "+repr(dir(pkg))
 
@@ -656,29 +832,61 @@ class PackageDatabase:
             ret.insert(0, (pkg.pid, pkg.name))
 
             while r != 0:
-                cat = sess.query(self.Category).filter_by(cid=r).first()
+                cat = self.sess.query(self.Category).filter_by(cid=r).first()
                 ret.insert(0, (cat.cid, cat.name))
                 r = cat.parent_cid
 
             # This is _presumed_. NOT inserted
             # ret.insert(0,(0, '/'))
 
-        sess.close()
 
         #print '-gpp- :' + repr(ret)
         return ret
 
-    def get_package_path_string(self, pid):
-        r = self.get_package_path(pid)
 
+    def get_category_path(self, cid):
+
+        ret = []
+        categ = None
+
+        if cid != None:
+            categ = self.sess.query(self.Category).filter_by(cid=cid).first()
+        else:
+            raise ValueError("Error getting category data from DB")
+
+        # print "categ: "+repr(dir(categ))
+
+        if categ != None :
+
+            r = categ.parent_cid
+            # print 'r: '+str(r)
+            ret.insert(0, (categ.cid, categ.name))
+
+            while r != 0:
+                cat = self.sess.query(self.Category).filter_by(cid=r).first()
+                ret.insert(0, (cat.cid, cat.name))
+                r = cat.parent_cid
+
+            # This is _presumed_. NOT inserted
+            # ret.insert(0,(0, '/'))
+
+        #print '-gpp- :' + repr(ret)
+        return ret
+
+
+    def get_package_path_string(self, cid):
+        r = self.get_package_path(cid)
         ret = join_pkg_path(r)
+        return ret
 
+    def get_category_path_string(self, cid):
+        r = self.get_category_path(cid)
+        ret = join_pkg_path(r)
         return ret
 
     def find_repository_package_name_collisions_in_database(self):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        lst = sess.query(self.Package).order_by(self.Package.name).all()
+        lst = self.sess.query(self.Package).order_by(self.Package.name).all()
 
         lst2 = []
 
@@ -690,7 +898,6 @@ class PackageDatabase:
 
         logging.info("Processing %(n)s packages..." % {'n': len(lst)})
         sys.stdout.flush()
-        sess.close()
 
         del(lst)
 
@@ -712,11 +919,11 @@ class PackageDatabase:
 
 
         if len(lst_dup) == 0:
-            logging.info("-%(t)s- Found %(c)s duplicated package names. Package locations look good!" % {
+            logging.info("Found %(c)s duplicated package names. Package locations look good!" % {
                 'c' : len(lst_dup)
                 })
         else:
-            logging.warning("-%(t)s- Found %(c)s duplicated package names" % {
+            logging.warning("Found %(c)s duplicated package names" % {
                 'c' : len(lst_dup)
                 })
 
@@ -749,47 +956,41 @@ class PackageDatabase:
 
         not_found = []
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
         names_found = []
 
         if names == None:
-            q = sess.query(self.Package).all()
+            q = self.sess.query(self.Package).all()
             for i in q:
                 names_found.append(i.name)
         else:
             names_found = names
 
         for i in names_found:
-            q = sess.query(self.PackageInfo).filter_by(name=i).first()
+            q = self.sess.query(self.PackageInfo).filter_by(name=i).first()
 
             if q == None:
                 not_found.append(q)
             else:
                 found.append(q)
 
-        sess.close()
-
         return (found, not_found)
 
     def package_info_record_to_dict(self, name=None, record=None):
         """
-        This method can accept package name or complited record
+        This method can accept package name or complete record
         instance.
 
         If name is given, record is not used and method does db query
         itself.
 
-        If name is not given, record is used as if it wer this method
+        If name is not given, record is used as if it were this method's
         query result.
         """
 
         ret = None
 
         if name != None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-            q = sess.query(self.PackageInfo).filter_by(name=name).first()
+            q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
         else:
             q = record
 
@@ -807,22 +1008,14 @@ class PackageDatabase:
                 'buildinfo'    : q.buildinfo
                 }
 
-        if name != None:
-            sess.close()
-
         return ret
 
 
-    def package_info_dict_to_record(self, name, struct, pre_sess=None):
+    def package_info_dict_to_record(self, name, struct):
 
         # TODO: check_info_dict(struct)
 
-        if pre_sess == None:
-            sess = sqlalchemy.orm.Session(bind=self._db_engine)
-        else:
-            sess = pre_sess
-
-        q = sess.query(self.PackageInfo).filter_by(name=name).first()
+        q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
 
         creating_new = False
         if q == None:
@@ -839,23 +1032,18 @@ class PackageDatabase:
         # q.category    = category
 
         if creating_new:
-            sess.add(q)
+            self.sess.add(q)
 
 
-        if pre_sess == None:
-            sess.commit()
-            sess.close()
-
-        self.set_package_tags(name, struct['tags'], pre_sess=pre_sess)
+        self.set_package_tags(name, struct['tags'])
+        self.commit_session()
 
         return
 
     def backup_package_info_to_filesystem(
         self, mask='*', force_rewrite=False):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-        q = sess.query(self.PackageInfo).all()
+        q = self.sess.query(self.PackageInfo).all()
 
         for i in q:
             if fnmatch.fnmatch(i.name, mask):
@@ -884,8 +1072,6 @@ class PackageDatabase:
                             'name': filename
                             })
 
-        sess.close()
-
         return
 
     def load_package_info_from_filesystem(
@@ -907,7 +1093,6 @@ class PackageDatabase:
         files.sort()
 
         missing = []
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
         logging.info("searching missing records")
         files_l = len(files)
         num = 0
@@ -925,7 +1110,7 @@ class PackageDatabase:
             name = os.path.basename(i)[:-4]
 
             if not all_records:
-                q = sess.query(self.PackageInfo).filter_by(
+                q = self.sess.query(self.PackageInfo).filter_by(
                     name=name
                     ).first()
                 if q == None:
@@ -933,11 +1118,8 @@ class PackageDatabase:
             else:
                 missing.append(i)
 
-        sess.close()
-
         print("")
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
         for i in missing:
             struct = org.wayround.aipsetup.info.read_from_file(i)
             name = os.path.basename(i)[:-4]
@@ -949,7 +1131,7 @@ class PackageDatabase:
                     )
 
                 self.package_info_dict_to_record(
-                    name, struct, pre_sess=sess
+                    name, struct
                     )
                 loaded += 1
             else:
@@ -957,32 +1139,26 @@ class PackageDatabase:
                     'name': i
                     })
         print("")
-        sess.commit()
-        sess.close()
-
 
         logging.info("Totally loaded %(n)d records" % {'n': loaded})
         return
 
     def delete_pkg_info_records(self, mask='*'):
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(self.PackageInfo).all()
+        q = self.sess.query(self.PackageInfo).all()
 
         deleted = 0
 
         for i in q:
 
             if fnmatch.fnmatch(i.name, mask):
-                sess.delete(i)
+                self.sess.delete(i)
                 deleted += 1
                 logging.info("deleted pkg info: %(name)s" % {
                     'name': i.name
                     })
                 sys.stdout.flush()
 
-        sess.commit()
-        sess.close()
         logging.info("Totally deleted %(n)d records" % {
             'n': deleted
             })
@@ -990,9 +1166,8 @@ class PackageDatabase:
 
     def list_pkg_info_records(self, mask='*', mute=False):
         lst = []
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
 
-        q = sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
+        q = self.sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
 
         found = 0
 
@@ -1002,7 +1177,6 @@ class PackageDatabase:
                 found += 1
                 lst.append(i.name)
 
-        sess.close()
         if not mute:
             org.wayround.utils.text.columned_list_print(lst)
             logging.info("Total found %(n)d records" % {
@@ -1013,9 +1187,7 @@ class PackageDatabase:
     def find_missing_pkg_info_records(
         self, create_templates=False, force_rewrite=False):
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-        q = sess.query(self.Package).order_by(self.Package.name).all()
+        q = self.sess.query(self.Package).order_by(self.Package.name).all()
 
         pkgs_checked = 0
         pkgs_missing = 0
@@ -1030,7 +1202,7 @@ class PackageDatabase:
 
             pkgs_checked += 1
 
-            q2 = sess.query(self.PackageInfo).filter_by(name=each.name).first()
+            q2 = self.sess.query(self.PackageInfo).filter_by(name=each.name).first()
 
             if q2 == None:
 
@@ -1050,14 +1222,14 @@ class PackageDatabase:
 
                     if os.path.exists(filename):
                         if not force_rewrite:
-                            logging.info("xml info file already exists")
+                            logging.info("XML info file already exists")
                             pkgs_exists += 1
                             continue
                         else:
                             pkgs_forced += 1
 
                     if force_rewrite:
-                        logging.info("forced template rewriting")
+                        logging.info("Forced template rewriting: {}".format(filename))
 
                     if org.wayround.aipsetup.info.write_to_file(
                         filename,
@@ -1068,8 +1240,6 @@ class PackageDatabase:
                             })
                     else:
                         pkgs_written += 1
-
-        sess.close()
 
         logging.info("""\
 Total records checked     : %(n1)d
@@ -1094,9 +1264,7 @@ Total records checked     : %(n1)d
 
         ret = []
 
-        sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-        q = sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
+        q = self.sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
 
         for i in q:
 
@@ -1121,14 +1289,12 @@ Total records checked     : %(n1)d
                     })
             else:
                 d2 = self.package_info_record_to_dict(record=i)
-                if not org.wayround.aipsetup.info.is_dicts_equal(d1, d2):
+                if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
                     ret.append(i.name)
                     if not mute:
                         logging.warning("xml init file differs for: %(name)s" % {
                             'name': i.name
                             })
-
-        sess.close()
 
         if not mute:
             logging.info("Total %(n)d warnings" % {'n': len(ret)})
@@ -1175,28 +1341,21 @@ Total records checked     : %(n1)d
             if r['pkg_name_type'] in org.wayround.aipsetup.name.NAME_REGEXPS:
                 regexp = org.wayround.aipsetup.name.NAME_REGEXPS[r['pkg_name_type']]
 
-            print("""
-Name: %(name)s
+            print("""\
++---[{name}]---------------------------------+
+ file name type: {pkg_name_type}
+filename regexp: {regexp}
+      buildinfo: {buildinfo}
+       homepage: {homepage}
+       category: {category}
+           tags: {tags}
++---[{name}]---------------------------------+
 
-File Name Type: %(pkg_name_type)s
+{description}
 
-Regular Expression: %(regexp)s
-
-Buildinfo: %(buildinfo)s
-
-== Description ==
-
-%(description)s
-
-Home Page: %(homepage)s
-
-----
-
-Category: %(category)s
-
-Tags: %(tags)s
-
-""" % {
++---[{name}]---------------------------------+
+""".format_map(
+        {
         'name'         : name,
         'homepage'     : r['homepage'],
         'pkg_name_type': r['pkg_name_type'],
@@ -1205,5 +1364,6 @@ Tags: %(tags)s
         'tags'         : ', '.join(r['tags']),
         'category'     : category,
         'buildinfo'    : r['buildinfo']
-        })
-
+        }
+        )
+    )

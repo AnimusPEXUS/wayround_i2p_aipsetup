@@ -9,12 +9,10 @@ import urllib.request, urllib.parse
 import subprocess
 import logging
 
-import org.wayround.utils
 
 import org.wayround.aipsetup.version
 import org.wayround.aipsetup.name
-import org.wayround.aipsetup.info
-import org.wayround.aipsetup.config
+import org.wayround.aipsetup.pkgindex
 
 
 def exported_commands():
@@ -107,7 +105,7 @@ def workout_search_params(opts, args):
     p_errors = False
 
     if args_l != 1:
-        logging.error("can be only one argument")
+        logging.error("must be one argument")
         p_errors = True
     else:
 
@@ -142,21 +140,14 @@ def workout_search_params(opts, args):
             p_errors = True
 
 
-        value = args[1]
+        value = args[0]
 
         if not p_errors:
 
             n_errors = False
 
             if how == 'i':
-                idic = org.wayround.aipsetup.info.read_from_file(
-                    os.path.join(
-                        org.wayround.aipsetup.config.config['info'],
-                        '%(name)s.xml' % {
-                            'name': value
-                            }
-                        )
-                    )
+                idic = org.wayround.aipsetup.pkgindex.get_package_info(value)
 
                 if not isinstance(idic, dict):
                     logging.error("Can't find info for %(name)s" % {
@@ -325,7 +316,7 @@ def get(output='.', wsp={}):
                 except:
                     logging.exception("Can't start wget")
                     raise
-                else
+                else:
                     process.wait()
 
     return ret

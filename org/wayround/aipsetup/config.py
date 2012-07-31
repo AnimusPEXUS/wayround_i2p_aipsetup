@@ -9,7 +9,6 @@ import logging
 import pprint
 
 
-import org.wayround.utils.error
 
 CONFIG_FULL_SAMPLE = {
     'editor'             : 'emacs',
@@ -22,8 +21,7 @@ CONFIG_FULL_SAMPLE = {
     'buildinfo'          : '/mnt/sda3/home/agu/_UNICORN/pkg_buildinfo',
     'buildtools'         : '/mnt/sda3/home/agu/_UNICORN/pkg_buildtools',
     'info'               : '/mnt/sda3/home/agu/_UNICORN/pkg_info',
-    'repository_index'   : '/mnt/sda3/home/agu/_UNICORN/index_repository.lst',
-    'source_index'       : '/mnt/sda3/home/agu/_UNICORN/index_source.lst',
+    'source_index'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/sources.sqlite',
 
     # configurable
     'repository'         : '/mnt/sda3/home/agu/_UNICORN/pkg_repository',
@@ -32,7 +30,7 @@ CONFIG_FULL_SAMPLE = {
 
 
     # DB config
-    'sqlalchemy_engine_string': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgindex.sqlite',
+    'package_index_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgindex.sqlite',
 
 
 
@@ -69,7 +67,7 @@ CONFIG_ALLOWED_PARAMETERS = frozenset([
     'repository',
     'source',
     'buildingsites',
-    'sqlalchemy_engine_string',
+    'package_index_db_config',
     'server_ip',
     'server_port',
     'server_prefix',
@@ -222,7 +220,7 @@ def format_config(config):
 
 
     # sql settings
-    'sqlalchemy_engine_string': '{sqlalchemy_engine_string}'
+    'package_index_db_config': '{package_index_db_config}'
 
  }}
 """.format_map(config)
@@ -261,13 +259,22 @@ def config_check_after_load(indict):
         ('constitution'    , 'system_constitution.py'),
         ('buildinfo'       , 'pkg_buildinfo'),
         ('buildtools'      , 'pkg_buildtools'),
-        ('info'            , 'pkg_info'),
-        ('repository_index', 'index_repository.lst'),
-        ('source_index'    , 'index_source.lst')
+        ('info'            , 'pkg_info')
         ]:
         indict[i] = os.path.abspath(
             os.path.join(indict['unicorn_root'], j)
             )
+
+    for i, j in [
+        ('source_index'    , 'sources.sqlite')
+        ]:
+        indict[i] = 'sqlite:///{path}'.format(
+            path=os.path.abspath(
+                os.path.join(indict['unicorn_root'], j)
+                )
+            )
+
+# sqlite:////mnt/sda3/home/agu/_UNICORN/
 
     for i, j in [
         ('installed_pkg_dir_buildlogs', 'buildlogs'),

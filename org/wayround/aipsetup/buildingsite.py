@@ -14,6 +14,7 @@ import org.wayround.aipsetup.info
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.config
+import org.wayround.aipsetup.pkgindex
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -334,46 +335,39 @@ def apply_pkg_info_on_buildingsite(dirname):
 
     ret = 0
 
-    d = read_package_info(dirname, ret_on_error={})
+    package_info = read_package_info(dirname, ret_on_error={})
 
-    if not isinstance(d, dict) \
-            or not 'pkg_nameinfo' in d \
-            or not isinstance(d['pkg_nameinfo'], dict) \
-            or not 'groups' in d['pkg_nameinfo'] \
-            or not isinstance(d['pkg_nameinfo']['groups'], dict) \
-            or not 'name' in d['pkg_nameinfo']['groups'] \
-            or not isinstance(d['pkg_nameinfo']['groups']['name'],
+    if not isinstance(package_info, dict) \
+            or not 'pkg_nameinfo' in package_info \
+            or not isinstance(package_info['pkg_nameinfo'], dict) \
+            or not 'groups' in package_info['pkg_nameinfo'] \
+            or not isinstance(package_info['pkg_nameinfo']['groups'], dict) \
+            or not 'name' in package_info['pkg_nameinfo']['groups'] \
+            or not isinstance(package_info['pkg_nameinfo']['groups']['name'],
                               str):
 
 
         logging.error("info undetermined")
-        d['pkg_info'] = {}
+        package_info['pkg_info'] = {}
         ret = 1
 
     else:
-        infoname = d['pkg_nameinfo']['groups']['name']
+        infoname = package_info['pkg_nameinfo']['groups']['name']
 
-        info_filename = os.path.join(
-            org.wayround.aipsetup.config.config['info'],
-            '{}.xml'.format(infoname)
-            )
+        logging.debug("Getting info from index DB")
 
-        logging.info("Reading info file `%(name)s'" % {
-            'name': info_filename
-            })
-        info = org.wayround.aipsetup.info.read_from_file(info_filename)
+        info = org.wayround.aipsetup.pkgindex.get_package_info(infoname)
+
         if not isinstance(info, dict):
-            logging.error("Can't read info from %(filename)s" % {
-                'filename': info_filename
-                })
-            d['pkg_info'] = {}
+            logging.error("Can't read info from DB")
+            package_info['pkg_info'] = {}
             ret = 2
         else:
 
-            d['pkg_info'] = info
+            package_info['pkg_info'] = info
             # print repr(info)
 
-            write_package_info(dirname, d)
+            write_package_info(dirname, package_info)
 
             ret = 0
 
