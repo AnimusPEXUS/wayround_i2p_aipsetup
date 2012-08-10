@@ -263,7 +263,7 @@ def get(output='.', wsp={}):
 
             lst = fn_version_filter(lst, wsp)
 
-            lst.sort(org.wayround.aipsetup.version.version_comparator)
+            lst.sort(org.wayround.aipsetup.version.source_version_comparator)
 
             lst = fn_version_min_max_filter(lst, wsp)
 
@@ -335,7 +335,7 @@ def search(wsp):
 
         lst = fn_version_filter(lst, wsp)
 
-        lst.sort(org.wayround.aipsetup.version.version_comparator)
+        lst.sort(org.wayround.aipsetup.version.source_version_comparator)
 
         lst = fn_version_min_max_filter(lst, wsp)
 
@@ -465,7 +465,7 @@ def fn_version_filter(lst, wsp):
             if org.wayround.aipsetup.name.source_name_parse(
                 i,
                 modify_info_file=False,
-                acceptable_vn=wsp['ver']
+                acceptable_version_number=wsp['ver']
                 ) != None:
 
                 ret.append(i)
@@ -479,7 +479,7 @@ def fn_version_min_max_filter(lst, wsp):
     """
     Return only maximal or minimal source file name from list
 
-    List must be sorted using version.version_comparator
+    List must be sorted using version.source_version_comparator
     before being passed to this function.
     """
 

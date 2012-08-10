@@ -24,6 +24,10 @@ NAME_REGEXPS_ORDER = [
     'version_right_after_name_with_status'
     ]
 
+# required/allowed group names:
+#    version_letter
+#    version_letter_number
+
 NAME_REGEXPS = {
     'standard': \
         r'^{standard_name}-{standard_version}{standard_extensions}$',
@@ -41,7 +45,16 @@ NAME_REGEXPS = {
         r'^{standard_name}-{standard_version}(?P<version_letter>[a-zA-Z])(?P<version_letter_number>\d*){standard_extensions}$',
 
     'standard_with_status': \
+        r'^{standard_name}-{standard_version}[\.-_]{standard_statuses}{standard_extensions}$',
+
+    'standard_with_not_separated_status': \
         r'^{standard_name}-{standard_version}{standard_statuses}{standard_extensions}$',
+
+    'underscored_with_status': \
+        r'^{standard_name}_{underscored_version}[\.-_]{underscored_statuses}{standard_extensions}$',
+
+    'underscored_with_not_separated_status': \
+        r'^{standard_name}_{underscored_version}{underscored_statuses}{standard_extensions}$',
 
     'underscored_with_status': \
         r'^{standard_name}_{underscored_version}{underscored_statuses}{standard_extensions}$',
@@ -54,18 +67,28 @@ NAME_REGEXPS = {
 
     }
 
+NAME_REGEXPS_COMPILED = {}
+
 for i in NAME_REGEXPS:
     logging.debug("Expending {}".format(i))
     NAME_REGEXPS[i] = NAME_REGEXPS[i].format_map({
         'statuses'            : r'pre|alpha|beta|rc|test|source|src|dist|full',
         'standard_extensions' : r'(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2|\.tbz)',
-        'standard_name'       : r'(?P<name>.+?)',
+
+        'standard_name'       : r'(?P<name>([0-9a-zA-Z]|-?)+?)',
+        'underscored_name'    : r'(?P<name>([0-9a-zA-Z]|_?)+?)',
+
         'standard_version'    : r'(?P<version>(\d+\.??)+)',
-        'standard_statuses'   : r'(?P<statuses>([-\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
         'underscored_version' : r'(?P<version>(\d+_??)+)',
-        'underscored_statuses': r'(?P<statuses>([_\.][a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
+
+        'standard_statuses'   : r'(?P<statuses>([a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
+        'underscored_statuses': r'(?P<statuses>([a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
         'date'                : r'(?P<date>\d{8,16})'
         })
+
+for i in NAME_REGEXPS:
+    logging.debug("Compiling {}".format(i))
+    NAME_REGEXPS_COMPILED[i] = re.compile(NAME_REGEXPS[i])
 
 del(i)
 
@@ -74,11 +97,11 @@ class RegexpsError(Exception): pass
 # Ensure exception in case something missed
 for each in NAME_REGEXPS_ORDER:
     if not each in NAME_REGEXPS:
-        raise RegexpsError
+        raise RegexpsError("{} absent in NAME_REGEXPS".format(each))
 
 for each in NAME_REGEXPS:
     if not each in NAME_REGEXPS_ORDER:
-        raise RegexpsError
+        raise RegexpsError("{} absent in NAME_REGEXPS_ORDER".format(each))
 
 del(each)
 
@@ -86,6 +109,15 @@ ASP_NAME_REGEXPS = {
     'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$',
     'aipsetup3': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
     }
+
+ASP_NAME_REGEXPS_COMPILED = {}
+
+for i in ASP_NAME_REGEXPS:
+    logging.debug("Compiling {}".format(i))
+    ASP_NAME_REGEXPS_COMPILED[i] = re.compile(ASP_NAME_REGEXPS[i])
+
+del(i)
+
 
 def exported_commands():
     return {
@@ -110,16 +142,14 @@ def name_parse_name(opts, args):
 
     ret = 0
 
-    if len(args) != 2:
+    if len(args) != 1:
         logging.error("File name required")
         ret = 1
     else:
 
-        filename = args[1]
+        filename = args[0]
 
-        write = False
-        if '-w' in opts:
-            write = True
+        write = '-w' in opts
 
         if source_name_parse(filename, modify_info_file=write) != 0:
             ret = 2
@@ -183,6 +213,8 @@ def name_test_expressions_on_sources(opts, args):
 
 def package_name_parse(filename):
 
+    filename = os.path.basename(filename)
+
     logging.debug("Parsing package file name {}".format(filename))
 
     ret = None
@@ -195,7 +227,7 @@ def package_name_parse(filename):
         filename = filename[:-3]
 
     for i in ASP_NAME_REGEXPS:
-        re_res = re.match(ASP_NAME_REGEXPS[i], filename)
+        re_res = ASP_NAME_REGEXPS_COMPILED[i].match(filename)
         if re_res != None:
             ret = {
                 're': i,
@@ -215,7 +247,13 @@ def package_name_parse(filename):
 
 
 
-def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
+def source_name_parse(
+    filename,
+    modify_info_file=False,
+    acceptable_version_number=None,
+    mute=False
+    ):
+
     """
     Parse source file name. On success do some more actions.
 
@@ -253,16 +291,21 @@ def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
 
     ret = None
 
-    bn = os.path.basename(filename)
+    filename = os.path.basename(filename)
 
     re_r = None
 
     # Find matching regular expression
     for j in NAME_REGEXPS_ORDER:
 
-        logging.info("Matching `{}'".format(j))
+        s = "Matching `{}'".format(j)
+        if mute:
+            logging.debug(s)
+        else:
+            logging.info(s)
 
-        re_r = re.match(NAME_REGEXPS[j], bn)
+
+        re_r = NAME_REGEXPS_COMPILED[j].match(filename)
 
         if re_r != None:
             break
@@ -296,13 +339,13 @@ def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
 
 
         fnmatched = False
-        if isinstance(acceptable_vn, str):
-            if fnmatch.fnmatch(ret['groups']['version'], acceptable_vn):
+        if isinstance(acceptable_version_number, str):
+            if fnmatch.fnmatch(ret['groups']['version'], acceptable_version_number):
                 fnmatched = True
 
 
-        if acceptable_vn == None or \
-                (isinstance(acceptable_vn, str) and fnmatched):
+        if acceptable_version_number == None or \
+                (isinstance(acceptable_version_number, str) and fnmatched):
 
             ret['groups']['version'] = \
                 ret['groups']['version'].replace('_', '.')
@@ -326,7 +369,7 @@ def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
                 ret['groups']['statuses_list'].remove('')
 
 
-            ret['name'] = bn
+            ret['name'] = filename
             ret['re'] = j
 
         else:
@@ -336,7 +379,7 @@ def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
 
 
     if ret == None:
-        logging.debug("No match `{}'".format(bn))
+        logging.debug("No match `{}'".format(filename))
 
     else:
 
@@ -347,12 +390,16 @@ def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
                 'value': repr(ret['groups'][i])
                 }
 
-        logging.info("Match `{bn}' `{re}'\n{groups}".format_map({
-            'bn': bn,
+        s = "Match `{filename}' `{re}'\n{groups}".format_map({
+            'filename': filename,
             're': j,
             'groups': groups
             })
-            )
+
+        if mute:
+            logging.debug(s)
+        else:
+            logging.info(s)
 
 
     if ret != None and modify_info_file:
@@ -363,7 +410,12 @@ def source_name_parse(filename, modify_info_file=False, acceptable_vn=None):
                 }
             )
 
-        logging.info("Updating info file {}".format(fn))
+        s = "Updating info file {}".format(fn)
+
+        if mute:
+            logging.debug(s)
+        else:
+            logging.info(s)
 
         data = org.wayround.aipsetup.info.read_from_file(fn)
 

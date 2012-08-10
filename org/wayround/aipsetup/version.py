@@ -4,27 +4,54 @@ import logging
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.config
 
-def version_comparator(name1, name2):
+def source_version_comparator(name1, name2):
 
     ret = 0
 
     d1 = org.wayround.aipsetup.name.source_name_parse(
-        org.wayround.aipsetup.config.config,
         name1, modify_info_file=False
         )
 
     d2 = org.wayround.aipsetup.name.source_name_parse(
-        org.wayround.aipsetup.config.config,
         name2, modify_info_file=False
         )
 
     if d1 == None or d2 == None:
-        logging.error("Can't parse filename")
-        raise Exception
+        raise Exception("Can't parse filename")
 
     if d1['groups']['name'] != d2['groups']['name']:
-        logging.error("Different names")
-        raise Exception
+        raise Exception("Different names")
+
+    else:
+        com_res = standard_comparison(
+            d1['groups']['version'],
+            d2['groups']['version']
+            )
+
+        if com_res != 0:
+            ret = com_res
+        else:
+            ret = 0
+
+    return ret
+
+def package_version_comparator(name1, name2):
+
+    ret = 0
+
+    d1 = org.wayround.aipsetup.name.package_name_parse(
+        name1, modify_info_file=False
+        )
+
+    d2 = org.wayround.aipsetup.name.package_name_parse(
+        name2, modify_info_file=False
+        )
+
+    if d1 == None or d2 == None:
+        raise Exception("Can't parse filename")
+
+    if d1['groups']['name'] != d2['groups']['name']:
+        raise Exception("Different names")
 
     else:
         com_res = standard_comparison(

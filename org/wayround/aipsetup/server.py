@@ -63,6 +63,32 @@ class Index:
 
     pkg_list.exposed = True
 
+
+    def directory(self, path=''):
+
+        db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+
+        txt = org.wayround.aipsetup.serverui.page_category(db, path)
+
+        db.close_session()
+
+        return txt
+
+    directory.exposed = True
+
+    def package(self, name=''):
+
+        db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+
+        txt = org.wayround.aipsetup.serverui.page_package(db, name)
+
+        db.close_session()
+
+        return txt
+
+    package.exposed = True
+
+
 #        self.config = org.wayround.aipsetup.config.config
 #        self.templates = templates
 #        self.pdb = org.wayround.aipsetup.pkgindex.PackageDatabase(self.config)
