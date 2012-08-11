@@ -372,6 +372,8 @@ def _scan_progress(added_tags, sub_dir_name, root_dir_name_len):
             )
         )
 
+    return
+
 def _index_directory_to_list(
     list_buffer,
     root_dir_name,
@@ -476,12 +478,14 @@ def index_directory(
         source_index, root_dir_name, sub_dir_name, root_dir_name_len, acceptable_endings
         )
 
+    org.wayround.utils.file.progress_write_finish()
+
     source_index = list(set(source_index))
     source_index.sort()
 
     found_count = len(source_index)
 
-    logging.info("Found {} tag_objects".format(found_count))
+    logging.info("Found {} indexable objects".format(found_count))
 
     try:
         tags = org.wayround.utils.tag.TagEngine(db_connection, commit_every=200)
@@ -515,6 +519,9 @@ def index_directory(
                         tags.set_tags(i, [parsed_src_filename['groups']['name']])
                         added_count += 1
                     else:
+                        org.wayround.utils.file.progress_write(
+                            "    failed to parse: {}\n".format(os.path.basename(i))
+                            )
                         failed_count += 1
 
                 org.wayround.utils.file.progress_write(
@@ -532,7 +539,7 @@ def index_directory(
 #            added_count = res['added_tags']
 
             tags.commit()
-            print("")
+            org.wayround.utils.file.progress_write_finish()
             logging.info("Cleaning wrong DB entries")
             tag_objects = tags.get_objects()
             deleted_count = 0
@@ -566,6 +573,8 @@ def index_directory(
                         i
                         )
                     )
+
+            org.wayround.utils.file.progress_write_finish()
 
             tags.commit()
 
@@ -620,21 +629,22 @@ def get_package_files(name):
 
 def get_package_source_files(name):
 
+    needed_files = []
+
     try:
-        f = org.wayround.utils.fileindex.FileIndexer(
+        f = org.wayround.utils.tag.TagEngine(
             org.wayround.aipsetup.config.config['source_index']
             )
     except:
         logging.exception("Can't connect to source file index")
     else:
         try:
-            needed_files = {}
-            files = f.get_files()
+            needed_files = []
+            files = f.objects_by_tags([name])
             for i in files:
-                file_name = os.path.basename(i)
-                file_name_parsed = org.wayround.aipsetup.name.source_name_parse(file_name)
-                if file_name_parsed and file_name_parsed['groups']['name'] == name:
-                    needed_files[i] = file_name_parsed
+                needed_files.append(i)
+
+            needed_files.sort()
 
         finally:
             f.close()
@@ -1097,7 +1107,7 @@ class PackageDatabase:
         self._scan_repo_for_pkg_and_cat(
             self._config['repository'], 0)
 
-        print("")
+        org.wayround.utils.file.progress_write_finish()
         self.sess.commit()
 
         logging.info("Searching for errors")
@@ -1209,7 +1219,7 @@ class PackageDatabase:
         for each in lst:
             org.wayround.utils.file.progress_write('       ' + each.name)
             lst2.append(self.get_package_path(pid=each.pid))
-        print("")
+        org.wayround.utils.file.progress_write_finish()
 
         logging.info("Processing %(n)s packages..." % {'n': len(lst)})
         sys.stdout.flush()
@@ -1433,7 +1443,7 @@ class PackageDatabase:
             else:
                 missing.append(i)
 
-        print("")
+        org.wayround.utils.file.progress_write_finish()
 
         for i in missing:
             struct = org.wayround.aipsetup.info.read_from_file(i)
@@ -1453,7 +1463,7 @@ class PackageDatabase:
                 logging.error("can't get info from file %(name)s" % {
                     'name': i
                     })
-        print("")
+        org.wayround.utils.file.progress_write_finish()
 
         logging.info("Totally loaded %(n)d records" % {'n': loaded})
         return

@@ -13,81 +13,31 @@ import org.wayround.aipsetup.config
 
 
 NAME_REGEXPS_ORDER = [
-    'standard_with_date',
-    'standard',
-    'underscored_with_date',
-    'underscored',
-    'standard_with_letter_after_version',
-    'standard_with_status',
-    'underscored_with_status',
-    'version_right_after_name',
-    'version_right_after_name_with_status'
+    'universal'
     ]
 
-# required/allowed group names:
-#    version_letter
-#    version_letter_number
-
 NAME_REGEXPS = {
-    'standard': \
-        r'^{standard_name}-{standard_version}{standard_extensions}$',
-
-    'standard_with_date': \
-        r'^{standard_name}-{standard_version}-{date}{standard_extensions}$',
-
-    'underscored': \
-        r'^{standard_name}_{underscored_version}{standard_extensions}$',
-
-    'underscored_with_date': \
-        r'^{standard_name}_{underscored_version}_{date}{standard_extensions}$',
-
-    'standard_with_letter_after_version': \
-        r'^{standard_name}-{standard_version}(?P<version_letter>[a-zA-Z])(?P<version_letter_number>\d*){standard_extensions}$',
-
-    'standard_with_status': \
-        r'^{standard_name}-{standard_version}[\.-_]{standard_statuses}{standard_extensions}$',
-
-    'standard_with_not_separated_status': \
-        r'^{standard_name}-{standard_version}{standard_statuses}{standard_extensions}$',
-
-    'underscored_with_status': \
-        r'^{standard_name}_{underscored_version}[\.-_]{underscored_statuses}{standard_extensions}$',
-
-    'underscored_with_not_separated_status': \
-        r'^{standard_name}_{underscored_version}{underscored_statuses}{standard_extensions}$',
-
-    'underscored_with_status': \
-        r'^{standard_name}_{underscored_version}{underscored_statuses}{standard_extensions}$',
-
-    'version_right_after_name': \
-        r'^{standard_name}{standard_version}{standard_extensions}$',
-
-    'version_right_after_name_with_status': \
-        r'^{standard_name}{standard_version}[-\.]?{standard_statuses}{standard_extensions}$'
-
+    'universal': (
+        r'^{universal_name}(?:[\-\._]?){universal_version}{universal_extensions}$'
+        ),
     }
 
 NAME_REGEXPS_COMPILED = {}
 
-for i in NAME_REGEXPS:
-    logging.debug("Expending {}".format(i))
+for i in list(NAME_REGEXPS.keys()):
+    logging.debug("Expending `{}'".format(i))
     NAME_REGEXPS[i] = NAME_REGEXPS[i].format_map({
-        'statuses'            : r'pre|alpha|beta|rc|test|source|src|dist|full',
-        'standard_extensions' : r'(?P<extension>\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2|\.tbz)',
+        'universal_extensions' : (
+            r'(?P<extension>(\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2|\.tbz))'
+            ),
 
-        'standard_name'       : r'(?P<name>([0-9a-zA-Z]|-?)+?)',
-        'underscored_name'    : r'(?P<name>([0-9a-zA-Z]|_?)+?)',
-
-        'standard_version'    : r'(?P<version>(\d+\.??)+)',
-        'underscored_version' : r'(?P<version>(\d+_??)+)',
-
-        'standard_statuses'   : r'(?P<statuses>([a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
-        'underscored_statuses': r'(?P<statuses>([a-zA-Z]+\d*[a-zA-Z]?\d*)+)',
-        'date'                : r'(?P<date>\d{8,16})'
+        'universal_name'       : r'(?P<name>[0-9a-zA-Z_\-\+]+?)',
+        'universal_version'    : r'(?P<version>\d+[\-_\.]?(?:(?:\d|[a-zA-Z])+[\-_\.\~]?)*)'
         })
+    logging.debug(NAME_REGEXPS[i])
 
-for i in NAME_REGEXPS:
-    logging.debug("Compiling {}".format(i))
+for i in list(NAME_REGEXPS.keys()):
+    logging.debug("Compiling `{}'".format(i))
     NAME_REGEXPS_COMPILED[i] = re.compile(NAME_REGEXPS[i])
 
 del(i)
@@ -318,11 +268,7 @@ def source_name_parse(
             'groups': {
                 'name'                 : None,
                 'version'              : None,
-                'version_letter'       : None,
-                'version_letter_number': None,
-                'statuses'             : None,
-                'patch'                : None,
-                'date'                 : None,
+                'version_list'         : None,
                 'extension'            : None
                 }
             }
@@ -347,26 +293,25 @@ def source_name_parse(
         if acceptable_version_number == None or \
                 (isinstance(acceptable_version_number, str) and fnmatched):
 
-            ret['groups']['version'] = \
+
+            ret['groups']['version'] = (
                 ret['groups']['version'].replace('_', '.')
+                )
 
-            ret['groups']['version'] = \
+            ret['groups']['version'] = (
+                ret['groups']['version'].replace('-', '.')
+                )
+
+            ret['groups']['version'] = (
                 ret['groups']['version'].strip('.')
+                )
 
-            ret['groups']['statuses'] = \
-                ret['groups']['statuses'].replace('_', '-')
+            ret['groups']['version_list'] = (
+                ret['groups']['version'].split('.')
+                )
 
-            ret['groups']['statuses'] = \
-                ret['groups']['statuses'].replace('.', '-')
-
-            ret['groups']['statuses'] = \
-                ret['groups']['statuses'].strip('-')
-
-            ret['groups']['statuses_list'] = \
-                ret['groups']['statuses'].split('-')
-
-            if '' in ret['groups']['statuses_list']:
-                ret['groups']['statuses_list'].remove('')
+            if '' in ret['groups']['version_list']:
+                ret['groups']['version_list'].remove('')
 
 
             ret['name'] = filename

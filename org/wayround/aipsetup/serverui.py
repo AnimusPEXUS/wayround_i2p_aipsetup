@@ -396,13 +396,11 @@ def package_file_list(db, name):
 def package_sources_file_list(db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
-
-    keys = list(files.keys())
-    keys.sort()
+    files.sort()
 
     rows = []
 
-    for i in keys:
+    for i in files:
 
         source_url = 'files_source' + i
 
@@ -440,7 +438,7 @@ def package_sources_file_list(db, name):
                                 attributes={
                                     'href': source_url
                                     },
-                                content=files[i]['name']
+                                content=os.path.basename(i)
                                 )
                             ]
                         ),

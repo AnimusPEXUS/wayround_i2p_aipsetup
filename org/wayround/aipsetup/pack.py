@@ -288,7 +288,7 @@ def destdir_deps_c(buildingsite):
                 else:
                     n_elfs += 1
 
-            print("")
+            org.wayround.utils.file.progress_write_finish()
 
             logging.info("ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
                 'elfs': elfs,
