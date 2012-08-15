@@ -15,6 +15,8 @@ import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.serverui
 
+import org.wayround.utils.tag
+
 
 def edefault(status, message, traceback, version):
 
@@ -55,9 +57,11 @@ class Index:
 
         db = org.wayround.aipsetup.pkgindex.PackageDatabase()
 
+
+
         txt = org.wayround.aipsetup.serverui.page_pkg_list(db)
 
-        db.close_session()
+        del db
 
         return txt
 
@@ -82,7 +86,7 @@ class Index:
 
         txt = org.wayround.aipsetup.serverui.page_package(db, name)
 
-        db.close_session()
+        del db
 
         return txt
 

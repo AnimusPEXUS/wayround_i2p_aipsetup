@@ -444,13 +444,17 @@ def package_sources_file_list(db, name):
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
+                        content=os.path.dirname(i)[1:]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
                         content="{m:.2f}MiB".format(
                             m=float(source_filesize) / 1024 / 1024
                             )
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="{}".format(source_moddate)
+                        content=str(source_moddate)
                         )
                     ]
                 )
@@ -480,6 +484,10 @@ def package_sources_file_list(db, name):
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
+                        content="Path"
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'th',
                         content="Size"
                         ),
                     org.wayround.utils.xml.tag(
@@ -500,12 +508,17 @@ def package_sources_file_list(db, name):
 
 def package_info(db, name):
 
-    dic = db.package_info_record_to_dict(name)
-    logging.debug("package_info: package_info_record_to_dict({}) == {}".format(name, dic))
+    package_info = db.package_info_record_to_dict(name)
+    logging.debug(
+        "package_info: package_info_record_to_dict({}) == {}".format(
+            name,
+            package_info
+            )
+        )
 
     ret = None
 
-    if dic == None:
+    if package_info == None:
         raise cherrypy.HTTPError(404, "No page for package `{}'".format(name))
     else:
 
@@ -514,10 +527,6 @@ def package_info(db, name):
             category = db.get_category_path_string(cid)
         else:
             category = "< Package not indexed! >"
-
-        regexp = '< Wrong regexp type name >'
-        if dic['pkg_name_type'] in org.wayround.aipsetup.name.NAME_REGEXPS:
-            regexp = org.wayround.aipsetup.name.NAME_REGEXPS[dic['pkg_name_type']]
 
         ret = org.wayround.utils.xml.tag(
             'div',
@@ -540,7 +549,7 @@ def package_info(db, name):
                                     content=[
                                         org.wayround.utils.xml.tag(
                                             'strong',
-                                            content='file name type:'
+                                            content='basename:'
                                             )
                                         ]
                                     ),
@@ -551,7 +560,7 @@ def package_info(db, name):
                                             'pre',
                                             new_line_before_content=False,
                                             new_line_after_content=False,
-                                            content=dic['pkg_name_type']
+                                            content=package_info['basename']
                                             )
                                         ]
                                     )
@@ -568,7 +577,7 @@ def package_info(db, name):
                                     content=[
                                         org.wayround.utils.xml.tag(
                                             'strong',
-                                            content='filename regexp:'
+                                            content='version regexp:'
                                             )
                                         ]
                                     ),
@@ -579,7 +588,7 @@ def package_info(db, name):
                                             'pre',
                                             new_line_before_content=False,
                                             new_line_after_content=False,
-                                            content=regexp
+                                            content=package_info['version_re']
                                             )
                                         ]
                                     )
@@ -607,7 +616,7 @@ def package_info(db, name):
                                             'pre',
                                             new_line_before_content=False,
                                             new_line_after_content=False,
-                                            content=dic['buildinfo']
+                                            content=package_info['buildinfo']
                                             )
                                         ]
                                     )
@@ -641,9 +650,9 @@ def package_info(db, name):
                                                     new_line_before_start=False,
                                                     new_line_after_end=False,
                                                     attributes={
-                                                        'href': dic['homepage']
+                                                        'href': package_info['home_page']
                                                         },
-                                                    content=dic['homepage']
+                                                    content=package_info['home_page']
                                                     )
                                                 ]
                                             )
@@ -711,7 +720,26 @@ def package_info(db, name):
                                             'pre',
                                             new_line_before_content=False,
                                             new_line_after_content=False,
-                                            content=', '.join(dic['tags'])
+                                            content=', '.join(package_info['tags'])
+                                            )
+                                        ]
+                                    )
+                                ]
+                            ),
+                        org.wayround.utils.xml.tag(
+                            'tr',
+                            content=[
+                                org.wayround.utils.xml.tag(
+                                    'td',
+                                    attributes={
+                                        'colspan': '2'
+                                        },
+                                    content=[
+                                        org.wayround.utils.xml.tag(
+                                            'pre',
+                                            new_line_before_content=False,
+                                            new_line_after_content=False,
+                                            content=package_info['description']
                                             )
                                         ]
                                     )
@@ -727,9 +755,35 @@ def package_info(db, name):
 
 def page_package(db, name):
 
+    cid = db.get_package_category_by_name(name)
+    if cid != None:
+        category = db.get_category_path_string(cid)
+    else:
+        category = "< Package not indexed! >"
+
     table = org.wayround.utils.xml.tag(
         'table',
         content=[
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'colspan': '2'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'a',
+                                attributes={
+                                    'href': "directory?path={}".format(category)
+                                    },
+                                content="Up to category ({})".format(category)
+                                )
+                             ]
+                        )
+                    ]
+                ),
             org.wayround.utils.xml.tag(
                 'tr',
                 content=[
@@ -762,12 +816,18 @@ def page_package(db, name):
                 content=[
                     org.wayround.utils.xml.tag(
                         'td',
+                        attributes={
+                            'valign':'top'
+                            },
                         content=[
                             package_file_list(db, name)
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
+                        attributes={
+                            'valign':'top'
+                            },
                         content=[
                             package_sources_file_list(db, name)
                             ]

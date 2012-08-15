@@ -9,6 +9,7 @@ import glob
 import fnmatch
 import copy
 import logging
+import re
 
 
 import sqlalchemy
@@ -27,32 +28,32 @@ import org.wayround.aipsetup.name
 
 def exported_commands():
     return {
-        'scan_repo_for_pkg_and_cat': pkgindex_scan_repo_for_pkg_and_cat,
-        'find_repository_package_name_collisions_in_database': \
+        'scan': pkgindex_scan_repo_for_pkg_and_cat,
+        'find_collisions': \
             pkgindex_find_repository_package_name_collisions_in_database,
-        'find_missing_pkg_info_records': pkgindex_find_missing_pkg_info_records,
-        'find_outdated_pkg_info_records': pkgindex_find_outdated_pkg_info_records,
-        'update_outdated_pkg_info_records': pkgindex_update_outdated_pkg_info_records,
-        'delete_pkg_info_records': pkgindex_delete_pkg_info_records,
-        'backup_package_info_to_filesystem': pkgindex_backup_package_info_to_filesystem,
-        'load_package_info_from_filesystem': pkgindex_load_package_info_from_filesystem,
-        'list_pkg_info_records': pkgindex_list_pkg_info_records,
-        'print_pkg_info_record': pkgindex_print_pkg_info_record,
+        'missing': pkgindex_find_missing_pkg_info_records,
+        'outdated': pkgindex_find_outdated_pkg_info_records,
+        'update': pkgindex_update_outdated_pkg_info_records,
+        'delete': pkgindex_delete_pkg_info_records,
+        'backup': pkgindex_backup_package_info_to_filesystem,
+        'load': pkgindex_load_package_info_from_filesystem,
+        'list': pkgindex_list_pkg_info_records,
+        'print': pkgindex_print_pkg_info_record,
         'index_sources': pkgindex_index_sources,
         }
 
 def commands_order():
     return [
-        'scan_repo_for_pkg_and_cat',
-        'find_repository_package_name_collisions_in_database',
-        'find_missing_pkg_info_records',
-        'find_outdated_pkg_info_records',
-        'update_outdated_pkg_info_records',
-        'delete_pkg_info_records',
-        'backup_package_info_to_filesystem',
-        'load_package_info_from_filesystem',
-        'list_pkg_info_records',
-        'print_pkg_info_record',
+        'scan',
+        'find_collisions',
+        'missing',
+        'outdated',
+        'update',
+        'delete',
+        'backup',
+        'load',
+        'list',
+        'print',
         'index_sources'
         ]
 
@@ -64,6 +65,7 @@ def pkgindex_scan_repo_for_pkg_and_cat(opts, args):
 
     r = PackageDatabase()
     ret = r.scan_repo_for_pkg_and_cat()
+    del r
 
     return ret
 
@@ -73,6 +75,7 @@ def pkgindex_find_repository_package_name_collisions_in_database(opts, args):
     """
     r = PackageDatabase()
     ret = r.find_repository_package_name_collisions_in_database()
+    del r
 
     return ret
 
@@ -96,6 +99,7 @@ def pkgindex_find_missing_pkg_info_records(opts, args):
     try:
         r = PackageDatabase()
         ret = r.find_missing_pkg_info_records(t, f)
+        del r
     except:
         logging.exception("Error while searching for missing records")
         ret = 1
@@ -108,8 +112,28 @@ def pkgindex_find_outdated_pkg_info_records(opts, args):
     """
     Finds pkg info records which differs to FS .xml files
     """
-    r = PackageDatabase()
-    ret = r.find_outdated_pkg_info_records()
+    ret = 0
+    try:
+        r = PackageDatabase()
+    except:
+        ret = 1
+        logging.error("Error connecting to DB")
+    else:
+        try:
+            res = r.find_outdated_pkg_info_records()
+
+        except:
+            ret = 2
+            raise
+
+        else:
+            if len(res) > 0:
+                logging.warning("Total {} warnings".format(len(res)))
+            else:
+                logging.info("No warnings")
+
+        finally:
+            del r
 
     return ret
 
@@ -118,13 +142,16 @@ def pkgindex_update_outdated_pkg_info_records(opts, args):
     Loads pkg info records which differs to FS .xml files
     """
     r = PackageDatabase()
-    ret = r.update_outdated_pkg_info_records()
+    r.update_outdated_pkg_info_records()
+    del r
 
-    return ret
+    return 0
 
 def pkgindex_delete_pkg_info_records(opts, args):
     """
-    If mask must be given or operation will fail
+    mask must be given or operation will fail
+
+    MASK
     """
     mask = None
 
@@ -136,6 +163,7 @@ def pkgindex_delete_pkg_info_records(opts, args):
     if mask != None:
         r = PackageDatabase()
         ret = r.delete_pkg_info_records(mask)
+        del r
     else:
         logging.error("Mask is not given")
         ret = 1
@@ -159,6 +187,7 @@ def pkgindex_backup_package_info_to_filesystem(opts, args):
 
     r = PackageDatabase()
     ret = r.backup_package_info_to_filesystem(mask, f)
+    del r
 
     return ret
 
@@ -168,7 +197,7 @@ def pkgindex_load_package_info_from_filesystem(opts, args):
 
     [-a] [file names]
 
-    If no files listed - assume all files in info dir
+    If no files listed - assume all files in info dir.
 
     -a force load all records, not only missing.
     """
@@ -185,6 +214,7 @@ def pkgindex_load_package_info_from_filesystem(opts, args):
 
     r = PackageDatabase()
     r.load_package_info_from_filesystem(filenames, rewrite_all)
+    del r
 
     return ret
 
@@ -204,9 +234,10 @@ def pkgindex_list_pkg_info_records(opts, args):
 
 
     r = PackageDatabase()
-    ret = r.list_pkg_info_records(mask)
+    r.list_pkg_info_records(mask)
+    del r
 
-    return ret
+    return 0
 
 def pkgindex_print_pkg_info_record(opts, args):
     """
@@ -224,6 +255,7 @@ def pkgindex_print_pkg_info_record(opts, args):
 
         r = PackageDatabase()
         ret = r.print_pkg_info_record(name)
+        del r
     else:
         logging.error("Name is not given")
         ret = 1
@@ -631,8 +663,12 @@ def get_package_source_files(name):
 
     needed_files = []
 
+    db = PackageDatabase()
+    pkg_info = db.package_info_record_to_dict(name=name)
+    del db
+
     try:
-        f = org.wayround.utils.tag.TagEngine(
+        tags_object = org.wayround.utils.tag.TagEngine(
             org.wayround.aipsetup.config.config['source_index']
             )
     except:
@@ -640,18 +676,52 @@ def get_package_source_files(name):
     else:
         try:
             needed_files = []
-            files = f.objects_by_tags([name])
+            files = tags_object.objects_by_tags([pkg_info['basename']])
             for i in files:
-                needed_files.append(i)
+                parsed_name = (
+                    org.wayround.aipsetup.name.source_name_parse(i, mute=True)
+                    )
+                if parsed_name:
+                    if re.match(
+                        pkg_info['version_re'],
+                        parsed_name['groups']['version']
+                        ):
+                        needed_files.append(i)
 
             needed_files.sort()
 
         finally:
-            f.close()
+            tags_object.close()
 
     return needed_files
 
+def guess_package_homepage(pkg_name, tag_db_connected=None):
 
+    db = None
+    if tag_db_connected:
+        db = tag_db_connected
+    else:
+        db = org.wayround.utils.tag.TagEngine(
+            org.wayround.aipsetup.config.config['source_index']
+            )
+
+    files = db.objects_by_tags([pkg_name])
+    possibilities = {}
+    for i in files:
+
+        domain = i[1:].split('/')[0]
+
+        if not domain in possibilities:
+            possibilities[domain] = 0
+
+        possibilities[domain] += 1
+
+    logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(possibilities)))
+
+    if not tag_db_connected:
+        del db
+
+    return possibilities
 
 class PackageDatabaseConfigError(Exception): pass
 
@@ -726,14 +796,26 @@ class PackageDatabase:
         __tablename__ = 'package_info'
 
         name = sqlalchemy.Column(
-            sqlalchemy.Unicode(256),
+            sqlalchemy.UnicodeText,
             nullable=False,
             primary_key=True,
             default=''
             )
 
+        basename = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
+        version_re = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
         home_page = sqlalchemy.Column(
-            sqlalchemy.Unicode(256),
+            sqlalchemy.UnicodeText,
             nullable=False,
             default=''
             )
@@ -744,17 +826,24 @@ class PackageDatabase:
             default=''
             )
 
-        pkg_name_type = sqlalchemy.Column(
-            sqlalchemy.Unicode(256),
+        buildinfo = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
             nullable=False,
             default=''
             )
 
-        buildinfo = sqlalchemy.Column(
-            sqlalchemy.Unicode(256),
+        installation_priority = sqlalchemy.Column(
+            sqlalchemy.Integer,
             nullable=False,
-            default=''
+            default=5
             )
+
+        deletable = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=True
+            )
+
 
     class PackageTag(Base):
         """
@@ -806,10 +895,6 @@ class PackageDatabase:
 
         self.sess = None
         self.start_session()
-
-    # TODO: Do I need this?
-    #def __del__(self):
-        #del(self._db_engine)
 
     def __del__(self):
         logging.debug("PKG Index DB cleaning")
@@ -1130,11 +1215,11 @@ class PackageDatabase:
 
         self.sess.query(self.PackageTag).filter_by(name=name).delete()
 
-        for i in tags:
-            n = self.PackageTag()
-            n.name = name
-            n.tag = i
-            self.sess.add(n)
+        for tag_name in tags:
+            new_tag = self.PackageTag()
+            new_tag.name = name
+            new_tag.tag = tag_name
+            self.sess.add(new_tag)
 
         return
 
@@ -1326,11 +1411,14 @@ class PackageDatabase:
             tags = self.get_package_tags(q.name)
 
             ret = {
-                'homepage'     : q.home_page,
-                'description'  : q.description,
-                'pkg_name_type': q.pkg_name_type,
-                'tags'         : tags,
-                'buildinfo'    : q.buildinfo
+                'home_page'            : q.home_page,
+                'description'          : q.description,
+                'deletable'            : q.deletable,
+                'tags'                 : tags,
+                'buildinfo'            : q.buildinfo,
+                'installation_priority': q.installation_priority,
+                'basename'             : q.basename,
+                'version_re'           : q.version_re
                 }
 
         return ret
@@ -1349,19 +1437,19 @@ class PackageDatabase:
 
         q.name = name
         q.description = struct['description']
-        q.home_page = struct['homepage']
-        q.pkg_name_type = struct['pkg_name_type']
+        q.home_page = struct['home_page']
+        q.deletable = struct['deletable']
         q.buildinfo = struct['buildinfo']
-
-        # category set only through pkg_repository
-        # q.category    = category
+        q.installation_priority = struct['installation_priority']
+        q.basename = struct['basename']
+        q.version_re = struct['version_re']
 
         if creating_new:
             self.sess.add(q)
 
 
         self.set_package_tags(name, struct['tags'])
-        self.commit_session()
+        #self.commit_session()
 
         return
 
@@ -1400,7 +1488,7 @@ class PackageDatabase:
         return
 
     def load_package_info_from_filesystem(
-        self, filenames=[], all_records=False
+        self, filenames=[], rewrite_existing=False
         ):
 
         """
@@ -1418,7 +1506,7 @@ class PackageDatabase:
         files.sort()
 
         missing = []
-        logging.info("searching missing records")
+        logging.info("Searching missing records")
         files_l = len(files)
         num = 0
         for i in files:
@@ -1434,7 +1522,7 @@ class PackageDatabase:
 
             name = os.path.basename(i)[:-4]
 
-            if not all_records:
+            if not rewrite_existing:
                 q = self.sess.query(self.PackageInfo).filter_by(
                     name=name
                     ).first()
@@ -1444,6 +1532,8 @@ class PackageDatabase:
                 missing.append(i)
 
         org.wayround.utils.file.progress_write_finish()
+
+        org.wayround.utils.file.progress_write("-i- Loading missing records")
 
         for i in missing:
             struct = org.wayround.aipsetup.info.read_from_file(i)
@@ -1463,6 +1553,7 @@ class PackageDatabase:
                 logging.error("can't get info from file %(name)s" % {
                     'name': i
                     })
+        self.commit_session()
         org.wayround.utils.file.progress_write_finish()
 
         logging.info("Totally loaded %(n)d records" % {'n': loaded})
@@ -1585,44 +1676,42 @@ Total records checked     : %(n1)d
         missing.sort()
         return missing
 
-    def find_outdated_pkg_info_records(self, mute=False):
+    def find_outdated_pkg_info_records(self, mute=True):
 
         ret = []
 
-        q = self.sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
+        query_result = (
+            self.sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
+            )
 
-        for i in q:
+        for i in query_result:
 
             filename = os.path.join(
                 self._config['info'],
-                '%(name)s.xml' % {'name': i.name}
+                '{}.xml'.format(i.name)
                 )
 
             if not os.path.exists(filename):
-                ret.append(i.name)
                 if not mute:
-                    logging.warning("file missing: %(name)s" % {
-                        'name': filename
-                        })
+                    logging.warning("File missing: {}".format(filename))
+                ret.append(i.name)
                 continue
 
             d1 = org.wayround.aipsetup.info.read_from_file(filename)
 
             if not isinstance(d1, dict):
-                logging.info("Error parsing file: %(name)s" % {
-                    'name': filename
-                    })
-            else:
-                d2 = self.package_info_record_to_dict(record=i)
-                if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
-                    ret.append(i.name)
-                    if not mute:
-                        logging.warning("xml init file differs for: %(name)s" % {
-                            'name': i.name
-                            })
+                if not mute:
+                    logging.error("Error parsing file: {}".format(filename))
+                ret.append(i.name)
+                continue
 
-        if not mute:
-            logging.info("Total %(n)d warnings" % {'n': len(ret)})
+            d2 = self.package_info_record_to_dict(record=i)
+            if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
+                if not mute:
+                    logging.warning("xml init file differs to `%(name)s' record" % {
+                        'name': i.name
+                        })
+                ret.append(i.name)
 
         return ret
 
@@ -1643,7 +1732,7 @@ Total records checked     : %(n1)d
 
         self.load_package_info_from_filesystem(
             filenames=opir2,
-            all_records=True
+            rewrite_existing=True
             )
 
 
@@ -1656,39 +1745,33 @@ Total records checked     : %(n1)d
             logging.error("Not found named info record")
         else:
 
-            pid = self.get_package_id(name)
-            if pid != None:
-                category = self.get_package_path_string(pid)
+            cid = self.get_package_category_by_name(name)
+            if cid != None:
+                category = self.get_category_path_string(cid)
             else:
                 category = "< Package not indexed! >"
 
-            regexp = '< Wrong regexp type name >'
-            if r['pkg_name_type'] in org.wayround.aipsetup.name.NAME_REGEXPS:
-                regexp = org.wayround.aipsetup.name.NAME_REGEXPS[r['pkg_name_type']]
-
             print("""\
 +---[{name}]---------------------------------+
- file name type: {pkg_name_type}
-filename regexp: {regexp}
+       basename: {basename}
+ version regexp: {version_re}
       buildinfo: {buildinfo}
-       homepage: {homepage}
+       homepage: {home_page}
        category: {category}
            tags: {tags}
 +---[{name}]---------------------------------+
-
 {description}
-
 +---[{name}]---------------------------------+
 """.format_map(
         {
         'name'         : name,
-        'homepage'     : r['homepage'],
-        'pkg_name_type': r['pkg_name_type'],
-        'regexp'       : regexp,
+        'home_page'     : r['home_page'],
         'description'  : r['description'],
         'tags'         : ', '.join(r['tags']),
         'category'     : category,
-        'buildinfo'    : r['buildinfo']
+        'buildinfo'    : r['buildinfo'],
+        'version_re'   : r['version_re'],
+        'basename'   : r['basename']
         }
         )
     )

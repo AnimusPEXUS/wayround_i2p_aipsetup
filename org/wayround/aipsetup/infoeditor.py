@@ -70,12 +70,22 @@ class MainWindow:
                     )
                 ret = 1
             else:
-                self.window.lineEdit.setText(data['homepage'])
+
+                self.window.lineEdit.setText(data['home_page'])
                 self.window.plainTextEdit.setPlainText(data['description'])
-                self.window.lineEdit_2.setText(data['pkg_name_type'])
+                self.window.checkBox.setChecked(data['deletable'])
+                self.window.lineEdit_3.setText(data['buildinfo'])
+                self.window.spinBox.setValue(data['installation_priority'])
+                self.window.lineEdit_2.setText(data['basename'])
+                self.window.lineEdit_4.setText(data['version_re'])
+
                 self.window.plainTextEdit_4.setPlainText(
                     '\n'.join(data['tags']) + '\n'
                     )
+
+                self.currently_opened = name
+                self.window.setWindowTitle(name + " - aipsetup v3 .xml info file editor")
+
 
         return ret
 
@@ -91,10 +101,13 @@ class MainWindow:
             )
 
         data = {}
-        data['homepage'] = str(self.window.lineEdit.text()).strip()
+        data['home_page'] = str(self.window.lineEdit.text()).strip()
         data['description'] = str(self.window.plainTextEdit.toPlainText())
-        data['pkg_name_type'] = str(self.window.lineEdit_2.text()).strip()
+        data['deletable'] = self.window.checkBox.isChecked()
         data['buildinfo'] = str(self.window.lineEdit_3.text()).strip()
+        data['installation_priority'] = self.window.spinBox.value()
+        data['basename'] = str(self.window.lineEdit_2.text()).strip()
+        data['version_re'] = str(self.window.lineEdit_4.text()).strip()
 
         data['tags'] = org.wayround.utils.text.strip_remove_empty_remove_duplicated_lines(
             str(self.window.plainTextEdit_4.toPlainText()).splitlines()
@@ -137,8 +150,6 @@ class MainWindow:
             #)
 
         self.load_data(item.text())
-        self.currently_opened = item.text()
-        self.window.setWindowTitle(item.text())
 
     def load_list(self):
 
@@ -156,6 +167,19 @@ class MainWindow:
     def wait(self):
         return self.app.exec_()
 
-def main():
+    def close(self):
+        self.app.quit()
+        return
+
+def main(file_to_edit=None):
     mw = MainWindow(org.wayround.aipsetup.config.config)
-    return mw.wait()
+
+    if isinstance(file_to_edit, str):
+        if mw.load_data(os.path.basename(file_to_edit)) != 0:
+            mw.close()
+        else:
+            mw.wait()
+    else:
+        mw.wait()
+
+    return

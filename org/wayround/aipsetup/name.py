@@ -63,7 +63,7 @@ ASP_NAME_REGEXPS = {
 ASP_NAME_REGEXPS_COMPILED = {}
 
 for i in ASP_NAME_REGEXPS:
-    logging.debug("Compiling {}".format(i))
+    logging.debug("Compiling `{}'".format(i))
     ASP_NAME_REGEXPS_COMPILED[i] = re.compile(ASP_NAME_REGEXPS[i])
 
 del(i)
@@ -72,11 +72,14 @@ del(i)
 def exported_commands():
     return {
         'test_expressions_on_sources': name_test_expressions_on_sources,
-        'parse_name': name_parse_name
+        'parse': name_parse_name
         }
 
 def commands_order():
-    return ['test_expressions_on_sources', 'parse_name']
+    return [
+        'test_expressions_on_sources',
+        'parse'
+        ]
 
 def name_parse_name(opts, args):
     """
