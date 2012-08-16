@@ -1,0 +1,22 @@
+<package>
+
+  <!-- This file is generated using aipsetup v3 -->
+
+  <description>None</description>
+
+  <home_page url="http://None"/>
+
+  <!-- Use <tag name="" /> constructions for listing
+       tags -->
+
+  <buildinfo value=""/>
+
+  <basename value="Python"/>
+
+  <version_re value="2\.7\..*"/>
+
+  <installation_priority value="5"/>
+
+  <deletable value="True"/>
+
+</package>

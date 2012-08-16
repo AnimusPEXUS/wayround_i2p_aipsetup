@@ -1716,7 +1716,6 @@ Total records checked     : %(n1)d
         return ret
 
     def update_outdated_pkg_info_records(self):
-        # find_missing_pkg_info_records
 
         opir = self.find_outdated_pkg_info_records(mute=True)
 
@@ -1734,7 +1733,6 @@ Total records checked     : %(n1)d
             filenames=opir2,
             rewrite_existing=True
             )
-
 
         return
 

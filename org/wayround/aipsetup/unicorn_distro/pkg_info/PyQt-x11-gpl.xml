@@ -1,0 +1,22 @@
+<package>
+
+  <!-- This file is generated using aipsetup v3 -->
+
+  <description>None</description>
+
+  <home_page url="http://None"/>
+
+  <!-- Use <tag name="" /> constructions for listing
+       tags -->
+
+  <buildinfo value=""/>
+
+  <basename value="PyQt-x11-gpl"/>
+
+  <version_re value=".*"/>
+
+  <installation_priority value="5"/>
+
+  <deletable value="True"/>
+
+</package>
