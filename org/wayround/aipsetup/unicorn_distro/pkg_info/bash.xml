@@ -15,8 +15,8 @@
 
   <version_re value=".*"/>
 
-  <installation_priority value="5"/>
+  <installation_priority value="0"/>
 
-  <deletable value="True"/>
+  <deletable value="False"/>
 
 </package>

@@ -11,14 +11,28 @@ import logging
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
+"""
+Difficult name examples:
+    boost_1_25_1.tar.bz2
+    dvd+rw-tools-5.5.4.3.4.tar.gz
+    GeSHi-1.0.2-beta-1.tar.bz2
+    openssl-0.9.7a.tar.gz
+    tcl8.4.19-src.tar.gz
+    xc-1.tar.gz
+    xf86-input-acecad-1.5.0.tar.bz2
+"""
 
 NAME_REGEXPS_ORDER = [
-    'universal'
+    'universal',
+    'universal2'
     ]
 
 NAME_REGEXPS = {
     'universal': (
-        r'^{universal_name}(?:[\-\._]?){universal_version}{universal_extensions}$'
+        r'^{universal_name}{universal_version}{universal_extensions}$'
+        ),
+    'universal2': (
+        r'^{universal_name2}{universal_version2}{universal_extensions}$'
         ),
     }
 
@@ -31,8 +45,11 @@ for i in list(NAME_REGEXPS.keys()):
             r'(?P<extension>(\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar\.lzma|\.tar|\.zip|\.7z|\.tgz|\.tbz2|\.tbz))'
             ),
 
-        'universal_name'       : r'(?P<name>[0-9a-zA-Z_\-\+]+?)',
-        'universal_version'    : r'(?P<version>\d+[\-_\.]?(?:(?:\d|[a-zA-Z])+[\-_\.\~]?)*)'
+        'universal_name'       : r'(?P<name>[0-9a-zA-Z_\-\+]+?)(?:[\-\._]?)',
+        'universal_name2'       : r'(?P<name>[0-9a-zA-Z_\-\+]+?)(?:[\-\._]?)',
+
+        'universal_version'    : r'(?P<version>(\d+[\-_\.]\d+[\-_\.]?)+(?:(?:\d|[a-zA-Z])+[\-_\.\~]?)*?)',
+        'universal_version2'    : r'(?P<version>(\d+[\-_\.]?)+(?:(?:\d|[a-zA-Z])+[\-_\.\~]?)*?)'
         })
     logging.debug(NAME_REGEXPS[i])
 

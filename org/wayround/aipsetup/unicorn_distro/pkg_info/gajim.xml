@@ -2,14 +2,26 @@
 
   <!-- This file is generated using aipsetup v3 -->
 
-  <description>write something here, please</description>
+  <description>good pythonic xmpp client
+
+supports voip, plugins and many other things
+
+python2.7 is required
+</description>
 
   <home_page url="http://None"/>
 
-  <!-- Use <tag name="" /> constructions for listing
-       tags -->
+  <tag name="chat"/>
+  <tag name="communication"/>
+  <tag name="e2e"/>
+  <tag name="file sharing"/>
+  <tag name="jabber"/>
+  <tag name="jingle"/>
+  <tag name="python"/>
+  <tag name="voip"/>
+  <tag name="xmpp"/>
 
-  <buildinfo value=""/>
+  <buildinfo value="autotools_usr"/>
 
   <basename value="gajim"/>
 
