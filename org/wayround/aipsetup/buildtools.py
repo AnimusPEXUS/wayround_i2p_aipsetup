@@ -5,12 +5,13 @@ import logging
 
 import org.wayround.aipsetup.config
 
+# TODO: May be command exporting needed. Not decided yet.
 
 def list_build_tools():
 
     tools_dir = os.path.abspath(org.wayround.aipsetup.config.config['buildtools'])
 
-    files = glob.glob(tools_dir + '/' + '*.py')
+    files = glob.glob(tools_dir + os.path.sep + '*.py')
 
     without_extensions = []
     for i in files:
@@ -27,12 +28,12 @@ def get_tool_functions(toolname):
     g = {}
     l = {}
 
-    fn = tools_dir + '/' + toolname
+    filename = tools_dir + os.path.sep + toolname
 
     try:
-        f = open(fn + '.py', 'r')
+        f = open(filename + '.py', 'r')
     except:
-        logging.exception("Can't open `{}'".format(fn))
+        logging.exception("Can't open `{}'".format(filename))
         raise
     else:
         try:

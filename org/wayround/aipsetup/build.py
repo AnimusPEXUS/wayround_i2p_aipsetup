@@ -3,10 +3,12 @@
 Build software before packaging
 """
 
+import os
 import sys
 import logging
 
 import org.wayround.utils.log
+import org.wayround.utils.error
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildtools
@@ -116,6 +118,7 @@ def build_{name}(opts, args):
 build_{name}.__doc__ = help_texts('{name}')
 """.format(name=i))
 
+
 def build_complete(opts, args):
     """
     Configures, builds, distributes and prepares software accordingly to info
@@ -142,6 +145,70 @@ def build_complete(opts, args):
 
     return ret
 
+
+def complete(dirname):
+    ret = 0
+
+    package_info = org.wayround.aipsetup.buildingsite.read_package_info(
+        dirname, ret_on_error=None
+        )
+
+    if package_info == None:
+        logging.error("Error reading package info from dir `{}'".format(dirname))
+        ret = 1
+    else:
+
+        actions_sequance = []
+        try:
+            actions_sequance = package_info['pkg_buildinfo']['build_sequance']
+        except:
+            logging.exception("Can't get action sequence")
+            ret = 2
+        else:
+
+            # FIXME: Check this functional
+
+            for i in actions_sequance:
+                if not i in FUNCTIONS_LIST:
+                    logging.error("Requested action `{}' not supported".format(i))
+                    ret = 3
+                    break
+
+            if not 'build_tools' in package_info['pkg_buildinfo']:
+                logging.error("No 'build_tools' in package_info['pkg_buildinfo']")
+                ret = 4
+
+            if ret == 0:
+                for i in actions_sequance:
+                    if not i in package_info['pkg_buildinfo']['build_tools']:
+                        logging.error("`{}' not found in package_info['pkg_buildinfo']['build_tools']")
+                        ret = 5
+                        break
+
+            if ret == 0:
+                for i in list(package_info['pkg_buildinfo']['build_tools'].keys()):
+                    if not i in org.wayround.aipsetup.buildtools.get_tool_functions(
+                        package_info['pkg_buildinfo']['build_tools'][i]
+                        ):
+
+                        logging.error(
+                            "`{}' not found in tool `{}' exported ".format(
+                                i, package_info['pkg_buildinfo']['build_tools'][i]
+                                )
+                            )
+                        ret = 6
+                        break
+
+            if ret == 0:
+                for i in actions_sequance:
+                    if general_tool_function(i, dirname) != 0:
+                        logging.error("Building error on stage `{}'".format(i))
+                        ret = 5
+                        break
+
+    return ret
+
+
 def general_tool_function(action_name, dirname):
 
     process = FUNCTIONS_TEXTS_SET[action_name][2]
@@ -149,26 +216,26 @@ def general_tool_function(action_name, dirname):
 
     ret = 0
 
-    log = org.wayround.utils.log.Log(dirname, process)
+    log = org.wayround.utils.log.Log(
+        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(dirname),
+        process
+        )
 
     log.info("=========[{}]=========".format(whatdoes.capitalize()))
 
-    pi = org.wayround.aipsetup.buildingsite.read_package_info(
+    package_info = org.wayround.aipsetup.buildingsite.read_package_info(
         dirname, ret_on_error=None
         )
 
-    if pi == None:
+    if package_info == None:
         log.error("Error getting information about `{}'".format(process))
         ret = 1
     else:
         try:
-            tool = pi['pkg_buildinfo'][action_name]
+            tool = package_info['pkg_buildinfo'][action_name]
         except:
-            log.error("Error getting tool name for action `{}'".format(action_name))
-            log.write(
-                org.wayround.utils.error.return_exception_info(
-                    sys.exc_info()
-                    )
+            log.error(
+                "Error getting tool name for action `{}'".format(action_name)
                 )
             ret = 2
 
@@ -199,41 +266,3 @@ def general_tool_function(action_name, dirname):
 
     return ret
 
-def complete(dirname):
-    ret = 0
-
-    pi = org.wayround.aipsetup.buildingsite.read_package_info(
-        dirname, ret_on_error=None
-        )
-
-    if pi == None:
-        logging.error("Error reading package info in dir {}".format(dirname))
-        ret = 1
-    else:
-
-        act_seq = []
-        try:
-            act_seq = pi['pkg_buildinfo']['build_sequance']
-        except:
-            logging.exception("Can't get action sequence")
-            ret = 2
-        else:
-
-            for i in act_seq:
-
-                if not i in ['extract', 'configure',
-                             'build', 'destribut',
-                             'prepack']:
-                    logging.error("Requested action not supported")
-                    ret = 3
-                else:
-
-                    general_tool_function(i, dirname)
-                    if eval("%(name)s(dirname)" % {
-                            'name': i
-                            }) != 0:
-                        logging.error("Building error on stage {}".format(i))
-                        ret = 5
-                        break
-
-    return ret

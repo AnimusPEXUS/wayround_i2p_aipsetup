@@ -31,51 +31,56 @@ modules:
 """.format(
     g1=org.wayround.utils.helprenderer.render_help(
         {
-         'info': org.wayround.aipsetup.info,
-         'buildinfo': org.wayround.aipsetup.buildinfo,
-        'constitution': org.wayround.aipsetup.constitution,
+            'info': org.wayround.aipsetup.info,
+            'buildinfo': org.wayround.aipsetup.buildinfo,
+            'constitution': org.wayround.aipsetup.constitution,
         },
-        ['info',
-         'buildinfo',
-         'constitution', ],
+        [
+            'info',
+            'buildinfo',
+            'constitution'
+        ],
         only_synopsis=True
         ),
     g2=org.wayround.utils.helprenderer.render_help(
         {
-        'buildingsite': org.wayround.aipsetup.buildingsite,
-        'build': org.wayround.aipsetup.build,
-        'pack': org.wayround.aipsetup.pack,
-        'package': org.wayround.aipsetup.package,
+            'buildingsite': org.wayround.aipsetup.buildingsite,
+            'build': org.wayround.aipsetup.build,
+            'pack': org.wayround.aipsetup.pack,
+            'package': org.wayround.aipsetup.package,
         },
         [
-
-        'buildingsite',
-        'build',
-        'pack',
-        'package',
+            'buildingsite',
+            'build',
+            'pack',
+            'package'
         ],
         only_synopsis=True
         ),
     g3=org.wayround.utils.helprenderer.render_help(
         {
-         'name': org.wayround.aipsetup.name,
-         'docbook': org.wayround.aipsetup.docbook,
-         'config': org.wayround.aipsetup.config
+            'name': org.wayround.aipsetup.name,
+            'docbook': org.wayround.aipsetup.docbook,
+            'config': org.wayround.aipsetup.config
         },
-        ['name',
-        'docbook',
-        'config'],
+        [
+            'name',
+            'docbook',
+            'config'
+        ],
         only_synopsis=True
         ),
     g4=org.wayround.utils.helprenderer.render_help(
         {
-        'server': org.wayround.aipsetup.server,
-        'client': org.wayround.aipsetup.client,
-        'pkgindex': org.wayround.aipsetup.pkgindex
+            'server': org.wayround.aipsetup.server,
+            'client': org.wayround.aipsetup.client,
+            'pkgindex': org.wayround.aipsetup.pkgindex
         },
-       ['server',
-        'client',
-        'pkgindex']
+        [
+            'server',
+            'client',
+            'pkgindex'
+        ]
         )
    )
 )

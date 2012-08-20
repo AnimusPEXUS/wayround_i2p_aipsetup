@@ -26,12 +26,14 @@ import org.wayround.utils.checksum
 import org.wayround.utils.text
 import org.wayround.utils.time
 import org.wayround.utils.archive
+import org.wayround.utils.log
 
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
+import org.wayround.aipsetup.build
 
 
 def exported_commands():
@@ -226,12 +228,12 @@ def package_build(opts, args):
     TARBALL
     """
 
-    # TODO: rework to support multiple files
-
     sources = []
 
+    ret = 0
+
     if len(args) > 0:
-        sources = [args[0]]
+        sources = args
 
     if len(sources) == 0:
         logging.error("No source files named")
@@ -240,7 +242,7 @@ def package_build(opts, args):
     if ret == 0:
         ret = build(sources)
 
-    return 0
+    return ret
 
 def package_find_files(opts, args):
     """
@@ -700,71 +702,87 @@ def build(source_files):
         except:
             pass
 
-        tmp_dir_prefix = "%(name)s-%(timestamp)s-" % {
-            'name': par_res['groups']['name'],
-            'timestamp': org.wayround.utils.time.currenttime_stamp()
-            }
-
-        build_site_dir = tempfile.mkdtemp(
-            prefix=tmp_dir_prefix,
-            dir=org.wayround.aipsetup.config.config['buildingsites']
+        package_info = org.wayround.aipsetup.pkgindex.find_package_info_by_basename_and_version(
+            par_res['groups']['name'], par_res['groups']['version']
             )
-        build_site_dir = os.path.abspath(build_site_dir)
 
-        if org.wayround.aipsetup.buildingsite.init(build_site_dir) != 0:
-            logging.error("Error initiating temporary dir")
+        if package_info == {}:
+            logging.error(
+                "Can't find package information for package with basename `{}'".format(
+                    par_res['groups']['name']
+                    )
+                )
             ret = 2
         else:
-            if source_files != None and isinstance(source_files, list):
 
-                logging.info("copying sources")
+            tmp_dir_prefix = "{name}-{version}-{timestamp}-".format_map(
+                {
+                    'name': par_res['groups']['name'],
+                    'version': par_res['groups']['version'],
+                    'timestamp': org.wayround.utils.time.currenttime_stamp()
+                    }
+                )
 
-                for source_file in source_files:
+            build_site_dir = tempfile.mkdtemp(
+                prefix=tmp_dir_prefix,
+                dir=org.wayround.aipsetup.config.config['buildingsites']
+                )
+            build_site_dir = os.path.abspath(build_site_dir)
 
-                    logging.info("%(name)s" % {
-                        'name': source_file
-                        })
+            if org.wayround.aipsetup.buildingsite.init(build_site_dir) != 0:
+                logging.error("Error initiating temporary dir")
+                ret = 3
+            else:
+                if source_files != None and isinstance(source_files, list):
 
-                    if os.path.isfile(source_file) \
-                            and not os.path.islink(source_file):
+                    logging.info("Copying sources...")
 
-                        try:
-                            shutil.copy(
-                                source_file, os.path.join(
-                                    build_site_dir,
-                                    org.wayround.aipsetup.buildingsite.DIR_TARBALL
-                                    )
-                                )
-                        except:
-                            logging.exception("Couldn't copy sources")
-                            ret = -3
+                    for source_file in source_files:
 
-                    else:
-
-                        logging.error("file %(file)s - not dir and not file. skipping copy" % {
-                            'file': source_file
+                        logging.info("    %(name)s" % {
+                            'name': source_file
                             })
 
-                if ret != 0:
-                    logging.error("Exception while copying one of soruce files")
+                        if (os.path.isfile(source_file)
+                            and not os.path.islink(source_file)):
 
-            if org.wayround.aipsetup.buildingsite.apply_info(
-                build_site_dir, source_files[0]
-                ) == 0:
+                            try:
+                                shutil.copy(
+                                    source_file, os.path.join(
+                                        build_site_dir,
+                                        org.wayround.aipsetup.buildingsite.DIR_TARBALL
+                                        )
+                                    )
+                            except:
+                                logging.exception("Couldn't copy source file")
+                                ret = 4
 
-                if complete(build_site_dir) != 0:
-                    logging.error("Package building failed")
-                    ret = 5
+                        else:
+
+                            logging.error("file %(file)s - not dir and not file. skipping copy" % {
+                                'file': source_file
+                                })
+
+                    if ret != 0:
+                        logging.error("Exception while copying one of source files")
+
+                if org.wayround.aipsetup.buildingsite.apply_info(
+                    build_site_dir, source_files[0]
+                    ) == 0:
+
+                    if complete(build_site_dir) != 0:
+                        logging.error("Package building failed")
+                        ret = 5
 
     return ret
 
 def complete(dirname):
 
     log = org.wayround.utils.log.Log(
-        dirname, 'buildingsite complete'
+        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(dirname), 'buildingsite complete'
         )
     log.info("Buildingsite processes started")
-    log.info("Closing this log now, cause it can't be done farther")
+    log.warning("Closing this log now, cause it can't work farther")
     log.stop()
 
     ret = 0

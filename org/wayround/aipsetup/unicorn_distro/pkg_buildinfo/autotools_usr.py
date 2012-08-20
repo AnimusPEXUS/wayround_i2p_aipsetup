@@ -1,17 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-def build_info(package_info):
+import org.wayround.aipsetup.constitution
 
-    constitution = package_info['constitution']
+def build_info():
 
-    package_info['pkg_buildinfo'] = {
-        'extractor'    : 'autotools',
-        'patcher'      : 'autotools',
-        'configurer'   : 'autotools',
-        'builder'      : 'autotools',
-        'distributor'  : 'autotools',
-        'prepackager'  : 'autotools',
+
+    constitution = org.wayround.aipsetup.constitution.read_constitution()
+
+    ret = {
+        'build_tools': {
+            'extract'    : 'autotools',
+            'patch'      : 'autotools',
+            'configure'  : 'autotools',
+            'build'      : 'autotools',
+            'distribute' : 'autotools',
+            'prepack'    : 'autotools'
+            },
 
         'build_sequance': [
             'extract',
@@ -102,4 +107,4 @@ def build_info(package_info):
 
         }
 
-    return
+    return ret

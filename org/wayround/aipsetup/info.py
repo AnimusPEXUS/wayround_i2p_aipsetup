@@ -371,6 +371,8 @@ def read_from_file(name):
                 ret['tags'] = _find_list(tree, 'tag', 'name')
 
                 ret['tags'].sort()
+
+                ret['name'] = name
                 del(tree)
         finally:
             f.close()

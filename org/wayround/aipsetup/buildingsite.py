@@ -4,17 +4,15 @@ Module for initiating building site, which required to farver package build.
 """
 
 import os
-import sys
-import inspect
-import copy
+#import inspect
 import pprint
 import logging
 
-import org.wayround.aipsetup.info
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
-import org.wayround.aipsetup.config
+#import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.buildinfo
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -181,7 +179,7 @@ def init(directory='build'):
             logging.info("Building site not exists - creating")
             os.mkdir(directory)
 
-        logging.info("Create all subdirs")
+        logging.info("Creating required subdirs")
         for i in DIR_ALL:
             a = os.path.abspath(os.path.join(directory, i))
 
@@ -214,6 +212,9 @@ def init(directory='build'):
 
 
 def read_package_info(directory, ret_on_error=None):
+
+    logging.debug("Trying to read package info in building site `{}'".format(directory))
+
     ret = ret_on_error
 
     pi_filename = os.path.join(directory, 'package_info.py')
@@ -228,6 +229,7 @@ def read_package_info(directory, ret_on_error=None):
 
         except:
             logging.exception("Can't open `{}'".format(pi_filename))
+            raise
 
         else:
             txt = f.read()
@@ -238,9 +240,11 @@ def read_package_info(directory, ret_on_error=None):
 
             try:
                 ret = eval(txt, g, l)
+
             except:
-                logging.exception("error in `{}'".format(pi_filename))
+                logging.exception("Error in `{}'".format(pi_filename))
                 ret = ret_on_error
+                raise
 
     return ret
 
@@ -253,16 +257,18 @@ def write_package_info(directory, info):
     try:
         f = open(pi_filename, 'w')
     except:
-        logging.exception("can't open `%(file)s' for writing" % {
+        logging.exception("Can't open `%(file)s' for writing" % {
             'file': pi_filename
             })
+        raise
     else:
         try:
             txt = ''
             try:
                 txt = pprint.pformat(info)
             except:
-                logging.exception("can't represent data for package info")
+                logging.exception("Can't represent data for package info")
+                raise
             else:
 
                 f.write("""\
@@ -283,9 +289,9 @@ def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
 
     ret = 0
 
-    d = read_package_info(dirname, ret_on_error={})
+    package_info = read_package_info(dirname, ret_on_error={})
 
-    d['pkg_nameinfo'] = None
+    package_info['pkg_nameinfo'] = None
 
     base = os.path.basename(filename)
 
@@ -298,9 +304,9 @@ def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
         logging.error("Can't correctly parse file name")
         ret = 1
     else:
-        d['pkg_nameinfo'] = parse_result
+        package_info['pkg_nameinfo'] = parse_result
 
-        write_package_info(dirname, d)
+        write_package_info(dirname, package_info)
 
         ret = 0
 
@@ -312,7 +318,7 @@ def apply_constitution_on_buildingsite(dirname):
 
     ret = 0
 
-    d = read_package_info(dirname, ret_on_error={})
+    package_info = read_package_info(dirname, ret_on_error={})
 
     const = org.wayround.aipsetup.constitution.read_constitution()
 
@@ -322,9 +328,9 @@ def apply_constitution_on_buildingsite(dirname):
 
     else:
 
-        d['constitution'] = const
+        package_info['constitution'] = const
 
-        write_package_info(dirname, d)
+        write_package_info(dirname, package_info)
 
         ret = 0
 
@@ -346,30 +352,46 @@ def apply_pkg_info_on_buildingsite(dirname):
             or not isinstance(package_info['pkg_nameinfo']['groups']['name'],
                               str):
 
-
-        logging.error("info undetermined")
+        logging.error("package_info['pkg_nameinfo']['groups'] undetermined")
         package_info['pkg_info'] = {}
         ret = 1
 
     else:
-        infoname = package_info['pkg_nameinfo']['groups']['name']
 
         logging.debug("Getting info from index DB")
 
-        info = org.wayround.aipsetup.pkgindex.get_package_info(infoname)
+        res = org.wayround.aipsetup.pkgindex.find_package_info_by_basename_and_version(
+            package_info['pkg_nameinfo']['groups']['name'],
+            package_info['pkg_nameinfo']['groups']['version']
+            )
 
-        if not isinstance(info, dict):
-            logging.error("Can't read info from DB")
-            package_info['pkg_info'] = {}
+        offerings = list(res.keys())
+        if len(offerings) == 0:
+            logging.error(
+                "Can't find acceptable basename=>version_re package info offering in package index"
+                )
             ret = 2
+        elif len(offerings) > 1:
+            logging.error(
+                "To many acceptable basename=>version_re offerings in package index:\n{}".format(res)
+                )
+            ret = 3
         else:
 
-            package_info['pkg_info'] = info
-            # print repr(info)
+            info = res[offerings[0]]
 
-            write_package_info(dirname, package_info)
+            if not isinstance(info, dict):
+                logging.error("Can't read info from DB")
+                package_info['pkg_info'] = {}
+                ret = 4
 
-            ret = 0
+            else:
+
+                package_info['pkg_info'] = info
+
+                write_package_info(dirname, package_info)
+
+                ret = 0
 
     return ret
 
@@ -378,67 +400,44 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
 
     ret = 0
 
-    pi = read_package_info(dirname, ret_on_error={})
+    package_info = read_package_info(dirname, ret_on_error={})
 
-    if not isinstance(pi, dict) \
-            or not 'pkg_info' in pi \
-            or not isinstance(pi['pkg_info'], dict) \
-            or not 'buildinfo' in pi['pkg_info'] \
-            or not isinstance(pi['pkg_info']['buildinfo'], str):
-        logging.error("buildinfo undetermined")
-        pi['pkg_buildinfo'] = {}
+
+    if not isinstance(package_info, dict) \
+            or not 'pkg_info' in package_info \
+            or not isinstance(package_info['pkg_info'], dict) \
+            or not 'buildinfo' in package_info['pkg_info'] \
+            or not isinstance(package_info['pkg_info']['buildinfo'], str):
+        logging.error("package_info['pkg_info']['buildinfo'] undetermined")
+        package_info['pkg_buildinfo'] = {}
         ret = 1
 
     else:
 
-        buildinfo_filename = os.path.join(
-            org.wayround.aipsetup.config.config['buildinfo'], '%(name)s.py' % {
-                'name': pi['pkg_info']['buildinfo']
-                }
-            )
-
-        if not os.path.exists(buildinfo_filename) \
-                or not os.path.isfile(buildinfo_filename):
-            logging.error("Can't find buildinfo Python script `%(name)s'" % {
-                'name': buildinfo_filename
-                })
+        if package_info['pkg_info']['buildinfo'] == '' or package_info['pkg_info']['buildinfo'].isspace():
+            logging.error(
+                "package_info['pkg_info']['buildinfo'] is empty or space.\n" +
+                "    probably you need to edit `{}' and update indexing".format(
+                    package_info['pkg_info']['name'] + '.xml')
+                )
             ret = 2
-
         else:
 
-            g = {}
-            l = {}
+            buildinfo = org.wayround.aipsetup.buildinfo.load_buildinfo(
+                package_info['pkg_info']['buildinfo']
+                )
 
-            try:
-                exec(compile(open(buildinfo_filename).read(), buildinfo_filename, 'exec'), g, l)
-            except:
-                logging.exception("Can't load buildinfo Python script `%(name)s'" % {
-                    'name': buildinfo_filename
-                    })
+            if not isinstance(buildinfo, dict):
+                logging.error(
+                    "Error loading buildinfo `{}'".format(
+                        package_info['pkg_info']['buildinfo']
+                        )
+                    )
                 ret = 3
-
             else:
 
-                if not 'build_info' in l \
-                        or not inspect.isfunction(l['build_info']):
-
-                    logging.error("Named module doesn't have 'build_info' function")
-                    ret = 4
-
-                else:
-
-                    try:
-                        l['build_info'](copy.copy(org.wayround.aipsetup.config.config), pi)
-                    except:
-                        logging.exception("Error while calling for build_info() from `{}'".format(buildinfo_filename))
-                        pi['pkg_buildinfo'] = {}
-                        ret = 5
-
-                    else:
-
-                        write_package_info(dirname, pi)
-
-                        ret = 0
+                package_info['pkg_buildinfo'] = buildinfo
+                write_package_info(dirname, package_info)
 
     return ret
 
@@ -446,6 +445,16 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
 def apply_info(dirname='.', source_filename=None):
 
     ret = 0
+
+    if read_package_info(dirname, None) == None:
+        logging.info(
+            "Applying new package info to dir `{}'".format(
+                os.path.abspath(
+                    dirname
+                    )
+                )
+            )
+        write_package_info(dirname, {})
 
     if apply_pkg_nameinfo_on_buildingsite(
             dirname, source_filename

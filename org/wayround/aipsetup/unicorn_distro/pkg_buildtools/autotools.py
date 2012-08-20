@@ -118,7 +118,7 @@ def extract(log, buildingsite='.'):
         )
 
     if os.path.isdir(output_dir):
-        log.write("-i- cleaningup source dir")
+        log.info("cleaningup source dir")
         org.wayround.utils.file.cleanup_dir(output_dir)
 
     if not os.path.isdir(output_dir):
@@ -197,7 +197,7 @@ def configure(log, buildingsite='.'):
 
         cmd = ['bash'] + [config_script] + run_parameters
 
-        log.write("-i- Starting autotools configurer script with following command:")
+        log.info("Starting autotools configurer script with following command:")
         log.write("    %(cmd)s" % {
                 'cmd': repr(cmd)
                 })
@@ -209,7 +209,7 @@ def configure(log, buildingsite='.'):
             )
 
         if len(pi['pkg_buildinfo']['autotools_configure_envs']) > 0:
-            log.write("-i- Environment Modifications: %(list)s" % {
+            log.info("Environment Modifications: %(list)s" % {
                     'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_configure_envs'])
                     })
 
@@ -244,7 +244,7 @@ def configure(log, buildingsite='.'):
                     )
                 ret = 100
             else:
-                log.write("-i- configurer return code was: %(code)d" % {
+                log.info("configurer return code was: %(code)d" % {
                         'code': p.returncode
                         })
                 ret = p.returncode
@@ -284,7 +284,7 @@ def build(log, buildingsite='.'):
 
         cmd = ['make'] + ['-f', makefile] + run_parameters
 
-        log.write("-i- Starting autotools make script with following command:")
+        log.info("Starting autotools make script with following command:")
         log.write("    %(cmd)s" % {
                 'cmd': repr(cmd)
                 })
@@ -296,7 +296,7 @@ def build(log, buildingsite='.'):
             )
 
         if len(pi['pkg_buildinfo']['autotools_build_envs']) > 0:
-            log.write("-i- Environment Modifications: %(list)s" % {
+            log.info("Environment Modifications: %(list)s" % {
                     'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_build_envs'])
                     })
 
@@ -331,7 +331,7 @@ def build(log, buildingsite='.'):
                     )
                 ret = 100
             else:
-                log.write("-i- builder return code was: %(code)d" % {
+                log.info("builder return code was: %(code)d" % {
                         'code': p.returncode
                         })
                 ret = p.returncode
@@ -386,7 +386,7 @@ def distribute(log, buildingsite='.'):
             'dd_name': pi['pkg_buildinfo']['autotools_install_opts']['DESTDIR_opt_name']
             }]
 
-        log.write("-i- Starting autotools install script with following command:")
+        log.info("Starting autotools install script with following command:")
         log.write("    %(cmd)s" % {
                 'cmd': repr(cmd)
                 })
@@ -417,10 +417,10 @@ def distribute(log, buildingsite='.'):
                 cwd=building_dir
                 )
         except:
-            log.write("-e- exception while starting install script")
-            log.write("    command line was:")
-            log.write("    " + repr(cmd))
-            log.write(
+            log.error(
+                "exception while starting install script\n" +
+                "    command line was:\n" +
+                "    " + repr(cmd) +
                 org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
@@ -444,7 +444,7 @@ def distribute(log, buildingsite='.'):
                     )
                 ret = 100
             else:
-                log.write("-i- installer return code was: %(code)d" % {
+                log.info("installer return code was: %(code)d" % {
                         'code': p.returncode
                         })
                 ret = p.returncode

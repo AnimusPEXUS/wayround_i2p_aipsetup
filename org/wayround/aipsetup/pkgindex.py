@@ -723,6 +723,20 @@ def guess_package_homepage(pkg_name, tag_db_connected=None):
 
     return possibilities
 
+def find_package_info_by_basename_and_version(basename, version, db_connected=None):
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
+    ret = db.find_package_info_by_basename_and_version(basename, version)
+
+    if not db_connected:
+        del db
+
+    return ret
+
 class PackageDatabaseConfigError(Exception): pass
 
 class PackageDatabase:
@@ -1418,7 +1432,8 @@ class PackageDatabase:
                 'buildinfo'            : q.buildinfo,
                 'installation_priority': q.installation_priority,
                 'basename'             : q.basename,
-                'version_re'           : q.version_re
+                'version_re'           : q.version_re,
+                'name'                 : q.name
                 }
 
         return ret
@@ -1773,3 +1788,16 @@ Total records checked     : %(n1)d
         }
         )
     )
+
+    def find_package_info_by_basename_and_version(self, basename, version):
+
+        ret = {}
+
+        q = self.sess.query(self.PackageInfo).filter_by(basename=basename).all()
+
+        for i in q:
+            if re.match(i.version_re, version):
+                ret[i.name] = self.package_info_record_to_dict(i.name, i)
+                break
+
+        return ret
