@@ -269,6 +269,7 @@ def pkgindex_index_sources(opts, args):
 
     [-f] [SUBDIR]
 
+    -d - before saving delete all found files from index
     -f - force reindexation of already indexed files
 
     SUBDIR - index only one of subderictories
@@ -280,10 +281,11 @@ def pkgindex_index_sources(opts, args):
             )
         )
 
+    first_delete_found = '-d' in opts
     force_reindex = '-f' in opts
 
     if len(args) > 1:
-        logging.error("Wrong parameter count: can be one or none")
+        logging.error("Wrong argument count: can be only one")
         ret = 1
     else:
 
@@ -291,9 +293,11 @@ def pkgindex_index_sources(opts, args):
             subdir_name = args[0]
             subdir_name = os.path.realpath(os.path.abspath(subdir_name))
 
-        if not (os.path.realpath(os.path.abspath(subdir_name)) + '/').startswith(
+        if (
+            not (os.path.realpath(os.path.abspath(subdir_name)) + '/').startswith(
             os.path.realpath(os.path.abspath(org.wayround.aipsetup.config.config['source'])) + '/'
-            ) or not os.path.isdir(os.path.abspath(subdir_name)):
+            )
+            or not os.path.isdir(os.path.abspath(subdir_name))):
             logging.error("Not a subdir of pkg_source")
             logging.debug(
 """\
@@ -309,7 +313,11 @@ exists: {}
             ret = 2
 
         else:
-            index_sources(os.path.realpath(subdir_name), force_reindex=force_reindex)
+            ret = index_sources(
+                os.path.realpath(subdir_name),
+                force_reindex=force_reindex,
+                first_delete_found=first_delete_found
+                )
 
     return ret
 
@@ -380,7 +388,7 @@ def join_pkg_path(pkg_path):
 
     return ret
 
-def index_sources(subdir_name, force_reindex=False):
+def index_sources(subdir_name, force_reindex=False, first_delete_found=False):
 
     index_directory(
         os.path.realpath(os.path.abspath(org.wayround.aipsetup.config.config['source'])),
@@ -390,10 +398,11 @@ def index_sources(subdir_name, force_reindex=False):
         ['.tar.gz', '.tar.bz2', '.zip',
          '.7z', '.tgz', '.tar.xz', '.tar.lzma',
          '.tbz2'],
-        force_reindex=force_reindex
+        force_reindex=force_reindex,
+        first_delete_found=first_delete_found
         )
 
-    return
+    return 0
 
 
 def _scan_progress(added_tags, sub_dir_name, root_dir_name_len):
@@ -478,7 +487,8 @@ def index_directory(
     sub_dir_name,
     db_connection,
     acceptable_endings=None,
-    force_reindex=False
+    force_reindex=False,
+    first_delete_found=False
     ):
 
     root_dir_name = os.path.realpath(os.path.abspath(root_dir_name))
@@ -507,7 +517,11 @@ def index_directory(
     source_index = []
 
     _index_directory_to_list(
-        source_index, root_dir_name, sub_dir_name, root_dir_name_len, acceptable_endings
+        source_index,
+        root_dir_name,
+        sub_dir_name,
+        root_dir_name_len,
+        acceptable_endings
         )
 
     org.wayround.utils.file.progress_write_finish()
@@ -527,6 +541,20 @@ def index_directory(
     else:
 
         try:
+            if first_delete_found:
+                removed = 0
+                logging.info("Removing found files from index")
+                for i in source_index:
+                    org.wayround.utils.file.progress_write(
+                        "    removed {} of {}".format(removed, found_count)
+                        )
+                    tags.del_object_tags(i)
+                    removed += 1
+
+                tags.commit()
+
+            org.wayround.utils.file.progress_write_finish()
+
             logging.info("Saving to DB")
             failed_count = 0
             skipped_count = 0
