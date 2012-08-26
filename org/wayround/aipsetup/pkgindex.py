@@ -553,14 +553,16 @@ def index_directory(
 
                 tags.commit()
 
-            org.wayround.utils.file.progress_write_finish()
+                org.wayround.utils.file.progress_write_finish()
 
             logging.info("Saving to DB")
+            index = -1
             failed_count = 0
             skipped_count = 0
             tag_objects = set(tags.get_objects())
 
             for i in source_index:
+                index += 1
 
                 if not force_reindex and i in tag_objects:
 
@@ -585,9 +587,10 @@ def index_directory(
                         failed_count += 1
 
                 org.wayround.utils.file.progress_write(
-                    "    saved {} out of {} (failed {}, skipped {})".format(
-                        added_count,
+                    "    processing {} out of {} (added {}, failed {}, skipped {})".format(
+                        index,
                         found_count,
+                        added_count,
                         failed_count,
                         skipped_count
                         )

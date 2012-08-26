@@ -11,11 +11,11 @@ def build_info():
     ret = {
         'build_tools': {
             'extract'    : 'autotools',
-            'patch'      : 'autotools',
+            #'patch'      : 'autotools',
             'configure'  : 'autotools',
             'build'      : 'autotools',
             'distribute' : 'autotools',
-            'prepack'    : 'autotools'
+            'prepack'    : 'autotools',
             },
 
         'build_sequance': [
@@ -23,7 +23,7 @@ def build_info():
             'configure',
             'build',
             'distribute',
-            'prepack'
+            'prepack',
             ],
 
         # Do not remove this, as it's used on also with configure less

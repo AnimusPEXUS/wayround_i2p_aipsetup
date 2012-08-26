@@ -166,8 +166,6 @@ def complete(dirname):
             ret = 2
         else:
 
-            # FIXME: Check this functional
-
             for i in actions_sequance:
                 if not i in FUNCTIONS_LIST:
                     logging.error("Requested action `{}' not supported".format(i))
@@ -187,17 +185,27 @@ def complete(dirname):
 
             if ret == 0:
                 for i in list(package_info['pkg_buildinfo']['build_tools'].keys()):
-                    if not i in org.wayround.aipsetup.buildtools.get_tool_functions(
-                        package_info['pkg_buildinfo']['build_tools'][i]
-                        ):
-
+                    tool_functions = (
+                        org.wayround.aipsetup.buildtools.get_tool_functions(
+                            package_info['pkg_buildinfo']['build_tools'][i]
+                            )
+                        )
+                    if not isinstance(tool_functions, dict):
                         logging.error(
-                            "`{}' not found in tool `{}' exported ".format(
-                                i, package_info['pkg_buildinfo']['build_tools'][i]
+                            "Can't get tool `{}' functions".format(
+                                package_info['pkg_buildinfo']['build_tools'][i]
                                 )
                             )
-                        ret = 6
-                        break
+                        ret = 7
+                    else:
+                        if not i in tool_functions:
+                            logging.error(
+                                "`{}' not found in `{}' exported functions".format(
+                                    i, package_info['pkg_buildinfo']['build_tools'][i]
+                                    )
+                                )
+                            ret = 6
+                            break
 
             if ret == 0:
                 for i in actions_sequance:
@@ -232,10 +240,10 @@ def general_tool_function(action_name, dirname):
         ret = 1
     else:
         try:
-            tool = package_info['pkg_buildinfo'][action_name]
+            tool = package_info['pkg_buildinfo']['build_tools'][action_name]
         except:
             log.error(
-                "Error getting tool name for action `{}'".format(action_name)
+                "Error getting tool name for function `{}'".format(action_name)
                 )
             ret = 2
 
@@ -248,19 +256,26 @@ def general_tool_function(action_name, dirname):
                     )
                 ret = 3
             else:
-                tool_actions = org.wayround.aipsetup.buildtools.get_tool_functions(tool)
-                if not action_name in tool_actions or not callable(tool_actions[action_name]):
-                    log.error("`{}' action is not exported by `{}' tool".format(action_name, tool))
-                    ret = 5
-                else:
-
-                    if tool_actions[action_name](log, dirname) != 0:
-                        log.error(
-                            ("Tool {} could not perform {}".format(tool, process))
+                tool_functions = org.wayround.aipsetup.buildtools.get_tool_functions(tool)
+                if not isinstance(tool_functions, dict):
+                    logging.error(
+                        "Can't get tool `{}' functions".format(
+                            package_info['pkg_buildinfo']['build_tools'][i]
                             )
-                        ret = 4
+                        )
+                else:
+                    if not action_name in tool_functions or not callable(tool_functions[action_name]):
+                        log.error("Function `{}' is not exported by `{}' tool".format(action_name, tool))
+                        ret = 5
                     else:
-                        log.info("{} complited".format(process.capitalize()))
+
+                        if tool_functions[action_name](log, dirname) != 0:
+                            log.error(
+                                ("Tool {} could not perform {}".format(tool, process))
+                                )
+                            ret = 4
+                        else:
+                            log.info("{} complited".format(process.capitalize()))
 
     log.stop()
 

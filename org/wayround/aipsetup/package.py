@@ -34,6 +34,7 @@ import org.wayround.aipsetup.name
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.build
+import org.wayround.aipsetup.pack
 
 
 def exported_commands():
@@ -717,7 +718,7 @@ def build(source_files):
 
             tmp_dir_prefix = "{name}-{version}-{timestamp}-".format_map(
                 {
-                    'name': par_res['groups']['name'],
+                    'name': package_info[list(package_info.keys())[0]]['name'],
                     'version': par_res['groups']['version'],
                     'timestamp': org.wayround.utils.time.currenttime_stamp()
                     }

@@ -11,6 +11,9 @@ import tempfile
 import shutil
 import pprint
 import logging
+import sys
+
+import org.wayround.aipsetup.buildingsite
 
 import org.wayround.utils.time
 import org.wayround.utils.checksum
@@ -170,9 +173,9 @@ def destdir_checksum(buildingsite):
 
     ret = 0
 
-    destdir = buildingsite.getDir_DESTDIR(buildingsite)
+    destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
-    lists_dir = buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
     output_file = os.path.abspath(
         os.path.join(
@@ -205,9 +208,9 @@ def destdir_filelist(buildingsite):
 
     ret = 0
 
-    destdir = buildingsite.getDir_DESTDIR(buildingsite)
+    destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
-    lists_dir = buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
     output_file = os.path.abspath(
         os.path.join(
@@ -237,9 +240,9 @@ def destdir_filelist(buildingsite):
 
 def destdir_deps_c(buildingsite):
     ret = 0
-    destdir = buildingsite.getDir_DESTDIR(buildingsite)
+    destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
-    lists_dir = buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
     lists_file = os.path.abspath(
         os.path.join(
@@ -273,11 +276,15 @@ def destdir_deps_c(buildingsite):
             file_list_i = 1
             for i in file_list:
                 file_list_i += 1
-                org.wayround.utils.file.progress_write("    (%(perc).2f%%) ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
-                    'perc': 100 / (float(file_list_l) / file_list_i),
-                    'elfs': elfs,
-                    'n_elfs': n_elfs
-                    })
+                org.wayround.utils.file.progress_write(
+                    "    ({perc:6.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".format_map(
+                        {
+                            'perc': 100.0 / (file_list_l / file_list_i),
+                            'elfs': elfs,
+                            'n_elfs': n_elfs
+                            }
+                        )
+                    )
                 filename = destdir + '/' + i
                 filename.replace(r'//', '/')
                 filename = os.path.abspath(filename)
@@ -290,10 +297,10 @@ def destdir_deps_c(buildingsite):
 
             org.wayround.utils.file.progress_write_finish()
 
-            logging.info("ELFs: %(elfs)d; non-ELFs: %(n_elfs)d" % {
+            logging.info("ELFs: {elfs}; non-ELFs: {n_elfs}".format_map({
                 'elfs': elfs,
                 'n_elfs': n_elfs
-                })
+                }))
 
             try:
                 f2 = open(deps_file, 'w')
@@ -315,8 +322,10 @@ def remove_source_and_build_dirs(buildingsite):
 
     ret = 0
 
-    for i in [buildingsite.DIR_SOURCE,
-              buildingsite.DIR_BUILDING]:
+    for i in [
+        org.wayround.aipsetup.buildingsite.DIR_SOURCE,
+        org.wayround.aipsetup.buildingsite.DIR_BUILDING
+        ]:
         dirname = os.path.abspath(
             os.path.join(
                 buildingsite,
@@ -336,9 +345,11 @@ def compress_patches_destdir_and_logs(buildingsite):
 
     ret = 0
 
-    for i in [buildingsite.DIR_PATCHES,
-              buildingsite.DIR_DESTDIR,
-              buildingsite.DIR_BUILD_LOGS]:
+    for i in [
+        org.wayround.aipsetup.buildingsite.DIR_PATCHES,
+        org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
+        org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+        ]:
         dirname = os.path.abspath(
             os.path.join(
                 buildingsite,
@@ -359,12 +370,12 @@ def compress_patches_destdir_and_logs(buildingsite):
             logging.info("Compressing %(i)s" % {
                 'i': i
                 })
-            org.wayround.utils.archive.compress_dir_contents_tar_compressor(
+            org.wayround.utils.archive.archive_tar_canonical(
                 dirname,
                 filename,
                 'xz',
                 verbose_tar=False,
-                verbose_compressor=True
+                verbose_compressor=False
                 )
 
     return ret
@@ -373,14 +384,20 @@ def compress_files_in_lists_dir(buildingsite):
 
     ret = 0
 
-    lists_dir = buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
     for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
         infile = os.path.join(lists_dir, i)
         outfile = infile + '.xz'
 
-        if org.wayround.utils.archive.compress_file_xz(infile, outfile) != 0:
+        if org.wayround.utils.exec.process_file(
+            'xz',
+            infile,
+            outfile,
+            stderr=None,
+            options=['-9', '-v', '-M', (200 * 1024 ** 2)]
+            ) != 0:
             logging.error("Error compressing files in lists dir")
             ret = 1
             break
@@ -391,9 +408,11 @@ def remove_patches_destdir_and_buildlogs_dirs(buildingsite):
 
     ret = 0
 
-    for i in [buildingsite.DIR_PATCHES,
-              buildingsite.DIR_DESTDIR,
-              buildingsite.DIR_BUILD_LOGS]:
+    for i in [
+        org.wayround.aipsetup.buildingsite.DIR_PATCHES,
+        org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
+        org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+        ]:
         dirname = os.path.abspath(
             os.path.join(
                 buildingsite,
@@ -413,7 +432,7 @@ def remove_decompressed_files_from_lists_dir(buildingsite):
 
     ret = 0
 
-    lists_dir = buildingsite.getDir_LISTS(buildingsite)
+    lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
     for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
@@ -466,7 +485,7 @@ def make_checksums_for_building_site(buildingsite):
 
 def pack_buildingsite(buildingsite):
 
-    pi = buildingsite.read_package_info(
+    pi = org.wayround.aipsetup.buildingsite.read_package_info(
         buildingsite, ret_on_error=None
         )
 
@@ -484,11 +503,9 @@ def pack_buildingsite(buildingsite):
 
         pack_file_name = os.path.join(
             pack_dir,
-            "%(pkgname)s-%(version)s%(versionl)s%(versionln)s-%(timestamp)s-%(archinfo)s.asp" % {
-                'pkgname': pi['pkg_nameinfo']['groups']['name'],
+            "(%(pkgname)s)-(%(version)s)-%(timestamp)s-%(archinfo)s.asp" % {
+                'pkgname': pi['pkg_info']['name'],
                 'version': pi['pkg_nameinfo']['groups']['version'],
-                'versionl': pi['pkg_nameinfo']['groups']['version_letter'],
-                'versionln': pi['pkg_nameinfo']['groups']['version_letter_number'],
                 'timestamp': org.wayround.utils.time.currenttime_stamp(),
                 'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
                     'arch'  : pi['constitution']['host_arch'],
@@ -499,10 +516,8 @@ def pack_buildingsite(buildingsite):
                 }
             )
 
-        try:
+        if not os.path.isdir(pack_dir):
             os.makedirs(pack_dir)
-        except:
-            pass
 
         org.wayround.utils.archive.pack_dir_contents_tar(
             buildingsite,

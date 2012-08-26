@@ -42,8 +42,6 @@ def buildinfo_edit_file(opts, args):
 
 def load_buildinfo(name):
 
-    # FIXME: cleanup buildingsite module from analogical functionality
-
     ret = None
 
     buildinfo_filename = os.path.abspath(

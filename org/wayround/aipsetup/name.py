@@ -464,8 +464,6 @@ def name_parse_test(args, opts):
 
 def parse_test():
 
-    # FIXME: fix parsers!
-
     for i in DIFFICULT_NAMES:
         logging.info("====== Testing RegExps on `{}' ======".format(i))
         if not isinstance(source_name_parse(i), dict):
