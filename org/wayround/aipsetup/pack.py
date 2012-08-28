@@ -285,8 +285,8 @@ def destdir_deps_c(buildingsite):
                             }
                         )
                     )
-                filename = destdir + '/' + i
-                filename.replace(r'//', '/')
+                filename = destdir + os.path.sep + i
+                filename.replace(os.path.sep * 2, os.path.sep)
                 filename = os.path.abspath(filename)
                 dep = org.wayround.utils.deps_c.elf_deps(filename)
                 if isinstance(dep, list):

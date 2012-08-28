@@ -1,0 +1,9 @@
+.package-info-module---info-upper-table {
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.package-info-module---info-upper-table>tbody>tr>td {
+    border: 1px solid black;
+}

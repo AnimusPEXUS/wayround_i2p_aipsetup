@@ -280,9 +280,6 @@ def package_put_to_index_many(opts, args):
     Put package to repository and add it to index
     """
 
-    # TODO: add addition to index, not only to repo, but also to file list.
-    # TODO: but first make file lists not plain but sqlite
-
     ret = 0
 
     files = []
@@ -577,7 +574,7 @@ def named_list_packages(asp_name, destdir='/'):
 def list_installed_packages(mask, destdir='/', return_list=False, mute=False):
     destdir = os.path.abspath(destdir)
     listdir = os.path.abspath(destdir + org.wayround.aipsetup.config.config['installed_pkg_dir'])
-    listdir = listdir.replace(r'//', '/')
+    listdir = listdir.replace(os.path.sep * 2, os.path.sep)
     filelist = glob.glob(os.path.join(listdir, mask))
 
     ret = 0
@@ -613,10 +610,10 @@ def remove_package(name, destdir='/'):
 
     destdir = os.path.abspath(destdir)
 
-    listdir = os.path.abspath(destdir + '/' + org.wayround.aipsetup.config.config['installed_pkg_dir'])
-    listdir = listdir.replace(r'//', '/')
+    listdir = os.path.abspath(destdir + os.path.sep + org.wayround.aipsetup.config.config['installed_pkg_dir'])
+    listdir = listdir.replace(os.path.sep * 2, os.path.sep)
 
-    filename = os.path.abspath(listdir + '/' + name + '.xz')
+    filename = os.path.abspath(listdir + os.path.sep + name + '.xz')
 
     if not os.path.isfile(filename):
         logging.error("Not found package file list `%(name)s'" % {
@@ -641,8 +638,8 @@ def remove_package(name, destdir='/'):
             lines.sort(None, None, True)
 
             for line in lines:
-                rm_file_name = os.path.abspath(destdir + '/' + line)
-                rm_file_name = rm_file_name.replace(r'//', '/')
+                rm_file_name = os.path.abspath(destdir + os.path.sep + line)
+                rm_file_name = rm_file_name.replace(os.path.sep * 2, os.path.sep)
                 if os.path.isfile(rm_file_name):
                     logging.info("removing %(name)s" % {
                         'name': rm_file_name
@@ -653,9 +650,9 @@ def remove_package(name, destdir='/'):
                       'installed_pkg_dir_sums',
                       'installed_pkg_dir']:
                 rm_file_name = os.path.abspath(
-                    destdir + '/' + org.wayround.aipsetup.config.config[i] + '/' + name + '.xz'
+                    destdir + os.path.sep + org.wayround.aipsetup.config.config[i] + os.path.sep + name + '.xz'
                     )
-                rm_file_name = rm_file_name.replace(r'//', '/')
+                rm_file_name = rm_file_name.replace(os.path.sep * 2, os.path.sep)
                 if os.path.isfile(rm_file_name):
                     logging.info("removing %(name)s" % {
                         'name': rm_file_name
@@ -933,8 +930,8 @@ def package_files(destdir, pkgname,
 
     destdir = os.path.abspath(destdir)
 
-    list_dir = destdir + '/' + org.wayround.aipsetup.config.config['installed_pkg_dir']
-    list_dir = list_dir.replace(r'//', '/')
+    list_dir = destdir + os.path.sep + org.wayround.aipsetup.config.config['installed_pkg_dir']
+    list_dir = list_dir.replace(os.path.sep * 2, os.path.sep)
     list_dir = os.path.abspath(list_dir)
 
     pkg_list_file = os.path.join(list_dir, pkgname)
@@ -1067,8 +1064,8 @@ def put_to_index(filename):
                         })
                     ret = 2
                 else:
-                    full_path = org.wayround.aipsetup.config.config['repository'] + '/' + path
-                    full_path = os.path.abspath(full_path.replace(r'//', '/'))
+                    full_path = org.wayround.aipsetup.config.config['repository'] + os.path.sep + path
+                    full_path = os.path.abspath(full_path.replace(os.path.sep * 2, os.path.sep))
 
                     if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
@@ -1084,9 +1081,9 @@ def put_to_index(filename):
                             'n2': full_path_pack
                             })
                         for i in [
-                            (filename, full_path_pack + '/' + fbn),
-                            (filename_md5, full_path_pack + '/' + fbn + '.md5'),
-                            (filename_sha512, full_path_pack + '/' + fbn + '.sha512')
+                            (filename, full_path_pack + os.path.sep + fbn),
+                            (filename_md5, full_path_pack + os.path.sep + fbn + '.md5'),
+                            (filename_sha512, full_path_pack + os.path.sep + fbn + '.sha512')
                             ]:
                             if (os.path.abspath(i[0]) != os.path.abspath(i[1])):
 
@@ -1115,8 +1112,8 @@ def put_to_index(filename):
                         })
                     ret = 2
                 else:
-                    full_path = org.wayround.aipsetup.config.config['repository'] + '/' + path
-                    full_path = os.path.abspath(full_path.replace(r'//', '/'))
+                    full_path = org.wayround.aipsetup.config.config['repository'] + os.path.sep + path
+                    full_path = os.path.abspath(full_path.replace(os.path.sep * 2, os.path.sep))
 
                     if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
@@ -1129,14 +1126,14 @@ def put_to_index(filename):
 
                         logging.info("moving `%(n1)s' to `%(n2)s'" % {
                             'n1': filename,
-                            'n2': full_path_pack + '/' + fbn
+                            'n2': full_path_pack + os.path.sep + fbn
                             })
 
-                        if (os.path.abspath(filename) != os.path.abspath(full_path_pack + '/' + fbn)):
+                        if (os.path.abspath(filename) != os.path.abspath(full_path_pack + os.path.sep + fbn)):
                             org.wayround.utils.file.remove_if_exists(
-                                full_path_pack + '/' + fbn
+                                full_path_pack + os.path.sep + fbn
                                 )
-                            shutil.move(filename, full_path_pack + '/' + fbn)
+                            shutil.move(filename, full_path_pack + os.path.sep + fbn)
 
         else:
 
@@ -1161,8 +1158,8 @@ def put_to_index(filename):
                         })
                     ret = 2
                 else:
-                    full_path = org.wayround.aipsetup.config.config['repository'] + '/' + path
-                    full_path = os.path.abspath(full_path.replace(r'//', '/'))
+                    full_path = org.wayround.aipsetup.config.config['repository'] + os.path.sep + path
+                    full_path = os.path.abspath(full_path.replace(os.path.sep * 2, os.path.sep))
 
                     if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
                         full_path
@@ -1175,15 +1172,15 @@ def put_to_index(filename):
 
                         logging.info("moving `%(n1)s' to `%(n2)s'" % {
                             'n1': filename,
-                            'n2': full_path_source + '/' + fbn
+                            'n2': full_path_source + os.path.sep + fbn
                             })
 
-                        if (os.path.abspath(filename) != os.path.abspath(full_path_source + '/' + fbn)):
+                        if (os.path.abspath(filename) != os.path.abspath(full_path_source + os.path.sep + fbn)):
                             org.wayround.utils.file.remove_if_exists(
-                                full_path_source + '/' + fbn
+                                full_path_source + os.path.sep + fbn
                                 )
-                            shutil.move(filename, full_path_source + '/' + fbn)
+                            shutil.move(filename, full_path_source + os.path.sep + fbn)
                             if os.path.isfile(filename + '.asc'):
-                                shutil.move(filename + '.asc', full_path_source + '/' + fbn + '.asc')
+                                shutil.move(filename + '.asc', full_path_source + os.path.sep + fbn + '.asc')
 
     return ret

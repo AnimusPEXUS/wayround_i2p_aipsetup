@@ -9,6 +9,8 @@ import fnmatch
 import logging
 import copy
 
+import org.wayround.utils.tag
+
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
@@ -49,7 +51,7 @@ ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
 
 ASP_NAME_REGEXPS = {
     'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$',
-    'aipsetup3': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
+    'aipsetup3': r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
     }
 
 ASP_NAME_REGEXPS_COMPILED = {}
@@ -63,7 +65,6 @@ del(i)
 
 def exported_commands():
     return {
-        'test_expressions_on_sources': name_test_expressions_on_sources,
         'parse': name_parse_name,
         'parse_test': name_parse_test
         }
@@ -104,58 +105,6 @@ def name_parse_name(opts, args):
     return ret
 
 
-def name_test_expressions_on_sources(opts, args):
-    """
-    Run parsing tests on available source package file names
-    """
-
-    ret = 0
-
-    # TODO: Add some more usability
-    # TODO: Add immediate package info files update _option_
-
-    logging.info("Testing expressions on sources")
-    logging.debug("Looking for source index file")
-    try:
-        f = open(org.wayround.aipsetup.config.config['source_index'], 'r')
-    except:
-        logging.exception(
-            "Can't open file `{}'".format(
-                org.wayround.aipsetup.config.config['source_index']
-                )
-            )
-        ret = 1
-
-    else:
-        try:
-            lst = f.readlines()
-
-            f.close()
-
-            logging.debug("Stripping lines")
-            lst2 = []
-
-            for i in lst:
-                lst2.append(i.strip())
-
-            lst = lst2
-            del(lst2)
-
-            logging.debug("Sorting lines")
-            lst.sort()
-
-            logging.debug("Parsing found filenames")
-            for i in lst:
-
-                logging.debug("Parsing file name {}".format(i))
-
-                # TODO: do I need return value?
-                source_name_parse(i, False)
-        finally:
-            f.close()
-
-
-    return ret
 
 
 def package_name_parse(filename):

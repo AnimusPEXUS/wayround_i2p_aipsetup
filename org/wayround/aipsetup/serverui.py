@@ -6,11 +6,15 @@ import time
 import cherrypy
 
 import org.wayround.utils.xml
-import org.wayround.utils.dict
 
 
 import org.wayround.aipsetup.pkgindex
 
+def pathed_css_path_renderer(obj, inname):
+    return 'css/' + inname
+
+def pathed_js_path_renderer(obj, inname):
+    return 'js/' + inname
 
 def page_index():
 
@@ -278,12 +282,25 @@ def page_category(db, path):
 
     return txt
 
+class TimestampSortKey:
+
+    def __init__(self, files_dict):
+        self.files_dict = files_dict
+
+    def timestamp_sort_key(self, i):
+        return self.files_dict[i]['groups']['timestamp']
+
 def package_file_list(db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_files(name)
 
     keys = list(files.keys())
-    keys.sort()
+
+    tsk = TimestampSortKey(files)
+
+    keys.sort(key=tsk.timestamp_sort_key, reverse=True)
+
+    del tsk
 
     rows = []
 
@@ -333,9 +350,15 @@ def package_file_list(db, name):
                                 attributes={
                                     'href': package_url
                                     },
-                                content=files[i]['name']
+                                content=(
+                                    files[i]['groups']['version']
+                                    )
                                 )
                             ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=files[i]['groups']['timestamp']
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
@@ -371,7 +394,11 @@ def package_file_list(db, name):
                 content=[
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Package Name"
+                        content="Version"
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'th',
+                        content="Timestamp"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
@@ -387,6 +414,9 @@ def package_file_list(db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
+        module='packages-file-list',
+        uid='packages-file-list-uid',
+        required_css=['packages_file_list.css'],
         content=rows
         )
 
@@ -500,6 +530,9 @@ def package_sources_file_list(db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
+        module='sources-file-list',
+        uid='sources-file-list-uid',
+        required_css=['sources_file_list.css'],
         content=rows
         )
 
@@ -530,13 +563,16 @@ def package_info(db, name):
 
         ret = org.wayround.utils.xml.tag(
             'div',
+            module='package-info-module',
+            uid='info-div',
+            required_css=['info-div.css'],
             content=[
-                org.wayround.utils.xml.tag(
-                    'h1',
-                    content="Package: {}".format(name)
-                    ),
                  org.wayround.utils.xml.tag(
                     'table',
+                    module='package-info-module',
+                    uid='info-info-table',
+                    required_css=['info-info-table.css'],
+
                     content=[
                         org.wayround.utils.xml.tag(
                             'tr',
@@ -650,7 +686,8 @@ def package_info(db, name):
                                                     new_line_before_start=False,
                                                     new_line_after_end=False,
                                                     attributes={
-                                                        'href': package_info['home_page']
+                                                        'href': package_info['home_page'],
+                                                        'target': '_blank'
                                                         },
                                                     content=package_info['home_page']
                                                     )
@@ -763,7 +800,27 @@ def page_package(db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
+        module='package-info-module',
+        uid='info-upper-table',
+        required_css=['info-upper-table.css'],
         content=[
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'colspan': '2'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'h1',
+                                content="Package: {}".format(name)
+                                ),
+                            ]
+                        )
+                    ]
+                ),
             org.wayround.utils.xml.tag(
                 'tr',
                 content=[
@@ -837,27 +894,41 @@ def page_package(db, name):
             ]
         )
 
-    tree = org.wayround.utils.xml.html(
-        title="Unicorn distribution server",
-        content=[table]
+    head = org.wayround.utils.xml.html_head(
+        "Unicorn distribution server"
         )
 
-    a = org.wayround.utils.xml.DictTreeToXMLRenderer(
+    tree = org.wayround.utils.xml.html(
+        head=head,
+        content=[table],
+        body_module='aipsetup_server_basic',
+        body_uid='body',
+        body_css=['body.css']
+        )
+
+    renderer = org.wayround.utils.xml.DictTreeToXMLRenderer(
         xml_indent_size=2,
         generate_css=True,
         generate_js=True,
-        css_and_js_holder=tree['00020_html']['content']['00010_head']
+        css_and_js_holder=head
         )
 
-    a.set_tree(tree)
+    renderer.set_tree(tree)
 
-    txt = a.render()
+    txt = renderer.render(
+        pathed_css_path_renderer,
+        pathed_js_path_renderer
+        )
 
-    if len(a.log) != 0:
+    if len(renderer.log) != 0:
         # TODO: rework this
-        for i in a.log:
+        for i in renderer.log:
             print(i)
         txt = 'Error'
+
+    del renderer
+
+#    print(pprint.pformat(tree, 4))
 
     return txt
 

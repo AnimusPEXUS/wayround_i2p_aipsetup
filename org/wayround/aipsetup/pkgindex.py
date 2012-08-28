@@ -346,7 +346,7 @@ def create_required_dirs_at_package(path):
     ret = 0
 
     for i in ['pack', 'source', 'aipsetup2']:
-        full_path = path + '/' + i
+        full_path = path + os.path.sep + i
 
         if not os.path.exists(full_path):
             try:
@@ -1795,6 +1795,7 @@ Total records checked     : %(n1)d
             else:
                 category = "< Package not indexed! >"
 
+            # TODO: add all fields
             print("""\
 +---[{name}]---------------------------------+
        basename: {basename}
@@ -1809,13 +1810,13 @@ Total records checked     : %(n1)d
 """.format_map(
         {
         'name'         : name,
-        'home_page'     : r['home_page'],
+        'home_page'    : r['home_page'],
         'description'  : r['description'],
         'tags'         : ', '.join(r['tags']),
         'category'     : category,
         'buildinfo'    : r['buildinfo'],
         'version_re'   : r['version_re'],
-        'basename'   : r['basename']
+        'basename'     : r['basename']
         }
         )
     )

@@ -21,6 +21,7 @@ CONFIG_FULL_SAMPLE = {
     'buildinfo'          : '/mnt/sda3/home/agu/_UNICORN/pkg_buildinfo',
     'buildtools'         : '/mnt/sda3/home/agu/_UNICORN/pkg_buildtools',
     'info'               : '/mnt/sda3/home/agu/_UNICORN/pkg_info',
+    'server_files'       : '/mnt/sda3/home/agu/_UNICORN/server_files',
     'source_index'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/sources.sqlite',
 
     # configurable
@@ -259,7 +260,8 @@ def config_check_after_load(indict):
         ('constitution'    , 'system_constitution.py'),
         ('buildinfo'       , 'pkg_buildinfo'),
         ('buildtools'      , 'pkg_buildtools'),
-        ('info'            , 'pkg_info')
+        ('info'            , 'pkg_info'),
+        ('server_files'    , 'server_files')
         ]:
         indict[i] = os.path.abspath(
             os.path.join(indict['unicorn_root'], j)
