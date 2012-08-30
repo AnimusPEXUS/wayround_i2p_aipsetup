@@ -713,10 +713,11 @@ def build(source_files):
             ret = 2
         else:
 
-            tmp_dir_prefix = "{name}-{version}-{timestamp}-".format_map(
+            tmp_dir_prefix = "{name}-{version}-{status}-{timestamp}-".format_map(
                 {
                     'name': package_info[list(package_info.keys())[0]]['name'],
                     'version': par_res['groups']['version'],
+                    'status': par_res['groups']['status'],
                     'timestamp': org.wayround.utils.time.currenttime_stamp()
                     }
                 )

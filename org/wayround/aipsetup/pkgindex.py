@@ -795,7 +795,7 @@ class PackageDatabase:
             )
 
         name = sqlalchemy.Column(
-            sqlalchemy.Unicode(256),
+            sqlalchemy.UnicodeText,
             nullable=False,
             default=''
             )
@@ -823,7 +823,7 @@ class PackageDatabase:
             )
 
         name = sqlalchemy.Column(
-            sqlalchemy.Unicode(256),
+            sqlalchemy.UnicodeText,
             nullable=False,
             default=''
             )
@@ -883,11 +883,32 @@ class PackageDatabase:
             default=5
             )
 
+        # FIXME: continue here
+
         deletable = sqlalchemy.Column(
             sqlalchemy.Boolean,
             nullable=False,
             default=True
             )
+
+        updatable = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=True
+            )
+
+        auto_newest_src = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=True
+            )
+
+        auto_newest_pkg = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=True
+            )
+
 
 
     class PackageTag(Base):
@@ -905,14 +926,66 @@ class PackageDatabase:
             )
 
         name = sqlalchemy.Column(
-            'name',
-            sqlalchemy.Unicode(256),
+            sqlalchemy.UnicodeText,
             nullable=False
             )
 
         tag = sqlalchemy.Column(
-            'tag',
-            sqlalchemy.Unicode(256),
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+    class PackageDependency(Base):
+        """
+        Class for package's Dependencies
+        """
+
+        __tablename__ = 'package_dependency'
+
+        id = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            primary_key=True,
+            autoincrement=True
+            )
+
+        name = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+        dep = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+    class PackageLatest(Base):
+        """
+        Class for package's Latests
+        """
+
+        __tablename__ = 'package_latest'
+
+        id = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            primary_key=True,
+            autoincrement=True
+            )
+
+        name = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+        typ = sqlalchemy.Column(
+            'type',
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+        file = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
             nullable=False
             )
 

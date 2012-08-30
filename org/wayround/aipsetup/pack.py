@@ -503,9 +503,10 @@ def pack_buildingsite(buildingsite):
 
         pack_file_name = os.path.join(
             pack_dir,
-            "(%(pkgname)s)-(%(version)s)-%(timestamp)s-%(archinfo)s.asp" % {
+            "(%(pkgname)s)-(%(version)s)-(%(status)s)-(%(timestamp)s)-(%(archinfo)s).asp" % {
                 'pkgname': pi['pkg_info']['name'],
                 'version': pi['pkg_nameinfo']['groups']['version'],
+                'status': pi['pkg_nameinfo']['groups']['status'],
                 'timestamp': org.wayround.utils.time.currenttime_stamp(),
                 'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
                     'arch'  : pi['constitution']['host_arch'],

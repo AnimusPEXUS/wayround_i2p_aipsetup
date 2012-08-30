@@ -2,13 +2,15 @@
 import os.path
 import logging
 import time
+import functools
 
 import cherrypy
 
 import org.wayround.utils.xml
 
-
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.version
+
 
 def pathed_css_path_renderer(obj, inname):
     return 'css/' + inname
@@ -43,114 +45,6 @@ def page_index():
     return txt
 
 
-def page_pkg_list(db_connection):
-
-#    db = org.wayround.aipsetup.pkgindex.PackageDatabase()
-#    lst = db.ls_packages()
-#    del db
-
-
-#    pack_sel = pkg_select(lst, lst)
-
-    tree = org.wayround.utils.xml.html(
-        title="Unicorn distribution server",
-        content=[category_tree(db_connection)]
-        )
-
-    a = org.wayround.utils.xml.DictTreeToXMLRenderer(
-        xml_indent_size=2,
-        generate_css=True,
-        generate_js=True,
-        css_and_js_holder=tree['00020_html']['content']['00010_head']
-        )
-
-    a.set_tree(tree)
-
-    txt = a.render()
-
-    if len(a.log) != 0:
-        # TODO: rework this
-        for i in a.log:
-            print(i)
-        txt = 'Error'
-
-    return txt
-
-
-def _category_tree(start_cat_id=0, db=None):
-
-    logging.debug("Getting package ids in cat {}".format(start_cat_id))
-    pack_ids = db.ls_package_ids(start_cat_id)
-    logging.debug("Getting cat ids in cat {}".format(start_cat_id))
-    cats_ids = db.ls_category_ids(start_cat_id)
-
-    cats_tags = []
-    pack_tags = []
-
-    logging.debug("Formatting cats in cat {}".format(start_cat_id))
-
-    for i in cats_ids:
-
-        cat_path = db.get_category_path_string(i)
-
-        cats_tags.append(
-            org.wayround.utils.xml.tag(
-                'div',
-                attributes={
-                    'class': 'dir_entry',
-                    'style': 'border: 3px blue solid;'
-                    },
-                content=[
-                    org.wayround.utils.xml.tag(
-                        'div',
-                        attributes={
-                            'class': 'dir_title',
-                            'style': 'padding-left: 10px; border: 3px green solid;'
-                            },
-                        content=cat_path
-                        ),
-                    org.wayround.utils.xml.tag(
-                        'div',
-                        attributes={
-                            'class': 'dir_title_entries',
-                            'style': 'border: 3px black solid;'
-                            },
-                        content=_category_tree(i, db)
-                        )
-                    ]
-                )
-            )
-
-    logging.debug("Formatting packs in cat {}".format(start_cat_id))
-
-    for i in pack_ids:
-        pack_tags.append(
-            org.wayround.utils.xml.tag(
-                'div',
-                attributes={
-                    'class': 'pack_entry',
-                    'style': 'padding-left: 10px; border: 3px red solid;'
-                    },
-                content=db.get_package_by_id(i)
-                )
-            )
-
-
-    ret = cats_tags + pack_tags
-
-    return ret
-
-
-
-def category_tree(db):
-
-    ret = org.wayround.utils.xml.tag(
-        'div',
-        content=_category_tree(0, db)
-        )
-
-    return ret
-
 def category(db, path):
 
     cat_id = db.get_category_by_path(path)
@@ -183,13 +77,26 @@ def category(db, path):
                 content=[
                     org.wayround.utils.xml.tag(
                         'div',
+                        module='categories',
+                        uid='single-page-cat-category-div',
                         content=[
                             org.wayround.utils.xml.tag(
                                 'a',
                                 attributes={
-                                    'href': 'directory?path={}'.format(cat_path)
+                                    'href': 'category?path={}'.format(cat_path)
                                     },
-                                content='[CAT] {}'.format(db.get_category_by_id(i))
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'img',
+                                        closed=True,
+                                        attributes={
+                                            'alt': 'open',
+                                            'src': 'css/icons/icons/folder.png',
+                                            },
+                                        ),
+                                    ' ',
+                                    db.get_category_by_id(i)
+                                    ]
                                 )
                             ]
                         )
@@ -204,13 +111,26 @@ def category(db, path):
         pack_tags.append(
             org.wayround.utils.xml.tag(
                 'div',
+                module='categories',
+                uid='single-page-cat-package-div',
                 content=[
                     org.wayround.utils.xml.tag(
                         'a',
                         attributes={
                             'href': 'package?name={}'.format(package_name)
                             },
-                        content='[pac] {}'.format(package_name)
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'img',
+                                closed=True,
+                                attributes={
+                                    'alt': 'open',
+                                    'src': 'css/icons/icons/package-x-generic.png',
+                                    },
+                                ),
+                            ' ',
+                            package_name
+                            ]
                         )
                     ]
                 )
@@ -231,7 +151,7 @@ def category(db, path):
                     org.wayround.utils.xml.tag(
                         'a',
                         attributes={
-                            'href': 'directory?path={}'.format(parent_cat_path)
+                            'href': 'category?path={}'.format(parent_cat_path)
                             },
                         content=".. (Parent Category: '{}')".format(parent_cat_path)
                         )
@@ -251,6 +171,9 @@ def category(db, path):
 
     ret = org.wayround.utils.xml.tag(
         'div',
+        module='categories',
+        uid='single-page-div',
+        required_css=['single-page-div.css'],
         content=ret
         )
 
@@ -258,25 +181,37 @@ def category(db, path):
 
 def page_category(db, path):
 
-    cat = org.wayround.utils.xml.html(
-        title='Category: {}'.format(path),
-        content=[category(db, path)]
+    head = org.wayround.utils.xml.html_head(
+        path
         )
 
-    a = org.wayround.utils.xml.DictTreeToXMLRenderer(
+    table = category(db, path)
+
+    tree = org.wayround.utils.xml.html(
+        head=head,
+        content=[table],
+        body_module='aipsetup_server_basic',
+        body_uid='body',
+        body_css=['body.css']
+        )
+
+    renderer = org.wayround.utils.xml.DictTreeToXMLRenderer(
         xml_indent_size=2,
         generate_css=True,
         generate_js=True,
-        css_and_js_holder=cat['00020_html']['content']['00010_head']
+        css_and_js_holder=head
         )
 
-    a.set_tree(cat)
+    renderer.set_tree(tree)
 
-    txt = a.render()
+    txt = renderer.render(
+        pathed_css_path_renderer,
+        pathed_js_path_renderer
+        )
 
-    if len(a.log) != 0:
+    if len(renderer.log) != 0:
         # TODO: rework this
-        for i in a.log:
+        for i in renderer.log:
             print(i)
         txt = 'Error'
 
@@ -348,11 +283,21 @@ def package_file_list(db, name):
                             org.wayround.utils.xml.tag(
                                 'a',
                                 attributes={
-                                    'href': package_url
+                                    'href': package_url,
+                                    'title': "Download File"
                                     },
-                                content=(
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'img',
+                                        closed=True,
+                                        attributes={
+                                            'alt': 'download',
+                                            'src': 'css/icons/icons/document-save.png',
+                                            },
+                                        ),
+                                    ' ',
                                     files[i]['groups']['version']
-                                    )
+                                    ]
                                 )
                             ]
                         ),
@@ -414,9 +359,9 @@ def package_file_list(db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
-        module='packages-file-list',
-        uid='packages-file-list-uid',
-        required_css=['packages_file_list.css'],
+        module='package-info-module',
+        uid='file-list-table',
+        required_css=['file-list-table.css'],
         content=rows
         )
 
@@ -426,7 +371,13 @@ def package_file_list(db, name):
 def package_sources_file_list(db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
-    files.sort()
+
+    org.wayround.utils.list.list_sort(
+        files,
+        cmp=org.wayround.aipsetup.version.source_version_comparator
+        )
+
+    files.reverse()
 
     rows = []
 
@@ -466,9 +417,21 @@ def package_sources_file_list(db, name):
                             org.wayround.utils.xml.tag(
                                 'a',
                                 attributes={
-                                    'href': source_url
+                                    'href': source_url,
+                                    'title': "Download File"
                                     },
-                                content=os.path.basename(i)
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'img',
+                                        closed=True,
+                                        attributes={
+                                            'alt': 'download',
+                                            'src': 'css/icons/icons/document-save.png',
+                                            },
+                                        ),
+                                    ' ',
+                                    os.path.basename(i)
+                                    ]
                                 )
                             ]
                         ),
@@ -530,9 +493,9 @@ def package_sources_file_list(db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
-        module='sources-file-list',
-        uid='sources-file-list-uid',
-        required_css=['sources_file_list.css'],
+        module='package-info-module',
+        uid='file-list-table',
+        required_css=['file-list-table.css'],
         content=rows
         )
 
@@ -597,6 +560,20 @@ def package_info(db, name):
                                             new_line_before_content=False,
                                             new_line_after_content=False,
                                             content=package_info['basename']
+                                            )
+                                        ]
+                                    ),
+                                org.wayround.utils.xml.tag(
+                                    'td',
+                                    attributes={
+                                        'rowspan': '6'
+                                        },
+                                    content=[
+                                        org.wayround.utils.xml.tag(
+                                            'pre',
+                                            new_line_before_content=False,
+                                            new_line_after_content=False,
+                                            content=package_info['description']
                                             )
                                         ]
                                     )
@@ -725,7 +702,7 @@ def package_info(db, name):
                                                     new_line_before_start=False,
                                                     new_line_after_end=False,
                                                     attributes={
-                                                        'href': "directory?path={}".format(category)
+                                                        'href': "category?path={}".format(category)
                                                         },
                                                     content=category
                                                     )
@@ -763,25 +740,6 @@ def package_info(db, name):
                                     )
                                 ]
                             ),
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'colspan': '2'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=package_info['description']
-                                            )
-                                        ]
-                                    )
-                                ]
-                            )
                         ]
                     )
                 ]
@@ -815,7 +773,7 @@ def page_package(db, name):
                         content=[
                             org.wayround.utils.xml.tag(
                                 'h1',
-                                content="Package: {}".format(name)
+                                content=name
                                 ),
                             ]
                         )
@@ -826,17 +784,206 @@ def page_package(db, name):
                 content=[
                     org.wayround.utils.xml.tag(
                         'td',
+                        module='package-info-module',
+                        uid='info-upper-table-buttons-cell',
+                        required_css=['info-upper-table-buttons-cell.css'],
                         attributes={
                             'colspan': '2'
                             },
                         content=[
                             org.wayround.utils.xml.tag(
-                                'a',
+                                'form',
                                 attributes={
-                                    'href': "directory?path={}".format(category)
+                                    'action': "..",
+                                    'mode': 'GET'
                                     },
-                                content="Up to category ({})".format(category)
-                                )
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'button',
+                                        attributes={
+                                            'type': 'submit',
+                                            },
+                                        content=[
+                                            org.wayround.utils.xml.tag(
+                                                'img',
+                                                closed=True,
+                                                attributes={
+                                                    'src': 'css/icons/icons/go-home.png',
+                                                    'alt': "Go Home"
+                                                    }
+                                                ),
+                                            " ",
+                                            "Go Home"
+                                            ]
+                                        )
+                                    ]
+                                ),
+                            org.wayround.utils.xml.tag(
+                                'form',
+                                attributes={
+                                    'action': "category",
+                                    'mode': 'GET'
+                                    },
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'button',
+                                        attributes={
+                                            'type': 'submit',
+                                            'name': 'path',
+                                            'value': category
+                                            },
+                                        content=[
+                                            org.wayround.utils.xml.tag(
+                                                'img',
+                                                closed=True,
+                                                attributes={
+                                                    'src': 'css/icons/icons/go-up.png',
+                                                    'alt': "Up to category"
+                                                    }
+                                                ),
+                                            " ",
+                                            "{}".format(category)
+                                            ]
+                                        )
+                                    ]
+                                ),
+
+
+                            org.wayround.utils.xml.tag(
+                                'form',
+                                attributes={
+                                    'action': "",
+                                    'mode': 'GET'
+                                    },
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'input',
+                                        closed=True,
+                                        attributes={
+                                            'type': 'hidden',
+                                            'name': 'name',
+                                            'value': name
+                                            }
+                                        ),
+                                    org.wayround.utils.xml.tag(
+                                        'input',
+                                        closed=True,
+                                        attributes={
+                                            'type': 'hidden',
+                                            'name': 'mode',
+                                            'value': 'packages'
+                                            }
+                                        ),
+                                    org.wayround.utils.xml.tag(
+                                        'button',
+                                        attributes={
+                                            'type': 'submit'
+                                            },
+                                        content=[
+                                            org.wayround.utils.xml.tag(
+                                                'img',
+                                                closed=True,
+                                                attributes={
+                                                    'src': 'css/icons/icons/gnome-mime-application-x-cd-image.png',
+                                                    'alt': "Packages JSON"
+                                                    }
+                                                ),
+                                            " ",
+                                            "Packages JSON"
+                                            ]
+                                        )
+                                    ]
+                                ),
+                            org.wayround.utils.xml.tag(
+                                'form',
+                                attributes={
+                                    'action': "",
+                                    'mode': 'GET'
+                                    },
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'input',
+                                        closed=True,
+                                        attributes={
+                                            'type': 'hidden',
+                                            'name': 'name',
+                                            'value': name
+                                            }
+                                        ),
+                                    org.wayround.utils.xml.tag(
+                                        'input',
+                                        closed=True,
+                                        attributes={
+                                            'type': 'hidden',
+                                            'name': 'mode',
+                                            'value': 'sources'
+                                            }
+                                        ),
+                                    org.wayround.utils.xml.tag(
+                                        'button',
+                                        attributes={
+                                            'type': 'submit'
+                                            },
+                                        content=[
+                                            org.wayround.utils.xml.tag(
+                                                'img',
+                                                closed=True,
+                                                attributes={
+                                                    'src': 'css/icons/icons/gnome-mime-application-x-cd-image.png',
+                                                    'alt': "Sources JSON"
+                                                    }
+                                                ),
+                                            " ",
+                                            "Sources JSON"
+                                            ]
+                                        )
+                                    ]
+                                ),
+                            org.wayround.utils.xml.tag(
+                                'form',
+                                attributes={
+                                    'action': "",
+                                    'mode': 'GET'
+                                    },
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'input',
+                                        closed=True,
+                                        attributes={
+                                            'type': 'hidden',
+                                            'name': 'name',
+                                            'value': name
+                                            }
+                                        ),
+                                    org.wayround.utils.xml.tag(
+                                        'input',
+                                        closed=True,
+                                        attributes={
+                                            'type': 'hidden',
+                                            'name': 'mode',
+                                            'value': 'info'
+                                            }
+                                        ),
+                                    org.wayround.utils.xml.tag(
+                                        'button',
+                                        attributes={
+                                            'type': 'submit'
+                                            },
+                                        content=[
+                                            org.wayround.utils.xml.tag(
+                                                'img',
+                                                closed=True,
+                                                attributes={
+                                                    'src': 'css/icons/icons/gnome-mime-application-x-cd-image.png',
+                                                    'alt': "Info JSON"
+                                                    }
+                                                ),
+                                            " ",
+                                            "Info JSON"
+                                            ]
+                                        )
+                                    ]
+                                ),
                              ]
                         )
                     ]
@@ -895,7 +1042,7 @@ def page_package(db, name):
         )
 
     head = org.wayround.utils.xml.html_head(
-        "Unicorn distribution server"
+        name
         )
 
     tree = org.wayround.utils.xml.html(
@@ -932,94 +1079,4 @@ def page_package(db, name):
 
     return txt
 
-
-def pkg_select(pkg_list, category_list):
-    lst1 = []
-    lst2 = []
-
-    for i in pkg_list:
-        lst1.append(
-            org.wayround.utils.xml.tag(
-                'option',
-                attributes={
-                    'value': i
-                    },
-                content=i
-                )
-            )
-
-    for i in category_list:
-        lst2.append(
-            org.wayround.utils.xml.tag(
-                'option',
-                attributes={
-                    'value': i
-                    },
-                content=i
-                )
-            )
-
-    return org.wayround.utils.xml.tag(
-        'div',
-        content=[
-            org.wayround.utils.xml.tag(
-                'table',
-                content=[
-                    org.wayround.utils.xml.tag(
-                        'tr',
-                        content=[
-                            org.wayround.utils.xml.tag(
-                                'td',
-                                content='Select Package'
-                                )
-                            ]
-                        ),
-                    org.wayround.utils.xml.tag(
-                        'tr',
-                        content=[
-                            org.wayround.utils.xml.tag(
-                                'td',
-                                content=category_tree()
-                                )
-                            ]
-                        ),
-                    org.wayround.utils.xml.tag(
-                        'tr',
-                        content=[
-                            org.wayround.utils.xml.tag(
-                                'td',
-                                content=[
-                                        org.wayround.utils.xml.tag(
-                                            'input',
-                                            attributes={
-                                                'name': 'pkgname',
-                                                'type': 'text'
-                                                },
-                                            closed=True
-                                            )
-                                    ]
-                                )
-                            ]
-                        ),
-                    org.wayround.utils.xml.tag(
-                        'tr',
-                        content=[
-                            org.wayround.utils.xml.tag(
-                                'td',
-                                content=[
-                                        org.wayround.utils.xml.tag(
-                                            'button',
-                                            attributes={
-                                                'type': 'submit'
-                                                },
-                                            content="Go to package page"
-                                            )
-                                    ]
-                                )
-                            ]
-                        )
-                    ]
-                )
-            ]
-        )
 

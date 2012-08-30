@@ -1,0 +1,7 @@
+.package-info-module---info-upper-table-buttons-cell>form {
+    display: inline;
+}
+
+.package-info-module---info-upper-table-buttons-cell>form>button {
+    vertical-align: middle;
+}

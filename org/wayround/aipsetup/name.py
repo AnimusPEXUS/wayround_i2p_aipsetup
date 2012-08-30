@@ -10,6 +10,8 @@ import logging
 import copy
 
 import org.wayround.utils.tag
+import org.wayround.utils.text
+import org.wayround.utils.list
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
@@ -51,7 +53,8 @@ ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
 
 ASP_NAME_REGEXPS = {
     'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$',
-    'aipsetup3': r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-(?P<timestamp>\d{8}\.\d{6}\.\d{7})-(?P<host>.*)$'
+    'aipsetup3':
+        r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$'
     }
 
 ASP_NAME_REGEXPS_COMPILED = {}
@@ -66,6 +69,7 @@ del(i)
 def exported_commands():
     return {
         'parse': name_parse_name,
+        'pparse': name_parse_package,
         'parse_test': name_parse_test
         }
 
@@ -73,7 +77,8 @@ def commands_order():
     return [
         'test_expressions_on_sources',
         'parse',
-        'parse_test'
+        'parse_test',
+        'pparse'
         ]
 
 def name_parse_name(opts, args):
@@ -86,8 +91,6 @@ def name_parse_name(opts, args):
     result
     """
 
-    # TODO: help clarification required
-
     ret = 0
 
     if len(args) != 1:
@@ -99,15 +102,41 @@ def name_parse_name(opts, args):
 
         write = '-w' in opts
 
-        if source_name_parse(filename, modify_info_file=write) != 0:
+        if source_name_parse(filename, modify_info_file=write) == None:
+            ret = 2
+
+    return ret
+
+def name_parse_package(opts, args):
+    """
+    Parse package name
+
+    NAME
+    """
+
+    ret = 0
+
+    if len(args) != 1:
+        logging.error("File name required")
+        ret = 1
+    else:
+
+        filename = args[0]
+
+        p_re = package_name_parse(filename, mute=False)
+
+        if p_re == None:
             ret = 2
 
     return ret
 
 
+def name_parse_test(args, opts):
+    parse_test()
+    return 0
 
 
-def package_name_parse(filename):
+def package_name_parse(filename, mute=True):
 
     filename = os.path.basename(filename)
 
@@ -132,10 +161,77 @@ def package_name_parse(filename):
                     'name': re_res.group('name'),
                     'version': re_res.group('version'),
                     'timestamp': re_res.group('timestamp'),
+                    'status': re_res.group('status'),
                     'host': re_res.group('host')
                     }
                 }
+
+            if ret['groups']['status'] == 'None':
+                ret['groups']['status'] = ''
+
+            ret['groups']['version_list_dirty'] = (
+                org.wayround.utils.text.slice_string_to_sections(
+                    ret['groups']['version']
+                    )
+                )
+
+            ret['groups']['version_list_dirty'] = (
+                org.wayround.utils.list.list_strip(
+                    ret['groups']['version_list_dirty'],
+                    ['.', '_', '-', '+']
+                    )
+                )
+
+            ret['groups']['version_list'] = (
+                copy.copy(ret['groups']['version_list_dirty'])
+                )
+
+            org.wayround.utils.list.remove_all_values(
+                ret['groups']['version_list'],
+                ['.', '_']
+                )
+
+            ret['groups']['status_list_dirty'] = (
+                org.wayround.utils.text.slice_string_to_sections(
+                    ret['groups']['status']
+                    )
+                )
+
+            ret['groups']['status_list_dirty'] = (
+                org.wayround.utils.list.list_strip(
+                    ret['groups']['status_list_dirty'],
+                    ['.', '_', '-', '+']
+                    )
+                )
+
+            ret['groups']['status_list'] = (
+                copy.copy(ret['groups']['status_list_dirty'])
+                )
+
+            org.wayround.utils.list.remove_all_values(
+                ret['groups']['status_list'],
+                ['.', '_']
+                )
+
             break
+
+    if ret != None:
+        groups = ''
+        for i in ret['groups']:
+            groups += "       %(group)s: %(value)s\n" % {
+                'group': i,
+                'value': repr(ret['groups'][i])
+                }
+
+        s = "Match `{filename}'\n{groups}".format_map({
+            'filename': filename,
+            'groups': groups
+            })
+
+        if mute:
+            logging.debug(s)
+        else:
+            logging.info(s)
 
     logging.debug("Parsing package file name {} result\n{}".format(filename, repr(ret)))
 
@@ -252,7 +348,7 @@ def source_name_parse_delicate(filename, mute=False):
     else:
         without_extension = filename[:-len(extension)]
 
-        name_sliced = re.findall(r'[a-zA-Z]+|\d+|[\.\-\_\~\+]', without_extension)
+        name_sliced = org.wayround.utils.text.slice_string_to_sections(without_extension)
 
         most_possible_version = find_most_possible_version(name_sliced, mute)
 
@@ -261,43 +357,77 @@ def source_name_parse_delicate(filename, mute=False):
         else:
             ret = {
                 'name': None,
-                'groups': {}
+                'groups': {
+                    'name'              : None,
+                    'extension'         : None,
+
+                    'version'           : None,
+                    'version_list_dirty': None,
+                    'version_list'      : None,
+                    'version_dirty'     : None,
+
+                    'status'            : None,
+                    'status_list_dirty' : None,
+                    'status_dirty'      : None,
+                    'status_list'       : None,
+                    }
                 }
 
             ret['name'] = filename
 
-            ret['groups']['name'] = ''.join(name_sliced[:most_possible_version[0]]).strip('.-_')
-            ret['groups']['version_list_dirty'] = name_sliced[most_possible_version[0]:most_possible_version[1]]
+            ret['groups']['name'] = ''.join(
+                name_sliced[:most_possible_version[0]]
+                ).strip('.-_')
 
-            ret['groups']['version_list'] = copy.copy(ret['groups']['version_list_dirty'])
+            ret['groups']['version_list_dirty'] = (
+                name_sliced[most_possible_version[0]:most_possible_version[1]]
+                )
 
-            for i in ['.', '_']:
-                while i in ret['groups']['version_list']:
-                    ret['groups']['version_list'].remove(i)
+            ret['groups']['version_list'] = (
+                copy.copy(ret['groups']['version_list_dirty'])
+                )
 
-            ret['groups']['version'] = '.'.join(ret['groups']['version_list'])
-            ret['groups']['version_dirty'] = ''.join(ret['groups']['version_list_dirty'])
+            org.wayround.utils.list.remove_all_values(
+                ret['groups']['version_list'],
+                ['.', '_']
+                )
+
+            ret['groups']['version'] = (
+                '.'.join(ret['groups']['version_list'])
+                )
+
+            ret['groups']['version_dirty'] = (
+                ''.join(ret['groups']['version_list_dirty'])
+                )
 
             ret['groups']['extension'] = extension
 
 
-            ret['groups']['status_list'] = name_sliced[most_possible_version[1]:]
+            ret['groups']['status_list'] = (
+                name_sliced[most_possible_version[1]:]
+                )
 
-            while (len(ret['groups']['status_list']) > 0
-                   and  ret['groups']['status_list'][0] in ['.', '_', '-', '+']):
-                del ret['groups']['status_list'][0]
-
-            while (len(ret['groups']['status_list']) > 0
-                   and ret['groups']['status_list'][-1] in ['.', '_', '-', '+']):
-                del ret['groups']['status_list'][-1]
+            ret['groups']['status_list'] = (
+                org.wayround.utils.list.list_strip(
+                    ret['groups']['status_list'],
+                    ['.', '_', '-', '+']
+                    )
+                )
 
             if len(ret['groups']['status_list']) > 0:
 
-                ret['groups']['status'] = ''.join(ret['groups']['status_list'])
+                ret['groups']['status_dirty'] = (
+                    ''.join(ret['groups']['status_list'])
+                    )
 
-                for i in ['.', '_', '-', '~']:
-                    while i in ret['groups']['status_list']:
-                        ret['groups']['status_list'].remove(i)
+                ret['groups']['status_list_dirty'] = (
+                    copy.copy(ret['groups']['status_list'])
+                    )
+
+                org.wayround.utils.list.remove_all_values(
+                    ret['groups']['status_list'],
+                    ['.', '_', '-', '~']
+                    )
 
 
     return ret
@@ -406,10 +536,6 @@ def _modify_info_file(src_filename_parsed, mute=True):
     org.wayround.aipsetup.info.write_to_file(fn, data)
 
     return
-
-def name_parse_test(args, opts):
-    parse_test()
-    return 0
 
 def parse_test():
 

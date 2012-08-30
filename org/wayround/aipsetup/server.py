@@ -58,20 +58,8 @@ class Index:
 
     index.exposed = True
 
-    def pkg_list(self):
 
-        db = org.wayround.aipsetup.pkgindex.PackageDatabase()
-
-        txt = org.wayround.aipsetup.serverui.page_pkg_list(db)
-
-        del db
-
-        return txt
-
-    pkg_list.exposed = True
-
-
-    def directory(self, path=''):
+    def category(self, path=''):
 
         db = org.wayround.aipsetup.pkgindex.PackageDatabase()
 
@@ -81,7 +69,7 @@ class Index:
 
         return txt
 
-    directory.exposed = True
+    category.exposed = True
 
     def package(self, name='', mode='normal'):
 
