@@ -217,43 +217,33 @@ def page_category(db, path):
 
     return txt
 
-class TimestampSortKey:
-
-    def __init__(self, files_dict):
-        self.files_dict = files_dict
-
-    def timestamp_sort_key(self, i):
-        return self.files_dict[i]['groups']['timestamp']
 
 def package_file_list(db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_files(name)
 
-    keys = list(files.keys())
+    org.wayround.utils.list.list_sort(
+        files, cmp=org.wayround.aipsetup.version.package_version_comparator
+        )
 
-    tsk = TimestampSortKey(files)
-
-    keys.sort(key=tsk.timestamp_sort_key, reverse=True)
-
-    del tsk
+    files.reverse()
 
     rows = []
 
-    for i in keys:
+    for i in files:
 
-        pid = db.get_package_id(name)
-        package_path = db.get_package_path_string(pid)
+        parsed = org.wayround.aipsetup.name.package_name_parse(
+            i, mute=True
+            )
 
         package_url = (
             'files_repository'
-            + os.path.sep + package_path + os.path.sep + 'pack' + os.path.sep
-            + files[i]['name'] + '.asp'
+            + i
             )
 
         package_filename = os.path.abspath(
             org.wayround.aipsetup.config.config['repository']
-            + os.path.sep + package_path + os.path.sep + 'pack' + os.path.sep
-            + files[i]['name'] + '.asp'
+            + i
             )
 
         try:
@@ -296,14 +286,14 @@ def package_file_list(db, name):
                                             },
                                         ),
                                     ' ',
-                                    files[i]['groups']['version']
+                                    parsed['groups']['version']
                                     ]
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=files[i]['groups']['timestamp']
+                        content=parsed['groups']['timestamp']
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
@@ -524,6 +514,290 @@ def package_info(db, name):
         else:
             category = "< Package not indexed! >"
 
+        rows = []
+
+        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+
+        for i in [
+            'tags', 'name', 'description', 'basename', 'home_page',
+            'newest_src', 'newest_pkg'
+            ]:
+            if i in keys:
+                keys.remove(i)
+
+
+        for i in keys:
+            rows.append(
+                org.wayround.utils.xml.tag(
+                    'tr',
+                    content=[
+                        org.wayround.utils.xml.tag(
+                            'td',
+                            attributes={
+                                'align': 'right'
+                                },
+                            content=[
+                                org.wayround.utils.xml.tag(
+                                    'strong',
+                                    content='{}:'.format(i.replace('_', ' ').capitalize())
+                                    )
+                                ]
+                            ),
+                        org.wayround.utils.xml.tag(
+                            'td',
+                            content=[
+                                org.wayround.utils.xml.tag(
+                                    'pre',
+                                    new_line_before_content=False,
+                                    new_line_after_content=False,
+                                    content=str(package_info[i])
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+
+        rows.insert(
+            0,
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'align': 'right'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'strong',
+                                content='Base Name:'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=package_info['basename']
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'rowspan': '13'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=package_info['description']
+                                )
+                            ]
+                        )
+                    ]
+                ),
+            )
+
+        rows.append(
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'align': 'right'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'strong',
+                                content='Category:'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'a',
+                                        new_line_before_start=False,
+                                        new_line_after_end=False,
+                                        attributes={
+                                            'href': "category?path={}".format(category)
+                                            },
+                                        content=category
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
+        rows.append(
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'align': 'right'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'strong',
+                                content='Home Page:'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=[
+                                    org.wayround.utils.xml.tag(
+                                        'a',
+                                        new_line_before_start=False,
+                                        new_line_after_end=False,
+                                        attributes={
+                                            'href': package_info['home_page'],
+                                            'target': '_blank'
+                                            },
+                                        content=package_info['home_page']
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
+        rows.append(
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'align': 'right'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'strong',
+                                content='Tags:'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=', '.join(package_info['tags'])
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
+        a = org.wayround.aipsetup.pkgindex.latest_package(
+                name,
+                db
+                )
+        if a == None:
+            a = 'None'
+        else:
+            a = os.path.basename(a)
+
+        rows.append(
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'align': 'right'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'strong',
+                                content='Latest Package:'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=a
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
+        a = org.wayround.aipsetup.pkgindex.latest_source(
+                name,
+                db
+                )
+        if a == None:
+            a = 'None'
+        else:
+            a = os.path.basename(a)
+
+        rows.append(
+            org.wayround.utils.xml.tag(
+                'tr',
+                content=[
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        attributes={
+                            'align': 'right'
+                            },
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'strong',
+                                content='Newest src:'
+                                )
+                            ]
+                        ),
+                    org.wayround.utils.xml.tag(
+                        'td',
+                        content=[
+                            org.wayround.utils.xml.tag(
+                                'pre',
+                                new_line_before_content=False,
+                                new_line_after_content=False,
+                                content=a
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
         ret = org.wayround.utils.xml.tag(
             'div',
             module='package-info-module',
@@ -535,212 +809,7 @@ def package_info(db, name):
                     module='package-info-module',
                     uid='info-info-table',
                     required_css=['info-info-table.css'],
-
-                    content=[
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'align': 'right'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'strong',
-                                            content='basename:'
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=package_info['basename']
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'rowspan': '6'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=package_info['description']
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'align': 'right'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'strong',
-                                            content='version regexp:'
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=package_info['version_re']
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'align': 'right'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'strong',
-                                            content='buildinfo:'
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=package_info['buildinfo']
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'align': 'right'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'strong',
-                                            content='homepage:'
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=[
-                                                org.wayround.utils.xml.tag(
-                                                    'a',
-                                                    new_line_before_start=False,
-                                                    new_line_after_end=False,
-                                                    attributes={
-                                                        'href': package_info['home_page'],
-                                                        'target': '_blank'
-                                                        },
-                                                    content=package_info['home_page']
-                                                    )
-                                                ]
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'align': 'right'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'strong',
-                                            content='category:'
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=[
-                                                org.wayround.utils.xml.tag(
-                                                    'a',
-                                                    new_line_before_start=False,
-                                                    new_line_after_end=False,
-                                                    attributes={
-                                                        'href': "category?path={}".format(category)
-                                                        },
-                                                    content=category
-                                                    )
-                                                ]
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                        org.wayround.utils.xml.tag(
-                            'tr',
-                            content=[
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    attributes={
-                                        'align': 'right'
-                                        },
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'strong',
-                                            content='tags:'
-                                            )
-                                        ]
-                                    ),
-                                org.wayround.utils.xml.tag(
-                                    'td',
-                                    content=[
-                                        org.wayround.utils.xml.tag(
-                                            'pre',
-                                            new_line_before_content=False,
-                                            new_line_after_content=False,
-                                            content=', '.join(package_info['tags'])
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                        ]
+                    content=rows
                     )
                 ]
             )

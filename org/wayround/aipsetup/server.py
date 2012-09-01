@@ -18,6 +18,7 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.serverui
 
 import org.wayround.utils.tag
+import org.wayround.utils.list
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'
@@ -91,15 +92,19 @@ class Index:
 
             files = org.wayround.aipsetup.pkgindex.get_package_files(name)
 
-            keys = list(files.keys())
+            org.wayround.utils.list.list_sort(
+                files, cmp=org.wayround.aipsetup.version.package_version_comparator
+                )
 
-            tsk = org.wayround.aipsetup.serverui.TimestampSortKey(files)
+            files.reverse()
 
-            keys.sort(key=tsk.timestamp_sort_key, reverse=True)
+            l = len(files)
+            i = -1
+            while i != l - 1:
+                i += 1
+                files[i] = 'files_repository' + files[i]
 
-            del tsk
-
-            txt = json.dumps(keys, indent=2, sort_keys=True)
+            txt = json.dumps(files, indent=2, sort_keys=True)
 
             cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
 
@@ -107,6 +112,12 @@ class Index:
         elif mode == 'sources':
             files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
             files.sort(reverse=True)
+
+            l = len(files)
+            i = -1
+            while i != l - 1:
+                i += 1
+                files[i] = 'files_source' + files[i]
 
             txt = json.dumps(files, indent=2, sort_keys=True)
 
@@ -124,11 +135,18 @@ class Index:
             else:
                 category = "< Package not indexed! >"
 
-            del db
 
             info = copy.copy(r)
             info['tags'] = ', '.join(r['tags'])
             info['category'] = category
+            info['newest_pkg'] = (
+                org.wayround.aipsetup.pkgindex.latest_package(name, db)
+                )
+            info['newest_src'] = (
+                org.wayround.aipsetup.pkgindex.latest_source(name, db)
+                )
+
+            del db
 
             txt = json.dumps(info, indent=2, sort_keys=True)
 

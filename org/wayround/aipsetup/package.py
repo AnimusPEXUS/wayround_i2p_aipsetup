@@ -795,14 +795,19 @@ def complete(dirname):
 
     return ret
 
-def find_files(destdir, instr, mode=None, mute=False,
-               return_dict=True):
+def find_files(
+    destdir, instr, mode=None, mute=False,
+    return_dict=True
+    ):
 
     ret = 0
 
-    lst = list_installed_packages(mask='*.xz', destdir=destdir,
-                        return_list=True,
-                        mute=True)
+    lst = list_installed_packages(
+        mask='*.xz',
+        destdir=destdir,
+        return_list=True,
+        mute=True
+        )
     if not isinstance(lst, list):
         logging.error("Error getting installed packages list")
         ret = 1

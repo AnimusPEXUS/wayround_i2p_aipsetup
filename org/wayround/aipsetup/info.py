@@ -33,56 +33,73 @@ import org.wayround.aipsetup.pkgindex
 
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
-    # file name base
-    basename='',
-    # acceptable version regexp
-    version_re='',
-    # not required, but can be useful
-    home_page="",
     # description
     description="",
+    # not required, but can be useful
+    home_page="",
     # string list
     tags=[],
     # string
     buildinfo='',
+    # file name base
+    basename='',
+    # acceptable version regexp
+    version_re='',
     # from 0 to 9. default 5. lower number - higher priority
     installation_priority=5,
     # can package be deleted without hazard to aipsetup functionality 
     # (including system stability)?
-    deletable=True
+    deletable=True,
+    # can package be updated without hazard to aipsetup functionality 
+    # (including system stability)?
+    updatable=True,
+    # can aipsetup automatically find and update latest version? 
+    # (can't not for files containing statuses, 
+    #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
+    auto_newest_src=True,
+    # can aipsetup automatically find and update latest version? 
+    # (can't not for files containing statuses, 
+    #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
+    auto_newest_pkg=True,
+    # latest src file name
+    newest_src=None,
+    # latest pkg file name
+    newest_pkg=None,
     )
 
 pkg_info_file_template = Template(text="""\
 <package>
 
-  <!-- This file is generated using aipsetup v3 -->
+    <!-- This file is generated using aipsetup v3 -->
 
-  <description>${ description | x}</description>
+    <description>${ description | x}</description>
 
-  <home_page url="${ home_page | x}"/>
+    <home_page url="${ home_page | x}"/>
 
-  % if len(tags) == 0:
-  <!-- Use <tag name="" /> constructions for listing
-       tags -->
-  % endif
-  % for i in tags:
-  <tag name="${ i | x}"/>
-  % endfor
+    % if len(tags) == 0:
+    <!-- Use <tag name="" /> constructions for listing
+         tags -->
+    % endif
+    % for i in tags:
+    <tag name="${ i | x}"/>
+    % endfor
 
-  <buildinfo value="${ buildinfo | x }"/>
+    <buildinfo value="${ buildinfo | x }"/>
 
-  <basename value="${ basename | x }"/>
+    <basename value="${ basename | x }"/>
 
-  <version_re value="${ version_re | x }"/>
+    <version_re value="${ version_re | x }"/>
 
-  <installation_priority value="${ installation_priority | x }"/>
+    <installation_priority value="${ installation_priority | x }"/>
 
-  <deletable value="${ deletable | x }"/>
+    <deletable value="${ deletable | x }"/>
+    <updatable value="${ updatable | x }"/>
+
+    <auto_newest_src value="${ auto_newest_src | x }"/>
+    <auto_newest_pkg value="${ auto_newest_pkg | x }"/>
 
 </package>
 """)
-
-
 
 def exported_commands():
     return {
@@ -265,9 +282,22 @@ def is_info_dicts_equal(d1, d2):
 
     ret = True
 
-    for i in ['deletable', 'buildinfo',
-              'home_page', 'description',
-              'installation_priority', 'basename', 'version_re']:
+    for i in [
+        'description',
+        'home_page',
+        'buildinfo',
+        'basename',
+        'version_re'
+        'installation_priority',
+        'deletable',
+        'updatable',
+        'auto_newest_src',
+        'auto_newest_pkg',
+        # next two items must not participate in
+        # equality checks, as they changing too often
+        # 'newest_src',
+        # 'newest_pkg'
+        ]:
         if d1[i] != d2[i]:
             ret = False
             break
@@ -319,11 +349,6 @@ def read_from_file(name):
             else:
                 ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
 
-                for i in ['buildinfo']:
-                    x = _find_latest(tree, i, 'value')
-                    if x != None:
-                        ret[i] = x
-
                 x = _find_latest(tree, 'installation_priority', 'value')
                 if x != None:
                     try:
@@ -340,33 +365,51 @@ def read_from_file(name):
                                 )
                             )
 
-                x = _find_latest(tree, 'deletable', 'value')
+                for i in [
+                    'deletable',
+                    'updatable'
+                    ]:
+                    x = _find_latest(tree, i, 'value')
+                    if x != None:
+                        if not x in ['True', 'False']:
+                            raise ValueError(
+                                "Wrong `{}' value in `{}'".format(
+                                    i,
+                                    name
+                                    )
+                                )
+                        else:
+                            ret[i] = eval(x)
+
+                x = _find_latest(tree, 'updatable', 'value')
                 if x != None:
                     if not x in ['True', 'False']:
                         raise ValueError(
-                            "Wrong deletable value in `{}'".format(
+                            "Wrong updatable value in `{}'".format(
                                 name
                                 )
                             )
                     else:
-                        ret['deletable'] = eval(x)
+                        ret['updatable'] = eval(x)
 
-                x = _find_latest(tree, 'home_page', 'url')
-                if x != None:
-                    ret['home_page'] = x
+                for i in [
+                    ('buildinfo', 'value'),
+                    ('home_page', 'url'),
+                    ('basename', 'value'),
+                    ('version_re', 'value'),
+                    ('auto_newest_src', 'value'),
+                    ('auto_newest_pkg', 'value'),
+                    ('newest_src', 'value'),
+                    ('newest_pkg', 'value')
+                    ]:
 
-                x = _find_latest(tree, 'basename', 'value')
-                if x != None:
-                    ret['basename'] = x
+                    x = _find_latest(tree, i[0], i[1])
+                    if x != None:
+                        ret[i[0]] = x
 
                 x = tree.findall('description')
                 if len(x) > 0:
                     ret['description'] = x[-1].text
-
-                x = _find_latest(tree, 'version_re', 'value')
-                if x != None:
-                    ret['version_re'] = x
-
 
                 ret['tags'] = _find_list(tree, 'tag', 'name')
 
@@ -386,14 +429,19 @@ def write_to_file(name, struct):
     struct['tags'].sort()
 
     txt = pkg_info_file_template.render(
-        deletable=struct['deletable'],
         description=struct['description'],
         home_page=struct['home_page'],
         tags=struct['tags'],
         buildinfo=struct['buildinfo'],
-        installation_priority=struct['installation_priority'],
         basename=struct['basename'],
-        version_re=struct['version_re']
+        version_re=struct['version_re'],
+        installation_priority=struct['installation_priority'],
+        deletable=struct['deletable'],
+        updatable=struct['updatable'],
+        auto_newest_src=struct['auto_newest_src'],
+        auto_newest_pkg=struct['auto_newest_pkg'],
+        newest_src=struct['newest_src'],
+        newest_pkg=struct['newest_pkg']
         )
 
     try:

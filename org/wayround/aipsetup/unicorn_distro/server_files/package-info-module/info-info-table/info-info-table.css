@@ -1,3 +1,7 @@
+.package-info-module---info-info-table>tbody>tr>td>pre {
+    margin: 2px;
+}
+
 .package-info-module---info-info-table>tbody>tr>td {
     border: 1px dotted black;
     padding-left: 10px;

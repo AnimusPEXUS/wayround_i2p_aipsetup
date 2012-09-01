@@ -20,10 +20,12 @@ import sqlalchemy.ext.declarative
 import org.wayround.utils.text
 import org.wayround.utils.fileindex
 import org.wayround.utils.tag
+import org.wayround.utils.log
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
+import org.wayround.aipsetup.version
 
 
 def exported_commands():
@@ -39,7 +41,7 @@ def exported_commands():
         'load': pkgindex_load_package_info_from_filesystem,
         'list': pkgindex_list_pkg_info_records,
         'print': pkgindex_print_pkg_info_record,
-        'index_sources': pkgindex_index_sources,
+        'index_sources': pkgindex_index_sources
         }
 
 def commands_order():
@@ -320,7 +322,6 @@ exists: {}
                 )
 
     return ret
-
 
 def is_repo_package_dir(path):
     return os.path.isdir(path) \
@@ -663,14 +664,19 @@ def get_package_info(name):
     return ret
 
 
-def get_package_files(name):
+def get_package_files(name, db_connected=None):
 
-    db = PackageDatabase()
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
 
     pid = db.get_package_id(name)
     package_path = db.get_package_path_string(pid)
 
-    del db
+    if not db_connected:
+        del db
 
     package_dir = os.path.abspath(
         org.wayround.aipsetup.config.config['repository']
@@ -680,23 +686,45 @@ def get_package_files(name):
     logging.debug("Looking for package files in `{}'".format(package_dir))
     files = glob.glob(os.path.join(package_dir, '*.asp'))
 
+    needed_files = []
+    for i in files:
+        needed_files.append(
+            '/' +
+            os.path.relpath(
+                i,
+                org.wayround.aipsetup.config.config['repository']
+                )
+            )
+#        file_name = os.path.basename(i)
+#        file_name_parsed = org.wayround.aipsetup.name.package_name_parse(file_name)
+#        if file_name_parsed and file_name_parsed['groups']['name'] == name:
+#            needed_files[file_name] = file_name_parsed
+
+    return needed_files
+
+def pkg_file_list_to_dict(files, name):
     needed_files = {}
     for i in files:
         file_name = os.path.basename(i)
         file_name_parsed = org.wayround.aipsetup.name.package_name_parse(file_name)
         if file_name_parsed and file_name_parsed['groups']['name'] == name:
             needed_files[file_name] = file_name_parsed
-
     return needed_files
 
-
-def get_package_source_files(name):
+def get_package_source_files(name, db_connected=None):
 
     needed_files = []
 
-    db = PackageDatabase()
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
     pkg_info = db.package_info_record_to_dict(name=name)
-    del db
+
+    if not db_connected:
+        del db
 
     try:
         tags_object = org.wayround.utils.tag.TagEngine(
@@ -726,33 +754,178 @@ def get_package_source_files(name):
 
     return needed_files
 
-def guess_package_homepage(pkg_name, tag_db_connected=None):
+def latest_source(name, db_connected=None):
+
+    ret = None
 
     db = None
-    if tag_db_connected:
-        db = tag_db_connected
+    if db_connected:
+        db = db_connected
     else:
-        db = org.wayround.utils.tag.TagEngine(
-            org.wayround.aipsetup.config.config['source_index']
-            )
+        db = PackageDatabase()
 
-    files = db.objects_by_tags([pkg_name])
-    possibilities = {}
-    for i in files:
+    r = db.package_info_record_to_dict(name)
 
-        domain = i[1:].split('/')[0]
+    if r['auto_newest_src']:
 
-        if not domain in possibilities:
-            possibilities[domain] = 0
+        files = get_package_source_files(name, db)
 
-        possibilities[domain] += 1
+        if len(files) == 0:
+            ret = None
+        else:
+            org.wayround.utils.list.list_sort(
+                files,
+                cmp=org.wayround.aipsetup.version.source_version_comparator
+                )
+            ret = files[-1]
 
-    logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(possibilities)))
+    else:
+        ret = r['newest_src']
 
-    if not tag_db_connected:
+    if not db_connected:
         del db
 
-    return possibilities
+    return ret
+
+def latest_package(name, db_connected=None):
+
+    ret = None
+
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
+    r = db.package_info_record_to_dict(name)
+
+    if r['auto_newest_pkg']:
+
+        files = get_package_files(name, db)
+
+        if len(files) == 0:
+            ret = None
+        else:
+
+            org.wayround.utils.list.list_sort(
+                files, cmp=org.wayround.aipsetup.version.package_version_comparator
+                )
+
+            ret = files[-1]
+
+    else:
+        ret = r['newest_pkg']
+
+    if not db_connected:
+        del db
+
+    return ret
+
+def latest_src_to_package(name, force=False, mute=True, db_connected=None):
+
+    ret = False
+
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
+    r = latest_source(name)
+    if r != None:
+        org.wayround.utils.log.verbose_print(
+            "Package's latest src is: `{}'".format(r),
+            not mute
+            )
+        if r != None:
+
+            ret = db.set_latest_source(name, r, force)
+
+        else:
+            ret = False
+
+    if not ret:
+        org.wayround.utils.log.verbose_print("Can't set")
+
+    if not db_connected:
+        del db
+
+    return ret
+
+def latest_src_to_packages(names, force=False, mute=True, db_connected=None):
+
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
+    if len(names) == 0:
+        names = db.list_pkg_info_records(mute=True)
+
+    for i in names:
+        latest_src_to_package(
+            i,
+            force,
+            mute,
+            db_connected
+            )
+
+    if not db_connected:
+        del db
+
+    return
+
+def latest_pkg_to_package(name, force=False, mute=True, db_connected=None):
+
+    ret = False
+
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
+
+    r = latest_package(name)
+    if r != None:
+        org.wayround.utils.log.verbose_print(
+            "Package's latest pkg is: `{}'".format(r),
+            not mute
+            )
+        if r != None:
+
+            ret = db.set_latest_package(name, r, force)
+
+        else:
+            ret = False
+
+    if not ret:
+        org.wayround.utils.log.verbose_print("Can't set", not mute)
+
+    if not db_connected:
+        del db
+
+    return ret
+
+def latest_pkg_to_packages(names, force=False, mute=True, db_connected=None):
+
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
+    if len(names) == 0:
+        names = db.list_pkg_info_records(mute=True)
+
+    for i in names:
+        latest_pkg_to_package(i, force, mute, db_connected)
+
+    if not db_connected:
+        del db
+
+    return
 
 def find_package_info_by_basename_and_version(basename, version, db_connected=None):
     db = None
@@ -883,8 +1056,6 @@ class PackageDatabase:
             default=5
             )
 
-        # FIXME: continue here
-
         deletable = sqlalchemy.Column(
             sqlalchemy.Boolean,
             nullable=False,
@@ -909,6 +1080,18 @@ class PackageDatabase:
             default=True
             )
 
+        newest_src = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=True,
+            default=None
+            )
+
+        newest_pkg = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=True,
+            default=None
+            )
+
 
 
     class PackageTag(Base):
@@ -931,60 +1114,6 @@ class PackageDatabase:
             )
 
         tag = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-    class PackageDependency(Base):
-        """
-        Class for package's Dependencies
-        """
-
-        __tablename__ = 'package_dependency'
-
-        id = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            primary_key=True,
-            autoincrement=True
-            )
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-        dep = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-    class PackageLatest(Base):
-        """
-        Class for package's Latests
-        """
-
-        __tablename__ = 'package_latest'
-
-        id = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            primary_key=True,
-            autoincrement=True
-            )
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-        typ = sqlalchemy.Column(
-            'type',
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-        file = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False
             )
@@ -1526,19 +1655,18 @@ class PackageDatabase:
             ret = None
         else:
 
+            ret = dict()
+
             tags = self.get_package_tags(q.name)
 
-            ret = {
-                'home_page'            : q.home_page,
-                'description'          : q.description,
-                'deletable'            : q.deletable,
-                'tags'                 : tags,
-                'buildinfo'            : q.buildinfo,
-                'installation_priority': q.installation_priority,
-                'basename'             : q.basename,
-                'version_re'           : q.version_re,
-                'name'                 : q.name
-                }
+            keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+            keys.remove('tags')
+
+            for i in keys:
+                ret[i] = eval('q.{}'.format(i))
+
+            ret['tags'] = tags
+            ret['name'] = q.name
 
         return ret
 
@@ -1554,18 +1682,17 @@ class PackageDatabase:
             q = self.PackageInfo()
             creating_new = True
 
-        q.name = name
-        q.description = struct['description']
-        q.home_page = struct['home_page']
-        q.deletable = struct['deletable']
-        q.buildinfo = struct['buildinfo']
-        q.installation_priority = struct['installation_priority']
-        q.basename = struct['basename']
-        q.version_re = struct['version_re']
+        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+
+        for i in ['tags', 'name']:
+            if i in keys:
+                keys.remove(i)
+
+        for i in keys:
+            exec('q.{key} = struct["{key}"]'.format(key=i))
 
         if creating_new:
             self.sess.add(q)
-
 
         self.set_package_tags(name, struct['tags'])
         #self.commit_session()
@@ -1720,7 +1847,8 @@ class PackageDatabase:
         return lst
 
     def find_missing_pkg_info_records(
-        self, create_templates=False, force_rewrite=False):
+        self, create_templates=False, force_rewrite=False
+        ):
 
         q = self.sess.query(self.Package).order_by(self.Package.name).all()
 
@@ -1870,26 +1998,40 @@ Total records checked     : %(n1)d
 
             # TODO: add all fields
             print("""\
-+---[{name}]---------------------------------+
-       basename: {basename}
- version regexp: {version_re}
-      buildinfo: {buildinfo}
-       homepage: {home_page}
-       category: {category}
-           tags: {tags}
-+---[{name}]---------------------------------+
++---[{name}]---------------------------------------+
+              basename: {basename}
+        version regexp: {version_re}
+             buildinfo: {buildinfo}
+              homepage: {home_page}
+              category: {category}
+                  tags: {tags}
+ installation priority: {installation_priority}
+             deletable: {deletable}
+             updatable: {updatable}
+       auto_newest_src: {auto_newest_src}
+       auto_newest_pkg: {auto_newest_pkg}
+            newest_src: {newest_src}
+            newest_pkg: {newest_pkg}
++---[{name}]---------------------------------------+
 {description}
-+---[{name}]---------------------------------+
++---[{name}]---------------------------------------+
 """.format_map(
         {
-        'name'         : name,
-        'home_page'    : r['home_page'],
-        'description'  : r['description'],
-        'tags'         : ', '.join(r['tags']),
-        'category'     : category,
-        'buildinfo'    : r['buildinfo'],
-        'version_re'   : r['version_re'],
-        'basename'     : r['basename']
+        'tags'                  : ', '.join(r['tags']),
+        'category'              : category,
+        'name'                  : name,
+        'description'           : r['description'],
+        'home_page'             : r['home_page'],
+        'buildinfo'             : r['buildinfo'],
+        'basename'              : r['basename'],
+        'version_re'            : r['version_re'],
+        'installation_priority' : r['installation_priority'],
+        'deletable'             : r['deletable'],
+        'updatable'             : r['updatable'],
+        'auto_newest_src'       : r['auto_newest_src'],
+        'auto_newest_pkg'       : r['auto_newest_pkg'],
+        'newest_src'            : latest_source(name, self),
+        'newest_pkg'            : latest_package(name, self),
         }
         )
     )
@@ -1904,5 +2046,43 @@ Total records checked     : %(n1)d
             if re.match(i.version_re, version):
                 ret[i.name] = self.package_info_record_to_dict(i.name, i)
                 break
+
+        return ret
+
+    def set_latest_source(self, name, filename, force=False):
+
+        ret = False
+
+#        filename = os.path.basename(filename)
+
+        q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
+
+        if q == None:
+            ret = False
+        else:
+            if q.auto_newest_src or force:
+                q.newest_src = filename
+                ret = True
+            else:
+                ret = False
+
+        return ret
+
+    def set_latest_package(self, name, filename, force=False):
+
+        ret = False
+
+#        filename = os.path.basename(filename)
+
+        q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
+
+        if q == None:
+            ret = False
+        else:
+            if q.auto_newest_pkg or force:
+                q.newest_pkg = filename
+                ret = True
+            else:
+                ret = False
 
         return ret

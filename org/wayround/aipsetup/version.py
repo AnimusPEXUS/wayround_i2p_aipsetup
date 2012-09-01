@@ -50,23 +50,26 @@ def package_version_comparator(name1, name2):
     ret = 0
 
     d1 = org.wayround.aipsetup.name.package_name_parse(
-        name1, modify_info_file=False
+        name1, mute=True
         )
 
     d2 = org.wayround.aipsetup.name.package_name_parse(
-        name2, modify_info_file=False
+        name2, mute=True
         )
 
-    if d1 == None or d2 == None:
-        raise Exception("Can't parse filename")
+    if d1 == None:
+        raise Exception("Can't parse filename: `{}'".format(name1))
+
+    if d2 == None:
+        raise Exception("Can't parse filename: `{}'".format(name2))
 
     if d1['groups']['name'] != d2['groups']['name']:
         raise Exception("Different names")
 
     else:
         com_res = standard_comparison(
-            d1['groups']['version_list'], d1['groups']['status_list'],
-            d2['groups']['version_list'], d2['groups']['status_list']
+            d1['groups']['timestamp'].split('.'), None,
+            d2['groups']['timestamp'].split('.'), None,
             )
 
         if com_res != 0:
@@ -138,6 +141,7 @@ def standard_comparison(
         vers_comp_res = 0
 
     if vers_comp_res == 0:
+        # TODO: better algorithm required 
         if status_list1 != None and status_list2 != None:
             s1 = '.'.join(status_list1)
             s2 = '.'.join(status_list2)
@@ -153,3 +157,4 @@ def standard_comparison(
     ret = vers_comp_res
 
     return ret
+
