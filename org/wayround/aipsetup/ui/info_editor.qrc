@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>accessories-text-editor.png</file>
+  </qresource>
+</RCC>

@@ -61,10 +61,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # (can't not for files containing statuses, 
     #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
     auto_newest_pkg=True,
-    # latest src file name
-    newest_src=None,
-    # latest pkg file name
-    newest_pkg=None,
     )
 
 pkg_info_file_template = Template(text="""\
@@ -287,7 +283,7 @@ def is_info_dicts_equal(d1, d2):
         'home_page',
         'buildinfo',
         'basename',
-        'version_re'
+        'version_re',
         'installation_priority',
         'deletable',
         'updatable',
@@ -367,7 +363,9 @@ def read_from_file(name):
 
                 for i in [
                     'deletable',
-                    'updatable'
+                    'updatable',
+                    'auto_newest_src',
+                    'auto_newest_pkg'
                     ]:
                     x = _find_latest(tree, i, 'value')
                     if x != None:
@@ -381,26 +379,12 @@ def read_from_file(name):
                         else:
                             ret[i] = eval(x)
 
-                x = _find_latest(tree, 'updatable', 'value')
-                if x != None:
-                    if not x in ['True', 'False']:
-                        raise ValueError(
-                            "Wrong updatable value in `{}'".format(
-                                name
-                                )
-                            )
-                    else:
-                        ret['updatable'] = eval(x)
 
                 for i in [
                     ('buildinfo', 'value'),
                     ('home_page', 'url'),
                     ('basename', 'value'),
                     ('version_re', 'value'),
-                    ('auto_newest_src', 'value'),
-                    ('auto_newest_pkg', 'value'),
-                    ('newest_src', 'value'),
-                    ('newest_pkg', 'value')
                     ]:
 
                     x = _find_latest(tree, i[0], i[1])
@@ -439,9 +423,9 @@ def write_to_file(name, struct):
         deletable=struct['deletable'],
         updatable=struct['updatable'],
         auto_newest_src=struct['auto_newest_src'],
-        auto_newest_pkg=struct['auto_newest_pkg'],
-        newest_src=struct['newest_src'],
-        newest_pkg=struct['newest_pkg']
+        auto_newest_pkg=struct['auto_newest_pkg']
+#        newest_src=struct['newest_src'],
+#        newest_pkg=struct['newest_pkg']
         )
 
     try:

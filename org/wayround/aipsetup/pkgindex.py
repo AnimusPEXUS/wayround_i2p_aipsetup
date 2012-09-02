@@ -10,6 +10,7 @@ import fnmatch
 import copy
 import logging
 import re
+import functools
 
 
 import sqlalchemy
@@ -41,7 +42,8 @@ def exported_commands():
         'load': pkgindex_load_package_info_from_filesystem,
         'list': pkgindex_list_pkg_info_records,
         'print': pkgindex_print_pkg_info_record,
-        'index_sources': pkgindex_index_sources
+        'index_sources': pkgindex_index_sources,
+        'edit_latests': pkgindex_latest_editor
         }
 
 def commands_order():
@@ -56,7 +58,8 @@ def commands_order():
         'load',
         'list',
         'print',
-        'index_sources'
+        'index_sources',
+        'edit_latests'
         ]
 
 def pkgindex_scan_repo_for_pkg_and_cat(opts, args):
@@ -320,6 +323,25 @@ exists: {}
                 force_reindex=force_reindex,
                 first_delete_found=first_delete_found
                 )
+
+    return ret
+
+def pkgindex_latest_editor(opts, args):
+    import org.wayround.aipsetup.latesteditor
+
+    ret = 0
+
+    name = None
+    len_args = len(args)
+    if len_args == 0:
+        pass
+    elif len_args == 1:
+        name = args[0]
+    else:
+        ret = 1
+
+    if ret == 0:
+        org.wayround.aipsetup.latesteditor.main(name)
 
     return ret
 
@@ -741,11 +763,21 @@ def get_package_source_files(name, db_connected=None):
                     org.wayround.aipsetup.name.source_name_parse(i, mute=True)
                     )
                 if parsed_name:
-                    if re.match(
-                        pkg_info['version_re'],
-                        parsed_name['groups']['version']
-                        ):
-                        needed_files.append(i)
+                    try:
+                        re_m = re.match(
+                            pkg_info['version_re'],
+                            parsed_name['groups']['version']
+                            )
+                    except:
+                        logging.exception(
+                            "Error matching RE `{}' to `'".format(
+                                pkg_info['version_re'],
+                                parsed_name['groups']['version']
+                                )
+                            )
+                    else:
+                        if re_m:
+                            needed_files.append(i)
 
             needed_files.sort()
 
@@ -758,32 +790,22 @@ def latest_source(name, db_connected=None):
 
     ret = None
 
-    db = None
-    if db_connected:
-        db = db_connected
+    files = get_package_source_files(name, db_connected)
+
+    if len(files) == 0:
+        ret = None
     else:
-        db = PackageDatabase()
-
-    r = db.package_info_record_to_dict(name)
-
-    if r['auto_newest_src']:
-
-        files = get_package_source_files(name, db)
-
-        if len(files) == 0:
-            ret = None
-        else:
-            org.wayround.utils.list.list_sort(
-                files,
-                cmp=org.wayround.aipsetup.version.source_version_comparator
+#        org.wayround.utils.list.list_sort(
+#            files,
+#            cmp=org.wayround.aipsetup.version.source_version_comparator
+#            )
+        ret = max(
+            files,
+            key=functools.cmp_to_key(
+                org.wayround.aipsetup.version.source_version_comparator
                 )
-            ret = files[-1]
-
-    else:
-        ret = r['newest_src']
-
-    if not db_connected:
-        del db
+            )
+#        ret = files[-1]
 
     return ret
 
@@ -791,33 +813,23 @@ def latest_package(name, db_connected=None):
 
     ret = None
 
-    db = None
-    if db_connected:
-        db = db_connected
+    files = get_package_files(name, db_connected)
+
+    if len(files) == 0:
+        ret = None
     else:
-        db = PackageDatabase()
 
-    r = db.package_info_record_to_dict(name)
-
-    if r['auto_newest_pkg']:
-
-        files = get_package_files(name, db)
-
-        if len(files) == 0:
-            ret = None
-        else:
-
-            org.wayround.utils.list.list_sort(
-                files, cmp=org.wayround.aipsetup.version.package_version_comparator
+        ret = max(
+            files,
+            key=functools.cmp_to_key(
+                org.wayround.aipsetup.version.package_version_comparator
                 )
-
-            ret = files[-1]
-
-    else:
-        ret = r['newest_pkg']
-
-    if not db_connected:
-        del db
+            )
+#        org.wayround.utils.list.list_sort(
+#            files, cmp=org.wayround.aipsetup.version.package_version_comparator
+#            )
+#
+#        ret = files[-1]
 
     return ret
 
@@ -940,6 +952,34 @@ def find_package_info_by_basename_and_version(basename, version, db_connected=No
         del db
 
     return ret
+
+def guess_package_homepage(pkg_name, tag_db_connected=None):
+
+    db = None
+    if tag_db_connected:
+        db = tag_db_connected
+    else:
+        db = org.wayround.utils.tag.TagEngine(
+            org.wayround.aipsetup.config.config['source_index']
+            )
+
+    files = db.objects_by_tags([pkg_name])
+    possibilities = {}
+    for i in files:
+        domain = i[1:].split('/')[0]
+
+        if not domain in possibilities:
+            possibilities[domain] = 0
+
+        possibilities[domain] += 1
+    logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(possibilities)))
+
+    if not tag_db_connected:
+        del db
+
+    return possibilities
+
+
 
 class PackageDatabaseConfigError(Exception): pass
 
@@ -1080,20 +1120,6 @@ class PackageDatabase:
             default=True
             )
 
-        newest_src = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=True,
-            default=None
-            )
-
-        newest_pkg = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=True,
-            default=None
-            )
-
-
-
     class PackageTag(Base):
         """
         Class for package's tags
@@ -1116,6 +1142,43 @@ class PackageDatabase:
         tag = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False
+            )
+
+    class Newest(Base):
+        """
+        Class for package's tags
+        """
+
+        __tablename__ = 'newest'
+
+        id = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            primary_key=True,
+            autoincrement=True
+            )
+
+        name = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+        typ = sqlalchemy.Column(
+            'type',
+            sqlalchemy.UnicodeText,
+            nullable=False
+            )
+
+        file = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=True,
+            default=None,
+            )
+
+        recheck_required = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=True
             )
 
 
@@ -1688,11 +1751,14 @@ class PackageDatabase:
             if i in keys:
                 keys.remove(i)
 
+        q.name = name
+
         for i in keys:
             exec('q.{key} = struct["{key}"]'.format(key=i))
 
         if creating_new:
             self.sess.add(q)
+
 
         self.set_package_tags(name, struct['tags'])
         #self.commit_session()
@@ -2008,10 +2074,10 @@ Total records checked     : %(n1)d
  installation priority: {installation_priority}
              deletable: {deletable}
              updatable: {updatable}
-       auto_newest_src: {auto_newest_src}
-       auto_newest_pkg: {auto_newest_pkg}
-            newest_src: {newest_src}
-            newest_pkg: {newest_pkg}
+       auto newest src: {auto_newest_src}
+       auto newest pkg: {auto_newest_pkg}
+            newest src: {newest_src}
+            newest pkg: {newest_pkg}
 +---[{name}]---------------------------------------+
 {description}
 +---[{name}]---------------------------------------+
@@ -2030,8 +2096,8 @@ Total records checked     : %(n1)d
         'updatable'             : r['updatable'],
         'auto_newest_src'       : r['auto_newest_src'],
         'auto_newest_pkg'       : r['auto_newest_pkg'],
-        'newest_src'            : latest_source(name, self),
-        'newest_pkg'            : latest_package(name, self),
+        'newest_src'            : self.get_latest_source(name),
+        'newest_pkg'            : self.get_latest_package(name),
         }
         )
     )
@@ -2050,34 +2116,27 @@ Total records checked     : %(n1)d
         return ret
 
     def set_latest_source(self, name, filename, force=False):
-
-        ret = False
-
-#        filename = os.path.basename(filename)
-
-        q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
-
-        if q == None:
-            ret = False
-        else:
-            if q.auto_newest_src or force:
-                q.newest_src = filename
-                ret = True
-            else:
-                ret = False
-
-        return ret
+        return self.set_latest(name, filename, 'source', force)
 
     def set_latest_package(self, name, filename, force=False):
+        return self.set_latest(name, filename, 'package', force)
+
+    def set_latest(self, name, filename, typ, force=False):
 
         ret = False
 
-#        filename = os.path.basename(filename)
-
-        q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
+        q = self.sess.query(
+            self.PackageInfo
+            ).filter_by(
+                name=name, typ=typ
+                ).first()
 
         if q == None:
-            ret = False
+            a = self.Newest()
+            a.name = name
+            a.file = filename
+            a.typ = typ
+            self.sess.add(a)
         else:
             if q.auto_newest_pkg or force:
                 q.newest_pkg = filename
@@ -2086,3 +2145,65 @@ Total records checked     : %(n1)d
                 ret = False
 
         return ret
+
+    def get_latest_source(self, name):
+        return self.get_latest(name, 'src')
+
+    def get_latest_package(self, name):
+        return self.get_latest(name, 'pkg')
+
+    def get_latest(self, name, typ):
+
+        ret = None
+
+        if not typ in ['src', 'pkg']:
+            raise ValueError("`typ' can be only 'src' or 'pkg'")
+
+        info = self.sess.query(self.PackageInfo).filter_by(name=name).first()
+
+        if info == None:
+            logging.error("Not found PackageInfo record for `{}'".format(name))
+        else:
+            typ2 = ''
+            if typ == 'src':
+                typ2 = 'source'
+            elif typ == 'pkg':
+                typ2 = 'package'
+
+            if eval('info.auto_newest_' + typ):
+                latest = ''
+                if typ == 'src':
+                    latest = latest_source(name, self)
+                elif typ == 'pkg':
+                    latest = latest_package(name, self)
+                ret = latest
+            else:
+
+                latest_r = self.sess.query(
+                    self.Newest
+                    ).filter_by(
+                        name=name, typ=typ2
+                        ).first()
+
+                if latest_r == None:
+                    ret = None
+                else:
+                    latest = latest_r.file
+                    ret = latest
+
+        return ret
+
+    def get_list_of_non_automatic_package_info(self):
+
+        q = self.sess.query(
+            self.PackageInfo
+            ).filter(
+                self.PackageInfo.auto_newest_pkg == False
+                or self.PackageInfo.auto_newest_src == False
+                ).all()
+
+        lst = []
+        for i in q:
+            lst.append(self.package_info_record_to_dict(i.name, i))
+
+        return lst

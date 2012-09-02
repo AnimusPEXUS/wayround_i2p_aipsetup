@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>627</width>
-    <height>568</height>
+    <width>908</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -86,13 +86,6 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line_7">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
           <string>Reload List</string>
@@ -136,6 +129,22 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Edit Latest Files</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QFrame" name="horizontalFrame_2">
@@ -159,9 +168,26 @@
            <property name="spacing">
             <number>0</number>
            </property>
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMaximumSize</enum>
+           </property>
            <property name="margin">
             <number>5</number>
            </property>
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEdit_7">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QLabel" name="label_5">
              <property name="text">
@@ -213,6 +239,34 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Latest src</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEdit_5">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Latest pkg</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEdit_6">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_3">

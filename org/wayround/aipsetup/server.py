@@ -8,6 +8,7 @@ import xml.sax.saxutils
 import logging
 import json
 import copy
+import functools
 
 import cherrypy
 import cherrypy.lib
@@ -92,11 +93,17 @@ class Index:
 
             files = org.wayround.aipsetup.pkgindex.get_package_files(name)
 
-            org.wayround.utils.list.list_sort(
-                files, cmp=org.wayround.aipsetup.version.package_version_comparator
+            files.sort(
+                reverse=True,
+                key=functools.cmp_to_key(
+                    org.wayround.aipsetup.version.package_version_comparator
+                    )
                 )
-
-            files.reverse()
+#            org.wayround.utils.list.list_sort(
+#                files, cmp=org.wayround.aipsetup.version.package_version_comparator
+#                )
+#
+#            files.reverse()
 
             l = len(files)
             i = -1

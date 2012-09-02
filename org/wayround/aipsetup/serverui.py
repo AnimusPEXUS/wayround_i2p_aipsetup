@@ -3,6 +3,7 @@ import os.path
 import logging
 import time
 import functools
+import urllib.parse
 
 import cherrypy
 
@@ -83,7 +84,7 @@ def category(db, path):
                             org.wayround.utils.xml.tag(
                                 'a',
                                 attributes={
-                                    'href': 'category?path={}'.format(cat_path)
+                                    'href': 'category?path={}'.format(urllib.parse.quote(cat_path))
                                     },
                                 content=[
                                     org.wayround.utils.xml.tag(
@@ -117,7 +118,7 @@ def category(db, path):
                     org.wayround.utils.xml.tag(
                         'a',
                         attributes={
-                            'href': 'package?name={}'.format(package_name)
+                            'href': 'package?name={}'.format(urllib.parse.quote(package_name))
                             },
                         content=[
                             org.wayround.utils.xml.tag(
@@ -222,11 +223,18 @@ def package_file_list(db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_files(name)
 
-    org.wayround.utils.list.list_sort(
-        files, cmp=org.wayround.aipsetup.version.package_version_comparator
+    files.sort(
+        reverse=True,
+        key=functools.cmp_to_key(
+            org.wayround.aipsetup.version.package_version_comparator
+            )
         )
 
-    files.reverse()
+#    org.wayround.utils.list.list_sort(
+#        files, cmp=org.wayround.aipsetup.version.package_version_comparator
+#        )
+#
+#    files.reverse()
 
     rows = []
 
@@ -362,12 +370,19 @@ def package_sources_file_list(db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
 
-    org.wayround.utils.list.list_sort(
-        files,
-        cmp=org.wayround.aipsetup.version.source_version_comparator
+    files.sort(
+        reverse=True,
+        key=functools.cmp_to_key(
+            org.wayround.aipsetup.version.source_version_comparator
+            )
         )
 
-    files.reverse()
+#    org.wayround.utils.list.list_sort(
+#        files,
+#        cmp=org.wayround.aipsetup.version.source_version_comparator
+#        )
+#
+#    files.reverse()
 
     rows = []
 
@@ -718,10 +733,7 @@ def package_info(db, name):
                 )
             )
 
-        a = org.wayround.aipsetup.pkgindex.latest_package(
-                name,
-                db
-                )
+        a = db.get_latest_package(name)
         if a == None:
             a = 'None'
         else:
@@ -758,10 +770,7 @@ def package_info(db, name):
                 )
             )
 
-        a = org.wayround.aipsetup.pkgindex.latest_source(
-                name,
-                db
-                )
+        a = db.get_latest_source(name)
         if a == None:
             a = 'None'
         else:

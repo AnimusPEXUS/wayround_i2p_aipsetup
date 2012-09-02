@@ -1,4 +1,3 @@
-# FIXME: continue here
 import os.path
 import glob
 
@@ -10,8 +9,7 @@ import org.wayround.utils.text
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
-# this is for special cases
-# __file__ == os.path.abspath(__file__)
+
 
 class MainWindow:
 
@@ -39,6 +37,14 @@ class MainWindow:
             self.onRevertButtonActivated
             )
 
+        self.window.pushButton.clicked.connect(
+            self.onSaveAndUpdateButtonActivated
+            )
+
+        self.window.pushButton_2.clicked.connect(
+            self.onListRealoadButtonActivated
+            )
+
         self.window.show()
         self.load_list()
 
@@ -48,6 +54,9 @@ class MainWindow:
     def load_data(self, name):
 
         ret = 0
+
+        self.window.setEnabled(False)
+        self.window.repaint()
 
         filename = os.path.join(
             self.config['info'],
@@ -71,25 +80,37 @@ class MainWindow:
                 ret = 1
             else:
 
-                self.window.lineEdit.setText(data['home_page'])
+                self.window.lineEdit_7.setText(name)
                 self.window.plainTextEdit.setPlainText(data['description'])
-                self.window.checkBox.setChecked(data['deletable'])
-                self.window.lineEdit_3.setText(data['buildinfo'])
-                self.window.spinBox.setValue(data['installation_priority'])
-                self.window.lineEdit_2.setText(data['basename'])
-                self.window.lineEdit_4.setText(data['version_re'])
+                self.window.lineEdit.setText(data['home_page'])
 
                 self.window.plainTextEdit_4.setPlainText(
                     '\n'.join(data['tags']) + '\n'
                     )
 
+                self.window.lineEdit_3.setText(data['buildinfo'])
+                self.window.lineEdit_2.setText(data['basename'])
+                self.window.lineEdit_4.setText(data['version_re'])
+                self.window.spinBox.setValue(data['installation_priority'])
+                self.window.checkBox.setChecked(bool(data['deletable']))
+                self.window.checkBox_2.setChecked(bool(data['updatable']))
+                self.window.checkBox_3.setChecked(bool(data['auto_newest_src']))
+                self.window.checkBox_4.setChecked(bool(data['auto_newest_pkg']))
+
+                db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+                self.window.lineEdit_5.setText(db.get_latest_source(name[:-4]))
+                self.window.lineEdit_6.setText(db.get_latest_package(name[:-4]))
+                del db
+
                 self.currently_opened = name
                 self.window.setWindowTitle(name + " - aipsetup v3 .xml info file editor")
 
 
+        self.window.setEnabled(True)
+
         return ret
 
-    def save_data(self, name):
+    def save_data(self, name, update_db=False):
 
         ret = 0
 
@@ -101,17 +122,22 @@ class MainWindow:
             )
 
         data = {}
-        data['home_page'] = str(self.window.lineEdit.text()).strip()
         data['description'] = str(self.window.plainTextEdit.toPlainText())
-        data['deletable'] = self.window.checkBox.isChecked()
-        data['buildinfo'] = str(self.window.lineEdit_3.text()).strip()
-        data['installation_priority'] = self.window.spinBox.value()
-        data['basename'] = str(self.window.lineEdit_2.text()).strip()
-        data['version_re'] = str(self.window.lineEdit_4.text()).strip()
+        data['home_page'] = str(self.window.lineEdit.text()).strip()
 
         data['tags'] = org.wayround.utils.text.strip_remove_empty_remove_duplicated_lines(
             str(self.window.plainTextEdit_4.toPlainText()).splitlines()
             )
+
+        data['buildinfo'] = str(self.window.lineEdit_3.text()).strip()
+        data['basename'] = str(self.window.lineEdit_2.text()).strip()
+        data['version_re'] = str(self.window.lineEdit_4.text()).strip()
+        data['installation_priority'] = self.window.spinBox.value()
+        data['deletable'] = self.window.checkBox.isChecked()
+        data['updatable'] = self.window.checkBox_2.isChecked()
+        data['auto_newest_src'] = self.window.checkBox_3.isChecked()
+        data['auto_newest_pkg'] = self.window.checkBox_4.isChecked()
+
 
         if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
             PyQt4.QtGui.QMessageBox.critical(
@@ -122,8 +148,24 @@ class MainWindow:
                 )
             ret = 1
         else:
+
+            dbu = ''
+            if update_db:
+                try:
+                    db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+                    db.load_package_info_from_filesystem(
+                        [filename], rewrite_existing=True
+                        )
+                    del db
+                    dbu = "DB updated"
+                except:
+                    dbu = "Some error while updating DB:"
+
+            if dbu != '':
+                dbu = '\n' + dbu
+
             PyQt4.QtGui.QMessageBox.information(
-                self.window, 'Success', 'File saved'
+                self.window, 'Success', 'File saved' + dbu
                 )
 
 
@@ -142,6 +184,12 @@ class MainWindow:
     def onSaveButtonActivated(self, toggle):
         self.save_data(self.currently_opened)
 
+    def onSaveAndUpdateButtonActivated(self, toggle):
+        self.save_data(self.currently_opened, update_db=True)
+
+    def onListRealoadButtonActivated(self, toggle):
+        self.load_list()
+
     def onListItemActivated(self, item):
         #PyQt4.QtGui.QMessageBox.information(
             #self.window, 'About', 'Activated %(name)s' % {
@@ -159,6 +207,7 @@ class MainWindow:
 
         files.sort()
 
+        self.window.listWidget.clear()
         for i in files:
             base = os.path.basename(i)
 
