@@ -1,22 +1,30 @@
 <package>
 
-  <!-- This file is generated using aipsetup v3 -->
+    <!-- This file is generated using aipsetup v3 -->
 
-  <description>None</description>
+    <description>:-)</description>
 
-  <home_page url="http://None"/>
+    <home_page url="http://python.org/"/>
 
-  <!-- Use <tag name="" /> constructions for listing
-       tags -->
+    <tag name="learning"/>
+    <tag name="programming"/>
+    <tag name="python"/>
+    <tag name="scripting"/>
+    <tag name="system"/>
+    <tag name="web"/>
 
-  <buildinfo value=""/>
+    <buildinfo value="autotools_usr"/>
 
-  <basename value="Python"/>
+    <basename value="Python"/>
 
-  <version_re value="3\.2\..*"/>
+    <version_re value="3\.2\..*"/>
 
-  <installation_priority value="5"/>
+    <installation_priority value="1"/>
 
-  <deletable value="True"/>
+    <deletable value="True"/>
+    <updatable value="True"/>
+
+    <auto_newest_src value="True"/>
+    <auto_newest_pkg value="True"/>
 
 </package>

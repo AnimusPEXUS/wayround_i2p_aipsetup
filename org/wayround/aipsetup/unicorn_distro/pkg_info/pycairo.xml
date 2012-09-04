@@ -1,0 +1,29 @@
+<package>
+
+    <!-- This file is generated using aipsetup v3 -->
+
+    <description>required by pygobject</description>
+
+    <home_page url="http://www.freedesktop.org"/>
+
+    <tag name="cairo"/>
+    <tag name="freedesktop"/>
+    <tag name="gtk"/>
+    <tag name="pycairo"/>
+    <tag name="python"/>
+
+    <buildinfo value="waf_usr_pycairo"/>
+
+    <basename value="pycairo"/>
+
+    <version_re value=".*"/>
+
+    <installation_priority value="5"/>
+
+    <deletable value="True"/>
+    <updatable value="True"/>
+
+    <auto_newest_src value="True"/>
+    <auto_newest_pkg value="True"/>
+
+</package>

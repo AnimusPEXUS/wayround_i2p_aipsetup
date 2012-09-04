@@ -1,34 +1,38 @@
 <package>
 
-  <!-- This file is generated using aipsetup v3 -->
+    <!-- This file is generated using aipsetup v3 -->
 
-  <description>good pythonic xmpp client
+    <description>good pythonic xmpp client
 
 supports voip, plugins and many other things
 
 python2.7 is required
 </description>
 
-  <home_page url="http://None"/>
+    <home_page url="http://gajim.org/"/>
 
-  <tag name="chat"/>
-  <tag name="communication"/>
-  <tag name="e2e"/>
-  <tag name="file sharing"/>
-  <tag name="jabber"/>
-  <tag name="jingle"/>
-  <tag name="python"/>
-  <tag name="voip"/>
-  <tag name="xmpp"/>
+    <tag name="chat"/>
+    <tag name="communication"/>
+    <tag name="e2e"/>
+    <tag name="file sharing"/>
+    <tag name="jabber"/>
+    <tag name="jingle"/>
+    <tag name="python"/>
+    <tag name="voip"/>
+    <tag name="xmpp"/>
 
-  <buildinfo value="autotools_usr"/>
+    <buildinfo value="autotools_usr"/>
 
-  <basename value="gajim"/>
+    <basename value="gajim"/>
 
-  <version_re value=".*"/>
+    <version_re value=".*"/>
 
-  <installation_priority value="5"/>
+    <installation_priority value="5"/>
 
-  <deletable value="True"/>
+    <deletable value="True"/>
+    <updatable value="True"/>
+
+    <auto_newest_src value="True"/>
+    <auto_newest_pkg value="True"/>
 
 </package>

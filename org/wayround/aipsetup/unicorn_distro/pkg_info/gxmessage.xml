@@ -1,22 +1,26 @@
 <package>
 
-  <!-- This file is generated using aipsetup v3 -->
+    <!-- This file is generated using aipsetup v3 -->
 
-  <description>write something here, please</description>
+    <description>write something here, please</description>
 
-  <home_page url="http://www.gnu.org"/>
+    <home_page url="http://www.gnu.org"/>
 
-  <!-- Use <tag name="" /> constructions for listing
-       tags -->
+    <!-- Use <tag name="" /> constructions for listing
+         tags -->
 
-  <buildinfo value=""/>
+    <buildinfo value=""/>
 
-  <basename value="gxmessage"/>
+    <basename value="gxmessage"/>
 
-  <version_re value=".*"/>
+    <version_re value=".*"/>
 
-  <installation_priority value="5"/>
+    <installation_priority value="5"/>
 
-  <deletable value="True"/>
+    <deletable value="True"/>
+    <updatable value="True"/>
+
+    <auto_newest_src value="True"/>
+    <auto_newest_pkg value="True"/>
 
 </package>

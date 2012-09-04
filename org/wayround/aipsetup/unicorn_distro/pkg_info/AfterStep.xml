@@ -1,23 +1,27 @@
 <package>
 
-  <!-- This file is generated using aipsetup v3 -->
+    <!-- This file is generated using aipsetup v3 -->
 
-  <description>Simple Window Manager
+    <description>Simple Window Manager
 </description>
 
-  <home_page url="http://www.afterstep.org"/>
+    <home_page url="http://www.afterstep.org"/>
 
-  <tag name="MW"/>
-  <tag name="X"/>
+    <tag name="MW"/>
+    <tag name="X"/>
 
-  <buildinfo value=""/>
+    <buildinfo value=""/>
 
-  <basename value="AfterStep"/>
+    <basename value="AfterStep"/>
 
-  <version_re value=".*"/>
+    <version_re value=".*"/>
 
-  <installation_priority value="5"/>
+    <installation_priority value="5"/>
 
-  <deletable value="True"/>
+    <deletable value="True"/>
+    <updatable value="True"/>
+
+    <auto_newest_src value="True"/>
+    <auto_newest_pkg value="True"/>
 
 </package>
