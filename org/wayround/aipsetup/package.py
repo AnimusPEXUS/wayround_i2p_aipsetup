@@ -476,17 +476,28 @@ def install(asp_name, destdir='/'):
                     logging.error("Can't get package's destdir")
                     ret = 4
                 else:
-                    if org.wayround.utils.archive.extract_tar_canonical_fobj(
-                            dd_fobj, destdir, 'xz',
+                    tec = org.wayround.utils.archive.extract_tar_canonical_fobj(
+                            dd_fobj,
+                            destdir,
+                            'xz',
                             verbose_tar=True,
                             verbose_compressor=True,
-                            add_tar_options=['--no-same-owner', '--no-same-permissions']
-                            ) != 0:
-                        logging.error("Package destdir decompression error")
+                            add_tar_options=[
+                                '--no-same-owner',
+                                '--no-same-permissions'
+                                ]
+                            )
+                    if tec != 0:
+                        logging.error(
+                            "Package destdir decompression error:"
+                            " tar exit code: {}".format(
+                                tec
+                            )
+                        )
                         ret = 5
                     else:
                         ret = 0
-                        logging.info("Installation look like complite :-)")
+                        logging.info("Installation look like complete :-)")
                     dd_fobj.close()
 
             tarf.close()
