@@ -327,7 +327,6 @@ exists: {}
     return ret
 
 def pkgindex_latest_editor(opts, args):
-    import org.wayround.aipsetup.latesteditor
 
     ret = 0
 
@@ -341,7 +340,14 @@ def pkgindex_latest_editor(opts, args):
         ret = 1
 
     if ret == 0:
-        org.wayround.aipsetup.latesteditor.main(name)
+        latest_editor(name)
+
+    return ret
+
+def latest_editor(name):
+    import org.wayround.aipsetup.latesteditor
+
+    ret = org.wayround.aipsetup.latesteditor.main(name)
 
     return ret
 

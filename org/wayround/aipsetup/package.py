@@ -453,9 +453,10 @@ def install(asp_name, destdir='/'):
                 if not os.path.exists(out_filename_dir):
                     os.makedirs(out_filename_dir)
 
-                if org.wayround.utils.archive.\
-                    tar_member_get_extract_file_to(
-                        tarf, i[0], out_filename
+                if org.wayround.utils.archive.tar_member_get_extract_file_to(
+                        tarf,
+                        i[0],
+                        out_filename
                         ) != 0 :
                     logging.error("Can't install %(what)s as %(outname)s" % {
                         'what': i[2],
@@ -475,8 +476,7 @@ def install(asp_name, destdir='/'):
                     logging.error("Can't get package's destdir")
                     ret = 4
                 else:
-                    if org.wayround.utils.archive.\
-                        extract_tar_canonical_fobj(
+                    if org.wayround.utils.archive.extract_tar_canonical_fobj(
                             dd_fobj, destdir, 'xz',
                             verbose_tar=True,
                             verbose_compressor=True,

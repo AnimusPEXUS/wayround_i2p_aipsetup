@@ -271,11 +271,11 @@ def general_tool_function(action_name, dirname):
 
                         if tool_functions[action_name](log, dirname) != 0:
                             log.error(
-                                ("Tool {} could not perform {}".format(tool, process))
+                                ("Tool `{}' could not perform `{}'".format(tool, process))
                                 )
                             ret = 4
                         else:
-                            log.info("{} complited".format(process.capitalize()))
+                            log.info("`{}' complited".format(process.capitalize()))
 
     log.stop()
 

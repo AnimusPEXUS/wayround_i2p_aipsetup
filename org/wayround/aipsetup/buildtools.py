@@ -22,8 +22,7 @@ def list_build_tools():
 
     return without_extensions
 
-def get_tool_functions(toolname):
-
+def get_tool(toolname):
     tools_dir = os.path.abspath(org.wayround.aipsetup.config.config['buildtools'])
 
     ret = None
@@ -49,13 +48,29 @@ def get_tool_functions(toolname):
                 ret = 2
                 raise
             else:
-                if (not 'export_functions' in g
-                    or not inspect.isfunction(g['export_functions'])):
-                    logging.error("No function `export_functions()' in `{}'".format(filename))
-                    ret = 3
-                else:
-                    ret = g['export_functions']()
+                ret = g
         finally:
             f.close()
+
+    return ret
+
+def get_tool_functions(toolname):
+
+    ret = None
+
+    g = get_tool(toolname)
+
+    if (not isinstance(g, dict)
+        or not 'export_functions' in g
+        or not inspect.isfunction(g['export_functions'])
+        ):
+        logging.error(
+            "No function `export_functions()' in tool `{}'".format(
+                toolname
+                )
+            )
+        ret = 1
+    else:
+        ret = g['export_functions']()
 
     return ret

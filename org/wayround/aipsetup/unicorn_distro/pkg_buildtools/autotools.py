@@ -55,19 +55,14 @@ def determine_configurer_parameters(pkginfo):
 
     for i in pkginfo['pkg_buildinfo']['autotools_configure_params']:
         if pkginfo['pkg_buildinfo']['autotools_configure_params'][i] != None:
-            run_parameters.append(
-                "--{par_name}={par_value}".format_map(
-                    {
-                        'par_name': i,
-                        'par_value':
-                            pkginfo['pkg_buildinfo']['autotools_configure_params'][i]
-                        }
-                    )
-                )
+            run_parameters.append("--%(par_name)s=%(par_value)s" % {
+                    'par_name': i,
+                    'par_value': pkginfo['pkg_buildinfo']['autotools_configure_params'][i]
+                    })
         else:
-            run_parameters.append(
-                "--{}s".format(i)
-                )
+            run_parameters.append("--%(par_name)s" % {
+                    'par_name': i
+                    })
 
     return run_parameters
 
@@ -78,14 +73,14 @@ def determine_builder_parameters(pkginfo):
 
     for i in pkginfo['pkg_buildinfo']['autotools_build_params']:
         if pkginfo['pkg_buildinfo']['autotools_build_params'][i] != None:
-            run_parameters.append(
-                "{}={}".format(
-                    i,
-                    pkginfo['pkg_buildinfo']['autotools_build_params'][i]
-                    )
-                )
+            run_parameters.append("%(par_name)s=%(par_value)s" % {
+                    'par_name': i,
+                    'par_value': pkginfo['pkg_buildinfo']['autotools_build_params'][i]
+                    })
         else:
-            run_parameters.append(i)
+            run_parameters.append("%(par_name)s" % {
+                    'par_name': i
+                    })
 
     return run_parameters
 
@@ -94,11 +89,11 @@ def determine_installer_parameters(pkginfo):
 
     run_parameters = []
 
-    for i in pkginfo['pkg_buildinfo']['autotools_install_params']:
-        if pkginfo['pkg_buildinfo']['autotools_install_params'][i] != None:
+    for i in pkginfo['pkg_buildinfo']['autotools_distribute_params']:
+        if pkginfo['pkg_buildinfo']['autotools_distribute_params'][i] != None:
             run_parameters.append("%(par_name)s=%(par_value)s" % {
                     'par_name': i,
-                    'par_value': pkginfo['pkg_buildinfo']['autotools_install_params'][i]
+                    'par_value': pkginfo['pkg_buildinfo']['autotools_distribute_params'][i]
                     })
         else:
             run_parameters.append("%(par_name)s" % {
@@ -123,9 +118,8 @@ def extract(log, buildingsite='.'):
         )
 
     if os.path.isdir(output_dir):
-        log.info("Cleaning up source dir")
+        log.info("cleaningup source dir")
         org.wayround.utils.file.cleanup_dir(output_dir)
-        log.info("Completed cleaning up source dir")
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -203,10 +197,14 @@ def configure(log, buildingsite='.'):
 
         cmd = ['bash'] + [config_script] + run_parameters
 
-        log.info("Starting autotools configurer script with following command:")
-        log.info(" %(cmd)s" % {
+        log.info("Working directory: {}".format(building_dir))
+
+        log.info(
+            "Starting autotools configurer script with following command:\n"
+            "    %(cmd)s" % {
                 'cmd': repr(cmd)
-                })
+                }
+            )
 
         env = org.wayround.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_configure_envs'],
@@ -221,38 +219,49 @@ def configure(log, buildingsite='.'):
         p = None
         try:
             p = subprocess.Popen(
-                cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir
+                cmd,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=building_dir
                 )
         except:
             log.error(
-                (
-                "exception while starting configuration script\n" +
-                " command line was:\n" +
-                " {}\n" +
-                "{}"
-                ).format(
-                    repr(cmd),
-                    org.wayround.utils.error.return_exception_info(
-                        sys.exc_info()
-                        )
+                "exception while starting configuration script"
+                "    command line was:"
+                "    " + repr(cmd) +
+                org.wayround.utils.error.return_exception_info(
+                    sys.exc_info()
                     )
                 )
             ret = 100
 
         else:
 
-            t = org.wayround.utils.stream.lbl_write(p.stdout, log, True)
+            t = org.wayround.utils.stream.lbl_write(
+                p.stdout,
+                log,
+                True
+                )
             t.start()
+
+            t2 = org.wayround.utils.stream.lbl_write(
+                p.stderr,
+                log,
+                True,
+                typ='error'
+                )
+            t2.start()
             t.join()
+            t2.join()
 
             try:
                 p.wait()
             except:
-                log.error(
-                    "-e- exception oqured while waiting for configure\n{}".format(
-                        org.wayround.utils.error.return_exception_info(
-                            sys.exc_info()
-                            )
+                log.write("\n-e- exception oqured while waiting for configure")
+                log.write(
+                    org.wayround.utils.error.return_exception_info(
+                        sys.exc_info()
                         )
                     )
                 ret = 100
@@ -298,9 +307,10 @@ def build(log, buildingsite='.'):
         cmd = ['make'] + ['-f', makefile] + run_parameters
 
         log.info("Starting autotools make script with following command:")
-        log.info(" %(cmd)s" % {
+        log.write("    %(cmd)s" % {
                 'cmd': repr(cmd)
                 })
+        log.write("-i-")
 
         env = org.wayround.utils.osutils.env_vars_edit(
             pi['pkg_buildinfo']['autotools_build_envs'],
@@ -308,20 +318,18 @@ def build(log, buildingsite='.'):
             )
 
         if len(pi['pkg_buildinfo']['autotools_build_envs']) > 0:
-            log.info(
-                "Environment Modifications: %(list)s" % {
+            log.info("Environment Modifications: %(list)s" % {
                     'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['autotools_build_envs'])
-                    }
-                )
+                    })
 
         p = None
         try:
             p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir)
         except:
-            log.error(
-                "exception while starting make script" +
-                "    command line was:" +
-                "    " + repr(cmd) +
+            log.error("exception while starting make script")
+            log.write("    command line was:")
+            log.write("    " + repr(cmd))
+            log.write(
                 org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
@@ -330,9 +338,22 @@ def build(log, buildingsite='.'):
 
         else:
 
-            t = org.wayround.utils.stream.lbl_write(p.stdout, log, True)
+            t = org.wayround.utils.stream.lbl_write(
+                p.stdout,
+                log,
+                True
+                )
             t.start()
+
+            t2 = org.wayround.utils.stream.lbl_write(
+                p.stderr,
+                log,
+                True,
+                typ='error'
+                )
+            t2.start()
             t.join()
+            t2.join()
 
             try:
                 p.wait()
@@ -380,7 +401,7 @@ def distribute(log, buildingsite='.'):
         makefile = os.path.abspath(
             os.path.join(
                 building_dir,
-                pi['pkg_buildinfo']['autotools_install_opts']['make_file_name']
+                pi['pkg_buildinfo']['autotools_distribute_opts']['make_file_name']
                 )
             )
 
@@ -397,25 +418,26 @@ def distribute(log, buildingsite='.'):
         cmd = ['make'] + ['-f', makefile] + run_parameters \
             + ['install'] + ['%(dd_name)s=%(dd)s' % {
             'dd':destdir,
-            'dd_name': pi['pkg_buildinfo']['autotools_install_opts']['DESTDIR_opt_name']
+            'dd_name': pi['pkg_buildinfo']['autotools_distribute_opts']['DESTDIR_opt_name']
             }]
 
         log.info("Starting autotools install script with following command:")
-        log.info(" %(cmd)s" % {
+        log.write("    %(cmd)s" % {
                 'cmd': repr(cmd)
                 })
+        log.write("-i-")
 
         env = org.wayround.utils.osutils.env_vars_edit(
-            pi['pkg_buildinfo']['autotools_install_envs'],
-            pi['pkg_buildinfo']['autotools_install_env_opts']['mode']
+            pi['pkg_buildinfo']['autotools_distribute_envs'],
+            pi['pkg_buildinfo']['autotools_distribute_env_opts']['mode']
             )
 
-        if len(pi['pkg_buildinfo']['autotools_install_envs']) > 0:
-            log.info(
-                "Environment Modifications: %(list)s" % {
+        if len(pi['pkg_buildinfo']['autotools_distribute_envs']) > 0:
+            log.write(
+                "-i- Environment Modifications: %(list)s" % {
                     'list': ' '.join(
                         repr(i) \
-                            for i in pi['pkg_buildinfo']['autotools_install_envs']
+                            for i in pi['pkg_buildinfo']['autotools_distribute_envs']
                         )
                     }
                 )
@@ -442,18 +464,30 @@ def distribute(log, buildingsite='.'):
 
         else:
 
-            t = org.wayround.utils.stream.lbl_write(p.stdout, log, True)
+            t = org.wayround.utils.stream.lbl_write(
+                p.stdout,
+                log,
+                True
+                )
             t.start()
+
+            t2 = org.wayround.utils.stream.lbl_write(
+                p.stderr,
+                log,
+                True,
+                typ='error'
+                )
+            t2.start()
             t.join()
+            t2.join()
 
             try:
                 p.wait()
             except:
-                log.error(
-                    "exception oqured while waiting for installer\n{}".format(
-                        org.wayround.utils.error.return_exception_info(
-                            sys.exc_info()
-                            )
+                log.write("\n-e- exception oqured while waiting for installer")
+                log.write(
+                    org.wayround.utils.error.return_exception_info(
+                        sys.exc_info()
                         )
                     )
                 ret = 100

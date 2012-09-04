@@ -12,9 +12,9 @@ def build_info():
         'build_tools': {
             'extract'    : 'autotools',
             #'patch'      : 'autotools',
-            'configure'  : 'autotools',
-            'build'      : 'autotools',
-            'distribute' : 'autotools',
+            'configure'  : 'waf',
+            'build'      : 'waf',
+            'distribute' : 'waf',
             'prepack'    : 'autotools',
             },
 
@@ -28,56 +28,39 @@ def build_info():
 
         # Do not remove this, as it's used on also with configure less
         # makes
-        'autotools_configure_opts': {
-            'separate_build_dir': True,
+        'waf_configure_opts': {
+            'separate_build_dir': False,
             'config_dir': '.',
-            'script_name': 'configure'
+            'script_name': 'waf'
             },
 
-        'autotools_configure_env_opts': {
+        'waf_configure_env_opts': {
             'mode': 'copy'      # can be copy or clean
             },
 
-        'autotools_configure_envs': {
-            # # example
-            # # this will add new or rewrite old
-            # 'NAME': 'VALUE',
-            # # this  will delete
-            # 'NAME': None
+        'waf_configure_envs': {
+            'PYTHON': '/usr/bin/python3'
             },
 
-        'autotools_configure_params': {
+        'waf_configure_params': {
             'prefix': '/usr',
             'mandir': '/usr/share/man',
             'sysconfdir': '/etc',
-            'localstatedir': '/var',
-            'enable-shared': None,
-            'host': '%(arch)s-%(type)s-%(kenl)s-%(name)s' % {
-                'arch': constitution['host_arch'],
-                'type': constitution['host_type'],
-                'kenl': constitution['host_kenl'],
-                'name': constitution['host_name']
-                },
-            'build': '%(arch)s-%(type)s-%(kenl)s-%(name)s' % {
-                'arch': constitution['host_arch'],
-                'type': constitution['host_type'],
-                'kenl': constitution['host_kenl'],
-                'name': constitution['host_name']
-                }
+            'localstatedir': '/var'
             },
 
-        'autotools_build_opts': {
+        'waf_build_opts': {
             'make_file_name': 'Makefile'
             },
 
-        'autotools_build_params': {
+        'waf_build_params': {
             },
 
-        'autotools_build_env_opts': {
+        'waf_build_env_opts': {
             'mode': 'copy'      # can be copy or clean
             },
 
-        'autotools_build_envs': {
+        'waf_build_envs': {
             # # example
             # # this will add new or rewrite old
             # 'NAME': 'VALUE',

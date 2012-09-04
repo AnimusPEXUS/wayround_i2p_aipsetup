@@ -1,5 +1,7 @@
 import os.path
 import glob
+import subprocess
+import logging
 
 import PyQt4.uic
 import PyQt4.QtGui
@@ -8,12 +10,12 @@ import org.wayround.utils.text
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
-
+import org.wayround.aipsetup.pkgindex
 
 
 class MainWindow:
 
-    def __init__(self, config):
+    def __init__(self, config, no_loop):
 
         self.config = config
 
@@ -21,7 +23,8 @@ class MainWindow:
             os.path.dirname(__file__), 'ui', 'info_edit.ui'
             )
 
-        self.app = PyQt4.QtGui.QApplication([])
+        if not no_loop:
+            self.app = PyQt4.QtGui.QApplication([])
 
         self.window = PyQt4.uic.loadUi(ui_file)
 
@@ -45,6 +48,10 @@ class MainWindow:
             self.onListRealoadButtonActivated
             )
 
+        self.window.pushButton_3.clicked.connect(
+            self.onEditLatestButtonActivated
+            )
+
         self.window.show()
         self.load_list()
 
@@ -56,7 +63,7 @@ class MainWindow:
         ret = 0
 
         self.window.setEnabled(False)
-        self.window.repaint()
+
 
         filename = os.path.join(
             self.config['info'],
@@ -80,6 +87,19 @@ class MainWindow:
                 ret = 1
             else:
 
+#                lst = self.window.listWidget.findItems(
+#                    name, PyQt4.QtCore.MatchExactly
+#                    )
+#                if len(lst) > 0:
+#                    self.window.listWidget.setCurrentItem(
+#                        lst[0]
+#                        )
+#                    self.window.listWidget.scrollToItem(
+#                        lst[0]
+#                        )
+##                    self.window.listWidget.setCurrentItem(
+##                        lst[0]
+##                        )
                 self.window.lineEdit_7.setText(name)
                 self.window.plainTextEdit.setPlainText(data['description'])
                 self.window.lineEdit.setText(data['home_page'])
@@ -97,6 +117,13 @@ class MainWindow:
                 self.window.checkBox_3.setChecked(bool(data['auto_newest_src']))
                 self.window.checkBox_4.setChecked(bool(data['auto_newest_pkg']))
 
+                self.window.pushButton_3.setEnabled(
+                    (
+                        not self.window.checkBox_3.isChecked()
+                        or not self.window.checkBox_3.isChecked()
+                        )
+                    )
+
                 db = org.wayround.aipsetup.pkgindex.PackageDatabase()
                 self.window.lineEdit_5.setText(db.get_latest_source(name[:-4]))
                 self.window.lineEdit_6.setText(db.get_latest_package(name[:-4]))
@@ -104,7 +131,6 @@ class MainWindow:
 
                 self.currently_opened = name
                 self.window.setWindowTitle(name + " - aipsetup v3 .xml info file editor")
-
 
         self.window.setEnabled(True)
 
@@ -159,7 +185,8 @@ class MainWindow:
                     del db
                     dbu = "DB updated"
                 except:
-                    dbu = "Some error while updating DB:"
+                    dbu = "Some error while updating DB"
+                    logging.exception(dbu)
 
             if dbu != '':
                 dbu = '\n' + dbu
@@ -199,6 +226,18 @@ class MainWindow:
 
         self.load_data(item.text())
 
+    def onEditLatestButtonActivated(self, toggle):
+
+        if self.window.lineEdit_7.text().endswith('.xml'):
+            subprocess.Popen(
+                [
+                'aipsetup3',
+                'pkgindex',
+                'edit_latests',
+                self.window.lineEdit_7.text()[:-4]
+                ]
+                )
+
     def load_list(self):
 
         mask = os.path.join(self.config['info'], '*.xml')
@@ -220,15 +259,17 @@ class MainWindow:
         self.app.quit()
         return
 
-def main(file_to_edit=None):
-    mw = MainWindow(org.wayround.aipsetup.config.config)
+def main(name_to_edit=None, no_loop=False):
+    mw = MainWindow(org.wayround.aipsetup.config.config, no_loop)
 
-    if isinstance(file_to_edit, str):
-        if mw.load_data(os.path.basename(file_to_edit)) != 0:
+    if isinstance(name_to_edit, str):
+        if mw.load_data(os.path.basename(name_to_edit)) != 0:
             mw.close()
         else:
-            mw.wait()
+            if not no_loop:
+                mw.wait()
     else:
-        mw.wait()
+        if not no_loop:
+            mw.wait()
 
     return
