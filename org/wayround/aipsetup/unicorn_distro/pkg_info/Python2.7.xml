@@ -4,23 +4,27 @@
 
     <description>None</description>
 
-    <home_page url="http://None"/>
+    <home_page url="http://python.org/"/>
 
-    <!-- Use <tag name="" /> constructions for listing
-         tags -->
+    <tag name="learning"/>
+    <tag name="programming"/>
+    <tag name="python"/>
+    <tag name="scripting"/>
+    <tag name="system"/>
+    <tag name="web"/>
 
-    <buildinfo value=""/>
+    <buildinfo value="autotools_usr"/>
 
     <basename value="Python"/>
 
     <version_re value="2\.7\..*"/>
 
-    <installation_priority value="5"/>
+    <installation_priority value="1"/>
 
     <deletable value="True"/>
     <updatable value="True"/>
 
-    <auto_newest_src value="True"/>
+    <auto_newest_src value="False"/>
     <auto_newest_pkg value="True"/>
 
 </package>

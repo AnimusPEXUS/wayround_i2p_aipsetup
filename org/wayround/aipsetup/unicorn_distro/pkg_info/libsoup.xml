@@ -9,11 +9,11 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildinfo value="autotools_usr"/>
 
     <basename value="libsoup"/>
 
-    <version_re value=".*"/>
+    <version_re value="\d*\.\d*?[02468]\..*"/>
 
     <installation_priority value="5"/>
 

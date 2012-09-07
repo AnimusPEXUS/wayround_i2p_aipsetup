@@ -9,11 +9,11 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildinfo value="autotools_usr_gtk_with_docs"/>
 
     <basename value="gtk+"/>
 
-    <version_re value="2\.[0-8]+.*"/>
+    <version_re value="3\..*?[02468]\..*"/>
 
     <installation_priority value="5"/>
 

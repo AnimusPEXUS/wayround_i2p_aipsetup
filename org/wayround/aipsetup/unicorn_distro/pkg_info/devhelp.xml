@@ -2,18 +2,18 @@
 
     <!-- This file is generated using aipsetup v3 -->
 
-    <description>write something here, please</description>
+    <description></description>
 
-    <home_page url="http://www.itstool.org"/>
+    <home_page url="http://gnome.org"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
     <buildinfo value="autotools_usr"/>
 
-    <basename value="itstool"/>
+    <basename value="devhelp"/>
 
-    <version_re value=".*"/>
+    <version_re value=".*\.\d+[02468]\..*"/>
 
     <installation_priority value="5"/>
 

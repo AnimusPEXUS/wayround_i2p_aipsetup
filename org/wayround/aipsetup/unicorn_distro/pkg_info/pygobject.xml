@@ -13,7 +13,7 @@
 
     <basename value="pygobject"/>
 
-    <version_re value="3\..*"/>
+    <version_re value="\d*\.\d*?[02468]\..*"/>
 
     <installation_priority value="5"/>
 

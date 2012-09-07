@@ -2,18 +2,18 @@
 
     <!-- This file is generated using aipsetup v3 -->
 
-    <description>write something here, please</description>
+    <description></description>
 
-    <home_page url="http://www.sourceforge.net"/>
+    <home_page url=""/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
     <buildinfo value=""/>
 
-    <basename value="libpng"/>
+    <basename value=""/>
 
-    <version_re value=".*"/>
+    <version_re value=""/>
 
     <installation_priority value="5"/>
 

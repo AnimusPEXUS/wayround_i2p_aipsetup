@@ -4,16 +4,16 @@
 
     <description>write something here, please</description>
 
-    <home_page url="http://www.itstool.org"/>
+    <home_page url="http://www.sourceforge.net"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr"/>
+    <buildinfo value=""/>
 
-    <basename value="itstool"/>
+    <basename value="libpng"/>
 
-    <version_re value=".*"/>
+    <version_re value="1\.2\..*"/>
 
     <installation_priority value="5"/>
 
