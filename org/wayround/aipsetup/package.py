@@ -35,6 +35,7 @@ import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.pack
+import org.wayround.aipsetup.sysupdates
 
 
 def exported_commands():
@@ -82,6 +83,7 @@ def package_install(opts, args):
     else:
         asp_name = args[0]
         ret = install(asp_name, basedir)
+        org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
 
@@ -269,9 +271,11 @@ def package_find_files(opts, args):
     if len(args) > 0:
         lookfor = args[0]
 
-    ret = find_files(basedir, lookfor, mode=look_meth,
-                     mute=False,
-                     return_dict=False)
+    ret = find_files(
+        basedir, lookfor, mode=look_meth,
+        mute=False,
+        return_dict=False
+        )
 
     return ret
 
@@ -831,9 +835,11 @@ def find_files(
             if pkgname.endswith('.xz'):
                 pkgname = pkgname[:-3]
 
-            found = find_file(destdir, pkgname, instr=instr,
-                              mode=mode,
-                              mute=True, return_list=True)
+            found = find_file(
+                destdir, pkgname, instr=instr,
+                mode=mode,
+                mute=True, return_list=True
+                )
 
             if len(found) != 0:
                 ret_dict[pkgname] = found
@@ -891,9 +897,10 @@ def find_file(destdir, pkgname, instr, mode=None, mute=False,
         if not pkgname.endswith('.xz'):
             pkgname += '.xz'
 
-        pkg_file_list = package_files(destdir, pkgname,
-                                      mute=False,
-                                      return_list=True)
+        pkg_file_list = package_files(
+            destdir, pkgname,
+            return_list=True
+            )
 
         if not isinstance(pkg_file_list, list):
             logging.error("Can't get list of files")
@@ -1050,6 +1057,8 @@ def put_to_index_many(files):
 
 def put_to_index(filename):
     ret = 0
+
+    logging.info("Processing file `{}'".format(filename))
 
     if os.path.isdir(filename) or os.path.islink(filename):
         logging.error("wrong file type `%(name)s'" % {

@@ -16,6 +16,7 @@ AIPSETUP_MODULES_LIST = frozenset(
 
     'name',
     'docbook',
+    'sysupdates',
 
     'config',
     'unicorn'

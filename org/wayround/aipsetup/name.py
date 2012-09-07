@@ -161,12 +161,18 @@ def package_name_parse(filename, mute=True):
                     'name': re_res.group('name'),
                     'version': re_res.group('version'),
                     'timestamp': re_res.group('timestamp'),
-                    'status': re_res.group('status'),
                     'host': re_res.group('host')
                     }
                 }
 
-            if ret['groups']['status'] == 'None':
+            if ret['re'] == 'aipsetup3':
+                ret['groups']['status'] = re_res.group('status')
+
+            if (
+                not 'status' in ret['groups']
+                or ret['groups']['status'] == None
+                or ret['groups']['status'] == 'None'
+                ):
                 ret['groups']['status'] = ''
 
             ret['groups']['version_list_dirty'] = (
@@ -482,7 +488,7 @@ def source_name_parse(
     if acceptable_version_number == None or \
             (isinstance(acceptable_version_number, str) and fnmatched):
 
-        if ret == None:
+        if not isinstance(ret, dict):
             logging.debug("No match `{}'".format(filename))
 
         else:

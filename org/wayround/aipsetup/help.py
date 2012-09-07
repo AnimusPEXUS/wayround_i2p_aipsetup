@@ -61,12 +61,14 @@ modules:
         {
             'name': org.wayround.aipsetup.name,
             'docbook': org.wayround.aipsetup.docbook,
-            'config': org.wayround.aipsetup.config
+            'config': org.wayround.aipsetup.config,
+            'sysupdates': org.wayround.aipsetup.sysupdates
         },
         [
             'name',
             'docbook',
-            'config'
+            'config',
+            'sysupdates'
         ],
         only_synopsis=True
         ),

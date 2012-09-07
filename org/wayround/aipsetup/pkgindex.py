@@ -716,13 +716,14 @@ def get_package_files(name, db_connected=None):
 
     needed_files = []
     for i in files:
-        needed_files.append(
-            '/' +
-            os.path.relpath(
-                i,
-                org.wayround.aipsetup.config.config['repository']
+        if org.wayround.aipsetup.name.package_name_parse(i) != None:
+            needed_files.append(
+                '/' +
+                os.path.relpath(
+                    i,
+                    org.wayround.aipsetup.config.config['repository']
+                    )
                 )
-            )
 #        file_name = os.path.basename(i)
 #        file_name_parsed = org.wayround.aipsetup.name.package_name_parse(file_name)
 #        if file_name_parsed and file_name_parsed['groups']['name'] == name:

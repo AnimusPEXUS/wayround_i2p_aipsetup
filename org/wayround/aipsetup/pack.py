@@ -375,7 +375,7 @@ def compress_patches_destdir_and_logs(buildingsite):
                 filename,
                 'xz',
                 verbose_tar=False,
-                verbose_compressor=False
+                verbose_compressor=True
                 )
 
     return ret
