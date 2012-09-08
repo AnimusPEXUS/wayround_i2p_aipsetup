@@ -1184,11 +1184,6 @@ class PackageDatabase:
             default=None,
             )
 
-        recheck_required = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
 
 
     def __init__(self):
@@ -2124,15 +2119,16 @@ Total records checked     : %(n1)d
 
         return ret
 
-    def set_latest_source(self, name, filename, force=False):
-        return self.set_latest(name, filename, 'src', force)
+    def set_latest_source(self, name, latest, force=False):
+        return self.set_latest(name, latest, 'src', force)
 
-    def set_latest_package(self, name, filename, force=False):
-        return self.set_latest(name, filename, 'pkg', force)
+    def set_latest_package(self, name, latest, force=False):
+        return self.set_latest(name, latest, 'pkg', force)
 
-    def set_latest(self, name, filename, typ, force=False):
+    def set_latest(self, name, latest, typ, force=False):
 
-        ret = False
+        logging.debug("setting latest `{}' to `{}'".format(typ, latest))
+        ret = None
 
         if not typ in ['src', 'pkg']:
             raise ValueError("`typ' can be only 'src' or 'pkg'")
@@ -2143,25 +2139,45 @@ Total records checked     : %(n1)d
         elif typ == 'pkg':
             typ2 = 'package'
 
+        info = self.package_info_record_to_dict(name)
 
-        q = self.sess.query(
-            self.Newest
-            ).filter_by(
-                name=name, typ=typ2
+        if info == None:
+            logging.error("Not found PackageInfo record for `{}'".format(name))
+        else:
+
+            logging.debug("Searching for existing `Newest' record of `{}'".format(name))
+            q = self.sess.query(
+                self.Newest
+                ).filter_by(
+                    name=name, typ=typ2
                 ).first()
 
-        if q == None:
-            a = self.Newest()
-            a.name = name
-            a.file = filename
-            a.typ = typ2
-            self.sess.add(a)
-        else:
-            if q.auto_newest_pkg or force:
-                q.newest_pkg = filename
-                ret = True
+            if q == None:
+                logging.debug("existing `Newest' record of `{}' not found".format(name))
+                if info['auto_newest_' + typ] or force:
+                    logging.debug("creating `Newest' record of `{}'".format(name))
+                    a = self.Newest()
+                    a.name = name
+                    a.file = latest
+                    a.typ = typ2
+                    self.sess.add(a)
+                    ret = True
+                else:
+                    ret = False
             else:
-                ret = False
+                logging.debug("existing `Newest' record of `{}' found".format(name))
+                if info['auto_newest_' + typ] or force:
+                    logging.debug("updating `Newest' record of `{}'".format(name))
+                    q.file = latest
+                    self.sess.commit()
+                    ret = True
+                else:
+                    ret = False
+
+        if ret == False:
+            logging.error(
+                "Not `auto_newest_{}' and not forced".format(typ)
+                )
 
         return ret
 

@@ -121,23 +121,19 @@ class MainWindow:
         self.ui['treeview1'].set_model(lst)
 
         if self.currently_opened:
-            self.scroll_package_list_to_name(self.currently_opened)
+            org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
+                self.ui['treeview1'],
+                self.currently_opened
+                )
+
         else:
             self.currently_opened = None
             self.load_item(None)
 
         return
 
-    def scroll_package_list_to_name(self, name):
-        org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
-            self.ui['treeview1'],
-            name
-            )
 
-        return
-
-    def _load_item(self, name):
-
+    def load_item(self, name):
         if name == None:
             self.ui['entry1'].set_text(NON_AUTOMATIC_NOT_SELECTED)
             self.ui['entry2'].set_text(NON_AUTOMATIC_NOT_SELECTED)
@@ -153,7 +149,6 @@ class MainWindow:
             self.ui['treeview3'].set_sensitive(False)
         else:
             self.ui['window1'].set_sensitive(False)
-            self.ui['spinner1'].start()
             db = org.wayround.aipsetup.pkgindex.PackageDatabase()
 
             info = db.package_info_record_to_dict(name)
@@ -234,16 +229,7 @@ class MainWindow:
 
             self.currently_opened = name
 
-            self.ui['spinner1'].stop()
             self.ui['window1'].set_sensitive(True)
-
-        return 0
-
-
-    def load_item(self, name):
-        th = threading.Thread(target=self._load_item, args=(name,))
-        th.start()
-        th.join()
 
         return 0
 
@@ -272,6 +258,7 @@ class MainWindow:
         if self.currently_opened:
             db = org.wayround.aipsetup.pkgindex.PackageDatabase()
             db.set_latest_source(self.currently_opened, None, force=True)
+            db.commit_session()
             self.ui['entry1'].set_text(str(db.get_latest_source(self.currently_opened)))
             del db
 
@@ -283,6 +270,7 @@ class MainWindow:
             db = org.wayround.aipsetup.pkgindex.PackageDatabase()
             db.set_latest_package(self.currently_opened, None, force=True)
             self.ui['entry2'].set_text(str(db.get_latest_package(self.currently_opened)))
+            db.commit_session()
             del db
 
         return
@@ -316,13 +304,14 @@ class MainWindow:
                 )
 
     def onSaveClicked(self, button):
-        self.ui['spinner1'].start()
 
         if self.currently_opened:
             db = org.wayround.aipsetup.pkgindex.PackageDatabase()
 
             db.set_latest_source(self.currently_opened, self.ui['entry1'].get_text(), force=True)
-            db.set_latest_package(self.currently_opened, self.ui['entry1'].get_text(), force=True)
+            db.set_latest_package(self.currently_opened, self.ui['entry2'].get_text(), force=True)
+
+            db.commit_session()
 
             self.ui['entry1'].set_text(str(db.get_latest_source(self.currently_opened)))
             self.ui['entry2'].set_text(str(db.get_latest_package(self.currently_opened)))
@@ -339,7 +328,6 @@ class MainWindow:
             dia.run()
             dia.destroy()
 
-        self.ui['spinner1'].stop()
 
         return
 
