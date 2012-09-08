@@ -3,46 +3,51 @@ import glob
 import subprocess
 import logging
 
-from gi.repository import Gtk
+#import PyQt4.uic
+#import PyQt4.QtGui
 
 import org.wayround.utils.text
-import org.wayround.utils.gtk
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
 
+from gi.repository import Gtk
 
 class MainWindow:
 
     def __init__(self, config, no_loop):
 
         self.config = config
-        self.currently_opened = None
+        self.currently_opened = ''
 
         ui_file = os.path.join(
             os.path.dirname(__file__), 'ui', 'info_edit.glade'
             )
 
-        ui = Gtk.Builder()
-        ui.add_from_file(ui_file)
-
-        self.ui = org.wayround.utils.gtk.widget_dict(ui)
+        self.ui = Gtk.Builder()
+        self.ui.add_from_file(ui_file)
 
 
-        self.ui['window1'].connect("delete-event", Gtk.main_quit)
-        self.ui['window1'].show_all()
+        self.window = self.ui.get_object('window1')
+        self.window.connect("delete-event", Gtk.main_quit)
+        self.window.show_all()
 
 
-        self.ui['button5'].connect('clicked', self.onListRealoadButtonActivated)
+        refreshListButton = self.ui.get_object('button5')
+        refreshListButton.connect('clicked', self.onListRealoadButtonActivated)
 
-        self.ui['button3'].connect('clicked', self.onRevertButtonActivated)
+        refreshListButton = self.ui.get_object('button3')
+        refreshListButton.connect('clicked', self.onRevertButtonActivated)
 
-        self.ui['button4'].connect('clicked', self.onSaveButtonActivated)
+        refreshListButton = self.ui.get_object('button4')
+        refreshListButton.connect('clicked', self.onSaveButtonActivated)
 
-        self.ui['button2'].connect('clicked', self.onSaveAndUpdateButtonActivated)
+        refreshListButton = self.ui.get_object('button2')
+        refreshListButton.connect('clicked', self.onSaveAndUpdateButtonActivated)
 
-        self.ui['button1'].connect('clicked', self.onEditLatestButtonActivated)
+        refreshListButton = self.ui.get_object('button1')
+        refreshListButton.connect('clicked', self.onEditLatestButtonActivated)
 
 
 
@@ -51,13 +56,13 @@ class MainWindow:
         c.pack_start(r, True)
         c.add_attribute(r, 'text', 0)
 
-        self.ui['treeview1'].append_column(c)
-        self.ui['treeview1'].show_all()
-        self.ui['treeview1'].connect('row-activated', self.onPackageListItemActivated)
+        treeview1 = self.ui.get_object('treeview1')
+        treeview1.append_column(c)
+        treeview1.show_all()
+        treeview1.connect('row-activated', self.onListItemActivated)
 
+        self.window.show()
         self.load_list()
-
-        return
 
 
     def load_data(self, name):
@@ -73,7 +78,7 @@ class MainWindow:
 
         if not os.path.isfile(filename):
             dia = Gtk.MessageDialog(
-                self.ui['window1'],
+                self.window,
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
@@ -87,7 +92,7 @@ class MainWindow:
 
             if not isinstance(data, dict):
                 dia = Gtk.MessageDialog(
-                    self.ui['window1'],
+                    self.window,
                     Gtk.DialogFlags.MODAL,
                     Gtk.MessageType.ERROR,
                     Gtk.ButtonsType.OK,
@@ -98,56 +103,72 @@ class MainWindow:
                 ret = 1
             else:
 
-                self.scroll_package_list_to_name(name)
+                self.scroll_to_name(name)
 
-                self.ui['entry1'].set_text(name)
+                e = self.ui.get_object('entry1')
+                e.set_text(name)
 
                 b = Gtk.TextBuffer()
                 b.set_text(data['description'])
 
-                self.ui['textview1'].set_buffer(b)
+                e = self.ui.get_object('textview1')
+                e.set_buffer(b)
 
-                self.ui['entry7'].set_text(data['home_page'])
+                e = self.ui.get_object('entry7')
+                e.set_text(data['home_page'])
 
                 b = Gtk.TextBuffer()
                 b.set_text('\n'.join(data['tags']))
 
-                self.ui['textview2'].set_buffer(b)
+                e = self.ui.get_object('textview2')
+                e.set_buffer(b)
 
-                self.ui['entry5'].set_text(data['buildinfo'])
+                e = self.ui.get_object('entry5')
+                e.set_text(data['buildinfo'])
 
-                self.ui['entry2'].set_text(data['basename'])
+                e = self.ui.get_object('entry2')
+                e.set_text(data['basename'])
 
-                self.ui['entry3'].set_text(data['version_re'])
 
-                self.ui['spinbutton1'].set_value(float(data['installation_priority']))
+                e = self.ui.get_object('entry3')
+                e.set_text(data['version_re'])
 
-                self.ui['checkbutton2'].set_active(bool(data['deletable']))
+                e = self.ui.get_object('spinbutton1')
+                e.set_value(float(data['installation_priority']))
 
-                self.ui['checkbutton1'].set_active(bool(data['updatable']))
+                e = self.ui.get_object('checkbutton2')
+                e.set_active(bool(data['deletable']))
 
-                self.ui['checkbutton3'].set_active(bool(data['auto_newest_src']))
+                e = self.ui.get_object('checkbutton1')
+                e.set_active(bool(data['updatable']))
 
-                self.ui['checkbutton4'].set_active(bool(data['auto_newest_pkg']))
+                e = self.ui.get_object('checkbutton3')
+                e.set_active(bool(data['auto_newest_src']))
 
-                self.ui['button1'].set_sensitive(
+                e = self.ui.get_object('checkbutton4')
+                e.set_active(bool(data['auto_newest_pkg']))
+
+                e = self.ui.get_object('button1')
+                e.set_sensitive(
                     (
-                        not self.ui['checkbutton3'].get_active()
+                        not self.ui.get_object('checkbutton3').get_active()
                         or
-                        not self.ui['checkbutton4'].get_active()
+                        not self.ui.get_object('checkbutton4').get_active()
                         )
                     )
 
                 db = org.wayround.aipsetup.pkgindex.PackageDatabase()
 
-                self.ui['entry4'].set_text(str(db.get_latest_source(name[:-4])))
+                e = self.ui.get_object('entry4')
+                e.set_text(str(db.get_latest_source(name[:-4])))
 
-                self.ui['entry6'].set_text(str(db.get_latest_package(name[:-4])))
+                e = self.ui.get_object('entry6')
+                e.set_text(str(db.get_latest_package(name[:-4])))
 
                 del db
 
                 self.currently_opened = name
-                self.ui['window1'].set_title(name + " - aipsetup v3 .xml info file editor")
+                self.window.set_title(name + " - aipsetup v3 .xml info file editor")
 
 #        self.window.set_sensitive(True)
 
@@ -166,38 +187,51 @@ class MainWindow:
 
         data = {}
 
-        b = self.ui['textview1'].get_buffer()
+        e = self.ui.get_object('textview1')
+        b = e.get_buffer()
 
         data['description'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
 
-        data['home_page'] = self.ui['entry7'].get_text()
+        e = self.ui.get_object('entry7')
+        data['home_page'] = e.get_text()
 
-        b = self.ui['textview2'].get_buffer()
 
+        e = self.ui.get_object('textview2')
+        b = e.get_buffer()
+
+        b = Gtk.TextBuffer()
         data['tags'] = org.wayround.utils.text.strip_remove_empty_remove_duplicated_lines(
-            b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
+            str(b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines())
             )
 
-        data['buildinfo'] = self.ui['entry5'].get_text()
+        e = self.ui.get_object('entry5')
+        data['buildinfo'] = e.get_text()
 
-        data['basename'] = self.ui['entry2'].get_text()
+        e = self.ui.get_object('entry2')
+        data['basename'] = e.get_text()
 
-        data['version_re'] = self.ui['entry3'].get_text()
+        e = self.ui.get_object('entry3')
+        data['version_re'] = e.get_text()
 
-        data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
+        e = self.ui.get_object('spinbutton1')
+        data['installation_priority'] = int(e.get_value())
 
-        data['deletable'] = self.ui['checkbutton2'].get_active()
+        e = self.ui.get_object('checkbutton2')
+        data['deletable'] = e.get_active()
 
-        data['updatable'] = self.ui['checkbutton1'].get_active()
+        e = self.ui.get_object('checkbutton1')
+        data['updatable'] = e.get_active()
 
-        data['auto_newest_src'] = self.ui['checkbutton3'].get_active()
+        e = self.ui.get_object('checkbutton3')
+        data['auto_newest_src'] = e.get_active()
 
-        data['auto_newest_pkg'] = self.ui['checkbutton4'].get_active()
+        e = self.ui.get_object('checkbutton4')
+        data['auto_newest_pkg'] = e.get_active()
 
 
         if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
             dia = Gtk.MessageDialog(
-                self.ui['window1'],
+                self.window,
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
@@ -227,7 +261,7 @@ class MainWindow:
                 dbu = '\n' + dbu
 
             dia = Gtk.MessageDialog(
-                self.ui['window1'],
+                self.window,
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.INFO,
                 Gtk.ButtonsType.OK,
@@ -238,45 +272,10 @@ class MainWindow:
 
         return ret
 
-
-    def load_list(self):
-
-        mask = os.path.join(self.config['info'], '*.xml')
-
-        files = glob.glob(mask)
-
-        files.sort()
-
-        self.ui['treeview1'].set_model(None)
-
-        lst = Gtk.ListStore(str)
-        for i in files:
-            base = os.path.basename(i)
-            lst.append([base])
-
-        self.ui['treeview1'].set_model(lst)
-        if self.currently_opened:
-            self.scroll_package_list_to_name(self.currently_opened)
-        return
-
-    def scroll_package_list_to_name(self, name):
-        org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
-            self.ui['treeview1'],
-            name
-            )
-        return
-
-    def wait(self):
-        return Gtk.main()
-
-    def close(self):
-#        self.app.quit()
-        return
-
     def onRevertButtonActivated(self, button):
         if self.load_data(self.currently_opened) != 0:
             dia = Gtk.MessageDialog(
-                self.ui['window1'],
+                self.window,
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
@@ -286,9 +285,9 @@ class MainWindow:
             dia.destroy()
         else:
             dia = Gtk.MessageDialog(
-                self.ui['window1'],
+                self.window,
                 Gtk.DialogFlags.MODAL,
-                Gtk.MessageType.INFO,
+                Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
                 "Rereaded data from file"
                 )
@@ -306,7 +305,7 @@ class MainWindow:
     def onListRealoadButtonActivated(self, button):
         self.load_list()
 
-    def onPackageListItemActivated(self, view, path, column):
+    def onListItemActivated(self, view, path, column):
 
         sel = view.get_selection()
 
@@ -318,15 +317,60 @@ class MainWindow:
 
     def onEditLatestButtonActivated(self, toggle):
 
-        if self.ui['entry1'].get_text().endswith('.xml'):
+        e = self.ui.get_object('entry1')
+        if e.get_text().endswith('.xml'):
             subprocess.Popen(
                 [
                 'aipsetup3',
                 'pkgindex',
                 'edit_latests',
-                self.ui['entry1'].get_text()[:-4]
+                e.get_text()[:-4]
                 ]
                 )
+
+    def load_list(self):
+
+        mask = os.path.join(self.config['info'], '*.xml')
+
+        files = glob.glob(mask)
+
+        files.sort()
+
+        treeview = self.ui.get_object('treeview1')
+        treeview.set_model(None)
+
+        lst = Gtk.ListStore(str)
+        for i in files:
+            base = os.path.basename(i)
+            lst.append([base])
+
+        treeview.set_model(lst)
+        if self.currently_opened:
+            self.scroll_to_name(self.currently_opened)
+        return
+
+    def scroll_to_name(self, name):
+        e = self.ui.get_object('treeview1')
+        sel = e.get_selection()
+        model = e.get_model()
+        ind = -1
+        if model:
+            for i in model:
+                ind += 1
+                if i[0] == name:
+                    path = Gtk.TreePath.new_from_string(str(ind))
+                    sel.select_path(path)
+                    e.scroll_to_cell(path, None, True, 0.5, 0.5)
+                    break
+
+        return
+
+    def wait(self):
+        return Gtk.main()
+
+    def close(self):
+#        self.app.quit()
+        return
 
 def main(name_to_edit=None, no_loop=False):
 #    s = Gtk.Settings.get_default()

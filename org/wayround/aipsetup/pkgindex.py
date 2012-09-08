@@ -691,15 +691,6 @@ def get_package_info(name):
 
     return ret
 
-def pkg_file_list_to_dict(files, name):
-    needed_files = {}
-    for i in files:
-        file_name = os.path.basename(i)
-        file_name_parsed = org.wayround.aipsetup.name.package_name_parse(file_name)
-        if file_name_parsed and file_name_parsed['groups']['name'] == name:
-            needed_files[file_name] = file_name_parsed
-    return needed_files
-
 
 def get_package_files(name, db_connected=None):
 
@@ -738,6 +729,15 @@ def get_package_files(name, db_connected=None):
 #        if file_name_parsed and file_name_parsed['groups']['name'] == name:
 #            needed_files[file_name] = file_name_parsed
 
+    return needed_files
+
+def pkg_file_list_to_dict(files, name):
+    needed_files = {}
+    for i in files:
+        file_name = os.path.basename(i)
+        file_name_parsed = org.wayround.aipsetup.name.package_name_parse(file_name)
+        if file_name_parsed and file_name_parsed['groups']['name'] == name:
+            needed_files[file_name] = file_name_parsed
     return needed_files
 
 def get_package_source_files(name, db_connected=None):
@@ -793,12 +793,11 @@ def get_package_source_files(name, db_connected=None):
 
     return needed_files
 
-def latest_source(name, db_connected=None, files=None):
+def latest_source(name, db_connected=None):
 
     ret = None
 
-    if not files:
-        files = get_package_source_files(name, db_connected)
+    files = get_package_source_files(name, db_connected)
 
     if len(files) == 0:
         ret = None
@@ -817,12 +816,11 @@ def latest_source(name, db_connected=None, files=None):
 
     return ret
 
-def latest_package(name, db_connected=None, files=None):
+def latest_package(name, db_connected=None):
 
     ret = None
 
-    if not files:
-        files = get_package_files(name, db_connected)
+    files = get_package_files(name, db_connected)
 
     if len(files) == 0:
         ret = None
@@ -2125,36 +2123,26 @@ Total records checked     : %(n1)d
         return ret
 
     def set_latest_source(self, name, filename, force=False):
-        return self.set_latest(name, filename, 'src', force)
+        return self.set_latest(name, filename, 'source', force)
 
     def set_latest_package(self, name, filename, force=False):
-        return self.set_latest(name, filename, 'pkg', force)
+        return self.set_latest(name, filename, 'package', force)
 
     def set_latest(self, name, filename, typ, force=False):
 
         ret = False
 
-        if not typ in ['src', 'pkg']:
-            raise ValueError("`typ' can be only 'src' or 'pkg'")
-
-        typ2 = ''
-        if typ == 'src':
-            typ2 = 'source'
-        elif typ == 'pkg':
-            typ2 = 'package'
-
-
         q = self.sess.query(
-            self.Newest
+            self.PackageInfo
             ).filter_by(
-                name=name, typ=typ2
+                name=name, typ=typ
                 ).first()
 
         if q == None:
             a = self.Newest()
             a.name = name
             a.file = filename
-            a.typ = typ2
+            a.typ = typ
             self.sess.add(a)
         else:
             if q.auto_newest_pkg or force:
@@ -2178,7 +2166,7 @@ Total records checked     : %(n1)d
         if not typ in ['src', 'pkg']:
             raise ValueError("`typ' can be only 'src' or 'pkg'")
 
-        info = self.package_info_record_to_dict(name)
+        info = self.sess.query(self.PackageInfo).filter_by(name=name).first()
 
         if info == None:
             logging.error("Not found PackageInfo record for `{}'".format(name))
@@ -2189,7 +2177,7 @@ Total records checked     : %(n1)d
             elif typ == 'pkg':
                 typ2 = 'package'
 
-            if info['auto_newest_' + typ]:
+            if eval('info.auto_newest_' + typ):
                 latest = ''
                 if typ == 'src':
                     latest = latest_source(name, self)
