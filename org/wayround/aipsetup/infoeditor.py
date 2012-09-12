@@ -5,8 +5,9 @@ import logging
 
 from gi.repository import Gtk
 
-import org.wayround.utils.text
 import org.wayround.utils.gtk
+import org.wayround.utils.text
+import org.wayround.utils.list
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
@@ -98,8 +99,6 @@ class MainWindow:
                 ret = 1
             else:
 
-                self.scroll_package_list_to_name(name)
-
                 self.ui['entry1'].set_text(name)
 
                 b = Gtk.TextBuffer()
@@ -122,9 +121,9 @@ class MainWindow:
 
                 self.ui['spinbutton1'].set_value(float(data['installation_priority']))
 
-                self.ui['checkbutton2'].set_active(bool(data['deletable']))
+                self.ui['checkbutton2'].set_active(bool(data['removable']))
 
-                self.ui['checkbutton1'].set_active(bool(data['updatable']))
+                self.ui['checkbutton1'].set_active(bool(data['reducible']))
 
                 self.ui['checkbutton3'].set_active(bool(data['auto_newest_src']))
 
@@ -148,6 +147,8 @@ class MainWindow:
 
                 self.currently_opened = name
                 self.ui['window1'].set_title(name + " - aipsetup v3 .xml info file editor")
+
+                self.scroll_package_list_to_name(name)
 
 #        self.window.set_sensitive(True)
 
@@ -174,7 +175,7 @@ class MainWindow:
 
         b = self.ui['textview2'].get_buffer()
 
-        data['tags'] = org.wayround.utils.text.strip_remove_empty_remove_duplicated_lines(
+        data['tags'] = org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(
             b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
             )
 
@@ -186,9 +187,9 @@ class MainWindow:
 
         data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
 
-        data['deletable'] = self.ui['checkbutton2'].get_active()
+        data['removable'] = self.ui['checkbutton2'].get_active()
 
-        data['updatable'] = self.ui['checkbutton1'].get_active()
+        data['reducible'] = self.ui['checkbutton1'].get_active()
 
         data['auto_newest_src'] = self.ui['checkbutton3'].get_active()
 

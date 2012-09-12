@@ -188,10 +188,10 @@ def pkgindex_backup_package_info_to_filesystem(opts, args):
     if len(args) > 0:
         mask = args[0]
 
-    f = '-f' in opts
+    force = '-f' in opts
 
     r = PackageDatabase()
-    ret = r.backup_package_info_to_filesystem(mask, f)
+    ret = r.backup_package_info_to_filesystem(mask, force)
     del r
 
     return ret
@@ -1105,13 +1105,13 @@ class PackageDatabase:
             default=5
             )
 
-        deletable = sqlalchemy.Column(
+        removable = sqlalchemy.Column(
             sqlalchemy.Boolean,
             nullable=False,
             default=True
             )
 
-        updatable = sqlalchemy.Column(
+        reducible = sqlalchemy.Column(
             sqlalchemy.Boolean,
             nullable=False,
             default=True
@@ -2076,8 +2076,8 @@ Total records checked     : %(n1)d
               category: {category}
                   tags: {tags}
  installation priority: {installation_priority}
-             deletable: {deletable}
-             updatable: {updatable}
+             removable: {removable}
+             reducible: {reducible}
        auto newest src: {auto_newest_src}
        auto newest pkg: {auto_newest_pkg}
             newest src: {newest_src}
@@ -2096,8 +2096,8 @@ Total records checked     : %(n1)d
         'basename'              : r['basename'],
         'version_re'            : r['version_re'],
         'installation_priority' : r['installation_priority'],
-        'deletable'             : r['deletable'],
-        'updatable'             : r['updatable'],
+        'removable'             : r['removable'],
+        'reducible'             : r['reducible'],
         'auto_newest_src'       : r['auto_newest_src'],
         'auto_newest_pkg'       : r['auto_newest_pkg'],
         'newest_src'            : self.get_latest_source(name),

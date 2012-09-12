@@ -49,10 +49,10 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     installation_priority=5,
     # can package be deleted without hazard to aipsetup functionality 
     # (including system stability)?
-    deletable=True,
+    removable=True,
     # can package be updated without hazard to aipsetup functionality 
     # (including system stability)?
-    updatable=True,
+    reducible=True,
     # can aipsetup automatically find and update latest version? 
     # (can't not for files containing statuses, 
     #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
@@ -88,8 +88,8 @@ pkg_info_file_template = Template(text="""\
 
     <installation_priority value="${ installation_priority | x }"/>
 
-    <deletable value="${ deletable | x }"/>
-    <updatable value="${ updatable | x }"/>
+    <removable value="${ removable | x }"/>
+    <reducible value="${ reducible | x }"/>
 
     <auto_newest_src value="${ auto_newest_src | x }"/>
     <auto_newest_pkg value="${ auto_newest_pkg | x }"/>
@@ -285,8 +285,8 @@ def is_info_dicts_equal(d1, d2):
         'basename',
         'version_re',
         'installation_priority',
-        'deletable',
-        'updatable',
+        'removable',
+        'reducible',
         'auto_newest_src',
         'auto_newest_pkg',
         # next two items must not participate in
@@ -362,8 +362,8 @@ def read_from_file(name):
                             )
 
                 for i in [
-                    'deletable',
-                    'updatable',
+                    'removable',
+                    'reducible',
                     'auto_newest_src',
                     'auto_newest_pkg'
                     ]:
@@ -420,8 +420,8 @@ def write_to_file(name, struct):
         basename=struct['basename'],
         version_re=struct['version_re'],
         installation_priority=struct['installation_priority'],
-        deletable=struct['deletable'],
-        updatable=struct['updatable'],
+        removable=struct['removable'],
+        reducible=struct['reducible'],
         auto_newest_src=struct['auto_newest_src'],
         auto_newest_pkg=struct['auto_newest_pkg']
 #        newest_src=struct['newest_src'],

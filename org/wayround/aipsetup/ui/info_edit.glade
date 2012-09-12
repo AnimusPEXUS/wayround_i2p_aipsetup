@@ -264,7 +264,7 @@
                     <property name="column_homogeneous">True</property>
                     <child>
                       <object class="GtkCheckButton" id="checkbutton1">
-                        <property name="label" translatable="yes">Updatable</property>
+                        <property name="label" translatable="yes">Reducible</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -282,7 +282,7 @@
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="checkbutton2">
-                        <property name="label" translatable="yes">Deletable</property>
+                        <property name="label" translatable="yes">Removable</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>

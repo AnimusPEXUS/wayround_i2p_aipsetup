@@ -43,7 +43,6 @@ ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
     '.tar.bz2',
     '.tar.xz',
     '.tar.lzma',
-    '.tar',
     '.zip',
     '.7z',
     '.tgz',
@@ -135,6 +134,23 @@ def name_parse_test(args, opts):
     parse_test()
     return 0
 
+def remove_extension_from_valid_package_name(name):
+
+    ret = ''
+
+    if name.endswith('.tar.xz'):
+        ret = name[:-7]
+
+    elif name.endswith('.asp'):
+        ret = name[:-4]
+
+    elif name.endswith('.xz'):
+        ret = name[:-3]
+
+    else:
+        ret = name
+
+    return ret
 
 def package_name_parse(filename, mute=True):
 
@@ -144,12 +160,7 @@ def package_name_parse(filename, mute=True):
 
     ret = None
 
-    if filename.endswith('.tar.xz'):
-        filename = filename[:-7]
-    elif filename.endswith('.asp'):
-        filename = filename[:-4]
-    elif filename.endswith('.xz'):
-        filename = filename[:-3]
+    filename = remove_extension_from_valid_package_name(filename)
 
     for i in ASP_NAME_REGEXPS:
         re_res = ASP_NAME_REGEXPS_COMPILED[i].match(filename)

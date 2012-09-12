@@ -1,21 +1,17 @@
 import os.path
-import glob
 import functools
-import threading
 import subprocess
+
 
 from gi.repository import Gtk
 
-import org.wayround.utils.text
 import org.wayround.utils.gtk
 
-
-import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.version
 
-NON_AUTOMATIC_NOT_SELECTED = "Non Automatic Not Selected"
+NON_AUTOMATIC_NOT_SELECTED = "Package Not Selected"
 
 
 class MainWindow:
@@ -228,6 +224,8 @@ class MainWindow:
                 )
 
             self.currently_opened = name
+            self.scrollPackageListToItem(name)
+            self.ui['window1'].set_title(str(name) + " - Latest Files Editor")
 
             self.ui['window1'].set_sensitive(True)
 
@@ -239,6 +237,12 @@ class MainWindow:
     def close(self):
 #        self.app.quit()
         return
+
+    def scrollPackageListToItem(self, name):
+        org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
+            self.ui['treeview1'],
+            name
+            )
 
     def onReloadListButtonActivated(self, button):
         self.load_package_list()
@@ -332,6 +336,7 @@ class MainWindow:
         return
 
 def main(name_to_edit=None, no_loop=False):
+
     mw = MainWindow(org.wayround.aipsetup.config.config, no_loop)
 
     if isinstance(name_to_edit, str):
