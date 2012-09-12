@@ -17,8 +17,8 @@
 
     <installation_priority value="0"/>
 
-    <deletable value="False"/>
-    <updatable value="True"/>
+    <removable value="False"/>
+    <reducible value="True"/>
 
     <auto_newest_src value="True"/>
     <auto_newest_pkg value="True"/>

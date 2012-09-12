@@ -11,15 +11,8 @@ python2.7 is required
 
     <home_page url="http://gajim.org/"/>
 
-    <tag name="chat"/>
-    <tag name="communication"/>
-    <tag name="e2e"/>
-    <tag name="file sharing"/>
-    <tag name="jabber"/>
-    <tag name="jingle"/>
-    <tag name="python"/>
-    <tag name="voip"/>
-    <tag name="xmpp"/>
+    <tag name="["/>
+    <tag name="]"/>
 
     <buildinfo value="autotools_usr"/>
 
@@ -29,8 +22,8 @@ python2.7 is required
 
     <installation_priority value="5"/>
 
-    <deletable value="True"/>
-    <updatable value="True"/>
+    <removable value="True"/>
+    <reducible value="True"/>
 
     <auto_newest_src value="True"/>
     <auto_newest_pkg value="True"/>
