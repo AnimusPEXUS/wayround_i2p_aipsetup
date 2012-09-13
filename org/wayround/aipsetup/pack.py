@@ -173,6 +173,8 @@ def destdir_checksum(buildingsite):
 
     ret = 0
 
+    logging.info("Creating checksums")
+
     destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
@@ -208,6 +210,8 @@ def destdir_filelist(buildingsite):
 
     ret = 0
 
+    logging.info("Creating file lists")
+
     destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
@@ -240,6 +244,8 @@ def destdir_filelist(buildingsite):
 
 def destdir_deps_c(buildingsite):
     ret = 0
+    logging.info("Generating C deps lists")
+
     destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
@@ -271,7 +277,6 @@ def destdir_deps_c(buildingsite):
             deps = {}
             elfs = 0
             n_elfs = 0
-            logging.info("Generating C deps lists")
             file_list_l = len(file_list)
             file_list_i = 1
             for i in file_list:
@@ -322,6 +327,13 @@ def remove_source_and_build_dirs(buildingsite):
 
     ret = 0
 
+    logging.info(
+        "Removing {} and {}".format(
+            org.wayround.aipsetup.buildingsite.DIR_SOURCE,
+            org.wayround.aipsetup.buildingsite.DIR_BUILDING
+            )
+        )
+
     for i in [
         org.wayround.aipsetup.buildingsite.DIR_SOURCE,
         org.wayround.aipsetup.buildingsite.DIR_BUILDING
@@ -345,6 +357,14 @@ def compress_patches_destdir_and_logs(buildingsite):
 
     ret = 0
 
+    logging.info(
+        "Compressing {}, {} and {}".format(
+            org.wayround.aipsetup.buildingsite.DIR_PATCHES,
+            org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
+            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+            )
+        )
+
     for i in [
         org.wayround.aipsetup.buildingsite.DIR_PATCHES,
         org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
@@ -367,9 +387,9 @@ def compress_patches_destdir_and_logs(buildingsite):
             ret = 1
             break
         else:
-            logging.info("Compressing %(i)s" % {
-                'i': i
-                })
+            size = org.wayround.utils.file.get_file_size(dirname)
+            logging.info("Compressing {} (size: {}B == {}MiB)".format(i, size, float(size) / 1024 / 1024))
+
             org.wayround.utils.archive.archive_tar_canonical(
                 dirname,
                 filename,
@@ -383,6 +403,8 @@ def compress_patches_destdir_and_logs(buildingsite):
 def compress_files_in_lists_dir(buildingsite):
 
     ret = 0
+
+    logging.info("Compressing files in lists dir")
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
@@ -408,6 +430,14 @@ def remove_patches_destdir_and_buildlogs_dirs(buildingsite):
 
     ret = 0
 
+    logging.info(
+        "Removing {}, {} and {}".format(
+            org.wayround.aipsetup.buildingsite.DIR_PATCHES,
+            org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
+            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+            )
+        )
+
     for i in [
         org.wayround.aipsetup.buildingsite.DIR_PATCHES,
         org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
@@ -432,6 +462,8 @@ def remove_decompressed_files_from_lists_dir(buildingsite):
 
     ret = 0
 
+    logging.info("Removing garbage from lists dir")
+
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
     for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
@@ -453,6 +485,8 @@ def make_checksums_for_building_site(buildingsite):
 
     ret = 0
 
+    logging.info("Making checksums for buildingsite files")
+
     buildingsite = os.path.abspath(buildingsite)
 
     package_checksums = os.path.join(
@@ -473,7 +507,8 @@ def make_checksums_for_building_site(buildingsite):
 
         if org.wayround.utils.checksum.make_dir_checksums_fo(
             buildingsite,
-            f) != 0:
+            f
+            ) != 0:
             logging.error("Error creating checksums for buildingsite")
             ret = 2
 
@@ -488,6 +523,8 @@ def pack_buildingsite(buildingsite):
     pi = org.wayround.aipsetup.buildingsite.read_package_info(
         buildingsite, ret_on_error=None
         )
+
+    logging.info("Creating package")
 
     if pi == None:
         logging.error("error getting information about package")
@@ -516,6 +553,8 @@ def pack_buildingsite(buildingsite):
                     }
                 }
             )
+
+        logging.info("Package will be saved as: {}".format(pack_file_name))
 
         if not os.path.isdir(pack_dir):
             os.makedirs(pack_dir)

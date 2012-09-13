@@ -102,22 +102,22 @@ class MainWindow:
                 self.ui['entry1'].set_text(name)
 
                 b = Gtk.TextBuffer()
-                b.set_text(data['description'])
+                b.set_text(str(data['description']))
 
                 self.ui['textview1'].set_buffer(b)
 
-                self.ui['entry7'].set_text(data['home_page'])
+                self.ui['entry7'].set_text(str(data['home_page']))
 
                 b = Gtk.TextBuffer()
                 b.set_text('\n'.join(data['tags']))
 
                 self.ui['textview2'].set_buffer(b)
 
-                self.ui['entry5'].set_text(data['buildinfo'])
+                self.ui['entry5'].set_text(str(data['buildinfo']))
 
-                self.ui['entry2'].set_text(data['basename'])
+                self.ui['entry2'].set_text(str(data['basename']))
 
-                self.ui['entry3'].set_text(data['version_re'])
+                self.ui['entry3'].set_text(str(data['version_re']))
 
                 self.ui['spinbutton1'].set_value(float(data['installation_priority']))
 

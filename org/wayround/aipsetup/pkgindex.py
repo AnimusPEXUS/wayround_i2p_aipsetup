@@ -683,11 +683,18 @@ def index_directory(
     return 0
 
 
-def get_package_info(name):
+def get_package_info(name, db_connected=None):
 
-    db = PackageDatabase()
+    db = None
+    if db_connected:
+        db = db_connected
+    else:
+        db = PackageDatabase()
+
     ret = db.package_info_record_to_dict(name)
-    del db
+
+    if not db_connected:
+        del db
 
     return ret
 
@@ -1749,16 +1756,27 @@ class PackageDatabase:
             q = self.PackageInfo()
             creating_new = True
 
-        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
-
-        for i in ['tags', 'name']:
-            if i in keys:
-                keys.remove(i)
+#        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+#
+#        for i in ['tags', 'name']:
+#            if i in keys:
+#                keys.remove(i)
 
         q.name = name
+        q.description = str(struct["description"])
+        q.home_page = str(struct["home_page"])
+        q.buildinfo = str(struct["buildinfo"])
+        q.basename = str(struct["basename"])
+        q.version_re = str(struct["version_re"])
+        q.installation_priority = int(struct["installation_priority"])
+        q.removable = bool(struct["removable"])
+        q.reducible = bool(struct["reducible"])
+        q.auto_newest_src = bool(struct["auto_newest_src"])
+        q.auto_newest_pkg = bool(struct["auto_newest_pkg"])
 
-        for i in keys:
-            exec('q.{key} = struct["{key}"]'.format(key=i))
+#        for i in keys:
+#            exec('q.{key} = struct["{key}"]'.format(key=i))
+
 
         if creating_new:
             self.sess.add(q)

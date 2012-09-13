@@ -67,9 +67,18 @@ def package_version_comparator(name1, name2):
         raise Exception("Different names")
 
     else:
+        d1_ts = d1['groups']['timestamp'].split('.')
+        d2_ts = d2['groups']['timestamp'].split('.')
+
+        if d1['re'] == 'aipsetup2':
+            d1_ts = [d1_ts[0][0:8], d1_ts[0][8:], '0']
+
+        if d2['re'] == 'aipsetup2':
+            d2_ts = [d2_ts[0][0:8], d2_ts[0][8:], '0']
+
         com_res = standard_comparison(
-            d1['groups']['timestamp'].split('.'), None,
-            d2['groups']['timestamp'].split('.'), None,
+            d1_ts, None,
+            d2_ts, None,
             )
 
         if com_res != 0:
