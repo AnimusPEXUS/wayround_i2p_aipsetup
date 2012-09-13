@@ -4,14 +4,14 @@
 
     <description>write something here, please</description>
 
-    <home_page url="http://None"/>
+    <home_page url="http://www.openprinting.org/download/foomatic"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildinfo value="autotools_usr_foomatic"/>
 
-    <basename value="cupsd"/>
+    <basename value="foomatic-db"/>
 
     <version_re value=".*"/>
 

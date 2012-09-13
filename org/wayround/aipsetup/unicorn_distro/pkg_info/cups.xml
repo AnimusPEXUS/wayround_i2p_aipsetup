@@ -4,14 +4,14 @@
 
     <description>write something here, please</description>
 
-    <home_page url="http://www.sourceforge.net"/>
+    <home_page url="http://cups.org"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr_hplip"/>
+    <buildinfo value="autotools_usr_cups"/>
 
-    <basename value="hplip"/>
+    <basename value="cups"/>
 
     <version_re value=".*"/>
 

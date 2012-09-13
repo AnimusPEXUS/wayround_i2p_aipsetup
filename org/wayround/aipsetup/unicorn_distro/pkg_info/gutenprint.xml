@@ -2,25 +2,25 @@
 
     <!-- This file is generated using aipsetup v3 -->
 
-    <description></description>
+    <description>None</description>
 
     <home_page url=""/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildinfo value="autotools_usr"/>
 
-    <basename value=""/>
+    <basename value="gutenprint"/>
 
-    <version_re value=""/>
+    <version_re value=".*"/>
 
     <installation_priority value="5"/>
 
-    <deletable value="True"/>
-    <updatable value="True"/>
+    <removable value="True"/>
+    <reducible value="True"/>
 
-    <auto_newest_src value="True"/>
+    <auto_newest_src value="False"/>
     <auto_newest_pkg value="True"/>
 
 </package>
