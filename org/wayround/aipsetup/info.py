@@ -40,7 +40,7 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # string list
     tags=[],
     # string
-    buildinfo='',
+    buildscript='',
     # file name base
     basename='',
     # acceptable version regexp
@@ -80,7 +80,7 @@ pkg_info_file_template = Template(text="""\
     <tag name="${ i | x}"/>
     % endfor
 
-    <buildinfo value="${ buildinfo | x }"/>
+    <buildscript value="${ buildscript | x }"/>
 
     <basename value="${ basename | x }"/>
 
@@ -281,7 +281,7 @@ def is_info_dicts_equal(d1, d2):
     for i in [
         'description',
         'home_page',
-        'buildinfo',
+        'buildscript',
         'basename',
         'version_re',
         'installation_priority',
@@ -381,7 +381,7 @@ def read_from_file(name):
 
 
                 for i in [
-                    ('buildinfo', 'value'),
+                    ('buildscript', 'value'),
                     ('home_page', 'url'),
                     ('basename', 'value'),
                     ('version_re', 'value'),
@@ -416,7 +416,7 @@ def write_to_file(name, struct):
         description=struct['description'],
         home_page=struct['home_page'],
         tags=struct['tags'],
-        buildinfo=struct['buildinfo'],
+        buildscript=struct['buildscript'],
         basename=struct['basename'],
         version_re=struct['version_re'],
         installation_priority=struct['installation_priority'],

@@ -3,7 +3,7 @@ AIPSETUP_VERSION = '3.0'
 AIPSETUP_MODULES_LIST = frozenset(
     [
     'info',
-    'buildinfo',
+    'buildscript',
     'constitution',
 
     'buildingsite',

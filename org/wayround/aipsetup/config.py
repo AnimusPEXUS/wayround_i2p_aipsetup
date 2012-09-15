@@ -18,7 +18,7 @@ CONFIG_FULL_SAMPLE = {
     # non-configurable parameters -- always in unicorn root!!
     # also, unicorn root must be writable for aipsetup
     'constitution'       : '/mnt/sda3/home/agu/_UNICORN/system_constitution.py',
-    'buildinfo'          : '/mnt/sda3/home/agu/_UNICORN/pkg_buildinfo',
+    'buildscript'        : '/mnt/sda3/home/agu/_UNICORN/pkg_buildscripts',
     'buildtools'         : '/mnt/sda3/home/agu/_UNICORN/pkg_buildtools',
     'info'               : '/mnt/sda3/home/agu/_UNICORN/pkg_info',
     'server_files'       : '/mnt/sda3/home/agu/_UNICORN/server_files',
@@ -258,7 +258,7 @@ def config_check_after_load(indict):
 
     for i, j in [
         ('constitution'    , 'system_constitution.py'),
-        ('buildinfo'       , 'pkg_buildinfo'),
+        ('buildscript'       , 'pkg_buildscript'),
         ('buildtools'      , 'pkg_buildtools'),
         ('info'            , 'pkg_info'),
         ('server_files'    , 'server_files')

@@ -32,12 +32,12 @@ modules:
     g1=org.wayround.utils.helprenderer.render_help(
         {
             'info': org.wayround.aipsetup.info,
-            'buildinfo': org.wayround.aipsetup.buildinfo,
+            'buildscript': org.wayround.aipsetup.buildscript,
             'constitution': org.wayround.aipsetup.constitution,
         },
         [
             'info',
-            'buildinfo',
+            'buildscript',
             'constitution'
         ],
         only_synopsis=True

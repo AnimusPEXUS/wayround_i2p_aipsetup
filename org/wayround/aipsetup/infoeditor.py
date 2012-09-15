@@ -45,6 +45,8 @@ class MainWindow:
 
         self.ui['button1'].connect('clicked', self.onEditLatestButtonActivated)
 
+        self.ui['button6'].connect('clicked', self.onReloadComboActivated)
+
 
 
         c = Gtk.TreeViewColumn("File Names")
@@ -57,6 +59,7 @@ class MainWindow:
         self.ui['treeview1'].connect('row-activated', self.onPackageListItemActivated)
 
         self.load_list()
+        self.load_buildscript_list()
 
         return
 
@@ -113,7 +116,7 @@ class MainWindow:
 
                 self.ui['textview2'].set_buffer(b)
 
-                self.ui['entry5'].set_text(str(data['buildinfo']))
+                self.ui['combobox-entry'].set_text(str(data['buildscript']))
 
                 self.ui['entry2'].set_text(str(data['basename']))
 
@@ -179,7 +182,7 @@ class MainWindow:
             b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
             )
 
-        data['buildinfo'] = self.ui['entry5'].get_text()
+        data['buildscript'] = self.ui['combobox-entry'].get_text()
 
         data['basename'] = self.ui['entry2'].get_text()
 
@@ -260,6 +263,24 @@ class MainWindow:
             self.scroll_package_list_to_name(self.currently_opened)
         return
 
+    def load_buildscript_list(self):
+        mask = os.path.join(self.config['buildscript'], '*.py')
+
+        files = glob.glob(mask)
+
+        files.sort()
+
+        self.ui['combobox1'].set_model(None)
+
+        lst = Gtk.ListStore(str)
+        for i in files:
+            base = os.path.basename(i)
+            lst.append([base[:-3]])
+
+        self.ui['combobox1'].set_model(lst)
+        self.ui['combobox1'].set_entry_text_column(0)
+
+
     def scroll_package_list_to_name(self, name):
         org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
             self.ui['treeview1'],
@@ -300,6 +321,9 @@ class MainWindow:
 
     def onSaveButtonActivated(self, button):
         self.save_data(self.currently_opened)
+
+    def onReloadComboActivated(self, buton):
+        self.load_buildscript_list()
 
     def onSaveAndUpdateButtonActivated(self, toggle):
         self.save_data(self.currently_opened, update_db=True)

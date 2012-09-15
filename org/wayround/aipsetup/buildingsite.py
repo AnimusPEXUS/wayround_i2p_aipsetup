@@ -12,7 +12,7 @@ import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
 #import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
-import org.wayround.aipsetup.buildinfo
+import org.wayround.aipsetup.buildscript
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -396,7 +396,7 @@ def apply_pkg_info_on_buildingsite(dirname):
     return ret
 
 
-def apply_pkg_buildinfo_on_buildingsite(dirname):
+def apply_pkg_buildscript_on_buildingsite(dirname):
 
     ret = 0
 
@@ -406,37 +406,37 @@ def apply_pkg_buildinfo_on_buildingsite(dirname):
     if not isinstance(package_info, dict) \
             or not 'pkg_info' in package_info \
             or not isinstance(package_info['pkg_info'], dict) \
-            or not 'buildinfo' in package_info['pkg_info'] \
-            or not isinstance(package_info['pkg_info']['buildinfo'], str):
-        logging.error("package_info['pkg_info']['buildinfo'] undetermined")
-        package_info['pkg_buildinfo'] = {}
+            or not 'buildscript' in package_info['pkg_info'] \
+            or not isinstance(package_info['pkg_info']['buildscript'], str):
+        logging.error("package_info['pkg_info']['buildscript'] undetermined")
+        package_info['pkg_buildscript'] = {}
         ret = 1
 
     else:
 
-        if package_info['pkg_info']['buildinfo'] == '' or package_info['pkg_info']['buildinfo'].isspace():
+        if package_info['pkg_info']['buildscript'] == '' or package_info['pkg_info']['buildscript'].isspace():
             logging.error(
-                "package_info['pkg_info']['buildinfo'] is empty or space.\n" +
+                "package_info['pkg_info']['buildscript'] is empty or space.\n" +
                 "    probably you need to edit `{}' and update indexing".format(
                     package_info['pkg_info']['name'] + '.xml')
                 )
             ret = 2
         else:
 
-            buildinfo = org.wayround.aipsetup.buildinfo.load_buildinfo(
-                package_info['pkg_info']['buildinfo']
+            buildscript = org.wayround.aipsetup.buildscript.load_buildscript(
+                package_info['pkg_info']['buildscript']
                 )
 
-            if not isinstance(buildinfo, dict):
+            if not isinstance(buildscript, dict):
                 logging.error(
-                    "Error loading buildinfo `{}'".format(
-                        package_info['pkg_info']['buildinfo']
+                    "Error loading buildscript `{}'".format(
+                        package_info['pkg_info']['buildscript']
                         )
                     )
                 ret = 3
             else:
 
-                package_info['pkg_buildinfo'] = buildinfo
+                package_info['pkg_buildscript'] = buildscript
                 write_package_info(dirname, package_info)
 
     return ret
@@ -464,7 +464,7 @@ def apply_info(dirname='.', source_filename=None):
         ret = 2
     elif apply_pkg_info_on_buildingsite(dirname) != 0:
         ret = 3
-    elif apply_pkg_buildinfo_on_buildingsite(dirname) != 0:
+    elif apply_pkg_buildscript_on_buildingsite(dirname) != 0:
         ret = 4
 
     return ret

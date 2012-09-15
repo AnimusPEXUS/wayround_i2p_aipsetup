@@ -24,7 +24,7 @@ def determine_source_dir(buildingsite, pkginfo):
         os.path.join(
             buildingsite,
             org.wayround.aipsetup.buildingsite.DIR_SOURCE,
-            pkginfo['pkg_buildinfo']['waf_configure_opts']['config_dir']
+            pkginfo['pkg_buildscript']['waf_configure_opts']['config_dir']
             )
         )
 
@@ -33,13 +33,13 @@ def determine_source_dir(buildingsite, pkginfo):
 def determine_building_dir(buildingsite, source_dir, pkginfo):
     building_dir = ''
 
-    if pkginfo['pkg_buildinfo']['waf_configure_opts']['separate_build_dir'] == True:
+    if pkginfo['pkg_buildscript']['waf_configure_opts']['separate_build_dir'] == True:
 
         building_dir = os.path.abspath(
             os.path.join(
                 buildingsite,
                 org.wayround.aipsetup.buildingsite.DIR_BUILDING,
-                pkginfo['pkg_buildinfo']['waf_configure_opts']['config_dir']
+                pkginfo['pkg_buildscript']['waf_configure_opts']['config_dir']
                 )
             )
 
@@ -53,11 +53,11 @@ def determine_configurer_parameters(pkginfo):
 
     run_parameters = []
 
-    for i in pkginfo['pkg_buildinfo']['waf_configure_params']:
-        if pkginfo['pkg_buildinfo']['waf_configure_params'][i] != None:
+    for i in pkginfo['pkg_buildscript']['waf_configure_params']:
+        if pkginfo['pkg_buildscript']['waf_configure_params'][i] != None:
             run_parameters.append("--%(par_name)s=%(par_value)s" % {
                     'par_name': i,
-                    'par_value': pkginfo['pkg_buildinfo']['waf_configure_params'][i]
+                    'par_value': pkginfo['pkg_buildscript']['waf_configure_params'][i]
                     })
         else:
             run_parameters.append("--%(par_name)s" % {
@@ -71,11 +71,11 @@ def determine_builder_parameters(pkginfo):
 
     run_parameters = []
 
-    for i in pkginfo['pkg_buildinfo']['waf_build_params']:
-        if pkginfo['pkg_buildinfo']['waf_build_params'][i] != None:
+    for i in pkginfo['pkg_buildscript']['waf_build_params']:
+        if pkginfo['pkg_buildscript']['waf_build_params'][i] != None:
             run_parameters.append("%(par_name)s=%(par_value)s" % {
                     'par_name': i,
-                    'par_value': pkginfo['pkg_buildinfo']['waf_build_params'][i]
+                    'par_value': pkginfo['pkg_buildscript']['waf_build_params'][i]
                     })
         else:
             run_parameters.append("%(par_name)s" % {
@@ -89,11 +89,11 @@ def determine_installer_parameters(pkginfo):
 
     run_parameters = []
 
-    for i in pkginfo['pkg_buildinfo']['waf_distribute_params']:
-        if pkginfo['pkg_buildinfo']['waf_distribute_params'][i] != None:
+    for i in pkginfo['pkg_buildscript']['waf_distribute_params']:
+        if pkginfo['pkg_buildscript']['waf_distribute_params'][i] != None:
             run_parameters.append("%(par_name)s=%(par_value)s" % {
                     'par_name': i,
-                    'par_value': pkginfo['pkg_buildinfo']['waf_distribute_params'][i]
+                    'par_value': pkginfo['pkg_buildscript']['waf_distribute_params'][i]
                     })
         else:
             run_parameters.append("%(par_name)s" % {
@@ -142,7 +142,7 @@ def _overal(log, buildingsite='.', name='configure'):
         config_script = os.path.abspath(
             os.path.join(
                 source_dir,
-                pi['pkg_buildinfo']['waf_configure_opts']['script_name']
+                pi['pkg_buildscript']['waf_configure_opts']['script_name']
                 )
             )
 
@@ -166,13 +166,13 @@ def _overal(log, buildingsite='.', name='configure'):
             )
 
         env = org.wayround.utils.osutils.env_vars_edit(
-            pi['pkg_buildinfo']['waf_configure_envs'],
-            pi['pkg_buildinfo']['waf_configure_env_opts']['mode']
+            pi['pkg_buildscript']['waf_configure_envs'],
+            pi['pkg_buildscript']['waf_configure_env_opts']['mode']
             )
 
-        if len(pi['pkg_buildinfo']['waf_configure_envs']) > 0:
+        if len(pi['pkg_buildscript']['waf_configure_envs']) > 0:
             log.info("Environment Modifications: %(list)s" % {
-                    'list': ' '.join(repr(i) for i in pi['pkg_buildinfo']['waf_configure_envs'])
+                    'list': ' '.join(repr(i) for i in pi['pkg_buildscript']['waf_configure_envs'])
                     })
 
         p = None

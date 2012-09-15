@@ -160,7 +160,7 @@ def complete(dirname):
 
         actions_sequance = []
         try:
-            actions_sequance = package_info['pkg_buildinfo']['build_sequance']
+            actions_sequance = package_info['pkg_buildscript']['build_sequance']
         except:
             logging.exception("Can't get action sequence")
             ret = 2
@@ -172,28 +172,28 @@ def complete(dirname):
                     ret = 3
                     break
 
-            if not 'build_tools' in package_info['pkg_buildinfo']:
-                logging.error("No 'build_tools' in package_info['pkg_buildinfo']")
+            if not 'build_tools' in package_info['pkg_buildscript']:
+                logging.error("No 'build_tools' in package_info['pkg_buildscript']")
                 ret = 4
 
             if ret == 0:
                 for i in actions_sequance:
-                    if not i in package_info['pkg_buildinfo']['build_tools']:
-                        logging.error("`{}' not found in package_info['pkg_buildinfo']['build_tools']")
+                    if not i in package_info['pkg_buildscript']['build_tools']:
+                        logging.error("`{}' not found in package_info['pkg_buildscript']['build_tools']")
                         ret = 5
                         break
 
             if ret == 0:
-                for i in list(package_info['pkg_buildinfo']['build_tools'].keys()):
+                for i in list(package_info['pkg_buildscript']['build_tools'].keys()):
                     tool_functions = (
                         org.wayround.aipsetup.buildtools.get_tool_functions(
-                            package_info['pkg_buildinfo']['build_tools'][i]
+                            package_info['pkg_buildscript']['build_tools'][i]
                             )
                         )
                     if not isinstance(tool_functions, dict):
                         logging.error(
                             "Can't get tool `{}' functions".format(
-                                package_info['pkg_buildinfo']['build_tools'][i]
+                                package_info['pkg_buildscript']['build_tools'][i]
                                 )
                             )
                         ret = 7
@@ -201,7 +201,7 @@ def complete(dirname):
                         if not i in tool_functions:
                             logging.error(
                                 "`{}' not found in `{}' exported functions".format(
-                                    i, package_info['pkg_buildinfo']['build_tools'][i]
+                                    i, package_info['pkg_buildscript']['build_tools'][i]
                                     )
                                 )
                             ret = 6
@@ -240,7 +240,7 @@ def general_tool_function(action_name, dirname):
         ret = 1
     else:
         try:
-            tool = package_info['pkg_buildinfo']['build_tools'][action_name]
+            tool = package_info['pkg_buildscript']['build_tools'][action_name]
         except:
             log.error(
                 "Error getting tool name for function `{}'".format(action_name)
@@ -260,7 +260,7 @@ def general_tool_function(action_name, dirname):
                 if not isinstance(tool_functions, dict):
                     logging.error(
                         "Can't get tool `{}' functions".format(
-                            package_info['pkg_buildinfo']['build_tools'][i]
+                            package_info['pkg_buildscript']['build_tools'][i]
                             )
                         )
                 else:

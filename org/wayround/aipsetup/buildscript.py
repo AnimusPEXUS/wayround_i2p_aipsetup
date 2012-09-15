@@ -1,6 +1,6 @@
 
 """
-Perform actions on buildinfo scripts
+Perform actions on buildscript scripts
 """
 
 import os.path
@@ -13,47 +13,47 @@ import org.wayround.aipsetup.config
 
 def exported_commands():
     return {
-        'list': buildinfo_list_files,
-        'edit': buildinfo_edit_file
+        'list': buildscript_list_files,
+        'edit': buildscript_edit_file
         }
 
 def commands_order():
     return ['list', 'edit']
 
-def buildinfo_list_files(opts, args):
+def buildscript_list_files(opts, args):
     """
-    List buildinfo files
+    List buildscript files
 
     [FILEMASK]
 
     Default FILEMASK is *.py
     """
     return org.wayround.aipsetup.info.info_list_files(
-        opts, args, 'buildinfo', mask='*.py'
+        opts, args, 'buildscript', mask='*.py'
         )
 
-def buildinfo_edit_file(opts, args):
+def buildscript_edit_file(opts, args):
     """
-    Edit buildinfo script
+    Edit buildscript script
 
     FILENAME
     """
-    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildinfo')
+    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
 
-def load_buildinfo(name):
+def load_buildscript(name):
 
     ret = None
 
-    buildinfo_filename = os.path.abspath(
+    buildscript_filename = os.path.abspath(
         os.path.join(
-            org.wayround.aipsetup.config.config['buildinfo'],
+            org.wayround.aipsetup.config.config['buildscript'],
             '{}.py'.format(name)
             )
         )
 
-    if not os.path.isfile(buildinfo_filename):
+    if not os.path.isfile(buildscript_filename):
         logging.error(
-            "Can't find buildinfo Python script `{}'".format(buildinfo_filename)
+            "Can't find buildscript Python script `{}'".format(buildscript_filename)
             )
         ret = 1
 
@@ -61,9 +61,9 @@ def load_buildinfo(name):
 
         txt = ''
         try:
-            f = open(buildinfo_filename, 'r')
+            f = open(buildscript_filename, 'r')
         except:
-            logging.exception("Can't read file `{}'".foamrt(buildinfo_filename))
+            logging.exception("Can't read file `{}'".foamrt(buildscript_filename))
             ret = 2
         else:
             txt = f.read()
@@ -76,7 +76,7 @@ def load_buildinfo(name):
                 exec(
                     compile(
                         txt,
-                        buildinfo_filename,
+                        buildscript_filename,
                         'exec'
                         ),
                     globals_dict,
@@ -84,22 +84,22 @@ def load_buildinfo(name):
                     )
 
             except:
-                logging.exception("Can't load buildinfo Python script `%(name)s'" % {
-                    'name': buildinfo_filename
+                logging.exception("Can't load buildscript Python script `%(name)s'" % {
+                    'name': buildscript_filename
                     })
                 ret = 3
 
             else:
 
                 if (
-                    not 'build_info' in locals_dict
+                    not 'build_script' in locals_dict
                     or
-                    not inspect.isfunction(locals_dict['build_info'])
+                    not inspect.isfunction(locals_dict['build_script'])
                     ):
 
                     logging.error(
-                        "Module `{}' doesn't have function `build_info'".format(
-                            buildinfo_filename
+                        "Module `{}' doesn't have function `build_script'".format(
+                            buildscript_filename
                             )
                         )
                     ret = 4
@@ -107,12 +107,12 @@ def load_buildinfo(name):
                 else:
 
                     try:
-#                        ret = module.build_info()
-                        ret = locals_dict['build_info']()
+#                        ret = module.build_script()
+                        ret = locals_dict['build_script']()
                     except:
                         logging.exception(
-                            "Error while calling for build_info() from `{}'".format(
-                                buildinfo_filename
+                            "Error while calling for build_script() from `{}'".format(
+                                buildscript_filename
                                 )
                             )
                         ret = 5
@@ -120,7 +120,7 @@ def load_buildinfo(name):
                     else:
                         logging.info(
                             "Retrieved building information from `{}'".format(
-                                buildinfo_filename
+                                buildscript_filename
                                 )
                             )
 

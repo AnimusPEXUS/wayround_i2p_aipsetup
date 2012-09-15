@@ -1100,7 +1100,7 @@ class PackageDatabase:
             default=''
             )
 
-        buildinfo = sqlalchemy.Column(
+        buildscript = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False,
             default=''
@@ -1765,7 +1765,7 @@ class PackageDatabase:
         q.name = name
         q.description = str(struct["description"])
         q.home_page = str(struct["home_page"])
-        q.buildinfo = str(struct["buildinfo"])
+        q.buildscript = str(struct["buildscript"])
         q.basename = str(struct["basename"])
         q.version_re = str(struct["version_re"])
         q.installation_priority = int(struct["installation_priority"])
@@ -2089,7 +2089,7 @@ Total records checked     : %(n1)d
 +---[{name}]---------------------------------------+
               basename: {basename}
         version regexp: {version_re}
-             buildinfo: {buildinfo}
+             buildscript: {buildscript}
               homepage: {home_page}
               category: {category}
                   tags: {tags}
@@ -2110,7 +2110,7 @@ Total records checked     : %(n1)d
         'name'                  : name,
         'description'           : r['description'],
         'home_page'             : r['home_page'],
-        'buildinfo'             : r['buildinfo'],
+        'buildscript'           : r['buildscript'],
         'basename'              : r['basename'],
         'version_re'            : r['version_re'],
         'installation_priority' : r['installation_priority'],

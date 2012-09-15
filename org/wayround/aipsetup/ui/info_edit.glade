@@ -180,6 +180,7 @@
               <object class="GtkBox" id="box3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">6</property>
                 <property name="margin_right">5</property>
                 <property name="orientation">vertical</property>
                 <child>
@@ -199,6 +200,7 @@
                   <object class="GtkEntry" id="entry1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                     <property name="invisible_char">●</property>
                   </object>
                   <packing>
@@ -455,7 +457,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Build Info</property>
+                    <property name="label" translatable="yes">Build Script</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -464,11 +466,52 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry5">
+                  <object class="GtkBox" id="box5">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">●</property>
-                    <property name="placeholder_text">input something</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkComboBox" id="combobox1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                        <property name="has_entry">True</property>
+                        <property name="popup_fixed_width">False</property>
+                        <child internal-child="entry">
+                          <object class="GtkEntry" id="combobox-entry">
+                            <property name="can_focus">False</property>
+                            <property name="invisible_char">●</property>
+                            <property name="placeholder_text">File From pkg_buildscripts Dir</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button6">
+                        <property name="use_action_appearance">False</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
+                        <child>
+                          <object class="GtkImage" id="image5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-refresh</property>
+                            <property name="icon-size">1</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
