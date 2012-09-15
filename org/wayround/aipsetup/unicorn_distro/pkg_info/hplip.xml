@@ -9,7 +9,7 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr_hplip"/>
+    <buildscript value="autotools_usr_hplip"/>
 
     <basename value="hplip"/>
 

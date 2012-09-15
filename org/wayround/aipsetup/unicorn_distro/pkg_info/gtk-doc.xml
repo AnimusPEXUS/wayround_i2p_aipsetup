@@ -9,7 +9,7 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr"/>
+    <buildscript value="autotools_usr"/>
 
     <basename value="gtk-doc"/>
 

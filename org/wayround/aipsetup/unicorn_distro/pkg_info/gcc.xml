@@ -9,7 +9,7 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr_gcc"/>
+    <buildscript value="autotools_usr_gcc"/>
 
     <basename value="gcc"/>
 

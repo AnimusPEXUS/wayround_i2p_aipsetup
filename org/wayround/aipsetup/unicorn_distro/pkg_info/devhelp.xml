@@ -2,14 +2,14 @@
 
     <!-- This file is generated using aipsetup v3 -->
 
-    <description></description>
+    <description>None</description>
 
     <home_page url="http://gnome.org"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr"/>
+    <buildscript value="autotools_usr"/>
 
     <basename value="devhelp"/>
 

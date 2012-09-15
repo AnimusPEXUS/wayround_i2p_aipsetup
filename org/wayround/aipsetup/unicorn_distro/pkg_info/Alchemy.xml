@@ -11,7 +11,7 @@ Can&#39;t remember :-(</description>
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildscript value=""/>
 
     <basename value="Alchemy"/>
 

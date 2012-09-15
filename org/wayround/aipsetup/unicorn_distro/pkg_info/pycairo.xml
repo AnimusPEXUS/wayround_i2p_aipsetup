@@ -12,7 +12,7 @@
     <tag name="pycairo"/>
     <tag name="python"/>
 
-    <buildinfo value="waf_usr_pycairo"/>
+    <buildscript value="waf_usr_pycairo"/>
 
     <basename value="pycairo"/>
 

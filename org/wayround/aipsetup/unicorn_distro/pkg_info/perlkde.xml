@@ -9,7 +9,7 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildscript value=""/>
 
     <basename value="perlkde"/>
 

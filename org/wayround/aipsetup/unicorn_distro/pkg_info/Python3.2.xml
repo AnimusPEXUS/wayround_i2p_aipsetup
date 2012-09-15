@@ -13,7 +13,7 @@
     <tag name="system"/>
     <tag name="web"/>
 
-    <buildinfo value="autotools_usr"/>
+    <buildscript value="autotools_usr"/>
 
     <basename value="Python"/>
 
