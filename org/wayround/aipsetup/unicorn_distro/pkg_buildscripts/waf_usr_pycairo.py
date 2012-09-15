@@ -3,7 +3,7 @@
 
 import org.wayround.aipsetup.constitution
 
-def build_info():
+def build_script():
 
 
     constitution = org.wayround.aipsetup.constitution.read_constitution()

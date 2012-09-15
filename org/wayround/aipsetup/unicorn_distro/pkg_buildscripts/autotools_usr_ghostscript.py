@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import org.wayround.aipsetup.buildinfo
+import org.wayround.aipsetup.buildscript
 
-def build_info():
+def build_script():
 
-    ret = org.wayround.aipsetup.buildinfo.load_buildinfo('autotools_usr')
+    ret = org.wayround.aipsetup.buildscript.load_buildscript('autotools_usr')
     ret['build_tools']['build'] = 'autotools_ghostscript'
     ret['build_tools']['distribute'] = 'autotools_ghostscript'
     ret['autotools_configure_params']['with-x'] = 'yes'
