@@ -1006,10 +1006,10 @@ def build(source_files):
 
     return ret
 
-def complete(dirname):
+def complete(building_site):
 
     log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(dirname), 'buildingsite complete'
+        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site), 'buildingsite complete'
         )
     log.info("Buildingsite processes started")
     log.warning("Closing this log now, cause it can't work farther")
@@ -1017,10 +1017,10 @@ def complete(dirname):
 
     ret = 0
 
-    if org.wayround.aipsetup.build.complete(dirname) != 0:
+    if org.wayround.aipsetup.build.complete(building_site) != 0:
         logging.error("Error on building stage")
         ret = 1
-    elif org.wayround.aipsetup.pack.complete(dirname) != 0:
+    elif org.wayround.aipsetup.pack.complete(building_site) != 0:
         logging.error("Error on packaging stage")
         ret = 2
 

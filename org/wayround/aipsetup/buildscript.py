@@ -108,7 +108,7 @@ def load_buildscript(name):
 
                     try:
 #                        ret = module.build_script()
-                        ret = locals_dict['build_script']()
+                        ret = locals_dict['build_script']
                     except:
                         logging.exception(
                             "Error while calling for build_script() from `{}'".format(

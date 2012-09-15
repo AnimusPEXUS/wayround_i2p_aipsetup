@@ -5,7 +5,7 @@ import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.buildtools
 import org.wayround.aipsetup.buildingsite
 
-def build_script(building_site, log, constitution=None):
+def build_script(building_site, constitution=None):
 
     autotools = org.wayround.aipsetup.buildtools.get_tool_functions('autotools')
 
@@ -17,24 +17,23 @@ def build_script(building_site, log, constitution=None):
             # TODO: 'Extract' must be not in autotools?
             dict(
                 name='extract',
+                words=('extractor', 'extracting', 'extraction'),
                 desc='extracting sources',
                 func=autotools['extract'],
-                args=(),
-                kwargs={}
+                data={}
             ),
 #            dict(
 #                name='patch',
 #                desc='patching sources',
 #                func=autotools['patch'],
-#                args=(),
-#                kwargs={}
+#                data={}
 #            ),
             dict(
                 name='configure',
+                words=('configurer', 'configuring', 'configuration'),
                 desc='configuring sources',
                 func=autotools['configure'],
-                args=(),
-                kwargs={
+                data={
                     'settings': {
                         'separate_build_dir': True,
                         'config_dir': '.',
@@ -56,30 +55,18 @@ def build_script(building_site, log, constitution=None):
                         'sysconfdir': '/etc',
                         'localstatedir': '/var',
                         'enable-shared': None,
-                        'host': '{arch}-{type}-{syst}'.format_map({
-                            'arch': constitution['host_arch'],
-                            'type': constitution['host_type'],
-                            'syst': constitution['host_system']
-                            }),
-                        'build': '{arch}-{type}-{syst}'.format_map({
-                            'arch': constitution['build_arch'],
-                            'type': constitution['build_type'],
-                            'syst': constitution['build_system']
-                            }),
-                        'target': '{arch}-{type}-{syst}'.format_map({
-                            'arch': constitution['target_arch'],
-                            'type': constitution['target_type'],
-                            'syst': constitution['target_system']
-                            })
+                        'host': constitution['host'],
+                        'build': constitution['build'],
+                        'target': constitution['target']
                         },
                     }
             ),
             dict(
                 name='build',
+                words=('builder', 'building', 'building'),
                 desc='building software',
                 func=autotools['make'],
-                args=(),
-                kwargs={
+                data={
                     'settings': {
                         'make_file_name': 'Makefile'
                         },
@@ -100,10 +87,10 @@ def build_script(building_site, log, constitution=None):
             ),
             dict(
                 name='distribute',
+                words=('distributer', 'distributing', 'distribution'),
                 desc='distributing software',
                 func=autotools['make'],
-                args=(),
-                kwargs={
+                data={
                     'settings': {
                         'make_file_name': 'Makefile',
                         },
@@ -128,10 +115,10 @@ def build_script(building_site, log, constitution=None):
             ),
 #            dict(
 #                name='prepack',
+#                words=('prepackager', 'prepackaging', 'prepackaging'),
 #                desc='prepackaging software',
 #                func=autotools['prepack'],
-#                args=(),
-#                kwargs={}
+#                data={}
 #            ),
 
             ],

@@ -4,6 +4,7 @@ Actions related to constitution file
 """
 
 import logging
+import re
 
 import org.wayround.utils.edit
 
@@ -76,4 +77,11 @@ def read_constitution():
         finally:
             f.close()
 
+    return ret
+
+def parse_triplet(string):
+    ret = None
+    a = re.match(r'(.*?)-(.*?)-(.*)', string)
+    if a:
+        ret = (a.group(1), a.group(2), a.group(3))
     return ret

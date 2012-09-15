@@ -15,28 +15,28 @@ def export_functions():
         'distribute': distribute,
         }
 
-def determine_source_dir(buildingsite, pkginfo):
+def determine_source_dir(buildingsite, info):
 
     source_dir = os.path.abspath(
         os.path.join(
             buildingsite,
             org.wayround.aipsetup.buildingsite.DIR_SOURCE,
-            pkginfo['pkg_buildscript']['autotools_configure_opts']['config_dir']
+            info['pkg_buildscript']['autotools_configure_opts']['config_dir']
             )
         )
 
     return source_dir
 
-def determine_building_dir(buildingsite, source_dir, pkginfo):
+def determine_building_dir(buildingsite, source_dir, info):
     building_dir = ''
 
-    if pkginfo['pkg_buildscript']['autotools_configure_opts']['separate_build_dir'] == True:
+    if info['pkg_buildscript']['autotools_configure_opts']['separate_build_dir'] == True:
 
         building_dir = os.path.abspath(
             os.path.join(
                 buildingsite,
                 org.wayround.aipsetup.buildingsite.DIR_BUILDING,
-                pkginfo['pkg_buildscript']['autotools_configure_opts']['config_dir']
+                info['pkg_buildscript']['autotools_configure_opts']['config_dir']
                 )
             )
 
@@ -88,30 +88,30 @@ def build(log, buildingsite='.'):
 
     ret = 0
 
-    pi = org.wayround.aipsetup.buildingsite.read_package_info(
+    info = org.wayround.aipsetup.buildingsite.read_package_info(
         buildingsite, ret_on_error=None)
 
-    if pi == None:
+    if info == None:
         log.error("error getting information about package")
         ret = 101
     else:
 
         source_dir = determine_source_dir(
-            buildingsite, pi
+            buildingsite, info
             )
 
         building_dir = determine_building_dir(
-            buildingsite, source_dir, pi
+            buildingsite, source_dir, info
             )
 
         run_parameters = determine_builder_parameters(
-            pi
+            info
             )
 
         makefile = os.path.abspath(
             os.path.join(
                 building_dir,
-                pi['pkg_buildscript']['autotools_build_opts']['make_file_name']
+                info['pkg_buildscript']['autotools_build_opts']['make_file_name']
                 )
             )
 
@@ -124,13 +124,13 @@ def build(log, buildingsite='.'):
         log.write("-i-")
 
         env = org.wayround.utils.osutils.env_vars_edit(
-            pi['pkg_buildscript']['autotools_build_envs'],
-            pi['pkg_buildscript']['autotools_build_env_opts']['mode']
+            info['pkg_buildscript']['autotools_build_envs'],
+            info['pkg_buildscript']['autotools_build_env_opts']['mode']
             )
 
-        if len(pi['pkg_buildscript']['autotools_build_envs']) > 0:
+        if len(info['pkg_buildscript']['autotools_build_envs']) > 0:
             log.info("Environment Modifications: %(list)s" % {
-                    'list': ' '.join(repr(i) for i in pi['pkg_buildscript']['autotools_build_envs'])
+                    'list': ' '.join(repr(i) for i in info['pkg_buildscript']['autotools_build_envs'])
                     })
 
         p = None
@@ -194,13 +194,13 @@ def build(log, buildingsite='.'):
                     log.write("-i-")
 
                     env = org.wayround.utils.osutils.env_vars_edit(
-                        pi['pkg_buildscript']['autotools_build_envs'],
-                        pi['pkg_buildscript']['autotools_build_env_opts']['mode']
+                        info['pkg_buildscript']['autotools_build_envs'],
+                        info['pkg_buildscript']['autotools_build_env_opts']['mode']
                         )
 
-                    if len(pi['pkg_buildscript']['autotools_build_envs']) > 0:
+                    if len(info['pkg_buildscript']['autotools_build_envs']) > 0:
                         log.info("Environment Modifications: %(list)s" % {
-                                'list': ' '.join(repr(i) for i in pi['pkg_buildscript']['autotools_build_envs'])
+                                'list': ' '.join(repr(i) for i in info['pkg_buildscript']['autotools_build_envs'])
                                 })
 
                     p = None
@@ -259,30 +259,30 @@ def distribute(log, buildingsite='.'):
 
     ret = 0
 
-    pi = org.wayround.aipsetup.buildingsite.read_package_info(
+    info = org.wayround.aipsetup.buildingsite.read_package_info(
         buildingsite, ret_on_error=None)
 
-    if pi == None:
+    if info == None:
         log.error("error getting information about package")
         ret = 101
     else:
 
         source_dir = determine_source_dir(
-            buildingsite, pi
+            buildingsite, info
             )
 
         building_dir = determine_building_dir(
-            buildingsite, source_dir, pi
+            buildingsite, source_dir, info
             )
 
         run_parameters = determine_installer_parameters(
-            pi
+            info
             )
 
         makefile = os.path.abspath(
             os.path.join(
                 building_dir,
-                pi['pkg_buildscript']['autotools_distribute_opts']['make_file_name']
+                info['pkg_buildscript']['autotools_distribute_opts']['make_file_name']
                 )
             )
 
@@ -299,7 +299,7 @@ def distribute(log, buildingsite='.'):
         cmd = ['make'] + ['-f', makefile] + run_parameters \
             + ['install'] + ['%(dd_name)s=%(dd)s' % {
             'dd':destdir,
-            'dd_name': pi['pkg_buildscript']['autotools_distribute_opts']['DESTDIR_opt_name']
+            'dd_name': info['pkg_buildscript']['autotools_distribute_opts']['DESTDIR_opt_name']
             }]
 
         log.info("Starting autotools install script with following command:")
@@ -309,16 +309,16 @@ def distribute(log, buildingsite='.'):
         log.write("-i-")
 
         env = org.wayround.utils.osutils.env_vars_edit(
-            pi['pkg_buildscript']['autotools_distribute_envs'],
-            pi['pkg_buildscript']['autotools_distribute_env_opts']['mode']
+            info['pkg_buildscript']['autotools_distribute_envs'],
+            info['pkg_buildscript']['autotools_distribute_env_opts']['mode']
             )
 
-        if len(pi['pkg_buildscript']['autotools_distribute_envs']) > 0:
+        if len(info['pkg_buildscript']['autotools_distribute_envs']) > 0:
             log.write(
                 "-i- Environment Modifications: %(list)s" % {
                     'list': ' '.join(
                         repr(i) \
-                            for i in pi['pkg_buildscript']['autotools_distribute_envs']
+                            for i in info['pkg_buildscript']['autotools_distribute_envs']
                         )
                     }
                 )
@@ -384,7 +384,7 @@ def distribute(log, buildingsite='.'):
                     cmd = ['make'] + ['-f', makefile] + run_parameters \
                         + ['soinstall'] + ['%(dd_name)s=%(dd)s' % {
                         'dd':destdir,
-                        'dd_name': pi['pkg_buildscript']['autotools_distribute_opts']['DESTDIR_opt_name']
+                        'dd_name': info['pkg_buildscript']['autotools_distribute_opts']['DESTDIR_opt_name']
                         }]
 
                     log.info("Starting autotools install script with following command:")
@@ -394,16 +394,16 @@ def distribute(log, buildingsite='.'):
                     log.write("-i-")
 
                     env = org.wayround.utils.osutils.env_vars_edit(
-                        pi['pkg_buildscript']['autotools_distribute_envs'],
-                        pi['pkg_buildscript']['autotools_distribute_env_opts']['mode']
+                        info['pkg_buildscript']['autotools_distribute_envs'],
+                        info['pkg_buildscript']['autotools_distribute_env_opts']['mode']
                         )
 
-                    if len(pi['pkg_buildscript']['autotools_distribute_envs']) > 0:
+                    if len(info['pkg_buildscript']['autotools_distribute_envs']) > 0:
                         log.write(
                             "-i- Environment Modifications: %(list)s" % {
                                 'list': ' '.join(
                                     repr(i) \
-                                        for i in pi['pkg_buildscript']['autotools_distribute_envs']
+                                        for i in info['pkg_buildscript']['autotools_distribute_envs']
                                     )
                                 }
                             )
