@@ -11,8 +11,12 @@ python2.7 is required
 
     <home_page url="http://gajim.org/"/>
 
-    <tag name="["/>
-    <tag name="]"/>
+    <tag name="chat"/>
+    <tag name="jabber"/>
+    <tag name="jingle"/>
+    <tag name="python"/>
+    <tag name="voip"/>
+    <tag name="xmpp"/>
 
     <buildinfo value="autotools_usr"/>
 

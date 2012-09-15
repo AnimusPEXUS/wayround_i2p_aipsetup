@@ -9,7 +9,7 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value="autotools_usr"/>
+    <buildinfo value="autotools_usr_build_in_source_dir"/>
 
     <basename value="cups-filters"/>
 

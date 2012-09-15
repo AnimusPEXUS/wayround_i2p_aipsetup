@@ -9,11 +9,11 @@
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildinfo value=""/>
+    <buildinfo value="autotools_usr_gcc"/>
 
     <basename value="gcc"/>
 
-    <version_re value=".*"/>
+    <version_re value="\d+\..*"/>
 
     <installation_priority value="5"/>
 
