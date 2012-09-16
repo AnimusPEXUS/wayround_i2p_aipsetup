@@ -4,15 +4,15 @@ Module for initiating building site, which required to farver package build.
 """
 
 import os
-#import inspect
 import pprint
 import logging
+import shutil
+import json
+
 
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
-#import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
-import org.wayround.aipsetup.buildscript
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -22,8 +22,9 @@ DIR_BUILDING = '03.BUILDING'
 DIR_DESTDIR = '04.DESTDIR'
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
 DIR_LISTS = '06.LISTS'
+DIR_TEMP = '07.TEMP'
 
-def _getDir_x(directory, _x='TARBALL'):
+def _getDIR_x(directory, _x='TARBALL'):
     '''
     Returns absolute path to DIR_{_x}
 
@@ -35,13 +36,14 @@ def _getDir_x(directory, _x='TARBALL'):
             eval('DIR_{}'.format(_x)))
         )
 
-def getDIR_TARBALL   (directory): return _getDir_x(directory, 'TARBALL')
-def getDIR_SOURCE    (directory): return _getDir_x(directory, 'SOURCE')
-def getDIR_PATCHES   (directory): return _getDir_x(directory, 'PATCHES')
-def getDIR_BUILDING  (directory): return _getDir_x(directory, 'BUILDING')
-def getDIR_DESTDIR   (directory): return _getDir_x(directory, 'DESTDIR')
-def getDIR_BUILD_LOGS(directory): return _getDir_x(directory, 'BUILD_LOGS')
-def getDIR_LISTS     (directory): return _getDir_x(directory, 'LISTS')
+def getDIR_TARBALL   (directory): return _getDIR_x(directory, 'TARBALL')
+def getDIR_SOURCE    (directory): return _getDIR_x(directory, 'SOURCE')
+def getDIR_PATCHES   (directory): return _getDIR_x(directory, 'PATCHES')
+def getDIR_BUILDING  (directory): return _getDIR_x(directory, 'BUILDING')
+def getDIR_DESTDIR   (directory): return _getDIR_x(directory, 'DESTDIR')
+def getDIR_BUILD_LOGS(directory): return _getDIR_x(directory, 'BUILD_LOGS')
+def getDIR_LISTS     (directory): return _getDIR_x(directory, 'LISTS')
+def getDIR_TEMP      (directory): return _getDIR_x(directory, 'TEMP')
 
 
 DIR_ALL = [
@@ -51,7 +53,8 @@ DIR_ALL = [
     DIR_BUILDING,
     DIR_DESTDIR,
     DIR_BUILD_LOGS,
-    DIR_LISTS
+    DIR_LISTS,
+    DIR_TEMP
     ]
 'All package directories list in proper order'
 
@@ -86,7 +89,11 @@ def buildingsite_init(opts, args):
     if len(args) > 0:
         init_dir = args[0]
 
-    ret = init(directory=init_dir)
+    files = None
+    if len(args) > 1:
+        files = args[1:]
+
+    ret = init(buildingsite=init_dir, files=files)
 
     return ret
 
@@ -145,22 +152,22 @@ def isWdDirRestricted(directory):
                 break
     return ret
 
-def init(directory='build'):
+def init(buildingsite='build', files=None):
     """
     Initiates building site dir for farcer package build
     """
 
     ret = 0
 
-    directory = os.path.abspath(directory)
+    buildingsite = os.path.abspath(buildingsite)
 
-    logging.info("Initiating building site `{}'".format(directory))
+    logging.info("Initiating building site `{}'".format(buildingsite))
 
     logging.info("Checking dir name safety")
 
-    if isWdDirRestricted(directory):
+    if isWdDirRestricted(buildingsite):
         logging.error(
-            "`{}' is restricted working dir -- won't init".format(directory)
+            "`{}' is restricted working dir -- won't init".format(buildingsite)
             )
         ret = -1
 
@@ -168,20 +175,20 @@ def init(directory='build'):
     # if exists and not derictory - not continue
     if ret == 0:
 
-        if ((os.path.exists(directory))
-            and not os.path.isdir(directory)):
-            logging.error("File already exists and it is not a directory")
+        if ((os.path.exists(buildingsite))
+            and not os.path.isdir(buildingsite)):
+            logging.error("File already exists and it is not a buildingsite")
             ret = -2
 
     if ret == 0:
 
-        if not os.path.exists(directory):
+        if not os.path.exists(buildingsite):
             logging.info("Building site not exists - creating")
-            os.mkdir(directory)
+            os.mkdir(buildingsite)
 
         logging.info("Creating required subdirs")
         for i in DIR_ALL:
-            a = os.path.abspath(os.path.join(directory, i))
+            a = os.path.abspath(os.path.join(buildingsite, i))
 
             if not os.path.exists(a):
                 resh = 'creating'
@@ -205,6 +212,14 @@ def init(directory='build'):
 
     if ret == 0:
         logging.info("Init complete")
+
+        if isinstance(files, list):
+            for i in files:
+                logging.info("Copying file {}".format(i))
+                t_dir = getDIR_TARBALL(buildingsite)
+                for i in files:
+                    shutil.copy(i, t_dir)
+
     else:
         logging.error("Init error")
 
@@ -217,7 +232,7 @@ def read_package_info(directory, ret_on_error=None):
 
     ret = ret_on_error
 
-    pi_filename = os.path.join(directory, 'package_info.py')
+    pi_filename = os.path.join(directory, 'package_info.json')
 
     if not os.path.isfile(pi_filename):
         logging.error("`{}' not found".format(pi_filename))
@@ -239,7 +254,8 @@ def read_package_info(directory, ret_on_error=None):
             l = {}
 
             try:
-                ret = eval(txt, g, l)
+#                ret = eval(txt, g, l)
+                ret = json.loads(txt)
 
             except:
                 logging.exception("Error in `{}'".format(pi_filename))
@@ -250,37 +266,33 @@ def read_package_info(directory, ret_on_error=None):
 
 def write_package_info(directory, info):
 
-    pi_filename = os.path.join(directory, 'package_info.py')
+    pi_filename = os.path.join(directory, 'package_info.json')
 
     f = None
 
     try:
         f = open(pi_filename, 'w')
     except:
-        logging.exception("Can't open `%(file)s' for writing" % {
+        raise OSError("Can't open `%(file)s' for writing" % {
             'file': pi_filename
             })
-        raise
     else:
         try:
             txt = ''
             try:
-                txt = pprint.pformat(info)
+#                txt = pprint.pformat(info)
+                txt = json.dumps(info, allow_nan=True, indent=2, sort_keys=True)
             except:
-                logging.exception("Can't represent data for package info")
-                raise
+                raise ValueError("Can't represent data for package info")
             else:
 
-                f.write("""\
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
+                f.write(
+"""\
 {text}
 """.format(text=txt))
 
         finally:
             f.close()
-
 
     return
 

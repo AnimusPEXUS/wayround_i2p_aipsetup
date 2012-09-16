@@ -3,12 +3,14 @@
 Build software before packaging
 """
 
+import os.path
 import logging
-
+import subprocess
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildscript
-
+import org.wayround.aipsetup.config
+import org.wayround.utils.log
 
 
 def exported_commands():
@@ -24,7 +26,26 @@ def commands_order():
         ]
 
 def build_script(opts, args):
-    pass
+
+    ret = 0
+
+    args_l = len(args)
+
+    if args_l != 1:
+        logging.error("one argument must be")
+        ret = 1
+    else:
+
+        action = args[0]
+
+        bs = '.'
+        if '-b' in opts:
+            bs = opts['-b']
+
+        ret = start_building_script(bs, action)
+
+    return ret
+
 
 
 def build_complete(opts, args):
@@ -55,33 +76,10 @@ def build_complete(opts, args):
 
 
 def complete(building_site):
-    return use_build_script(building_site, script_action=None)
+    return start_building_script(building_site)
 
 
-
-def use_build_script(building_site, script_action=None):
-
-    ret = 0
-
-    script_action_started = True
-    script_action_continuer = False
-
-    # paranoid mood...
-    if isinstance(script_action, str):
-        if script_action.endswith('+'):
-            script_action = script_action[-1:]
-            script_action_started = False
-            script_action_continuer = True
-        else:
-            script_action = script_action
-            script_action_started = False
-            script_action_continuer = False
-    else:
-        script_action = None
-        script_action_started = True
-        script_action_continuer = True
-
-
+def start_building_script(building_site, opts=None, args=None):
     package_info = org.wayround.aipsetup.buildingsite.read_package_info(
         building_site, ret_on_error=None
         )
@@ -93,26 +91,22 @@ def use_build_script(building_site, script_action=None):
             )
         ret = 1
     else:
-        buildscript_func = org.wayround.aipsetup.buildscript.load_buildscript(
-            package_info['pkg_info']['buildscript']
+
+        script = (
+            org.wayround.aipsetup.buildscript.load_buildscript(
+                package_info['pkg_info']['buildscript']
+                )
             )
 
-        buildscript = buildscript_func()
+#        buildscript_file = os.path.abspath(
+#            org.wayround.aipsetup.config.config['buildscript'] +
+#            os.path.sep +
+#
+#            )
 
-        for i in buildscript['actions']:
-            if script_action and i['name'] == script_action:
-                script_action_started = True
+        ret = script['main'](building_site, opts, args)
 
-            if script_action_started:
-
-                r = i['func'](building_site, i)
-                if r != 0:
-                    ret = r
-                    break
-
-            if script_action and (
-                i['name'] != script_action and not script_action_continuer
-                ):
-                script_action_started = False
+#        p = subprocess.Popen([buildscript_file], cwd=building_site)
+#        ret = p.wait()
 
     return ret

@@ -264,9 +264,8 @@ class MainWindow:
         return
 
     def load_buildscript_list(self):
-        mask = os.path.join(self.config['buildscript'], '*.py')
 
-        files = glob.glob(mask)
+        files = os.listdir(self.config['buildscript'])
 
         files.sort()
 
@@ -274,8 +273,7 @@ class MainWindow:
 
         lst = Gtk.ListStore(str)
         for i in files:
-            base = os.path.basename(i)
-            lst.append([base[:-3]])
+            lst.append([os.path.basename(i)])
 
         self.ui['combobox1'].set_model(lst)
         self.ui['combobox1'].set_entry_text_column(0)

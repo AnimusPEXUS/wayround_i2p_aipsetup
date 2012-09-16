@@ -1,51 +1,52 @@
 
+"""
+autotools tools and specific to it
+"""
+
 import os.path
 import subprocess
 import glob
 import shutil
 import sys
+import tempfile
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.utils.osutils
 import org.wayround.utils.archive
 
-def export_functions():
-    return {
-        'extract': extract,
-        'configure': configure,
-        'make': build
-        }
+def determine_configure_dir(buildingsite, info):
+    """
+    Determine config dir taking in account info['data']['settings']['config_dir']
+    """
 
-def determine_source_dir(buildingsite, info):
-
-    source_dir = os.path.abspath(
-        os.path.join(
-            buildingsite,
-            org.wayround.aipsetup.buildingsite.DIR_SOURCE,
-            info['data']['settings']['config_dir']
-            )
+    config_dir = os.path.abspath(
+        org.wayround.aipsetup.buildingsite.getDIR_SOURCE(
+            buildingsite
+            ) + os.path.sep + info['data']['settings']['config_dir']
         )
 
-    return source_dir
+    return config_dir
 
 def determine_building_dir(buildingsite, source_dir, info):
+    """
+    Determine building dir taking in account info['data']['settings']['separate_build_dir']
+    """
+
     building_dir = ''
 
     if info['data']['settings']['separate_build_dir'] == True:
 
         building_dir = os.path.abspath(
-            os.path.join(
-                buildingsite,
-                org.wayround.aipsetup.buildingsite.DIR_BUILDING,
-                info['data']['settings']['config_dir']
+            org.wayround.aipsetup.buildingsite.getDIR_BUILDING(
+                buildingsite
                 )
+#            + os.path.sep + info['data']['settings']['config_dir']                                       
             )
-
     else:
-
         building_dir = source_dir
 
     return building_dir
+
 
 def determine_configure_parameters(info):
 
@@ -105,82 +106,90 @@ def determine_installer_parameters(pkginfo):
     return run_parameters
 
 
-def extract(buildingsite='.', info=None):
+def extract(
+    log,
+    buildingsite,
+    tarball,
+    outdir,
+    unwrap_dir=False,
+    rename_dir=False
+    ):
 
     ret = 0
 
-    log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(buildingsite),
-        info['name']
-        )
-
-    tarball_dir = os.path.join(
-        buildingsite,
-        org.wayround.aipsetup.buildingsite.DIR_TARBALL
-        )
-
-    output_dir = os.path.join(
-        buildingsite,
-        org.wayround.aipsetup.buildingsite.DIR_SOURCE
-        )
-
-    if os.path.isdir(output_dir):
+    if os.path.isdir(outdir):
         log.info("cleaningup source dir")
-        org.wayround.utils.file.cleanup_dir(output_dir)
+        org.wayround.utils.file.cleanup_dir(outdir)
 
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
 
-    arch = glob.glob(os.path.join(tarball_dir, '*'))
-    if len(arch) == 0:
-        log.error("No tarballs supplied")
-        ret = 1
-    elif len(arch) > 1:
-        log.error("autotools[configurer]: too many source files")
-        ret = 2
+    tmpdir = tempfile.mkdtemp(
+        dir=org.wayround.aipsetup.buildingsite.getDIR_TEMP(buildingsite)
+        )
+
+    if not os.path.isdir(tmpdir):
+        os.makedirs(tmpdir)
+
+
+    log.info("Extracting {}".format(os.path.basename(tarball)))
+    extr_error = org.wayround.utils.archive.extract(
+        tarball, tmpdir
+        )
+
+    if extr_error != 0:
+        log.error(
+            "Extraction error: {}".format(extr_error)
+            )
+        ret = 3
     else:
 
-        arch = arch[0]
+        extracted_dir = os.listdir(tmpdir)
 
-        log.info("Extracting {}".format(os.path.basename(arch)))
-        extr_error = org.wayround.utils.archive.extract(
-            arch, output_dir
-            )
-
-        if extr_error != 0:
-            log.error("Extraction error: %(num)d" % {
-                    'num': extr_error
-                })
-            ret = 3
+        if len(extracted_dir) > 1:
+            log.error("too many extracted files")
+            ret = 4
         else:
 
-            extracted_dir = glob.glob(os.path.join(output_dir, '*'))
+            extracted_dir = tmpdir + os.path.sep + extracted_dir[0]
 
-            if len(extracted_dir) > 1:
-                log.error("autotools['extract']: too many extracted files")
-                ret = 4
-            else:
-                extracted_dir = extracted_dir[0]
-                extracted_dir_files = glob.glob(os.path.join(extracted_dir, '*'))
+            if unwrap_dir:
+
+                extracted_dir_files = os.listdir(extracted_dir)
                 for i in extracted_dir_files:
-                    shutil.move(i, output_dir)
+                    shutil.move(extracted_dir + os.path.sep + i, outdir)
                 shutil.rmtree(extracted_dir)
 
-    log.stop()
+            else:
+                if rename_dir:
+                    shutil.move(extracted_dir, outdir + os.path.sep + str(rename_dir))
+                else:
+                    shutil.move(extracted_dir, outdir)
 
     return ret
 
 
-def configure(buildingsite='.', info=None):
+def configure(
+    log,
+    buildingsite,
+    opts,
+    separate_build=True,
+    env=None,
+    env_mode='copy',
+    config_dir='.',
+    script_name='configure'
+    ):
 
     ret = 0
+
+    buildingsite = os.path.abspath(buildingsite)
 
     log = org.wayround.utils.log.Log(
         org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(buildingsite),
         info['name']
         )
 
-    source_dir = determine_source_dir(
+    source_dir = determine_configure_dir(
         buildingsite, info
         )
 
@@ -195,9 +204,6 @@ def configure(buildingsite='.', info=None):
     if not os.path.isdir(building_dir):
         os.makedirs(building_dir)
 
-    run_parameters = determine_configure_parameters(
-        info
-        )
 
     config_script = os.path.abspath(
         os.path.join(
@@ -286,7 +292,7 @@ def configure(buildingsite='.', info=None):
 
     return ret
 
-def build(log, buildingsite='.'):
+def make(log, buildingsite='.'):
 
     ret = 0
 

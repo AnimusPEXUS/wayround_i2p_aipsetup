@@ -13,13 +13,12 @@ import pprint
 CONFIG_FULL_SAMPLE = {
     'editor'             : 'emacs',
 
-    'unicorn_root'            : '/mnt/sda3/home/agu/_UNICORN',
+    'unicorn_root'       : '/mnt/sda3/home/agu/_UNICORN',
 
     # non-configurable parameters -- always in unicorn root!!
     # also, unicorn root must be writable for aipsetup
     'constitution'       : '/mnt/sda3/home/agu/_UNICORN/system_constitution.py',
     'buildscript'        : '/mnt/sda3/home/agu/_UNICORN/pkg_buildscripts',
-    'buildtools'         : '/mnt/sda3/home/agu/_UNICORN/pkg_buildtools',
     'info'               : '/mnt/sda3/home/agu/_UNICORN/pkg_info',
     'server_files'       : '/mnt/sda3/home/agu/_UNICORN/server_files',
     'source_index'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/sources.sqlite',
@@ -258,8 +257,7 @@ def config_check_after_load(indict):
 
     for i, j in [
         ('constitution'    , 'system_constitution.py'),
-        ('buildscript'       , 'pkg_buildscript'),
-        ('buildtools'      , 'pkg_buildtools'),
+        ('buildscript'     , 'pkg_buildscripts'),
         ('info'            , 'pkg_info'),
         ('server_files'    , 'server_files')
         ]:

@@ -23,13 +23,9 @@ def commands_order():
 def buildscript_list_files(opts, args):
     """
     List buildscript files
-
-    [FILEMASK]
-
-    Default FILEMASK is *.py
     """
     return org.wayround.aipsetup.info.info_list_files(
-        opts, args, 'buildscript', mask='*.py'
+        opts, args, 'buildscript', mask='*'
         )
 
 def buildscript_edit_file(opts, args):
@@ -40,6 +36,8 @@ def buildscript_edit_file(opts, args):
     """
     return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
 
+
+# TODO: rework required
 def load_buildscript(name):
 
     ret = None
@@ -47,7 +45,7 @@ def load_buildscript(name):
     buildscript_filename = os.path.abspath(
         os.path.join(
             org.wayround.aipsetup.config.config['buildscript'],
-            '{}.py'.format(name)
+            '{}'.format(name)
             )
         )
 
@@ -63,7 +61,7 @@ def load_buildscript(name):
         try:
             f = open(buildscript_filename, 'r')
         except:
-            logging.exception("Can't read file `{}'".foamrt(buildscript_filename))
+            logging.exception("Can't read file `{}'".format(buildscript_filename))
             ret = 2
         else:
             txt = f.read()
@@ -91,37 +89,22 @@ def load_buildscript(name):
 
             else:
 
-                if (
-                    not 'build_script' in locals_dict
-                    or
-                    not inspect.isfunction(locals_dict['build_script'])
-                    ):
-
-                    logging.error(
-                        "Module `{}' doesn't have function `build_script'".format(
+                try:
+#                        ret = module.build_script()
+                    ret = globals_dict
+                except:
+                    logging.exception(
+                        "Error while calling for build_script() from `{}'".format(
                             buildscript_filename
                             )
                         )
-                    ret = 4
+                    ret = 5
 
                 else:
-
-                    try:
-#                        ret = module.build_script()
-                        ret = locals_dict['build_script']
-                    except:
-                        logging.exception(
-                            "Error while calling for build_script() from `{}'".format(
-                                buildscript_filename
-                                )
+                    logging.info(
+                        "Retrieved building information from `{}'".format(
+                            buildscript_filename
                             )
-                        ret = 5
-
-                    else:
-                        logging.info(
-                            "Retrieved building information from `{}'".format(
-                                buildscript_filename
-                                )
-                            )
+                        )
 
     return ret
