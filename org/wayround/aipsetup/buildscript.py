@@ -102,7 +102,7 @@ def load_buildscript(name):
 
                 else:
                     logging.info(
-                        "Retrieved building information from `{}'".format(
+                        "Loaded building script: `{}'".format(
                             buildscript_filename
                             )
                         )

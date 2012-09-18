@@ -13,61 +13,45 @@ import tempfile
 import org.wayround.aipsetup.buildingsite
 import org.wayround.utils.osutils
 import org.wayround.utils.archive
+import org.wayround.utils.error
 
-def determine_configure_dir(buildingsite, info):
+def determine_abs_configure_dir(buildingsite, config_dir):
     """
-    Determine config dir taking in account info['data']['settings']['config_dir']
+    Determine config dir taking in account config_dir
     """
 
     config_dir = os.path.abspath(
         org.wayround.aipsetup.buildingsite.getDIR_SOURCE(
             buildingsite
-            ) + os.path.sep + info['data']['settings']['config_dir']
+            ) + os.path.sep + config_dir
         )
 
     return config_dir
 
-def determine_building_dir(buildingsite, source_dir, info):
+def determine_building_dir(
+    buildingsite, config_dir, separate_build_dir
+    ):
     """
-    Determine building dir taking in account info['data']['settings']['separate_build_dir']
+    Determine building dir taking in account config_dir and separate_build_dir
     """
 
     building_dir = ''
 
-    if info['data']['settings']['separate_build_dir'] == True:
+    if separate_build_dir == True:
 
         building_dir = os.path.abspath(
             org.wayround.aipsetup.buildingsite.getDIR_BUILDING(
                 buildingsite
                 )
-#            + os.path.sep + info['data']['settings']['config_dir']                                       
             )
     else:
-        building_dir = source_dir
+        building_dir = (
+            org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+            + os.path.sep
+            + config_dir
+            )
 
     return building_dir
-
-
-def determine_configure_parameters(info):
-
-    run_parameters = []
-
-    for i in info['data']['opts']:
-        if info['data']['opts'][i] != None:
-            run_parameters.append(
-                "--%(par_name)s=%(par_value)s" % {
-                    'par_name': i,
-                    'par_value': info['data']['opts'][i]
-                    }
-                )
-        else:
-            run_parameters.append(
-                "--%(par_name)s" % {
-                    'par_name': i
-                    }
-                )
-
-    return run_parameters
 
 
 def determine_make_parameters(pkginfo):
@@ -105,10 +89,67 @@ def determine_installer_parameters(pkginfo):
 
     return run_parameters
 
+def extract_high(building_site, tarball_basename):
 
-def extract(
+    ret = 0
+
+    building_site = os.path.abspath(building_site)
+
+    log = org.wayround.utils.log.Log(
+        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+        'extract'
+        )
+
+    building_site = os.path.abspath(building_site)
+
+    tarball_dir = org.wayround.aipsetup.buildingsite.getDIR_TARBALL(building_site)
+
+    source_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(building_site)
+
+    tarball_dir_files = os.listdir(tarball_dir)
+
+    tarball_dir_files_len = len(tarball_dir_files)
+
+    tmpdir = tempfile.mkdtemp(
+        dir=org.wayround.aipsetup.buildingsite.getDIR_TEMP(building_site)
+        )
+
+    if tarball_dir_files_len == 0:
+        log.error("No Source Tarball Supplied")
+        ret = 1
+    else:
+
+        tarball = None
+        for i in tarball_dir_files:
+            parsed = org.wayround.aipsetup.name.source_name_parse(
+                i, mute=True
+                )
+            if isinstance(parsed, dict):
+                if parsed['groups']['name'] == tarball_basename:
+                    tarball = tarball_dir + os.path.sep + tarball_dir_files[0]
+                    break
+
+        if not tarball:
+            log.error("Couldn't find acceptable tarball for current building site")
+            ret = 2
+        else:
+
+            ret = extract_low(
+                log,
+                tmpdir,
+                tarball,
+                source_dir,
+                unwrap_dir=True
+                )
+
+    log.close()
+
+    return ret
+
+
+def extract_low(
     log,
-    buildingsite,
+    tmpdir,
     tarball,
     outdir,
     unwrap_dir=False,
@@ -124,13 +165,8 @@ def extract(
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
 
-    tmpdir = tempfile.mkdtemp(
-        dir=org.wayround.aipsetup.buildingsite.getDIR_TEMP(buildingsite)
-        )
-
     if not os.path.isdir(tmpdir):
         os.makedirs(tmpdir)
-
 
     log.info("Extracting {}".format(os.path.basename(tarball)))
     extr_error = org.wayround.utils.archive.extract(
@@ -169,69 +205,86 @@ def extract(
     return ret
 
 
-def configure(
-    log,
-    buildingsite,
-    opts,
-    separate_build=True,
-    env=None,
-    env_mode='copy',
-    config_dir='.',
-    script_name='configure'
+def configure_high(
+    building_site,
+    options,
+    arguments,
+    environment,
+    environment_mode,
+    source_configure_reldir,
+    use_separate_buildding_dir,
+    script_name
     ):
 
     ret = 0
 
-    buildingsite = os.path.abspath(buildingsite)
+    building_site = os.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(buildingsite),
-        info['name']
+        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+        'configure'
         )
 
-    source_dir = determine_configure_dir(
-        buildingsite, info
+    pkg_info = org.wayround.aipsetup.buildingsite.read_package_info(
+        building_site
         )
 
-    building_dir = determine_building_dir(
-        buildingsite, source_dir, info
-        )
+    if not isinstance(pkg_info, dict):
+        log.error("Can't read package info")
+        ret = 1
+    else:
 
-#        if os.path.isdir(building_dir):
-#            log.info("cleaningup building dir")
-#            org.wayround.utils.file.cleanup_dir(building_dir)
-
-    if not os.path.isdir(building_dir):
-        os.makedirs(building_dir)
-
-
-    config_script = os.path.abspath(
-        os.path.join(
-            source_dir,
-            info['data']['settings']['script_name']
+        env = org.wayround.utils.osutils.env_vars_edit(
+            environment,
+            environment_mode
             )
-        )
 
-    cmd = ['bash'] + [config_script] + run_parameters
+        if len(environment) > 0:
+            log.info(
+                "Environment modifications: {}".format(
+                    repr(i) for i in list(environment.keys())
+                    )
+                )
 
-    log.info("Working directory: {}".format(building_dir))
+        script_path = determine_abs_configure_dir(
+            building_site,
+            source_configure_reldir
+            ) + os.path.sep + script_name
 
-    log.info(
-        "Starting autotools configurer script with following command:\n"
-        "    %(cmd)s" % {
-            'cmd': repr(cmd)
-            }
-        )
+        working_dir = determine_building_dir(
+            building_site,
+            source_configure_reldir,
+            use_separate_buildding_dir
+            )
 
-    env = org.wayround.utils.osutils.env_vars_edit(
-        info['data']['env'],
-        info['data']['env_opts']['mode']
-        )
+        ret = configure_low(
+            log,
+            script_path,
+            working_dir,
+            options,
+            arguments,
+            env
+            )
 
-    if len(info['data']['env']) > 0:
-        log.info("Environment Modifications: %(list)s" % {
-                'list': ' '.join(repr(i) for i in info['data']['env'])
-                })
+    log.close()
+
+    return ret
+
+def configure_low(
+    log,
+    script_path,
+    working_dir,
+    opts,
+    args,
+    env
+    ):
+
+    ret = 0
+
+    cmd = ['bash'] + [script_path] + opts + args
+
+    log.info("directory: {}".format(working_dir))
+    log.info("command: {}".format(cmd))
 
     p = None
     try:
@@ -240,12 +293,12 @@ def configure(
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=building_dir
+            cwd=working_dir
             )
     except:
         log.error(
-            "exception while starting configuration script"
-            "    command line was:"
+            "exception while starting configuration script\n"
+            "    command line was:\n"
             "    " + repr(cmd) +
             org.wayround.utils.error.return_exception_info(
                 sys.exc_info()
@@ -275,246 +328,138 @@ def configure(
         try:
             p.wait()
         except:
-            log.write("\n-e- exception oqured while waiting for configure")
-            log.write(
+            log.error(
+                "Exception occurred while waiting for configure\n" +
                 org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
             ret = 100
         else:
-            log.info("configurer return code was: %(code)d" % {
-                    'code': p.returncode
-                    })
+            tmp_s = "configure return code was: {}".format(p.returncode)
+
+            if p.returncode == 0:
+                log.info(tmp_s)
+            else:
+                log.error(tmp_s)
+
             ret = p.returncode
 
-    log.stop()
+    return ret
+
+def make_high(
+    building_site,
+    options,
+    arguments,
+    environment,
+    environment_mode,
+    use_separate_buildding_dir,
+    source_configure_reldir
+    ):
+
+    building_site = os.path.abspath(building_site)
+
+    log = org.wayround.utils.log.Log(
+        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+        'make'
+        )
+
+    env = org.wayround.utils.osutils.env_vars_edit(
+        environment,
+        environment_mode
+        )
+
+    if len(environment) > 0:
+        log.info(
+            "Environment modifications: {}".format(
+                repr(i) for i in list(environment.keys())
+                )
+            )
+
+    working_dir = determine_building_dir(
+        building_site,
+        source_configure_reldir,
+        use_separate_buildding_dir
+        )
+
+    ret = make_low(log, options, arguments, env, working_dir)
+
+    log.close()
 
     return ret
 
-def make(log, buildingsite='.'):
+def make_low(
+    log,
+    opts,
+    args,
+    env,
+    working_dir
+    ):
 
     ret = 0
 
-    info = org.wayround.aipsetup.buildingsite.read_package_info(
-        buildingsite, ret_on_error=None)
+    cmd = ['make'] + opts + args
 
-    if info == None:
-        log.error("error getting information about package")
-        ret = 101
+    log.info("directory: {}".format(working_dir))
+    log.info("command: {}".format(cmd))
+
+    p = None
+    try:
+        p = subprocess.Popen(
+            cmd,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=working_dir
+            )
+    except:
+        log.error(
+            "exception while starting make script\n" +
+            "    command line was:\n" +
+            "    " + repr(cmd) + "\n" +
+            org.wayround.utils.error.return_exception_info(
+                sys.exc_info()
+                )
+            )
+        ret = 100
+
     else:
 
-        source_dir = determine_source_dir(
-            buildingsite, info
+        t = org.wayround.utils.stream.lbl_write(
+            p.stdout,
+            log,
+            True
             )
+        t.start()
 
-        building_dir = determine_building_dir(
-            buildingsite, source_dir, info
+        t2 = org.wayround.utils.stream.lbl_write(
+            p.stderr,
+            log,
+            True,
+            typ='error'
             )
+        t2.start()
+        t.join()
+        t2.join()
 
-        run_parameters = determine_builder_parameters(
-            info
-            )
-
-        makefile = os.path.abspath(
-            os.path.join(
-                building_dir,
-                info['pkg_buildscript']['autotools_build_opts']['make_file_name']
-                )
-            )
-
-        cmd = ['make'] + ['-f', makefile] + run_parameters
-
-        log.info("Starting autotools make script with following command:")
-        log.write("    %(cmd)s" % {
-                'cmd': repr(cmd)
-                })
-        log.write("-i-")
-
-        env = org.wayround.utils.osutils.env_vars_edit(
-            info['pkg_buildscript']['autotools_build_envs'],
-            info['pkg_buildscript']['autotools_build_env_opts']['mode']
-            )
-
-        if len(info['pkg_buildscript']['autotools_build_envs']) > 0:
-            log.info("Environment Modifications: %(list)s" % {
-                    'list': ' '.join(repr(i) for i in info['pkg_buildscript']['autotools_build_envs'])
-                    })
-
-        p = None
         try:
-            p = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=building_dir)
-        except:
-            log.error("exception while starting make script")
-            log.write("    command line was:")
-            log.write("    " + repr(cmd))
-            log.write(
-                org.wayround.utils.error.return_exception_info(
-                    sys.exc_info()
-                    )
-                )
-            ret = 100
-
-        else:
-
-            t = org.wayround.utils.stream.lbl_write(
-                p.stdout,
-                log,
-                True
-                )
-            t.start()
-
-            t2 = org.wayround.utils.stream.lbl_write(
-                p.stderr,
-                log,
-                True,
-                typ='error'
-                )
-            t2.start()
-            t.join()
-            t2.join()
-
-            try:
-                p.wait()
-            except:
-                log.write("\n-e- exception oqured while waiting for builder")
-                log.write(
-                    org.wayround.utils.error.return_exception_info(
-                        sys.exc_info()
-                        )
-                    )
-                ret = 100
-            else:
-                log.info("builder return code was: %(code)d" % {
-                        'code': p.returncode
-                        })
-                ret = p.returncode
-
-    return ret
-
-
-def distribute(log, buildingsite='.'):
-
-    ret = 0
-
-    info = org.wayround.aipsetup.buildingsite.read_package_info(
-        buildingsite, ret_on_error=None)
-
-    if info == None:
-        log.error("error getting information about package")
-        ret = 101
-    else:
-
-        source_dir = determine_source_dir(
-            buildingsite, info
-            )
-
-        building_dir = determine_building_dir(
-            buildingsite, source_dir, info
-            )
-
-        run_parameters = determine_installer_parameters(
-            info
-            )
-
-        makefile = os.path.abspath(
-            os.path.join(
-                building_dir,
-                info['pkg_buildscript']['autotools_distribute_opts']['make_file_name']
-                )
-            )
-
-        destdir = os.path.abspath(
-            os.path.join(
-                buildingsite,
-                org.wayround.aipsetup.buildingsite.DIR_DESTDIR
-                )
-            )
-
-        if not os.path.isdir(destdir):
-            os.makedirs(destdir)
-
-        cmd = ['make'] + ['-f', makefile] + run_parameters \
-            + ['install'] + ['%(dd_name)s=%(dd)s' % {
-            'dd':destdir,
-            'dd_name': info['pkg_buildscript']['autotools_distribute_opts']['DESTDIR_opt_name']
-            }]
-
-        log.info("Starting autotools install script with following command:")
-        log.write("    %(cmd)s" % {
-                'cmd': repr(cmd)
-                })
-        log.write("-i-")
-
-        env = org.wayround.utils.osutils.env_vars_edit(
-            info['pkg_buildscript']['autotools_distribute_envs'],
-            info['pkg_buildscript']['autotools_distribute_env_opts']['mode']
-            )
-
-        if len(info['pkg_buildscript']['autotools_distribute_envs']) > 0:
-            log.write(
-                "-i- Environment Modifications: %(list)s" % {
-                    'list': ' '.join(
-                        repr(i) \
-                            for i in info['pkg_buildscript']['autotools_distribute_envs']
-                        )
-                    }
-                )
-
-        p = None
-        try:
-            p = subprocess.Popen(
-                cmd,
-                env=env,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=building_dir
-                )
+            p.wait()
         except:
             log.error(
-                "exception while starting install script\n" +
-                "    command line was:\n" +
-                "    " + repr(cmd) +
+                "exception occurred while waiting for builder\n" +
                 org.wayround.utils.error.return_exception_info(
                     sys.exc_info()
                     )
                 )
             ret = 100
-
         else:
+            tmp_s = "make return code was: {}".format(p.returncode)
 
-            t = org.wayround.utils.stream.lbl_write(
-                p.stdout,
-                log,
-                True
-                )
-            t.start()
-
-            t2 = org.wayround.utils.stream.lbl_write(
-                p.stderr,
-                log,
-                True,
-                typ='error'
-                )
-            t2.start()
-            t.join()
-            t2.join()
-
-            try:
-                p.wait()
-            except:
-                log.write("\n-e- exception oqured while waiting for installer")
-                log.write(
-                    org.wayround.utils.error.return_exception_info(
-                        sys.exc_info()
-                        )
-                    )
-                ret = 100
+            if p.returncode == 0:
+                log.info(tmp_s)
             else:
-                log.info("installer return code was: %(code)d" % {
-                        'code': p.returncode
-                        })
-                ret = p.returncode
+                log.error(tmp_s)
+
+            ret = p.returncode
 
     return ret
-

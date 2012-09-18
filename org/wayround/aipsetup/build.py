@@ -79,7 +79,7 @@ def complete(building_site):
     return start_building_script(building_site)
 
 
-def start_building_script(building_site, opts=None, args=None):
+def start_building_script(building_site, action=None):
     package_info = org.wayround.aipsetup.buildingsite.read_package_info(
         building_site, ret_on_error=None
         )
@@ -104,9 +104,32 @@ def start_building_script(building_site, opts=None, args=None):
 #
 #            )
 
-        ret = script['main'](building_site, opts, args)
+        ret = script['main'](building_site, action)
 
 #        p = subprocess.Popen([buildscript_file], cwd=building_site)
 #        ret = p.wait()
+
+    return ret
+
+def build_actions_selector(actions, action):
+
+    continued_action = True
+
+    if isinstance(action, str) and action.endswith('+'):
+        continued_action = True
+        action = action[:-1]
+    else:
+        continued_action = False
+
+    if action in actions:
+
+        action_pos = actions.index(action)
+
+        if continued_action:
+            actions = actions[action_pos:]
+        else:
+            actions = [actions[action_pos]]
+
+    ret = (actions, action)
 
     return ret
