@@ -91,7 +91,7 @@ def start_building_script(building_site, action=None):
     if package_info == None:
         logging.error(
             "Error getting information "
-            "from building site's(`{}') `package_info.py'".format(building_site)
+            "from building site's(`{}') `package_info.json'".format(building_site)
             )
         ret = 1
     else:

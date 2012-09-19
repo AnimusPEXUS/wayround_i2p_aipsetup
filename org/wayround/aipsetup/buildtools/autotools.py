@@ -247,7 +247,7 @@ def configure_high(
         if len(environment) > 0:
             log.info(
                 "Environment modifications: {}".format(
-                    repr(i) for i in list(environment.keys())
+                    repr(environment)
                     )
                 )
 

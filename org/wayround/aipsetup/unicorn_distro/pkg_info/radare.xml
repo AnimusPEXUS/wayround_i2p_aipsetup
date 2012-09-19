@@ -4,12 +4,12 @@
 
     <description>write something here, please</description>
 
-    <home_page url="http://www.nopcode.org"/>
+    <home_page url="http://radare.org/"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildscript value=""/>
+    <buildscript value="autotools_usr"/>
 
     <basename value="radare"/>
 

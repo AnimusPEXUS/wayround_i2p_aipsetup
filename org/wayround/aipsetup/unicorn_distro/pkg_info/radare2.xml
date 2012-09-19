@@ -2,14 +2,14 @@
 
     <!-- This file is generated using aipsetup v3 -->
 
-    <description>write something here, please</description>
+    <description>disassembler</description>
 
-    <home_page url="http://None"/>
+    <home_page url="http://radare.org/"/>
 
     <!-- Use <tag name="" /> constructions for listing
          tags -->
 
-    <buildscript value=""/>
+    <buildscript value="autotools_usr"/>
 
     <basename value="radare2"/>
 

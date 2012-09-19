@@ -14,6 +14,7 @@ import logging
 import sys
 
 import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.package
 
 import org.wayround.utils.time
 import org.wayround.utils.checksum
