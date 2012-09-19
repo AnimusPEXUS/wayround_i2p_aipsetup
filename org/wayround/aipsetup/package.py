@@ -348,7 +348,7 @@ def check_package(asp_name, mute=False):
                     tar_members = tarf.getmembers()
 
                     check_list = ['./04.DESTDIR.tar.xz', './05.BUILD_LOGS.tar.xz',
-                                  './package_info.py', './02.PATCHES.tar.xz']
+                                  './package_info.json', './02.PATCHES.tar.xz']
 
                     for i in ['./00.TARBALL', './06.LISTS']:
                         for j in tar_members:
@@ -541,7 +541,12 @@ def install_package(name, force=False, destdir='/'):
                             reduce_asps(name, asps, destdir)
 
     else:
-        pass
+        info = org.wayround.aipsetup.pkgindex.get_package_info(name)
+
+        if not isinstance(info, dict):
+            logging.error("Don't know about package")
+
+    return ret
 
 def update_package(name, force=False, destdir='/'):
     # TODO: do or del
@@ -1167,158 +1172,88 @@ def put_files_to_index(files):
 
     return 0
 
+def _put_files_to_index(files, pkg_name, subdir):
+
+    ret = 0
+
+    repository_path = org.wayround.aipsetup.config.config['repository']
+
+
+    for file in files:
+
+        full_path = os.path.abspath(
+            repository_path + os.path.sep + subdir
+            )
+
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
+
+        logging.info("moving {}\n       to {}".format(file, full_path))
+        shutil.move(file, full_path)
+
+    return ret
+
 def put_file_to_index(filename):
     ret = 0
 
     logging.info("Processing file `{}'".format(filename))
 
     if os.path.isdir(filename) or os.path.islink(filename):
-        logging.error("wrong file type `%(name)s'" % {
-            'name': filename
-            })
+        logging.error(
+            "Wrong file type `{}'".format(filename)
+            )
         ret = 10
     else:
 
         if check_package_aipsetup2(filename) == 0:
-            filename = os.path.abspath(filename)
-            filename_sha512 = filename + '.sha512'
-            filename_md5 = filename + '.md5'
-            fbn = os.path.basename(filename)
 
-            par_res = org.wayround.aipsetup.name.package_name_parse(fbn)
-            if not isinstance(par_res, dict):
-                logging.error("Couldn't parse filename `%(fn)s'" % {
-                    'fn': fbn
-                    })
-                ret = 1
-            else:
-                path = org.wayround.aipsetup.pkgindex.get_package_path(
-                    par_res['groups']['name']
+            parsed = org.wayround.aipsetup.name.package_name_parse(filename)
+
+            if not isinstance(parsed, dict):
+                logging.error(
+                    "Can't parse file name {}".format(
+                        os.path.basename(filename)
+                        )
                     )
+            else:
+                file = os.path.abspath(filename)
 
-                if path == None:
-                    logging.error("Can't get `%(package)s' path from database" % {
-                        'package': par_res['groups']['name']
-                        })
-                    ret = 2
-                else:
-                    full_path = org.wayround.aipsetup.config.config['repository'] + os.path.sep + path
-                    full_path = os.path.abspath(full_path.replace(os.path.sep * 2, os.path.sep))
+                files = [
+                    file,
+                    file + '.sha512',
+                    file + '.md5'
+                    ]
 
-                    if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
-                        full_path
-                        ) != 0:
-                        logging.error("Can't ensure existence of required dirs")
-                        ret = 3
-                    else:
+                path = org.wayround.aipsetup.pkgindex.get_package_path(
+                    parsed['groups']['name']
+                    ) + os.path.sep + 'aipsetup2'
 
-                        full_path_pack = full_path + '/aipsetup2'
-
-                        logging.info("moving `%(n1)s' to `%(n2)s'" % {
-                            'n1': filename,
-                            'n2': full_path_pack
-                            })
-                        for i in [
-                            (filename, full_path_pack + os.path.sep + fbn),
-                            (filename_md5, full_path_pack + os.path.sep + fbn + '.md5'),
-                            (filename_sha512, full_path_pack + os.path.sep + fbn + '.sha512')
-                            ]:
-                            if (os.path.abspath(i[0]) != os.path.abspath(i[1])):
-
-                                org.wayround.utils.file.remove_if_exists(
-                                    i[1]
-                                    )
-
-                                shutil.move(i[0], i[1])
+                _put_files_to_index(files, parsed['groups']['name'], path)
 
         elif check_package(filename, mute=True) == 0:
-            filename = os.path.abspath(filename)
-            fbn = os.path.basename(filename)
-            par_res = org.wayround.aipsetup.name.package_name_parse(fbn)
-            if not isinstance(par_res, dict):
-                logging.error("Couldn't parse filename `%(fn)s'" % {
-                    'fn': fbn
-                    })
-                ret = 1
-            else:
-                path = org.wayround.aipsetup.pkgindex.get_package_path(
-                    par_res['groups']['name']
+            parsed = org.wayround.aipsetup.name.package_name_parse(filename)
+
+            if not isinstance(parsed, dict):
+                logging.error(
+                    "Can't parse file name {}".format(
+                        os.path.basename(filename)
+                        )
                     )
-                if path == None:
-                    logging.error("Can't get `%(package)s' path from database" % {
-                        'package': par_res['groups']['name']
-                        })
-                    ret = 2
-                else:
-                    full_path = org.wayround.aipsetup.config.config['repository'] + os.path.sep + path
-                    full_path = os.path.abspath(full_path.replace(os.path.sep * 2, os.path.sep))
+            else:
+                file = os.path.abspath(filename)
 
-                    if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
-                        full_path
-                        ) != 0:
-                        logging.error("Can't ensure existence of required dirs")
-                        ret = 3
-                    else:
+                files = [
+                    file
+                    ]
 
-                        full_path_pack = full_path + '/pack'
+                path = org.wayround.aipsetup.pkgindex.get_package_path(
+                    parsed['groups']['name']
+                    ) + os.path.sep + 'pack'
 
-                        logging.info("moving `%(n1)s' to `%(n2)s'" % {
-                            'n1': filename,
-                            'n2': full_path_pack + os.path.sep + fbn
-                            })
-
-                        if (os.path.abspath(filename) != os.path.abspath(full_path_pack + os.path.sep + fbn)):
-                            org.wayround.utils.file.remove_if_exists(
-                                full_path_pack + os.path.sep + fbn
-                                )
-                            shutil.move(filename, full_path_pack + os.path.sep + fbn)
+                _put_files_to_index(files, parsed['groups']['name'], path)
 
         else:
 
-            sn_pres = org.wayround.aipsetup.name.source_name_parse(
-                filename
-                )
-
-            if not isinstance(sn_pres, dict):
-                logging.warning("File action undefined: `%(name)s'" % {
-                    'name': filename
-                    })
-            else:
-                logging.info("Source name parsed")
-                fbn = os.path.basename(filename)
-                path = org.wayround.aipsetup.pkgindex.get_package_path(
-                    sn_pres['groups']['name']
-                    )
-
-                if path == None:
-                    logging.error("Can't get `%(package)s' path from database" % {
-                        'package': sn_pres['groups']['name']
-                        })
-                    ret = 2
-                else:
-                    full_path = org.wayround.aipsetup.config.config['repository'] + os.path.sep + path
-                    full_path = os.path.abspath(full_path.replace(os.path.sep * 2, os.path.sep))
-
-                    if org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(
-                        full_path
-                        ) != 0:
-                        logging.error("Can't ensure existence of required dirs")
-                        ret = 3
-                    else:
-
-                        full_path_source = full_path + '/source'
-
-                        logging.info("moving `%(n1)s' to `%(n2)s'" % {
-                            'n1': filename,
-                            'n2': full_path_source + os.path.sep + fbn
-                            })
-
-                        if (os.path.abspath(filename) != os.path.abspath(full_path_source + os.path.sep + fbn)):
-                            org.wayround.utils.file.remove_if_exists(
-                                full_path_source + os.path.sep + fbn
-                                )
-                            shutil.move(filename, full_path_source + os.path.sep + fbn)
-                            if os.path.isfile(filename + '.asc'):
-                                shutil.move(filename + '.asc', full_path_source + os.path.sep + fbn + '.asc')
+            logging.error("Don't know what to do with `{}'".format(filename))
 
     return ret

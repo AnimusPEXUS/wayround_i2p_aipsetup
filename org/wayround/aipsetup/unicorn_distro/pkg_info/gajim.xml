@@ -18,7 +18,7 @@ python2.7 is required
     <tag name="voip"/>
     <tag name="xmpp"/>
 
-    <buildscript value="autotools_usr.py"/>
+    <buildscript value="autotools_usr"/>
 
     <basename value="gajim"/>
 

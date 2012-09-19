@@ -19,12 +19,6 @@
     <property name="stock">gtk-save</property>
     <property name="icon-size">1</property>
   </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-undo</property>
-    <property name="icon-size">1</property>
-  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -87,51 +81,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="box2">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="spacing">8</property>
-                <property name="homogeneous">True</property>
-                <child>
-                  <object class="GtkButton" id="button3">
-                    <property name="label" translatable="yes">Revert</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="image">image3</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="button4">
-                    <property name="label" translatable="yes">Save</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="image">image2</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="button2">
                 <property name="label" translatable="yes">Save and Update DB</property>
                 <property name="use_action_appearance">False</property>
@@ -139,11 +88,12 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
+                <property name="image">image2</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -159,7 +109,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>

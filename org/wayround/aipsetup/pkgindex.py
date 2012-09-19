@@ -357,7 +357,7 @@ def is_repo_package_dir(path):
             os.path.join(path, '.package')
             )
 
-
+# TODO: make db_connection
 def get_package_path(name):
     ret = None
     r = PackageDatabase()
@@ -374,7 +374,7 @@ def create_required_dirs_at_package(path):
 
     ret = 0
 
-    for i in ['pack', 'source', 'aipsetup2']:
+    for i in ['pack', 'aipsetup2']:
         full_path = path + os.path.sep + i
 
         if not os.path.exists(full_path):
@@ -1236,6 +1236,7 @@ class PackageDatabase:
             self.sess.close()
             self.sess = None
 
+    close = close_session
 
     def create_category(self, name='name', parent_cid=0):
 
@@ -1424,7 +1425,11 @@ class PackageDatabase:
 
     def ls_category_dict(self, parent_cid=0):
 
-        lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
+        lst = None
+        if parent_cid == None:
+            lst = self.sess.query(self.Category).order_by(self.Category.name).all()
+        else:
+            lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
 
         dic = {}
         for i in lst:
@@ -1605,8 +1610,8 @@ class PackageDatabase:
         return ret
 
 
-    def get_package_path_string(self, cid):
-        r = self.get_package_path(cid)
+    def get_package_path_string(self, pid):
+        r = self.get_package_path(pid)
         ret = join_pkg_path(r)
         return ret
 

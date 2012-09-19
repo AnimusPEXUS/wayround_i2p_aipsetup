@@ -89,7 +89,12 @@ def determine_installer_parameters(pkginfo):
 
     return run_parameters
 
-def extract_high(building_site, tarball_basename):
+def extract_high(
+    building_site,
+    tarball_basename,
+    unwrap_dir,
+    rename_dir
+    ):
 
     ret = 0
 
@@ -126,7 +131,7 @@ def extract_high(building_site, tarball_basename):
                 )
             if isinstance(parsed, dict):
                 if parsed['groups']['name'] == tarball_basename:
-                    tarball = tarball_dir + os.path.sep + tarball_dir_files[0]
+                    tarball = tarball_dir + os.path.sep + i
                     break
 
         if not tarball:
@@ -139,7 +144,8 @@ def extract_high(building_site, tarball_basename):
                 tmpdir,
                 tarball,
                 source_dir,
-                unwrap_dir=True
+                unwrap_dir=unwrap_dir,
+                rename_dir=rename_dir
                 )
 
     log.close()
@@ -157,10 +163,6 @@ def extract_low(
     ):
 
     ret = 0
-
-    if os.path.isdir(outdir):
-        log.info("cleaningup source dir")
-        org.wayround.utils.file.cleanup_dir(outdir)
 
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
@@ -198,8 +200,11 @@ def extract_low(
 
             else:
                 if rename_dir:
-                    shutil.move(extracted_dir, outdir + os.path.sep + str(rename_dir))
+                    n = outdir + os.path.sep + str(rename_dir)
+                    log.info("moving extracted dir as `{}'".format(n))
+                    shutil.move(extracted_dir, n)
                 else:
+                    log.info("moving extracted dir to `{}'".format(outdir))
                     shutil.move(extracted_dir, outdir)
 
     return ret

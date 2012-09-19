@@ -1,17 +1,110 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import org.wayround.aipsetup.buildscript
+import os.path
+import logging
 
-def build_script():
+import org.wayround.utils.file
 
-    ret = org.wayround.aipsetup.buildscript.load_buildscript('autotools_usr')
-    ret['autotools_configure_params']['enable-kernel'] = '2.6.39.3'
-    ret['autotools_configure_params']['enable-tls'] = 'yes'
-    ret['autotools_configure_params']['with-elf'] = 'yes'
-    ret['autotools_configure_params']['enable-multi-arch'] = 'yes'
+import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
+import org.wayround.aipsetup.buildtools.autotools as autotools
 
-#    ret['autotools_configure_opts']['separate_build_dir'] = False
 
+def main(buildingsite, action=None):
+
+    ret = 0
+
+    r = org.wayround.aipsetup.build.build_script_wrap(
+            buildingsite,
+            ['extract', 'extract2', 'configure', 'build', 'distribute'],
+            action,
+            "help"
+            )
+
+    if not isinstance(r, tuple):
+        logging.error("Error")
+        ret = r
+
+    else:
+
+        pkg_info, actions = r
+
+        src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+
+        if os.path.isdir(src_dir):
+            logging.info("cleaningup source dir")
+            org.wayround.utils.file.cleanup_dir(src_dir)
+
+
+        if 'extract' in actions:
+            ret = autotools.extract_high(
+                buildingsite,
+                pkg_info['pkg_info']['basename'],
+                unwrap_dir=True,
+                rename_dir=False
+                )
+
+        if 'extract2' in actions:
+            ret = autotools.extract_high(
+                buildingsite,
+                'glibc-ports',
+                unwrap_dir=False,
+                rename_dir='ports'
+                )
+
+        if 'configure' in actions and ret == 0:
+            ret = autotools.configure_high(
+                buildingsite,
+                options=[
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+                    '--target=' + pkg_info['constitution']['target'],
+                    '--enable-kernel=2.6.39.3',
+                    '--enable-tls',
+                    '--with-elf',
+                    '--enable-multi-arch'
+                    ],
+                arguments=['configure'],
+                environment={},
+                environment_mode='copy',
+                source_configure_reldir='.',
+                use_separate_buildding_dir=True,
+                script_name='configure'
+                )
+
+        if 'build' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=True,
+                source_configure_reldir='.'
+                )
+
+        if 'distribute' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install',
+                    'DESTDIR=' + (
+                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+                            buildingsite
+                            )
+                        )
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=True,
+                source_configure_reldir='.'
+                )
 
     return ret

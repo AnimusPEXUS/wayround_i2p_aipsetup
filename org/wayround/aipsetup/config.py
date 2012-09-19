@@ -39,7 +39,7 @@ CONFIG_FULL_SAMPLE = {
     # server is for serving localy
     'server_ip'          : '127.0.0.1',
     'server_port'        : '8005',
-    'server_prefix'      : '/',
+    'server_path'      : '/',
     'server_password'    : '123456789',
 
     # client is to designate remote server from which to catch updates 
@@ -47,7 +47,7 @@ CONFIG_FULL_SAMPLE = {
     'client_proto'       : 'http',
     'client_host'        : '127.0.0.1',
     'client_port'        : '8005',
-    'client_prefix'      : '/',
+    'client_path'      : '/',
 
     # this will be used relatively to install.py destdir parameters
     'installed_pkg_dir': '/var/log/packages',
@@ -70,12 +70,12 @@ CONFIG_ALLOWED_PARAMETERS = frozenset([
     'package_index_db_config',
     'server_ip',
     'server_port',
-    'server_prefix',
+    'server_path',
     'server_password',
     'client_proto',
     'client_host',
     'client_port',
-    'client_prefix',
+    'client_path',
     'installed_pkg_dir'
     ])
 
@@ -197,7 +197,7 @@ def format_config(config):
     # server is for serving localy
     'server_ip'          : '{server_ip}',
     'server_port'        : '{server_port}',
-    'server_prefix'      : '{server_prefix}',
+    'server_path'        : '{server_path}',
     'server_password'    : '{server_password}',
 
     # client is to designate remote server from which to catch updates
@@ -205,7 +205,7 @@ def format_config(config):
     'client_proto'       : '{client_proto}',
     'client_host'        : '{client_host}',
     'client_port'        : '{client_port}',
-    'client_prefix'      : '{client_prefix}',
+    'client_path'        : '{client_path}',
 
 
     # this will be used relatively to install.py destdir parameters

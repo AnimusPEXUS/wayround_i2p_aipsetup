@@ -28,7 +28,7 @@ FUNCTIONS_LIST = [
     'remove_source_and_build_dirs',
     'compress_patches_destdir_and_logs',
     'compress_files_in_lists_dir',
-    'remove_patches_destdir_and_buildlogs_dirs',
+    'remove_patches_destdir_buildlogs_and_temp_dirs',
     'remove_decompressed_files_from_lists_dir',
     'make_checksums_for_building_site',
     'pack_buildingsite'
@@ -70,7 +70,7 @@ Compress patches, distribution and logs.
 Compress files found in lists dir
 """
 
-    elif name == 'remove_patches_destdir_and_buildlogs_dirs':
+    elif name == 'remove_patches_destdir_buildlogs_and_temp_dirs':
         ret = """\
 Removes patches, destdir and logs (one of cleanups stages)
 """
@@ -388,7 +388,7 @@ def compress_patches_destdir_and_logs(buildingsite):
             break
         else:
             size = org.wayround.utils.file.get_file_size(dirname)
-            logging.info("Compressing {} (size: {}B == {}MiB)".format(i, size, float(size) / 1024 / 1024))
+            logging.info("Compressing {} (size: {} B ~= {:4.2f} MiB)".format(i, size, float(size) / 1024 / 1024))
 
             org.wayround.utils.archive.archive_tar_canonical(
                 dirname,
@@ -426,22 +426,24 @@ def compress_files_in_lists_dir(buildingsite):
 
     return ret
 
-def remove_patches_destdir_and_buildlogs_dirs(buildingsite):
+def remove_patches_destdir_buildlogs_and_temp_dirs(buildingsite):
 
     ret = 0
 
     logging.info(
-        "Removing {}, {} and {}".format(
+        "Removing {}, {}, {} and {}".format(
             org.wayround.aipsetup.buildingsite.DIR_PATCHES,
             org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
-            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS,
+            org.wayround.aipsetup.buildingsite.DIR_TEMP
             )
         )
 
     for i in [
         org.wayround.aipsetup.buildingsite.DIR_PATCHES,
         org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
-        org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+        org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS,
+        org.wayround.aipsetup.buildingsite.DIR_TEMP
         ]:
         dirname = os.path.abspath(
             os.path.join(
@@ -526,8 +528,11 @@ def pack_buildingsite(buildingsite):
 
     logging.info("Creating package")
 
+    ret = 0
+
     if pi == None:
         logging.error("error getting information about package")
+        ret = 1
     else:
 
         pack_dir = os.path.abspath(
@@ -540,17 +545,12 @@ def pack_buildingsite(buildingsite):
 
         pack_file_name = os.path.join(
             pack_dir,
-            "(%(pkgname)s)-(%(version)s)-(%(status)s)-(%(timestamp)s)-(%(archinfo)s).asp" % {
+            "(%(pkgname)s)-(%(version)s)-(%(status)s)-(%(timestamp)s)-(%(hostinfo)s).asp" % {
                 'pkgname': pi['pkg_info']['name'],
                 'version': pi['pkg_nameinfo']['groups']['version'],
                 'status': pi['pkg_nameinfo']['groups']['status'],
                 'timestamp': org.wayround.utils.time.currenttime_stamp(),
-                'archinfo': "%(arch)s-%(type)s-%(kernel)s-%(os)s" % {
-                    'arch'  : pi['constitution']['host_arch'],
-                    'type'  : pi['constitution']['host_type'],
-                    'kernel': pi['constitution']['host_kenl'],
-                    'os'    : pi['constitution']['host_name']
-                    }
+                'hostinfo': pi['constitution']['host'],
                 }
             )
 
@@ -559,12 +559,17 @@ def pack_buildingsite(buildingsite):
         if not os.path.isdir(pack_dir):
             os.makedirs(pack_dir)
 
-        org.wayround.utils.archive.pack_dir_contents_tar(
+        if org.wayround.utils.archive.pack_dir_contents_tar(
             buildingsite,
             pack_file_name
-            )
+            ) != 0:
+            logging.error("Some error while compressing package")
+            ret = 2
+        else:
 
-    return 0
+            ret = org.wayround.aipsetup.package.put_file_to_index(pack_file_name)
+
+    return ret
 
 def complete(dirname):
 
@@ -576,7 +581,7 @@ def complete(dirname):
               'remove_source_and_build_dirs',
               'compress_patches_destdir_and_logs',
               'compress_files_in_lists_dir',
-              'remove_patches_destdir_and_buildlogs_dirs',
+              'remove_patches_destdir_buildlogs_and_temp_dirs',
               'remove_decompressed_files_from_lists_dir',
               'make_checksums_for_building_site',
               'pack_buildingsite']:

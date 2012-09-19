@@ -5,7 +5,6 @@ UNICORN distro serving related stuff
 
 import os.path
 import xml.sax.saxutils
-import logging
 import json
 import copy
 import functools
@@ -18,8 +17,6 @@ import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.serverui
 
-import org.wayround.utils.tag
-import org.wayround.utils.list
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'
@@ -61,13 +58,65 @@ class Index:
     index.exposed = True
 
 
-    def category(self, path=''):
+    def category(self, path=None, mode=None):
 
-        db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+        if mode == None:
+            mode = 'html'
 
-        txt = org.wayround.aipsetup.serverui.page_category(db, path)
+        if not mode in ['html', 'json']:
+            raise cherrypy.HTTPError(400, "Wrong `mode' parameter")
 
-        db.close_session()
+        txt = ''
+        if mode == 'html':
+
+            if path == None:
+                path = ''
+
+            db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+
+            txt = org.wayround.aipsetup.serverui.page_category(db, path)
+
+            db.close()
+
+        elif mode == 'json':
+
+            db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+
+            if path == None:
+
+                pkgs = db.ls_package_dict(None)
+
+                cats = db.ls_category_dict(None)
+
+            else:
+                cid = db.get_category_by_path(path)
+
+                pkgs = db.ls_package_dict(cid)
+
+                cats = db.ls_category_dict(cid)
+
+            for i in list(pkgs.keys()):
+                pkgs[i] = db.get_package_path_string(i)
+
+            for i in list(cats.keys()):
+                cats[i] = db.get_category_path_string(i)
+
+            db.close()
+
+
+
+            txt = json.dumps(
+                {
+                    'packages': pkgs,
+                    'categories': cats
+                    },
+                indent=2,
+                sort_keys=True
+                )
+
+            txt = bytes(txt, 'utf-8')
+
+            cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
 
         return txt
 
@@ -99,11 +148,6 @@ class Index:
                     org.wayround.aipsetup.version.package_version_comparator
                     )
                 )
-#            org.wayround.utils.list.list_sort(
-#                files, cmp=org.wayround.aipsetup.version.package_version_comparator
-#                )
-#
-#            files.reverse()
 
             l = len(files)
             i = -1
@@ -227,7 +271,7 @@ def start_host():
 
     cherrypy.quickstart(
         Index(),
-        org.wayround.aipsetup.config.config['server_prefix'],
+        org.wayround.aipsetup.config.config['server_path'],
         serv_config
         )
 

@@ -6,6 +6,8 @@ Build software before packaging
 import os.path
 import logging
 import subprocess
+import copy
+
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildscript
@@ -84,6 +86,8 @@ def start_building_script(building_site, action=None):
         building_site, ret_on_error=None
         )
 
+    ret = 0
+
     if package_info == None:
         logging.error(
             "Error getting information "
@@ -98,16 +102,12 @@ def start_building_script(building_site, action=None):
                 )
             )
 
-#        buildscript_file = os.path.abspath(
-#            org.wayround.aipsetup.config.config['buildscript'] +
-#            os.path.sep +
-#
-#            )
+        if not isinstance(script, dict):
+            logging.error("Some error while loading script")
+            ret = 2
+        else:
 
-        ret = script['main'](building_site, action)
-
-#        p = subprocess.Popen([buildscript_file], cwd=building_site)
-#        ret = p.wait()
+            ret = script['main'](building_site, action)
 
     return ret
 
@@ -131,5 +131,48 @@ def build_actions_selector(actions, action):
             actions = [actions[action_pos]]
 
     ret = (actions, action)
+
+    return ret
+
+def build_script_wrap(buildingsite, desired_actions, action, help_text):
+
+    pkg_info = org.wayround.aipsetup.buildingsite.read_package_info(
+        buildingsite
+        )
+
+    ret = 0
+
+    if not isinstance(pkg_info, dict):
+        logging.error("Can't read package info")
+        ret = 1
+    else:
+
+        actions = copy.copy(desired_actions)
+
+        if action == 'help':
+            print(help_text)
+            ret = 2
+        else:
+
+            r = org.wayround.aipsetup.build.build_actions_selector(
+                actions,
+                action
+                )
+
+            if isinstance(r, tuple):
+                actions, action = r
+
+            if action != None and not (isinstance(action, str) and isinstance(r, tuple)):
+                logging.error("Wrong command")
+                ret = 3
+            else:
+
+                if not isinstance(actions, list):
+                    logging.error("Wrong action `{}' ({})".format(action, actions))
+                    ret = 3
+
+                else:
+
+                    ret = (pkg_info, actions)
 
     return ret

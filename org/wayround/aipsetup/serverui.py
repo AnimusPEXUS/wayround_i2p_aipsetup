@@ -305,7 +305,7 @@ def package_file_list(db, name):
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="{m:.2f}MiB".format(
+                        content="{m:.2f} MiB".format(
                             m=float(package_filesize) / 1024 / 1024
                             )
                         ),
@@ -446,7 +446,7 @@ def package_sources_file_list(db, name):
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="{m:.2f}MiB".format(
+                        content="{m:.2f} MiB".format(
                             m=float(source_filesize) / 1024 / 1024
                             )
                         ),

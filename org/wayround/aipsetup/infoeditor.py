@@ -37,10 +37,6 @@ class MainWindow:
 
         self.ui['button5'].connect('clicked', self.onListRealoadButtonActivated)
 
-        self.ui['button3'].connect('clicked', self.onRevertButtonActivated)
-
-        self.ui['button4'].connect('clicked', self.onSaveButtonActivated)
-
         self.ui['button2'].connect('clicked', self.onSaveAndUpdateButtonActivated)
 
         self.ui['button1'].connect('clicked', self.onEditLatestButtonActivated)
@@ -265,7 +261,7 @@ class MainWindow:
 
     def load_buildscript_list(self):
 
-        files = os.listdir(self.config['buildscript'])
+        files = glob.glob(self.config['buildscript'] + os.path.sep + '*.py')
 
         files.sort()
 
@@ -273,7 +269,7 @@ class MainWindow:
 
         lst = Gtk.ListStore(str)
         for i in files:
-            lst.append([os.path.basename(i)])
+            lst.append([os.path.basename(i)[:-3]])
 
         self.ui['combobox1'].set_model(lst)
         self.ui['combobox1'].set_entry_text_column(0)
@@ -316,9 +312,6 @@ class MainWindow:
             dia.destroy()
 
         return
-
-    def onSaveButtonActivated(self, button):
-        self.save_data(self.currently_opened)
 
     def onReloadComboActivated(self, buton):
         self.load_buildscript_list()

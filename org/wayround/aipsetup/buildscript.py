@@ -25,7 +25,7 @@ def buildscript_list_files(opts, args):
     List buildscript files
     """
     return org.wayround.aipsetup.info.info_list_files(
-        opts, args, 'buildscript', mask='*'
+        opts, args, 'buildscript', mask='*.py'
         )
 
 def buildscript_edit_file(opts, args):
@@ -45,7 +45,7 @@ def load_buildscript(name):
     buildscript_filename = os.path.abspath(
         os.path.join(
             org.wayround.aipsetup.config.config['buildscript'],
-            '{}'.format(name)
+            '{}.py'.format(name)
             )
         )
 
