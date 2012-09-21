@@ -38,6 +38,8 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # not required, but can be useful
     home_page="",
     # string list
+    # WARNING: Though tags list is in this dict, it is not participates 
+    #          in package comparisons
     tags=[],
     # string
     buildscript='',
@@ -298,24 +300,6 @@ def is_info_dicts_equal(d1, d2):
             ret = False
             break
 
-    if ret:
-        for i in ['tags']:
-
-            if ret:
-                for each in d1[i]:
-                    if not each in d2[i]:
-                        ret = False
-                        break
-
-            if ret:
-                for each in d2[i]:
-                    if not each in d1[i]:
-                        ret = False
-                        break
-
-            if not ret:
-                break
-
     return ret
 
 def read_from_file(name):
@@ -443,7 +427,7 @@ def write_to_file(name, struct):
 
     return ret
 
-def info_fixes(info, pkg_name, src_db_connected=None, forced_homepage_fix=False):
+def info_fixes(info, pkg_name, tag_db=None, forced_homepage_fix=False):
     """
     This function is used by `info_mass_info_fix'
 
@@ -460,7 +444,7 @@ def info_fixes(info, pkg_name, src_db_connected=None, forced_homepage_fix=False)
     if forced_homepage_fix or info['home_page'] in ['', 'None']:
         possibilities = org.wayround.aipsetup.pkgindex.guess_package_homepage(
             pkg_name,
-            src_db_connected
+            tag_db
             )
 
         keys = list(possibilities.keys())

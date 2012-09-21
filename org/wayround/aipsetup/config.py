@@ -30,7 +30,10 @@ CONFIG_FULL_SAMPLE = {
 
 
     # DB config
-    'package_index_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgindex.sqlite',
+    'package_index_db_config'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgindex.sqlite',
+    'package_info_db_config'        : 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkginfo.sqlite',
+    'package_latest_db_config'      : 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkglatest.sqlite',
+    'package_tags_db_config'        : 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgtags.sqlite',
 
 
 
@@ -39,7 +42,7 @@ CONFIG_FULL_SAMPLE = {
     # server is for serving localy
     'server_ip'          : '127.0.0.1',
     'server_port'        : '8005',
-    'server_path'      : '/',
+    'server_path'        : '/',
     'server_password'    : '123456789',
 
     # client is to designate remote server from which to catch updates 
@@ -47,7 +50,7 @@ CONFIG_FULL_SAMPLE = {
     'client_proto'       : 'http',
     'client_host'        : '127.0.0.1',
     'client_port'        : '8005',
-    'client_path'      : '/',
+    'client_path'        : '/',
 
     # this will be used relatively to install.py destdir parameters
     'installed_pkg_dir': '/var/log/packages',
@@ -68,6 +71,9 @@ CONFIG_ALLOWED_PARAMETERS = frozenset([
     'source',
     'buildingsites',
     'package_index_db_config',
+    'package_info_db_config',
+    'package_latest_db_config',
+    'package_tags_db_config',
     'server_ip',
     'server_port',
     'server_path',
@@ -220,7 +226,11 @@ def format_config(config):
 
 
     # sql settings
-    'package_index_db_config': '{package_index_db_config}'
+    'package_index_db_config'    : '{package_index_db_config}',
+    'package_info_db_config'     : '{package_info_db_config}',
+    'package_latest_db_config'   : '{package_latest_db_config}',
+
+    'package_tags_db_config'     : '{package_tags_db_config}'
 
  }}
 """.format_map(config)

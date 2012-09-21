@@ -6,7 +6,6 @@ Facility for indexing and analyzing sources and packages repository
 import os.path
 import sys
 import glob
-import fnmatch
 import copy
 import logging
 import re
@@ -14,19 +13,20 @@ import functools
 
 
 import sqlalchemy
-import sqlalchemy.orm
-import sqlalchemy.ext.declarative
 
 
-import org.wayround.utils.text
-import org.wayround.utils.fileindex
+import org.wayround.utils.db
 import org.wayround.utils.tag
 import org.wayround.utils.log
 
-import org.wayround.aipsetup.info
+
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.version
+
+import org.wayround.aipsetup.pkginfo as pkginfo
+import org.wayround.aipsetup.pkglatest as pkglatest
+
 
 
 def exported_commands():
@@ -43,7 +43,8 @@ def exported_commands():
         'list': pkgindex_list_pkg_info_records,
         'print': pkgindex_print_pkg_info_record,
         'index_sources': pkgindex_index_sources,
-        'edit_latests': pkgindex_latest_editor
+        'edit_latests': pkgindex_latest_editor,
+        'edit_tags':pkgindex_tag_editor
         }
 
 def commands_order():
@@ -59,7 +60,8 @@ def commands_order():
         'list',
         'print',
         'index_sources',
-        'edit_latests'
+        'edit_latests',
+        'edit_tags'
         ]
 
 def pkgindex_scan_repo_for_pkg_and_cat(opts, args):
@@ -68,7 +70,7 @@ def pkgindex_scan_repo_for_pkg_and_cat(opts, args):
     to database
     """
 
-    r = PackageDatabase()
+    r = PackageIndex()
     ret = r.scan_repo_for_pkg_and_cat()
     del r
 
@@ -78,7 +80,7 @@ def pkgindex_find_repository_package_name_collisions_in_database(opts, args):
     """
     Scan index for equal package names
     """
-    r = PackageDatabase()
+    r = PackageIndex()
     ret = r.find_repository_package_name_collisions_in_database()
     del r
 
@@ -102,7 +104,7 @@ def pkgindex_find_missing_pkg_info_records(opts, args):
     f = '-f' in opts
 
     try:
-        r = PackageDatabase()
+        r = PackageIndex()
         ret = r.find_missing_pkg_info_records(t, f)
         del r
     except:
@@ -119,7 +121,7 @@ def pkgindex_find_outdated_pkg_info_records(opts, args):
     """
     ret = 0
     try:
-        r = PackageDatabase()
+        r = PackageIndex()
     except:
         ret = 1
         logging.error("Error connecting to DB")
@@ -146,7 +148,7 @@ def pkgindex_update_outdated_pkg_info_records(opts, args):
     """
     Loads pkg info records which differs to FS .xml files
     """
-    r = PackageDatabase()
+    r = PackageIndex()
     r.update_outdated_pkg_info_records()
     del r
 
@@ -166,7 +168,7 @@ def pkgindex_delete_pkg_info_records(opts, args):
         mask = args[0]
 
     if mask != None:
-        r = PackageDatabase()
+        r = PackageIndex()
         ret = r.delete_pkg_info_records(mask)
         del r
     else:
@@ -190,7 +192,7 @@ def pkgindex_backup_package_info_to_filesystem(opts, args):
 
     force = '-f' in opts
 
-    r = PackageDatabase()
+    r = PackageIndex()
     ret = r.backup_package_info_to_filesystem(mask, force)
     del r
 
@@ -217,7 +219,7 @@ def pkgindex_load_package_info_from_filesystem(opts, args):
 
     rewrite_all = '-a' in opts
 
-    r = PackageDatabase()
+    r = PackageIndex()
     r.load_package_info_from_filesystem(filenames, rewrite_all)
     del r
 
@@ -238,7 +240,7 @@ def pkgindex_list_pkg_info_records(opts, args):
         mask = args[0]
 
 
-    r = PackageDatabase()
+    r = PackageIndex()
     r.list_pkg_info_records(mask)
     del r
 
@@ -258,7 +260,7 @@ def pkgindex_print_pkg_info_record(opts, args):
 
     if name != None:
 
-        r = PackageDatabase()
+        r = PackageIndex()
         ret = r.print_pkg_info_record(name)
         del r
     else:
@@ -344,6 +346,14 @@ def pkgindex_latest_editor(opts, args):
 
     return ret
 
+def pkgindex_tag_editor(opts, args):
+
+    ret = 0
+
+    tag_editor(None, None)
+
+    return ret
+
 def latest_editor(name):
     import org.wayround.aipsetup.latesteditor
 
@@ -351,24 +361,92 @@ def latest_editor(name):
 
     return ret
 
+def tag_editor(mode, name):
+    import org.wayround.aipsetup.tageditor
+
+    ret = org.wayround.aipsetup.tageditor.main(mode, name)
+
+    return ret
+
+class PackageIndex(org.wayround.utils.db.BasicDB):
+    """
+    Main package index DB handling class
+    """
+
+    class Package(Base):
+        """
+        Package class
+
+        There can be many packages with same name, but this
+        is only for tucking down duplicates and eradicate
+        them.
+        """
+
+        __tablename__ = 'package'
+
+        pid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            primary_key=True,
+            autoincrement=True
+            )
+
+        name = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
+        cid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            default=0
+            )
+
+
+    class Category(Base):
+        """
+        Class for package categories
+
+        There can be categories with same names
+        """
+
+        __tablename__ = 'category'
+
+        cid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            primary_key=True,
+            autoincrement=True
+            )
+
+        name = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
+        parent_cid = sqlalchemy.Column(
+            sqlalchemy.Integer,
+            nullable=False,
+            default=0
+            )
+
+    def __init__(self):
+
+        org.wayround.utils.db.BasicDB.__init__(
+            self,
+            org.wayround.aipsetup.config.config['package_index_db_config'],
+            echo=False
+            )
+
+        return
+
+
 def is_repo_package_dir(path):
     return os.path.isdir(path) \
         and os.path.isfile(
             os.path.join(path, '.package')
             )
 
-# TODO: make db_connection
-def get_package_path(name):
-    ret = None
-    r = PackageDatabase()
-    pid = r.get_package_id(name)
-    if pid == None:
-        logging.error("Can't get `{}' from database".format(name))
-        ret = None
-    else:
-        ret = r.get_package_path_string(pid)
-    del(r)
-    return ret
 
 def create_required_dirs_at_package(path):
 
@@ -682,22 +760,6 @@ def index_directory(
 
     return 0
 
-
-def get_package_info(name, db_connected=None):
-
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
-
-    ret = db.package_info_record_to_dict(name)
-
-    if not db_connected:
-        del db
-
-    return ret
-
 def pkg_file_list_to_dict(files, name):
     needed_files = {}
     for i in files:
@@ -708,19 +770,12 @@ def pkg_file_list_to_dict(files, name):
     return needed_files
 
 
-def get_package_files(name, db_connected=None):
+def get_package_files(name, index_db=None):
 
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
 
-    pid = db.get_package_id(name)
-    package_path = db.get_package_path_string(pid)
+    pid = get_package_id(name, index_db=index_db)
+    package_path = get_package_path_string(pid, index_db=index_db)
 
-    if not db_connected:
-        del db
 
     package_dir = os.path.abspath(
         org.wayround.aipsetup.config.config['repository']
@@ -740,27 +795,15 @@ def get_package_files(name, db_connected=None):
                     org.wayround.aipsetup.config.config['repository']
                     )
                 )
-#        file_name = os.path.basename(i)
-#        file_name_parsed = org.wayround.aipsetup.name.package_name_parse(file_name)
-#        if file_name_parsed and file_name_parsed['groups']['name'] == name:
-#            needed_files[file_name] = file_name_parsed
 
     return needed_files
 
-def get_package_source_files(name, db_connected=None):
+def get_package_source_files(name, info_db=None):
 
     needed_files = []
 
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
+    pkg_info = pkginfo.package_info_record_to_dict(name=name, info_db=info_db)
 
-    pkg_info = db.package_info_record_to_dict(name=name)
-
-    if not db_connected:
-        del db
 
     try:
         tags_object = org.wayround.utils.tag.TagEngine(
@@ -800,1468 +843,435 @@ def get_package_source_files(name, db_connected=None):
 
     return needed_files
 
-def latest_source(name, db_connected=None, files=None):
-
-    ret = None
-
-    if not files:
-        files = get_package_source_files(name, db_connected)
-
-    if len(files) == 0:
-        ret = None
-    else:
-#        org.wayround.utils.list.list_sort(
-#            files,
-#            cmp=org.wayround.aipsetup.version.source_version_comparator
-#            )
-        ret = max(
-            files,
-            key=functools.cmp_to_key(
-                org.wayround.aipsetup.version.source_version_comparator
-                )
-            )
-#        ret = files[-1]
-
-    return ret
-
-def latest_package(name, db_connected=None, files=None):
-
-    ret = None
-
-    if not files:
-        files = get_package_files(name, db_connected)
-
-    if len(files) == 0:
-        ret = None
-    else:
-
-        ret = max(
-            files,
-            key=functools.cmp_to_key(
-                org.wayround.aipsetup.version.package_version_comparator
-                )
-            )
-#        org.wayround.utils.list.list_sort(
-#            files, cmp=org.wayround.aipsetup.version.package_version_comparator
-#            )
-#
-#        ret = files[-1]
-
-    return ret
-
-def latest_src_to_package(name, force=False, mute=True, db_connected=None):
-
-    ret = False
-
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
-
-    r = latest_source(name)
-    if r != None:
-        org.wayround.utils.log.verbose_print(
-            "Package's latest src is: `{}'".format(r),
-            not mute
-            )
-        if r != None:
-
-            ret = db.set_latest_source(name, r, force)
-
-        else:
-            ret = False
-
-    if not ret:
-        org.wayround.utils.log.verbose_print("Can't set")
-
-    if not db_connected:
-        del db
-
-    return ret
-
-def latest_src_to_packages(names, force=False, mute=True, db_connected=None):
-
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
-
-    if len(names) == 0:
-        names = db.list_pkg_info_records(mute=True)
-
-    for i in names:
-        latest_src_to_package(
-            i,
-            force,
-            mute,
-            db_connected
-            )
-
-    if not db_connected:
-        del db
-
-    return
-
-def latest_pkg_to_package(name, force=False, mute=True, db_connected=None):
-
-    ret = False
-
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
-
-
-    r = latest_package(name)
-    if r != None:
-        org.wayround.utils.log.verbose_print(
-            "Package's latest pkg is: `{}'".format(r),
-            not mute
-            )
-        if r != None:
-
-            ret = db.set_latest_package(name, r, force)
-
-        else:
-            ret = False
-
-    if not ret:
-        org.wayround.utils.log.verbose_print("Can't set", not mute)
-
-    if not db_connected:
-        del db
-
-    return ret
-
-def latest_pkg_to_packages(names, force=False, mute=True, db_connected=None):
-
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
-
-    if len(names) == 0:
-        names = db.list_pkg_info_records(mute=True)
-
-    for i in names:
-        latest_pkg_to_package(i, force, mute, db_connected)
-
-    if not db_connected:
-        del db
-
-    return
-
-def find_package_info_by_basename_and_version(basename, version, db_connected=None):
-    db = None
-    if db_connected:
-        db = db_connected
-    else:
-        db = PackageDatabase()
-
-    ret = db.find_package_info_by_basename_and_version(basename, version)
-
-    if not db_connected:
-        del db
-
-    return ret
-
-def guess_package_homepage(pkg_name, tag_db_connected=None):
-
-    db = None
-    if tag_db_connected:
-        db = tag_db_connected
-    else:
-        db = org.wayround.utils.tag.TagEngine(
-            org.wayround.aipsetup.config.config['source_index']
-            )
-
-    files = db.objects_by_tags([pkg_name])
-    possibilities = {}
-    for i in files:
-        domain = i[1:].split('/')[0]
-
-        if not domain in possibilities:
-            possibilities[domain] = 0
-
-        possibilities[domain] += 1
-    logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(possibilities)))
-
-    if not tag_db_connected:
-        del db
-
-    return possibilities
-
-
-
-class PackageDatabaseConfigError(Exception): pass
-
-class PackageDatabase:
-    """
-    Main package index DB handling class
-    """
-
-    Base = sqlalchemy.ext.declarative.declarative_base()
-
-    class Package(Base):
-        """
-        Package class
-
-        There can be many packages with same name, but this
-        is only for tucking down duplicates and eradicate
-        them.
-        """
-
-        __tablename__ = 'package'
-
-        pid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            primary_key=True,
-            autoincrement=True
-            )
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        cid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            default=0
-            )
-
-
-    class Category(Base):
-        """
-        Class for package categories
-
-        There can be categories with same names
-        """
-
-        __tablename__ = 'category'
-
-        cid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            primary_key=True,
-            autoincrement=True
-            )
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        parent_cid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            default=0
-            )
-
-    class PackageInfo(Base):
-        """
-        Class for holding package information
-        """
-        __tablename__ = 'package_info'
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            primary_key=True,
-            default=''
-            )
-
-        basename = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        version_re = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        home_page = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        description = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        buildscript = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        installation_priority = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            default=5
-            )
-
-        removable = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
-
-        reducible = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
-
-        auto_newest_src = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
-
-        auto_newest_pkg = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
-
-    class PackageTag(Base):
-        """
-        Class for package's tags
-        """
-
-        __tablename__ = 'package_tag'
-
-        id = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            primary_key=True,
-            autoincrement=True
-            )
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-        tag = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-    class Newest(Base):
-        """
-        Class for package's tags
-        """
-
-        __tablename__ = 'newest'
-
-        id = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            primary_key=True,
-            autoincrement=True
-            )
-
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-        typ = sqlalchemy.Column(
-            'type',
-            sqlalchemy.UnicodeText,
-            nullable=False
-            )
-
-        file = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=True,
-            default=None,
-            )
-
-
-
-    def __init__(self):
-
-        self._config = org.wayround.aipsetup.config.config
-
-        if not os.path.isdir(self._config['repository']):
-            raise PackageDatabaseConfigError(
-                "No repository to service configured"
-                )
-
-        db_echo = False
-
-        self._db_engine = \
-            sqlalchemy.create_engine(
-            self._config['package_index_db_config'],
-            echo=db_echo
-            )
-
-        self.Base.metadata.bind = self._db_engine
-
-        self.Base.metadata.create_all()
-
-        self.sess = None
-        self.start_session()
-
-    def __del__(self):
-        logging.debug("PKG Index DB cleaning")
-        self.close_session()
-
-
-    def start_session(self):
-        if not self.sess:
-            self.sess = sqlalchemy.orm.Session(bind=self._db_engine)
-
-    def commit_session(self):
-        if self.sess:
-            self.sess.commit()
-
-    def close_session(self):
-        if self.sess:
-            self.sess.commit()
-            self.sess.close()
-            self.sess = None
-
-    close = close_session
-
-    def create_category(self, name='name', parent_cid=0):
-
-        new_cat = self.Category(name=name, parent_cid=parent_cid)
-
-        self.sess.add(new_cat)
-
-        new_cat_id = new_cat.cid
-
-        return new_cat_id
-
-    def get_category_by_id(self, cid):
-
-        ret = None
-
-        q = self.sess.query(self.Category).filter_by(cid=cid).first()
-
-        if q:
-            ret = q.name
-
-        return ret
-
-    def get_category_parent_by_id(self, cid):
-
-        ret = None
-
-        q = self.sess.query(self.Category).filter_by(cid=cid).first()
-
-        if q:
-            ret = q.parent_cid
-
-        return ret
-
-    def get_category_by_path(self, path):
-
-        if not isinstance(path, str):
-            raise ValueError("`path' must be string")
-
-        ret = 0
-        if len(path) > 0:
-
-            logging.debug("path: {}".format(repr(path)))
-            path_parsed = path.split('/')
-
-            logging.debug("path_parsed: {}".format(repr(path_parsed)))
-
-            level = 0
-
-            for i in path_parsed:
-
-                logging.debug("Searching for: {}".format(i))
-                cat_dir = self.ls_category_dict(level)
-                logging.debug("cat_dir: {}".format(cat_dir))
-
-                found_cat = False
-                for j in cat_dir:
-                    if cat_dir[j] == i:
-                        level = j
-                        ret = j
-                        logging.debug("found `{}' cid == {}".format(i, j))
-                        found_cat = True
-                        break
-
-                if not found_cat:
-                    ret = None
-                    logging.debug("not found `{}' cid".format(i))
-                    break
-
-                if ret == None:
-                    break
-
-        return ret
-
-    def get_package_id(self, name):
-
-        ret = None
-
-        q = self.sess.query(self.Package).filter_by(name=name).first()
-        if q != None:
-            ret = q.pid
-
-        return ret
-
-    def get_package_category(self, pid):
-        ret = None
-
-        q = self.sess.query(self.Package).filter_by(pid=pid).first()
-        if q != None:
-            ret = q.cid
-
-        return ret
-
-    def get_package_category_by_name(self, name):
-        ret = None
-
-        q = self.sess.query(self.Package).filter_by(name=name).first()
-        if q != None:
-            ret = q.cid
-
-        return ret
-
-
-    def get_package_by_id(self, pid):
-
-        ret = None
-
-        q = self.sess.query(self.Package).filter_by(pid=pid).first()
-        if q != None:
-            ret = q.name
-
-        return ret
-
-
-    def ls_packages(self, cid=None):
-
-        if cid == None:
-            lst = self.sess.query(self.Package).all()
-        else:
-            lst = self.sess.query(self.Package).filter_by(cid=cid).all()
-
-        lst_names = []
-        for i in lst:
-            lst_names.append(i.name)
-
-        del(lst)
-
-        lst_names.sort()
-
-        return lst_names
-
-    def ls_package_ids(self, cid=None):
-
-        if cid == None:
-            lst = self.sess.query(self.Package).all()
-        else:
-            lst = self.sess.query(self.Package).filter_by(cid=cid).all()
-
-        ids = []
-        for i in lst:
-            ids.append(i.pid)
-
-        del(lst)
-
-        return ids
-
-    def ls_package_dict(self, cid=None):
-
-        if cid == None:
-            lst = self.sess.query(self.Package).all()
-        else:
-            lst = self.sess.query(self.Package).filter_by(cid=cid).all()
-
-        dic = {}
-        for i in lst:
-            dic[int(i.pid)] = i.name
-
-        del(lst)
-
-        return dic
-
-    def ls_categories(self, parent_cid=0):
-
-        lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
-
-        lst_names = []
-        for i in lst:
-            lst_names.append(i.name)
-
-        del(lst)
-
-        lst_names.sort()
-
-        return lst_names
-
-    def ls_category_ids(self, parent_cid=0):
-
-        lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
-
-        ids = []
-        for i in lst:
-            ids.append(i.cid)
-
-        del(lst)
-
-        return ids
-
-    def ls_category_dict(self, parent_cid=0):
-
-        lst = None
-        if parent_cid == None:
-            lst = self.sess.query(self.Category).order_by(self.Category.name).all()
-        else:
-            lst = self.sess.query(self.Category).filter_by(parent_cid=parent_cid).order_by(self.Category.name).all()
-
-        dic = {}
-        for i in lst:
-            dic[int(i.cid)] = i.name
-
-        del(lst)
-
-        return dic
-
-
-    def _scan_repo_for_pkg_and_cat(self, root_dir, cid):
-
-        files = os.listdir(root_dir)
-
-        files.sort()
-
-        isfiles = 0
-
-        for each in files:
-            full_path = os.path.join(root_dir, each)
-
-            if not os.path.isdir(full_path):
-                isfiles += 1
-
-        if isfiles >= 3:
-            logging.warning("too many non-dirs : %(path)s" % {
-                'path': root_dir
-                })
-            print("       skipping")
-
-            return 1
-
-        for each in files:
-            if each in ['.', '..']:
-                continue
-
-            full_path = os.path.join(root_dir, each)
-
-            if os.path.islink(full_path):
-                continue
-
-            if is_repo_package_dir(full_path):
-                pa = self.Package(name=each, cid=cid)
-                self.sess.add(pa)
-                # TODO: May be comment this commit?
-                # self.sess.commit()
-                if sys.stdout.isatty():
-                    pcount = self.sess.query(self.Package).count()
-                    line_to_write = "       %(num)d packages found: %(name)s" % {
-                        'num': pcount,
-                        'name': pa.name
-                        }
-                    org.wayround.utils.file.progress_write(line_to_write)
-                del(pa)
-            elif os.path.isdir(full_path):
-                new_cat = self.Category(name=each, parent_cid=cid)
-
-                self.sess.add(new_cat)
-                self.sess.commit()
-
-                new_cat_cid = new_cat.cid
-                del(new_cat)
-
-                self._scan_repo_for_pkg_and_cat(
-                    full_path, new_cat_cid
-                    )
-            else:
-                logging.warning("garbage file found: %(path)s" % {
-                    'path': full_path
-                    })
-
-        return 0
-
-    def scan_repo_for_pkg_and_cat(self):
-
-        ret = 0
-
-        logging.info("Deleting old data")
-        self.sess.query(self.Category).delete()
-        self.sess.query(self.Package).delete()
-
-        logging.info("Committing")
-        self.sess.commit()
-
-        logging.info("Scanning repository...")
-        self._scan_repo_for_pkg_and_cat(
-            self._config['repository'], 0)
-
-        org.wayround.utils.file.progress_write_finish()
-        self.sess.commit()
-
-        logging.info("Searching for errors")
-        self.find_repository_package_name_collisions_in_database()
-        logging.info("Search operations finished")
-
-        return ret
-
-    def get_package_tags(self, name):
-        ret = []
-
-        q = self.sess.query(self.PackageTag).filter_by(name=name).all()
-
-        for i in q:
-            ret.append(i.tag)
-
-        return ret
-
-    def set_package_tags(self, name, tags):
-
-        self.sess.query(self.PackageTag).filter_by(name=name).delete()
-
-        for tag_name in tags:
-            new_tag = self.PackageTag()
-            new_tag.name = name
-            new_tag.tag = tag_name
-            self.sess.add(new_tag)
-
-        return
-
-    def get_package_path(self, pid):
-
-        ret = []
-        pkg = None
-
-        if pid != None:
-            pkg = self.sess.query(self.Package).filter_by(pid=pid).first()
-        else:
-            raise ValueError("Error getting package data from DB")
-
-        # print "pkg: "+repr(dir(pkg))
-
-        if pkg != None :
-
-            r = pkg.cid
-            # print 'r: '+str(r)
-            ret.insert(0, (pkg.pid, pkg.name))
-
-            while r != 0:
-                cat = self.sess.query(self.Category).filter_by(cid=r).first()
-                ret.insert(0, (cat.cid, cat.name))
-                r = cat.parent_cid
-
-            # This is _presumed_. NOT inserted
-            # ret.insert(0,(0, '/'))
-
-
-        #print '-gpp- :' + repr(ret)
-        return ret
-
-
-    def get_category_path(self, cid):
-
-        ret = []
-        categ = None
-
-        if cid != None:
-            categ = self.sess.query(self.Category).filter_by(cid=cid).first()
-        else:
-            raise ValueError("Error getting category data from DB")
-
-        # print "categ: "+repr(dir(categ))
-
-        if categ != None :
-
-            r = categ.parent_cid
-            # print 'r: '+str(r)
-            ret.insert(0, (categ.cid, categ.name))
-
-            while r != 0:
-                cat = self.sess.query(self.Category).filter_by(cid=r).first()
-                ret.insert(0, (cat.cid, cat.name))
-                r = cat.parent_cid
-
-            # This is _presumed_. NOT inserted
-            # ret.insert(0,(0, '/'))
-
-        #print '-gpp- :' + repr(ret)
-        return ret
-
-
-    def get_package_path_string(self, pid):
-        r = self.get_package_path(pid)
-        ret = join_pkg_path(r)
-        return ret
-
-    def get_category_path_string(self, cid):
-        r = self.get_category_path(cid)
-        ret = join_pkg_path(r)
-        return ret
-
-    def find_repository_package_name_collisions_in_database(self):
-
-        lst = self.sess.query(self.Package).order_by(self.Package.name).all()
-
-        lst2 = []
-
-        logging.info("Scanning paths")
-        for each in lst:
-            org.wayround.utils.file.progress_write('       ' + each.name)
-            lst2.append(self.get_package_path(pid=each.pid))
-        org.wayround.utils.file.progress_write_finish()
-
-        logging.info("Processing %(n)s packages..." % {'n': len(lst)})
-        sys.stdout.flush()
-
-        del(lst)
-
-        lst_dup = {}
-        pkg_paths = {}
-
-        for each in lst2:
-
-            l = each[-1][1].lower()
-
-            if not l in pkg_paths:
-                pkg_paths[l] = []
-
-            pkg_paths[l].append(join_pkg_path(each))
-
-        for each in list(pkg_paths.keys()):
-            if len(pkg_paths[each]) > 1:
-                lst_dup[each] = pkg_paths[each]
-
-
-        if len(lst_dup) == 0:
-            logging.info("Found %(c)s duplicated package names. Package locations look good!" % {
-                'c' : len(lst_dup)
-                })
-        else:
-            logging.warning("Found %(c)s duplicated package names" % {
-                'c' : len(lst_dup)
-                })
-
-            print("       listing:")
-
-            sorted_keys = list(lst_dup.keys())
-            sorted_keys.sort()
-
-            for each in sorted_keys:
-                print("          %(key)s:" % {
-                    'key': each
-                    })
-
-                lst_dup[each].sort()
-
-                for each2 in lst_dup[each]:
-                    print("             %(path)s" % {
-                        'path': each2
-                        })
-
-        return 0
-
-    def check_package_information(self, names=None):
-        """
-        names can be a list of names to check. if names is None -
-        check all.
-        """
-
-        found = []
-
-        not_found = []
-
-        names_found = []
-
-        if names == None:
-            q = self.sess.query(self.Package).all()
-            for i in q:
-                names_found.append(i.name)
-        else:
-            names_found = names
-
-        for i in names_found:
-            q = self.sess.query(self.PackageInfo).filter_by(name=i).first()
-
-            if q == None:
-                not_found.append(q)
-            else:
-                found.append(q)
-
-        return (found, not_found)
-
-    def package_info_record_to_dict(self, name=None, record=None):
-        """
-        This method can accept package name or complete record
-        instance.
-
-        If name is given, record is not used and method does db query
-        itself.
-
-        If name is not given, record is used as if it were this method's
-        query result.
-        """
-
-        ret = None
-
-        if name != None:
-            q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
-        else:
-            q = record
-
-        if q == None:
-            ret = None
-        else:
-
-            ret = dict()
-
-            tags = self.get_package_tags(q.name)
-
-            keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
-            keys.remove('tags')
-
-            for i in keys:
-                ret[i] = eval('q.{}'.format(i))
-
-            ret['tags'] = tags
-            ret['name'] = q.name
-
-        return ret
-
-
-    def package_info_dict_to_record(self, name, struct):
-
-        # TODO: check_info_dict(struct)
-
-        q = self.sess.query(self.PackageInfo).filter_by(name=name).first()
-
-        creating_new = False
-        if q == None:
-            q = self.PackageInfo()
-            creating_new = True
-
-#        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
-#
-#        for i in ['tags', 'name']:
-#            if i in keys:
-#                keys.remove(i)
-
-        q.name = name
-        q.description = str(struct["description"])
-        q.home_page = str(struct["home_page"])
-        q.buildscript = str(struct["buildscript"])
-        q.basename = str(struct["basename"])
-        q.version_re = str(struct["version_re"])
-        q.installation_priority = int(struct["installation_priority"])
-        q.removable = bool(struct["removable"])
-        q.reducible = bool(struct["reducible"])
-        q.auto_newest_src = bool(struct["auto_newest_src"])
-        q.auto_newest_pkg = bool(struct["auto_newest_pkg"])
-
-#        for i in keys:
-#            exec('q.{key} = struct["{key}"]'.format(key=i))
-
-
-        if creating_new:
-            self.sess.add(q)
-
-
-        self.set_package_tags(name, struct['tags'])
-        #self.commit_session()
-
-        return
-
-    def backup_package_info_to_filesystem(
-        self, mask='*', force_rewrite=False):
-
-        q = self.sess.query(self.PackageInfo).all()
-
-        for i in q:
-            if fnmatch.fnmatch(i.name, mask):
-                filename = os.path.join(
-                    self._config['info'], '%(name)s.xml' % {
-                        'name': i.name
-                        })
-                if not force_rewrite and os.path.exists(filename):
-                    logging.warning("File exists - skipping: %(name)s" % {
-                        'name': filename
-                        })
-                    continue
-                if force_rewrite and os.path.exists(filename):
-                    logging.info("File exists - rewriting: %(name)s" % {
-                        'name': filename
-                        })
-                if not os.path.exists(filename):
-                    logging.info("Writing: %(name)s" % {
-                        'name': filename
-                        })
-
-                r = self.package_info_record_to_dict(record=i)
-                if isinstance(r, dict):
-                    if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
-                        logging.error("can't write file %(name)s" % {
-                            'name': filename
-                            })
-
-        return
-
-    def load_package_info_from_filesystem(
-        self, filenames=[], rewrite_existing=False
-        ):
-
-        """
-        If names list is given - load only named and don't delete
-        existing
-        """
-
-        files = []
-        loaded = 0
-
-        for i in filenames:
-            if i.endswith('.xml'):
-                files.append(i)
-
-        files.sort()
-
-        missing = []
-        logging.info("Searching missing records")
-        files_l = len(files)
-        num = 0
-        for i in files:
-
-            if num == 0:
-                perc = 0
-            else:
-                perc = 100 / (float(files_l) / num)
-            org.wayround.utils.file.progress_write('    %(percent)d%%' % {
-                'percent': perc
-                })
-            num += 1
-
-            name = os.path.basename(i)[:-4]
-
-            if not rewrite_existing:
-                q = self.sess.query(self.PackageInfo).filter_by(
-                    name=name
-                    ).first()
-                if q == None:
-                    missing.append(i)
-            else:
-                missing.append(i)
-
-        org.wayround.utils.file.progress_write_finish()
-
-        org.wayround.utils.file.progress_write("-i- Loading missing records")
-
-        for i in missing:
-            struct = org.wayround.aipsetup.info.read_from_file(i)
-            name = os.path.basename(i)[:-4]
-            if isinstance(struct, dict):
-                org.wayround.utils.file.progress_write(
-                    "    loading record: %(name)s" % {
-                        'name': name
-                        }
-                    )
-
-                self.package_info_dict_to_record(
-                    name, struct
-                    )
-                loaded += 1
-            else:
-                logging.error("can't get info from file %(name)s" % {
-                    'name': i
-                    })
-        self.commit_session()
-        org.wayround.utils.file.progress_write_finish()
-
-        logging.info("Totally loaded %(n)d records" % {'n': loaded})
-        return
-
-    def delete_pkg_info_records(self, mask='*'):
-
-        q = self.sess.query(self.PackageInfo).all()
-
-        deleted = 0
-
-        for i in q:
-
-            if fnmatch.fnmatch(i.name, mask):
-                self.sess.delete(i)
-                deleted += 1
-                logging.info("deleted pkg info: %(name)s" % {
-                    'name': i.name
-                    })
-                sys.stdout.flush()
-
-        logging.info("Totally deleted %(n)d records" % {
-            'n': deleted
-            })
-        return
-
-    def list_pkg_info_records(self, mask='*', mute=False):
-        lst = []
-
-        q = self.sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
-
-        found = 0
-
-        for i in q:
-
-            if fnmatch.fnmatch(i.name, mask):
-                found += 1
-                lst.append(i.name)
-
-        if not mute:
-            org.wayround.utils.text.columned_list_print(lst)
-            logging.info("Total found %(n)d records" % {
-                'n': found
-                })
-        return lst
-
-    def find_missing_pkg_info_records(
-        self, create_templates=False, force_rewrite=False
-        ):
-
-        q = self.sess.query(self.Package).order_by(self.Package.name).all()
-
-        pkgs_checked = 0
-        pkgs_missing = 0
-        pkgs_written = 0
-        pkgs_exists = 0
-        pkgs_failed = 0
-        pkgs_forced = 0
-
-        missing = []
-
-        for each in q:
-
-            pkgs_checked += 1
-
-            q2 = self.sess.query(self.PackageInfo).filter_by(name=each.name).first()
-
-            if q2 == None:
-
-                pkgs_missing += 1
-                missing.append(each.name)
-
-                logging.warning("missing package DB info record: %(name)s" % {
-                    'name': each.name
-                    })
-
-                if create_templates:
-
-                    filename = os.path.join(
-                        self._config['info'],
-                        '%(name)s.xml' % {'name': each.name}
-                        )
-
-                    if os.path.exists(filename):
-                        if not force_rewrite:
-                            logging.info("XML info file already exists")
-                            pkgs_exists += 1
-                            continue
-                        else:
-                            pkgs_forced += 1
-
-                    if force_rewrite:
-                        logging.info("Forced template rewriting: {}".format(filename))
-
-                    if org.wayround.aipsetup.info.write_to_file(
-                        filename,
-                        org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
-                        pkgs_failed += 1
-                        logging.error("failed writing template to `%(name)s'" % {
-                            'name': filename
-                            })
-                    else:
-                        pkgs_written += 1
-
-        logging.info("""\
-Total records checked     : %(n1)d
-    Missing records           : %(n2)d
-    Missing but present on FS : %(n3)d
-    Written                   : %(n4)d
-    Write failed              : %(n5)d
-    Write forced              : %(n6)d
-""" % {
-            'n1': pkgs_checked,
-            'n2': pkgs_missing,
-            'n3': pkgs_exists,
-            'n4': pkgs_written,
-            'n5': pkgs_failed,
-            'n6': pkgs_forced
-})
-
-        missing.sort()
-        return missing
-
-    def find_outdated_pkg_info_records(self, mute=True):
-
-        ret = []
-
-        query_result = (
-            self.sess.query(self.PackageInfo).order_by(self.PackageInfo.name).all()
-            )
-
-        for i in query_result:
-
-            filename = os.path.join(
-                self._config['info'],
-                '{}.xml'.format(i.name)
-                )
-
-            if not os.path.exists(filename):
-                if not mute:
-                    logging.warning("File missing: {}".format(filename))
-                ret.append(i.name)
-                continue
-
-            d1 = org.wayround.aipsetup.info.read_from_file(filename)
-
-            if not isinstance(d1, dict):
-                if not mute:
-                    logging.error("Error parsing file: {}".format(filename))
-                ret.append(i.name)
-                continue
-
-            d2 = self.package_info_record_to_dict(record=i)
-            if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
-                if not mute:
-                    logging.warning("xml init file differs to `%(name)s' record" % {
-                        'name': i.name
-                        })
-                ret.append(i.name)
-
-        return ret
-
-    def update_outdated_pkg_info_records(self):
-
-        opir = self.find_outdated_pkg_info_records(mute=True)
-
-        opir2 = []
-
-        for i in opir:
-            opir2.append(
-                os.path.join(
-                    self._config['info'],
-                    '%(name)s.xml' % {'name': i}
-                    )
-                )
-
-        self.load_package_info_from_filesystem(
-            filenames=opir2,
-            rewrite_existing=True
-            )
-
-        return
-
-
-    def print_pkg_info_record(self, name):
-        r = self.package_info_record_to_dict(name=name)
-        if r == None:
-            logging.error("Not found named info record")
-        else:
-
-            cid = self.get_package_category_by_name(name)
-            if cid != None:
-                category = self.get_category_path_string(cid)
-            else:
-                category = "< Package not indexed! >"
-
-            # TODO: add all fields
-            print("""\
-+---[{name}]---------------------------------------+
-              basename: {basename}
-        version regexp: {version_re}
-             buildscript: {buildscript}
-              homepage: {home_page}
-              category: {category}
-                  tags: {tags}
- installation priority: {installation_priority}
-             removable: {removable}
-             reducible: {reducible}
-       auto newest src: {auto_newest_src}
-       auto newest pkg: {auto_newest_pkg}
-            newest src: {newest_src}
-            newest pkg: {newest_pkg}
-+---[{name}]---------------------------------------+
-{description}
-+---[{name}]---------------------------------------+
-""".format_map(
-        {
-        'tags'                  : ', '.join(r['tags']),
-        'category'              : category,
-        'name'                  : name,
-        'description'           : r['description'],
-        'home_page'             : r['home_page'],
-        'buildscript'           : r['buildscript'],
-        'basename'              : r['basename'],
-        'version_re'            : r['version_re'],
-        'installation_priority' : r['installation_priority'],
-        'removable'             : r['removable'],
-        'reducible'             : r['reducible'],
-        'auto_newest_src'       : r['auto_newest_src'],
-        'auto_newest_pkg'       : r['auto_newest_pkg'],
-        'newest_src'            : self.get_latest_source(name),
-        'newest_pkg'            : self.get_latest_package(name),
-        }
+def package_tags_connection():
+    return org.wayround.utils.tag.TagEngine(
+        org.wayround.aipsetup.config.config['package_tags_db_config']
         )
-    )
 
-    def find_package_info_by_basename_and_version(self, basename, version):
 
-        ret = {}
+def create_category(name='name', parent_cid=0, index_db=None):
 
-        q = self.sess.query(self.PackageInfo).filter_by(basename=basename).all()
+    new_cat = index_db.Category(name=name, parent_cid=parent_cid)
 
-        for i in q:
-            if re.match(i.version_re, version):
-                ret[i.name] = self.package_info_record_to_dict(i.name, i)
+    index_db.sess.add(new_cat)
+
+    new_cat_id = new_cat.cid
+
+    return new_cat_id
+
+def get_category_by_id(cid, index_db):
+
+    ret = None
+
+    q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+
+    if q:
+        ret = q.name
+
+    return ret
+
+def get_category_parent_by_id(cid, index_db):
+
+    ret = None
+
+    q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+
+    if q:
+        ret = q.parent_cid
+
+    return ret
+
+def get_category_by_path(path, index_db):
+
+    if not isinstance(path, str):
+        raise ValueError("`path' must be string")
+
+    ret = 0
+    if len(path) > 0:
+
+        logging.debug("path: {}".format(repr(path)))
+        path_parsed = path.split('/')
+
+        logging.debug("path_parsed: {}".format(repr(path_parsed)))
+
+        level = 0
+
+        for i in path_parsed:
+
+            logging.debug("Searching for: {}".format(i))
+            cat_dir = ls_category_dict(level)
+            logging.debug("cat_dir: {}".format(cat_dir))
+
+            found_cat = False
+            for j in cat_dir:
+                if cat_dir[j] == i:
+                    level = j
+                    ret = j
+                    logging.debug("found `{}' cid == {}".format(i, j))
+                    found_cat = True
+                    break
+
+            if not found_cat:
+                ret = None
+                logging.debug("not found `{}' cid".format(i))
                 break
 
-        return ret
+            if ret == None:
+                break
 
-    def set_latest_source(self, name, latest, force=False):
-        return self.set_latest(name, latest, 'src', force)
+    return ret
 
-    def set_latest_package(self, name, latest, force=False):
-        return self.set_latest(name, latest, 'pkg', force)
+def get_package_id(name, index_db):
 
-    def set_latest(self, name, latest, typ, force=False):
+    ret = None
 
-        logging.debug("setting latest `{}' to `{}'".format(typ, latest))
-        ret = None
+    q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
+    if q != None:
+        ret = q.pid
 
-        if not typ in ['src', 'pkg']:
-            raise ValueError("`typ' can be only 'src' or 'pkg'")
+    return ret
 
-        typ2 = ''
-        if typ == 'src':
-            typ2 = 'source'
-        elif typ == 'pkg':
-            typ2 = 'package'
+def get_package_category(pid, index_db):
+    ret = None
 
-        info = self.package_info_record_to_dict(name)
+    q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+    if q != None:
+        ret = q.cid
 
-        if info == None:
-            logging.error("Not found PackageInfo record for `{}'".format(name))
-        else:
+    return ret
 
-            logging.debug("Searching for existing `Newest' record of `{}'".format(name))
-            q = self.sess.query(
-                self.Newest
-                ).filter_by(
-                    name=name, typ=typ2
-                ).first()
+def get_package_category_by_name(name, index_db):
+    ret = None
 
-            if q == None:
-                logging.debug("existing `Newest' record of `{}' not found".format(name))
-                if info['auto_newest_' + typ] or force:
-                    logging.debug("creating `Newest' record of `{}'".format(name))
-                    a = self.Newest()
-                    a.name = name
-                    a.file = latest
-                    a.typ = typ2
-                    self.sess.add(a)
-                    ret = True
-                else:
-                    ret = False
-            else:
-                logging.debug("existing `Newest' record of `{}' found".format(name))
-                if info['auto_newest_' + typ] or force:
-                    logging.debug("updating `Newest' record of `{}'".format(name))
-                    q.file = latest
-                    self.sess.commit()
-                    ret = True
-                else:
-                    ret = False
+    q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
+    if q != None:
+        ret = q.cid
 
-        if ret == False:
-            logging.error(
-                "Not `auto_newest_{}' and not forced".format(typ)
+    return ret
+
+
+def get_package_by_id(pid, index_db):
+
+    ret = None
+
+    q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+    if q != None:
+        ret = q.name
+
+    return ret
+
+
+def ls_packages(cid=None, index_db=None):
+
+    if cid == None:
+        lst = index_db.sess.query(index_db.Package).all()
+    else:
+        lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+
+    lst_names = []
+    for i in lst:
+        lst_names.append(i.name)
+
+    del(lst)
+
+    lst_names.sort()
+
+    return lst_names
+
+def ls_package_ids(cid=None, index_db=None):
+
+    lst = None
+    if cid == None:
+        lst = index_db.sess.query(index_db.Package).all()
+    else:
+        lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+
+    ids = []
+    for i in lst:
+        ids.append(i.pid)
+
+    del(lst)
+
+    return ids
+
+def ls_package_dict(cid=None, index_db=None):
+
+    if cid == None:
+        lst = index_db.sess.query(index_db.Package).all()
+    else:
+        lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+
+    dic = {}
+    for i in lst:
+        dic[int(i.pid)] = i.name
+
+    del(lst)
+
+    return dic
+
+def ls_categories(parent_cid=0, index_db=None):
+
+    lst = index_db.sess.query(index_db.Category).filter_by(parent_cid=parent_cid).order_by(index_db.Category.name).all()
+
+    lst_names = []
+    for i in lst:
+        lst_names.append(i.name)
+
+    del(lst)
+
+    lst_names.sort()
+
+    return lst_names
+
+def ls_category_ids(parent_cid=0, index_db=None):
+
+    lst = index_db.sess.query(index_db.Category).filter_by(parent_cid=parent_cid).order_by(index_db.Category.name).all()
+
+    ids = []
+    for i in lst:
+        ids.append(i.cid)
+
+    del(lst)
+
+    return ids
+
+def ls_category_dict(parent_cid=0, index_db=None):
+
+    lst = None
+    if parent_cid == None:
+        lst = index_db.sess.query(index_db.Category).order_by(index_db.Category.name).all()
+    else:
+        lst = index_db.sess.query(index_db.Category).filter_by(parent_cid=parent_cid).order_by(index_db.Category.name).all()
+
+    dic = {}
+    for i in lst:
+        dic[int(i.cid)] = i.name
+
+    del(lst)
+
+    return dic
+
+
+def _scan_repo_for_pkg_and_cat(root_dir, cid, index_db):
+
+    files = os.listdir(root_dir)
+
+    files.sort()
+
+    isfiles = 0
+
+    for each in files:
+        full_path = os.path.join(root_dir, each)
+
+        if not os.path.isdir(full_path):
+            isfiles += 1
+
+    if isfiles >= 3:
+        logging.warning("too many non-dirs : %(path)s" % {
+            'path': root_dir
+            })
+        print("       skipping")
+
+        return 1
+
+    for each in files:
+        if each in ['.', '..']:
+            continue
+
+        full_path = os.path.join(root_dir, each)
+
+        if os.path.islink(full_path):
+            continue
+
+        if is_repo_package_dir(full_path):
+            pa = index_db.Package(name=each, cid=cid)
+            index_db.sess.add(pa)
+            # TODO: May be comment this commit?
+            # self.sess.commit()
+            if sys.stdout.isatty():
+                pcount = index_db.sess.query(index_db.Package).count()
+                line_to_write = "       %(num)d packages found: %(name)s" % {
+                    'num': pcount,
+                    'name': pa.name
+                    }
+                org.wayround.utils.file.progress_write(line_to_write)
+            del(pa)
+        elif os.path.isdir(full_path):
+            new_cat = index_db.Category(name=each, parent_cid=cid)
+
+            index_db.sess.add(new_cat)
+            index_db.sess.commit()
+
+            new_cat_cid = new_cat.cid
+            del(new_cat)
+
+            _scan_repo_for_pkg_and_cat(
+                full_path, new_cat_cid, index_db
                 )
-
-        return ret
-
-    def get_latest_source(self, name):
-        return self.get_latest(name, 'src')
-
-    def get_latest_package(self, name):
-        return self.get_latest(name, 'pkg')
-
-    def get_latest(self, name, typ):
-
-        ret = None
-
-        if not typ in ['src', 'pkg']:
-            raise ValueError("`typ' can be only 'src' or 'pkg'")
-
-        info = self.package_info_record_to_dict(name)
-
-        if info == None:
-            logging.error("Not found PackageInfo record for `{}'".format(name))
         else:
-            typ2 = ''
-            if typ == 'src':
-                typ2 = 'source'
-            elif typ == 'pkg':
-                typ2 = 'package'
+            logging.warning("garbage file found: %(path)s" % {
+                'path': full_path
+                })
 
-            if info['auto_newest_' + typ]:
-                latest = ''
-                if typ == 'src':
-                    latest = latest_source(name, self)
-                elif typ == 'pkg':
-                    latest = latest_package(name, self)
-                ret = latest
-            else:
+    return 0
 
-                latest_r = self.sess.query(
-                    self.Newest
-                    ).filter_by(
-                        name=name, typ=typ2
-                        ).first()
+def scan_repo_for_pkg_and_cat(index_db):
 
-                if latest_r == None:
-                    ret = None
-                else:
-                    latest = latest_r.file
-                    ret = latest
+    ret = 0
 
-        return ret
+    logging.info("Deleting old data")
+    index_db.sess.query(index_db.Category).delete()
+    index_db.sess.query(index_db.Package).delete()
 
-    def get_list_of_non_automatic_package_info(self):
+    logging.info("Committing")
+    index_db.sess.commit()
 
-        q = self.sess.query(
-            self.PackageInfo
-            ).filter(
-                self.PackageInfo.auto_newest_pkg == False
-                or self.PackageInfo.auto_newest_src == False
-                ).all()
+    logging.info("Scanning repository...")
+    _scan_repo_for_pkg_and_cat(
+        org.wayround.aipsetup.config.config['repository'],
+        0
+        )
 
-        lst = []
-        for i in q:
-            lst.append(self.package_info_record_to_dict(i.name, i))
+    org.wayround.utils.file.progress_write_finish()
+    index_db.sess.commit()
 
-        return lst
+    logging.info("Searching for errors")
+    find_repository_package_name_collisions_in_database()
+    logging.info("Search operations finished")
+
+    return ret
+
+def get_package_path(pid, index_db):
+
+    ret = []
+    pkg = None
+
+    if pid != None:
+        pkg = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+    else:
+        raise ValueError("Error getting package data from DB")
+
+    # print "pkg: "+repr(dir(pkg))
+
+    if pkg != None :
+
+        r = pkg.cid
+        # print 'r: '+str(r)
+        ret.insert(0, (pkg.pid, pkg.name))
+
+        while r != 0:
+            cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
+            ret.insert(0, (cat.cid, cat.name))
+            r = cat.parent_cid
+
+        # This is _presumed_. NOT inserted
+        # ret.insert(0,(0, '/'))
+
+
+    #print '-gpp- :' + repr(ret)
+    return ret
+
+
+def get_category_path(cid, index_db):
+
+    ret = []
+    categ = None
+
+    if cid != None:
+        categ = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+    else:
+        raise ValueError("Error getting category data from DB")
+
+    # print "categ: "+repr(dir(categ))
+
+    if categ != None :
+
+        r = categ.parent_cid
+        # print 'r: '+str(r)
+        ret.insert(0, (categ.cid, categ.name))
+
+        while r != 0:
+            cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
+            ret.insert(0, (cat.cid, cat.name))
+            r = cat.parent_cid
+
+        # This is _presumed_. NOT inserted
+        # ret.insert(0,(0, '/'))
+
+    #print '-gpp- :' + repr(ret)
+    return ret
+
+
+def get_package_path_string(pid, index_db):
+    r = index_db.get_package_path(pid)
+    ret = join_pkg_path(r)
+    return ret
+
+def get_category_path_string(cid, index_db):
+    r = index_db.get_category_path(cid)
+    ret = join_pkg_path(r)
+    return ret
+
+def find_repository_package_name_collisions_in_database(index_db):
+
+    lst = index_db.sess.query(index_db.Package).order_by(index_db.Package.name).all()
+
+    lst2 = []
+
+    logging.info("Scanning paths")
+    for each in lst:
+        org.wayround.utils.file.progress_write('       ' + each.name)
+        lst2.append(get_package_path(pid=each.pid))
+    org.wayround.utils.file.progress_write_finish()
+
+    logging.info("Processing %(n)s packages..." % {'n': len(lst)})
+    sys.stdout.flush()
+
+    del(lst)
+
+    lst_dup = {}
+    pkg_paths = {}
+
+    for each in lst2:
+
+        l = each[-1][1].lower()
+
+        if not l in pkg_paths:
+            pkg_paths[l] = []
+
+        pkg_paths[l].append(join_pkg_path(each))
+
+    for each in list(pkg_paths.keys()):
+        if len(pkg_paths[each]) > 1:
+            lst_dup[each] = pkg_paths[each]
+
+
+    if len(lst_dup) == 0:
+        logging.info("Found %(c)s duplicated package names. Package locations look good!" % {
+            'c' : len(lst_dup)
+            })
+    else:
+        logging.warning("Found %(c)s duplicated package names" % {
+            'c' : len(lst_dup)
+            })
+
+        print("       listing:")
+
+        sorted_keys = list(lst_dup.keys())
+        sorted_keys.sort()
+
+        for each in sorted_keys:
+            print("          %(key)s:" % {
+                'key': each
+                })
+
+            lst_dup[each].sort()
+
+            for each2 in lst_dup[each]:
+                print("             %(path)s" % {
+                    'path': each2
+                    })
+
+    return 0
+
+

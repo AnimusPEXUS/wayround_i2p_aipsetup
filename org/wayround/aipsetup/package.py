@@ -48,7 +48,7 @@ def exported_commands():
         'remove'        : package_remove,
         'complete'      : package_complete,
         'build'         : package_build,
-        'find_file'     : package_find_files,
+        'find'          : package_find_files,
         'index'         : package_put_to_index_many
         }
 
@@ -229,10 +229,13 @@ def package_build(opts, args):
     """
     Place named source files in new building site and build new package from them.
 
-    TARBALL
+    [--one] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
+
+    --one    treat all tarballs as for one build.
     """
 
     sources = []
+    multiple_packages = True
 
     ret = 0
 
@@ -244,7 +247,13 @@ def package_build(opts, args):
         ret = 2
 
     if ret == 0:
-        ret = build(sources)
+
+        if multiple_packages:
+            for i in sources:
+                build([i])
+            ret = 0
+        else:
+            ret = build(sources)
 
     return ret
 
@@ -273,10 +282,41 @@ def package_find_files(opts, args):
         lookfor = args[0]
 
     ret = find_file_in_files_installed_by_asps(
-        basedir, lookfor, mode=look_meth,
-        mute=False,
-        return_dict=False
+        basedir, lookfor, mode=look_meth
         )
+
+    if isinstance(ret, dict):
+
+        rd_keys = list(ret.keys())
+        if len(rd_keys) == 0:
+            logging.info("Not found")
+        else:
+            logging.info("Found %(num)d packages with `%(inc)s'" % {
+                'num': len(rd_keys),
+                'inc': lookfor
+                })
+
+            print("")
+            rd_keys.sort()
+
+            for i in rd_keys:
+                print("\t%(name)s:" % {
+                    'name': i
+                    })
+
+                pp_lst = ret[i]
+                pp_lst.sort()
+
+                for j in pp_lst:
+                    print("\t\t%(name)s" % {
+                        'name': j
+                        })
+
+                print("")
+        ret = 0
+
+    else:
+        ret = 1
 
     return ret
 
@@ -447,7 +487,7 @@ def check_package_aipsetup2(filename):
 def remove_package(name, force=False, destdir='/', mute=False):
     ret = 0
 
-    db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+    db = org.wayround.aipsetup.pkgindex.PackageIndex()
     info = db.package_info_record_to_dict(name)
     del db
 
@@ -505,7 +545,7 @@ def install_package(name, force=False, destdir='/'):
         else:
 
             info = None
-            if not force and isinstance(name_parsed, dict):
+            if isinstance(name_parsed, dict):
                 info = org.wayround.aipsetup.pkgindex.get_package_info(
                     name_parsed['groups']['name']
                     )
@@ -536,15 +576,66 @@ def install_package(name, force=False, destdir='/'):
                             " so no updation following"
                             )
                     else:
-                        if info['reducible']:
-                            logging.info("Reducing `{}' ASPs".format(name_parsed['groups']['name']))
-                            reduce_asps(name, asps, destdir)
+                        if isinstance(info, dict):
+                            if info['reducible']:
+                                logging.info("Reducing `{}' ASPs".format(name_parsed['groups']['name']))
+                                reduce_asps(name, asps, destdir)
 
     else:
         info = org.wayround.aipsetup.pkgindex.get_package_info(name)
 
         if not isinstance(info, dict):
             logging.error("Don't know about package")
+            ret = 2
+        else:
+            db = org.wayround.aipsetup.pkgindex.PackageIndex()
+            latest_in_repo = db.get_latest_package(name)
+            del(db)
+
+
+            latest_in_repo_no_ext = (
+                org.wayround.aipsetup.name.remove_extension_from_valid_package_name(
+                    os.path.basename(
+                        latest_in_repo
+                        )
+                    )
+                )
+
+            latest_installed = latest_installed_package_s_asp(name)
+            latest_installed_no_ext = (
+                org.wayround.aipsetup.name.remove_extension_from_valid_package_name(
+                    latest_installed
+                    )
+                )
+
+            if force or latest_installed_no_ext != latest_in_repo_no_ext:
+
+                if latest_installed_no_ext == latest_in_repo_no_ext and force:
+                    logging.info(
+                        "Forced installation of "
+                        "already installed package {name} ({asp_name})".format(
+                            name=name,
+                            asp_name=latest_installed_no_ext
+                            )
+                        )
+
+                full_name = os.path.abspath(
+                    org.wayround.aipsetup.config.config['repository'] +
+                    os.path.sep +
+                    latest_in_repo
+                    )
+
+#                ret = install_package(full_name, False, destdir)
+            else:
+                if latest_installed_no_ext == latest_in_repo_no_ext:
+                    logging.info(
+                        "Latest `{name}' already installed ({asp_name})".format(
+                            name=name,
+                            asp_name=latest_installed_no_ext
+                            )
+                        )
+
+                ret = 3
 
     return ret
 
@@ -849,6 +940,19 @@ def list_installed_packages(mask='*', destdir='/', mute=False):
 
     return ret
 
+def latest_installed_package_s_asp(name, destdir='/'):
+
+    lst = list_installed_package_s_asps(name, destdir)
+
+    latest = max(
+        lst,
+        key=functools.cmp_to_key(
+            org.wayround.aipsetup.version.package_version_comparator
+            )
+        )
+
+    return latest
+
 def list_installed_package_s_asps(name, destdir='/'):
 
     ret = 0
@@ -1032,8 +1136,7 @@ def complete(building_site):
     return ret
 
 def find_file_in_files_installed_by_asps(
-    destdir, instr, mode=None, mute=False,
-    return_dict=True
+    destdir, instr, mode=None
     ):
 
     ret = 0
@@ -1063,36 +1166,7 @@ def find_file_in_files_installed_by_asps(
             if len(found) != 0:
                 ret_dict[pkgname] = found
 
-        if not mute:
-            rd_keys = list(ret_dict.keys())
-            if len(rd_keys) == 0:
-                logging.info("Not found")
-            else:
-                logging.info("Found %(num)d packages with `%(inc)s'" % {
-                    'num': len(rd_keys),
-                    'inc': instr
-                    })
-
-                print("")
-                rd_keys.sort()
-
-                for i in rd_keys:
-                    print("\t%(name)s:" % {
-                        'name': i
-                        })
-
-                    pp_lst = ret_dict[i]
-                    pp_lst.sort()
-
-                    for j in pp_lst:
-                        print("\t\t%(name)s" % {
-                            'name': j
-                            })
-
-                    print("")
-
-        if return_dict:
-            ret = ret_dict
+        ret = ret_dict
 
     return ret
 
