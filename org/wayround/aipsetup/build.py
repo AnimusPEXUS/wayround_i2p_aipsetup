@@ -14,6 +14,8 @@ import org.wayround.aipsetup.buildscript
 import org.wayround.aipsetup.config
 import org.wayround.utils.log
 
+def cli_name():
+    return 'bd'
 
 def exported_commands():
     return {

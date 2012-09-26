@@ -20,6 +20,10 @@ def exported_commands():
 def commands_order():
     return ['list', 'edit']
 
+def cli_name():
+    return 'sc'
+
+
 def buildscript_list_files(opts, args):
     """
     List buildscript files

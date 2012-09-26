@@ -13,6 +13,9 @@ import lxml.etree
 
 import org.wayround.utils.file
 
+def cli_name():
+    return 'docbook'
+
 
 def exported_commands():
 

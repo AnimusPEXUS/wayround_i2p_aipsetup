@@ -64,6 +64,9 @@ for i in ASP_NAME_REGEXPS:
 
 del(i)
 
+def cli_name():
+    return 'n'
+
 
 def exported_commands():
     return {

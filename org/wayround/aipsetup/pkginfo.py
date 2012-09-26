@@ -6,6 +6,8 @@ import sys
 import re
 
 import sqlalchemy
+import sqlalchemy.ext
+
 
 import org.wayround.utils.file
 import org.wayround.utils.db
@@ -13,13 +15,16 @@ import org.wayround.utils.db
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.info
 
-import org.wayround.aipsetup.pkgindex as pkgindex
-import org.wayround.aipsetup.pkglatest as pkglatest
+import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkglatest
+
 
 class PackageInfo(org.wayround.utils.db.BasicDB):
     """
     Main package index DB handling class
     """
+
+    Base = sqlalchemy.ext.declarative.declarative_base()
 
     class Info(Base):
         """
@@ -106,7 +111,7 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
 
 
 
-def check_package_information(names, info_db, index_db):
+def get_lists_of_packages_missing_and_present_info_records(names, info_db, index_db):
     """
     names can be a list of names to check. if names is None -
     check all.
@@ -126,7 +131,7 @@ def check_package_information(names, info_db, index_db):
         names_found = names
 
     for i in names_found:
-        q = info_db.sess.query(info_db.PackageInfo).filter_by(name=i).first()
+        q = info_db.sess.query(info_db.Info).filter_by(name=i).first()
 
         if q == None:
             not_found.append(q)
@@ -136,7 +141,7 @@ def check_package_information(names, info_db, index_db):
     return (found, not_found)
 
 
-def package_info_record_to_dict(name=None, record=None, info_db=None):
+def get_package_info_record(name=None, record=None, info_db=None):
     """
     This method can accept package name or complete record
     instance.
@@ -148,10 +153,13 @@ def package_info_record_to_dict(name=None, record=None, info_db=None):
     query result.
     """
 
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
     ret = None
 
     if name != None:
-        q = info_db.sess.query(info_db.PackageInfo).filter_by(name=name).first()
+        q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
     else:
         q = record
 
@@ -173,15 +181,15 @@ def package_info_record_to_dict(name=None, record=None, info_db=None):
     return ret
 
 
-def package_info_dict_to_record(name, struct, info_db):
+def set_package_info_record(name, struct, info_db):
 
     # TODO: check_info_dict(struct)
 
-    q = info_db.sess.query(info_db.PackageInfo).filter_by(name=name).first()
+    q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
 
     creating_new = False
     if q == None:
-        q = info_db.PackageInfo()
+        q = info_db.Info()
         creating_new = True
 
 #        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
@@ -211,138 +219,15 @@ def package_info_dict_to_record(name, struct, info_db):
 
     return
 
-def backup_package_info_to_filesystem(
-    mask='*', force_rewrite=False, info_db=None
-    ):
 
-    q = info_db.sess.query(info_db.PackageInfo).all()
+def get_info_records_list(mask='*', mute=False, info_db=None):
 
-    for i in q:
-        if fnmatch.fnmatch(i.name, mask):
-            filename = os.path.join(
-                org.wayround.aipsetup.config.config['info'], '%(name)s.xml' % {
-                    'name': i.name
-                    })
-            if not force_rewrite and os.path.exists(filename):
-                logging.warning("File exists - skipping: %(name)s" % {
-                    'name': filename
-                    })
-                continue
-            if force_rewrite and os.path.exists(filename):
-                logging.info("File exists - rewriting: %(name)s" % {
-                    'name': filename
-                    })
-            if not os.path.exists(filename):
-                logging.info("Writing: %(name)s" % {
-                    'name': filename
-                    })
+    if info_db == None:
+        raise ValueError("info_db can't be None")
 
-            r = package_info_record_to_dict(record=i, info_db=info_db)
-            if isinstance(r, dict):
-                if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
-                    logging.error("can't write file %(name)s" % {
-                        'name': filename
-                        })
-
-    return
-
-def load_package_info_from_filesystem(
-    filenames=[], rewrite_existing=False, info_db=None
-    ):
-
-    """
-    If names list is given - load only named and don't delete
-    existing
-    """
-
-    files = []
-    loaded = 0
-
-    for i in filenames:
-        if i.endswith('.xml'):
-            files.append(i)
-
-    files.sort()
-
-    missing = []
-    logging.info("Searching missing records")
-    files_l = len(files)
-    num = 0
-    for i in files:
-
-        if num == 0:
-            perc = 0
-        else:
-            perc = 100 / (float(files_l) / num)
-        org.wayround.utils.file.progress_write('    %(percent)d%%' % {
-            'percent': perc
-            })
-        num += 1
-
-        name = os.path.basename(i)[:-4]
-
-        if not rewrite_existing:
-            q = info_db.sess.query(info_db.PackageInfo).filter_by(
-                name=name
-                ).first()
-            if q == None:
-                missing.append(i)
-        else:
-            missing.append(i)
-
-    org.wayround.utils.file.progress_write_finish()
-
-    org.wayround.utils.file.progress_write("-i- Loading missing records")
-
-    for i in missing:
-        struct = org.wayround.aipsetup.info.read_from_file(i)
-        name = os.path.basename(i)[:-4]
-        if isinstance(struct, dict):
-            org.wayround.utils.file.progress_write(
-                "    loading record: %(name)s" % {
-                    'name': name
-                    }
-                )
-
-            package_info_dict_to_record(
-                name, struct, info_db
-                )
-            loaded += 1
-        else:
-            logging.error("can't get info from file %(name)s" % {
-                'name': i
-                })
-    info_db.commit()
-    org.wayround.utils.file.progress_write_finish()
-
-    logging.info("Totally loaded %(n)d records" % {'n': loaded})
-    return
-
-def delete_pkg_info_records(mask='*', info_db=None):
-
-    q = info_db.sess.query(info_db.PackageInfo).all()
-
-    deleted = 0
-
-    for i in q:
-
-        if fnmatch.fnmatch(i.name, mask):
-            info_db.sess.delete(i)
-            deleted += 1
-            logging.info("deleted pkg info: %(name)s" % {
-                'name': i.name
-                })
-            sys.stdout.flush()
-
-    logging.info("Totally deleted %(n)d records" % {
-        'n': deleted
-        })
-    return
-
-def list_pkg_info_records(mask='*', mute=False, info_db=None):
     lst = []
 
-    q = info_db.sess.query(info_db.PackageInfo).order_by(info_db.PackageInfo.name).all()
+    q = info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
 
     found = 0
 
@@ -359,9 +244,16 @@ def list_pkg_info_records(mask='*', mute=False, info_db=None):
             })
     return lst
 
-def find_missing_pkg_info_records(
+def get_missing_info_records_list(
     create_templates=False, force_rewrite=False, index_db=None, info_db=None
     ):
+
+    if index_db == None:
+        raise ValueError("index_db can't be None")
+
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
 
     q = index_db.sess.query(index_db.Package).order_by(index_db.Package.name).all()
 
@@ -378,7 +270,7 @@ def find_missing_pkg_info_records(
 
         pkgs_checked += 1
 
-        q2 = info_db.sess.query(info_db.PackageInfo).filter_by(name=each.name).first()
+        q2 = info_db.sess.query(info_db.Info).filter_by(name=each.name).first()
 
         if q2 == None:
 
@@ -436,12 +328,15 @@ Write forced              : %(n6)d
     missing.sort()
     return missing
 
-def find_outdated_pkg_info_records(mute=True, info_db=None):
+def get_outdated_info_records_list(mute=True, info_db=None):
+
+    if info_db == None:
+        raise ValueError("info_db can't be None")
 
     ret = []
 
     query_result = (
-        info_db.sess.query(info_db.PackageInfo).order_by(info_db.PackageInfo.name).all()
+        info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
         )
 
     for i in query_result:
@@ -465,7 +360,7 @@ def find_outdated_pkg_info_records(mute=True, info_db=None):
             ret.append(i.name)
             continue
 
-        d2 = package_info_record_to_dict(record=i, info_db=info_db)
+        d2 = get_package_info_record(record=i, info_db=info_db)
         if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
             if not mute:
                 logging.warning("xml init file differs to `%(name)s' record" % {
@@ -475,22 +370,75 @@ def find_outdated_pkg_info_records(mute=True, info_db=None):
 
     return ret
 
+
+def get_info_record_by_basename_and_version(basename, version, info_db):
+
+    ret = {}
+
+    q = info_db.sess.query(info_db.Info).filter_by(basename=basename).all()
+
+    for i in q:
+        if re.match(i.version_re, version):
+            ret[i.name] = get_package_info_record(i.name, i, info_db=info_db)
+            break
+
+    return ret
+
+def get_non_automatic_packages_info_list(info_db):
+
+    q = info_db.sess.query(
+        info_db.Info
+        ).filter(
+            info_db.Info.auto_newest_pkg == False
+            or info_db.Info.auto_newest_src == False
+        ).all()
+
+    lst = []
+    for i in q:
+        lst.append(get_package_info_record(i.name, i, info_db=info_db))
+
+    return lst
+
+
+def guess_package_homepage(pkg_name, src_db=None):
+
+    if src_db == None:
+        raise ValueError("src_db can't be None")
+
+    files = src_db.objects_by_tags([pkg_name])
+
+    ret = {}
+    for i in files:
+        domain = i[1:].split('/')[0]
+
+        if not domain in ret:
+            ret[domain] = 0
+
+        ret[domain] += 1
+    logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(ret)))
+
+    return ret
+
 def update_outdated_pkg_info_records(info_db=None):
 
-    opir = find_outdated_pkg_info_records(mute=True, info_db=info_db)
+#    sys.stdout.flush()
+    if info_db == None:
+        raise ValueError("info_db can't be None")
 
-    opir2 = []
+    logging.info("Getting outdated records list")
 
-    for i in opir:
-        opir2.append(
-            os.path.join(
-                org.wayround.aipsetup.config.config['info'],
-                '%(name)s.xml' % {'name': i}
-                )
+    oir = get_outdated_info_records_list(mute=True, info_db=info_db)
+
+    logging.info("Found {} outdated records".format(len(oir)))
+
+    for i in range(len(oir)):
+        oir[i] = os.path.join(
+            org.wayround.aipsetup.config.config['info'],
+            oir[i] + '.xml'
             )
 
-    load_package_info_from_filesystem(
-        filenames=opir2,
+    load_info_records_from_fs(
+        filenames=oir,
         rewrite_existing=True,
         info_db=info_db
         )
@@ -498,36 +446,49 @@ def update_outdated_pkg_info_records(info_db=None):
     return
 
 
-def print_pkg_info_record(name, info_db=None, index_db=None):
+def print_info_record(name, info_db=None, index_db=None, latest_db=None):
 
-    r = package_info_record_to_dict(name=name, info_db=info_db)
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
+    if latest_db == None:
+        raise ValueError("latest_db can't be None")
+
+    if index_db == None:
+        raise ValueError("index_db can't be None")
+
+    r = get_package_info_record(name=name, info_db=info_db)
 
     if r == None:
         logging.error("Not found named info record")
     else:
 
-        cid = pkgindex.get_package_category_by_name(name, index_db=index_db)
+        cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(
+            name, index_db=index_db
+            )
         if cid != None:
-            category = pkgindex.get_category_path_string(cid, index_db=index_db)
+            category = org.wayround.aipsetup.pkgindex.get_category_path_string(
+                cid, index_db=index_db
+                )
         else:
             category = "< Package not indexed! >"
 
         # TODO: add all fields
         print("""\
 +---[{name}]---------------------------------------+
-          basename: {basename}
-    version regexp: {version_re}
-         buildscript: {buildscript}
-          homepage: {home_page}
-          category: {category}
-              tags: {tags}
-installation priority: {installation_priority}
-         removable: {removable}
-         reducible: {reducible}
-   auto newest src: {auto_newest_src}
-   auto newest pkg: {auto_newest_pkg}
-        newest src: {newest_src}
-        newest pkg: {newest_pkg}
+              basename: {basename}
+        version regexp: {version_re}
+           buildscript: {buildscript}
+              homepage: {home_page}
+              category: {category}
+                  tags: {tags}
+ installation priority: {installation_priority}
+             removable: {removable}
+             reducible: {reducible}
+       auto newest src: {auto_newest_src}
+       auto newest pkg: {auto_newest_pkg}
+            newest src: {newest_src}
+            newest pkg: {newest_pkg}
 +---[{name}]---------------------------------------+
 {description}
 +---[{name}]---------------------------------------+
@@ -546,52 +507,152 @@ installation priority: {installation_priority}
     'reducible'             : r['reducible'],
     'auto_newest_src'       : r['auto_newest_src'],
     'auto_newest_pkg'       : r['auto_newest_pkg'],
-    'newest_src'            : pkglatest.get_latest_source(name),
-    'newest_pkg'            : pkglatest.get_latest_package(name),
+    'newest_src'            : (
+        org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+            name,
+            latest_db=latest_db,
+            info_db=info_db
+            )
+        ),
+    'newest_pkg'            : (
+        org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+            name,
+            latest_db=latest_db,
+            info_db=info_db
+            )
+        ),
     }
     )
 )
 
-def find_package_info_by_basename_and_version(basename, version, info_db):
+def delete_info_records(mask='*', info_db=None):
 
-    ret = {}
+    if info_db == None:
+        raise ValueError("info_db can't be None")
 
-    q = info_db.sess.query(info_db.PackageInfo).filter_by(basename=basename).all()
+    q = info_db.sess.query(info_db.Info).all()
+
+    deleted = 0
 
     for i in q:
-        if re.match(i.version_re, version):
-            ret[i.name] = package_info_record_to_dict(i.name, i, info_db=info_db)
-            break
 
-    return ret
+        if fnmatch.fnmatch(i.name, mask):
+            info_db.sess.delete(i)
+            deleted += 1
+            logging.info(
+                "deleted pkg info: {}".format(i.name)
+                )
+            sys.stdout.flush()
 
-def get_list_of_non_automatic_package_info(info_db):
+    logging.info("Totally deleted {} records".format(deleted))
 
-    q = info_db.sess.query(
-        info_db.PackageInfo
-        ).filter(
-            info_db.PackageInfo.auto_newest_pkg == False
-            or info_db.PackageInfo.auto_newest_src == False
-            ).all()
+    return
 
-    lst = []
+def save_info_records_to_fs(
+    mask='*', force_rewrite=False, info_db=None
+    ):
+
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
+    q = info_db.sess.query(info_db.Info).all()
+
     for i in q:
-        lst.append(package_info_record_to_dict(i.name, i, info_db=info_db))
+        if fnmatch.fnmatch(i.name, mask):
+            filename = os.path.join(
+                org.wayround.aipsetup.config.config['info'], '%(name)s.xml' % {
+                    'name': i.name
+                    })
+            if not force_rewrite and os.path.exists(filename):
+                logging.warning("File exists - skipping: %(name)s" % {
+                    'name': filename
+                    })
+                continue
+            if force_rewrite and os.path.exists(filename):
+                logging.info("File exists - rewriting: %(name)s" % {
+                    'name': filename
+                    })
+            if not os.path.exists(filename):
+                logging.info("Writing: %(name)s" % {
+                    'name': filename
+                    })
 
-    return lst
+            r = get_package_info_record(record=i, info_db=info_db)
+            if isinstance(r, dict):
+                if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
+                    logging.error("can't write file %(name)s" % {
+                        'name': filename
+                        })
 
-def guess_package_homepage(pkg_name, src_db=None):
+    return
 
-    files = src_db.objects_by_tags([pkg_name])
+def load_info_records_from_fs(
+    filenames=[], rewrite_existing=False, info_db=None
+    ):
+    """
+    If names list is given - load only named and don't delete
+    existing
+    """
 
-    ret = {}
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
+    files = []
+    loaded = 0
+
+    for i in filenames:
+        if i.endswith('.xml'):
+            files.append(i)
+
+    files.sort()
+
+    missing = []
+    logging.info("Searching missing records")
+    files_l = len(files)
+    num = 0
     for i in files:
-        domain = i[1:].split('/')[0]
 
-        if not domain in ret:
-            ret[domain] = 0
+        num += 1
 
-        ret[domain] += 1
-    logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(ret)))
+        if num == 0:
+            perc = 0
+        else:
+            perc = float(100) / (float(files_l) / float(num))
+        org.wayround.utils.file.progress_write('    {:6.2f}%'.format(perc))
 
-    return ret
+        name = os.path.basename(i)[:-4]
+
+        if not rewrite_existing:
+            q = info_db.sess.query(info_db.Info).filter_by(
+                name=name
+                ).first()
+            if q == None:
+                missing.append(i)
+        else:
+            missing.append(i)
+
+    org.wayround.utils.file.progress_write_finish()
+
+    org.wayround.utils.file.progress_write("-i- Loading missing records")
+
+    for i in missing:
+        struct = org.wayround.aipsetup.info.read_from_file(i)
+        name = os.path.basename(i)[:-4]
+        if isinstance(struct, dict):
+            org.wayround.utils.file.progress_write(
+                "    loading record: %(name)s" % {
+                    'name': name
+                    }
+                )
+
+            set_package_info_record(
+                name, struct, info_db
+                )
+            loaded += 1
+        else:
+            logging.error("Can't get info from file {}".format(i))
+    info_db.commit()
+    org.wayround.utils.file.progress_write_finish()
+
+    logging.info("Totally loaded {} records".format(loaded))
+    return

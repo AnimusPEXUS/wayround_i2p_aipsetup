@@ -32,12 +32,16 @@ import org.wayround.utils.log
 
 
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.pack
 import org.wayround.aipsetup.sysupdates
+
+def cli_name():
+    return 'pkg'
 
 
 def exported_commands():
@@ -84,7 +88,9 @@ def package_install(opts, args):
         ret = 2
     else:
         name = args[0]
-        ret = install_package(name, force, basedir)
+        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+        ret = install_package(name, force, basedir, info_db=info_db)
+        del info_db
         org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
@@ -248,12 +254,16 @@ def package_build(opts, args):
 
     if ret == 0:
 
+        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+
         if multiple_packages:
             for i in sources:
-                build([i])
+                build([i], info_db)
             ret = 0
         else:
-            ret = build(sources)
+            ret = build(sources, info_db)
+
+        del info_db
 
     return ret
 
@@ -530,7 +540,7 @@ def remove_package(name, force=False, destdir='/', mute=False):
 
     return ret
 
-def install_package(name, force=False, destdir='/'):
+def install_package(name, force=False, destdir='/', info_db=None):
 
     ret = 0
 
@@ -546,8 +556,9 @@ def install_package(name, force=False, destdir='/'):
 
             info = None
             if isinstance(name_parsed, dict):
-                info = org.wayround.aipsetup.pkgindex.get_package_info(
-                    name_parsed['groups']['name']
+                info = org.wayround.aipsetup.pkginfo.get_package_info_record(
+                    name_parsed['groups']['name'],
+                    info_db=info_db
                     )
 
             if not isinstance(info, dict) and not force:
@@ -582,7 +593,10 @@ def install_package(name, force=False, destdir='/'):
                                 reduce_asps(name, asps, destdir)
 
     else:
-        info = org.wayround.aipsetup.pkgindex.get_package_info(name)
+        info = org.wayround.aipsetup.pkginfo.get_package_info_record(
+            name,
+            info_db=info_db
+            )
 
         if not isinstance(info, dict):
             logging.error("Don't know about package")
@@ -1025,7 +1039,7 @@ def list_files_installed_by_asp(
 
 
 # TODO: build [TARBALL1] [TARBALL2] .. [TARBALLn]
-def build(source_files):
+def build(source_files, info_db):
     ret = 0
 
     par_res = org.wayround.aipsetup.name.source_name_parse(source_files[0])
@@ -1040,8 +1054,10 @@ def build(source_files):
         except:
             pass
 
-        package_info = org.wayround.aipsetup.pkgindex.find_package_info_by_basename_and_version(
-            par_res['groups']['name'], par_res['groups']['version']
+        package_info = org.wayround.aipsetup.pkginfo.get_info_record_by_basename_and_version(
+            par_res['groups']['name'],
+            par_res['groups']['version'],
+            info_db=info_db
             )
 
         if package_info == {}:

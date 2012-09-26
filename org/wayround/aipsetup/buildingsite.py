@@ -74,6 +74,10 @@ def commands_order():
         'apply_info'
         ]
 
+def cli_name():
+    return 'bsi'
+
+
 def buildingsite_init(opts, args):
     """
     Initiate new building site dir
@@ -117,7 +121,9 @@ def buildingsite_apply_info(opts, args):
         if '-d' in opts:
             dirname = opts['-d']
 
-        ret = apply_info(dirname, source_filename=name)
+        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+        ret = apply_info(dirname, source_filename=name, info_db=info_db)
+        del info_db
 
     return ret
 
@@ -349,7 +355,7 @@ def apply_constitution_on_buildingsite(dirname):
     return ret
 
 
-def apply_pkg_info_on_buildingsite(dirname):
+def apply_pkg_info_on_buildingsite(dirname, info_db):
 
     ret = 0
 
@@ -372,9 +378,10 @@ def apply_pkg_info_on_buildingsite(dirname):
 
         logging.debug("Getting info from index DB")
 
-        res = org.wayround.aipsetup.pkgindex.find_package_info_by_basename_and_version(
+        res = org.wayround.aipsetup.pkginfo.get_info_record_by_basename_and_version(
             package_info['pkg_nameinfo']['groups']['name'],
-            package_info['pkg_nameinfo']['groups']['version']
+            package_info['pkg_nameinfo']['groups']['version'],
+            info_db=info_db
             )
 
         offerings = list(res.keys())
@@ -454,7 +461,7 @@ def apply_pkg_info_on_buildingsite(dirname):
 #    return ret
 
 
-def apply_info(dirname='.', source_filename=None):
+def apply_info(dirname='.', source_filename=None, info_db=None):
 
     ret = 0
 
@@ -474,7 +481,7 @@ def apply_info(dirname='.', source_filename=None):
         ret = 1
     elif apply_constitution_on_buildingsite(dirname) != 0:
         ret = 2
-    elif apply_pkg_info_on_buildingsite(dirname) != 0:
+    elif apply_pkg_info_on_buildingsite(dirname, info_db) != 0:
         ret = 3
 #    elif apply_pkg_buildscript_on_buildingsite(dirname) != 0:
 #        ret = 4

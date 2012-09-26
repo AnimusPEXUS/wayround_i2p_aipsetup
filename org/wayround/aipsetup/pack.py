@@ -101,6 +101,9 @@ Makes final packaging and creates UNICORN software package
 
     return ret
 
+def cli_name():
+    return 'pk'
+
 def exported_commands():
 
     commands = {}

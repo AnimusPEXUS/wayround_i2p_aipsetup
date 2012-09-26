@@ -20,6 +20,10 @@ def commands_order():
         'install'
         ]
 
+def cli_name():
+    return 'unicorn'
+
+
 def unicorn_install(opts, args):
     """
     Install new (initial) UNICORN distribution into selected directory.

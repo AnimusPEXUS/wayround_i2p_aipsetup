@@ -29,6 +29,9 @@ def edefault(status, message, traceback, version):
         'status': str(status)
         }
 
+def cli_name():
+    return 'srv'
+
 def exported_commands():
     return {
         'start': server_start_host

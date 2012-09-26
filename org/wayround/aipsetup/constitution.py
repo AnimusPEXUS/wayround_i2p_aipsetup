@@ -20,6 +20,9 @@ def exported_commands():
 def commands_order():
     return ['edit', 'cat']
 
+def cli_name():
+    return 'const'
+
 def constitution_edit(opts, args):
     """
     Edit constitution.py file in UNICORN directory

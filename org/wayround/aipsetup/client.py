@@ -16,6 +16,9 @@ import org.wayround.aipsetup.version
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pkgindex
 
+def cli_name():
+    return 'cli'
+
 
 def exported_commands():
     return {

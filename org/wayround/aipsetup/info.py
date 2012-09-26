@@ -117,6 +117,9 @@ def commands_order():
         'mass_info_fix'
         ]
 
+def cli_name():
+    return 'i'
+
 def info_list_files(opts, args, typ='info', mask='*.xml'):
     """
     List XML files in pkg_info dir of UNICORN dir
@@ -223,9 +226,7 @@ def info_mass_info_fix(opts, args):
     lst_c = len(lst)
     lst_i = 0
 
-    src_db = org.wayround.utils.tag.TagEngine(
-        org.wayround.aipsetup.config.config['source_index']
-        )
+    src_db = org.wayround.aipsetup.pkgindex.get_sources_connection()
 
     for i in lst:
 
@@ -251,9 +252,7 @@ def info_mass_info_fix(opts, args):
 
     org.wayround.utils.file.progress_write_finish()
 
-    logging.info("Processed %(n)d files" % {
-        'n': len(lst)
-        })
+    logging.info("Processed {} files".format(lst))
 
     return 0
 

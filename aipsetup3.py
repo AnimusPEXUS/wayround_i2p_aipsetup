@@ -8,6 +8,7 @@ import org.wayround.utils.getopt2
 import org.wayround.aipsetup
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.help
+import org.wayround.aipsetup.modhelp
 
 
 # Logging settings
@@ -70,38 +71,49 @@ elif args_l == 0:
 
 else:
 
-    if not args[0] in org.wayround.aipsetup.AIPSETUP_MODULES_LIST:
-        logging.error("Have no module named `{}'".format(args[0]))
-        ret = 1
+    long_name = org.wayround.aipsetup.modhelp.short_name_to_long(args[0])
+
+    items = org.wayround.aipsetup.modhelp.modules_dict()
+
+    if long_name == None:
+        logging.error("Can't get long module name by short(`{}').".format(args[0]))
+        logging.info("Available modules: {}".format(', '.join(list(items.keys()))))
+        ret = 2
+
     else:
 
-        if org.wayround.aipsetup.config.config == {} \
-            and args[0] in org.wayround.aipsetup.AIPSETUP_MODULES_LIST_FUSED:
-            logging.error("Configuration error. Only allowed modules are {}".format(
-                    repr(list(org.wayround.aipsetup.AIPSETUP_MODULES_LIST - org.wayround.aipsetup.AIPSETUP_MODULES_LIST_FUSED))
-                    )
-                )
+        if not args[0] in items.keys():
+            logging.error("Have no module named `{}'".format(args[0]))
+            ret = 1
         else:
 
-            try:
-                exec("import org.wayround.aipsetup.{}".format(args[0]))
-            except:
-                logging.exception("Error importing submodule `{}'".format(args[0]))
+            if org.wayround.aipsetup.config.config == {} \
+                and not long_name in org.wayround.aipsetup.AIPSETUP_CLI_MODULE_LIST_UNFUSED:
+                logging.error("Configuration error. Only allowed modules are {}".format(
+                        org.wayround.aipsetup.AIPSETUP_CLI_MODULE_LIST_UNFUSED
+                        )
+                    )
             else:
-                commands = {}
+
                 try:
-                    exec("commands = org.wayround.aipsetup.{}.exported_commands()".format(args[0]))
+                    exec("import org.wayround.aipsetup.{}".format(long_name))
                 except:
-                    logging.exception("Can't get `{}' module exported commands".format(args[0]))
-
+                    logging.exception("Error importing module `{}'".format(long_name))
                 else:
-                    if args_l == 1:
-                        logging.error("module command is required. see aipsetup {} --help".format(args[0]))
-                    else:
-                        if not args[1] in commands:
-                            logging.error("Function `{}' not exported by module `{}'".format(args[1], args[0]))
-                        else:
+                    commands = {}
+                    try:
+                        exec("commands = org.wayround.aipsetup.{}.exported_commands()".format(long_name))
+                    except:
+                        logging.exception("Can't get `{}' module exported commands".format(long_name))
 
-                            ret = commands[args[1]](opts, args[2:])
+                    else:
+                        if args_l == 1:
+                            logging.error("module command is required. see aipsetup {} --help".format(args[0]))
+                        else:
+                            if not args[1] in commands:
+                                logging.error("Function `{}' not exported by module `{}'".format(args[1], args[0]))
+                            else:
+
+                                ret = commands[args[1]](opts, args[2:])
 
 exit(ret)

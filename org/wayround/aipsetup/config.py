@@ -112,6 +112,9 @@ def commands_order():
         'print_config'
         ]
 
+def cli_name():
+    return 'cfg'
+
 
 def config_create_example(opts, args):
     """

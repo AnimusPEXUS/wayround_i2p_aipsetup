@@ -1,7 +1,7 @@
 AIPSETUP_VERSION = '3.0'
 
-AIPSETUP_MODULES_LIST = frozenset(
-    [
+# modules allowed to be accessed from CLI (only if aipsetup.conf setup properly)
+AIPSETUP_CLI_MODULE_LIST = [
     'info',
     'buildscript',
     'constitution',
@@ -12,7 +12,7 @@ AIPSETUP_MODULES_LIST = frozenset(
     'package',
     'server',
     'client',
-    'pkgindex',
+    'repoman',
 
     'name',
     'docbook',
@@ -20,7 +20,10 @@ AIPSETUP_MODULES_LIST = frozenset(
 
     'config',
     'unicorn'
-     ]
-    )
+    ]
 
-AIPSETUP_MODULES_LIST_FUSED = AIPSETUP_MODULES_LIST - set(['config'])
+# modules allowed to be accessed from CLI without 
+# proper aipsetup.conf
+AIPSETUP_CLI_MODULE_LIST_UNFUSED = [
+    'config',
+    ]
