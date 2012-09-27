@@ -19,7 +19,7 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
 
 import org.wayround.aipsetup.pkginfo
-import org.wayround.aipsetup.pkgtags
+import org.wayround.aipsetup.pkgtag
 
 
 class PackageIndex(org.wayround.utils.db.BasicDB):

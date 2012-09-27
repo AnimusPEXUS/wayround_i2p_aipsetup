@@ -27,6 +27,7 @@ CONFIG_FULL_SAMPLE = {
     'repository'         : '/mnt/sda3/home/agu/_UNICORN/pkg_repository',
     'source'             : '/mnt/sda3/home/agu/_UNICORN/pkg_source',
     'buildingsites'      : '/mnt/sda3/home/agu/_UNICORN/pkg_buildingsites',
+    'tags'               : '/mnt/sda3/home/agu/_UNICORN/tags.json',
 
 
     # DB config
@@ -68,6 +69,7 @@ CONFIG_ALLOWED_PARAMETERS = frozenset([
     'editor',
     'unicorn_root',
     'repository',
+    'tags',
     'source',
     'buildingsites',
     'package_index_db_config',
@@ -227,6 +229,9 @@ def format_config(config):
     # where to build stuff
     'buildingsites'      : '{buildingsites}',
 
+    # tags.json
+    'tags':              : '{tags}'
+
 
     # sql settings
     'package_index_db_config'    : '{package_index_db_config}',
@@ -272,7 +277,8 @@ def config_check_after_load(indict):
         ('constitution'    , 'system_constitution.py'),
         ('buildscript'     , 'pkg_buildscripts'),
         ('info'            , 'pkg_info'),
-        ('server_files'    , 'server_files')
+        ('server_files'    , 'server_files'),
+        ('tags'    , 'tags.json')
         ]:
         indict[i] = os.path.abspath(
             os.path.join(indict['unicorn_root'], j)

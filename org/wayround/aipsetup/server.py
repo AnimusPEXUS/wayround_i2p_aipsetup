@@ -14,6 +14,8 @@ import cherrypy.lib
 
 
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.pkgtag
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.serverui
 
@@ -75,36 +77,50 @@ class Index:
             if path == None:
                 path = ''
 
-            db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
 
-            txt = org.wayround.aipsetup.serverui.page_category(db, path)
+            txt = org.wayround.aipsetup.serverui.page_category(index_db, path)
 
-            db.close()
+            index_db.close()
 
         elif mode == 'json':
 
-            db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
 
             if path == None:
 
-                pkgs = db.ls_package_dict(None)
+                pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
+                    None, index_db=index_db
+                    )
 
-                cats = db.ls_category_dict(None)
+                cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
+                    None, index_db=index_db
+                    )
 
             else:
-                cid = db.get_category_by_path(path)
+                cid = org.wayround.aipsetup.pkgindex.get_category_by_path(
+                    path, index_db=index_db
+                    )
 
-                pkgs = db.ls_package_dict(cid)
+                pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
+                    cid, index_db=index_db
+                    )
 
-                cats = db.ls_category_dict(cid)
+                cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
+                    cid, index_db=index_db
+                    )
 
             for i in list(pkgs.keys()):
-                pkgs[i] = db.get_package_path_string(i)
+                pkgs[i] = org.wayround.aipsetup.pkgindex.get_package_path_string(
+                    i, index_db=index_db
+                    )
 
             for i in list(cats.keys()):
-                cats[i] = db.get_category_path_string(i)
+                cats[i] = org.wayround.aipsetup.pkgindex.get_category_path_string(
+                    i, index_db=index_db
+                    )
 
-            db.close()
+            index_db.close()
 
 
 
@@ -136,14 +152,21 @@ class Index:
         txt = ''
         if mode == 'normal':
 
-            db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
+            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
+            tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
 
-            txt = org.wayround.aipsetup.serverui.page_package(db, name)
+            txt = org.wayround.aipsetup.serverui.page_package(index_db, info_db, latest_db, tag_db, name)
 
-            del db
+            del index_db
+            del info_db
+            del latest_db
+            del tag_db
+
         elif mode == 'packages':
 
-            files = org.wayround.aipsetup.pkgindex.get_package_files(name)
+            files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db=index_db)
 
             files.sort(
                 reverse=True,
@@ -180,12 +203,15 @@ class Index:
 
         elif mode == 'info':
 
-            db = org.wayround.aipsetup.pkgindex.PackageDatabase()
-            r = db.package_info_record_to_dict(name=name)
+            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
+            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
 
-            cid = db.get_package_category_by_name(name)
+            r = org.wayround.aipsetup.pkginfo.get_package_info_record(name=name, info_db=info_db)
+
+            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db=index_db)
             if cid != None:
-                category = db.get_category_path_string(cid)
+                category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db=index_db)
             else:
                 category = "< Package not indexed! >"
 
@@ -194,13 +220,15 @@ class Index:
             info['tags'] = ', '.join(r['tags'])
             info['category'] = category
             info['newest_pkg'] = (
-                org.wayround.aipsetup.pkgindex.latest_package(name, db)
+                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, index_db=index_db, latest_db=latest_db)
                 )
             info['newest_src'] = (
-                org.wayround.aipsetup.pkgindex.latest_source(name, db)
+                org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, index_db=index_db, latest_db=latest_db)
                 )
 
-            del db
+            del index_db
+            del info_db
+            del latest_db
 
             txt = json.dumps(info, indent=2, sort_keys=True)
 

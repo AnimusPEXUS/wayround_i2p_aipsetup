@@ -11,7 +11,11 @@ import org.wayround.utils.list
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
+
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.pkglatest
+import org.wayround.aipsetup.pkgtag
 
 
 class MainWindow:
@@ -107,8 +111,12 @@ class MainWindow:
 
                 self.ui['entry7'].set_text(str(data['home_page']))
 
+                tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+
                 b = Gtk.TextBuffer()
-                b.set_text('\n'.join(data['tags']))
+                b.set_text('\n'.join(tag_db.get_tags(name[:-4])))
+
+                tag_db.close()
 
                 self.ui['textview2'].set_buffer(b)
 
@@ -136,13 +144,35 @@ class MainWindow:
                         )
                     )
 
-                db = org.wayround.aipsetup.pkgindex.PackageDatabase()
+                info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+                index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
+                latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
 
-                self.ui['entry4'].set_text(str(db.get_latest_source(name[:-4])))
+                self.ui['entry4'].set_text(
+                    str(
+                        org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+                            name[:-4],
+                            latest_db=latest_db,
+                            info_db=info_db,
+                            index_db=index_db
+                            )
+                        )
+                    )
 
-                self.ui['entry6'].set_text(str(db.get_latest_package(name[:-4])))
+                self.ui['entry6'].set_text(
+                    str(
+                        org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+                            name[:-4],
+                            latest_db=latest_db,
+                            info_db=info_db,
+                            index_db=index_db
+                            )
+                        )
+                    )
 
-                del db
+                del info_db
+                del latest_db
+                del index_db
 
                 self.currently_opened = name
                 self.ui['window1'].set_title(name + " - aipsetup v3 .xml info file editor")
@@ -172,11 +202,11 @@ class MainWindow:
 
         data['home_page'] = self.ui['entry7'].get_text()
 
-        b = self.ui['textview2'].get_buffer()
-
-        data['tags'] = org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(
-            b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
-            )
+#        b = self.ui['textview2'].get_buffer()
+#
+#        data['tags'] = org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(
+#            b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
+#            )
 
         data['buildscript'] = self.ui['combobox-entry'].get_text()
 
@@ -213,11 +243,14 @@ class MainWindow:
             dbu = ''
             if update_db:
                 try:
-                    db = org.wayround.aipsetup.pkgindex.PackageDatabase()
-                    db.load_package_info_from_filesystem(
-                        [filename], rewrite_existing=True
+                    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+
+                    org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
+                        [filename], rewrite_existing=True, info_db=info_db
                         )
-                    del db
+
+                    del info_db
+
                     dbu = "DB updated"
                 except:
                     dbu = "Some error while updating DB"

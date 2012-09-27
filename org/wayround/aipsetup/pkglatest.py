@@ -265,23 +265,26 @@ def _set_latest_to_record(
 
     return ret
 
-def get_latest_src_from_record(name, latest_db=None, info_db=None):
+def get_latest_src_from_record(name, latest_db=None, info_db=None, index_db=None):
     return _get_latest_from_record(
-        name, 'src', info_db=info_db, latest_db=latest_db
+        name, 'src', info_db=info_db, latest_db=latest_db, index_db=index_db
         )
 
-def get_latest_pkg_from_record(name, latest_db=None, info_db=None):
+def get_latest_pkg_from_record(name, latest_db=None, info_db=None, index_db=None):
     return _get_latest_from_record(
-        name, 'pkg', info_db=info_db, latest_db=latest_db
+        name, 'pkg', info_db=info_db, latest_db=latest_db, index_db=index_db
         )
 
-def _get_latest_from_record(name, typ, latest_db=None, info_db=None):
+def _get_latest_from_record(name, typ, latest_db=None, info_db=None, index_db=None):
 
     if info_db == None:
         raise ValueError("info_db can't be None")
 
     if latest_db == None:
         raise ValueError("latest_db can't be None")
+
+    if index_db == None:
+        raise ValueError("index_db can't be None")
 
     ret = None
 
@@ -307,7 +310,7 @@ def _get_latest_from_record(name, typ, latest_db=None, info_db=None):
             if typ == 'src':
                 latest = get_latest_src_from_src_db(name, info_db=info_db)
             elif typ == 'pkg':
-                latest = get_latest_pkg_from_repo(name, info_db=info_db)
+                latest = get_latest_pkg_from_repo(name, index_db=index_db)
             ret = latest
         else:
 

@@ -10,6 +10,8 @@ import cherrypy
 import org.wayround.utils.xml
 
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.pkglatest
 import org.wayround.aipsetup.version
 
 
@@ -46,9 +48,9 @@ def page_index():
     return txt
 
 
-def category(db, path):
+def category(index_db, path):
 
-    cat_id = db.get_category_by_path(path)
+    cat_id = org.wayround.aipsetup.pkgindex.get_category_by_path(path, index_db=index_db)
 
     if cat_id == None:
         raise cherrypy.HTTPError(404, "Category not found")
@@ -56,9 +58,12 @@ def category(db, path):
     logging.debug("Category `{}' corresponds to path `{}'".format(cat_id, path))
 
     logging.debug("Getting package ids in cat {}".format(cat_id))
-    pack_ids = db.ls_package_ids(cat_id)
+    pack_ids = org.wayround.aipsetup.pkgindex.get_package_id_list(cat_id, index_db=index_db)
     logging.debug("Getting cat ids in cat {}".format(cat_id))
-    cats_ids = db.ls_category_ids(cat_id)
+    cats_ids = org.wayround.aipsetup.pkgindex.get_category_id_list(cat_id, index_db=index_db)
+
+#    cats_lst = list(cats_ids.keys())
+#    cats_lst.sort()
 
     cats_tags = []
     pack_tags = []
@@ -67,7 +72,7 @@ def category(db, path):
 
     for i in cats_ids:
 
-        cat_path = db.get_category_path_string(i)
+        cat_path = org.wayround.aipsetup.pkgindex.get_category_path_string(i, index_db=index_db)
 
         cats_tags.append(
             org.wayround.utils.xml.tag(
@@ -96,7 +101,7 @@ def category(db, path):
                                             },
                                         ),
                                     ' ',
-                                    db.get_category_by_id(i)
+                                    org.wayround.aipsetup.pkgindex.get_category_by_id(i, index_db=index_db)
                                     ]
                                 )
                             ]
@@ -108,7 +113,7 @@ def category(db, path):
     logging.debug("Formatting packs in cat {}".format(cat_id))
 
     for i in pack_ids:
-        package_name = db.get_package_by_id(i)
+        package_name = org.wayround.aipsetup.pkgindex.get_package_by_id(i, index_db=index_db)
         pack_tags.append(
             org.wayround.utils.xml.tag(
                 'div',
@@ -142,8 +147,8 @@ def category(db, path):
 
     double_dot = []
     if cat_id != 0:
-        parent_cat_id = db.get_category_parent_by_id(cat_id)
-        parent_cat_path = db.get_category_path_string(parent_cat_id)
+        parent_cat_id = org.wayround.aipsetup.pkgindex.get_category_parent_by_id(cat_id, index_db=index_db)
+        parent_cat_path = org.wayround.aipsetup.pkgindex.get_category_path_string(parent_cat_id, index_db=index_db)
 
         double_dot = [
             org.wayround.utils.xml.tag(
@@ -166,7 +171,7 @@ def category(db, path):
         0,
         org.wayround.utils.xml.tag(
             'h1',
-            content='Category: {}'.format(db.get_category_path_string(cat_id))
+            content='Category: {}'.format(org.wayround.aipsetup.pkgindex.get_category_path_string(cat_id, index_db=index_db))
             )
         )
 
@@ -180,13 +185,13 @@ def category(db, path):
 
     return ret
 
-def page_category(db, path):
+def page_category(index_db, path):
 
     head = org.wayround.utils.xml.html_head(
         path
         )
 
-    table = category(db, path)
+    table = category(index_db, path)
 
     tree = org.wayround.utils.xml.html(
         head=head,
@@ -219,9 +224,9 @@ def page_category(db, path):
     return txt
 
 
-def package_file_list(db, name):
+def package_file_list(index_db, name):
 
-    files = org.wayround.aipsetup.pkgindex.get_package_files(name)
+    files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db=index_db)
 
     files.sort(
         reverse=True,
@@ -366,9 +371,9 @@ def package_file_list(db, name):
     return table
 
 
-def package_sources_file_list(db, name):
+def package_sources_file_list(info_db, name):
 
-    files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
+    files = org.wayround.aipsetup.pkgindex.get_package_source_files(name, info_db=info_db)
 
     files.sort(
         reverse=True,
@@ -507,25 +512,27 @@ def package_sources_file_list(db, name):
     return table
 
 
-def package_info(db, name):
+def package_info(index_db, info_db, latest_db, tag_db, name):
 
-    package_info = db.package_info_record_to_dict(name)
+    pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(name, info_db=info_db)
     logging.debug(
         "package_info: package_info_record_to_dict({}) == {}".format(
             name,
-            package_info
+            pkg_info
             )
         )
 
+    tags = tag_db.get_tags(name)
+
     ret = None
 
-    if package_info == None:
+    if pkg_info == None:
         raise cherrypy.HTTPError(404, "No page for package `{}'".format(name))
     else:
 
-        cid = db.get_package_category_by_name(name)
+        cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db=index_db)
         if cid != None:
-            category = db.get_category_path_string(cid)
+            category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db=index_db)
         else:
             category = "< Package not indexed! >"
 
@@ -565,7 +572,7 @@ def package_info(db, name):
                                     'pre',
                                     new_line_before_content=False,
                                     new_line_after_content=False,
-                                    content=str(package_info[i])
+                                    content=str(pkg_info[i])
                                     )
                                 ]
                             )
@@ -597,7 +604,7 @@ def package_info(db, name):
                                 'pre',
                                 new_line_before_content=False,
                                 new_line_after_content=False,
-                                content=package_info['basename']
+                                content=pkg_info['basename']
                                 )
                             ]
                         ),
@@ -611,7 +618,7 @@ def package_info(db, name):
                                 'pre',
                                 new_line_before_content=False,
                                 new_line_after_content=False,
-                                content=package_info['description']
+                                content=pkg_info['description']
                                 )
                             ]
                         )
@@ -689,10 +696,10 @@ def package_info(db, name):
                                         new_line_before_start=False,
                                         new_line_after_end=False,
                                         attributes={
-                                            'href': package_info['home_page'],
+                                            'href': pkg_info['home_page'],
                                             'target': '_blank'
                                             },
-                                        content=package_info['home_page']
+                                        content=pkg_info['home_page']
                                         )
                                     ]
                                 )
@@ -725,7 +732,7 @@ def package_info(db, name):
                                 'pre',
                                 new_line_before_content=False,
                                 new_line_after_content=False,
-                                content=', '.join(package_info['tags'])
+                                content=', '.join(tags)
                                 )
                             ]
                         )
@@ -733,7 +740,7 @@ def package_info(db, name):
                 )
             )
 
-        a = db.get_latest_package(name)
+        a = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, latest_db=latest_db, info_db=info_db, index_db=index_db)
         if a == None:
             a = 'None'
         else:
@@ -770,7 +777,7 @@ def package_info(db, name):
                 )
             )
 
-        a = db.get_latest_source(name)
+        a = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, latest_db=latest_db, info_db=info_db, index_db=index_db)
         if a == None:
             a = 'None'
         else:
@@ -826,11 +833,11 @@ def package_info(db, name):
     return ret
 
 
-def page_package(db, name):
+def page_package(index_db, info_db, latest_db, tag_db, name):
 
-    cid = db.get_package_category_by_name(name)
+    cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db=index_db)
     if cid != None:
-        category = db.get_category_path_string(cid)
+        category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db=index_db)
     else:
         category = "< Package not indexed! >"
 
@@ -1075,7 +1082,7 @@ def page_package(db, name):
                             'colspan': '2'
                             },
                         content=[
-                            package_info(db, name)
+                            package_info(index_db, info_db, latest_db, tag_db, name)
                             ]
                         )
                     ]
@@ -1102,7 +1109,7 @@ def page_package(db, name):
                             'valign':'top'
                             },
                         content=[
-                            package_file_list(db, name)
+                            package_file_list(index_db, name)
                             ]
                         ),
                     org.wayround.utils.xml.tag(
@@ -1111,7 +1118,7 @@ def page_package(db, name):
                             'valign':'top'
                             },
                         content=[
-                            package_sources_file_list(db, name)
+                            package_sources_file_list(info_db, name)
                             ]
                         )
                     ]

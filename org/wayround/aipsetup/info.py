@@ -37,10 +37,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     description="",
     # not required, but can be useful
     home_page="",
-    # string list
-    # WARNING: Though tags list is in this dict, it is not participates 
-    #          in package comparisons
-    tags=[],
     # string
     buildscript='',
     # file name base
@@ -73,14 +69,6 @@ pkg_info_file_template = Template(text="""\
     <description>${ description | x}</description>
 
     <home_page url="${ home_page | x}"/>
-
-    % if len(tags) == 0:
-    <!-- Use <tag name="" /> constructions for listing
-         tags -->
-    % endif
-    % for i in tags:
-    <tag name="${ i | x}"/>
-    % endfor
 
     <buildscript value="${ buildscript | x }"/>
 
@@ -378,10 +366,6 @@ def read_from_file(name):
                 if len(x) > 0:
                     ret['description'] = x[-1].text
 
-                ret['tags'] = _find_list(tree, 'tag', 'name')
-
-                ret['tags'].sort()
-
                 ret['name'] = name
                 del(tree)
         finally:
@@ -393,12 +377,9 @@ def write_to_file(name, struct):
 
     ret = 0
 
-    struct['tags'].sort()
-
     txt = pkg_info_file_template.render(
         description=struct['description'],
         home_page=struct['home_page'],
-        tags=struct['tags'],
         buildscript=struct['buildscript'],
         basename=struct['basename'],
         version_re=struct['version_re'],
@@ -407,8 +388,6 @@ def write_to_file(name, struct):
         reducible=struct['reducible'],
         auto_newest_src=struct['auto_newest_src'],
         auto_newest_pkg=struct['auto_newest_pkg']
-#        newest_src=struct['newest_src'],
-#        newest_pkg=struct['newest_pkg']
         )
 
     try:
@@ -440,6 +419,7 @@ def info_fixes(info, pkg_name, tag_db=None, forced_homepage_fix=False):
     if info['version_re'] == '':
         info['version_re'] = '.*'
 
+    # TODO: think about this all 
     if forced_homepage_fix or info['home_page'] in ['', 'None']:
         possibilities = org.wayround.aipsetup.pkgindex.guess_package_homepage(
             pkg_name,

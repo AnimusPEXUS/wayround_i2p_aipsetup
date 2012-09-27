@@ -8,7 +8,7 @@ import logging
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest
-import org.wayround.aipsetup.pkgtags
+import org.wayround.aipsetup.pkgtag
 import os.path
 
 
@@ -26,7 +26,9 @@ def exported_commands():
         'backup': repoman_backup_package_info_to_filesystem,
         'load': repoman_load_package_info_from_filesystem,
         'list': repoman_list_pkg_info_records,
-        'print': repoman_print_pkg_info_record
+        'print': repoman_print_pkg_info_record,
+        'loadt':repoman_load_tags,
+        'savet':repoman_save_tags,
         }
 
 def commands_order():
@@ -302,9 +304,11 @@ def repoman_load_package_info_from_filesystem(opts, args):
     rewrite_all = '-a' in opts
 
     info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
+
     org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
         filenames, rewrite_all, info_db=info_db
         )
+
     del info_db
 
     return ret
@@ -361,3 +365,26 @@ def repoman_print_pkg_info_record(opts, args):
 
     return ret
 
+def repoman_load_tags(opts, args):
+
+    tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+
+    org.wayround.aipsetup.pkgtag.load_tags_from_fs(
+        tag_db
+        )
+
+    del tag_db
+
+    return 0
+
+def repoman_save_tags(opts, args):
+
+    tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+
+    org.wayround.aipsetup.pkgtag.save_tags_to_fs(
+        tag_db
+        )
+
+    del tag_db
+
+    return 0

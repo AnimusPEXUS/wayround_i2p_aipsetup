@@ -170,7 +170,6 @@ def get_package_info_record(name=None, record=None, info_db=None):
         ret = dict()
 
         keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
-        keys.remove('tags')
 
         for i in keys:
             ret[i] = eval('q.{}'.format(i))
