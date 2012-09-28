@@ -11,7 +11,6 @@ import tempfile
 import shutil
 import pprint
 import logging
-import sys
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.package
@@ -571,7 +570,9 @@ def pack_buildingsite(buildingsite):
             ret = 2
         else:
 
-            ret = org.wayround.aipsetup.package.put_file_to_index(pack_file_name)
+            ret = org.wayround.aipsetup.package.put_file_to_index(
+                pack_file_name
+                )
 
     return ret
 

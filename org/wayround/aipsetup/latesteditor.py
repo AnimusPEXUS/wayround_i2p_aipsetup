@@ -7,7 +7,6 @@ from gi.repository import Gtk
 
 import org.wayround.utils.gtk
 
-import org.wayround.aipsetup.config
 import org.wayround.aipsetup.version
 
 import org.wayround.aipsetup.pkgindex
@@ -20,9 +19,8 @@ NON_AUTOMATIC_NOT_SELECTED = "Package Not Selected"
 
 class MainWindow:
 
-    def __init__(self, config, no_loop):
+    def __init__(self):
 
-        self.config = config
         self.currently_opened = None
 
         ui_file = os.path.join(
@@ -104,14 +102,9 @@ class MainWindow:
 
     def load_package_list(self):
 
-        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-
-        names = org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list(info_db)
+        names = org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list()
 
         names.sort(key=lambda i: i['name'])
-
-        del info_db
-
 
         self.ui['treeview1'].set_model(None)
         lst = Gtk.ListStore(str)
@@ -149,18 +142,14 @@ class MainWindow:
             self.ui['treeview3'].set_sensitive(False)
         else:
             self.ui['window1'].set_sensitive(False)
-            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
 
             info = org.wayround.aipsetup.pkginfo.get_package_info_record(
-                name,
-                info_db=info_db
+                name
                 )
 
 
-            latest_source = org.wayround.aipsetup.pkglatest.get_latest_src_from_src_db(
-                name,
-                info_db=info_db
+            latest_source = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+                name
                 )
 
             self.ui['entry1'].set_text(str(latest_source))
@@ -177,9 +166,8 @@ class MainWindow:
 
 
 
-            latest_package = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_repo(
-                name,
-                index_db=index_db
+            latest_package = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+                name
                 )
 
             self.ui['entry2'].set_text(str(latest_package))
@@ -196,8 +184,7 @@ class MainWindow:
 
 
             files = org.wayround.aipsetup.pkgindex.get_package_source_files(
-                name,
-                info_db
+                name
                 )
 
             files.sort(
@@ -215,8 +202,7 @@ class MainWindow:
             self.ui['treeview2'].set_model(lst)
 
             files = org.wayround.aipsetup.pkgindex.get_package_files(
-                name,
-                index_db
+                name
                 )
 
             files.sort(
@@ -232,9 +218,6 @@ class MainWindow:
                 lst.append([i])
 
             self.ui['treeview3'].set_model(lst)
-
-            del info_db
-            del index_db
 
             org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
                 self.ui['treeview2'],
@@ -283,52 +266,43 @@ class MainWindow:
     def onNullLatestSourceClicked(self, button):
 
         if self.currently_opened:
-            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
-            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
             org.wayround.aipsetup.pkglatest.set_latest_src_to_record(
                 self.currently_opened,
                 None,
-                force=True,
-                info_db=info_db,
-                latest_db=latest_db
+                force=True
                 )
+
+            latest_db = org.wayround.aipsetup.dbconnections.latest_db()
+            latest_db.commit()
+
             self.ui['entry1'].set_text(
                 str(
                     org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                        self.currently_opened,
-                        info_db=info_db,
-                        latest_db=latest_db
+                        self.currently_opened
                         )
                     )
                 )
-            del latest_db
-            del info_db
 
         return
 
     def onNullLatestPackageClicked(self, button):
 
         if self.currently_opened:
-            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
-            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
             org.wayround.aipsetup.pkglatest.set_latest_pkg_to_record(
                 self.currently_opened,
                 None,
-                force=True,
-                info_db=info_db,
-                latest_db=latest_db
+                force=True
                 )
             self.ui['entry2'].set_text(
                 str(
                     org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                        self.currently_opened,
-                        info_db=info_db,
-                        latest_db=latest_db
+                        self.currently_opened
                         )
                     )
                 )
-            del latest_db
-            del info_db
+
+            latest_db = org.wayround.aipsetup.dbconnections.latest_db()
+            latest_db.commit()
 
         return
 
@@ -353,56 +327,42 @@ class MainWindow:
         if self.currently_opened:
             subprocess.Popen(
                 [
-                'aipsetup3',
-                'info',
-                'editor',
-                self.currently_opened + '.xml'
-                ]
+                    'aipsetup3',
+                    'info',
+                    'editor',
+                    self.currently_opened + '.xml'
+                    ]
                 )
 
     def onSaveClicked(self, button):
 
         if self.currently_opened:
 
-            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
-            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-
             org.wayround.aipsetup.pkglatest.set_latest_src_to_record(
                 self.currently_opened,
                 self.ui['entry1'].get_text(),
-                force=True,
-                info_db=info_db,
-                latest_db=latest_db
+                force=True
                 )
             org.wayround.aipsetup.pkglatest.set_latest_pkg_to_record(
                 self.currently_opened,
                 self.ui['entry2'].get_text(),
-                force=True,
-                info_db=info_db,
-                latest_db=latest_db
+                force=True
                 )
 
             self.ui['entry1'].set_text(
                 str(
                     org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                        self.currently_opened,
-                        info_db=info_db,
-                        latest_db=latest_db
+                        self.currently_opened
                         )
                     )
                 )
             self.ui['entry2'].set_text(
                 str(
                     org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                        self.currently_opened,
-                        info_db=info_db,
-                        latest_db=latest_db
+                        self.currently_opened
                         )
                     )
                 )
-
-            del info_db
-            del latest_db
 
             dia = Gtk.MessageDialog(
                 self.ui['window1'],
@@ -414,22 +374,22 @@ class MainWindow:
             dia.run()
             dia.destroy()
 
+            latest_db = org.wayround.aipsetup.dbconnections.latest_db()
+            latest_db.commit()
 
         return
 
-def main(name_to_edit=None, no_loop=False):
+def main(name_to_edit=None):
 
-    mw = MainWindow(org.wayround.aipsetup.config.config, no_loop)
+    mw = MainWindow()
 
     if isinstance(name_to_edit, str):
         if mw.load_item(name_to_edit) != 0:
             mw.close()
         else:
-            if not no_loop:
-                mw.wait()
-    else:
-        if not no_loop:
             mw.wait()
+    else:
+        mw.wait()
 
     return
 

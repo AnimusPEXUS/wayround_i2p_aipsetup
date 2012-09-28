@@ -12,7 +12,7 @@ import json
 
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
-import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.dbconnections
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -121,9 +121,7 @@ def buildingsite_apply_info(opts, args):
         if '-d' in opts:
             dirname = opts['-d']
 
-        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-        ret = apply_info(dirname, source_filename=name, info_db=info_db)
-        del info_db
+        ret = apply_info(dirname, source_filename=name)
 
     return ret
 
@@ -256,15 +254,10 @@ def read_package_info(directory, ret_on_error=None):
             txt = f.read()
             f.close()
 
-            g = {}
-            l = {}
-
             try:
-#                ret = eval(txt, g, l)
                 ret = json.loads(txt)
-
             except:
-                logging.exception("Error in `{}'".format(pi_filename))
+                logging.error("Error in `{}'".format(pi_filename))
                 ret = ret_on_error
                 raise
 
@@ -286,16 +279,11 @@ def write_package_info(directory, info):
         try:
             txt = ''
             try:
-#                txt = pprint.pformat(info)
                 txt = json.dumps(info, allow_nan=True, indent=2, sort_keys=True)
             except:
                 raise ValueError("Can't represent data for package info")
             else:
-
-                f.write(
-"""\
-{text}
-""".format(text=txt))
+                f.write(txt)
 
         finally:
             f.close()
@@ -355,7 +343,7 @@ def apply_constitution_on_buildingsite(dirname):
     return ret
 
 
-def apply_pkg_info_on_buildingsite(dirname, info_db):
+def apply_pkg_info_on_buildingsite(dirname):
 
     ret = 0
 
@@ -380,8 +368,7 @@ def apply_pkg_info_on_buildingsite(dirname, info_db):
 
         res = org.wayround.aipsetup.pkginfo.get_info_record_by_basename_and_version(
             package_info['pkg_nameinfo']['groups']['name'],
-            package_info['pkg_nameinfo']['groups']['version'],
-            info_db=info_db
+            package_info['pkg_nameinfo']['groups']['version']
             )
 
         offerings = list(res.keys())
@@ -415,53 +402,7 @@ def apply_pkg_info_on_buildingsite(dirname, info_db):
     return ret
 
 
-#def apply_pkg_buildscript_on_buildingsite(dirname):
-#
-#    ret = 0
-#
-#    package_info = read_package_info(dirname, ret_on_error={})
-#
-#
-#    if not isinstance(package_info, dict) \
-#            or not 'pkg_info' in package_info \
-#            or not isinstance(package_info['pkg_info'], dict) \
-#            or not 'buildscript' in package_info['pkg_info'] \
-#            or not isinstance(package_info['pkg_info']['buildscript'], str):
-#        logging.error("package_info['pkg_info']['buildscript'] undetermined")
-#        package_info['pkg_buildscript'] = {}
-#        ret = 1
-#
-#    else:
-#
-#        if package_info['pkg_info']['buildscript'] == '' or package_info['pkg_info']['buildscript'].isspace():
-#            logging.error(
-#                "package_info['pkg_info']['buildscript'] is empty or space.\n" +
-#                "    probably you need to edit `{}' and update indexing".format(
-#                    package_info['pkg_info']['name'] + '.xml')
-#                )
-#            ret = 2
-#        else:
-#
-#            buildscript = org.wayround.aipsetup.buildscript.load_buildscript(
-#                package_info['pkg_info']['buildscript']
-#                )
-#
-#            if not isinstance(buildscript, dict):
-#                logging.error(
-#                    "Error loading buildscript `{}'".format(
-#                        package_info['pkg_info']['buildscript']
-#                        )
-#                    )
-#                ret = 3
-#            else:
-#
-#                package_info['pkg_buildscript'] = buildscript
-#                write_package_info(dirname, package_info)
-#
-#    return ret
-
-
-def apply_info(dirname='.', source_filename=None, info_db=None):
+def apply_info(dirname='.', source_filename=None):
 
     ret = 0
 
@@ -481,7 +422,7 @@ def apply_info(dirname='.', source_filename=None, info_db=None):
         ret = 1
     elif apply_constitution_on_buildingsite(dirname) != 0:
         ret = 2
-    elif apply_pkg_info_on_buildingsite(dirname, info_db) != 0:
+    elif apply_pkg_info_on_buildingsite(dirname) != 0:
         ret = 3
 #    elif apply_pkg_buildscript_on_buildingsite(dirname) != 0:
 #        ret = 4

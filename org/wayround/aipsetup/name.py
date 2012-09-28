@@ -137,7 +137,7 @@ def name_parse_test(args, opts):
     parse_test()
     return 0
 
-def remove_extension_from_valid_package_name(name):
+def rm_ext_from_pkg_name(name):
 
     ret = ''
 
@@ -163,7 +163,7 @@ def package_name_parse(filename, mute=True):
 
     ret = None
 
-    filename = remove_extension_from_valid_package_name(filename)
+    filename = rm_ext_from_pkg_name(filename)
 
     for i in ASP_NAME_REGEXPS:
         re_res = ASP_NAME_REGEXPS_COMPILED[i].match(filename)

@@ -81,8 +81,6 @@ class Index:
 
             txt = org.wayround.aipsetup.serverui.page_category(index_db, path)
 
-            index_db.close()
-
         elif mode == 'json':
 
             index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
@@ -120,10 +118,6 @@ class Index:
                     i, index_db=index_db
                     )
 
-            index_db.close()
-
-
-
             txt = json.dumps(
                 {
                     'packages': pkgs,
@@ -158,11 +152,6 @@ class Index:
             tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
 
             txt = org.wayround.aipsetup.serverui.page_package(index_db, info_db, latest_db, tag_db, name)
-
-            del index_db
-            del info_db
-            del latest_db
-            del tag_db
 
         elif mode == 'packages':
 
@@ -225,10 +214,6 @@ class Index:
             info['newest_src'] = (
                 org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, index_db=index_db, latest_db=latest_db)
                 )
-
-            del index_db
-            del info_db
-            del latest_db
 
             txt = json.dumps(info, indent=2, sort_keys=True)
 

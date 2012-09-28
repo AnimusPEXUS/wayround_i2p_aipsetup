@@ -1,5 +1,4 @@
 
-import os.path
 import logging
 import json
 
@@ -7,8 +6,6 @@ import org.wayround.utils.tag
 import org.wayround.utils.file
 
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.info
-
 
 
 def pkgtags_tag_editor(opts, args):
@@ -32,11 +29,9 @@ def tag_editor(mode, name):
 
     return ret
 
-def load_tags_from_fs(tag_db=None):
+def load_tags_from_fs():
 
-    if tag_db == None:
-        raise ValueError("tag_db can't be None")
-
+    tag_db = org.wayround.aipsetup.dbconnections.tag_db()
 
     file_name = org.wayround.aipsetup.config.config['tags']
 
@@ -74,10 +69,9 @@ def load_tags_from_fs(tag_db=None):
 
     return
 
-def save_tags_to_fs(tag_db=None):
+def save_tags_to_fs():
 
-    if tag_db == None:
-        raise ValueError("tag_db can't be None")
+    tag_db = org.wayround.aipsetup.dbconnections.tag_db()
 
     file_name = org.wayround.aipsetup.config.config['tags']
 

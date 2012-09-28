@@ -19,7 +19,7 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
 
 import org.wayround.aipsetup.pkginfo
-import org.wayround.aipsetup.pkgtag
+import org.wayround.aipsetup.dbconnections
 
 
 class PackageIndex(org.wayround.utils.db.BasicDB):
@@ -124,10 +124,10 @@ def get_is_repo_package_dir(path):
             )
         )
 
-def get_package_files(name, index_db):
+def get_package_files(name):
 
-    pid = get_package_id(name, index_db=index_db)
-    package_path = get_package_path_string(pid, index_db=index_db)
+    pid = get_package_id(name)
+    package_path = get_package_path_string(pid)
 
     package_dir = os.path.abspath(
         org.wayround.aipsetup.config.config['repository']
@@ -150,20 +150,16 @@ def get_package_files(name, index_db):
 
     return needed_files
 
-def get_package_source_files(name, info_db=None):
-
-    if info_db == None:
-        raise ValueError("info_db can't be None")
+def get_package_source_files(name):
 
     needed_files = []
 
     pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(
-        name=name, info_db=info_db
+        name=name
         )
 
-
     try:
-        tags_object = org.wayround.aipsetup.pkgindex.get_sources_connection()
+        tags_object = org.wayround.aipsetup.dbconnections.src_db()
     except:
         logging.exception("Can't connect to source file index")
     else:
@@ -194,13 +190,15 @@ def get_package_source_files(name, info_db=None):
             needed_files.sort()
 
         finally:
-            tags_object.close()
+            tags_object.commit()
 
     return needed_files
 
-def get_category_by_id(cid, index_db):
+def get_category_by_id(cid):
 
     ret = None
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
 
@@ -209,9 +207,11 @@ def get_category_by_id(cid, index_db):
 
     return ret
 
-def get_category_parent_by_id(cid, index_db):
+def get_category_parent_by_id(cid):
 
     ret = None
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
 
@@ -220,7 +220,7 @@ def get_category_parent_by_id(cid, index_db):
 
     return ret
 
-def get_category_by_path(path, index_db):
+def get_category_by_path(path):
 
     if not isinstance(path, str):
         raise ValueError("`path' must be string")
@@ -238,7 +238,7 @@ def get_category_by_path(path, index_db):
         for i in path_parsed:
 
             logging.debug("Searching for: {}".format(i))
-            cat_dir = get_category_idname_dict(level, index_db=index_db)
+            cat_dir = get_category_idname_dict(level)
             logging.debug("cat_dir: {}".format(cat_dir))
 
             found_cat = False
@@ -260,7 +260,9 @@ def get_category_by_path(path, index_db):
 
     return ret
 
-def get_package_id(name, index_db):
+def get_package_id(name):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     ret = None
 
@@ -270,7 +272,10 @@ def get_package_id(name, index_db):
 
     return ret
 
-def get_package_category(pid, index_db):
+def get_package_category(pid):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
+
     ret = None
 
     q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
@@ -279,7 +284,10 @@ def get_package_category(pid, index_db):
 
     return ret
 
-def get_package_category_by_name(name, index_db):
+def get_package_category_by_name(name):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
+
     ret = None
 
     q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
@@ -289,7 +297,9 @@ def get_package_category_by_name(name, index_db):
     return ret
 
 
-def get_package_by_id(pid, index_db):
+def get_package_by_id(pid):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     ret = None
 
@@ -300,10 +310,9 @@ def get_package_by_id(pid, index_db):
     return ret
 
 
-def get_package_name_list(cid=None, index_db=None):
+def get_package_name_list(cid=None):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     if cid == None:
         lst = index_db.sess.query(index_db.Package).all()
@@ -320,10 +329,9 @@ def get_package_name_list(cid=None, index_db=None):
 
     return lst_names
 
-def get_package_id_list(cid=None, index_db=None):
+def get_package_id_list(cid=None):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     lst = None
     if cid == None:
@@ -339,10 +347,9 @@ def get_package_id_list(cid=None, index_db=None):
 
     return ids
 
-def get_package_idname_dict(cid=None, index_db=None):
+def get_package_idname_dict(cid=None):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     if cid == None:
         lst = index_db.sess.query(index_db.Package).all()
@@ -357,11 +364,9 @@ def get_package_idname_dict(cid=None, index_db=None):
 
     return dic
 
-def get_category_name_list(parent_cid=0, index_db=None):
+def get_category_name_list(parent_cid=0):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
-
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     lst = index_db.sess.query(
         index_db.Category
@@ -381,10 +386,9 @@ def get_category_name_list(parent_cid=0, index_db=None):
 
     return lst_names
 
-def get_category_id_list(parent_cid=0, index_db=None):
+def get_category_id_list(parent_cid=0):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     lst = index_db.sess.query(
         index_db.Category
@@ -402,10 +406,9 @@ def get_category_id_list(parent_cid=0, index_db=None):
 
     return ids
 
-def get_category_idname_dict(parent_cid=0, index_db=None):
+def get_category_idname_dict(parent_cid=0):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     lst = None
     if parent_cid == None:
@@ -432,7 +435,9 @@ def get_category_idname_dict(parent_cid=0, index_db=None):
     return dic
 
 
-def get_package_path(pid, index_db):
+def get_package_path(pid):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     ret = []
     pkg = None
@@ -458,7 +463,9 @@ def get_package_path(pid, index_db):
     return ret
 
 
-def get_category_path(cid, index_db):
+def get_category_path(cid):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     ret = []
     categ = None
@@ -482,17 +489,19 @@ def get_category_path(cid, index_db):
     return ret
 
 
-def get_package_path_string(pid, index_db):
-    r = get_package_path(pid, index_db)
+def get_package_path_string(pid):
+    r = get_package_path(pid)
     ret = join_pkg_path(r)
     return ret
 
-def get_category_path_string(cid, index_db):
-    r = get_category_path(cid, index_db)
+def get_category_path_string(cid):
+    r = get_category_path(cid)
     ret = join_pkg_path(r)
     return ret
 
-def get_package_collisions_in_db(index_db):
+def get_package_collisions_in_db():
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     ret = 0
 
@@ -507,7 +516,7 @@ def get_package_collisions_in_db(index_db):
     logging.info("Scanning paths")
     for each in lst:
         org.wayround.utils.file.progress_write('       {}'.format(each.name))
-        lst2.append(get_package_path(pid=each.pid, index_db=index_db))
+        lst2.append(get_package_path(pid=each.pid))
 
     org.wayround.utils.file.progress_write_finish()
 
@@ -563,10 +572,9 @@ def get_package_collisions_in_db(index_db):
 
     return ret
 
-def create_category(name='name', parent_cid=0, index_db=None):
+def create_category(name='name', parent_cid=0):
 
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     new_cat = index_db.Category(name=name, parent_cid=parent_cid)
 
@@ -577,7 +585,9 @@ def create_category(name='name', parent_cid=0, index_db=None):
     return new_cat_id
 
 
-def _scan_repo_for_pkg_and_cat(root_dir, cid, index_db):
+def _scan_repo_for_pkg_and_cat(root_dir, cid):
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     files = os.listdir(root_dir)
 
@@ -634,14 +644,16 @@ def _scan_repo_for_pkg_and_cat(root_dir, cid, index_db):
             del(new_cat)
 
             _scan_repo_for_pkg_and_cat(
-                full_path, new_cat_cid, index_db
+                full_path, new_cat_cid
                 )
         else:
             logging.warning("garbage file found: {}".format(full_path))
 
     return 0
 
-def scan_repo_for_pkg_and_cat(index_db):
+def scan_repo_for_pkg_and_cat():
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     ret = 0
 
@@ -663,7 +675,7 @@ def scan_repo_for_pkg_and_cat(index_db):
     index_db.sess.commit()
 
     logging.info("Searching for errors")
-    get_package_collisions_in_db(index_db=index_db)
+    get_package_collisions_in_db()
     logging.info("Search operations finished")
 
     return ret
@@ -796,7 +808,6 @@ def _index_sources_directory_to_list(
 def index_sources_directory(
     root_dir_name,
     sub_dir_name,
-    src_db,
     acceptable_endings=None,
     force_reindex=False,
     first_delete_found=False

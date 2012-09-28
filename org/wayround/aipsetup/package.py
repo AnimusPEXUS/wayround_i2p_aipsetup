@@ -1,6 +1,6 @@
 
 """
-Module for system related package actions
+Module for UNIX system related package actions
 
  * install_asp into system;
  * list installed;
@@ -11,7 +11,6 @@ Module for system related package actions
 """
 
 import sys
-import os
 import os.path
 import tarfile
 import glob
@@ -88,9 +87,11 @@ def package_install(opts, args):
         ret = 2
     else:
         name = args[0]
-        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-        ret = install_package(name, force, basedir, info_db=info_db)
-        del info_db
+
+        ret = install_package(
+            name, force, basedir
+            )
+
         org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
@@ -164,15 +165,13 @@ def package_list_asps(opts, args):
 
             lst.sort(
                 reverse=True,
-                key=functools.cmp_to_key(org.wayround.aipsetup.version.package_version_comparator)
+                key=functools.cmp_to_key(
+                    org.wayround.aipsetup.version.package_version_comparator
+                    )
                 )
 
             for i in lst:
                 print("    {}".format(i))
-
-#            org.wayround.utils.text.columned_list_print(
-#                lst, fd=sys.stdout.fileno()
-#            )
 
     return ret
 
@@ -254,16 +253,12 @@ def package_build(opts, args):
 
     if ret == 0:
 
-        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-
         if multiple_packages:
             for i in sources:
-                build([i], info_db)
+                build([i])
             ret = 0
         else:
-            ret = build(sources, info_db)
-
-        del info_db
+            ret = build(sources)
 
     return ret
 
@@ -397,13 +392,17 @@ def check_package(asp_name, mute=False):
 
                     tar_members = tarf.getmembers()
 
-                    check_list = ['./04.DESTDIR.tar.xz', './05.BUILD_LOGS.tar.xz',
-                                  './package_info.json', './02.PATCHES.tar.xz']
+                    check_list = [
+                        './04.DESTDIR.tar.xz', './05.BUILD_LOGS.tar.xz',
+                        './package_info.json', './02.PATCHES.tar.xz'
+                        ]
 
                     for i in ['./00.TARBALL', './06.LISTS']:
                         for j in tar_members:
-                            if ((j.name.startswith(i) \
-                                and j.name != i)):
+                            if (
+                                j.name.startswith(i)
+                                and j.name != i
+                                ):
                                 check_list.append(j.name)
 
                     check_list.sort()
@@ -412,8 +411,10 @@ def check_package(asp_name, mute=False):
 
                     for i in check_list:
                         cresult = ''
-                        if not i in sums \
-                            or tarobj_check_member_sum(tarf, sums, i) == False:
+                        if (
+                            not i in sums
+                            or tarobj_check_member_sum(tarf, sums, i) == False
+                            ):
                             error_found = True
                             cresult = "FAIL"
                         else:
@@ -494,12 +495,16 @@ def check_package_aipsetup2(filename):
     return ret
 
 
-def remove_package(name, force=False, destdir='/', mute=False):
+def remove_package(name, force=False, destdir='/', mute=False, info_db=None):
+
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
     ret = 0
 
-    db = org.wayround.aipsetup.pkgindex.PackageIndex()
-    info = db.package_info_record_to_dict(name)
-    del db
+    info = org.wayround.aipsetup.pkginfo.get_package_info_record(
+        name, info_db=info_db
+        )
 
     if not isinstance(info, dict) and not force:
         logging.error("Can't find information about package `{}'".format(name))
@@ -520,7 +525,9 @@ def remove_package(name, force=False, destdir='/', mute=False):
 
             lst.sort(
                 reverse=True,
-                key=functools.cmp_to_key(org.wayround.aipsetup.version.package_version_comparator)
+                key=functools.cmp_to_key(
+                    org.wayround.aipsetup.version.package_version_comparator
+                    )
                 )
 
             if not mute:
@@ -530,9 +537,7 @@ def remove_package(name, force=False, destdir='/', mute=False):
 
             for i in lst:
 
-                name = (
-                    org.wayround.aipsetup.name.remove_extension_from_valid_package_name(i)
-                    )
+                name = org.wayround.aipsetup.name.rm_ext_from_pkg_name(i)
 
                 if not mute:
                     logging.info("Removing package `{}'".format(name))
@@ -540,7 +545,18 @@ def remove_package(name, force=False, destdir='/', mute=False):
 
     return ret
 
-def install_package(name, force=False, destdir='/', info_db=None):
+def install_package(
+    name, force=False, destdir='/', info_db=None, latest_db=None, index_db=None
+    ):
+
+    if info_db == None:
+        raise ValueError("info_db can't be None")
+
+    if latest_db == None:
+        raise ValueError("latest_db can't be None")
+
+    if index_db == None:
+        raise ValueError("index_db can't be None")
 
     ret = 0
 
@@ -589,7 +605,11 @@ def install_package(name, force=False, destdir='/', info_db=None):
                     else:
                         if isinstance(info, dict):
                             if info['reducible']:
-                                logging.info("Reducing `{}' ASPs".format(name_parsed['groups']['name']))
+                                logging.info(
+                                    "Reducing `{}' ASPs".format(
+                                        name_parsed['groups']['name']
+                                        )
+                                    )
                                 reduce_asps(name, asps, destdir)
 
     else:
@@ -602,13 +622,11 @@ def install_package(name, force=False, destdir='/', info_db=None):
             logging.error("Don't know about package")
             ret = 2
         else:
-            db = org.wayround.aipsetup.pkgindex.PackageIndex()
-            latest_in_repo = db.get_latest_package(name)
-            del(db)
 
+            latest_in_repo = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, latest_db, info_db, index_db)
 
             latest_in_repo_no_ext = (
-                org.wayround.aipsetup.name.remove_extension_from_valid_package_name(
+                org.wayround.aipsetup.name.rm_ext_from_pkg_name(
                     os.path.basename(
                         latest_in_repo
                         )
@@ -617,7 +635,7 @@ def install_package(name, force=False, destdir='/', info_db=None):
 
             latest_installed = latest_installed_package_s_asp(name)
             latest_installed_no_ext = (
-                org.wayround.aipsetup.name.remove_extension_from_valid_package_name(
+                org.wayround.aipsetup.name.rm_ext_from_pkg_name(
                     latest_installed
                     )
                 )
@@ -633,11 +651,11 @@ def install_package(name, force=False, destdir='/', info_db=None):
                             )
                         )
 
-                full_name = os.path.abspath(
-                    org.wayround.aipsetup.config.config['repository'] +
-                    os.path.sep +
-                    latest_in_repo
-                    )
+#                full_name = os.path.abspath(
+#                    org.wayround.aipsetup.config.config['repository'] +
+#                    os.path.sep +
+#                    latest_in_repo
+#                    )
 
 #                ret = install_package(full_name, False, destdir)
             else:
@@ -652,10 +670,6 @@ def install_package(name, force=False, destdir='/', info_db=None):
                 ret = 3
 
     return ret
-
-def update_package(name, force=False, destdir='/'):
-    # TODO: do or del
-    pass
 
 def tarobj_check_member_sum(tarobj, sums, member_name):
     ret = True
@@ -723,7 +737,7 @@ def install_asp(asp_name, destdir='/'):
                 else:
                     logs_path = org.wayround.aipsetup.config.config[i[1]]
 
-                out_filename = \
+                out_filename = (
                     os.path.abspath(
                         os.path.join(
                             destdir,
@@ -731,6 +745,7 @@ def install_asp(asp_name, destdir='/'):
                             package_name + '.xz'
                             )
                         )
+                    )
 
                 out_filename_dir = os.path.dirname(out_filename)
 
@@ -868,13 +883,13 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 
     reduce_to = os.path.basename(reduce_to)
     reduce_to = (
-        org.wayround.aipsetup.name.remove_extension_from_valid_package_name(reduce_to)
+        org.wayround.aipsetup.name.rm_ext_from_pkg_name(reduce_to)
         )
 
     for i in range(len(reduce_what)):
         reduce_what[i] = os.path.basename(reduce_what[i])
         reduce_what[i] = (
-            org.wayround.aipsetup.name.remove_extension_from_valid_package_name(
+            org.wayround.aipsetup.name.rm_ext_from_pkg_name(
                 reduce_what[i]
                 )
             )
@@ -969,7 +984,7 @@ def latest_installed_package_s_asp(name, destdir='/'):
 
 def list_installed_package_s_asps(name, destdir='/'):
 
-    ret = 0
+#    ret = 0
 
     lst = list_installed_asps(destdir=destdir, mute=True)
 
@@ -1122,7 +1137,7 @@ def build(source_files, info_db):
                         logging.error("Exception while copying one of source files")
 
                 if org.wayround.aipsetup.buildingsite.apply_info(
-                    build_site_dir, source_files[0]
+                    build_site_dir, source_files[0], info_db=info_db
                     ) == 0:
 
                     if complete(build_site_dir) != 0:
@@ -1254,11 +1269,11 @@ def find_file_in_files_installed_by_asp(
     return ret
 
 
-def put_files_to_index(files):
+def put_files_to_index(files, index_db):
 
     for i in files:
         if os.path.exists(i):
-            put_file_to_index(i)
+            put_file_to_index(i, index_db=index_db)
 
     return 0
 
@@ -1283,7 +1298,7 @@ def _put_files_to_index(files, pkg_name, subdir):
 
     return ret
 
-def put_file_to_index(filename):
+def put_file_to_index(filename, index_db):
     ret = 0
 
     logging.info("Processing file `{}'".format(filename))
@@ -1314,8 +1329,9 @@ def put_file_to_index(filename):
                     file + '.md5'
                     ]
 
-                path = org.wayround.aipsetup.pkgindex.get_package_path(
-                    parsed['groups']['name']
+                path = org.wayround.aipsetup.pkgindex.get_package_path_string(
+                    parsed['groups']['name'],
+                    index_db=index_db
                     ) + os.path.sep + 'aipsetup2'
 
                 _put_files_to_index(files, parsed['groups']['name'], path)
@@ -1336,8 +1352,9 @@ def put_file_to_index(filename):
                     file
                     ]
 
-                path = org.wayround.aipsetup.pkgindex.get_package_path(
-                    parsed['groups']['name']
+                path = org.wayround.aipsetup.pkgindex.get_package_path_string(
+                    parsed['groups']['name'],
+                    index_db=index_db
                     ) + os.path.sep + 'pack'
 
                 _put_files_to_index(files, parsed['groups']['name'], path)

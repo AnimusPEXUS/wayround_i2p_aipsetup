@@ -59,7 +59,8 @@ def main(buildingsite, action=None):
                     '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=['configure'],
-                environment={'PYTHON': '/usr/bin/python3'},
+                environment={},
+#                environment={'PYTHON': '/usr/bin/python3'},
                 environment_mode='copy',
                 source_configure_reldir='.',
                 use_separate_buildding_dir=separate_build_dir,

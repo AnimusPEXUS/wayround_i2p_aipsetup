@@ -236,8 +236,6 @@ def info_mass_info_fix(opts, args):
                 )
             )
 
-    del src_db
-
     org.wayround.utils.file.progress_write_finish()
 
     logging.info("Processed {} files".format(lst))

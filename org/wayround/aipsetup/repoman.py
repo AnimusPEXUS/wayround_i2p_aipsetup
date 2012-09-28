@@ -27,8 +27,8 @@ def exported_commands():
         'load': repoman_load_package_info_from_filesystem,
         'list': repoman_list_pkg_info_records,
         'print': repoman_print_pkg_info_record,
-        'loadt':repoman_load_tags,
-        'savet':repoman_save_tags,
+        'loadt': repoman_load_tags,
+        'savet': repoman_save_tags,
         }
 
 def commands_order():
@@ -45,6 +45,8 @@ def commands_order():
         'list',
         'print',
         'latests',
+        'loadt',
+        'savet'
         ]
 
 def cli_name():
@@ -56,9 +58,7 @@ def repoman_scan_repo_for_pkg_and_cat(opts, args):
     to database
     """
 
-    index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
-    ret = org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat(index_db)
-    del index_db
+    ret = org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat()
 
     return ret
 
@@ -67,11 +67,8 @@ def repoman_find_repository_package_name_collisions_in_database(opts, args):
     Scan index for equal package names
     """
 
-    index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
     ret = org.wayround.aipsetup.pkgindex.get_package_collisions_in_db(
-        index_db=index_db
         )
-    del index_db
 
     return ret
 
@@ -170,24 +167,16 @@ def repoman_find_missing_pkg_info_records(opts, args):
 
     f = '-f' in opts
 
-    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-    index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
-
     try:
         org.wayround.aipsetup.pkginfo.get_missing_info_records_list(
             t,
-            f,
-            info_db=info_db,
-            index_db=index_db
+            f
             )
     except:
         logging.exception("Error while searching for missing records")
         ret = 1
     else:
         ret = 0
-    finally:
-        del info_db
-        del index_db
 
     return ret
 
@@ -197,11 +186,8 @@ def repoman_find_outdated_pkg_info_records(opts, args):
     """
     ret = 0
 
-    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-
     try:
         res = org.wayround.aipsetup.pkginfo.get_outdated_info_records_list(
-            info_db=info_db
             )
 
     except:
@@ -215,19 +201,13 @@ def repoman_find_outdated_pkg_info_records(opts, args):
         else:
             logging.info("No warnings")
 
-    finally:
-        del info_db
-
     return ret
 
 def repoman_update_outdated_pkg_info_records(opts, args):
     """
     Loads pkg info records which differs to FS .xml files
     """
-
-    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-    org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records(info_db)
-    del info_db
+    org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records()
 
     return 0
 
@@ -245,12 +225,9 @@ def repoman_delete_pkg_info_records(opts, args):
         mask = args[0]
 
     if mask != None:
-        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
         ret = org.wayround.aipsetup.pkginfo.delete_info_records(
-            mask,
-            info_db=info_db
+            mask
             )
-        del info_db
     else:
         logging.error("Mask is not given")
         ret = 1
@@ -272,13 +249,10 @@ def repoman_backup_package_info_to_filesystem(opts, args):
 
     force = '-f' in opts
 
-    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
     ret = org.wayround.aipsetup.pkginfo.save_info_records_to_fs(
         mask,
-        force,
-        info_db=info_db
+        force
         )
-    del info_db
 
     return ret
 
@@ -303,13 +277,10 @@ def repoman_load_package_info_from_filesystem(opts, args):
 
     rewrite_all = '-a' in opts
 
-    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
 
     org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
-        filenames, rewrite_all, info_db=info_db
+        filenames, rewrite_all
         )
-
-    del info_db
 
     return ret
 
@@ -327,10 +298,7 @@ def repoman_list_pkg_info_records(opts, args):
     if len(args) > 0:
         mask = args[0]
 
-
-    info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-    org.wayround.aipsetup.pkginfo.get_info_records_list(mask, info_db=info_db)
-    del info_db
+    org.wayround.aipsetup.pkginfo.get_info_records_list(mask)
 
     return 0
 
@@ -348,17 +316,9 @@ def repoman_print_pkg_info_record(opts, args):
 
     if name != None:
 
-        info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-        index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
-        latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
-
         ret = org.wayround.aipsetup.pkginfo.print_info_record(
-            name,
-            info_db=info_db,
-            index_db=index_db,
-            latest_db=latest_db
+            name
             )
-        del info_db, latest_db, index_db
     else:
         logging.error("Name is not given")
         ret = 1
@@ -367,24 +327,14 @@ def repoman_print_pkg_info_record(opts, args):
 
 def repoman_load_tags(opts, args):
 
-    tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
-
     org.wayround.aipsetup.pkgtag.load_tags_from_fs(
-        tag_db
         )
-
-    del tag_db
 
     return 0
 
 def repoman_save_tags(opts, args):
 
-    tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
-
     org.wayround.aipsetup.pkgtag.save_tags_to_fs(
-        tag_db
         )
-
-    del tag_db
 
     return 0

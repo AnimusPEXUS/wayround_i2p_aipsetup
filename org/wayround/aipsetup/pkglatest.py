@@ -14,14 +14,6 @@ import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkgindex
 
 
-def latest_editor(name):
-    import org.wayround.aipsetup.latesteditor
-
-    ret = org.wayround.aipsetup.latesteditor.main(name)
-
-    return ret
-
-
 class PackageLatest(org.wayround.utils.db.BasicDB):
     """
     Main package index DB handling class
@@ -72,17 +64,18 @@ class PackageLatest(org.wayround.utils.db.BasicDB):
 
         return
 
+def latest_editor(name):
+    import org.wayround.aipsetup.latesteditor
+
+    ret = org.wayround.aipsetup.latesteditor.main(name)
+
+    return ret
+
 
 
 def set_found_latest_src_to_record(
-    name, force=False, mute=True, info_db=None, latest_db=None
+    name, force=False, mute=True
     ):
-
-    if info_db == None:
-        raise ValueError("info_db can't be None")
-
-    if latest_db == None:
-        raise ValueError("latest_db can't be None")
 
     ret = False
 
@@ -94,7 +87,7 @@ def set_found_latest_src_to_record(
         if r != None:
 
             ret = set_latest_src_to_record(
-                name, r, force, info_db=info_db, latest_db=latest_db
+                name, r, force
                 )
 
         else:
@@ -107,41 +100,26 @@ def set_found_latest_src_to_record(
     return ret
 
 def set_found_latest_src_to_records(
-    names, force=False, mute=True, info_db=None, latest_db=None
+    names, force=False, mute=True
     ):
-
-    if info_db == None:
-        raise ValueError("info_db can't be None")
-
-    if latest_db == None:
-        raise ValueError("latest_db can't be None")
-
 
     if len(names) == 0:
         names = org.wayround.aipsetup.pkginfo.get_info_records_list(
-            mute=True, info_db=info_db
+            mute=True
             )
 
     for i in names:
         set_found_latest_src_to_record(
             i,
             force,
-            mute,
-            info_db=info_db,
-            latest_db=latest_db
+            mute
             )
 
     return
 
 def set_found_latest_pkg_to_record(
-    name, force=False, mute=True, info_db=None, latest_db=None
+    name, force=False, mute=True
     ):
-
-    if info_db == None:
-        raise ValueError("info_db can't be None")
-
-    if latest_db == None:
-        raise ValueError("latest_db can't be None")
 
     ret = False
 
@@ -153,7 +131,7 @@ def set_found_latest_pkg_to_record(
         if r != None:
 
             ret = set_latest_pkg_to_record(
-                name, r, force, info_db=info_db, latest_db=latest_db
+                name, r, force
                 )
 
         else:
@@ -166,48 +144,38 @@ def set_found_latest_pkg_to_record(
     return ret
 
 def set_found_latest_pkg_to_records(
-    names, force=False, mute=True, info_db=None, latest_db=None
+    names, force=False, mute=True
     ):
-
-    if info_db == None:
-        raise ValueError("info_db can't be None")
-
-    if latest_db == None:
-        raise ValueError("latest_db can't be None")
 
     if len(names) == 0:
         names = org.wayround.aipsetup.pkginfo.get_info_records_list(
-            mute=True, info_db=info_db
+            mute=True
             )
 
     for i in names:
         set_found_latest_pkg_to_record(
-            i, force, mute, info_db=info_db, latest_db=latest_db
+            i, force, mute
             )
 
     return
 
 
-def set_latest_src_to_record(name, latest, force=False, info_db=None, latest_db=None):
-    return _set_latest_to_record(name, latest, 'src', force, info_db=info_db, latest_db=latest_db)
+def set_latest_src_to_record(name, latest, force=False):
+    return _set_latest_to_record(name, latest, 'src', force)
 
 def set_latest_pkg_to_record(
-    name, latest, force=False, info_db=None, latest_db=None
+    name, latest, force=False
     ):
 
     return _set_latest_to_record(
-        name, latest, 'pkg', force, info_db=info_db, latest_db=latest_db
+        name, latest, 'pkg', force
         )
 
 def _set_latest_to_record(
-    name, latest, typ, force=False, info_db=None, latest_db=None
+    name, latest, typ, force=False
     ):
 
-    if info_db == None:
-        raise ValueError("info_db can't be None")
-
-    if latest_db == None:
-        raise ValueError("latest_db can't be None")
+    latest_db = org.wayround.aipsetup.dbconnections.latest_db()
 
     logging.debug("setting latest `{}' to `{}'".format(typ, latest))
     ret = None
@@ -222,7 +190,7 @@ def _set_latest_to_record(
         typ2 = 'package'
 
     info = org.wayround.aipsetup.pkginfo.get_package_info_record(
-        name, info_db=info_db
+        name
         )
 
     if info == None:
@@ -240,11 +208,11 @@ def _set_latest_to_record(
             logging.debug("existing `Latest' record of `{}' not found".format(name))
             if info['auto_newest_' + typ] or force:
                 logging.debug("creating `Latest' record of `{}'".format(name))
-                a = latest_db.Latest()
-                a.name = name
-                a.file = latest
-                a.typ = typ2
-                latest_db.sess.add(a)
+                q = latest_db.Latest()
+                q.name = name
+                q.file = latest
+                q.typ = typ2
+                latest_db.sess.add(q)
                 ret = True
             else:
                 ret = False
@@ -253,10 +221,11 @@ def _set_latest_to_record(
             if info['auto_newest_' + typ] or force:
                 logging.debug("updating `Latest' record of `{}'".format(name))
                 q.file = latest
-                latest_db.sess.commit()
                 ret = True
             else:
                 ret = False
+
+        latest_db.sess.commit()
 
     if ret == False:
         logging.error(
@@ -265,26 +234,19 @@ def _set_latest_to_record(
 
     return ret
 
-def get_latest_src_from_record(name, latest_db=None, info_db=None, index_db=None):
+def get_latest_src_from_record(name):
     return _get_latest_from_record(
-        name, 'src', info_db=info_db, latest_db=latest_db, index_db=index_db
+        name, 'src'
         )
 
-def get_latest_pkg_from_record(name, latest_db=None, info_db=None, index_db=None):
+def get_latest_pkg_from_record(name):
     return _get_latest_from_record(
-        name, 'pkg', info_db=info_db, latest_db=latest_db, index_db=index_db
+        name, 'pkg'
         )
 
-def _get_latest_from_record(name, typ, latest_db=None, info_db=None, index_db=None):
+def _get_latest_from_record(name, typ):
 
-    if info_db == None:
-        raise ValueError("info_db can't be None")
-
-    if latest_db == None:
-        raise ValueError("latest_db can't be None")
-
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+    latest_db = org.wayround.aipsetup.dbconnections.latest_db()
 
     ret = None
 
@@ -292,8 +254,7 @@ def _get_latest_from_record(name, typ, latest_db=None, info_db=None, index_db=No
         raise ValueError("`typ' can be only 'src' or 'pkg'")
 
     info = org.wayround.aipsetup.pkginfo.get_package_info_record(
-        name,
-        info_db=info_db
+        name
         )
 
     if info == None:
@@ -308,9 +269,9 @@ def _get_latest_from_record(name, typ, latest_db=None, info_db=None, index_db=No
         if info['auto_newest_' + typ]:
             latest = ''
             if typ == 'src':
-                latest = get_latest_src_from_src_db(name, info_db=info_db)
+                latest = get_latest_src_from_src_db(name)
             elif typ == 'pkg':
-                latest = get_latest_pkg_from_repo(name, index_db=index_db)
+                latest = get_latest_pkg_from_repo(name)
             ret = latest
         else:
 
@@ -329,16 +290,13 @@ def _get_latest_from_record(name, typ, latest_db=None, info_db=None, index_db=No
     return ret
 
 
-def get_latest_src_from_src_db(name, info_db=None, files=None):
-
-    if info_db == None:
-        raise ValueError("info_db can't be None")
+def get_latest_src_from_src_db(name, files=None):
 
     ret = None
 
     if not files:
         files = org.wayround.aipsetup.pkgindex.get_package_source_files(
-            name, info_db=info_db
+            name
             )
 
     if len(files) == 0:
@@ -353,16 +311,13 @@ def get_latest_src_from_src_db(name, info_db=None, files=None):
 
     return ret
 
-def get_latest_pkg_from_repo(name, index_db=None, files=None):
-
-    if index_db == None:
-        raise ValueError("index_db can't be None")
+def get_latest_pkg_from_repo(name, files=None):
 
     ret = None
 
     if not files:
         files = org.wayround.aipsetup.pkgindex.get_package_files(
-            name, index_db=index_db
+            name
             )
 
     if len(files) == 0:
