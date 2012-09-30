@@ -140,6 +140,7 @@ class MainWindow:
             self.ui['entry2'].set_sensitive(False)
             self.ui['label8'].set_text(NON_AUTOMATIC_NOT_SELECTED)
             self.ui['treeview3'].set_sensitive(False)
+            self.currently_opened = None
         else:
             self.ui['window1'].set_sensitive(False)
 
@@ -147,93 +148,106 @@ class MainWindow:
                 name
                 )
 
-
-            latest_source = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                name
-                )
-
-            self.ui['entry1'].set_text(str(latest_source))
-            if info['auto_newest_src']:
-                self.ui['button4'].set_sensitive(False)
-                self.ui['entry1'].set_sensitive(False)
-                self.ui['label7'].set_text("Automatic")
-                self.ui['treeview2'].set_sensitive(False)
-            else:
-                self.ui['button4'].set_sensitive(True)
-                self.ui['entry1'].set_sensitive(True)
-                self.ui['label7'].set_text("Select latest src file")
-                self.ui['treeview2'].set_sensitive(True)
-
-
-
-            latest_package = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                name
-                )
-
-            self.ui['entry2'].set_text(str(latest_package))
-            if info['auto_newest_pkg']:
-                self.ui['button5'].set_sensitive(False)
-                self.ui['entry2'].set_sensitive(False)
-                self.ui['label8'].set_text("Automatic")
-                self.ui['treeview3'].set_sensitive(False)
-            else:
-                self.ui['button5'].set_sensitive(True)
-                self.ui['entry2'].set_sensitive(True)
-                self.ui['label8'].set_text("Select latest src file")
-                self.ui['treeview3'].set_sensitive(True)
-
-
-            files = org.wayround.aipsetup.pkgindex.get_package_source_files(
-                name
-                )
-
-            files.sort(
-                reverse=True,
-                key=functools.cmp_to_key(
-                    org.wayround.aipsetup.version.source_version_comparator
+            if not isinstance(info, dict):
+                dia = Gtk.MessageDialog(
+                    self.ui['window1'],
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    "Error getting information from DB\n"
+                    "Perhaps `aipsetup repo load' required"
                     )
-                )
+                dia.run()
+                dia.destroy()
 
-            self.ui['treeview2'].set_model(None)
-            lst = Gtk.ListStore(str)
-            for i in files:
-                lst.append([i])
+            else:
 
-            self.ui['treeview2'].set_model(lst)
-
-            files = org.wayround.aipsetup.pkgindex.get_package_files(
-                name
-                )
-
-            files.sort(
-                reverse=True,
-                key=functools.cmp_to_key(
-                    org.wayround.aipsetup.version.package_version_comparator
+                latest_source = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+                    name
                     )
-                )
 
-            self.ui['treeview3'].set_model(None)
-            lst = Gtk.ListStore(str)
-            for i in files:
-                lst.append([i])
+                self.ui['entry1'].set_text(str(latest_source))
+                if info['auto_newest_src']:
+                    self.ui['button4'].set_sensitive(False)
+                    self.ui['entry1'].set_sensitive(False)
+                    self.ui['label7'].set_text("Automatic")
+                    self.ui['treeview2'].set_sensitive(False)
+                else:
+                    self.ui['button4'].set_sensitive(True)
+                    self.ui['entry1'].set_sensitive(True)
+                    self.ui['label7'].set_text("Select latest src file")
+                    self.ui['treeview2'].set_sensitive(True)
 
-            self.ui['treeview3'].set_model(lst)
 
-            org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
-                self.ui['treeview2'],
-                latest_source
-                )
 
-            org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
-                self.ui['treeview3'],
-                latest_package
-                )
+                latest_package = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+                    name
+                    )
 
-            self.currently_opened = name
-            self.scrollPackageListToItem(name)
-            self.ui['window1'].set_title(str(name) + " - Latest Files Editor")
+                self.ui['entry2'].set_text(str(latest_package))
+                if info['auto_newest_pkg']:
+                    self.ui['button5'].set_sensitive(False)
+                    self.ui['entry2'].set_sensitive(False)
+                    self.ui['label8'].set_text("Automatic")
+                    self.ui['treeview3'].set_sensitive(False)
+                else:
+                    self.ui['button5'].set_sensitive(True)
+                    self.ui['entry2'].set_sensitive(True)
+                    self.ui['label8'].set_text("Select latest src file")
+                    self.ui['treeview3'].set_sensitive(True)
 
-            self.ui['window1'].set_sensitive(True)
+
+                files = org.wayround.aipsetup.pkgindex.get_package_source_files(
+                    name
+                    )
+
+                files.sort(
+                    reverse=True,
+                    key=functools.cmp_to_key(
+                        org.wayround.aipsetup.version.source_version_comparator
+                        )
+                    )
+
+                self.ui['treeview2'].set_model(None)
+                lst = Gtk.ListStore(str)
+                for i in files:
+                    lst.append([i])
+
+                self.ui['treeview2'].set_model(lst)
+
+                files = org.wayround.aipsetup.pkgindex.get_package_files(
+                    name
+                    )
+
+                files.sort(
+                    reverse=True,
+                    key=functools.cmp_to_key(
+                        org.wayround.aipsetup.version.package_version_comparator
+                        )
+                    )
+
+                self.ui['treeview3'].set_model(None)
+                lst = Gtk.ListStore(str)
+                for i in files:
+                    lst.append([i])
+
+                self.ui['treeview3'].set_model(lst)
+
+                org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
+                    self.ui['treeview2'],
+                    latest_source
+                    )
+
+                org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
+                    self.ui['treeview3'],
+                    latest_package
+                    )
+
+                self.currently_opened = name
+                self.scrollPackageListToItem(name)
+                self.ui['window1'].set_title(str(name) + " - Latest Files Editor")
+
+                self.ui['window1'].set_sensitive(True)
 
         return 0
 
@@ -328,9 +342,9 @@ class MainWindow:
             subprocess.Popen(
                 [
                     'aipsetup3',
-                    'info',
+                    'i',
                     'editor',
-                    self.currently_opened + '.xml'
+                    self.currently_opened + '.json'
                     ]
                 )
 

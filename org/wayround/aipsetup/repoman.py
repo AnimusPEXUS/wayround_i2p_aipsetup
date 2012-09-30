@@ -67,8 +67,7 @@ def repoman_find_repository_package_name_collisions_in_database(opts, args):
     Scan index for equal package names
     """
 
-    ret = org.wayround.aipsetup.pkgindex.get_package_collisions_in_db(
-        )
+    ret = org.wayround.aipsetup.pkgindex.get_package_collisions_in_db()
 
     return ret
 
@@ -105,10 +104,19 @@ def repoman_index_sources(opts, args):
             subdir_name = os.path.realpath(os.path.abspath(subdir_name))
 
         if (
-            not (os.path.realpath(os.path.abspath(subdir_name)) + '/').startswith(
-            os.path.realpath(os.path.abspath(org.wayround.aipsetup.config.config['source'])) + '/'
-            )
-            or not os.path.isdir(os.path.abspath(subdir_name))):
+            not (
+                os.path.realpath(
+                    os.path.abspath(subdir_name)
+                    ) + '/'
+                 ).startswith(
+                    os.path.realpath(
+                        os.path.abspath(
+                            org.wayround.aipsetup.config.config['source']
+                            )
+                        ) + '/'
+                    )
+            or not os.path.isdir(os.path.abspath(subdir_name))
+            ):
             logging.error("Not a subdir of pkg_source")
             logging.debug(
 """\
@@ -117,7 +125,11 @@ config: {}
 exists: {}
 """.format(
                     os.path.realpath(os.path.abspath(subdir_name)),
-                    os.path.realpath(os.path.abspath(org.wayround.aipsetup.config.config['source'])),
+                    os.path.realpath(
+                        os.path.abspath(
+                            org.wayround.aipsetup.config.config['source']
+                            )
+                        ),
                     os.path.isdir(subdir_name)
                     )
                 )
@@ -156,9 +168,9 @@ def repoman_find_missing_pkg_info_records(opts, args):
 
     [-t] [-f]
 
-    -t creates non-existing .xml file templates in info dir
+    -t creates non-existing .json file templates in info dir
 
-    -f forces rewrite existing .xml files
+    -f forces rewrite existing .json files
     """
 
     ret = 0
@@ -168,10 +180,7 @@ def repoman_find_missing_pkg_info_records(opts, args):
     f = '-f' in opts
 
     try:
-        org.wayround.aipsetup.pkginfo.get_missing_info_records_list(
-            t,
-            f
-            )
+        org.wayround.aipsetup.pkginfo.get_missing_info_records_list(t, f)
     except:
         logging.exception("Error while searching for missing records")
         ret = 1
@@ -182,13 +191,12 @@ def repoman_find_missing_pkg_info_records(opts, args):
 
 def repoman_find_outdated_pkg_info_records(opts, args):
     """
-    Finds pkg info records which differs to FS .xml files
+    Finds pkg info records which differs to FS .json files
     """
     ret = 0
 
     try:
-        res = org.wayround.aipsetup.pkginfo.get_outdated_info_records_list(
-            )
+        res = org.wayround.aipsetup.pkginfo.get_outdated_info_records_list()
 
     except:
         logging.exception("Error getting outdated info records list")
@@ -205,8 +213,9 @@ def repoman_find_outdated_pkg_info_records(opts, args):
 
 def repoman_update_outdated_pkg_info_records(opts, args):
     """
-    Loads pkg info records which differs to FS .xml files
+    Loads pkg info records which differs to FS .json files
     """
+
     org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records()
 
     return 0
@@ -225,9 +234,7 @@ def repoman_delete_pkg_info_records(opts, args):
         mask = args[0]
 
     if mask != None:
-        ret = org.wayround.aipsetup.pkginfo.delete_info_records(
-            mask
-            )
+        ret = org.wayround.aipsetup.pkginfo.delete_info_records(mask)
     else:
         logging.error("Mask is not given")
         ret = 1
@@ -249,10 +256,7 @@ def repoman_backup_package_info_to_filesystem(opts, args):
 
     force = '-f' in opts
 
-    ret = org.wayround.aipsetup.pkginfo.save_info_records_to_fs(
-        mask,
-        force
-        )
+    ret = org.wayround.aipsetup.pkginfo.save_info_records_to_fs(mask, force)
 
     return ret
 
@@ -271,7 +275,13 @@ def repoman_load_package_info_from_filesystem(opts, args):
 
     filenames = []
     if len(args) == 0:
-        filenames = glob.glob(org.wayround.aipsetup.config.config['info'] + os.path.sep + '*')
+        filenames = (
+            glob.glob(
+                org.wayround.aipsetup.config.config['info'] +
+                os.path.sep +
+                '*'
+                )
+            )
     else:
         filenames = copy.copy(args)
 
@@ -316,9 +326,8 @@ def repoman_print_pkg_info_record(opts, args):
 
     if name != None:
 
-        ret = org.wayround.aipsetup.pkginfo.print_info_record(
-            name
-            )
+        ret = org.wayround.aipsetup.pkginfo.print_info_record(name)
+
     else:
         logging.error("Name is not given")
         ret = 1
@@ -327,14 +336,12 @@ def repoman_print_pkg_info_record(opts, args):
 
 def repoman_load_tags(opts, args):
 
-    org.wayround.aipsetup.pkgtag.load_tags_from_fs(
-        )
+    org.wayround.aipsetup.pkgtag.load_tags_from_fs()
 
     return 0
 
 def repoman_save_tags(opts, args):
 
-    org.wayround.aipsetup.pkgtag.save_tags_to_fs(
-        )
+    org.wayround.aipsetup.pkgtag.save_tags_to_fs()
 
     return 0

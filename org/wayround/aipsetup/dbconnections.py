@@ -54,3 +54,26 @@ def src_db():
         _src_db_connection = org.wayround.aipsetup.pkgindex.get_sources_connection()
 
     return _src_db_connection
+
+def close_all():
+    global _info_db_connection
+    global _index_db_connection
+    global _latest_db_connection
+    global _tag_db_connection
+    global _src_db_connection
+
+    if _info_db_connection:
+        _info_db_connection.close()
+
+    if _index_db_connection:
+        _index_db_connection.close()
+
+    if _latest_db_connection:
+        _latest_db_connection.close()
+
+    if _tag_db_connection:
+        _tag_db_connection.close()
+
+    if _src_db_connection:
+        _src_db_connection.close()
+

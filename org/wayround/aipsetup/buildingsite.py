@@ -4,7 +4,6 @@ Module for initiating building site, which required to farver package build.
 """
 
 import os
-import pprint
 import logging
 import shutil
 import json
@@ -12,7 +11,6 @@ import json
 
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
-import org.wayround.aipsetup.dbconnections
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -23,6 +21,7 @@ DIR_DESTDIR = '04.DESTDIR'
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
 DIR_LISTS = '06.LISTS'
 DIR_TEMP = '07.TEMP'
+
 
 def _getDIR_x(directory, _x='TARBALL'):
     '''
@@ -35,6 +34,7 @@ def _getDIR_x(directory, _x='TARBALL'):
             directory,
             eval('DIR_{}'.format(_x)))
         )
+
 
 def getDIR_TARBALL   (directory): return _getDIR_x(directory, 'TARBALL')
 def getDIR_SOURCE    (directory): return _getDIR_x(directory, 'SOURCE')
@@ -232,7 +232,9 @@ def init(buildingsite='build', files=None):
 
 def read_package_info(directory, ret_on_error=None):
 
-    logging.debug("Trying to read package info in building site `{}'".format(directory))
+    logging.debug(
+        "Trying to read package info in building site `{}'".format(directory)
+        )
 
     ret = ret_on_error
 
@@ -272,9 +274,10 @@ def write_package_info(directory, info):
     try:
         f = open(pi_filename, 'w')
     except:
-        raise OSError("Can't open `%(file)s' for writing" % {
-            'file': pi_filename
-            })
+        logging.error(
+            "Can't open `{}' for writing".format(pi_filename)
+            )
+        raise
     else:
         try:
             txt = ''
@@ -349,14 +352,14 @@ def apply_pkg_info_on_buildingsite(dirname):
 
     package_info = read_package_info(dirname, ret_on_error={})
 
-    if not isinstance(package_info, dict) \
-            or not 'pkg_nameinfo' in package_info \
-            or not isinstance(package_info['pkg_nameinfo'], dict) \
-            or not 'groups' in package_info['pkg_nameinfo'] \
-            or not isinstance(package_info['pkg_nameinfo']['groups'], dict) \
-            or not 'name' in package_info['pkg_nameinfo']['groups'] \
-            or not isinstance(package_info['pkg_nameinfo']['groups']['name'],
-                              str):
+    if (not isinstance(package_info, dict)
+        or not 'pkg_nameinfo' in package_info
+        or not isinstance(package_info['pkg_nameinfo'], dict)
+        or not 'groups' in package_info['pkg_nameinfo']
+        or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
+        or not 'name' in package_info['pkg_nameinfo']['groups']
+        or not isinstance(package_info['pkg_nameinfo']['groups']['name'], str)
+        ):
 
         logging.error("package_info['pkg_nameinfo']['groups'] undetermined")
         package_info['pkg_info'] = {}
@@ -366,7 +369,7 @@ def apply_pkg_info_on_buildingsite(dirname):
 
         logging.debug("Getting info from index DB")
 
-        res = org.wayround.aipsetup.pkginfo.get_info_record_by_basename_and_version(
+        res = org.wayround.aipsetup.pkginfo.get_info_rec_by_base_and_ver(
             package_info['pkg_nameinfo']['groups']['name'],
             package_info['pkg_nameinfo']['groups']['version']
             )

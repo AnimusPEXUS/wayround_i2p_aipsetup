@@ -126,29 +126,44 @@ def get_is_repo_package_dir(path):
 
 def get_package_files(name):
 
+    ret = 0
+
     pid = get_package_id(name)
-    package_path = get_package_path_string(pid)
+    if pid == None:
+        logging.error("Error getting package `{}' ID".format(name))
+        ret = 1
+    else:
 
-    package_dir = os.path.abspath(
-        org.wayround.aipsetup.config.config['repository']
-        + os.path.sep + package_path + os.path.sep + 'pack'
-        )
+        package_path = get_package_path_string(pid)
 
-    logging.debug("Looking for package files in `{}'".format(package_dir))
-    files = glob.glob(os.path.join(package_dir, '*.asp'))
+        if not isinstance(package_path, str):
+            logging.error("Can't get path for package `{}'".format(pid))
+            ret = 2
+        else:
 
-    needed_files = []
-    for i in files:
-        if org.wayround.aipsetup.name.package_name_parse(i) != None:
-            needed_files.append(
-                '/' +
-                os.path.relpath(
-                    i,
-                    org.wayround.aipsetup.config.config['repository']
-                    )
+            package_dir = os.path.abspath(
+                org.wayround.aipsetup.config.config['repository']
+                + os.path.sep + package_path + os.path.sep + 'pack'
                 )
 
-    return needed_files
+            logging.debug("Looking for package files in `{}'".format(package_dir))
+            files = glob.glob(os.path.join(package_dir, '*.asp'))
+
+            needed_files = []
+            for i in files:
+                parsed = org.wayround.aipsetup.name.package_name_parse(i)
+                if parsed and parsed['groups']['name'] == name:
+                    needed_files.append(
+                        '/' +
+                        os.path.relpath(
+                            i,
+                            org.wayround.aipsetup.config.config['repository']
+                            )
+                        )
+
+            ret = needed_files
+
+    return ret
 
 def get_package_source_files(name):
 
@@ -435,30 +450,37 @@ def get_category_idname_dict(parent_cid=0):
     return dic
 
 
-def get_package_path(pid):
+def get_package_path(pid_or_name):
 
-    index_db = org.wayround.aipsetup.dbconnections.index_db()
+    if not isinstance(pid_or_name, int):
+        pid_or_name = str(pid_or_name)
+
+    pid = None
+    if isinstance(pid_or_name, str):
+        pid = get_package_id(pid_or_name)
+    else:
+        pid = int(pid_or_name)
 
     ret = []
     pkg = None
 
-    if pid != None:
-        pkg = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+    if pid == None:
+        logging.error("Error getting package `{}' data from DB".format())
+        ret = None
     else:
-        raise ValueError("Error getting package data from DB")
+        index_db = org.wayround.aipsetup.dbconnections.index_db()
+        pkg = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
 
+        if pkg != None :
 
+            r = pkg.cid
 
-    if pkg != None :
+            ret.insert(0, (pkg.pid, pkg.name))
 
-        r = pkg.cid
-
-        ret.insert(0, (pkg.pid, pkg.name))
-
-        while r != 0:
-            cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
-            ret.insert(0, (cat.cid, cat.name))
-            r = cat.parent_cid
+            while r != 0:
+                cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
+                ret.insert(0, (cat.cid, cat.name))
+                r = cat.parent_cid
 
     return ret
 
@@ -470,33 +492,53 @@ def get_category_path(cid):
     ret = []
     categ = None
 
-    if cid != None:
-        categ = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+    if cid == None:
+        logging.error(
+            "Error getting category `{}' data from DB".format(
+                cid
+                )
+            )
+        ret = None
     else:
-        raise ValueError("Error getting category data from DB")
+        categ = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
 
-    if categ != None :
+        if categ != None :
 
-        r = categ.parent_cid
+            r = categ.parent_cid
 
-        ret.insert(0, (categ.cid, categ.name))
+            ret.insert(0, (categ.cid, categ.name))
 
-        while r != 0:
-            cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
-            ret.insert(0, (cat.cid, cat.name))
-            r = cat.parent_cid
+            while r != 0:
+                cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
+                ret.insert(0, (cat.cid, cat.name))
+                r = cat.parent_cid
 
     return ret
 
 
-def get_package_path_string(pid):
-    r = get_package_path(pid)
-    ret = join_pkg_path(r)
+def get_package_path_string(pid_or_name):
+
+    ret = None
+
+    r = get_package_path(pid_or_name)
+
+    if not isinstance(r, list):
+        ret = None
+    else:
+        ret = join_pkg_path(r)
     return ret
 
-def get_category_path_string(cid):
-    r = get_category_path(cid)
-    ret = join_pkg_path(r)
+def get_category_path_string(cid_or_name):
+
+    ret = None
+
+    r = get_category_path(cid_or_name)
+
+    if not isinstance(r, list):
+        ret = None
+    else:
+        ret = join_pkg_path(r)
+
     return ret
 
 def get_package_collisions_in_db():
@@ -667,8 +709,7 @@ def scan_repo_for_pkg_and_cat():
     logging.info("Scanning repository...")
     _scan_repo_for_pkg_and_cat(
         org.wayround.aipsetup.config.config['repository'],
-        0,
-        index_db=index_db
+        0
         )
 
     org.wayround.utils.file.progress_write_finish()
@@ -684,7 +725,9 @@ def create_required_dirs_at_package(path):
 
     ret = 0
 
-    # TODO: maybe it's time to remove aipsetup2 from here
+    # NOTE: it's not time to remove aipsetup2 from here yet
+    # NOTE: some of those packages are steel needed
+
     for i in ['pack', 'aipsetup2']:
         full_path = path + os.path.sep + i
 

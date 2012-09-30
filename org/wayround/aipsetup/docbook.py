@@ -9,7 +9,8 @@ import stat
 import re
 import logging
 
-import lxml.etree
+# FIXME: look for new lxml releases supporting Python 3.3
+#import lxml.etree
 
 import org.wayround.utils.file
 

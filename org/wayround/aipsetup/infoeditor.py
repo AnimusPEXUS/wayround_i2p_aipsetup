@@ -157,7 +157,7 @@ class MainWindow:
                     )
 
                 self.currently_opened = name
-                self.ui['window1'].set_title(name + " - aipsetup v3 .xml info file editor")
+                self.ui['window1'].set_title(name + " - aipsetup v3 .json info file editor")
 
                 self.scroll_package_list_to_name(name)
 
@@ -252,7 +252,7 @@ class MainWindow:
 
     def load_list(self):
 
-        mask = os.path.join(self.config['info'], '*.xml')
+        mask = os.path.join(self.config['info'], '*.json')
 
         files = glob.glob(mask)
 
@@ -345,12 +345,12 @@ class MainWindow:
 
     def onEditLatestButtonActivated(self, toggle):
 
-        if self.ui['entry1'].get_text().endswith('.xml'):
+        if self.ui['entry1'].get_text().endswith('.json'):
             subprocess.Popen(
                 [
                 'aipsetup3',
-                'pkgindex',
-                'edit_latests',
+                'repo',
+                'latests',
                 self.ui['entry1'].get_text()[:-4]
                 ]
                 )

@@ -283,7 +283,7 @@ def get_missing_info_records_list(
 
                 filename = os.path.join(
                     org.wayround.aipsetup.config.config['info'],
-                    '%(name)s.xml' % {'name': each.name}
+                    '%(name)s.json' % {'name': each.name}
                     )
 
                 if os.path.exists(filename):
@@ -340,7 +340,7 @@ def get_outdated_info_records_list(mute=True):
 
         filename = os.path.join(
             org.wayround.aipsetup.config.config['info'],
-            '{}.xml'.format(i.name)
+            '{}.json'.format(i.name)
             )
 
         if not os.path.exists(filename):
@@ -368,7 +368,7 @@ def get_outdated_info_records_list(mute=True):
     return ret
 
 
-def get_info_record_by_basename_and_version(basename, version):
+def get_info_rec_by_base_and_ver(basename, version):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
@@ -430,7 +430,7 @@ def update_outdated_pkg_info_records():
     for i in range(len(oir)):
         oir[i] = os.path.join(
             org.wayround.aipsetup.config.config['info'],
-            oir[i] + '.xml'
+            oir[i] + '.json'
             )
 
     load_info_records_from_fs(
@@ -459,6 +459,11 @@ def print_info_record(name):
         else:
             category = "< Package not indexed! >"
 
+        tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+
+        tags = tag_db.get_tags(name[:-4])
+        tags.sort()
+
         # TODO: add all fields
         print("""\
 +---[{name}]---------------------------------------+
@@ -480,7 +485,7 @@ def print_info_record(name):
 +---[{name}]---------------------------------------+
 """.format_map(
     {
-    'tags'                  : ', '.join(r['tags']),
+    'tags'                  : ', '.join(tags),
     'category'              : category,
     'name'                  : name,
     'description'           : r['description'],
@@ -535,12 +540,12 @@ def save_info_records_to_fs(
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
-    q = info_db.sess.query(info_db.Info).all()
+    q = info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
 
     for i in q:
         if fnmatch.fnmatch(i.name, mask):
             filename = os.path.join(
-                org.wayround.aipsetup.config.config['info'], '%(name)s.xml' % {
+                org.wayround.aipsetup.config.config['info'], '%(name)s.json' % {
                     'name': i.name
                     })
             if not force_rewrite and os.path.exists(filename):
@@ -580,7 +585,7 @@ def load_info_records_from_fs(
     loaded = 0
 
     for i in filenames:
-        if i.endswith('.xml'):
+        if i.endswith('.json'):
             files.append(i)
 
     files.sort()
@@ -625,7 +630,7 @@ def load_info_records_from_fs(
                 )
 
             set_package_info_record(
-                name, struct, info_db
+                name, struct
                 )
             loaded += 1
         else:

@@ -1,15 +1,7 @@
-#!/usr/bin/python3.2
+#!/usr/bin/python3
 
 import sys
 import logging
-
-import org.wayround.utils.getopt2
-
-import org.wayround.aipsetup
-import org.wayround.aipsetup.config
-import org.wayround.aipsetup.help
-import org.wayround.aipsetup.modhelp
-
 
 # Logging settings
 for i in [
@@ -23,9 +15,9 @@ for i in [
     logging.addLevelName(i[0], i[1])
 del i
 
-# Parse parameters
+import org.wayround.utils.getopt2
+
 opts, args = org.wayround.utils.getopt2.getopt_keyed(sys.argv[1:])
-args_l = len(args)
 
 # Setup logging level and format
 log_level = 'INFO'
@@ -43,6 +35,15 @@ if '--log' in opts:
 
 logging.basicConfig(format="%(levelname)s %(message)s", level=log_level)
 
+import org.wayround.aipsetup
+import org.wayround.aipsetup.config
+import org.wayround.aipsetup.help
+import org.wayround.aipsetup.modhelp
+import org.wayround.aipsetup.dbconnections
+
+
+# Parse parameters
+args_l = len(args)
 
 # Try load config
 try:
@@ -114,6 +115,12 @@ else:
                                 logging.error("Function `{}' not exported by module `{}'".format(args[1], args[0]))
                             else:
 
-                                ret = commands[args[1]](opts, args[2:])
+                                try:
+                                    ret = commands[args[1]](opts, args[2:])
+                                except:
+                                    logging.exception("Some error. See below")
+                                    ret = 102
+
+org.wayround.aipsetup.dbconnections.close_all()
 
 exit(ret)

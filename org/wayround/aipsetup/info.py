@@ -9,26 +9,12 @@ import os.path
 import copy
 import glob
 import logging
-
-try:
-    import lxml.etree
-except:
-    logging.exception("lxml xml pareser is required")
-    raise
-
-try:
-    from mako.template import Template
-except:
-    logging.exception("mako template engine is required")
-    raise
-
+import json
 
 import org.wayround.utils.file
 import org.wayround.utils.edit
-import org.wayround.utils.tag
 
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pkgindex
 
 
@@ -61,35 +47,35 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     auto_newest_pkg=True,
     )
 
-pkg_info_file_template = Template(text="""\
-<package>
-
-    <!-- This file is generated using aipsetup v3 -->
-
-    <description>${ description | x}</description>
-
-    <home_page url="${ home_page | x}"/>
-
-    <buildscript value="${ buildscript | x }"/>
-
-    <basename value="${ basename | x }"/>
-
-    <version_re value="${ version_re | x }"/>
-
-    <installation_priority value="${ installation_priority | x }"/>
-
-    <removable value="${ removable | x }"/>
-    <reducible value="${ reducible | x }"/>
-
-    <auto_newest_src value="${ auto_newest_src | x }"/>
-    <auto_newest_pkg value="${ auto_newest_pkg | x }"/>
-
-</package>
-""")
+#pkg_info_file_template = Template(text="""\
+#<package>
+#
+#    <!-- This file is generated using aipsetup v3 -->
+#
+#    <description>${ description | x}</description>
+#
+#    <home_page url="${ home_page | x}"/>
+#
+#    <buildscript value="${ buildscript | x }"/>
+#
+#    <basename value="${ basename | x }"/>
+#
+#    <version_re value="${ version_re | x }"/>
+#
+#    <installation_priority value="${ installation_priority | x }"/>
+#
+#    <removable value="${ removable | x }"/>
+#    <reducible value="${ reducible | x }"/>
+#
+#    <auto_newest_src value="${ auto_newest_src | x }"/>
+#    <auto_newest_pkg value="${ auto_newest_pkg | x }"/>
+#
+#</package>
+#""")
 
 def exported_commands():
     return {
-        'mass_info_fix': info_mass_info_fix,
+        'fix': info_mass_info_fix,
         'list': info_list_files,
         'edit': info_edit_file,
         'editor': info_editor,
@@ -102,22 +88,22 @@ def commands_order():
         'list',
         'edit',
         'copy',
-        'mass_info_fix'
+        'fix'
         ]
 
 def cli_name():
     return 'i'
 
-def info_list_files(opts, args, typ='info', mask='*.xml'):
+def info_list_files(opts, args, typ='info', mask='*.json'):
     """
     List XML files in pkg_info dir of UNICORN dir
 
     [FILEMASK]
 
-    One argument is allowed - FILEMASK, which defaults to '*.xml'
+    One argument is allowed - FILEMASK, which defaults to '*.json'
 
     example:
-    aipsetup info list '*doc*.xml'
+    aipsetup info list '*doc*.json'
     """
 
     args_l = len(args)
@@ -199,14 +185,14 @@ def info_copy(opts, args):
 
 def info_mass_info_fix(opts, args):
     """
-    Does various .xml info files fixes
+    Does various .json info files fixes
 
     [--forced-homepage-fix]
 
     --forced-homepage-fix    forces fixes on homepage fields
     """
 
-    lst = glob.glob(os.path.join(org.wayround.aipsetup.config.config['info'], '*.xml'))
+    lst = glob.glob(os.path.join(org.wayround.aipsetup.config.config['info'], '*.json'))
     lst.sort()
 
     forced_homepage_fix = '--forced-homepage-fix' in opts
@@ -214,15 +200,13 @@ def info_mass_info_fix(opts, args):
     lst_c = len(lst)
     lst_i = 0
 
-    src_db = org.wayround.aipsetup.pkgindex.get_sources_connection()
-
     for i in lst:
 
         name = os.path.basename(i)[:-4]
 
         dicti = read_from_file(i)
 
-        info_fixes(dicti, name, src_db, forced_homepage_fix)
+        info_fixes(dicti, name, forced_homepage_fix)
 
         write_to_file(i, dicti)
 
@@ -238,7 +222,7 @@ def info_mass_info_fix(opts, args):
 
     org.wayround.utils.file.progress_write_finish()
 
-    logging.info("Processed {} files".format(lst))
+    logging.info("Processed {} files".format(lst_c))
 
     return 0
 
@@ -296,16 +280,16 @@ def read_from_file(name):
     try:
         f = open(name, 'r')
     except:
-        logging.exception("Can't open file %(name)s" % {
-            'name': name
-            })
+        logging.exception(
+            "Can't open file `{}'".format(name)
+            )
         ret = 1
     else:
         try:
             txt = f.read()
 
             try:
-                tree = lxml.etree.fromstring(txt)
+                tree = json.loads(txt)
             except:
                 logging.exception("Can't parse file `%(name)s'" % {
                     'name': name
@@ -314,55 +298,57 @@ def read_from_file(name):
             else:
                 ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
 
-                x = _find_latest(tree, 'installation_priority', 'value')
-                if x != None:
-                    try:
-                        x = int(x)
-                    except:
-                        x = 5
+                ret.update(tree)
 
-                    if x >= 0 and x <= 9:
-                        ret['installation_priority'] = x
-                    else:
-                        raise ValueError(
-                            "Wrong installation_priority value in `{}'".format(
-                                name
-                                )
-                            )
-
-                for i in [
-                    'removable',
-                    'reducible',
-                    'auto_newest_src',
-                    'auto_newest_pkg'
-                    ]:
-                    x = _find_latest(tree, i, 'value')
-                    if x != None:
-                        if not x in ['True', 'False']:
-                            raise ValueError(
-                                "Wrong `{}' value in `{}'".format(
-                                    i,
-                                    name
-                                    )
-                                )
-                        else:
-                            ret[i] = eval(x)
-
-
-                for i in [
-                    ('buildscript', 'value'),
-                    ('home_page', 'url'),
-                    ('basename', 'value'),
-                    ('version_re', 'value'),
-                    ]:
-
-                    x = _find_latest(tree, i[0], i[1])
-                    if x != None:
-                        ret[i[0]] = x
-
-                x = tree.findall('description')
-                if len(x) > 0:
-                    ret['description'] = x[-1].text
+#                x = _find_latest(tree, 'installation_priority', 'value')
+#                if x != None:
+#                    try:
+#                        x = int(x)
+#                    except:
+#                        x = 5
+#
+#                    if x >= 0 and x <= 9:
+#                        ret['installation_priority'] = x
+#                    else:
+#                        raise ValueError(
+#                            "Wrong installation_priority value in `{}'".format(
+#                                name
+#                                )
+#                            )
+#
+#                for i in [
+#                    'removable',
+#                    'reducible',
+#                    'auto_newest_src',
+#                    'auto_newest_pkg'
+#                    ]:
+#                    x = _find_latest(tree, i, 'value')
+#                    if x != None:
+#                        if not x in ['True', 'False']:
+#                            raise ValueError(
+#                                "Wrong `{}' value in `{}'".format(
+#                                    i,
+#                                    name
+#                                    )
+#                                )
+#                        else:
+#                            ret[i] = eval(x)
+#
+#
+#                for i in [
+#                    ('buildscript', 'value'),
+#                    ('home_page', 'url'),
+#                    ('basename', 'value'),
+#                    ('version_re', 'value'),
+#                    ]:
+#
+#                    x = _find_latest(tree, i[0], i[1])
+#                    if x != None:
+#                        ret[i[0]] = x
+#
+#                x = tree.findall('description')
+#                if len(x) > 0:
+#                    ret['description'] = x[-1].text
 
                 ret['name'] = name
                 del(tree)
@@ -375,18 +361,23 @@ def write_to_file(name, struct):
 
     ret = 0
 
-    txt = pkg_info_file_template.render(
-        description=struct['description'],
-        home_page=struct['home_page'],
-        buildscript=struct['buildscript'],
-        basename=struct['basename'],
-        version_re=struct['version_re'],
-        installation_priority=struct['installation_priority'],
-        removable=struct['removable'],
-        reducible=struct['reducible'],
-        auto_newest_src=struct['auto_newest_src'],
-        auto_newest_pkg=struct['auto_newest_pkg']
-        )
+    struct = copy.copy(struct)
+
+    if 'name' in struct:
+        del struct['name']
+
+    txt = json.dumps(struct, indent=2, sort_keys=True)
+#        description=struct['description'],
+#        home_page=struct['home_page'],
+#        buildscript=struct['buildscript'],
+#        basename=struct['basename'],
+#        version_re=struct['version_re'],
+#        installation_priority=struct['installation_priority'],
+#        removable=struct['removable'],
+#        reducible=struct['reducible'],
+#        auto_newest_src=struct['auto_newest_src'],
+#        auto_newest_pkg=struct['auto_newest_pkg']
+#        )
 
     try:
         f = open(name, 'w')
@@ -403,7 +394,7 @@ def write_to_file(name, struct):
 
     return ret
 
-def info_fixes(info, pkg_name, tag_db=None, forced_homepage_fix=False):
+def info_fixes(info, pkg_name, forced_homepage_fix=False):
     """
     This function is used by `info_mass_info_fix'
 
@@ -419,9 +410,8 @@ def info_fixes(info, pkg_name, tag_db=None, forced_homepage_fix=False):
 
     # TODO: think about this all 
     if forced_homepage_fix or info['home_page'] in ['', 'None']:
-        possibilities = org.wayround.aipsetup.pkgindex.guess_package_homepage(
-            pkg_name,
-            tag_db
+        possibilities = org.wayround.aipsetup.pkginfo.guess_package_homepage(
+            pkg_name
             )
 
         keys = list(possibilities.keys())

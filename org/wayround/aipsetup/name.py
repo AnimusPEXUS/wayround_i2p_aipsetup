@@ -89,7 +89,7 @@ def name_parse_name(opts, args):
 
     [-w] NAME
 
-    if -w is set - change <name>.xml info file nametype value to
+    if -w is set - change <name>.json info file nametype value to
     result
     """
 
@@ -535,7 +535,7 @@ def source_name_parse(
 def _modify_info_file(src_filename_parsed, mute=True):
     fn = os.path.join(
         org.wayround.aipsetup.config.config['info'],
-        '%(name)s.xml' % {
+        '%(name)s.json' % {
             'name': src_filename_parsed['groups']['name']
             }
         )
