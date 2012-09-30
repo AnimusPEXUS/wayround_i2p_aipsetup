@@ -1,0 +1,12 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "devhelp", 
+  "buildscript": "autotools_usr", 
+  "description": "None", 
+  "home_page": "http://gnome.org", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version_re": ".*?.*?[02468]\\..*"
+}

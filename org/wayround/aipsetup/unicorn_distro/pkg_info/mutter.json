@@ -1,0 +1,12 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "mutter", 
+  "buildscript": "", 
+  "description": "write something here, please", 
+  "home_page": "http://www.gnome.org", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version_re": ".*"
+}

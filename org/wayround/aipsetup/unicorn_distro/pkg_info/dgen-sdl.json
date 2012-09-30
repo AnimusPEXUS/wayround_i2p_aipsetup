@@ -1,0 +1,12 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "dgen-sdl", 
+  "buildscript": "", 
+  "description": "write something here, please", 
+  "home_page": "http://www.tamentis.com", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version_re": ".*"
+}

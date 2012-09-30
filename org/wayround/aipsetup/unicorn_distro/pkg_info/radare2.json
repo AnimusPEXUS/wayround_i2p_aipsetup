@@ -1,0 +1,12 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "radare2", 
+  "buildscript": "autotools_usr", 
+  "description": "disassembler", 
+  "home_page": "http://radare.org/", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version_re": ".*"
+}

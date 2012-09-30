@@ -1,0 +1,12 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": false, 
+  "basename": "Python", 
+  "buildscript": "autotools_usr", 
+  "description": ":-)", 
+  "home_page": "http://python.org/", 
+  "installation_priority": 1, 
+  "reducible": true, 
+  "removable": true, 
+  "version_re": "3\\..*"
+}
