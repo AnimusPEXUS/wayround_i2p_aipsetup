@@ -60,14 +60,16 @@ def determine_make_parameters(pkginfo):
 
     for i in pkginfo['data']['autotools_build_params']:
         if pkginfo['data']['autotools_build_params'][i] != None:
-            run_parameters.append("%(par_name)s=%(par_value)s" % {
-                    'par_name': i,
-                    'par_value': pkginfo['data']['autotools_build_params'][i]
-                    })
+            run_parameters.append(
+                "{par_name}={par_value}".format_map(
+                    {
+                        'par_name': i,
+                        'par_value': pkginfo['data']['autotools_build_params'][i]
+                        }
+                    )
+                )
         else:
-            run_parameters.append("%(par_name)s" % {
-                    'par_name': i
-                    })
+            run_parameters.append(i)
 
     return run_parameters
 
@@ -78,14 +80,16 @@ def determine_installer_parameters(pkginfo):
 
     for i in pkginfo['pkg_buildscript']['autotools_distribute_params']:
         if pkginfo['pkg_buildscript']['autotools_distribute_params'][i] != None:
-            run_parameters.append("%(par_name)s=%(par_value)s" % {
-                    'par_name': i,
-                    'par_value': pkginfo['pkg_buildscript']['autotools_distribute_params'][i]
-                    })
+            run_parameters.append(
+                "{par_name}={par_value}".format_map(
+                    {
+                        'par_name': i,
+                        'par_value': pkginfo['pkg_buildscript']['autotools_distribute_params'][i]
+                        }
+                    )
+                )
         else:
-            run_parameters.append("%(par_name)s" % {
-                    'par_name': i
-                    })
+            run_parameters.append(i)
 
     return run_parameters
 

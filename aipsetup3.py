@@ -33,7 +33,10 @@ if '--log' in opts:
     del(opts['--log'])
     del(log_level_u)
 
-logging.basicConfig(format="%(levelname)s %(message)s", level=log_level)
+logging.basicConfig(
+    format="%(levelname)s %(message)s",
+    level=log_level
+    )
 
 import org.wayround.aipsetup
 import org.wayround.aipsetup.config

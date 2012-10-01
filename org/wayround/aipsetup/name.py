@@ -238,10 +238,12 @@ def package_name_parse(filename, mute=True):
     if ret != None:
         groups = ''
         for i in ret['groups']:
-            groups += "       %(group)s: %(value)s\n" % {
-                'group': i,
-                'value': repr(ret['groups'][i])
-                }
+            groups += "       {group}: {value}\n".format_map(
+                {
+                    'group': i,
+                    'value': repr(ret['groups'][i])
+                    }
+                )
 
         s = "Match `{filename}'\n{groups}".format_map({
             'filename': filename,
@@ -509,10 +511,12 @@ def source_name_parse(
 
             groups = ''
             for i in ret['groups']:
-                groups += "       %(group)s: %(value)s\n" % {
-                    'group': i,
-                    'value': repr(ret['groups'][i])
-                    }
+                groups += "       {group}: {value}\n".format_map(
+                    {
+                        'group': i,
+                        'value': repr(ret['groups'][i])
+                        }
+                    )
 
             s = "Match `{filename}'\n{groups}".format_map({
                 'filename': filename,
@@ -535,9 +539,7 @@ def source_name_parse(
 def _modify_info_file(src_filename_parsed, mute=True):
     fn = os.path.join(
         org.wayround.aipsetup.config.config['info'],
-        '%(name)s.json' % {
-            'name': src_filename_parsed['groups']['name']
-            }
+        '{}.json'.format(src_filename_parsed['groups']['name'])
         )
 
     s = "Updating info file {}".format(fn)

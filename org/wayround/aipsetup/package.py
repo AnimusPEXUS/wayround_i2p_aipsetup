@@ -296,26 +296,26 @@ def package_find_files(opts, args):
         if len(rd_keys) == 0:
             logging.info("Not found")
         else:
-            logging.info("Found %(num)d packages with `%(inc)s'" % {
-                'num': len(rd_keys),
-                'inc': lookfor
-                })
+            logging.info(
+                "Found {num} packages with `{inc}'".format_map(
+                    {
+                        'num': len(rd_keys),
+                        'inc': lookfor
+                        }
+                    )
+                )
 
             print("")
             rd_keys.sort()
 
             for i in rd_keys:
-                print("\t%(name)s:" % {
-                    'name': i
-                    })
+                print("\t{}:".format(i))
 
                 pp_lst = ret[i]
                 pp_lst.sort()
 
                 for j in pp_lst:
-                    print("\t\t%(name)s" % {
-                        'name': j
-                        })
+                    print("\t\t{}".format(j))
 
                 print("")
         ret = 0
@@ -355,17 +355,13 @@ def check_package(asp_name, mute=False):
 
     if not asp_name.endswith('.asp'):
         if not mute:
-            logging.error("Wrong file extension `%(name)s'" % {
-                'name': asp_name
-                })
+            logging.error("Wrong file extension `{}'".format(asp_name))
         ret = 3
     else:
         try:
             tarf = tarfile.open(asp_name, mode='r')
         except:
-            logging.exception("Can't open file `%(name)s'" % {
-                'name': asp_name
-                })
+            logging.exception("Can't open file `{}'".format(asp_name))
             ret = 1
         else:
             try:
@@ -421,10 +417,14 @@ def check_package(asp_name, mute=False):
                             cresult = "OK"
 
                         if not mute:
-                            print("       %(name)s - %(result)s" % {
-                                'name': i,
-                                'result': cresult
-                                })
+                            print(
+                                "       {name} - {result}".format_map(
+                                    {
+                                        'name': i,
+                                        'result': cresult
+                                        }
+                                    )
+                                )
 
                     if error_found:
                         logging.error("Error was found while checking package")
@@ -728,9 +728,7 @@ def install_asp(asp_name, destdir='/'):
                      )
                 ]:
 
-                logging.info("Installing %(what)s" % {
-                    'what': i[2]
-                    })
+                logging.info("Installing {}".format(i[2]))
 
                 logs_path = ''
                 if org.wayround.aipsetup.config.config[i[1]][0] == '/':
@@ -758,10 +756,9 @@ def install_asp(asp_name, destdir='/'):
                         i[0],
                         out_filename
                         ) != 0 :
-                    logging.error("Can't install_asp %(what)s as %(outname)s" % {
-                        'what': i[2],
-                        'outname': out_filename
-                        })
+                    logging.error(
+                        "Can't install_asp {} as {}".format(i[2], out_filename)
+                        )
                     ret = 2
                     break
 
@@ -871,9 +868,7 @@ def remove_asp(
                 asp_name + '.xz'
                 )
             if os.path.isfile(rm_file_name):
-                logging.info("   removing: %(name)s" % {
-                    'name': rm_file_name
-                    })
+                logging.info("   removing: {}".format(rm_file_name))
                 os.unlink(rm_file_name)
     return ret
 
@@ -924,9 +919,7 @@ def list_installed_asps(destdir='/', mute=False):
     ret = 0
 
     if not os.path.isdir(listdir):
-        logging.error("not a dir %(dir)s" % {
-            'dir': listdir
-            })
+        logging.error("not a dir {}".format(listdir))
         ret = 1
     else:
 
@@ -1113,9 +1106,7 @@ def build(source_files):
 
                     for source_file in source_files:
 
-                        logging.info("    %(name)s" % {
-                            'name': source_file
-                            })
+                        logging.info("    {}".format(source_file))
 
                         if (os.path.isfile(source_file)
                             and not os.path.islink(source_file)):
@@ -1133,9 +1124,11 @@ def build(source_files):
 
                         else:
 
-                            logging.error("file %(file)s - not dir and not file. skipping copy" % {
-                                'file': source_file
-                                })
+                            logging.error(
+                                "file {} - not dir and not file. skipping copy".format(
+                                    source_file
+                                    )
+                                )
 
                     if ret != 0:
                         logging.error("Exception while copying one of source files")

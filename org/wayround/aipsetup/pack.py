@@ -350,9 +350,7 @@ def remove_source_and_build_dirs(buildingsite):
         if os.path.isdir(dirname):
             org.wayround.utils.file.remove_if_exists(dirname)
         else:
-            logging.warning("Dir not exists: %(dirname)s" % {
-                'dirname': dirname
-                })
+            logging.warning("Dir not exists: {}".format(dirname))
 
     return ret
 
@@ -379,14 +377,10 @@ def compress_patches_destdir_and_logs(buildingsite):
                 i
                 )
             )
-        filename = "%(dirname)s.tar.xz" % {
-            'dirname': dirname
-            }
+        filename = "{}.tar.xz".format(dirname)
 
         if not os.path.isdir(dirname):
-            logging.warning("Dir not exists: %(dirname)s" % {
-                'dirname': dirname
-                })
+            logging.warning("Dir not exists: {}".format(dirname))
             ret = 1
             break
         else:
@@ -457,9 +451,7 @@ def remove_patches_destdir_buildlogs_and_temp_dirs(buildingsite):
         if os.path.isdir(dirname):
             org.wayround.utils.file.remove_if_exists(dirname)
         else:
-            logging.warning("Dir not exists: %(dirname)s" % {
-                'dirname': dirname
-                })
+            logging.warning("Dir not exists: {}".format(dirname))
 
     return ret
 
@@ -479,9 +471,7 @@ def remove_decompressed_files_from_lists_dir(buildingsite):
             try:
                 os.unlink(filename)
             except:
-                logging.exception("Can't remove file `%(name)s'" % {
-                    'name': filename
-                    })
+                logging.exception("Can't remove file `{}'".format(filename))
                 ret = 1
 
     return ret
@@ -548,13 +538,15 @@ def pack_buildingsite(buildingsite):
 
         pack_file_name = os.path.join(
             pack_dir,
-            "(%(pkgname)s)-(%(version)s)-(%(status)s)-(%(timestamp)s)-(%(hostinfo)s).asp" % {
-                'pkgname': pi['pkg_info']['name'],
-                'version': pi['pkg_nameinfo']['groups']['version'],
-                'status': pi['pkg_nameinfo']['groups']['status'],
-                'timestamp': org.wayround.utils.time.currenttime_stamp(),
-                'hostinfo': pi['constitution']['host'],
-                }
+            "({pkgname})-({version})-({status})-({timestamp})-({hostinfo}).asp".format_map(
+                {
+                    'pkgname': pi['pkg_info']['name'],
+                    'version': pi['pkg_nameinfo']['groups']['version'],
+                    'status': pi['pkg_nameinfo']['groups']['status'],
+                    'timestamp': org.wayround.utils.time.currenttime_stamp(),
+                    'hostinfo': pi['constitution']['host'],
+                    }
+                )
             )
 
         logging.info("Package will be saved as: {}".format(pack_file_name))
@@ -590,12 +582,8 @@ def complete(dirname):
               'remove_decompressed_files_from_lists_dir',
               'make_checksums_for_building_site',
               'pack_buildingsite']:
-        if eval("%(name)s(dirname)" % {
-                'name': i
-                }) != 0:
-            logging.error("Error on %(name)s" % {
-                'name': i
-                })
+        if eval("{}(dirname)".format(i)) != 0:
+            logging.error("Error on {}".format(i))
             ret = 1
             break
 

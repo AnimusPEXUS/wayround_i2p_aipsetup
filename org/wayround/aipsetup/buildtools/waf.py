@@ -55,14 +55,16 @@ def determine_configurer_parameters(info):
 
     for i in info['pkg_buildscript']['waf_configure_params']:
         if info['pkg_buildscript']['waf_configure_params'][i] != None:
-            run_parameters.append("--%(par_name)s=%(par_value)s" % {
-                    'par_name': i,
-                    'par_value': info['pkg_buildscript']['waf_configure_params'][i]
-                    })
+            run_parameters.append(
+                "--{par_name}={par_value}".format_map(
+                    {
+                        'par_name': i,
+                        'par_value': info['pkg_buildscript']['waf_configure_params'][i]
+                        }
+                    )
+                )
         else:
-            run_parameters.append("--%(par_name)s" % {
-                    'par_name': i
-                    })
+            run_parameters.append(i)
 
     return run_parameters
 
@@ -73,14 +75,16 @@ def determine_builder_parameters(pkginfo):
 
     for i in pkginfo['pkg_buildscript']['waf_build_params']:
         if pkginfo['pkg_buildscript']['waf_build_params'][i] != None:
-            run_parameters.append("%(par_name)s=%(par_value)s" % {
-                    'par_name': i,
-                    'par_value': pkginfo['pkg_buildscript']['waf_build_params'][i]
-                    })
+            run_parameters.append(
+                "{par_name}={par_value}".format_map(
+                    {
+                        'par_name': i,
+                        'par_value': pkginfo['pkg_buildscript']['waf_build_params'][i]
+                        }
+                    )
+                )
         else:
-            run_parameters.append("%(par_name)s" % {
-                    'par_name': i
-                    })
+            run_parameters.append(i)
 
     return run_parameters
 
@@ -91,14 +95,16 @@ def determine_installer_parameters(pkginfo):
 
     for i in pkginfo['pkg_buildscript']['waf_distribute_params']:
         if pkginfo['pkg_buildscript']['waf_distribute_params'][i] != None:
-            run_parameters.append("%(par_name)s=%(par_value)s" % {
-                    'par_name': i,
-                    'par_value': pkginfo['pkg_buildscript']['waf_distribute_params'][i]
-                    })
+            run_parameters.append(
+                "{par_name}={par_value}".format_map(
+                    {
+                        'par_name': i,
+                        'par_value': pkginfo['pkg_buildscript']['waf_distribute_params'][i]
+                        }
+                    )
+                )
         else:
-            run_parameters.append("%(par_name)s" % {
-                    'par_name': i
-                    })
+            run_parameters.append(i)
 
     return run_parameters
 
@@ -171,9 +177,13 @@ def _overal(log, buildingsite='.', name='configure'):
             )
 
         if len(info['pkg_buildscript']['waf_configure_envs']) > 0:
-            log.info("Environment Modifications: %(list)s" % {
-                    'list': ' '.join(repr(i) for i in info['pkg_buildscript']['waf_configure_envs'])
-                    })
+            log.info(
+                "Environment Modifications: {}".format(
+                    ' '.join(
+                        repr(i) for i in info['pkg_buildscript']['waf_configure_envs']
+                        )
+                    )
+                )
 
         p = None
         try:
@@ -226,9 +236,7 @@ def _overal(log, buildingsite='.', name='configure'):
                     )
                 ret = 100
             else:
-                log.info("waf return code was: %(code)d" % {
-                        'code': p.returncode
-                        })
+                log.info("waf return code was: {}".format(p.returncode))
                 ret = p.returncode
 
     return ret

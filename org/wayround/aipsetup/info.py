@@ -291,9 +291,7 @@ def read_from_file(name):
             try:
                 tree = json.loads(txt)
             except:
-                logging.exception("Can't parse file `%(name)s'" % {
-                    'name': name
-                    })
+                logging.exception("Can't parse file `{}'".format(name))
                 ret = 2
             else:
                 ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
@@ -382,9 +380,7 @@ def write_to_file(name, struct):
     try:
         f = open(name, 'w')
     except:
-        logging.exception("Can't rewrite file %(name)s" % {
-            'name': name
-            })
+        logging.exception("Can't rewrite file {}".format(name))
         ret = 1
     else:
         try:

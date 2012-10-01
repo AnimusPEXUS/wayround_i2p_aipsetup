@@ -241,9 +241,7 @@ def get_info_records_list(mask='*', mute=False):
 
     if not mute:
         org.wayround.utils.text.columned_list_print(lst)
-        logging.info("Total found %(n)d records" % {
-            'n': found
-            })
+        logging.info("Total found {} records".format(found))
     return lst
 
 def get_missing_info_records_list(
@@ -275,15 +273,15 @@ def get_missing_info_records_list(
             pkgs_missing += 1
             missing.append(each.name)
 
-            logging.warning("missing package DB info record: %(name)s" % {
-                'name': each.name
-                })
+            logging.warning(
+                "missing package DB info record: {}".format(each.name)
+                )
 
             if create_templates:
 
                 filename = os.path.join(
                     org.wayround.aipsetup.config.config['info'],
-                    '%(name)s.json' % {'name': each.name}
+                    '{}.json'.format(each.name)
                     )
 
                 if os.path.exists(filename):
@@ -301,27 +299,31 @@ def get_missing_info_records_list(
                     filename,
                     org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
                     pkgs_failed += 1
-                    logging.error("failed writing template to `%(name)s'" % {
-                        'name': filename
-                        })
+                    logging.error(
+                        "failed writing template to `{}'".format(filename)
+                        )
                 else:
                     pkgs_written += 1
 
-    logging.info("""\
-Total records checked     : %(n1)d
-Missing records           : %(n2)d
-Missing but present on FS : %(n3)d
-Written                   : %(n4)d
-Write failed              : %(n5)d
-Write forced              : %(n6)d
-""" % {
-        'n1': pkgs_checked,
-        'n2': pkgs_missing,
-        'n3': pkgs_exists,
-        'n4': pkgs_written,
-        'n5': pkgs_failed,
-        'n6': pkgs_forced
-})
+    logging.info(
+        """\
+Total records checked     : {n1}
+Missing records           : {n2}
+Missing but present on FS : {n3}
+Written                   : {n4}
+Write failed              : {n5}
+Write forced              : {n6}
+""".format_map(
+            {
+                'n1': pkgs_checked,
+                'n2': pkgs_missing,
+                'n3': pkgs_exists,
+                'n4': pkgs_written,
+                'n5': pkgs_failed,
+                'n6': pkgs_forced
+                }
+            )
+        )
 
     missing.sort()
     return missing
@@ -360,9 +362,9 @@ def get_outdated_info_records_list(mute=True):
         d2 = get_package_info_record(record=i)
         if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
             if not mute:
-                logging.warning("xml init file differs to `%(name)s' record" % {
-                    'name': i.name
-                    })
+                logging.warning(
+                    "xml init file differs to `{}' record".format(i.name)
+                    )
             ret.append(i.name)
 
     return ret
@@ -545,29 +547,20 @@ def save_info_records_to_fs(
     for i in q:
         if fnmatch.fnmatch(i.name, mask):
             filename = os.path.join(
-                org.wayround.aipsetup.config.config['info'], '%(name)s.json' % {
-                    'name': i.name
-                    })
+                org.wayround.aipsetup.config.config['info'],
+                '{}.json'.format(i.name))
             if not force_rewrite and os.path.exists(filename):
-                logging.warning("File exists - skipping: %(name)s" % {
-                    'name': filename
-                    })
+                logging.warning("File exists - skipping: {}".format(filename))
                 continue
             if force_rewrite and os.path.exists(filename):
-                logging.info("File exists - rewriting: %(name)s" % {
-                    'name': filename
-                    })
+                logging.info("File exists - rewriting: {}".format(filename))
             if not os.path.exists(filename):
-                logging.info("Writing: %(name)s" % {
-                    'name': filename
-                    })
+                logging.info("Writing: {}".format(filename))
 
             r = get_package_info_record(record=i)
             if isinstance(r, dict):
                 if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
-                    logging.error("can't write file %(name)s" % {
-                        'name': filename
-                        })
+                    logging.error("can't write file {}".format(filename))
 
     return
 
@@ -624,9 +617,7 @@ def load_info_records_from_fs(
         name = os.path.basename(i)[:-4]
         if isinstance(struct, dict):
             org.wayround.utils.file.progress_write(
-                "    loading record: %(name)s" % {
-                    'name': name
-                    }
+                "    loading record: {}".format(name)
                 )
 
             set_package_info_record(

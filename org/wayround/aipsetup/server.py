@@ -26,10 +26,10 @@ APPLICATION_JSON = 'application/json; codepage=utf-8'
 
 def edefault(status, message, traceback, version):
 
-    return "%(status)s: %(message)s" % {
-        'message': xml.sax.saxutils.escape(message),
-        'status': str(status)
-        }
+    return "{}: {}".format(
+        xml.sax.saxutils.escape(message),
+        status
+        )
 
 def cli_name():
     return 'srv'

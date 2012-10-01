@@ -562,7 +562,7 @@ def get_package_collisions_in_db():
 
     org.wayround.utils.file.progress_write_finish()
 
-    logging.info("Processing %(n)s packages..." % {'n': len(lst)})
+    logging.info("Processing {} packages...".format(len(lst)))
     sys.stdout.flush()
 
     del(lst)
@@ -585,31 +585,29 @@ def get_package_collisions_in_db():
 
 
     if len(lst_dup) == 0:
-        logging.info("Found %(c)s duplicated package names. Package locations look good!" % {
-            'c' : len(lst_dup)
-            })
+        logging.info(
+            "Found {} duplicated package names. Package locations look good!".format(
+                len(lst_dup)
+                )
+            )
         ret = 0
     else:
-        logging.warning("Found %(c)s duplicated package names" % {
-            'c' : len(lst_dup)
-            })
-
-        print("       listing:")
+        logging.warning(
+            "Found {} duplicated package names\n        listing:".format(
+                len(lst_dup)
+                )
+            )
 
         sorted_keys = list(lst_dup.keys())
         sorted_keys.sort()
 
         for each in sorted_keys:
-            print("          %(key)s:" % {
-                'key': each
-                })
+            print("          {}:".format(each))
 
             lst_dup[each].sort()
 
             for each2 in lst_dup[each]:
-                print("             %(path)s" % {
-                    'path': each2
-                    })
+                print("             {}".format(each2))
         ret = 1
 
     return ret
@@ -644,10 +642,9 @@ def _scan_repo_for_pkg_and_cat(root_dir, cid):
             isfiles += 1
 
     if isfiles >= 3:
-        logging.warning("too many non-dirs : %(path)s" % {
-            'path': root_dir
-            })
-        print("       skipping")
+        logging.warning(
+            "too many non-dirs : {}\n        skipping".format(root_dir)
+            )
 
         return 1
 
@@ -735,22 +732,16 @@ def create_required_dirs_at_package(path):
             try:
                 os.makedirs(full_path)
             except:
-                logging.exception("Can't make dir `%(name)s'" % {
-                    'name': full_path
-                    })
+                logging.exception("Can't make dir `{}'".format(full_path))
                 ret = 3
             else:
                 ret = 0
         else:
             if os.path.islink(full_path):
-                logging.error("`%(name)s' is link" % {
-                    'name': full_path
-                    })
+                logging.error("`{}' is link".format(full_path))
                 ret = 4
             elif os.path.isfile(full_path):
-                logging.error("`%(name)s' is file" % {
-                    'name': full_path
-                    })
+                logging.error("`{}' is file".format(full_path))
                 ret = 5
             else:
                 ret = 0

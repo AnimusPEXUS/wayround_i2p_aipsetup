@@ -68,9 +68,7 @@ class MainWindow:
 
         filename = os.path.join(
             self.config['info'],
-            '%(name)s' % {
-                'name': name
-                }
+            name
             )
 
         if not os.path.isfile(filename):
@@ -171,9 +169,7 @@ class MainWindow:
 
         filename = os.path.join(
             self.config['info'],
-            '%(name)s' % {
-                'name': name
-                }
+            name
             )
 
         data = {}
@@ -213,9 +209,7 @@ class MainWindow:
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
-                "Can't save to file %(name)s" % {
-                    'name': filename
-                    }
+                "Can't save to file {}".format(filename)
                 )
             dia.run()
             dia.destroy()

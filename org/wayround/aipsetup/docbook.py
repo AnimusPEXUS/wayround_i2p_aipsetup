@@ -4,10 +4,10 @@ Install docbook data into current (or selected) system
 """
 
 import os.path
-import sys
 import stat
 import re
 import logging
+import subprocess
 
 # FIXME: look for new lxml releases supporting Python 3.3
 #import lxml.etree
@@ -38,7 +38,10 @@ def docbook_install_files(opts, args):
     """
 
     if len(args) == 1:
-        logging.error("docbook-xml zip or docbook-xsl-*.tar* archive filenames reaquired as arguments")
+        logging.error(
+            "docbook-xml zip or docbook-xsl-*.tar* archive filenames " +
+            "reaquired as arguments"
+            )
         ret = 10
     else:
 
@@ -96,29 +99,28 @@ def set_correct_owners(directory):
 
 def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
-    logging.info("Preparing base dir: %(dir)s" % {'dir': base_dir})
+    logging.info("Preparing base dir: {}".format(base_dir))
 
     for i in [base_dir_etc_xml, base_dir_share_docbook]:
-        logging.info("   checking: %(dir)s" % {'dir': i})
+        logging.info("   checking: {}".format(i))
         try:
             os.makedirs(i)
         except:
             pass
 
         if not os.path.isdir(i):
-            logging.error("      not a dir %(i)s" % {
-                'i': i
-                })
+            logging.error("      not a dir {}".format(i))
             return 1
 
     return 0
 
 def unpack_tar(docbook_xsl_tar, dir_name):
     # TODO: use aipsetup.utils
-    r = os.system("tar -xf '%(docbook_xsl_tar)s' -C '%(dir_name)s'" % {
-            'docbook_xsl_tar': docbook_xsl_tar,
-            'dir_name': dir_name
-            })
+    r = subprocess.Popen(
+        [
+            'tar', '-xf', docbook_xsl_tar, '-C', dir_name
+            ]
+        ).wait()
 
     return r
 
@@ -135,7 +137,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         return 20
 
     if not docbook_zip.endswith('.zip'):
-        logging.error("Not a zip file: %(file)s" % {'file': docbook_zip})
+        logging.error("Not a zip file: {}".format(docbook_zip))
         return 30
 
     docbook_no_zip = ''
@@ -158,9 +160,14 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         logging.error("Wrong zip file version")
         return 60
 
-    base_dir_share_docbook_dtd = os.path.abspath(os.path.join(base_dir_share_docbook, 'xml-dtd-%(ver)s' % {'ver': version}))
+    base_dir_share_docbook_dtd = os.path.abspath(
+        os.path.join(
+            base_dir_share_docbook,
+            'xml-dtd-' + version
+            )
+        )
 
-    logging.info("making dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
+    logging.info("making dtd dir: {}".format(base_dir_share_docbook_dtd))
 
     try:
         os.makedirs(base_dir_share_docbook_dtd)
@@ -168,15 +175,23 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         pass
 
     if not os.path.isdir(base_dir_share_docbook_dtd):
-        logging.error("   can not create dtd dir: %(dir)s" % {'dir': base_dir_share_docbook_dtd})
+        logging.error(
+            "   can not create dtd dir: {}".format(
+                base_dir_share_docbook_dtd
+                )
+            )
         return 70
 
     logging.info("   unzipping...")
 
-    e = os.system("7z -o'%(dir)s' x '%(file)s'" % {'file': docbook_zip, 'dir': base_dir_share_docbook_dtd})
+    e = subprocess.Popen(
+        [
+            '7z', '-o' + base_dir_share_docbook_dtd, 'x', docbook_zip
+            ]
+        ).wait()
 
     if e != 0:
-        logging.error("   error unzipping %(file)s" % {'file': docbook_zip})
+        logging.error("   error unzipping {}".format(docbook_zip))
         return 80
 
     logging.info("   ok")
@@ -189,10 +204,14 @@ def prepare_catalog(base_dir_etc_xml_catalog):
 
     r = 0
 
-    logging.info("Checking for catalog %(cat)s" % {'cat': base_dir_etc_xml_catalog})
+    logging.info("Checking for catalog {}".format(base_dir_etc_xml_catalog))
     if not os.path.isfile(base_dir_etc_xml_catalog):
         logging.info("   creating new")
-        r = os.system("xmlcatalog --noout --create '%(cat)s'" % {'cat': base_dir_etc_xml_catalog})
+        r = subprocess.Popen(
+            [
+                'xmlcatalog', '--noout', '--create', base_dir_etc_xml_catalog
+                ]
+            ).wait()
     else:
         logging.info("   already exists")
 
@@ -201,13 +220,17 @@ def prepare_catalog(base_dir_etc_xml_catalog):
 
 def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
 
-    logging.info("   Importing into docbook: %(dir)s" % {'dir': os.path.basename(dtd_dir)})
+    logging.info(
+        "   Importing into docbook: {}".format(
+            os.path.basename(dtd_dir)
+            )
+        )
 
     specific_cat_file = os.path.join(dtd_dir, 'catalog.xml')
 
 
     if not os.path.isfile(specific_cat_file):
-        logging.error("   %(file)s not found" % {'file': specific_cat_file})
+        logging.error("   {} not found".format(specific_cat_file))
         return 10
 
     tmp_cat_lxml = None
@@ -217,14 +240,21 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
     except:
         logging.exception("Can't parse catalog file")
 
-    tmp_cat_lxml_ns = '{%(ns)s}' % {'ns': tmp_cat_lxml.getroot().nsmap[None]}
+    tmp_cat_lxml_ns = '{{{}}}'.format(tmp_cat_lxml.getroot().nsmap[None])
 
     for tag in ['public', 'system']:
 
         for each in tmp_cat_lxml.findall(tmp_cat_lxml_ns + tag):
 
             if each.tag == tmp_cat_lxml_ns + tag:
-                logging.info("      %(tag)s - %(Id)s" % {'Id': each.get(tag + 'Id'), 'tag': tag})
+                logging.info(
+                    "      {tag} - {Id}".format_map(
+                        {
+                            'Id': each.get(tag + 'Id'),
+                            'tag': tag
+                            }
+                        )
+                    )
 
                 src_uri = each.get('uri')
                 dst_uri = ''
@@ -238,12 +268,15 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
                     else:
                         dst_uri = src_uri
 
-                r = os.system("xmlcatalog --noout --add '%(tag)s' '%(Id)s' '%(uri)s' '%(catalog)s'" % {
-                        'Id': each.get(tag + 'Id'),
-                        'uri': 'file://%(uri)s' % {'uri': dst_uri},
-                        'catalog': base_dir_etc_xml_catalog_docbook,
-                        'tag': tag
-                        })
+                r = subprocess.Popen(
+                    [
+                        'xmlcatalog', '--noout', '--add',
+                        tag,
+                        each.get(tag + 'Id'),
+                        'file://{}'.format(dst_uri),
+                        base_dir_etc_xml_catalog_docbook,
+                        ]
+                    ).wait()
                 if r != 0:
                     logging.error("         error")
 
@@ -251,25 +284,45 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
 
 def import_docbook_to_catalog(base_dir_etc_xml_catalog):
 
-    for each in ["xmlcatalog --noout --add 'delegatePublic' '-//OASIS//ENTITIES DocBook XML' 'file:///etc/xml/docbook' '{0}'",
-                 "xmlcatalog --noout --add 'delegatePublic' '-//OASIS//DTD DocBook XML' 'file:///etc/xml/docbook' '{0}'",
-                 "xmlcatalog --noout --add 'delegateSystem' 'http://www.oasis-open.org/docbook/' 'file:///etc/xml/docbook' '{0}'",
-                 "xmlcatalog --noout --add 'delegateURI' 'http://www.oasis-open.org/docbook/' 'file:///etc/xml/docbook' '{0}'"
-                 ]:
-        each1 = each.format(base_dir_etc_xml_catalog)
+    for each in [
+        [
+            'xmlcatalog', '--noout', '--add', 'delegatePublic',
+            '-//OASIS//ENTITIES DocBook XML',
+            'file:///etc/xml/docbook'
+            ],
+        [
+            'xmlcatalog', '--noout', '--add', 'delegatePublic',
+            '-//OASIS//DTD DocBook XML',
+            'file:///etc/xml/docbook'
+            ],
+        [
+            'xmlcatalog', '--noout', '--add', 'delegateSystem',
+            'http://www.oasis-open.org/docbook/',
+            'file:///etc/xml/docbook'
+            ],
+        [
+            'xmlcatalog', '--noout', '--add', 'delegateURI',
+            'http://www.oasis-open.org/docbook/',
+            'file:///etc/xml/docbook'
+            ]
+        ]:
 
-        if 0 != os.system(each1):
-            logging.error("error doing %(cmd)s" % {'cmd': each1})
+        p = subprocess.Popen(each + [base_dir_etc_xml_catalog])
+
+        if 0 != p.wait():
+            logging.error("error doing {}".format(repr(each)))
 
     return 0
 
 
-def install_docbook_zips(docbook_zip_list,
-                         base_dir,
-                         base_dir_etc_xml,
-                         base_dir_etc_xml_catalog,
-                         base_dir_etc_xml_catalog_docbook,
-                         base_dir_share_docbook):
+def install_docbook_zips(
+    docbook_zip_list,
+    base_dir,
+    base_dir_etc_xml,
+    base_dir_etc_xml_catalog,
+    base_dir_etc_xml_catalog_docbook,
+    base_dir_share_docbook
+    ):
 
     dtd_dirs = []
 
@@ -279,7 +332,7 @@ def install_docbook_zips(docbook_zip_list,
                        base_dir_share_docbook)
 
         if isinstance(r, int):
-            logging.warning("error processing file %(file)s" % {'file': i})
+            logging.warning("error processing file {}".format(i))
             continue
 
         dtd_dirs.append(r)
@@ -305,11 +358,12 @@ def install_docbook_zips(docbook_zip_list,
 
 
 
-def install_docbook_xsl_zips(docbook_xsl_zip_list,
-                             base_dir,
-                             base_dir_etc_xml_catalog,
-                             base_dir_share_docbook
-                             ):
+def install_docbook_xsl_zips(
+    docbook_xsl_zip_list,
+    base_dir,
+    base_dir_etc_xml_catalog,
+    base_dir_share_docbook
+    ):
 
     logging.info("Installing XSLs")
 
@@ -323,15 +377,25 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
         version = name[name.rfind('-') + 1:]
 
 
-        base_dir_share_docbook_name = \
-            os.path.join(base_dir_share_docbook, name)
+        base_dir_share_docbook_name = os.path.join(
+            base_dir_share_docbook, name
+            )
 
-        base_dir_share_docbook_xsl_stylesheets = \
-            os.path.join(base_dir_share_docbook, 'xsl-stylesheets-%(version)s' % {'version': version})
+        base_dir_share_docbook_xsl_stylesheets = (
+            os.path.join(
+                base_dir_share_docbook,
+                'xsl-stylesheets-{}'.format(version)
+                )
+            )
 
-        logging.info("Installing XSL %(xsl_name)s into %(xsl_dest)s" % {
-            'xsl_name': name,
-            'xsl_dest': base_dir_share_docbook_xsl_stylesheets})
+        logging.info(
+            "Installing XSL {xsl_name} into {xsl_dest}".format_map(
+                {
+                    'xsl_name': name,
+                    'xsl_dest': base_dir_share_docbook_xsl_stylesheets
+                    }
+                )
+            )
 
         logging.info("   preparing dirs")
 
@@ -350,7 +414,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
             # return 20
             continue
 
-        logging.info("Extracting into %(name)s" % {'name': base_dir_share_docbook_name})
+        logging.info("Extracting into {}".format(base_dir_share_docbook_name))
 
         if 0 != unpack_tar(docbook_xsl_zip, base_dir_share_docbook):
             logging.error("   Extraction error")
@@ -358,9 +422,14 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
 
         logging.info("extracted")
 
-        logging.info("renaming %(one)s to %(another)s" % {
-            'one':     base_dir_share_docbook_name,
-            'another': base_dir_share_docbook_xsl_stylesheets})
+        logging.info(
+            "renaming {one} to {another}".format_map(
+                {
+                    'one':     base_dir_share_docbook_name,
+                    'another': base_dir_share_docbook_xsl_stylesheets
+                    }
+                )
+            )
         try:
             os.rename(base_dir_share_docbook_name,
                       base_dir_share_docbook_xsl_stylesheets)
@@ -380,7 +449,7 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
 
     installed_versions.sort(version.standard_comparison)
 
-    logging.info("Installed XSL: %(versions)s" % {'versions': ', '.join(installed_versions)})
+    logging.info("Installed XSL: {}".format(', '.join(installed_versions)))
 
 
     iv_l = len(installed_versions)
@@ -391,36 +460,47 @@ def install_docbook_xsl_zips(docbook_xsl_zip_list,
 
     current = installed_versions[iv_l - 1]
 
-    logging.info("Presuming current XSL: %(version)s" % {'version': current})
+    logging.info("Presuming current XSL: {}".format(current))
 
     logging.info("Updating XML catalog")
 
     for i in installed_versions:
-        os.system(
-            "xmlcatalog --noout --add 'rewriteSystem' 'http://docbook.sourceforge.net/release/xsl/%(version)s' '/usr/share/xml/docbook/xsl-stylesheets-%(version)s' '%(catalog)s'" % {
-                'version': i,
-                'catalog': base_dir_etc_xml_catalog
-                })
+        subprocess.Popen(
+            [
+                'xmlcatalog', '--noout', '--add', 'rewriteSystem',
+                'http://docbook.sourceforge.net/release/xsl/' + i,
+                '/usr/share/xml/docbook/xsl-stylesheets-' + i,
+                base_dir_etc_xml_catalog
+                ]
+            ).wait()
 
-        os.system(
-            "xmlcatalog --noout --add 'rewriteURI' 'http://docbook.sourceforge.net/release/xsl/%(version)s' '/usr/share/xml/docbook/xsl-stylesheets-%(version)s' '%(catalog)s'" % {
-                'version': i,
-                'catalog': base_dir_etc_xml_catalog
-                })
+        subprocess.Popen(
+            [
+                'xmlcatalog' , '--noout', '--add' , 'rewriteURI',
+                'http://docbook.sourceforge.net/release/xsl/' + i,
+                '/usr/share/xml/docbook/xsl-stylesheets-' + i,
+                 base_dir_etc_xml_catalog
+                 ]
+            ).wait()
 
 
-    os.system(
-        "xmlcatalog --noout --add 'rewriteSystem' 'http://docbook.sourceforge.net/release/xsl/current' '/usr/share/xml/docbook/xsl-stylesheets-%(version)s' '%(catalog)s'" % {
-            'version': current,
-            'catalog': base_dir_etc_xml_catalog
-            })
+    subprocess.Popen(
+        [
+            'xmlcatalog', '--noout' , '--add' , 'rewriteSystem',
+            'http://docbook.sourceforge.net/release/xsl/current',
+            '/usr/share/xml/docbook/xsl-stylesheets-' + current,
+            base_dir_etc_xml_catalog
+            ]
+        ).wait()
 
-    os.system(
-        "xmlcatalog --noout --add 'rewriteURI' 'http://docbook.sourceforge.net/release/xsl/current' '/usr/share/xml/docbook/xsl-stylesheets-%(version)s' '%(catalog)s'" % {
-            'version': current,
-            'catalog': base_dir_etc_xml_catalog
-            })
-
+    subprocess.Popen(
+        [
+            'xmlcatalog', '--noout', '--add', 'rewriteURI',
+            'http://docbook.sourceforge.net/release/xsl/current',
+            '/usr/share/xml/docbook/xsl-stylesheets-' + current,
+            base_dir_etc_xml_catalog
+        ]
+        ).wait()
 
     return 0
 
@@ -435,14 +515,14 @@ def install(files, base_dir):
         elif re.match(r'docbook-xsl-(\d\.?)*tar\.(.*)', os.path.basename(i)):
             docbook_xsl_zip_list.append(i)
         else:
-            print("-w- %(i)s is not a correct package" % {'i': i})
+            print("-w- {} is not a correct package".format(i))
 
     docbook_zip_list.sort()
     docbook_xsl_zip_list.sort()
 
 
-    logging.info("XMLs: %(xml)s;" % {'xml': ', '.join(docbook_zip_list)})
-    logging.info("XSLs: %(xsl)s." % {'xsl': ', '.join(docbook_xsl_zip_list)})
+    logging.info("XMLs: {};".format(', '.join(docbook_zip_list)))
+    logging.info("XSLs: {}.".format(', '.join(docbook_xsl_zip_list)))
 
     base_dir = os.path.abspath(base_dir)
 

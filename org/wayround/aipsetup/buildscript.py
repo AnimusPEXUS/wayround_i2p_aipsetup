@@ -86,9 +86,11 @@ def load_buildscript(name):
                     )
 
             except:
-                logging.exception("Can't load buildscript Python script `%(name)s'" % {
-                    'name': buildscript_filename
-                    })
+                logging.exception(
+                    "Can't load buildscript Python script `{}'".format(
+                        buildscript_filename
+                        )
+                    )
                 ret = 3
 
             else:
