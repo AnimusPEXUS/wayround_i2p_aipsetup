@@ -283,16 +283,16 @@ def destdir_deps_c(buildingsite):
             file_list_l = len(file_list)
             file_list_i = 1
             for i in file_list:
-                file_list_i += 1
                 org.wayround.utils.file.progress_write(
                     "    ({perc:6.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".format_map(
                         {
-                            'perc': 100.0 / (file_list_l / file_list_i),
+                            'perc': 100.0 / (float(file_list_l) / float(file_list_i)),
                             'elfs': elfs,
                             'n_elfs': n_elfs
                             }
                         )
                     )
+                file_list_i += 1
                 filename = destdir + os.path.sep + i
                 filename.replace(os.path.sep * 2, os.path.sep)
                 filename = os.path.abspath(filename)

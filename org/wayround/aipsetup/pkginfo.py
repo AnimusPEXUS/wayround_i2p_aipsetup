@@ -184,8 +184,6 @@ def get_package_info_record(name=None, record=None):
 
 def set_package_info_record(name, struct):
 
-    # TODO: check_info_dict(struct)
-
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
     q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
@@ -434,7 +432,6 @@ def update_outdated_pkg_info_records():
             org.wayround.aipsetup.config.config['info'],
             oir[i] + '.json'
             )
-
     load_info_records_from_fs(
         filenames=oir,
         rewrite_existing=True
@@ -466,7 +463,6 @@ def print_info_record(name):
         tags = tag_db.get_tags(name[:-4])
         tags.sort()
 
-        # TODO: add all fields
         print("""\
 +---[{name}]---------------------------------------+
               basename: {basename}
@@ -597,7 +593,7 @@ def load_info_records_from_fs(
             perc = float(100) / (float(files_l) / float(num))
         org.wayround.utils.file.progress_write('    {:6.2f}%'.format(perc))
 
-        name = os.path.basename(i)[:-4]
+        name = os.path.basename(i)[:-5]
 
         if not rewrite_existing:
             q = info_db.sess.query(info_db.Info).filter_by(
@@ -614,7 +610,7 @@ def load_info_records_from_fs(
 
     for i in missing:
         struct = org.wayround.aipsetup.info.read_from_file(i)
-        name = os.path.basename(i)[:-4]
+        name = os.path.basename(i)[:-5]
         if isinstance(struct, dict):
             org.wayround.utils.file.progress_write(
                 "    loading record: {}".format(name)

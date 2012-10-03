@@ -202,7 +202,7 @@ def info_mass_info_fix(opts, args):
 
     for i in lst:
 
-        name = os.path.basename(i)[:-4]
+        name = os.path.basename(i)[:-5]
 
         dicti = read_from_file(i)
 
@@ -404,7 +404,6 @@ def info_fixes(info, pkg_name, forced_homepage_fix=False):
     if info['version_re'] == '':
         info['version_re'] = '.*'
 
-    # TODO: think about this all 
     if forced_homepage_fix or info['home_page'] in ['', 'None']:
         possibilities = org.wayround.aipsetup.pkginfo.guess_package_homepage(
             pkg_name

@@ -302,7 +302,6 @@ def repoman_list_pkg_info_records(opts, args):
 
     Default MASK is *
     """
-    # TODO: clarification for help needed
     mask = '*'
 
     if len(args) > 0:

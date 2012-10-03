@@ -6,7 +6,6 @@ Build software before packaging
 import logging
 import copy
 
-
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildscript
 
@@ -15,13 +14,13 @@ def cli_name():
 
 def exported_commands():
     return {
-        'script': build_script,
+        's': build_script,
         'complete': build_complete,
         }
 
 def commands_order():
     return [
-        'script',
+        's',
         'complete'
         ]
 
@@ -105,7 +104,15 @@ def start_building_script(building_site, action=None):
             ret = 2
         else:
 
-            ret = script['main'](building_site, action)
+            try:
+                ret = script['main'](building_site, action)
+            except:
+                logging.exception(
+                    "Error starting `main' function in `{}'".format(
+                        package_info['pkg_info']['buildscript']
+                        )
+                    )
+                ret = 3
 
     return ret
 

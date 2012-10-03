@@ -14,6 +14,8 @@ import subprocess
 
 import org.wayround.utils.file
 
+import org.wayround.utils.archive
+
 def cli_name():
     return 'docbook'
 
@@ -115,12 +117,10 @@ def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
     return 0
 
 def unpack_tar(docbook_xsl_tar, dir_name):
-    # TODO: use aipsetup.utils
-    r = subprocess.Popen(
-        [
-            'tar', '-xf', docbook_xsl_tar, '-C', dir_name
-            ]
-        ).wait()
+
+    r = org.wayround.utils.archive.extract(
+        docbook_xsl_tar, dir_name
+        )
 
     return r
 
@@ -184,11 +184,9 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
     logging.info("   unzipping...")
 
-    e = subprocess.Popen(
-        [
-            '7z', '-o' + base_dir_share_docbook_dtd, 'x', docbook_zip
-            ]
-        ).wait()
+    e = org.wayround.utils.archive.extract(
+        docbook_zip, base_dir_share_docbook_dtd
+        )
 
     if e != 0:
         logging.error("   error unzipping {}".format(docbook_zip))

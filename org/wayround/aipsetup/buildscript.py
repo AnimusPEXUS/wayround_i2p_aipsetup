@@ -41,7 +41,6 @@ def buildscript_edit_file(opts, args):
     return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
 
 
-# TODO: rework required
 def load_buildscript(name):
 
     ret = None

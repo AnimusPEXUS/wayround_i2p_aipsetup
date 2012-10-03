@@ -185,7 +185,6 @@ def package_remove(opts, args):
     --force    force removal of packages for which info is not
                available or which is not removable
     """
-    # TODO: maybe some warnings need to be included in help
 
     ret = 0
 
@@ -609,7 +608,9 @@ def install_package(
             ret = 2
         else:
 
-            latest_in_repo = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name)
+            latest_in_repo = (
+                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name)
+                )
 
             latest_in_repo_no_ext = (
                 org.wayround.aipsetup.name.rm_ext_from_pkg_name(
@@ -630,7 +631,6 @@ def install_package(
                         )
                     )
 
-            # TODO: simplification needed
             if latest_installed_no_ext != None:
                 if force or latest_installed_no_ext != latest_in_repo_no_ext:
 
@@ -708,94 +708,110 @@ def install_asp(asp_name, destdir='/'):
             ret = 1
         else:
 
-            package_name = asp_name[:-4]
+            package_name = os.path.basename(asp_name)
+            if org.wayround.aipsetup.name.package_name_parse(package_name) == None:
+                logging.error("Can't parse package name `{}'".format(package_name))
+                ret = 2
+            else:
+                package_name = package_name[:-4]
+                for i in [
+                    (
+                         './06.LISTS/DESTDIR.lst.xz',
+                         'installed_pkg_dir',
+                         "package's file list"
+                         ),
+                    (
+                         './06.LISTS/DESTDIR.sha512.xz',
+                         'installed_pkg_dir_sums',
+                         "package's check sums"
+                         ),
+                    (
+                         './05.BUILD_LOGS.tar.xz',
+                         'installed_pkg_dir_buildlogs',
+                         "package's buildlogs"
+                         )
+                    ]:
 
-            for i in [
-                (
-                     './06.LISTS/DESTDIR.lst.xz',
-                     'installed_pkg_dir',
-                     "package's file list"
-                     ),
-                (
-                     './06.LISTS/DESTDIR.sha512.xz',
-                     'installed_pkg_dir_sums',
-                     "package's check sums"
-                     ),
-                (
-                     './05.BUILD_LOGS.tar.xz',
-                     'installed_pkg_dir_buildlogs',
-                     "package's buildlogs"
-                     )
-                ]:
-
-                logging.info("Installing {}".format(i[2]))
-
-                logs_path = ''
-                if org.wayround.aipsetup.config.config[i[1]][0] == '/':
-                    logs_path = org.wayround.aipsetup.config.config[i[1]][1:]
-                else:
-                    logs_path = org.wayround.aipsetup.config.config[i[1]]
-
-                out_filename = (
-                    os.path.abspath(
-                        os.path.join(
-                            destdir,
-                            logs_path,
-                            package_name + '.xz'
-                            )
-                        )
-                    )
-
-                out_filename_dir = os.path.dirname(out_filename)
-
-                if not os.path.exists(out_filename_dir):
-                    os.makedirs(out_filename_dir)
-
-                if org.wayround.utils.archive.tar_member_get_extract_file_to(
-                        tarf,
-                        i[0],
-                        out_filename
-                        ) != 0 :
-                    logging.error(
-                        "Can't install_asp {} as {}".format(i[2], out_filename)
-                        )
-                    ret = 2
-                    break
-
-            if ret == 0:
-                logging.info("Installing package's destdir")
-
-                dd_fobj = org.wayround.utils.archive.\
-                    tar_member_get_extract_file(
-                        tarf, './04.DESTDIR.tar.xz'
-                        )
-                if not isinstance(dd_fobj, tarfile.ExFileObject):
-                    logging.error("Can't get package's destdir")
-                    ret = 4
-                else:
-                    tec = org.wayround.utils.archive.extract_tar_canonical_fobj(
-                            dd_fobj,
-                            destdir,
-                            'xz',
-                            verbose_tar=True,
-                            verbose_compressor=True,
-                            add_tar_options=[
-                                '--no-same-owner',
-                                '--no-same-permissions'
-                                ]
-                            )
-                    if tec != 0:
-                        logging.error(
-                            "Package destdir decompression error:"
-                            " tar exit code: {}".format(
-                                tec
-                            )
-                        )
-                        ret = 5
+                    logs_path = ''
+                    if org.wayround.aipsetup.config.config[i[1]][0] == '/':
+                        logs_path = org.wayround.aipsetup.config.config[i[1]][1:]
                     else:
-                        ret = 0
-                        logging.info("Installation look like complete :-)")
-                    dd_fobj.close()
+                        logs_path = org.wayround.aipsetup.config.config[i[1]]
+
+                    out_filename = (
+                        os.path.abspath(
+                            os.path.join(
+                                destdir,
+                                logs_path,
+                                package_name + '.xz'
+                                )
+                            )
+                        )
+
+#                    print("dd: " + destdir)
+#                    print("lp: " + logs_path)
+#                    print("pn: " + package_name)
+#                    print("ou: " + out_filename)
+
+                    out_filename_dir = os.path.dirname(out_filename)
+
+                    if not os.path.exists(out_filename_dir):
+                        os.makedirs(out_filename_dir)
+
+                    logging.info(
+                        "Installing {} as {}".format(
+                            i[2],
+                            out_filename
+                            )
+                        )
+
+                    if org.wayround.utils.archive.tar_member_get_extract_file_to(
+                            tarf,
+                            i[0],
+                            out_filename
+                            ) != 0 :
+                        logging.error(
+                            "Can't install asp {} as {}".format(i[2], out_filename)
+                            )
+                        ret = 2
+                        break
+
+#                exit(0)
+
+                if ret == 0:
+                    logging.info("Installing package's destdir")
+
+                    dd_fobj = org.wayround.utils.archive.\
+                        tar_member_get_extract_file(
+                            tarf, './04.DESTDIR.tar.xz'
+                            )
+                    if not isinstance(dd_fobj, tarfile.ExFileObject):
+                        logging.error("Can't get package's destdir")
+                        ret = 4
+                    else:
+                        tec = org.wayround.utils.archive.extract_tar_canonical_fobj(
+                                dd_fobj,
+                                destdir,
+                                'xz',
+                                verbose_tar=True,
+                                verbose_compressor=True,
+                                add_tar_options=[
+                                    '--no-same-owner',
+                                    '--no-same-permissions'
+                                    ]
+                                )
+                        if tec != 0:
+                            logging.error(
+                                "Package destdir decompression error:"
+                                " tar exit code: {}".format(
+                                    tec
+                                )
+                            )
+                            ret = 5
+                        else:
+                            ret = 0
+                            logging.info("Installation look like complete :-)")
+                        dd_fobj.close()
 
             tarf.close()
 
@@ -874,6 +890,8 @@ def remove_asp(
 
 def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 
+    ret = 0
+
     if not isinstance(reduce_what, list):
         raise ValueError("reduce_what must be a list of strings")
 
@@ -897,17 +915,23 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
         if not mute:
             logging.info("Destdir: {}".format(destdir))
 
-    reduce_to_lst = set(list_files_installed_by_asp(destdir, reduce_to))
+    fiba = list_files_installed_by_asp(destdir, reduce_to)
 
-    for i in reduce_what:
-        remove_asp(
-            i,
-            destdir,
-#            only_remove_package_registration=True,
-            exclude=reduce_to_lst
-            )
+    if not isinstance(fiba, list):
+        logging.error("Some Error")
+        ret = 1
+    else:
 
-    return 0
+        reduce_to_lst = set()
+
+        for i in reduce_what:
+            remove_asp(
+                i,
+                destdir,
+                exclude=fiba
+                )
+
+    return ret
 
 
 def list_installed_asps(destdir='/', mute=False):
@@ -1028,7 +1052,7 @@ def list_files_installed_by_asp(
     try:
         f = open(pkg_list_file, 'rb')
     except:
-        logging.exception("Can't open list file")
+        logging.exception("Can't open list file `{}'".format(pkg_list_file))
         ret = 2
     else:
 
@@ -1051,7 +1075,6 @@ def list_files_installed_by_asp(
     return ret
 
 
-# TODO: build [TARBALL1] [TARBALL2] .. [TARBALLn]
 def build(source_files):
     ret = 0
 

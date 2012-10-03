@@ -17,9 +17,9 @@ def main(buildingsite, action=None):
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
             [
-             'extract', 'configure', 'build', 'distribute',
-             'extract2', 'configure2', 'build2', 'distribute2'
-             ],
+                'extract', 'configure', 'build', 'distribute',
+                'extract2', 'configure2', 'build2', 'distribute2'
+                ],
             action,
             "help"
             )

@@ -675,7 +675,6 @@ def _scan_repo_for_pkg_and_cat(root_dir, cid):
             new_cat = index_db.Category(name=each, parent_cid=cid)
 
             index_db.sess.add(new_cat)
-            # TODO: comment commit or not?
             index_db.sess.commit()
 
             new_cat_cid = new_cat.cid
@@ -1014,11 +1013,7 @@ def index_sources(subdir_name, force_reindex=False, first_delete_found=False):
     index_sources_directory(
         os.path.realpath(os.path.abspath(org.wayround.aipsetup.config.config['source'])),
         os.path.realpath(os.path.abspath(subdir_name)),
-        get_sources_connection(),
-        # TODO: move this list to config
-        ['.tar.gz', '.tar.bz2', '.zip',
-         '.7z', '.tgz', '.tar.xz', '.tar.lzma',
-         '.tbz2'],
+        org.wayround.aipsetup.config.config['acceptable_src_file_extensions'],
         force_reindex=force_reindex,
         first_delete_found=first_delete_found
         )

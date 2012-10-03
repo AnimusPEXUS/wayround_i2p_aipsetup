@@ -150,7 +150,6 @@ def standard_comparison(
         vers_comp_res = 0
 
     if vers_comp_res == 0:
-        # TODO: better algorithm required 
         if status_list1 != None and status_list2 != None:
             s1 = '.'.join(status_list1)
             s2 = '.'.join(status_list2)

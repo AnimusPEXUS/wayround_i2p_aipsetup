@@ -56,6 +56,11 @@ class MainWindow:
         self.ui['treeview1'].show_all()
         self.ui['treeview1'].connect('row-activated', self.onPackageListItemActivated)
 
+        r = Gtk.CellRendererText()
+        self.ui['combobox1'].pack_start(r, True)
+        self.ui['combobox1'].add_attribute(r, 'text', 0)
+
+
         self.load_list()
         self.load_buildscript_list()
 
@@ -110,11 +115,22 @@ class MainWindow:
                 tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
 
                 b = Gtk.TextBuffer()
-                b.set_text('\n'.join(tag_db.get_tags(name[:-4])))
+                b.set_text('\n'.join(tag_db.get_tags(name[:-5])))
 
                 self.ui['textview2'].set_buffer(b)
 
-                self.ui['combobox-entry'].set_text(str(data['buildscript']))
+                m = self.ui['combobox1'].get_model()
+                name_i = -1
+
+                for i in range(len(m)):
+
+                    if m[i][0] == str(data['buildscript']):
+                        name_i = i
+                        break
+
+                self.ui['combobox1'].set_active(name_i)
+
+#                self.ui['combobox-entry'].set_text(str(data['buildscript']))
 
                 self.ui['entry2'].set_text(str(data['basename']))
 
@@ -140,16 +156,16 @@ class MainWindow:
 
                 self.ui['entry4'].set_text(
                     str(
-                        org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                            name[:-4]
+                        org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+                            name[:-5]
                             )
                         )
                     )
 
                 self.ui['entry6'].set_text(
                     str(
-                        org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                            name[:-4]
+                        org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+                            name[:-5]
                             )
                         )
                     )
@@ -167,79 +183,92 @@ class MainWindow:
 
         ret = 0
 
-        filename = os.path.join(
-            self.config['info'],
-            name
-            )
-
-        data = {}
-
-        b = self.ui['textview1'].get_buffer()
-
-        data['description'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
-
-        data['home_page'] = self.ui['entry7'].get_text()
-
-#        b = self.ui['textview2'].get_buffer()
-#
-#        data['tags'] = org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(
-#            b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
-#            )
-
-        data['buildscript'] = self.ui['combobox-entry'].get_text()
-
-        data['basename'] = self.ui['entry2'].get_text()
-
-        data['version_re'] = self.ui['entry3'].get_text()
-
-        data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
-
-        data['removable'] = self.ui['checkbutton2'].get_active()
-
-        data['reducible'] = self.ui['checkbutton1'].get_active()
-
-        data['auto_newest_src'] = self.ui['checkbutton3'].get_active()
-
-        data['auto_newest_pkg'] = self.ui['checkbutton4'].get_active()
-
-
-        if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
-            dia = Gtk.MessageDialog(
-                self.ui['window1'],
-                Gtk.DialogFlags.MODAL,
-                Gtk.MessageType.ERROR,
-                Gtk.ButtonsType.OK,
-                "Can't save to file {}".format(filename)
-                )
-            dia.run()
-            dia.destroy()
+        if not self.currently_opened:
             ret = 1
         else:
-
-            dbu = ''
-            if update_db:
-                try:
-                    org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
-                        [filename], rewrite_existing=True
-                        )
-
-                    dbu = "DB updated"
-                except:
-                    dbu = "Some error while updating DB"
-                    logging.exception(dbu)
-
-            if dbu != '':
-                dbu = '\n' + dbu
-
-            dia = Gtk.MessageDialog(
-                self.ui['window1'],
-                Gtk.DialogFlags.MODAL,
-                Gtk.MessageType.INFO,
-                Gtk.ButtonsType.OK,
-                'File saved' + dbu
+            filename = os.path.join(
+                self.config['info'],
+                name
                 )
-            dia.run()
-            dia.destroy()
+
+            data = {}
+
+            b = self.ui['textview1'].get_buffer()
+
+            data['description'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
+
+            data['home_page'] = self.ui['entry7'].get_text()
+
+    #        b = self.ui['textview2'].get_buffer()
+    #
+    #        data['tags'] = org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(
+    #            b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
+    #            )
+
+    #        data['buildscript'] = self.ui['combobox-entry'].get_text()
+
+            model = self.ui['combobox1'].get_model()
+            active = self.ui['combobox1'].get_active()
+
+            name = None
+            if model:
+                if active != -1:
+                    name = model[active][0]
+
+            data['buildscript'] = name
+
+            data['basename'] = self.ui['entry2'].get_text()
+
+            data['version_re'] = self.ui['entry3'].get_text()
+
+            data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
+
+            data['removable'] = self.ui['checkbutton2'].get_active()
+
+            data['reducible'] = self.ui['checkbutton1'].get_active()
+
+            data['auto_newest_src'] = self.ui['checkbutton3'].get_active()
+
+            data['auto_newest_pkg'] = self.ui['checkbutton4'].get_active()
+
+
+            if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
+                dia = Gtk.MessageDialog(
+                    self.ui['window1'],
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    "Can't save to file {}".format(filename)
+                    )
+                dia.run()
+                dia.destroy()
+                ret = 1
+            else:
+
+                dbu = ''
+                if update_db:
+                    try:
+                        org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
+                            [filename], rewrite_existing=True
+                            )
+
+                        dbu = "DB updated"
+                    except:
+                        dbu = "Some error while updating DB"
+                        logging.exception(dbu)
+
+                if dbu != '':
+                    dbu = '\n' + dbu
+
+                dia = Gtk.MessageDialog(
+                    self.ui['window1'],
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.INFO,
+                    Gtk.ButtonsType.OK,
+                    'File saved' + dbu
+                    )
+                dia.run()
+                dia.destroy()
 
         return ret
 
@@ -270,6 +299,15 @@ class MainWindow:
 
         files.sort()
 
+        model = self.ui['combobox1'].get_model()
+        active = self.ui['combobox1'].get_active()
+
+        name = None
+        if model:
+            if active != -1:
+                name = model[active][0]
+
+
         self.ui['combobox1'].set_model(None)
 
         lst = Gtk.ListStore(str)
@@ -277,8 +315,17 @@ class MainWindow:
             lst.append([os.path.basename(i)[:-3]])
 
         self.ui['combobox1'].set_model(lst)
-        self.ui['combobox1'].set_entry_text_column(0)
 
+        name_i = -1
+        if model:
+            for i in range(len(model)):
+                if model[i][0] == name:
+                    name_i = i
+                    break
+
+        self.ui['combobox1'].set_active(name_i)
+
+        return
 
     def scroll_package_list_to_name(self, name):
         org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
@@ -345,7 +392,7 @@ class MainWindow:
                 'aipsetup3',
                 'repo',
                 'latests',
-                self.ui['entry1'].get_text()[:-4]
+                self.ui['entry1'].get_text()[:-5]
                 ]
                 )
 

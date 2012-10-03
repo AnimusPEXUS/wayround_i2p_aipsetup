@@ -36,26 +36,39 @@ def main(buildingsite, action=None):
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
-                org.wayround.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+                if org.wayround.utils.file.cleanup_dir(src_dir) != 0:
+                    logging.error("Some error while cleaning up source dir")
+                    ret = 1
+
+            if ret == 0:
+
+                ret = autotools.extract_high(
+                    buildingsite,
+                    pkg_info['pkg_info']['basename'],
+                    unwrap_dir=True,
+                    rename_dir=False
+                    )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--enable-shared',
+                    '--enable-optimize',
+                    '--enable-default-toolkit=cairo-gtk2',
+                    '--enable-xft',
+                    '--enable-freetype2',
+                    '--enable-application=suite',
+                    '--enable-calendar',
+                    '--enable-shared-js',
+                    '--enable-safe-browsing',
+                    '--enable-storage',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+                    '--build=' + pkg_info['constitution']['build']
                     ],
                 arguments=['configure'],
                 environment={},

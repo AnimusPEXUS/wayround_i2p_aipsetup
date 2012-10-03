@@ -65,13 +65,13 @@ DIR_LIST = DIR_ALL
 def exported_commands():
     return {
         'init': buildingsite_init,
-        'apply_info': buildingsite_apply_info
+        'apply': buildingsite_apply_info
         }
 
 def commands_order():
     return [
         'init',
-        'apply_info'
+        'apply'
         ]
 
 def cli_name():

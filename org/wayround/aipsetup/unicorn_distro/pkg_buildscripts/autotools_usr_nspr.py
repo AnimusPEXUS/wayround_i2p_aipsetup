@@ -54,13 +54,12 @@ def main(buildingsite, action=None):
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+                    '--build=' + pkg_info['constitution']['build']
                     ],
                 arguments=['configure'],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
+                source_configure_reldir='mozilla/nsprpub',
                 use_separate_buildding_dir=separate_build_dir,
                 script_name='configure'
                 )
