@@ -32,12 +32,11 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
-        if os.path.isdir(src_dir):
-            logging.info("cleaningup source dir")
-            org.wayround.utils.file.cleanup_dir(src_dir)
-
 
         if 'extract' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],

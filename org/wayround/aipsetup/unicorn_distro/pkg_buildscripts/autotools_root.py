@@ -33,8 +33,6 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
-        source_configure_reldir = '.'
-
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -51,6 +49,9 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--bindir=' + pkg_info['constitution']['paths']['basic_bin'],
+                    '--sbindir=' + pkg_info['constitution']['paths']['basic_sbin'],
+                    '--libdir=' + pkg_info['constitution']['paths']['basic_lib'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
@@ -62,7 +63,7 @@ def main(buildingsite, action=None):
                 arguments=['configure'],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
+                source_configure_reldir='.',
                 use_separate_buildding_dir=separate_build_dir,
                 script_name='configure'
                 )
@@ -75,7 +76,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
+                source_configure_reldir='.'
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -93,7 +94,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
+                source_configure_reldir='.'
                 )
 
     return ret

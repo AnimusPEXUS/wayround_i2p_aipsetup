@@ -32,6 +32,7 @@ def main(buildingsite, action=None):
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
         separate_build_dir = False
+        source_configure_reldir = 'mozilla/nsprpub'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -53,13 +54,15 @@ def main(buildingsite, action=None):
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build']
+                    '--with-mozilla',
+                    '--with-pthreads',
+#                    '--host=' + pkg_info['constitution']['host'],
+#                    '--build=' + pkg_info['constitution']['build']
                     ],
                 arguments=['configure'],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='mozilla/nsprpub',
+                source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
                 script_name='configure'
                 )
@@ -72,7 +75,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -90,7 +93,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret
