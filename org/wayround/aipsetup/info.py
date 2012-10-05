@@ -161,6 +161,9 @@ def info_editor(opts, args):
         ret = 1
 
     if ret == 0:
+        if isinstance(file_name, str):
+            if not file_name.endswith('.json'):
+                file_name = file_name + '.json'
         org.wayround.aipsetup.infoeditor.main(file_name)
 
     return ret

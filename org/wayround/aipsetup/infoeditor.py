@@ -1,3 +1,5 @@
+
+import copy
 import os.path
 import glob
 import subprocess
@@ -18,9 +20,9 @@ import org.wayround.aipsetup.pkgtag
 
 class MainWindow:
 
-    def __init__(self, config, no_loop):
+    def __init__(self):
 
-        self.config = config
+        self.config = copy.copy(org.wayround.aipsetup.config.config)
         self.currently_opened = None
 
         ui_file = os.path.join(
@@ -396,21 +398,19 @@ class MainWindow:
                 ]
                 )
 
-def main(name_to_edit=None, no_loop=False):
+def main(name_to_edit=None):
 #    s = Gtk.Settings.get_default()
 #    s.set_string_property("gtk-theme-name", "Adwaita", "")
 #    s.set_long_property("gtk-xft-dpi", 75000, "")
 #    Gtk.Settings.set_string_property("gtk-theme-name", "Default", "")
-    mw = MainWindow(org.wayround.aipsetup.config.config, no_loop)
+    mw = MainWindow()
 
     if isinstance(name_to_edit, str):
         if mw.load_data(os.path.basename(name_to_edit)) != 0:
             mw.close()
         else:
-            if not no_loop:
-                mw.wait()
-    else:
-        if not no_loop:
             mw.wait()
+    else:
+        mw.wait()
 
     return

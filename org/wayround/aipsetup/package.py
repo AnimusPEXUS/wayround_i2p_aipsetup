@@ -239,7 +239,8 @@ def package_build(opts, args):
     """
 
     sources = []
-    multiple_packages = True
+
+    multiple_packages = not '--one' in opts
 
     ret = 0
 

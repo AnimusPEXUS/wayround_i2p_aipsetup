@@ -911,15 +911,15 @@ def index_sources_directory(
                 org.wayround.utils.file.progress_write_finish()
 
             logging.info("Saving to DB")
-            index = -1
+            index = 0
             failed_count = 0
             skipped_count = 0
-            tag_objects = set(tags.get_objects())
+            src_tag_objects = set(tags.get_objects())
 
             for i in source_index:
                 index += 1
 
-                if not force_reindex and i in tag_objects:
+                if not force_reindex and i in src_tag_objects:
 
                     skipped_count += 1
 
@@ -951,7 +951,6 @@ def index_sources_directory(
                         )
                     )
 
-
             del source_index
 #            res = _index_directory(tags, root_dir_name, root_dir_name_len, acceptable_endings)
 #            added_count = res['added_tags']
@@ -959,11 +958,11 @@ def index_sources_directory(
             tags.commit()
             org.wayround.utils.file.progress_write_finish()
             logging.info("Cleaning wrong DB entries")
-            tag_objects = tags.get_objects()
+            src_tag_objects = tags.get_objects()
             deleted_count = 0
             found_scanned_count = 0
             skipped_count = 0
-            for i in tag_objects:
+            for i in src_tag_objects:
 
                 logging.debug("Checking to skip {}".format(os.path.sep + rel_path + os.path.sep))
 
