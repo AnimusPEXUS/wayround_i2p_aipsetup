@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 
 """
 Set of commands to perform package creation sequence
@@ -6,6 +7,7 @@ This module creates checksums, removes garbage, packs file and
 all other preparations and actions needed to build final package
 """
 
+import os
 import os.path
 import tempfile
 import shutil
@@ -21,7 +23,9 @@ import org.wayround.utils.archive
 import org.wayround.utils.deps_c
 
 
+# TODO: this list is suspiciously similar to what in complete function
 FUNCTIONS_LIST = [
+    'destdir_verify_paths_correctness',
     'destdir_checksum',
     'destdir_filelist',
     'destdir_deps_c',
@@ -39,6 +43,12 @@ FUNCTIONS_SET = frozenset(FUNCTIONS_LIST)
 def help_texts(name):
 
     ret = None
+
+    if name == 'destdir_verify_paths_correctness':
+        ret = """\
+Ensure new package creates with bin, sbin, lib and lib64 symlinkd
+into usr
+"""
 
     if name == 'destdir_checksum':
         ret = """\
@@ -171,6 +181,45 @@ def pack_complete(opts, args):
 
     return ret
 
+def destdir_verify_paths_correctness(buildingsite):
+
+    # TODO: Maybe this function need to be rewriten to be more flexible
+
+    ret = 0
+
+    destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
+    # TODO: change constants to constitution values instances
+    for i in [
+        'bin',
+        'lib',
+        'sbin',
+        'lib64'
+        ]:
+
+        p1 = destdir + os.path.sep + i
+
+        if os.path.islink(p1) or os.path.exists(p1):
+            logging.error(
+                "File {} MUST NOT EXIST!".format(
+                    p1
+                    )
+                )
+            ret = 1
+
+    # if ret == 0:
+    #     for i in [
+    #         'bin',
+    #         'lib',
+    #         'sbin',
+    #         'lib64'
+    #         ]:
+
+    #         p1 = destdir + os.path.sep + i
+
+    #         os.symlink('usr'+os.path.sep+i, p1)
+
+    return ret
 
 def destdir_checksum(buildingsite):
 
@@ -572,16 +621,20 @@ def complete(dirname):
 
     ret = 0
 
-    for i in ['destdir_checksum',
-              'destdir_filelist',
-              'destdir_deps_c',
-              'remove_source_and_build_dirs',
-              'compress_patches_destdir_and_logs',
-              'compress_files_in_lists_dir',
-              'remove_patches_destdir_buildlogs_and_temp_dirs',
-              'remove_decompressed_files_from_lists_dir',
-              'make_checksums_for_building_site',
-              'pack_buildingsite']:
+    for i in [
+        'destdir_verify_paths_correctness',
+        'destdir_checksum',
+        'destdir_filelist',
+        'destdir_deps_c',
+        'remove_source_and_build_dirs',
+        'compress_patches_destdir_and_logs',
+        'compress_files_in_lists_dir',
+        'remove_patches_destdir_buildlogs_and_temp_dirs',
+        'remove_decompressed_files_from_lists_dir',
+        'make_checksums_for_building_site',
+        'pack_buildingsite'
+        ]:
+
         if eval("{}(dirname)".format(i)) != 0:
             logging.error("Error on {}".format(i))
             ret = 1

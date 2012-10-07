@@ -29,11 +29,17 @@ def _getDIR_x(directory, _x='TARBALL'):
 
     note: this method is generated dinamicly
     '''
-    return os.path.abspath(
+
+    ret = os.path.abspath(
         os.path.join(
             directory,
             eval('DIR_{}'.format(_x)))
         )
+
+    while r'//' in ret:
+        ret.replace(r'//', '/')
+
+    return ret
 
 
 def getDIR_TARBALL   (directory): return _getDIR_x(directory, 'TARBALL')

@@ -28,6 +28,7 @@ import org.wayround.utils.text
 import org.wayround.utils.time
 import org.wayround.utils.archive
 import org.wayround.utils.log
+import org.wayround.utils.file
 
 
 import org.wayround.aipsetup.pkgindex
@@ -45,6 +46,7 @@ def cli_name():
 
 def exported_commands():
     return {
+        'check'         : package_check_package,
         'install'       : package_install,
         'list'          : package_list,
         'list_asps'     : package_list_asps,
@@ -57,6 +59,7 @@ def exported_commands():
 
 def commands_order():
     return [
+        'check',
         'list',
         'list_asps',
         'install',
@@ -344,6 +347,21 @@ def package_put_to_index_many(opts, args):
 
     return ret
 
+def package_check_package(opts, args):
+    ret = 0
+    file = None
+    
+    if len(args) == 1:
+        file = args[0]
+    
+    if file == None:
+        logging.error("Filename required")
+        ret = 2
+
+    else:
+
+        ret = check_package(file)
+    return ret
 
 def check_package(asp_name, mute=False):
     """
@@ -430,7 +448,50 @@ def check_package(asp_name, mute=False):
                         logging.error("Error was found while checking package")
                         ret = 3
                     else:
-                        ret = 0
+
+                        fobj = org.wayround.utils.archive.tar_member_get_extract_file(
+                            tarf,
+                            './06.LISTS/DESTDIR.lst.xz'
+                            )
+                        if not isinstance(fobj, tarfile.ExFileObject):
+                            ret = False
+                        else:
+
+                            try:
+                                dest_dir_files_list = org.wayround.utils.archive.xzcat(
+                                    fobj, 
+                                    convert_to_str='utf-8'
+                                    )
+                                dest_dir_files_list = dest_dir_files_list.splitlines()
+
+                                for i in [
+                                    'bin',
+                                    'sbin',
+                                    'lib',
+                                    'lib64'
+                                    ]:
+
+                                    for j in dest_dir_files_list:
+
+                                        p1=os.path.sep+i+os.path.sep
+
+                                        if j.startswith(p1):
+                                            logging.error(
+                                                "{} has file paths starting with {}".format(
+                                                    os.path.basename(asp_name), p1
+                                                    )
+                                                )
+                                            ret = 5
+                                            break
+
+                                        if ret != 0:
+                                            break
+                                
+                            except:
+                                logging.exception("Error")
+                                ret = 4
+                            finally:
+                                fobj.close()
             finally:
                 tarf.close()
 
@@ -819,12 +880,12 @@ def install_asp(asp_name, destdir='/'):
     return ret
 
 def remove_asp(
-        asp_name,
-        destdir='/',
-        only_remove_package_registration=False,
-        exclude=None,
-        mute=False
-        ):
+    asp_name,
+    destdir='/',
+    only_remove_package_registration=False,
+    exclude=None,
+    mute=False
+    ):
 
     ret = 0
 
@@ -864,15 +925,44 @@ def remove_asp(
                 rm_file_name = os.path.abspath(
                     destdir + os.path.sep + line
                     )
-                if os.path.islink(rm_file_name) or os.path.isfile(rm_file_name):
+
+                while r'//' in rm_file_name:
+                    rm_file_name.replace(r'//','/')
+
+                if line in [
+                    '/bin',
+                    '/sbin',
+                    '/lib',
+                    '/lib64'
+                    ]:
+                    logging.warning("{} can't be removed -- skipping".format(rm_file_name))
+                    continue
+
+                if (
+                    (os.path.islink(rm_file_name) and not os.path.exists(rm_file_name))
+                    or
+                    (os.path.isfile(rm_file_name))
+                    or
+                    (os.path.isdir(rm_file_name) and org.wayround.utils.file.is_dir_empty(rm_file_name))
+                    ):
                     if not mute:
                         logging.info("   removing: {}".format(rm_file_name))
-                    try:
-                        os.unlink(rm_file_name)
-                    except:
-                        logging.exception(
-                            "Couldn't remove file: {}".format(rm_file_name)
-                            )
+
+                    if os.path.isfile(rm_file_name) or os.path.islink(rm_file_name):
+
+                        try:
+                            os.unlink(rm_file_name)
+                        except:
+                            logging.exception(
+                                "Couldn't remove file: {}".format(rm_file_name)
+                                )
+                    else:
+                        try:
+                            os.rmdir(rm_file_name)
+                        except:
+                            logging.exception(
+                                "Couldn't remove dir: {}".format(rm_file_name)
+                                )
 
         for i in [
             'installed_pkg_dir_buildlogs',
@@ -1205,7 +1295,20 @@ def find_file_in_files_installed_by_asps(
 
         ret_dict = dict()
 
+
+        lst_l = len(lst)
+        lst_i = -1
+
         for pkgname in lst:
+
+            lst_i += 1
+
+            perc = 0
+            if lst_i == 0:
+                perc = 0.0
+            else:
+                perc = 100.0 / (float(lst_l) / float(lst_i))
+
             if pkgname.endswith('.xz'):
                 pkgname = pkgname[:-3]
 
@@ -1215,9 +1318,18 @@ def find_file_in_files_installed_by_asps(
                 mute=True
                 )
 
+            org.wayround.utils.file.progress_write(
+                "    {:6.2f}% (found {} packages) ({})".format(
+                    perc,
+                    len(ret_dict.keys()),
+                    pkgname
+                    )
+                )
+
             if len(found) != 0:
                 ret_dict[pkgname] = found
 
+        org.wayround.utils.file.progress_write_finish()
         ret = ret_dict
 
     return ret
@@ -1298,7 +1410,7 @@ def put_files_to_index(files):
 
     return 0
 
-def _put_files_to_index(files, pkg_name, subdir):
+def _put_files_to_index(files, subdir):
 
     ret = 0
 
@@ -1314,15 +1426,17 @@ def _put_files_to_index(files, pkg_name, subdir):
         if not os.path.exists(full_path):
             os.makedirs(full_path)
 
-        logging.info("moving {}\n       to {}".format(file, full_path))
-        shutil.move(file, full_path)
+        if os.path.dirname(file) != full_path:
+
+            logging.info("moving {}\n       to {}".format(file, full_path))
+            shutil.move(file, full_path)
 
     return ret
 
 def put_file_to_index(filename):
     ret = 0
 
-    logging.info("Processing file `{}'".format(filename))
+    logging.info("Processing file `{}'".format(os.path.basename(filename)))
 
     if os.path.isdir(filename) or os.path.islink(filename):
         logging.error(
@@ -1331,41 +1445,48 @@ def put_file_to_index(filename):
         ret = 10
     else:
 
-        if check_package_aipsetup2(filename) == 0:
+        # if check_package_aipsetup2(filename) == 0:
 
-            parsed = org.wayround.aipsetup.name.package_name_parse(filename)
+        #     parsed = org.wayround.aipsetup.name.package_name_parse(filename)
 
-            if not isinstance(parsed, dict):
-                logging.error(
-                    "Can't parse file name {}".format(
-                        os.path.basename(filename)
-                        )
-                    )
-            else:
-                file = os.path.abspath(filename)
+        #     if not isinstance(parsed, dict):
+        #         logging.error(
+        #             "Can't parse file name {}".format(
+        #                 os.path.basename(filename)
+        #                 )
+        #             )
+        #     else:
+        #         file = os.path.abspath(filename)
 
-                files = [
-                    file,
-                    file + '.sha512',
-                    file + '.md5'
-                    ]
+        #         files = [
+        #             file,
+        #             file + '.sha512',
+        #             file + '.md5'
+        #             ]
 
-                path = org.wayround.aipsetup.pkgindex.get_package_path_string(
-                    parsed['groups']['name']
-                    ) + os.path.sep + 'aipsetup2'
+        #         package_path = org.wayround.aipsetup.pkgindex.get_package_path_string(
+        #             parsed['groups']['name']
+        #             )
 
-                if not isinstance(path, str):
-                    logging.error(
-                        "Can't get package `{}' path string".format(
-                            parsed['groups']['name']
-                            )
-                        )
-                    ret = 11
-                else:
+        #         if not isinstance(package_path, str):
+        #             logging.error("Package path error `{}'".format(parsed['groups']['name']))
+        #             ret = 11
+        #         else:
+        #             path = package_path + os.path.sep + 'aipsetup2'
 
-                    _put_files_to_index(files, parsed['groups']['name'], path)
+        #             if not isinstance(path, str):
+        #                 logging.error(
+        #                     "Can't get package `{}' path string".format(
+        #                         parsed['groups']['name']
+        #                         )
+        #                     )
+        #                 ret = 12
+        #             else:
 
-        elif check_package(filename, mute=True) == 0:
+        #                 _put_files_to_index(files, path)
+
+        # el
+        if check_package(filename, mute=True) == 0:
             parsed = org.wayround.aipsetup.name.package_name_parse(filename)
 
             if not isinstance(parsed, dict):
@@ -1381,19 +1502,27 @@ def put_file_to_index(filename):
                     file
                     ]
 
-                path = org.wayround.aipsetup.pkgindex.get_package_path_string(
-                    parsed['groups']['name']
-                    ) + os.path.sep + 'pack'
 
-                if not isinstance(path, str):
-                    logging.error(
-                        "Can't get package `{}' path string".format(
-                            parsed['groups']['name']
-                            )
-                        )
+                package_path = org.wayround.aipsetup.pkgindex.get_package_path_string(
+                    parsed['groups']['name']
+                    )
+
+                if not isinstance(package_path, str):
+                    logging.error("Package path error `{}'".format(parsed['groups']['name']))
                     ret = 11
                 else:
-                    _put_files_to_index(files, parsed['groups']['name'], path)
+
+                    path = package_path + os.path.sep + 'pack'
+
+                    if not isinstance(path, str):
+                        logging.error(
+                            "Can't get package `{}' path string".format(
+                                parsed['groups']['name']
+                                )
+                            )
+                        ret = 12
+                    else:
+                        _put_files_to_index(files, path)
 
         else:
 

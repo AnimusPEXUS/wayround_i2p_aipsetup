@@ -21,6 +21,7 @@ CONFIG_FULL_SAMPLE = {
     'buildscript'        : '/mnt/sda3/home/agu/_UNICORN/pkg_buildscripts',
     'info'               : '/mnt/sda3/home/agu/_UNICORN/pkg_info',
     'server_files'       : '/mnt/sda3/home/agu/_UNICORN/server_files',
+    'garbage'            : '/mnt/sda3/home/agu/_UNICORN/garbage',
     'source_index'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/sources.sqlite',
     'tags'               : '/mnt/sda3/home/agu/_UNICORN/tags.json',
 
@@ -43,7 +44,7 @@ CONFIG_FULL_SAMPLE = {
 
 
 
-    # client and server config stuff 
+    # client and server config stuff
 
     # server is for serving localy
     'server_ip'          : '127.0.0.1',
@@ -51,7 +52,7 @@ CONFIG_FULL_SAMPLE = {
     'server_path'        : '/',
     'server_password'    : '123456789',
 
-    # client is to designate remote server from which to catch updates 
+    # client is to designate remote server from which to catch updates
     # and other things
     'client_proto'       : 'http',
     'client_host'        : '127.0.0.1',
@@ -61,7 +62,7 @@ CONFIG_FULL_SAMPLE = {
     # this will be used relatively to install.py destdir parameters
     'installed_pkg_dir': '/var/log/packages',
 
-    # this two are non-configurable and will be in `installed_pkg_dir' always 
+    # this two are non-configurable and will be in `installed_pkg_dir' always
     'installed_pkg_dir_buildlogs': '/var/log/packages/buildlogs',
     'installed_pkg_dir_sums': '/var/log/packages/sums'
     }
@@ -127,9 +128,6 @@ def config_print_example(opts, args):
     """
     Print example aipsetup.conf file
     """
-
-    if len(args) == 1:
-        filename = args[0]
 
     ret = print_example_config()
 
@@ -278,11 +276,12 @@ def config_check_after_load(indict):
                 )
 
     for i, j in [
-        ('constitution'    , 'system_constitution.py'),
-        ('buildscript'     , 'pkg_buildscripts'),
-        ('info'            , 'pkg_info'),
-        ('server_files'    , 'server_files'),
-        ('tags'            , 'tags.json')
+        ('constitution'     , 'system_constitution.py'),
+        ('buildscript'      , 'pkg_buildscripts'),
+        ('info'             , 'pkg_info'),
+        ('server_files'     , 'server_files'),
+        ('tags'             , 'tags.json'),
+        ('garbage'          , 'garbage')
         ]:
         indict[i] = os.path.abspath(
             os.path.join(indict['unicorn_root'], j)

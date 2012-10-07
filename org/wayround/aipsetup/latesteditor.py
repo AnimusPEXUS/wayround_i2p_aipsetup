@@ -32,7 +32,7 @@ class MainWindow:
 
         self.ui = org.wayround.utils.gtk.widget_dict(ui)
 
-        self.ui['window1'].connect("delete-event", Gtk.main_quit)
+#        self.ui['window1'].connect("delete-event", gtk_widget_hide_on_delete)
         self.ui['window1'].show_all()
 
 
@@ -251,13 +251,6 @@ class MainWindow:
 
         return 0
 
-    def wait(self):
-        return Gtk.main()
-
-    def close(self):
-#        self.app.quit()
-        return
-
     def scrollPackageListToItem(self, name):
         org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
             self.ui['treeview1'],
@@ -338,15 +331,19 @@ class MainWindow:
 
     def onEditInfoClicked(self, button):
 
-        if self.currently_opened:
-            subprocess.Popen(
-                [
-                    'aipsetup3',
-                    'i',
-                    'editor',
-                    self.currently_opened + '.json'
-                    ]
-                )
+        import org.wayround.aipsetup.infoeditor
+
+        org.wayround.aipsetup.infoeditor.main(self.currently_opened + '.json')
+
+#        if self.currently_opened:
+#            subprocess.Popen(
+#                [
+#                    'aipsetup3',
+#                    'i',
+#                    'editor',
+#                    self.currently_opened + '.json'
+#                    ]
+#                )
 
     def onSaveClicked(self, button):
 
@@ -399,11 +396,9 @@ def main(name_to_edit=None):
 
     if isinstance(name_to_edit, str):
         if mw.load_item(name_to_edit) != 0:
-            mw.close()
-        else:
-            mw.wait()
+            org.wayround.aipsetup.gtk.start_session()
     else:
-        mw.wait()
+        org.wayround.aipsetup.gtk.start_session()
 
     return
 

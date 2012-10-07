@@ -5,11 +5,13 @@ Repository manipulations CLI module
 import copy
 import glob
 import logging
+import os.path
+
+
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest
 import org.wayround.aipsetup.pkgtag
-import os.path
 
 
 
@@ -29,6 +31,7 @@ def exported_commands():
         'print': repoman_print_pkg_info_record,
         'loadt': repoman_load_tags,
         'savet': repoman_save_tags,
+        'clean': repoman_cleanup_repo
         }
 
 def commands_order():
@@ -46,7 +49,8 @@ def commands_order():
         'print',
         'latests',
         'loadt',
-        'savet'
+        'savet',
+        'clean'
         ]
 
 def cli_name():
@@ -196,7 +200,9 @@ def repoman_find_outdated_pkg_info_records(opts, args):
     ret = 0
 
     try:
-        res = org.wayround.aipsetup.pkginfo.get_outdated_info_records_list()
+        res = org.wayround.aipsetup.pkginfo.get_outdated_info_records_list(
+            mute=False
+            )
 
     except:
         logging.exception("Error getting outdated info records list")
@@ -343,4 +349,8 @@ def repoman_save_tags(opts, args):
 
     org.wayround.aipsetup.pkgtag.save_tags_to_fs()
 
+    return 0
+
+def repoman_cleanup_repo(opts, args):
+    org.wayround.aipsetup.pkgindex.cleanup_repo()
     return 0

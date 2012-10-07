@@ -306,11 +306,11 @@ def get_missing_info_records_list(
     logging.info(
         """\
 Total records checked     : {n1}
-Missing records           : {n2}
-Missing but present on FS : {n3}
-Written                   : {n4}
-Write failed              : {n5}
-Write forced              : {n6}
+    Missing records           : {n2}
+    Missing but present on FS : {n3}
+    Written                   : {n4}
+    Write failed              : {n5}
+    Write forced              : {n6}
 """.format_map(
             {
                 'n1': pkgs_checked,

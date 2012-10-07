@@ -320,6 +320,9 @@ def get_latest_pkg_from_repo(name, files=None):
             name
             )
 
+    if not isinstance(files, list):
+        files = []
+
     if len(files) == 0:
         ret = None
     else:

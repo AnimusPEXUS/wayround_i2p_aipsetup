@@ -26,6 +26,9 @@ def determine_abs_configure_dir(buildingsite, config_dir):
             ) + os.path.sep + config_dir
         )
 
+    while r'//' in config_dir:
+        config_dir.replace(r'//', '/')
+
     return config_dir
 
 def determine_building_dir(
@@ -222,7 +225,9 @@ def configure_high(
     environment_mode,
     source_configure_reldir,
     use_separate_buildding_dir,
-    script_name
+    script_name,
+    run_script_not_bash,
+    relative_call
     ):
 
     ret = 0
@@ -258,7 +263,7 @@ def configure_high(
         script_path = determine_abs_configure_dir(
             building_site,
             source_configure_reldir
-            ) + os.path.sep + script_name
+            )
 
         working_dir = determine_building_dir(
             building_site,
@@ -272,7 +277,10 @@ def configure_high(
             working_dir,
             options,
             arguments,
-            env
+            env,
+            run_script_not_bash,
+            relative_call,
+            script_name
             )
 
     log.close()
@@ -285,15 +293,26 @@ def configure_low(
     working_dir,
     opts,
     args,
-    env
+    env,
+    run_script_not_bash,
+    relative_call,
+    script_name
     ):
 
     ret = 0
 
-    cmd = ['bash'] + [script_path] + opts + args
+    if relative_call:
+        script_path = os.path.relpath(script_path, working_dir)
+
+    cmd = []
+    if not run_script_not_bash:
+        cmd = ['bash'] + [script_path + os.path.sep + script_name] + opts + args
+    else:
+        cmd = [script_path + os.path.sep + script_name] + opts + args
 
     log.info("directory: {}".format(working_dir))
     log.info("command: {}".format(cmd))
+    log.info("command(joined): {}".format(' '.join(cmd)))
 
     p = None
     try:

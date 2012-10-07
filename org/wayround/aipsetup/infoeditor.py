@@ -11,6 +11,7 @@ import org.wayround.utils.gtk
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
+import org.wayround.aipsetup.gtk
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
@@ -35,7 +36,7 @@ class MainWindow:
         self.ui = org.wayround.utils.gtk.widget_dict(ui)
 
 
-        self.ui['window1'].connect("delete-event", Gtk.main_quit)
+#        self.ui['window1'].connect("delete-event", gtk_widget_hide_on_delete)
         self.ui['window1'].show_all()
 
 
@@ -336,13 +337,6 @@ class MainWindow:
             )
         return
 
-    def wait(self):
-        return Gtk.main()
-
-    def close(self):
-#        self.app.quit()
-        return
-
     def onRevertButtonActivated(self, button):
         if self.load_data(self.currently_opened) != 0:
             dia = Gtk.MessageDialog(
@@ -388,29 +382,28 @@ class MainWindow:
 
     def onEditLatestButtonActivated(self, toggle):
 
-        if self.ui['entry1'].get_text().endswith('.json'):
-            subprocess.Popen(
-                [
-                'aipsetup3',
-                'repo',
-                'latests',
-                self.ui['entry1'].get_text()[:-5]
-                ]
-                )
+        import org.wayround.aipsetup.latesteditor
+
+        org.wayround.aipsetup.latesteditor.main(self.ui['entry1'].get_text()[:-5])
+
+#        if self.ui['entry1'].get_text().endswith('.json'):
+#            subprocess.Popen(
+#                [
+#                'aipsetup3',
+#                'repo',
+#                'latests',
+#                self.ui['entry1'].get_text()[:-5]
+#                ]
+#                )
 
 def main(name_to_edit=None):
-#    s = Gtk.Settings.get_default()
-#    s.set_string_property("gtk-theme-name", "Adwaita", "")
-#    s.set_long_property("gtk-xft-dpi", 75000, "")
-#    Gtk.Settings.set_string_property("gtk-theme-name", "Default", "")
+
     mw = MainWindow()
 
     if isinstance(name_to_edit, str):
-        if mw.load_data(os.path.basename(name_to_edit)) != 0:
-            mw.close()
-        else:
-            mw.wait()
+        if mw.load_data(os.path.basename(name_to_edit)) == 0:
+            org.wayround.aipsetup.gtk.start_session()
     else:
-        mw.wait()
+        org.wayround.aipsetup.gtk.start_session()
 
     return

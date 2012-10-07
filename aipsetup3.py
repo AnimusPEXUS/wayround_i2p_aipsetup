@@ -43,6 +43,7 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.help
 import org.wayround.aipsetup.modhelp
 import org.wayround.aipsetup.dbconnections
+import org.wayround.aipsetup.gtk
 
 
 # Parse parameters
@@ -125,5 +126,9 @@ else:
                                     ret = 102
 
 org.wayround.aipsetup.dbconnections.close_all()
+try:
+    org.wayround.aipsetup.gtk.stop_session()
+except:
+    logging.warning("gtk not ready")
 
 exit(ret)

@@ -8,12 +8,15 @@ import sys
 import glob
 import logging
 import re
+import shutil
+import functools
 
 import sqlalchemy
 import sqlalchemy.ext
 
 import org.wayround.utils.db
 import org.wayround.utils.tag
+import org.wayround.utils.file
 
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
@@ -465,7 +468,8 @@ def get_package_path(pid_or_name):
     pkg = None
 
     if pid == None:
-        logging.error("Error getting package `{}' data from DB".format())
+        logging.error("Error getting package `{}' data from DB".format(pid_or_name))
+        logging.warning("Maybe it's not indexed")
         ret = None
     else:
         index_db = org.wayround.aipsetup.dbconnections.index_db()
@@ -558,7 +562,7 @@ def get_package_collisions_in_db():
     logging.info("Scanning paths")
     for each in lst:
         org.wayround.utils.file.progress_write('       {}'.format(each.name))
-        lst2.append(get_package_path(pid=each.pid))
+        lst2.append(get_package_path(pid_or_name=each.pid))
 
     org.wayround.utils.file.progress_write_finish()
 
@@ -721,10 +725,7 @@ def create_required_dirs_at_package(path):
 
     ret = 0
 
-    # NOTE: it's not time to remove aipsetup2 from here yet
-    # NOTE: some of those packages are steel needed
-
-    for i in ['pack', 'aipsetup2']:
+    for i in ['pack']:
         full_path = path + os.path.sep + i
 
         if not os.path.exists(full_path):
@@ -799,7 +800,7 @@ def _index_sources_directory_to_list(
         if os.path.islink(full_path):
             continue
 
-        # not each_file[0] == '.' and 
+        # not each_file[0] == '.' and
         if os.path.isdir(full_path):
 
             res = _index_sources_directory_to_list(
@@ -812,7 +813,7 @@ def _index_sources_directory_to_list(
                 )
             added_tags = res['added_tags']
 
-        # not each_file[0] == '.' and 
+        # not each_file[0] == '.' and
         elif os.path.isfile(full_path):
 
             if isinstance(acceptable_endings, list):
@@ -1019,3 +1020,163 @@ def index_sources(subdir_name, force_reindex=False, first_delete_found=False):
 
     return 0
 
+def cleanup_repo_package_pack(name):
+
+    g_path = org.wayround.aipsetup.config.config['garbage'] + os.path.sep + name
+
+    os.makedirs(g_path, exist_ok=True)
+
+    path = (
+        org.wayround.aipsetup.config.config['repository'] + os.path.sep +
+        org.wayround.aipsetup.pkgindex.get_package_path_string(name) +
+        os.path.sep + 'pack'
+        )
+
+    while r'//' in path:
+        path.replace(r'//', '/')
+
+    path = os.path.abspath(path)
+
+    files = os.listdir(path)
+    files.sort()
+
+    for i in files:
+        p1 = path + os.path.sep + i
+
+        if os.path.exists(p1):
+
+            org.wayround.aipsetup.package.put_file_to_index(
+                path + os.path.sep + i
+                )
+
+    files = os.listdir(path)
+    files.sort()
+
+    for i in files:
+
+        p1 = path + os.path.sep + i
+
+        if os.path.exists(p1):
+
+            p2 = g_path + os.path.sep + i
+
+            if org.wayround.aipsetup.package.check_package(
+                p1, True
+                ) != 0:
+                logging.warning(
+                    "Wrong package, garbaging: `{}'\n\tas `{}'".format(p1, p2)
+                    )
+                try:
+                    shutil.move(p1, p2)
+                except:
+                    logging.exception("Can't garbage")
+
+    files = os.listdir(path)
+    files.sort(
+        key=functools.cmp_to_key(
+            org.wayround.aipsetup.version.package_version_comparator
+            ),
+
+        reverse=True
+        )
+
+    if len(files) > 5:
+        for i in files[5:]:
+            p1 = path + os.path.sep + i
+
+            logging.warning("Removing outdated package: {}".format(p1))
+            try:
+                os.unlink(p1)
+            except:
+                logging.exception("Error")
+
+
+def cleanup_repo_package(name):
+
+    g_path = org.wayround.aipsetup.config.config['garbage'] + os.path.sep + name
+
+    os.makedirs(g_path, exist_ok=True)
+
+    path = (
+        org.wayround.aipsetup.config.config['repository'] + os.path.sep +
+        org.wayround.aipsetup.pkgindex.get_package_path_string(name)
+        )
+
+    while r'//' in path:
+        path.replace(r'//', '/')
+
+    path = os.path.abspath(path)
+
+    create_required_dirs_at_package(path)
+
+    files = os.listdir(path)
+
+    for i in files:
+        if not i in ['.package', 'pack']:
+
+            p1 = path + os.path.sep + i
+            p2 = g_path
+            logging.warning(
+                "moving `{}'\n\tto {}".format(
+                    p1,
+                    p2
+                    )
+                )
+            try:
+                shutil.move(p1, p2)
+            except:
+                logging.exception("Can't move file or dir")
+
+
+def cleanup_repo():
+
+    garbage_dir = org.wayround.aipsetup.config.config['garbage']
+
+    os.makedirs(garbage_dir, exist_ok=True)
+
+    logging.info("Getting packages information from DB")
+
+    pkgs = get_package_idname_dict(None)
+
+    logging.info("Scanning repository for garbage in packages")
+
+    lst = list(pkgs.keys())
+    lst.sort()
+    lst_l = len(lst)
+    lst_i = -1
+
+    for i in lst:
+
+        lst_i += 1
+        perc = 0
+
+        if lst_i == 0:
+            perc = 0.0
+        else:
+            perc = 100.0 / (float(lst_l) / lst_i)
+
+        org.wayround.utils.file.progress_write(
+                "    {:6.2f}% (package {})".format(
+                    perc,
+                    pkgs[i]
+                    )
+            )
+
+        cleanup_repo_package(pkgs[i])
+        cleanup_repo_package_pack(pkgs[i])
+
+    g_files = os.listdir(garbage_dir)
+
+    for i in g_files:
+        p1 = garbage_dir + os.path.sep + i
+        if not os.path.islink(p1):
+            if os.path.isdir(p1):
+                if org.wayround.utils.file.isdirempty(p1):
+                    try:
+                        os.rmdir(p1)
+                    except:
+                        logging.exception("Error")
+
+#        pkgs[i] = org.wayround.aipsetup.pkgindex.get_package_path_string(
+#            i, index_db=index_db
+#            )
