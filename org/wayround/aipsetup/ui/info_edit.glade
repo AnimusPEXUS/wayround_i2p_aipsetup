@@ -67,11 +67,9 @@
             <child>
               <object class="GtkButton" id="button5">
                 <property name="label" translatable="yes">Reload List</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="image">image4</property>
               </object>
               <packing>
@@ -83,11 +81,9 @@
             <child>
               <object class="GtkButton" id="button2">
                 <property name="label" translatable="yes">Save and Update DB</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="image">image2</property>
               </object>
               <packing>
@@ -99,11 +95,9 @@
             <child>
               <object class="GtkButton" id="button1">
                 <property name="label" translatable="yes">Edit Latest Files</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="image">image1</property>
               </object>
               <packing>
@@ -217,11 +211,9 @@
                     <child>
                       <object class="GtkCheckButton" id="checkbutton1">
                         <property name="label" translatable="yes">Reducible</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -235,11 +227,9 @@
                     <child>
                       <object class="GtkCheckButton" id="checkbutton2">
                         <property name="label" translatable="yes">Removable</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -253,11 +243,9 @@
                     <child>
                       <object class="GtkCheckButton" id="checkbutton3">
                         <property name="label" translatable="yes">Auto Newest src</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -271,11 +259,9 @@
                     <child>
                       <object class="GtkCheckButton" id="checkbutton4">
                         <property name="label" translatable="yes">Auto Newest pkg</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -421,12 +407,10 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkButton" id="button6">
-                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Refresh List</property>
-                        <property name="use_action_appearance">False</property>
                         <child>
                           <object class="GtkImage" id="image5">
                             <property name="visible">True</property>
