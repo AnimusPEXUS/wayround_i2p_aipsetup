@@ -65,7 +65,7 @@ def main(buildingsite, action=None):
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']
                     ],
-                arguments=['configure'],
+                arguments=[],
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir='.',

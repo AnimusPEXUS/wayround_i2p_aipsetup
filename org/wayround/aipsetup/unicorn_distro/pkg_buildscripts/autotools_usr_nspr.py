@@ -59,7 +59,7 @@ def main(buildingsite, action=None):
 #                    '--host=' + pkg_info['constitution']['host'],
 #                    '--build=' + pkg_info['constitution']['build']
                     ],
-                arguments=['configure'],
+                arguments=[],
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,

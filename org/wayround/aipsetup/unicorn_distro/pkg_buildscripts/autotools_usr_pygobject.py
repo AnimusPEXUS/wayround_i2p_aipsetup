@@ -61,7 +61,7 @@ def main(buildingsite, action=None):
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']
                     ],
-                arguments=['configure'],
+                arguments=[],
                 environment={'PYTHON': '/usr/bin/python2'},
                 environment_mode='copy',
                 source_configure_reldir='.',
@@ -124,7 +124,7 @@ def main(buildingsite, action=None):
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']
                     ],
-                arguments=['configure'],
+                arguments=[],
                 environment={'PYTHON': '/usr/bin/python3'},
                 environment_mode='copy',
                 source_configure_reldir='.',

@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "dbus", 
-  "buildscript": "", 
+  "buildscript": "autotools_usr_dbus", 
   "description": "write something here, please", 
   "home_page": "http://www.freedesktop.org", 
   "installation_priority": 5, 

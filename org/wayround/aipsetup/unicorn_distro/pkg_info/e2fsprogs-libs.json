@@ -1,10 +1,10 @@
 {
   "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
+  "auto_newest_src": false, 
   "basename": "e2fsprogs-libs", 
-  "buildscript": "", 
+  "buildscript": "autotools_e2fsprogs", 
   "description": "write something here, please", 
-  "home_page": "http://None", 
+  "home_page": "http://sf.net", 
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 

@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "glib-networking", 
-  "buildscript": "autotools_usr", 
+  "buildscript": "autotools_usr_glib_networking", 
   "description": "write something here, please", 
   "home_page": "http://www.gnome.org", 
   "installation_priority": 5, 

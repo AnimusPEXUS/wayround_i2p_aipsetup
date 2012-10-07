@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "mc", 
-  "buildscript": "", 
+  "buildscript": "autotools_mc", 
   "description": "write something here, please", 
   "home_page": "http://www.midnight-commander.org", 
   "installation_priority": 5, 

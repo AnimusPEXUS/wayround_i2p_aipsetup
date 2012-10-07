@@ -69,7 +69,7 @@ def main(buildingsite, action=None):
                     '--with-elf',
                     '--enable-multi-arch'
                     ],
-                arguments=['configure'],
+                arguments=[],
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir='.',
