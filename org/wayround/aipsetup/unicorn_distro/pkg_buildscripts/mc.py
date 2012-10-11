@@ -2,6 +2,8 @@
 
 import os.path
 import logging
+import glob
+import shutil
 
 import org.wayround.utils.file
 
@@ -16,7 +18,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['extract', 'configure', 'build', 'distribute', 'wrapper'],
             action,
             "help"
             )
@@ -31,13 +33,18 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
-        if os.path.isdir(src_dir):
-            logging.info("cleaningup source dir")
-            org.wayround.utils.file.cleanup_dir(src_dir)
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+            buildingsite
+            )
 
         separate_build_dir = False
 
+        source_configure_reldir = '.'
+
         if 'extract' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
@@ -60,11 +67,12 @@ def main(buildingsite, action=None):
                     ],
                 arguments=[],
                 environment={},
-#                environment={'PYTHON': '/usr/bin/python3'},
                 environment_mode='copy',
-                source_configure_reldir='.',
+                source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure'
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
@@ -75,7 +83,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -84,16 +92,55 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
+
+        if 'wrapper' in actions and ret == 0:
+            os.makedirs(
+                dst_dir +
+                    os.path.sep + 'etc' + os.path.sep +
+                    'profile.d' + os.path.sep + 'SET',
+                exist_ok=True
+                )
+
+            os.makedirs(
+                dst_dir +
+                    os.path.sep + 'usr' + os.path.sep + 'share' + os.path.sep +
+                    'mc' + os.path.sep + 'bin',
+                exist_ok=True
+                )
+
+            files = glob.glob(
+                src_dir + os.path.sep + 'contrib' + os.path.sep + '*.sh'
+                )
+
+            for i in files:
+                shutil.copy(
+                    i,
+                    dst_dir +
+                        os.path.sep + 'usr' + os.path.sep + 'share' + os.path.sep +
+                        'mc' + os.path.sep + 'bin'
+                    )
+
+            f = open(
+                dst_dir +
+                    os.path.sep + 'etc' + os.path.sep +
+                    'profile.d' + os.path.sep + 'SET' + os.path.sep + '009.mc',
+                'w'
+                )
+            f.write(
+"""\
+#!/bin/bash
+
+alias mc=". /usr/share/mc/bin/mc-wrapper.sh"
+
+"""
+                )
+            f.close()
 
     return ret

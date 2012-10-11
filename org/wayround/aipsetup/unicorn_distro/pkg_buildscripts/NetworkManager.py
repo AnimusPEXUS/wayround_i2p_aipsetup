@@ -33,6 +33,8 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
+        source_configure_reldir = '.'
+
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -48,24 +50,26 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-distro=' +
+                        pkg_info['constitution']['system_title'] +
+                        pkg_info['constitution']['system_version'],
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--bindir=' + pkg_info['constitution']['paths']['basic_bin'],
-                    '--sbindir=' + pkg_info['constitution']['paths']['basic_sbin'],
-                    '--libdir=' + pkg_info['constitution']['paths']['basic_lib'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
+                source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure'
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
@@ -76,7 +80,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -94,7 +98,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

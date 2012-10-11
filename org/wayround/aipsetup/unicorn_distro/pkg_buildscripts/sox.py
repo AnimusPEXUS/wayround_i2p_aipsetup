@@ -50,42 +50,30 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    # experimental options
-#                    '--enable-targets=all',
-                    '--enable-tls',
-                    '--enable-nls',
-                    # normal options
-                    '--with-arch-32=i486',
-                    '--with-tune=generic',
-                    '--enable-languages=all,go,objc,obj-c++',
-                    '--enable-bootstrap',
-                    '--enable-threads=posix',
-                    '--enable-multiarch',
-                    '--enable-checking=release',
-                    '--with-gmp=/usr',
-                    '--with-mpfr=/usr',
-                    '--enable-shared',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure'
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
-                arguments=[],
+                arguments=['CFLAGS+=-Ilmms'],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
@@ -111,4 +99,3 @@ def main(buildingsite, action=None):
                 )
 
     return ret
-

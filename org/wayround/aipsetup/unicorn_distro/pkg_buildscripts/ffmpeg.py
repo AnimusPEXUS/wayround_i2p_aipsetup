@@ -16,7 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['configure', 'build', 'distribute'],
             action,
             "help"
             )
@@ -35,41 +35,41 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = '.'
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                org.wayround.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+        # if 'extract' in actions:
+        #     if os.path.isdir(src_dir):
+        #         logging.info("cleaningup source dir")
+        #         org.wayround.utils.file.cleanup_dir(src_dir)
+        #     ret = autotools.extract_high(
+        #         buildingsite,
+        #         pkg_info['pkg_info']['basename'],
+        #         unwrap_dir=True,
+        #         rename_dir=False
+        #         )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--disable-libuuid',
-                    '--disable-uuidd',
-                    '--disable-libblkid',
-                    '--enable-elf-shlibs',
-                    '--disable-fsck',
+                    '--enable-shared', 
+                    '--enable-gpl', 
+                    '--enable-libtheora', 
+                    '--enable-libvorbis', 
+                    '--enable-x11grab', 
+                    '--enable-libmp3lame', 
+                    '--enable-libx264', 
+                    '--enable-libxvid', 
+                    '--enable-runtime-cpudetect', 
+                    '--enable-doc',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure'
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:

@@ -54,17 +54,19 @@ def main(buildingsite, action=None):
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--enable-gtk-doc',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
+#                environment={'PYTHON': '/usr/bin/python3'},
                 environment_mode='copy',
                 source_configure_reldir='.',
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure'
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
@@ -97,4 +99,3 @@ def main(buildingsite, action=None):
                 )
 
     return ret
-

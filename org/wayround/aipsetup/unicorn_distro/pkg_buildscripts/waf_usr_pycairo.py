@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# FIXME: REWORK THIS MODULE!!!
+raise Exception("DEPRECATED")
+
 import org.wayround.aipsetup.constitution
 
 def build_script():
@@ -35,7 +38,7 @@ def build_script():
             },
 
         'waf_configure_env_opts': {
-            'mode': 'copy'      # can be copy or clean
+            'mode': 'copy'  # can be copy or clean
             },
 
         'waf_configure_envs': {
@@ -57,7 +60,7 @@ def build_script():
             },
 
         'waf_build_env_opts': {
-            'mode': 'copy'      # can be copy or clean
+            'mode': 'copy'  # can be copy or clean
             },
 
         'waf_build_envs': {
@@ -77,7 +80,7 @@ def build_script():
             },
 
         'autotools_distribute_env_opts': {
-            'mode': 'copy'      # can be copy or clean
+            'mode': 'copy'  # can be copy or clean
             },
 
         'autotools_distribute_envs': {

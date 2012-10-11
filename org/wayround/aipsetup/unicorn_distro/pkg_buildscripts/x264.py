@@ -16,7 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'build2', 'distribute'],
+            ['configure', 'build', 'distribute'],
             action,
             "help"
             )
@@ -35,16 +35,16 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = '.'
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                org.wayround.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+        # if 'extract' in actions:
+        #     if os.path.isdir(src_dir):
+        #         logging.info("cleaningup source dir")
+        #         org.wayround.utils.file.cleanup_dir(src_dir)
+        #     ret = autotools.extract_high(
+        #         buildingsite,
+        #         pkg_info['pkg_info']['basename'],
+        #         unwrap_dir=True,
+        #         rename_dir=False
+        #         )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
@@ -55,29 +55,21 @@ def main(buildingsite, action=None):
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--host=i686-pc-linux-gnu',
-                    '--build=i686-pc-linux-gnu'
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure'
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=['depend'],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'build2' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
