@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "gajim", 
-  "buildscript": "autotools_usr_gajim", 
+  "buildscript": "gajim", 
   "description": "good pythonic xmpp client\n\nsupports voip, plugins and many other things\n\npython2.7 is required\n", 
   "home_page": "http://gajim.org/", 
   "installation_priority": 5, 

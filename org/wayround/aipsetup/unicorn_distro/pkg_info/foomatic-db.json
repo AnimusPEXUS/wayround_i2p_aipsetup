@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "foomatic-db", 
-  "buildscript": "autotools_usr_foomatic", 
+  "buildscript": "std", 
   "description": "write something here, please", 
   "home_page": "http://www.openprinting.org/download/foomatic", 
   "installation_priority": 5, 

@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "glibc", 
-  "buildscript": "autotools_usr_glibc", 
+  "buildscript": "glibc", 
   "description": "write something here, please", 
   "home_page": "http://www.gnu.org", 
   "installation_priority": 0, 

@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "qpdf", 
-  "buildscript": "autotools_usr_build_in_source_dir", 
+  "buildscript": "", 
   "description": "None", 
   "home_page": "http://sf.net", 
   "installation_priority": 5, 

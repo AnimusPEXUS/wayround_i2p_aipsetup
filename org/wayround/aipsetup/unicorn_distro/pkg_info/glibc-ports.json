@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "glibc-ports", 
-  "buildscript": "autotools_usr_glibc", 
+  "buildscript": "glibc", 
   "description": "This is glibc plugin. optional in glibc build time.", 
   "home_page": "http://www.gnu.org", 
   "installation_priority": 5, 
