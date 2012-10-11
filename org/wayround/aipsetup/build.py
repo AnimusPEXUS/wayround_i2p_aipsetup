@@ -106,6 +106,8 @@ def start_building_script(building_site, action=None):
 
             try:
                 ret = script['main'](building_site, action)
+            except KeyboardInterrupt:
+                raise
             except:
                 logging.exception(
                     "Error starting `main' function in `{}'".format(

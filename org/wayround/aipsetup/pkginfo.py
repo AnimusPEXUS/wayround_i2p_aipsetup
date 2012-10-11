@@ -369,6 +369,13 @@ def get_outdated_info_records_list(mute=True):
 
 
 def get_info_rec_by_base_and_ver(basename, version):
+    """
+    Get package info by basename and version strings
+
+    Returning {} if nothing found or {'name': get_package_info_record(i.name)}
+    """
+
+    # TODO: This function need tobe erradicated
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
@@ -378,7 +385,27 @@ def get_info_rec_by_base_and_ver(basename, version):
 
     for i in q:
         if re.match(i.version_re, version):
-            ret[i.name] = get_package_info_record(i.name)
+            ret[i.name]= get_package_info_record(i.name)
+            break
+
+    return ret
+
+def get_package_name_by_base_and_ver(basename, version):
+    """
+    Get package name by basename and version strings
+
+    Returning None if nothing found or str
+    """
+
+    info_db = org.wayround.aipsetup.dbconnections.info_db()
+
+    ret = None
+
+    q = info_db.sess.query(info_db.Info).filter_by(basename=basename).all()
+
+    for i in q:
+        if re.match(i.version_re, version):
+            ret = i.name
             break
 
     return ret

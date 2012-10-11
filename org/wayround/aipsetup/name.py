@@ -65,10 +65,16 @@ for i in ASP_NAME_REGEXPS:
 del(i)
 
 def cli_name():
+    """
+    Internally used by aipsetup
+    """
     return 'n'
 
 
 def exported_commands():
+    """
+    Internally used by aipsetup
+    """
     return {
         'parse': name_parse_name,
         'pparse': name_parse_package,
@@ -76,6 +82,9 @@ def exported_commands():
         }
 
 def commands_order():
+    """
+    Internally used by aipsetup
+    """
     return [
         'test_expressions_on_sources',
         'parse',
@@ -104,7 +113,11 @@ def name_parse_name(opts, args):
 
         write = '-w' in opts
 
-        if source_name_parse(filename, modify_info_file=write) == None:
+        if source_name_parse(
+            filename,
+            modify_info_file=write
+            ) == None:
+
             ret = 2
 
     return ret
@@ -134,10 +147,16 @@ def name_parse_package(opts, args):
 
 
 def name_parse_test(args, opts):
+    """
+    Test Name Parsing Facilities
+    """
     parse_test()
     return 0
 
 def rm_ext_from_pkg_name(name):
+    """
+    Remove extension from package name
+    """
 
     ret = ''
 
@@ -156,6 +175,9 @@ def rm_ext_from_pkg_name(name):
     return ret
 
 def package_name_parse(filename, mute=True):
+    """
+    Parse package name
+    """
 
     filename = os.path.basename(filename)
 
@@ -349,6 +371,13 @@ def find_most_possible_version(name_sliced, mute=False):
 
 
 def source_name_parse_delicate(filename, mute=False):
+
+    """
+    Main source name parsing function
+
+    Do not use this directly, use source_name_parse() instead.
+    """
+
     filename = os.path.basename(filename)
 
     logging.debug("Parsing source file name {}".format(filename))
@@ -461,7 +490,7 @@ def source_name_parse(
     mute=False
     ):
     """
-    Parse source file name. On success do some more actions.
+    Parse source file name and do some more actions on success
 
     If this function succeeded but not passed version check -
     return None.
@@ -472,22 +501,21 @@ def source_name_parse(
 
     If this function succided, return dict:
 
-        {
-            # original (not parsed) package name
+        ret = {
             'name': None,
-            # matched soure regular expression name
-            # (NAME_REGEXPS in this module)
-            're'  : None,
-            # matched regular expression's groups
             'groups': {
-                'name'                 : None,
-                'version'              : None,
-                'version_letter'       : None,
-                'version_letter_number': None,
-                'statuses'             : None,
-                'patch'                : None,
-                'date'                 : None,
-                'extension'            : None
+                'name'              : None,
+                'extension'         : None,
+
+                'version'           : None,
+                'version_list_dirty': None,
+                'version_list'      : None,
+                'version_dirty'     : None,
+
+                'status'            : None,
+                'status_list_dirty' : None,
+                'status_dirty'      : None,
+                'status_list'       : None,
                 }
             }
 

@@ -16,6 +16,9 @@ import org.wayround.utils.edit
 
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.name
+import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.pkginfo
 
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
@@ -31,18 +34,18 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     version_re='',
     # from 0 to 9. default 5. lower number - higher priority
     installation_priority=5,
-    # can package be deleted without hazard to aipsetup functionality 
-    # (including system stability)?
+    # can package be deleted without hazard to aipsetup functionality (including
+    # system stability)?
     removable=True,
-    # can package be updated without hazard to aipsetup functionality 
-    # (including system stability)?
+    # can package be updated without hazard to aipsetup functionality (including
+    # system stability)?
     reducible=True,
-    # can aipsetup automatically find and update latest version? 
-    # (can't not for files containing statuses, 
-    #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
+    # can aipsetup automatically find and update latest version? (can't not for
+    # files containing statuses, e.g. openssl-1.0.1a.tar.gz, where 'a' is
+    # status)
     auto_newest_src=True,
-    # can aipsetup automatically find and update latest version? 
-    # (can't not for files containing statuses, 
+    # can aipsetup automatically find and update latest version?
+    # (can't not for files containing statuses,
     #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
     auto_newest_pkg=True,
     )
@@ -79,7 +82,8 @@ def exported_commands():
         'list': info_list_files,
         'edit': info_edit_file,
         'editor': info_editor,
-        'copy': info_copy
+        'copy': info_copy,
+        'script': info_mass_script
         }
 
 def commands_order():
@@ -88,7 +92,8 @@ def commands_order():
         'list',
         'edit',
         'copy',
-        'fix'
+        'fix',
+        'script'
         ]
 
 def cli_name():
@@ -161,6 +166,38 @@ def info_editor(opts, args):
         ret = 1
 
     if ret == 0:
+
+        if os.path.isfile(file_name):
+
+            parsed = org.wayround.aipsetup.name.source_name_parse(
+                file_name, mute=True
+                )
+
+            if not isinstance(parsed, dict):
+                logging.error(
+                    "Name `{}' can't be parsed".format(file_name)
+                    )
+                ret = 3
+
+            else:
+
+                pkg_name = (
+                    org.wayround.aipsetup.pkginfo.get_package_name_by_base_and_ver(
+                        parsed['groups']['name'],
+                        parsed['groups']['version']
+                        )
+                    )
+
+                if not pkg_name:
+                    logging.error(
+                        "Could not find package name of `{}'".format(
+                            file_name
+                            )
+                        )
+                    ret = 4
+                else:
+                    file_name = pkg_name
+
         if isinstance(file_name, str):
             if not file_name.endswith('.json'):
                 file_name = file_name + '.json'
@@ -229,6 +266,86 @@ def info_mass_info_fix(opts, args):
 
     return 0
 
+def info_mass_script(opts, args):
+    """
+    Mass buildscript applience
+
+    scriptname [tarballs list]
+    """
+
+    ret = 0
+
+    sources = []
+
+    script_name = None
+
+    if len(args) > 0:
+        script_name = args[0]
+
+    if len(args) > 1:
+        sources = args[1:]
+
+    if script_name == None:
+        logging.error("Script name required")
+        ret = 3
+
+    if len(sources) == 0:
+        logging.error("No source files named")
+        ret = 2
+
+    if ret == 0:
+
+
+        for i in sources:
+
+            parsed = org.wayround.aipsetup.name.source_name_parse(i, mute=True)
+
+            if not isinstance(parsed, dict):
+                logging.error(
+                    "Name `{}' can't be parsed".format(i)
+                    )
+                ret = 3
+
+            else:
+
+                pkg_name = org.wayround.aipsetup.pkginfo.get_package_name_by_base_and_ver(
+                    parsed['groups']['name'],
+                    parsed['groups']['version']
+                    )
+
+                if not pkg_name:
+                    logging.error("Could not find package name of `{}'".format(i))
+                    ret = 4
+                else:
+
+                    info_dir = org.wayround.aipsetup.config.config['info']
+
+                    p1 = info_dir + os.path.sep + pkg_name + '.json'
+
+                    info = read_from_file(p1)
+
+                    if not isinstance(info, dict):
+                        logging.error("Wrong info {}".format(p1))
+                        ret = 5
+                    else:
+
+                        if info['buildscript'] == '':
+                            info['buildscript'] = script_name
+
+                            write_to_file(p1, info)
+
+                            logging.info("Applied to {}".format(pkg_name))
+                        else:
+                            logging.warning(
+                                "{} already have defined script".format(
+                                    pkg_name
+                                    )
+                                )
+
+
+        org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records()
+
+    return ret
 
 def _find_latest(tree, tag, field):
     y = None
@@ -246,7 +363,6 @@ def _find_list(tree, tag, field):
         if isinstance(z, str):
             y.append(z)
     return y
-
 
 def is_info_dicts_equal(d1, d2):
 
@@ -296,60 +412,11 @@ def read_from_file(name):
             except:
                 logging.exception("Can't parse file `{}'".format(name))
                 ret = 2
+
             else:
                 ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
 
                 ret.update(tree)
-
-#                x = _find_latest(tree, 'installation_priority', 'value')
-#                if x != None:
-#                    try:
-#                        x = int(x)
-#                    except:
-#                        x = 5
-#
-#                    if x >= 0 and x <= 9:
-#                        ret['installation_priority'] = x
-#                    else:
-#                        raise ValueError(
-#                            "Wrong installation_priority value in `{}'".format(
-#                                name
-#                                )
-#                            )
-#
-#                for i in [
-#                    'removable',
-#                    'reducible',
-#                    'auto_newest_src',
-#                    'auto_newest_pkg'
-#                    ]:
-#                    x = _find_latest(tree, i, 'value')
-#                    if x != None:
-#                        if not x in ['True', 'False']:
-#                            raise ValueError(
-#                                "Wrong `{}' value in `{}'".format(
-#                                    i,
-#                                    name
-#                                    )
-#                                )
-#                        else:
-#                            ret[i] = eval(x)
-#
-#
-#                for i in [
-#                    ('buildscript', 'value'),
-#                    ('home_page', 'url'),
-#                    ('basename', 'value'),
-#                    ('version_re', 'value'),
-#                    ]:
-#
-#                    x = _find_latest(tree, i[0], i[1])
-#                    if x != None:
-#                        ret[i[0]] = x
-#
-#                x = tree.findall('description')
-#                if len(x) > 0:
-#                    ret['description'] = x[-1].text
 
                 ret['name'] = name
                 del(tree)
@@ -368,17 +435,6 @@ def write_to_file(name, struct):
         del struct['name']
 
     txt = json.dumps(struct, indent=2, sort_keys=True)
-#        description=struct['description'],
-#        home_page=struct['home_page'],
-#        buildscript=struct['buildscript'],
-#        basename=struct['basename'],
-#        version_re=struct['version_re'],
-#        installation_priority=struct['installation_priority'],
-#        removable=struct['removable'],
-#        reducible=struct['reducible'],
-#        auto_newest_src=struct['auto_newest_src'],
-#        auto_newest_pkg=struct['auto_newest_pkg']
-#        )
 
     try:
         f = open(name, 'w')
@@ -393,7 +449,10 @@ def write_to_file(name, struct):
 
     return ret
 
-def info_fixes(info, pkg_name, forced_homepage_fix=False):
+def info_fixes(
+    info, pkg_name,
+    forced_homepage_fix=False
+    ):
     """
     This function is used by `info_mass_info_fix'
 

@@ -39,6 +39,15 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.pack
 import org.wayround.aipsetup.sysupdates
+import org.wayround.aipsetup.info
+
+
+ROOT_LINKS = [
+    os.path.sep + 'bin',
+    os.path.sep + 'sbin',
+    os.path.sep + 'lib',
+    os.path.sep + 'lib64'
+    ]
 
 def cli_name():
     return 'pkg'
@@ -72,9 +81,11 @@ def commands_order():
 
 def package_install(opts, args):
     """
-    [-b=DIRNAME] [--force] NAME
+    Install package(s)
 
-    Install package. If -b is given - it is used as destination root
+    [-b=DIRNAME] [--force] NAMES
+
+    If -b is given - it is used as destination root
     """
 
     ret = 0
@@ -86,18 +97,23 @@ def package_install(opts, args):
     force = '--force' in opts
 
     if len(args) == 0:
-        logging.error("Package name required!")
+        logging.error("Package name(s) required!")
         ret = 2
     else:
-        name = args[0]
+        names = args
 
-        ret = install_package(
-            name, force, basedir
-            )
+        for name in names:
+            ret = install_package(
+                name, force, basedir
+                )
+            if ret != 0:
+                logging.error("Some package's installation error -- see above")
+                break
 
         org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
+
 
 def package_list(opts, args):
     """
@@ -218,34 +234,43 @@ def package_complete(opts, args):
     """
     Complete package building process: build complete; pack complete
 
-    [DIRNAME]
+    [DIRNAME [FILENAME]]
 
     DIRNAME defaults to current dir
     """
 
     dirname = '.'
+    file = None
 
     if len(args) > 0:
         dirname = args[0]
 
-    ret = complete(dirname)
+    if len(args) > 1:
+        file = args[1]
+
+    ret = complete(dirname, file)
 
     return ret
 
 def package_build(opts, args):
     """
-    Place named source files in new building site and build new package from them.
+    Place named source files in new building site and build new
+    package from them.
 
-    [--one] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
+    [-o] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
 
-    --one    treat all tarballs as for one build.
+    -o 	    treat all tarballs as for one build.
     """
 
     sources = []
 
-    multiple_packages = not '--one' in opts
+    multiple_packages = not '-o' in opts
 
     ret = 0
+
+    org.wayround.aipsetup.config.config['buildingsites'] = (
+        os.getcwd()
+        )
 
     if len(args) > 0:
         sources = args
@@ -257,6 +282,7 @@ def package_build(opts, args):
     if ret == 0:
 
         if multiple_packages:
+            sources.sort()
             for i in sources:
                 build([i])
             ret = 0
@@ -350,10 +376,10 @@ def package_put_to_index_many(opts, args):
 def package_check_package(opts, args):
     ret = 0
     file = None
-    
+
     if len(args) == 1:
         file = args[0]
-    
+
     if file == None:
         logging.error("Filename required")
         ret = 2
@@ -449,6 +475,9 @@ def check_package(asp_name, mute=False):
                         ret = 3
                     else:
 
+                        # TODO: additionally to this leaf, make test
+                        #       by tar -t output
+
                         fobj = org.wayround.utils.archive.tar_member_get_extract_file(
                             tarf,
                             './06.LISTS/DESTDIR.lst.xz'
@@ -459,7 +488,7 @@ def check_package(asp_name, mute=False):
 
                             try:
                                 dest_dir_files_list = org.wayround.utils.archive.xzcat(
-                                    fobj, 
+                                    fobj,
                                     convert_to_str='utf-8'
                                     )
                                 dest_dir_files_list = dest_dir_files_list.splitlines()
@@ -473,12 +502,24 @@ def check_package(asp_name, mute=False):
 
                                     for j in dest_dir_files_list:
 
-                                        p1=os.path.sep+i+os.path.sep
+                                        p1 = os.path.sep + i + os.path.sep
+                                        p2 = os.path.sep + i
 
                                         if j.startswith(p1):
                                             logging.error(
                                                 "{} has file paths starting with {}".format(
-                                                    os.path.basename(asp_name), p1
+                                                    os.path.basename(asp_name),
+                                                    p1
+                                                    )
+                                                )
+                                            ret = 5
+                                            break
+
+                                        elif j == p2:
+                                            logging.error(
+                                                "{} has file paths equal to {}".format(
+                                                    os.path.basename(asp_name),
+                                                    p2
                                                     )
                                                 )
                                             ret = 5
@@ -486,7 +527,7 @@ def check_package(asp_name, mute=False):
 
                                         if ret != 0:
                                             break
-                                
+
                             except:
                                 logging.exception("Error")
                                 ret = 4
@@ -659,6 +700,11 @@ def install_package(
                                         )
                                     )
                                 reduce_asps(name, asps, destdir)
+                                logging.info(
+                                    "Reduced `{}' ASPs".format(
+                                        name_parsed['groups']['name']
+                                        )
+                                    )
 
     else:
         info = org.wayround.aipsetup.pkginfo.get_package_info_record(
@@ -872,7 +918,7 @@ def install_asp(asp_name, destdir='/'):
                             ret = 5
                         else:
                             ret = 0
-                            logging.info("Installation look like complete :-)")
+                            logging.info("Installed `{}' ;-)".format(package_name))
                         dd_fobj.close()
 
             tarf.close()
@@ -893,7 +939,7 @@ def remove_asp(
 
     lines = list_files_installed_by_asp(destdir, asp_name, mute)
 
-    logging.info("Removing {} files".format(asp_name))
+    logging.info("Removing `{}' files".format(asp_name))
 
     if not isinstance(lines, list):
         logging.error(
@@ -907,9 +953,27 @@ def remove_asp(
         if not only_remove_package_registration:
 
             lines_before_ex = len(lines)
+
             if exclude:
                 lines = list(set(lines) - set(exclude))
+
+                for line in lines[:]:
+
+                    for i in ROOT_LINKS:
+                        if line.startswith(i + os.path.sep):
+                            if (os.path.sep + 'usr' + line) in exclude:
+
+                                while line in lines:
+                                    lines.remove(line)
+
+            for line in lines[:]:
+
+                if line in ROOT_LINKS:
+                    while line in lines:
+                        lines.remove(line)
+
             lines_after_ex = len(lines)
+
 
             if lines_before_ex != lines_after_ex:
                 logging.info(
@@ -927,16 +991,7 @@ def remove_asp(
                     )
 
                 while r'//' in rm_file_name:
-                    rm_file_name.replace(r'//','/')
-
-                if line in [
-                    '/bin',
-                    '/sbin',
-                    '/lib',
-                    '/lib64'
-                    ]:
-                    logging.warning("{} can't be removed -- skipping".format(rm_file_name))
-                    continue
+                    rm_file_name.replace(r'//', '/')
 
                 if (
                     (os.path.islink(rm_file_name) and not os.path.exists(rm_file_name))
@@ -1012,8 +1067,6 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
         logging.error("Some Error")
         ret = 1
     else:
-
-        reduce_to_lst = set()
 
         for i in reduce_what:
             remove_asp(
@@ -1171,7 +1224,7 @@ def build(source_files):
 
     par_res = org.wayround.aipsetup.name.source_name_parse(source_files[0])
 
-    if par_res == None:
+    if not isinstance(par_res, dict):
         logging.error("Can't parse source file name")
         ret = 1
     else:
@@ -1247,33 +1300,94 @@ def build(source_files):
                     if ret != 0:
                         logging.error("Exception while copying one of source files")
 
-                if org.wayround.aipsetup.buildingsite.apply_info(
-                    build_site_dir, source_files[0]
-                    ) == 0:
+                if ret == 0:
 
-                    if complete(build_site_dir) != 0:
+                    # FIXME: rework this
+                    if complete(build_site_dir, source_files[0]) != 0:
                         logging.error("Package building failed")
                         ret = 5
 
     return ret
 
-def complete(building_site):
-
-    log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site), 'buildingsite complete'
-        )
-    log.info("Buildingsite processes started")
-    log.warning("Closing this log now, cause it can't work farther")
-    log.stop()
+def _complete_info_correctness_check(workdir):
 
     ret = 0
 
-    if org.wayround.aipsetup.build.complete(building_site) != 0:
-        logging.error("Error on building stage")
+    r = org.wayround.aipsetup.buildingsite.read_package_info(
+        workdir, {}
+        )
+
+    scr_name = ''
+
+    try:
+        scr_name = r['pkg_info']['buildscript']
+    except:
+        scr_name = ''
+
+    if (
+        scr_name == ''
+        or
+        not isinstance(
+            org.wayround.aipsetup.buildscript.load_buildscript(
+                scr_name
+                ),
+            dict
+            )
+        ):
         ret = 1
-    elif org.wayround.aipsetup.pack.complete(building_site) != 0:
-        logging.error("Error on packaging stage")
-        ret = 2
+
+    return ret
+
+def complete(building_site, main_src_file=None):
+
+    ret = 0
+
+    if (_complete_info_correctness_check(building_site) != 0
+        or
+        isinstance(main_src_file, str)
+        ):
+
+        logging.warning("buildscript information not available (or new main tarball file forced)")
+
+        if org.wayround.aipsetup.buildingsite.apply_info(
+            building_site,
+            main_src_file
+            ) != 0 :
+            logging.error("Can't apply build information to site")
+            ret = 15
+
+    if ret == 0:
+        if _complete_info_correctness_check(building_site) != 0:
+
+            logging.error("`{}' has wrong build script name".format(main_src_file))
+            ret = 16
+
+    if ret == 0:
+
+        log = org.wayround.utils.log.Log(
+            org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site), 'buildingsite complete'
+            )
+        log.info("Buildingsite processes started")
+        log.warning("Closing this log now, cause it can't work farther")
+        log.stop()
+
+        if org.wayround.aipsetup.build.complete(building_site) != 0:
+            logging.error("Error on building stage")
+            ret = 1
+        elif org.wayround.aipsetup.pack.complete(building_site) != 0:
+            logging.error("Error on packaging stage")
+            ret = 2
+
+    if ret == 0:
+        logging.info(
+            "Building successful -- removing buildingsite: {}".format(
+                building_site
+                )
+            )
+        try:
+            shutil.rmtree(building_site)
+        except:
+            logging.error("See above")
 
     return ret
 
@@ -1428,7 +1542,7 @@ def _put_files_to_index(files, subdir):
 
         if os.path.dirname(file) != full_path:
 
-            logging.info("moving {}\n       to {}".format(file, full_path))
+            logging.info("moving {}\n       to {}".format(os.path.basename(file), full_path))
             shutil.move(file, full_path)
 
     return ret
@@ -1445,47 +1559,6 @@ def put_file_to_index(filename):
         ret = 10
     else:
 
-        # if check_package_aipsetup2(filename) == 0:
-
-        #     parsed = org.wayround.aipsetup.name.package_name_parse(filename)
-
-        #     if not isinstance(parsed, dict):
-        #         logging.error(
-        #             "Can't parse file name {}".format(
-        #                 os.path.basename(filename)
-        #                 )
-        #             )
-        #     else:
-        #         file = os.path.abspath(filename)
-
-        #         files = [
-        #             file,
-        #             file + '.sha512',
-        #             file + '.md5'
-        #             ]
-
-        #         package_path = org.wayround.aipsetup.pkgindex.get_package_path_string(
-        #             parsed['groups']['name']
-        #             )
-
-        #         if not isinstance(package_path, str):
-        #             logging.error("Package path error `{}'".format(parsed['groups']['name']))
-        #             ret = 11
-        #         else:
-        #             path = package_path + os.path.sep + 'aipsetup2'
-
-        #             if not isinstance(path, str):
-        #                 logging.error(
-        #                     "Can't get package `{}' path string".format(
-        #                         parsed['groups']['name']
-        #                         )
-        #                     )
-        #                 ret = 12
-        #             else:
-
-        #                 _put_files_to_index(files, path)
-
-        # el
         if check_package(filename, mute=True) == 0:
             parsed = org.wayround.aipsetup.name.package_name_parse(filename)
 
@@ -1526,6 +1599,6 @@ def put_file_to_index(filename):
 
         else:
 
-            logging.error("Don't know what to do with `{}'".format(filename))
+            logging.error("Action indefined for `{}'".format(os.path.basename(filename)))
 
     return ret

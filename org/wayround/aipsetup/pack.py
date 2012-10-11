@@ -3,8 +3,8 @@
 """
 Set of commands to perform package creation sequence
 
-This module creates checksums, removes garbage, packs file and
-all other preparations and actions needed to build final package
+This module creates checksums, removes garbage, packs file and all
+other preparations and actions needed to build final package
 """
 
 import os
@@ -23,7 +23,9 @@ import org.wayround.utils.archive
 import org.wayround.utils.deps_c
 
 
-# TODO: this list is suspiciously similar to what in complete function
+# NOTE: this list is suspiciously similar to what in complete
+# function, but actually they must be separate
+
 FUNCTIONS_LIST = [
     'destdir_verify_paths_correctness',
     'destdir_checksum',
@@ -45,13 +47,13 @@ def help_texts(name):
     ret = None
 
     if name == 'destdir_verify_paths_correctness':
-        ret = """\
-Ensure new package creates with bin, sbin, lib and lib64 symlinkd
-into usr
+        ret = """
+Ensure new package creates with bin, sbin, lib and lib64 symlinkd into
+usr
 """
 
     if name == 'destdir_checksum':
-        ret = """\
+        ret = """
 Create checksums of distribution files
 """
 
@@ -67,7 +69,8 @@ Create list of ELF dependencies
 
     elif name == 'remove_source_and_build_dirs':
         ret = """\
-Removes source dir and build dir (one of cleanups stages)
+Removes source dir and build dir (one of cleanups
+stages)
 """
 
     elif name == 'compress_patches_destdir_and_logs':
@@ -183,7 +186,8 @@ def pack_complete(opts, args):
 
 def destdir_verify_paths_correctness(buildingsite):
 
-    # TODO: Maybe this function need to be rewriten to be more flexible
+    # TODO: Maybe this function need to be rewriten to be more
+    #       flexible
 
     ret = 0
 
@@ -434,7 +438,13 @@ def compress_patches_destdir_and_logs(buildingsite):
             break
         else:
             size = org.wayround.utils.file.get_file_size(dirname)
-            logging.info("Compressing {} (size: {} B ~= {:4.2f} MiB)".format(i, size, float(size) / 1024 / 1024))
+            logging.info(
+                "Compressing {} (size: {} B ~= {:4.2f} MiB)".format(
+                    i,
+                    size,
+                    float(size) / 1024 / 1024
+                    )
+                )
 
             org.wayround.utils.archive.archive_tar_canonical(
                 dirname,
@@ -609,11 +619,12 @@ def pack_buildingsite(buildingsite):
             ) != 0:
             logging.error("Some error while compressing package")
             ret = 2
-        else:
 
-            ret = org.wayround.aipsetup.package.put_file_to_index(
-                pack_file_name
-                )
+        # else:
+
+        #     ret = org.wayround.aipsetup.package.put_file_to_index(
+        #         pack_file_name
+        #         )
 
     return ret
 

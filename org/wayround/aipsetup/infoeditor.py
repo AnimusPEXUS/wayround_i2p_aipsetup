@@ -361,10 +361,10 @@ class MainWindow:
 
         return
 
-    def onReloadComboActivated(self, buton):
+    def onReloadComboActivated(self, button):
         self.load_buildscript_list()
 
-    def onSaveAndUpdateButtonActivated(self, toggle):
+    def onSaveAndUpdateButtonActivated(self, button):
         self.save_data(self.currently_opened, update_db=True)
 
     def onListRealoadButtonActivated(self, button):
@@ -380,7 +380,7 @@ class MainWindow:
 
         return
 
-    def onEditLatestButtonActivated(self, toggle):
+    def onEditLatestButtonActivated(self, button):
 
         import org.wayround.aipsetup.latesteditor
 

@@ -111,23 +111,19 @@ def buildingsite_apply_info(opts, args):
     """
     Apply info to building dir
 
-    [-d=DIRNAME] SOURCE_FILE_NAME
+    [DIRNAME [FILENAME]]
     """
-    ret = 0
 
-    if len(args) != 1:
-        logging.error("tarball name to analyze not specified")
-        ret = 1
-    else:
+    dirname = '.'
+    file = None
 
-        name = args[0]
+    if len(args) > 0:
+        dirname = args[0]
 
-        dirname = '.'
+    if len(args) > 1:
+        file = args[1]
 
-        if '-d' in opts:
-            dirname = opts['-d']
-
-        ret = apply_info(dirname, source_filename=name)
+    ret = apply_info(dirname, file)
 
     return ret
 
@@ -224,11 +220,15 @@ def init(buildingsite='build', files=None):
         logging.info("Init complete")
 
         if isinstance(files, list):
-            for i in files:
-                logging.info("Copying file {}".format(i))
+
+            if len(files) > 0:
                 t_dir = getDIR_TARBALL(buildingsite)
+
                 for i in files:
+                    logging.info("Copying file {}".format(i))
                     shutil.copy(i, t_dir)
+
+                apply_info(buildingsite, files[0])
 
     else:
         logging.error("Init error")
@@ -299,6 +299,31 @@ def write_package_info(directory, info):
 
     return
 
+def set_pkg_main_tarball(dirname, filename):
+
+    r = org.wayround.aipsetup.buildingsite.read_package_info(
+        dirname, {}
+        )
+    r['pkg_tarball'] = dict(name=filename)
+
+    org.wayround.aipsetup.buildingsite.write_package_info(
+        dirname, r
+        )
+
+    return 0
+
+def get_pkg_main_tarball(dirname):
+
+    ret = ''
+
+    r = org.wayround.aipsetup.buildingsite.read_package_info(
+        dirname, {}
+        )
+
+    if 'pkg_tarball' in r and 'name' in r['pkg_tarball']:
+        ret = r['pkg_tarball']['name']
+
+    return ret
 
 def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
 
@@ -411,31 +436,44 @@ def apply_pkg_info_on_buildingsite(dirname):
     return ret
 
 
-def apply_info(dirname='.', source_filename=None):
+def apply_info(dirname='.', src_file_name=None):
+
+    dirname = os.path.abspath(dirname)
 
     ret = 0
 
-    if read_package_info(dirname, None) == None:
-        logging.info(
-            "Applying new package info to dir `{}'".format(
-                os.path.abspath(
-                    dirname
+    tar_dir = getDIR_TARBALL(dirname)
+
+    if not isinstance(src_file_name, str):
+        tar_files = os.listdir(tar_dir)
+
+        if len(tar_files) != 1:
+            logging.error("Can't decide which tarball to use")
+            ret = 15
+        else:
+            src_file_name = tar_files[0]
+
+    if ret == 0:
+
+        if read_package_info(dirname, None) == None:
+            logging.info(
+                "Applying new package info to dir `{}'".format(
+                    os.path.abspath(
+                        dirname
+                        )
                     )
                 )
-            )
-        write_package_info(dirname, {})
+            write_package_info(dirname, {})
 
-    if apply_pkg_nameinfo_on_buildingsite(
-            dirname, source_filename
-            ) != 0:
-        ret = 1
-    elif apply_constitution_on_buildingsite(dirname) != 0:
-        ret = 2
-    elif apply_pkg_info_on_buildingsite(dirname) != 0:
-        ret = 3
-#    elif apply_pkg_buildscript_on_buildingsite(dirname) != 0:
-#        ret = 4
+        if apply_pkg_nameinfo_on_buildingsite(
+                dirname, src_file_name
+                ) != 0:
+            ret = 1
+        elif apply_constitution_on_buildingsite(dirname) != 0:
+            ret = 2
+        elif apply_pkg_info_on_buildingsite(dirname) != 0:
+            ret = 3
+    #    elif apply_pkg_buildscript_on_buildingsite(dirname) != 0:
+    #        ret = 4
 
     return ret
-
-
