@@ -64,6 +64,19 @@ class MainWindow:
         self.ui['combobox1'].add_attribute(r, 'text', 0)
 
 
+        mode_selector = Gtk.ListStore(str)
+        for i in ['Regular Expression', 'Version Comparison']:
+            mode_selector.append([i])
+
+        r = Gtk.CellRendererText()
+        self.ui['combobox2'].pack_start(r, True)
+        self.ui['combobox2'].add_attribute(r, 'text', 0)
+
+        self.ui['combobox2'].set_model(mode_selector)
+        self.ui['combobox2'].set_active(0)
+
+
+
         self.load_list()
         self.load_buildscript_list()
 
@@ -133,11 +146,18 @@ class MainWindow:
 
                 self.ui['combobox1'].set_active(name_i)
 
-#                self.ui['combobox-entry'].set_text(str(data['buildscript']))
+
+                if data['version_mtd'] == 're':
+                    self.ui['combobox2'].set_active(0)
+                elif data['version_mtd'] == 'lb':
+                    self.ui['combobox2'].set_active(1)
+                else:
+                    self.ui['combobox2'].set_active(-1)
+
 
                 self.ui['entry2'].set_text(str(data['basename']))
 
-                self.ui['entry3'].set_text(str(data['version_re']))
+                self.ui['entry3'].set_text(str(data['version']))
 
                 self.ui['spinbutton1'].set_value(float(data['installation_priority']))
 
@@ -218,11 +238,16 @@ class MainWindow:
                 if active != -1:
                     name = model[active][0]
 
+            if self.ui['combobox2'].get_active() == 1:
+                data['version_mtd'] = 'lb'
+            else:
+                data['version_mtd'] = 're'
+
             data['buildscript'] = name
 
             data['basename'] = self.ui['entry2'].get_text()
 
-            data['version_re'] = self.ui['entry3'].get_text()
+            data['version'] = self.ui['entry3'].get_text()
 
             data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
 
@@ -318,6 +343,7 @@ class MainWindow:
             lst.append([os.path.basename(i)[:-3]])
 
         self.ui['combobox1'].set_model(lst)
+        model = self.ui['combobox1'].get_model()
 
         name_i = -1
         if model:

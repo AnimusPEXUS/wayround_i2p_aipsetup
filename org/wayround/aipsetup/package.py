@@ -1340,6 +1340,8 @@ def _complete_info_correctness_check(workdir):
 
 def complete(building_site, main_src_file=None):
 
+    building_site = os.path.abspath(building_site)
+
     ret = 0
 
     if (_complete_info_correctness_check(building_site) != 0
@@ -1387,7 +1389,7 @@ def complete(building_site, main_src_file=None):
         try:
             shutil.rmtree(building_site)
         except:
-            logging.error("See above")
+            logging.exception("Error removing buildingsite")
 
     return ret
 
@@ -1542,7 +1544,10 @@ def _put_files_to_index(files, subdir):
 
         if os.path.dirname(file) != full_path:
 
-            logging.info("moving {}\n       to {}".format(os.path.basename(file), full_path))
+            logging.info("Moving {}\n       to {}".format(os.path.basename(file), full_path))
+            sfile = full_path + os.path.sep + os.path.basename(file)
+            if os.path.isfile(sfile):
+                os.unlink(sfile)
             shutil.move(file, full_path)
 
     return ret

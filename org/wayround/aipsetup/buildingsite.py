@@ -383,7 +383,8 @@ def apply_pkg_info_on_buildingsite(dirname):
 
     package_info = read_package_info(dirname, ret_on_error={})
 
-    if (not isinstance(package_info, dict)
+    if (
+        not isinstance(package_info, dict)
         or not 'pkg_nameinfo' in package_info
         or not isinstance(package_info['pkg_nameinfo'], dict)
         or not 'groups' in package_info['pkg_nameinfo']
@@ -408,12 +409,12 @@ def apply_pkg_info_on_buildingsite(dirname):
         offerings = list(res.keys())
         if len(offerings) == 0:
             logging.error(
-                "Can't find acceptable basename=>version_re package info offering in package index"
+                "Can't find acceptable basename=>version package info offering in package index"
                 )
             ret = 2
         elif len(offerings) > 1:
             logging.error(
-                "To many acceptable basename=>version_re offerings in package index:\n{}".format(res)
+                "To many acceptable basename=>version offerings in package index:\n{}".format(res)
                 )
             ret = 3
         else:

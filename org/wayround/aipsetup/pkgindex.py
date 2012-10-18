@@ -168,6 +168,7 @@ def get_package_files(name):
 
     return ret
 
+
 def get_package_source_files(name):
 
     needed_files = []
@@ -189,21 +190,30 @@ def get_package_source_files(name):
                     org.wayround.aipsetup.name.source_name_parse(i, mute=True)
                     )
                 if parsed_name:
-                    try:
-                        re_m = re.match(
-                            pkg_info['version_re'],
-                            parsed_name['groups']['version']
-                            )
-                    except:
-                        logging.exception(
-                            "Error matching RE `{}' to `'".format(
-                                pkg_info['version_re'],
+                    if pkg_info['version_mtd'] == 're':
+                        try:
+                            re_m = re.match(
+                                pkg_info['version'],
                                 parsed_name['groups']['version']
                                 )
-                            )
-                    else:
-                        if re_m:
+                        except:
+                            logging.exception(
+                                "Error matching RE `{}' to `'".format(
+                                    pkg_info['version'],
+                                    parsed_name['groups']['version']
+                                    )
+                                )
+                        else:
+                            if re_m:
+                                needed_files.append(i)
+
+                    elif pkg_info['version_mtd'] == 'lb':
+                        if org.wayround.aipsetup.version.lb_comparator(
+                            parsed_name['groups']['version'],
+                            pkg_info['version']
+                            ):
                             needed_files.append(i)
+
 
             needed_files.sort()
 
@@ -1024,7 +1034,8 @@ def cleanup_repo_package_pack(name):
 
     g_path = org.wayround.aipsetup.config.config['garbage'] + os.path.sep + name
 
-    os.makedirs(g_path, exist_ok=True)
+    if not os.path.exists(g_path):
+        os.makedirs(g_path, exist_ok=True)
 
     path = (
         org.wayround.aipsetup.config.config['repository'] + os.path.sep +
@@ -1095,7 +1106,8 @@ def cleanup_repo_package(name):
 
     g_path = org.wayround.aipsetup.config.config['garbage'] + os.path.sep + name
 
-    os.makedirs(g_path, exist_ok=True)
+    if not os.path.exists(g_path):
+        os.makedirs(g_path)
 
     path = (
         org.wayround.aipsetup.config.config['repository'] + os.path.sep +
@@ -1132,7 +1144,8 @@ def cleanup_repo():
 
     garbage_dir = org.wayround.aipsetup.config.config['garbage']
 
-    os.makedirs(garbage_dir, exist_ok=True)
+    if not os.path.exists(garbage_dir):
+        os.makedirs(garbage_dir)
 
     logging.info("Getting packages information from DB")
 

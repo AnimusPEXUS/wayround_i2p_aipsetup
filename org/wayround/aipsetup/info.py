@@ -30,8 +30,10 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     buildscript='',
     # file name base
     basename='',
+    # version cmp method
+    version_mtd='re',
     # acceptable version regexp
-    version_re='',
+    version='',
     # from 0 to 9. default 5. lower number - higher priority
     installation_priority=5,
     # can package be deleted without hazard to aipsetup functionality (including
@@ -167,7 +169,7 @@ def info_editor(opts, args):
 
     if ret == 0:
 
-        if os.path.isfile(file_name):
+        if isinstance(file_name, str) and os.path.isfile(file_name):
 
             parsed = org.wayround.aipsetup.name.source_name_parse(
                 file_name, mute=True
@@ -270,12 +272,18 @@ def info_mass_script(opts, args):
     """
     Mass buildscript applience
 
-    scriptname [tarballs list]
+    scriptname [-f] [tarballs list]
+
+    -f    force (by default new script name will not be applied to
+          records with existing ones)
     """
 
     ret = 0
 
     sources = []
+
+    force = '-f' in opts
+
 
     script_name = None
 
@@ -329,7 +337,7 @@ def info_mass_script(opts, args):
                         ret = 5
                     else:
 
-                        if info['buildscript'] == '':
+                        if force or info['buildscript'] == '':
                             info['buildscript'] = script_name
 
                             write_to_file(p1, info)
@@ -373,7 +381,8 @@ def is_info_dicts_equal(d1, d2):
         'home_page',
         'buildscript',
         'basename',
-        'version_re',
+        'version_mtd',
+        'version',
         'installation_priority',
         'removable',
         'reducible',
@@ -459,6 +468,7 @@ def info_fixes(
     Sometime it will contain checks and fixes for
     info files
     """
+    raise Exception("Outdated")
 
     if info['basename'] == '':
         info['basename'] = pkg_name

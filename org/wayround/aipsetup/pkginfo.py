@@ -45,7 +45,13 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             default=''
             )
 
-        version_re = sqlalchemy.Column(
+        version_mtd = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
+        version = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False,
             default=''
@@ -204,7 +210,8 @@ def set_package_info_record(name, struct):
     q.home_page = str(struct["home_page"])
     q.buildscript = str(struct["buildscript"])
     q.basename = str(struct["basename"])
-    q.version_re = str(struct["version_re"])
+    q.version = str(struct["version"])
+    q.version_mtd = str(struct["version_mtd"])
     q.installation_priority = int(struct["installation_priority"])
     q.removable = bool(struct["removable"])
     q.reducible = bool(struct["reducible"])
@@ -375,18 +382,15 @@ def get_info_rec_by_base_and_ver(basename, version):
     Returning {} if nothing found or {'name': get_package_info_record(i.name)}
     """
 
-    # TODO: This function need tobe erradicated
-
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
     ret = {}
 
-    q = info_db.sess.query(info_db.Info).filter_by(basename=basename).all()
-
-    for i in q:
-        if re.match(i.version_re, version):
-            ret[i.name]= get_package_info_record(i.name)
-            break
+    name = get_package_name_by_base_and_ver(basename, version)
+    if name == None:
+        ret = {}
+    else:
+        ret[name]= get_package_info_record(name)
 
     return ret
 
@@ -404,9 +408,19 @@ def get_package_name_by_base_and_ver(basename, version):
     q = info_db.sess.query(info_db.Info).filter_by(basename=basename).all()
 
     for i in q:
-        if re.match(i.version_re, version):
-            ret = i.name
-            break
+        if i.version_mtd == 're':
+            if re.match(i.version, version):
+                ret = i.name
+                break
+        elif i.version_mtd == 'lb':
+            if org.wayround.aipsetup.version.lb_comparator(
+                version,
+                i.version
+                ):
+                ret = i.name
+                break
+        else:
+            logging.warning("Wrong version_mtd for package `{}'".format(i.name))
 
     return ret
 
@@ -492,19 +506,20 @@ def print_info_record(name):
 
         print("""\
 +---[{name}]---------------------------------------+
-              basename: {basename}
-        version regexp: {version_re}
-           buildscript: {buildscript}
-              homepage: {home_page}
-              category: {category}
-                  tags: {tags}
- installation priority: {installation_priority}
-             removable: {removable}
-             reducible: {reducible}
-       auto newest src: {auto_newest_src}
-       auto newest pkg: {auto_newest_pkg}
-            newest src: {newest_src}
-            newest pkg: {newest_pkg}
+                  basename: {basename}
+ version comparison method: {version_mtd}
+           version pattern: {version}
+               buildscript: {buildscript}
+                  homepage: {home_page}
+                  category: {category}
+                      tags: {tags}
+     installation priority: {installation_priority}
+                 removable: {removable}
+                 reducible: {reducible}
+           auto newest src: {auto_newest_src}
+           auto newest pkg: {auto_newest_pkg}
+                newest src: {newest_src}
+                newest pkg: {newest_pkg}
 +---[{name}]---------------------------------------+
 {description}
 +---[{name}]---------------------------------------+
@@ -517,7 +532,8 @@ def print_info_record(name):
     'home_page'             : r['home_page'],
     'buildscript'           : r['buildscript'],
     'basename'              : r['basename'],
-    'version_re'            : r['version_re'],
+    'version'               : r['version'],
+    'version_mtd'           : r['version_mtd'],
     'installation_priority' : r['installation_priority'],
     'removable'             : r['removable'],
     'reducible'             : r['reducible'],

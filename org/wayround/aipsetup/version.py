@@ -88,6 +88,79 @@ def package_version_comparator(name1, name2):
 
     return ret
 
+def lb_comparator(version_str, pattern_str='== 0.0.0'):
+
+    logging.debug("lb_comparator: `{}', `{}'".format(version_str, pattern_str))
+    pattern_str = str(pattern_str).strip()
+    version_str = str(version_str).strip()
+
+    comparator = '=='
+
+    if ' ' in pattern_str:
+        spc_ind = pattern_str.index(' ')
+        comparator = pattern_str[0:spc_ind]
+        pattern_str = pattern_str[spc_ind+1:].strip()
+
+    if comparator == '=':
+        comparator = '=='
+
+    if not comparator in ['==', '<', '<=', '>', '>=']:
+        raise ValueError("Wrong comparator: `{}'".format(comparator))
+
+    pattern_str = pattern_str.split('.')
+    version_str = version_str.split('.')
+
+    cmp_res = standard_comparator(version_str, pattern_str)
+
+    ret = eval("cmp_res {} 0".format(comparator))
+    logging.debug("evaluating: {} {} 0 => {}".format(cmp_res, comparator, ret))
+    return ret
+
+
+def standard_comparator(
+    version1,
+    version2
+    ):
+
+    logging.debug("standard_comparator: `{}', `{}'".format(version1, version2))
+
+    int_v1 = version1
+    int_v2 = version2
+
+    i1_error = False
+    i2_error = False
+
+    if isinstance(version1, str):
+        int_v1 = version1.split('.')
+
+    if isinstance(version2, str):
+        int_v2 = version2.split('.')
+
+    if not isinstance(int_v1, list):
+        i1_error = True
+    else:
+        for i in int_v1:
+            if not isinstance(i, (int, str)):
+                i1_error = True
+
+    if not isinstance(int_v2, list):
+        i2_error = True
+    else:
+        for i in int_v2:
+            if not isinstance(i, (int, str)):
+                i2_error = True
+
+    if i1_error:
+        raise ValueError("standart_comparison parameters must be [lists of [str or int]] or [strings], not {}".format(int_v1))
+
+    if i2_error:
+        raise ValueError("standart_comparison parameters must be [lists of [str or int]] or [strings], not {}".format(int_v2))
+
+    ret = standard_comparison(int_v1, None, int_v2, None)
+    logging.debug("standard_comparator ret: `{}'".format(ret))
+    return ret
+
+
 
 def standard_comparison(
     version_list1, status_list1,
@@ -165,4 +238,3 @@ def standard_comparison(
     ret = vers_comp_res
 
     return ret
-

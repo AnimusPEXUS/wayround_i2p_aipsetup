@@ -28,6 +28,7 @@ import org.wayround.utils.deps_c
 
 FUNCTIONS_LIST = [
     'destdir_verify_paths_correctness',
+    'destdir_set_modes',
     'destdir_checksum',
     'destdir_filelist',
     'destdir_deps_c',
@@ -51,8 +52,12 @@ def help_texts(name):
 Ensure new package creates with bin, sbin, lib and lib64 symlinkd into
 usr
 """
+    elif name == 'destdir_set_modes':
+        ret = """
+Ensure files and dirs have correct modes
+"""
 
-    if name == 'destdir_checksum':
+    elif name == 'destdir_checksum':
         ret = """
 Create checksums of distribution files
 """
@@ -224,6 +229,36 @@ def destdir_verify_paths_correctness(buildingsite):
     #         os.symlink('usr'+os.path.sep+i, p1)
 
     return ret
+
+def destdir_set_modes(buildingsite):
+
+    buildingsite = os.path.abspath(buildingsite)
+
+    destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+    ret = 0
+
+    try:
+        for dirpath, dirnames, filenames in os.walk(destdir):
+            filenames.sort()
+            dirnames.sort()
+            dirpath = os.path.abspath(dirpath)
+
+            for i in dirnames:
+                f = os.path.join(dirpath, i)
+                if not os.path.islink(f):
+                    os.chmod(f, mode=0o755)
+
+            for i in filenames:
+                f = os.path.join(dirpath, i)
+                if not os.path.islink(f):
+                    os.chmod(f, mode=0o755)
+
+    except:
+        logging.exception("Modes change exception")
+        ret = 1
+
+    return ret
+
 
 def destdir_checksum(buildingsite):
 
@@ -634,6 +669,7 @@ def complete(dirname):
 
     for i in [
         'destdir_verify_paths_correctness',
+        'destdir_set_modes',
         'destdir_checksum',
         'destdir_filelist',
         'destdir_deps_c',

@@ -33,50 +33,37 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
+        source_configure_reldir = '.'
+
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
-                if org.wayround.utils.file.cleanup_dir(src_dir) != 0:
-                    logging.error("Some error while cleaning up source dir")
-                    ret = 1
-
-            if ret == 0:
-
-                ret = autotools.extract_high(
-                    buildingsite,
-                    pkg_info['pkg_info']['basename'],
-                    unwrap_dir=True,
-                    rename_dir=False
-                    )
-
+                org.wayround.utils.file.cleanup_dir(src_dir)
+            ret = autotools.extract_high(
+                buildingsite,
+                pkg_info['pkg_info']['basename'],
+                unwrap_dir=True,
+                rename_dir=False
+                )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--with-system-nspr',
-                    '--with-system-nss',
-                    '--enable-shared',
-                    '--enable-optimize',
-                    '--enable-default-toolkit=cairo-gtk2',
-                    '--enable-xft',
-                    '--enable-freetype2',
-                    '--enable-application=suite',
-                    '--enable-calendar',
-                    '--enable-shared-js',
-                    '--enable-safe-browsing',
-                    '--enable-storage',
+                    '--with-ca-certificates=/etc/ssl/ca-bundle.crt',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build']
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
+                source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
                 run_script_not_bash=False,
@@ -91,7 +78,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -109,7 +96,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

@@ -15,6 +15,7 @@ import org.wayround.utils.list
 
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
+import org.wayround.aipsetup.pkginfo
 
 #Difficult name examples:
 DIFFICULT_NAMES = [
@@ -113,12 +114,21 @@ def name_parse_name(opts, args):
 
         write = '-w' in opts
 
-        if source_name_parse(
+        parsed = source_name_parse(
             filename,
             modify_info_file=write
-            ) == None:
+            )
 
+        if not isinstance(parsed, dict):
+            logging.debug("Parsed is: {}".format(parsed))
             ret = 2
+        else:
+            packagename = org.wayround.aipsetup.pkginfo.get_package_name_by_base_and_ver(
+                parsed['groups']['name'],
+                parsed['groups']['version']
+                )
+
+            print("Package name is: {}".format(packagename))
 
     return ret
 
@@ -519,6 +529,7 @@ def source_name_parse(
                 }
             }
 
+    NOTO: version numbers are always joined with `.'
     """
 
     ret = source_name_parse_delicate(filename, mute)

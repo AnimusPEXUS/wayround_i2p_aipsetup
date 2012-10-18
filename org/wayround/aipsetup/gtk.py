@@ -60,7 +60,6 @@ class MainWindow:
         self.ui = org.wayround.utils.gtk.widget_dict(ui)
 
         self.ui['window1'].connect("delete-event", Gtk.main_quit)
-        self.ui['window1'].show_all()
 
         self.ui['button1'].connect(
             'clicked',
@@ -76,6 +75,9 @@ class MainWindow:
             'clicked',
             self.onEditLatestButtonActivated
             )
+        self.ui['window1'].iconify()
+
+        self.ui['window1'].show_all()
 
     def onExitClicked(self, toggle):
 
