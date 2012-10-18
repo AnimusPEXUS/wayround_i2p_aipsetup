@@ -1,12 +1,13 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "", 
-  "buildscript": "", 
+  "basename": "ibus", 
+  "buildscript": "std", 
   "description": "", 
-  "home_page": "", 
+  "home_page": "http://ibus.googlecode.com/files/", 
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 
-  "version_re": ""
+  "version": ".*", 
+  "version_mtd": "re"
 }

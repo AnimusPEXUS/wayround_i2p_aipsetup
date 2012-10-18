@@ -1,12 +1,13 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "gst-ffmpeg", 
+  "basename": "gst-plugins-ugly", 
   "buildscript": "std", 
   "description": "write something here, please", 
   "home_page": "http://www.freedesktop.org", 
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 
-  "version_re": "0\\.10\\.*"
+  "version": "0\\.10\\.*", 
+  "version_mtd": "re"
 }

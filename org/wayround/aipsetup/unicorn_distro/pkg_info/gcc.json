@@ -8,5 +8,6 @@
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 
-  "version_re": "\\d+\\..*"
+  "version": "\\d+\\..*", 
+  "version_mtd": "re"
 }

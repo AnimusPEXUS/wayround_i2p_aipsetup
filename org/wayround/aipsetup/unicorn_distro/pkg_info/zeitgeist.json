@@ -1,0 +1,13 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "zeitgeist", 
+  "buildscript": "std", 
+  "description": "", 
+  "home_page": "http://zeitgeist-project.com/", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version": ".*", 
+  "version_mtd": "re"
+}

@@ -1,0 +1,13 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "colord-gtk", 
+  "buildscript": "std", 
+  "description": "", 
+  "home_page": "http://freedesktop.org/", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version": ".*", 
+  "version_mtd": "re"
+}

@@ -1,12 +1,13 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "openal", 
+  "basename": "", 
   "buildscript": "", 
-  "description": "write something here, please", 
-  "home_page": "http://None", 
+  "description": "", 
+  "home_page": "", 
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 
-  "version_re": ".*"
+  "version": "", 
+  "version_mtd": "re"
 }

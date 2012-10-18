@@ -2,11 +2,12 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "gst-libav", 
-  "buildscript": "", 
+  "buildscript": "std", 
   "description": "write something here, please", 
   "home_page": "http://www.freedesktop.org", 
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 
-  "version_re": ".*"
+  "version": ">= 0.11", 
+  "version_mtd": "lb"
 }
