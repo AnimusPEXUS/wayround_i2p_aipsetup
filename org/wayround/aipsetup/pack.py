@@ -203,15 +203,16 @@ def destdir_verify_paths_correctness(buildingsite):
         'bin',
         'lib',
         'sbin',
-        'lib64'
+        'lib64',
+        'mnt'
         ]:
 
         p1 = destdir + os.path.sep + i
 
         if os.path.islink(p1) or os.path.exists(p1):
             logging.error(
-                "File {} MUST NOT EXIST!".format(
-                    p1
+                "Forbidden path: {}".format(
+                    os.path.relpath(p1, buildingsite)
                     )
                 )
             ret = 1

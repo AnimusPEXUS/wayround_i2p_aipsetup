@@ -30,6 +30,7 @@
         <property name="can_focus">True</property>
         <child>
           <object class="GtkBox" id="box1">
+            <property name="width_request">130</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>
@@ -54,12 +55,10 @@
             </child>
             <child>
               <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">Reload List</property>
-                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Reload</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="image">image3</property>
               </object>
               <packing>
@@ -71,11 +70,9 @@
             <child>
               <object class="GtkButton" id="button2">
                 <property name="label" translatable="yes">Save</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="image">image4</property>
               </object>
               <packing>
@@ -86,12 +83,10 @@
             </child>
             <child>
               <object class="GtkButton" id="button3">
-                <property name="label" translatable="yes">Edit Info File</property>
-                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Edit Info</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="image">image5</property>
               </object>
               <packing>
@@ -151,13 +146,11 @@
                             <property name="can_focus">False</property>
                             <child>
                               <object class="GtkButton" id="button4">
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Set To None
 Permanent DB Change</property>
-                                <property name="use_action_appearance">False</property>
                                 <child>
                                   <object class="GtkImage" id="image1">
                                     <property name="visible">True</property>
@@ -211,13 +204,11 @@ Permanent DB Change</property>
                             <property name="can_focus">False</property>
                             <child>
                               <object class="GtkButton" id="button5">
-                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Set To None
 Permanent DB Change</property>
-                                <property name="use_action_appearance">False</property>
                                 <child>
                                   <object class="GtkImage" id="image2">
                                     <property name="visible">True</property>

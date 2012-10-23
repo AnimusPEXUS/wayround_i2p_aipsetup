@@ -33,7 +33,7 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
-        source_configure_reldir = '.'
+        source_configure_reldir = 'build_unix'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -50,11 +50,11 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--with-distro=lfs',
-#                    '--with-distro=' +
-#                        pkg_info['constitution']['system_title'],
-#                    '--with-dist-version=2.00',
-#                    '--without-systemdsystemunitdir',
+                    '--enable-sql',
+                    '--enable-compat185',
+                    '--enable-cxx',
+                    '--enable-tcl',
+                    '--with-tcl=/usr/lib',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -69,7 +69,7 @@ def main(buildingsite, action=None):
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
+                script_name='../dist/configure',
                 run_script_not_bash=False,
                 relative_call=False
                 )
@@ -86,21 +86,34 @@ def main(buildingsite, action=None):
                 )
 
         if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+            dis_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+                                buildingsite
+                                )
+
+            doc_dir = os.path.join(dis_dir, 'usr', 'share', 'doc', 'db')
+
+            try:
+                os.makedirs(
+                    doc_dir,
+                    mode=0o755
+                    )
+            except:
+                logging.exception("Error")
+                ret = 20
+            else:
+
+                ret = autotools.make_high(
+                    buildingsite,
+                    options=[],
+                    arguments=[
+                        'install',
+                        'DESTDIR=' + dis_dir,
+                        'docdir=/usr/share/doc/db'  # it's not a mistake docdir must be eq to /usr/share/doc/db
+                        ],
+                    environment={},
+                    environment_mode='copy',
+                    use_separate_buildding_dir=separate_build_dir,
+                    source_configure_reldir=source_configure_reldir
+                    )
 
     return ret

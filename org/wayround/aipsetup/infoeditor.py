@@ -391,7 +391,18 @@ class MainWindow:
         self.load_buildscript_list()
 
     def onSaveAndUpdateButtonActivated(self, button):
-        self.save_data(self.currently_opened, update_db=True)
+        if self.ui['entry1'].get_text() == '':
+            dia = Gtk.MessageDialog(
+                self.ui['window1'],
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+        else:
+            self.save_data(self.currently_opened, update_db=True)
 
     def onListRealoadButtonActivated(self, button):
         self.load_list()
@@ -410,17 +421,19 @@ class MainWindow:
 
         import org.wayround.aipsetup.latesteditor
 
-        org.wayround.aipsetup.latesteditor.main(self.ui['entry1'].get_text()[:-5])
+        if self.ui['entry1'].get_text() == '':
+            dia = Gtk.MessageDialog(
+                self.ui['window1'],
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+        else:
+            org.wayround.aipsetup.latesteditor.main(self.ui['entry1'].get_text()[:-5])
 
-#        if self.ui['entry1'].get_text().endswith('.json'):
-#            subprocess.Popen(
-#                [
-#                'aipsetup3',
-#                'repo',
-#                'latests',
-#                self.ui['entry1'].get_text()[:-5]
-#                ]
-#                )
 
 def main(name_to_edit=None):
 

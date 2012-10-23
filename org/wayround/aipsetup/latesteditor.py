@@ -196,52 +196,85 @@ class MainWindow:
                     self.ui['label8'].set_text("Select latest src file")
                     self.ui['treeview3'].set_sensitive(True)
 
+                sources_error = False
+                packages_error = False
+
+                self.ui['treeview2'].set_model(None)
+                self.ui['treeview3'].set_model(None)
 
                 files = org.wayround.aipsetup.pkgindex.get_package_source_files(
                     name
                     )
 
-                files.sort(
-                    reverse=True,
-                    key=functools.cmp_to_key(
-                        org.wayround.aipsetup.version.source_version_comparator
+                if not isinstance(files, list):
+                    sources_error = True
+                else:
+
+                    files.sort(
+                        reverse=True,
+                        key=functools.cmp_to_key(
+                            org.wayround.aipsetup.version.source_version_comparator
+                            )
                         )
-                    )
 
-                self.ui['treeview2'].set_model(None)
-                lst = Gtk.ListStore(str)
-                for i in files:
-                    lst.append([i])
+                    lst = Gtk.ListStore(str)
+                    for i in files:
+                        lst.append([i])
 
-                self.ui['treeview2'].set_model(lst)
+                    self.ui['treeview2'].set_model(lst)
+
+                    org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
+                        self.ui['treeview2'],
+                        latest_source
+                        )
 
                 files = org.wayround.aipsetup.pkgindex.get_package_files(
                     name
                     )
 
-                files.sort(
-                    reverse=True,
-                    key=functools.cmp_to_key(
-                        org.wayround.aipsetup.version.package_version_comparator
+                if not isinstance(files, list):
+                    packages_error = True
+                else:
+
+                    files.sort(
+                        reverse=True,
+                        key=functools.cmp_to_key(
+                            org.wayround.aipsetup.version.package_version_comparator
+                            )
                         )
-                    )
 
-                self.ui['treeview3'].set_model(None)
-                lst = Gtk.ListStore(str)
-                for i in files:
-                    lst.append([i])
+                    lst = Gtk.ListStore(str)
+                    for i in files:
+                        lst.append([i])
 
-                self.ui['treeview3'].set_model(lst)
+                    self.ui['treeview3'].set_model(lst)
 
-                org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
-                    self.ui['treeview2'],
-                    latest_source
-                    )
+                    org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
+                        self.ui['treeview3'],
+                        latest_package
+                        )
 
-                org.wayround.utils.gtk.list_view_select_and_scroll_to_name(
-                    self.ui['treeview3'],
-                    latest_package
-                    )
+                if packages_error or sources_error:
+
+                    error_text = ''
+
+                    if packages_error:
+                        error_text += 'Error getting package files list\n'
+
+                    if sources_error:
+                        error_text += 'Error getting source files list\n'
+
+                    error_text += 'Check package repository registration'
+
+                    dia = Gtk.MessageDialog(
+                        self.ui['window1'],
+                        Gtk.DialogFlags.MODAL,
+                        Gtk.MessageType.ERROR,
+                        Gtk.ButtonsType.OK,
+                        error_text
+                        )
+                    dia.run()
+                    dia.destroy()
 
                 self.currently_opened = name
                 self.scrollPackageListToItem(name)
@@ -333,22 +366,36 @@ class MainWindow:
 
         import org.wayround.aipsetup.infoeditor
 
-        org.wayround.aipsetup.infoeditor.main(self.currently_opened + '.json')
-
-#        if self.currently_opened:
-#            subprocess.Popen(
-#                [
-#                    'aipsetup3',
-#                    'i',
-#                    'editor',
-#                    self.currently_opened + '.json'
-#                    ]
-#                )
+        if not self.currently_opened:
+            dia = Gtk.MessageDialog(
+                self.ui['window1'],
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+        else:
+            org.wayround.aipsetup.infoeditor.main(
+                self.currently_opened + '.json'
+                )
 
     def onSaveClicked(self, button):
 
-        if self.currently_opened:
+        if not self.currently_opened:
 
+            dia = Gtk.MessageDialog(
+                self.ui['window1'],
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+
+        else:
             org.wayround.aipsetup.pkglatest.set_latest_src_to_record(
                 self.currently_opened,
                 self.ui['entry1'].get_text(),

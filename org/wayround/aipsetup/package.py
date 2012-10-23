@@ -234,21 +234,88 @@ def package_complete(opts, args):
     """
     Complete package building process: build complete; pack complete
 
-    [DIRNAME [FILENAME]]
+    [DIRNAME] [TARBALL]
 
-    DIRNAME defaults to current dir
+    [DIRNAME1] [DIRNAME2] [DIRNAMEn]
+
+    This command has two modes of work:
+
+       1. Working with single dir, which is pointed or not pointed by
+          first parameter. In this mode, a tarball can be passed,
+          which name will be used to apply new package info to pointed
+          dir. By default DIRNAME is `.' (current dir)
+
+       2. Working with multiple dirs. In this mode, tarball can't be
+          passed.
     """
 
     dirname = '.'
     file = None
 
-    if len(args) > 0:
-        dirname = args[0]
+    ret = 0
 
-    if len(args) > 1:
-        file = args[1]
+    args_l = len(args)
 
-    ret = complete(dirname, file)
+    if args_l == 0:
+
+        dirname = '.'
+        file = None
+
+        ret = complete(dirname, file)
+
+    elif args_l == 1:
+
+        if os.path.isdir(args[0]):
+
+            dirname = args[0]
+            file = None
+
+        elif os.path.isfile(args[0]):
+
+            dirname = '.'
+            file = args[0]
+
+        else:
+
+            logging.error("{} not a dir and not a file".format())
+            ret = 2
+
+        if ret == 0:
+
+            ret = complete(dirname, file)
+
+    elif args_l == 2:
+
+        if os.path.isdir(args[0]) and os.path.isfile(args[1]):
+
+            dirname = args[0]
+            file = args[1]
+
+            ret = complete(dirname, file)
+
+        elif os.path.isdir(args[0]) and os.path.isdir(args[1]):
+
+            file = None
+            ret = 0
+            for i in args[:2]:
+                if complete(i, file) != 0:
+                    ret += 1
+
+        else:
+            logging.error("Wrong arguments")
+
+
+    elif args_l > 2:
+
+        file = None
+
+        ret = 0
+        for i in args[2:]:
+            if complete(i, file) != 0:
+                ret += 1
+
+    else:
+        raise Exception("Programming error")
 
     return ret
 
@@ -720,37 +787,60 @@ def install_package(
                 org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name)
                 )
 
-            latest_in_repo_no_ext = (
-                org.wayround.aipsetup.name.rm_ext_from_pkg_name(
-                    os.path.basename(
-                        latest_in_repo
-                        )
-                    )
-                )
+            if latest_in_repo == None:
+                logging.error("Repo has no latest package")
+                ret = 3
+            else:
 
-            latest_installed = latest_installed_package_s_asp(name)
-
-            latest_installed_no_ext = None
-
-            if latest_installed != None:
-                latest_installed_no_ext = (
+                latest_in_repo_no_ext = (
                     org.wayround.aipsetup.name.rm_ext_from_pkg_name(
-                        latest_installed
+                        os.path.basename(
+                            latest_in_repo
+                            )
                         )
                     )
 
-            if latest_installed_no_ext != None:
-                if force or latest_installed_no_ext != latest_in_repo_no_ext:
+                latest_installed = latest_installed_package_s_asp(name)
 
-                    if latest_installed_no_ext == latest_in_repo_no_ext and force:
-                        logging.info(
-                            "Forced installation of "
-                            "already installed package {name} ({asp_name})".format(
-                                name=name,
-                                asp_name=latest_installed_no_ext
+                latest_installed_no_ext = None
+
+                if latest_installed != None:
+                    latest_installed_no_ext = (
+                        org.wayround.aipsetup.name.rm_ext_from_pkg_name(
+                            latest_installed
+                            )
+                        )
+
+                if latest_installed_no_ext != None:
+                    if force or latest_installed_no_ext != latest_in_repo_no_ext:
+
+                        if latest_installed_no_ext == latest_in_repo_no_ext and force:
+                            logging.info(
+                                "Forced installation of "
+                                "already installed package {name} ({asp_name})".format(
+                                    name=name,
+                                    asp_name=latest_installed_no_ext
+                                    )
                                 )
+
+                        full_name = os.path.abspath(
+                            org.wayround.aipsetup.config.config['repository'] +
+                            os.path.sep +
+                            latest_in_repo
                             )
 
+                        ret = install_package(full_name, False, destdir)
+                    else:
+                        if latest_installed_no_ext == latest_in_repo_no_ext:
+                            logging.info(
+                                "Latest `{name}' already installed ({asp_name})".format(
+                                    name=name,
+                                    asp_name=latest_installed_no_ext
+                                    )
+                                )
+
+                        ret = 3
+                else:
                     full_name = os.path.abspath(
                         org.wayround.aipsetup.config.config['repository'] +
                         os.path.sep +
@@ -758,24 +848,6 @@ def install_package(
                         )
 
                     ret = install_package(full_name, False, destdir)
-                else:
-                    if latest_installed_no_ext == latest_in_repo_no_ext:
-                        logging.info(
-                            "Latest `{name}' already installed ({asp_name})".format(
-                                name=name,
-                                asp_name=latest_installed_no_ext
-                                )
-                            )
-
-                    ret = 3
-            else:
-                full_name = os.path.abspath(
-                    org.wayround.aipsetup.config.config['repository'] +
-                    os.path.sep +
-                    latest_in_repo
-                    )
-
-                ret = install_package(full_name, False, destdir)
 
 
     return ret

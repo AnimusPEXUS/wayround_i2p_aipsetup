@@ -1,6 +1,6 @@
 {
   "auto_newest_pkg": true, 
-  "auto_newest_src": false, 
+  "auto_newest_src": true, 
   "basename": "e2fsprogs-libs", 
   "buildscript": "e2fsprogs", 
   "description": "write something here, please", 

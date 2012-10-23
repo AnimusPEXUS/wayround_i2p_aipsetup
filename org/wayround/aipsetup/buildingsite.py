@@ -340,7 +340,7 @@ def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
         modify_info_file=False
         )
 
-    if parse_result == None:
+    if not isinstance(parse_result, dict):
         logging.error("Can't correctly parse file name")
         ret = 1
     else:

@@ -75,10 +75,11 @@ def build_complete(opts, args):
 
 
 def complete(building_site):
-    return start_building_script(building_site)
+    return start_building_script(building_site, action=None)
 
 
 def start_building_script(building_site, action=None):
+
     package_info = org.wayround.aipsetup.buildingsite.read_package_info(
         building_site, ret_on_error=None
         )
@@ -120,24 +121,44 @@ def start_building_script(building_site, action=None):
 
 def build_actions_selector(actions, action):
 
-    continued_action = True
+    ret = None
 
-    if isinstance(action, str) and action.endswith('+'):
-        continued_action = True
-        action = action[:-1]
+    actions = copy.copy(actions)
+
+    if action == 'complete':
+        action = None
+
+    # action == None - indicates all actions! equals to 'complete'
+    if action in [None, 'help']:
+        ret = (actions, action)
+
     else:
-        continued_action = False
 
-    if action in actions:
+        continued_action = True
 
-        action_pos = actions.index(action)
+        if isinstance(action, str) and action.endswith('+'):
 
-        if continued_action:
-            actions = actions[action_pos:]
+            continued_action = True
+            action = action[:-1]
+
         else:
-            actions = [actions[action_pos]]
+            continued_action = False
 
-    ret = (actions, action)
+        # if not action available - return error
+        if not action in actions:
+
+            ret = 2
+
+        else:
+
+            action_pos = actions.index(action)
+
+            if continued_action:
+                actions = actions[action_pos:]
+            else:
+                actions = [actions[action_pos]]
+
+            ret = (actions, action)
 
     return ret
 
@@ -158,28 +179,34 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
 
         if action == 'help':
             print(help_text)
+            print("")
+            print("Available actions: {}".format(actions))
             ret = 2
         else:
 
-            r = org.wayround.aipsetup.build.build_actions_selector(
+            r = build_actions_selector(
                 actions,
                 action
                 )
 
-            if isinstance(r, tuple):
-                actions, action = r
-
-            if action != None and not (isinstance(action, str) and isinstance(r, tuple)):
-                logging.error("Wrong command")
-                ret = 3
+            if not isinstance(r, tuple):
+                logging.error("Wrong command 1")
+                ret = 2
             else:
 
-                if not isinstance(actions, list):
-                    logging.error("Wrong action `{}' ({})".format(action, actions))
-                    ret = 3
+                actions, action = r
 
+                if action != None and not isinstance(action, str):
+                    logging.error("Wrong command 2")
+                    ret = 3
                 else:
 
-                    ret = (pkg_info, actions)
+                    if not isinstance(actions, list):
+                        logging.error("Wrong command 3")
+                        ret = 3
+
+                    else:
+
+                        ret = (pkg_info, actions)
 
     return ret

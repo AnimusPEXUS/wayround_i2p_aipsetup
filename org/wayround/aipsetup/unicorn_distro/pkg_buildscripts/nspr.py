@@ -49,13 +49,13 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-mozilla',
+                    '--with-pthreads',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--with-mozilla',
-                    '--with-pthreads',
 #                    '--host=' + pkg_info['constitution']['host'],
 #                    '--build=' + pkg_info['constitution']['build']
                     ],

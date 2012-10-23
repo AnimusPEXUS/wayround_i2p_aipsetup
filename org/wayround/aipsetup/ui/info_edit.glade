@@ -35,6 +35,7 @@
         <property name="can_focus">True</property>
         <child>
           <object class="GtkBox" id="box1">
+            <property name="width_request">130</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>
@@ -323,7 +324,7 @@
                     <property name="editable">False</property>
                     <property name="invisible_char">●</property>
                     <property name="primary_icon_stock">gtk-dialog-info</property>
-                    <property name="primary_icon_tooltip_text" translatable="yes">Read-Only. Use 'Edit Latest Files'</property>
+                    <property name="primary_icon_tooltip_text" translatable="yes">Read-Only. Use 'Edit Latest' button</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -351,7 +352,7 @@
                     <property name="editable">False</property>
                     <property name="invisible_char">●</property>
                     <property name="primary_icon_stock">gtk-info</property>
-                    <property name="primary_icon_tooltip_text" translatable="yes">Read-Only. Use 'Edit Latest Files'</property>
+                    <property name="primary_icon_tooltip_text" translatable="yes">Read-Only. Use 'Edit Latest' button</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
