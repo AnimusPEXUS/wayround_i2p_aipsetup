@@ -159,6 +159,8 @@ class MainWindow:
 
                 self.ui['entry3'].set_text(str(data['version']))
 
+                self.ui['entry5'].set_text(str(data['src_path_prefix']))
+
                 self.ui['spinbutton1'].set_value(float(data['installation_priority']))
 
                 self.ui['checkbutton2'].set_active(bool(data['removable']))
@@ -168,6 +170,10 @@ class MainWindow:
                 self.ui['checkbutton3'].set_active(bool(data['auto_newest_src']))
 
                 self.ui['checkbutton4'].set_active(bool(data['auto_newest_pkg']))
+
+                self.ui['checkbutton5'].set_active(bool(data['non_installable']))
+
+                self.ui['checkbutton6'].set_active(bool(data['deprecated']))
 
                 self.ui['button1'].set_sensitive(
                     (
@@ -249,6 +255,8 @@ class MainWindow:
 
             data['version'] = self.ui['entry3'].get_text()
 
+            data['src_path_prefix'] = self.ui['entry5'].get_text()
+
             data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
 
             data['removable'] = self.ui['checkbutton2'].get_active()
@@ -259,6 +267,9 @@ class MainWindow:
 
             data['auto_newest_pkg'] = self.ui['checkbutton4'].get_active()
 
+            data['non_installable'] = self.ui['checkbutton5'].get_active()
+
+            data['deprecated'] = self.ui['checkbutton6'].get_active()
 
             if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
                 dia = Gtk.MessageDialog(

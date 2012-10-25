@@ -186,33 +186,36 @@ def get_package_source_files(name):
             needed_files = []
             files = tags_object.objects_by_tags([pkg_info['basename']])
             for i in files:
-                parsed_name = (
-                    org.wayround.aipsetup.name.source_name_parse(i, mute=True)
-                    )
-                if parsed_name:
-                    if pkg_info['version_mtd'] == 're':
-                        try:
-                            re_m = re.match(
-                                pkg_info['version'],
-                                parsed_name['groups']['version']
-                                )
-                        except:
-                            logging.exception(
-                                "Error matching RE `{}' to `'".format(
+
+                if i.startswith(pkg_info['src_path_prefix']):
+
+                    parsed_name = (
+                        org.wayround.aipsetup.name.source_name_parse(i, mute=True)
+                        )
+                    if parsed_name:
+                        if pkg_info['version_mtd'] == 're':
+                            try:
+                                re_m = re.match(
                                     pkg_info['version'],
                                     parsed_name['groups']['version']
                                     )
-                                )
-                        else:
-                            if re_m:
-                                needed_files.append(i)
+                            except:
+                                logging.exception(
+                                    "Error matching RE `{}' to `'".format(
+                                        pkg_info['version'],
+                                        parsed_name['groups']['version']
+                                        )
+                                    )
+                            else:
+                                if re_m:
+                                    needed_files.append(i)
 
-                    elif pkg_info['version_mtd'] == 'lb':
-                        if org.wayround.aipsetup.version.lb_comparator(
-                            parsed_name['groups']['version'],
-                            pkg_info['version']
-                            ):
-                            needed_files.append(i)
+                        elif pkg_info['version_mtd'] == 'lb':
+                            if org.wayround.aipsetup.version.lb_comparator(
+                                parsed_name['groups']['version'],
+                                pkg_info['version']
+                                ):
+                                needed_files.append(i)
 
 
             needed_files.sort()

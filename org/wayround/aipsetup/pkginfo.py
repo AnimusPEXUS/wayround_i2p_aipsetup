@@ -57,6 +57,12 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             default=''
             )
 
+        src_path_prefix = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
         home_page = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False,
@@ -91,6 +97,18 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             sqlalchemy.Boolean,
             nullable=False,
             default=True
+            )
+
+        non_installable = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=False
+            )
+
+        deprecated = sqlalchemy.Column(
+            sqlalchemy.Boolean,
+            nullable=False,
+            default=False
             )
 
         auto_newest_src = sqlalchemy.Column(
@@ -212,9 +230,12 @@ def set_package_info_record(name, struct):
     q.basename = str(struct["basename"])
     q.version = str(struct["version"])
     q.version_mtd = str(struct["version_mtd"])
+    q.src_path_prefix = str(struct["src_path_prefix"])
     q.installation_priority = int(struct["installation_priority"])
     q.removable = bool(struct["removable"])
     q.reducible = bool(struct["reducible"])
+    q.non_installable = bool(struct["non_installable"])
+    q.deprecated = bool(struct["deprecated"])
     q.auto_newest_src = bool(struct["auto_newest_src"])
     q.auto_newest_pkg = bool(struct["auto_newest_pkg"])
 
@@ -382,8 +403,6 @@ def get_info_rec_by_base_and_ver(basename, version):
     Returning {} if nothing found or {'name': get_package_info_record(i.name)}
     """
 
-    info_db = org.wayround.aipsetup.dbconnections.info_db()
-
     ret = {}
 
     name = get_package_name_by_base_and_ver(basename, version)
@@ -509,6 +528,7 @@ def print_info_record(name):
                   basename: {basename}
  version comparison method: {version_mtd}
            version pattern: {version}
+        source path prefix: {src_path_prefix}
                buildscript: {buildscript}
                   homepage: {home_page}
                   category: {category}
@@ -516,6 +536,8 @@ def print_info_record(name):
      installation priority: {installation_priority}
                  removable: {removable}
                  reducible: {reducible}
+           non-installable: {non_installable}
+                deprecated: {deprecated}
            auto newest src: {auto_newest_src}
            auto newest pkg: {auto_newest_pkg}
                 newest src: {newest_src}
@@ -534,9 +556,12 @@ def print_info_record(name):
     'basename'              : r['basename'],
     'version'               : r['version'],
     'version_mtd'           : r['version_mtd'],
+    'src_path_prefix'       : r['src_path_prefix'],
     'installation_priority' : r['installation_priority'],
     'removable'             : r['removable'],
     'reducible'             : r['reducible'],
+    'non_installable'       : r['non_installable'],
+    'deprecated'            : r['deprecated'],
     'auto_newest_src'       : r['auto_newest_src'],
     'auto_newest_pkg'       : r['auto_newest_pkg'],
     'newest_src'            : (

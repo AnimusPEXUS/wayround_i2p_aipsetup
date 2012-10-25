@@ -24,31 +24,50 @@ import org.wayround.aipsetup.pkginfo
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # description
     description="",
+
     # not required, but can be useful
     home_page="",
+
     # string
     buildscript='',
+
     # file name base
     basename='',
+
     # version cmp method
     version_mtd='re',
+
     # acceptable version regexp
     version='',
+
+    # source files filter by  path prefix
+    src_path_prefix='',
+
     # from 0 to 9. default 5. lower number - higher priority
     installation_priority=5,
+
     # can package be deleted without hazard to aipsetup functionality (including
     # system stability)?
     removable=True,
+
     # can package be updated without hazard to aipsetup functionality (including
     # system stability)?
     reducible=True,
+
+    # package can not be installed
+    non_installable=False,
+
+    # package outdated and need to be removed
+    deprecated=False,
+
     # can aipsetup automatically find and update latest version? (can't not for
     # files containing statuses, e.g. openssl-1.0.1a.tar.gz, where 'a' is
     # status)
     auto_newest_src=True,
-    # can aipsetup automatically find and update latest version?
-    # (can't not for files containing statuses,
-    #  e.g. openssl-1.0.1a.tar.gz, where 'a' is status)
+
+    # can aipsetup automatically find and update latest version? (can't not for
+    # files containing statuses, e.g. openssl-1.0.1a.tar.gz, where 'a' is
+    # status)
     auto_newest_pkg=True,
     )
 
@@ -386,8 +405,11 @@ def is_info_dicts_equal(d1, d2):
         'installation_priority',
         'removable',
         'reducible',
+        'non_installable',
+        'deprecated',
         'auto_newest_src',
         'auto_newest_pkg',
+        'src_path_prefix',
         # next two items must not participate in
         # equality checks, as they changing too often
         # 'newest_src',
