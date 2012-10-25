@@ -169,7 +169,7 @@ def get_package_files(name):
     return ret
 
 
-def get_package_source_files(name):
+def get_package_source_files(name, filtered=True):
 
     needed_files = []
 
@@ -187,7 +187,7 @@ def get_package_source_files(name):
             files = tags_object.objects_by_tags([pkg_info['basename']])
             for i in files:
 
-                if i.startswith(pkg_info['src_path_prefix']):
+                if not filtered or i.startswith(pkg_info['src_path_prefix']):
 
                     parsed_name = (
                         org.wayround.aipsetup.name.source_name_parse(i, mute=True)

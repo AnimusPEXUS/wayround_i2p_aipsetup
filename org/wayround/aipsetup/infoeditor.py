@@ -48,6 +48,9 @@ class MainWindow:
 
         self.ui['button6'].connect('clicked', self.onReloadComboActivated)
 
+        self.ui['button3'].connect('clicked', self.onShowAllSourceFilesButtonActivated)
+
+        self.ui['button4'].connect('clicked', self.onShowFilteredSourceFilesButtonActivated)
 
 
         c = Gtk.TreeViewColumn("File Names")
@@ -414,6 +417,76 @@ class MainWindow:
             dia.destroy()
         else:
             self.save_data(self.currently_opened, update_db=True)
+
+    def onShowAllSourceFilesButtonActivated(self, button):
+
+        if self.ui['entry1'].get_text() == '':
+            dia = Gtk.MessageDialog(
+                self.ui['window1'],
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+        else:
+            lst = org.wayround.aipsetup.pkgindex.get_package_source_files(
+                self.ui['entry1'].get_text()[:-5],
+                filtered=False
+                )
+
+            if not isinstance(lst, list):
+                dia = Gtk.MessageDialog(
+                    self.ui['window1'],
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    "Error getting source files from database"
+                    )
+                dia.run()
+                dia.destroy()
+            else:
+                org.wayround.utils.gtk.text_view(
+                    '\n'.join(lst),
+                    "{} - Non-filtered tarballs".format(self.ui['entry1'].get_text()[:-5])
+                    )
+
+    def onShowFilteredSourceFilesButtonActivated(self, button):
+
+        if self.ui['entry1'].get_text() == '':
+            dia = Gtk.MessageDialog(
+                self.ui['window1'],
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+        else:
+            lst = org.wayround.aipsetup.pkgindex.get_package_source_files(
+                self.ui['entry1'].get_text()[:-5],
+                filtered=True
+                )
+
+            if not isinstance(lst, list):
+                dia = Gtk.MessageDialog(
+                    self.ui['window1'],
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    "Error getting source files from database"
+                    )
+                dia.run()
+                dia.destroy()
+            else:
+                org.wayround.utils.gtk.text_view(
+                    '\n'.join(lst),
+                    "{} - Filtered tarballs".format(self.ui['entry1'].get_text()[:-5])
+                    )
+
+
 
     def onListRealoadButtonActivated(self, button):
         self.load_list()
