@@ -3,11 +3,14 @@
   "auto_newest_src": true, 
   "basename": "FreeImage", 
   "buildscript": "FreeImage", 
+  "deprecated": false, 
   "description": "", 
   "home_page": "http://sf.net/projects/freeimage", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
+  "src_path_prefix": "", 
   "version": "\\d*", 
   "version_mtd": "re"
 }

@@ -3,11 +3,14 @@
   "auto_newest_src": true, 
   "basename": "syslinux", 
   "buildscript": "", 
+  "deprecated": false, 
   "description": "linux kernel boot loader used in this distribution", 
   "home_page": "http://www.kernel.org", 
   "installation_priority": 0, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": false, 
+  "src_path_prefix": "", 
   "version": ".*", 
   "version_mtd": "re"
 }

@@ -3,10 +3,14 @@
   "auto_newest_src": true, 
   "basename": "openal-soft", 
   "buildscript": "std_cmake", 
+  "deprecated": false, 
   "description": "write something here, please", 
   "home_page": "http://connect.creativelabs.com/openal/Downloads/", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "version": ".*"
+  "src_path_prefix": "", 
+  "version": ".*", 
+  "version_mtd": "re"
 }

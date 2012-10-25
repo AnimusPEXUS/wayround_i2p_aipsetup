@@ -3,11 +3,14 @@
   "auto_newest_src": false, 
   "basename": "Python", 
   "buildscript": "std", 
+  "deprecated": false, 
   "description": "None", 
   "home_page": "http://python.org/", 
   "installation_priority": 1, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
+  "src_path_prefix": "", 
   "version": "2\\..*", 
   "version_mtd": "re"
 }

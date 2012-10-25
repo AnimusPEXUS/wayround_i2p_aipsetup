@@ -3,11 +3,14 @@
   "auto_newest_src": true, 
   "basename": "glibc-ports", 
   "buildscript": "glibc", 
+  "deprecated": false, 
   "description": "This is glibc plugin. optional in glibc build time.", 
   "home_page": "http://www.gnu.org", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": false, 
   "removable": false, 
+  "src_path_prefix": "", 
   "version": ".*", 
   "version_mtd": "re"
 }

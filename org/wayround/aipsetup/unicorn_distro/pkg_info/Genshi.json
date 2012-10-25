@@ -2,12 +2,15 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "Genshi", 
-  "buildscript": null, 
+  "buildscript": "None", 
+  "deprecated": false, 
   "description": "write something here, please", 
   "home_page": "http://www.edgewall.com", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
+  "src_path_prefix": "", 
   "version": ".*", 
   "version_mtd": "re"
 }

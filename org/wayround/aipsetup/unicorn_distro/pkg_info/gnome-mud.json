@@ -3,11 +3,14 @@
   "auto_newest_src": true, 
   "basename": "gnome-mud", 
   "buildscript": "std", 
+  "deprecated": false, 
   "description": "write something here, please", 
   "home_page": "http://www.gnome.org", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
+  "src_path_prefix": "", 
   "version": ".*", 
   "version_mtd": "re"
 }

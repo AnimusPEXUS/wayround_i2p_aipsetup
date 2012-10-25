@@ -3,11 +3,14 @@
   "auto_newest_src": true, 
   "basename": "libgphoto2", 
   "buildscript": "std", 
+  "deprecated": false, 
   "description": "", 
   "home_page": "http://sf.net", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
+  "src_path_prefix": "", 
   "version": ".*", 
   "version_mtd": "re"
 }

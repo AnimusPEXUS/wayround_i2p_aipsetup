@@ -3,11 +3,14 @@
   "auto_newest_src": false, 
   "basename": "tcl", 
   "buildscript": "", 
+  "deprecated": false, 
   "description": "write something here, please", 
   "home_page": "http://www.sourceforge.net", 
   "installation_priority": 5, 
+  "non_installable": false, 
   "reducible": true, 
   "removable": true, 
+  "src_path_prefix": "", 
   "version": ".*", 
   "version_mtd": "re"
 }
