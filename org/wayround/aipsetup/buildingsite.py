@@ -37,7 +37,7 @@ def _getDIR_x(directory, _x='TARBALL'):
         )
 
     while r'//' in ret:
-        ret.replace(r'//', '/')
+        ret = ret.replace(r'//', '/')
 
     return ret
 

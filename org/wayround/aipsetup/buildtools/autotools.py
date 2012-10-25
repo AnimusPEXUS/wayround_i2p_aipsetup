@@ -261,6 +261,15 @@ def configure_low(
 
     ret = 0
 
+    while r'//' in script_name:
+        script_name = script_name.replace(r'//', '/')
+
+    while r'//' in working_dir:
+        working_dir = working_dir.replace(r'//', '/')
+
+    while r'//' in script_path:
+        script_path = script_path.replace(r'//', '/')
+
     if relative_call:
         script_path = os.path.relpath(script_path, working_dir)
 

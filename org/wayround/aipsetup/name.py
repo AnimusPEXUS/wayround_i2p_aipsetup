@@ -27,6 +27,7 @@ DIFFICULT_NAMES = [
     'GeSHi-1.0.2-beta-1.tar.bz2',
     'lynx2.8.7rel.1.tar.bz2',
     'name.tar.gz',
+    'ogre_src_v1-8-1.tar.bz2',
     'openssl-0.9.7a.tar.gz',
     'org.apache.felix.ipojo.manipulator-1.8.4-project.tar.gz',
     'Perl-Dist-Strawberry-BuildPerl-5101-2.11_10.tar.gz'
@@ -36,7 +37,7 @@ DIFFICULT_NAMES = [
     'wmirq-0.1-source.tar.gz',
     'xc-1.tar.gz',
     'xf86-input-acecad-1.5.0.tar.bz2',
-    'xf86-input-elo2300-1.1.2.tar.bz2'
+    'xf86-input-elo2300-1.1.2.tar.bz2',
     ]
 
 ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
@@ -65,6 +66,11 @@ for i in ASP_NAME_REGEXPS:
 
 del(i)
 
+#VERSION_DELIMITERS = ['.', '_']
+#STATUS_DELIMITERS = ['.', '_', '-', '+', '~']
+#ALL_DELIMITERS = list(set(VERSION_DELIMITERS + STATUS_DELIMITERS))
+ALL_DELIMITERS = ['.', '_', '-', '+', '~']
+
 def cli_name():
     """
     Internally used by aipsetup
@@ -87,10 +93,9 @@ def commands_order():
     Internally used by aipsetup
     """
     return [
-        'test_expressions_on_sources',
         'parse',
-        'parse_test',
-        'pparse'
+        'pparse',
+        'parse_test'
         ]
 
 def name_parse_name(opts, args):
@@ -230,7 +235,7 @@ def package_name_parse(filename, mute=True):
             ret['groups']['version_list_dirty'] = (
                 org.wayround.utils.list.list_strip(
                     ret['groups']['version_list_dirty'],
-                    ['.', '_', '-', '+']
+                    ALL_DELIMITERS
                     )
                 )
 
@@ -240,7 +245,7 @@ def package_name_parse(filename, mute=True):
 
             org.wayround.utils.list.remove_all_values(
                 ret['groups']['version_list'],
-                ['.', '_']
+               ALL_DELIMITERS
                 )
 
             ret['groups']['status_list_dirty'] = (
@@ -252,7 +257,7 @@ def package_name_parse(filename, mute=True):
             ret['groups']['status_list_dirty'] = (
                 org.wayround.utils.list.list_strip(
                     ret['groups']['status_list_dirty'],
-                    ['.', '_', '-', '+']
+                    ALL_DELIMITERS
                     )
                 )
 
@@ -262,7 +267,7 @@ def package_name_parse(filename, mute=True):
 
             org.wayround.utils.list.remove_all_values(
                 ret['groups']['status_list'],
-                ['.', '_']
+                ALL_DELIMITERS
                 )
 
             break
@@ -291,9 +296,10 @@ def package_name_parse(filename, mute=True):
 
     return ret
 
-def find_possible_chared_versions(name_sliced, separator='.'):
+def find_possible_chared_versions_and_singles(name_sliced, separator='.'):
 
     versions = []
+    logging.debug("(internal1) versions delimitered by `{}': {}".format(separator, versions))
 
     version_started = None
     version_ended = None
@@ -322,60 +328,146 @@ def find_possible_chared_versions(name_sliced, separator='.'):
         versions.append((version_started, version_ended + 1,))
         version_started = None
 
-    return versions
+    logging.debug("(internal2) versions delimitered by `{}': {}".format(separator, versions))
 
-def find_possible_versions(name_sliced):
-    ret = {}
-    for i in ['.', '_']:
-        ret[i] = find_possible_chared_versions(name_sliced, i)
+    singles = []
+    multiples = []
+
+    for i in versions:
+        if i[1] - i[0] == 1:
+            singles.append(i)
+        elif i[1] - i[0] > 1:
+            multiples.append(i)
+        else:
+            raise Exception("Programming error")
+
+    logging.debug("(internal3) versions delimitered by `{}': {}".format(separator, versions))
+
+    return {'singles': singles, 'version': multiples}
+
+def find_all_versions_and_singles(name_sliced):
+    ret = dict()
+    for i in ALL_DELIMITERS:
+        ret[i] = find_possible_chared_versions_and_singles(name_sliced, i)
+        logging.debug("versions delimitered by `{}': {}".format(i, ret[i]))
     return ret
 
 def find_most_possible_version(name_sliced, mute=False):
 
     ret = None
 
-    possible_versions = find_possible_versions(name_sliced)
-    logging.debug("possible_versions: {}".format(repr(possible_versions)))
+    possible_versions_and_singles_grouped_by_delimeter = \
+        find_all_versions_and_singles(name_sliced)
 
-    maximum_length = 0
+    logging.debug(
+        "possible_versions_and_singles_grouped_by_delimeter: {}".format(
+            repr(
+                 possible_versions_and_singles_grouped_by_delimeter
+                 )
+            )
+        )
 
-    for i in ['.', '_']:
-        for j in possible_versions[i]:
-            l = j[1] - j[0]
-            if l > maximum_length:
-                maximum_length = l
+    possible_versions_grouped_by_delimeter = {}
+    possible_singles_grouped_by_delimeter = {}
 
-    if maximum_length == 0:
-        s = "Version not found"
-        if not mute:
-            logging.error(s)
+    for i in ALL_DELIMITERS:
+
+        possible_versions_grouped_by_delimeter[i] = \
+            possible_versions_and_singles_grouped_by_delimeter[i]['version']
+
+        possible_singles_grouped_by_delimeter[i] = \
+            possible_versions_and_singles_grouped_by_delimeter[i]['singles']
+
+    for i in ALL_DELIMITERS:
+
+        if isinstance(ret, (tuple, int)):
+            break
+
+        l_possible_versions_grouped_by_delimeter_i = (
+            len(possible_versions_grouped_by_delimeter[i])
+            )
+
+        if  l_possible_versions_grouped_by_delimeter_i == 0:
+            pass
+
+        elif l_possible_versions_grouped_by_delimeter_i == 1:
+            ret = possible_versions_grouped_by_delimeter[i][0]
+            break
         else:
-            logging.debug(s)
-        ret = 1
-    else:
 
-        lists_to_compare = []
+            current_delimiter_group = possible_versions_grouped_by_delimeter[i]
 
-        logging.debug("lists_to_compare: {}".format(repr(lists_to_compare)))
+            maximum_length = 0
 
-        for i in ['.', '_']:
-            for j in possible_versions[i]:
+            for j in current_delimiter_group:
                 l = j[1] - j[0]
-                if l == maximum_length:
-                    lists_to_compare.append(j)
+                if l > maximum_length:
+                    maximum_length = l
 
-        l = len(lists_to_compare)
-        if l == 0:
-            ret = None
-        else:
-            most_possible_version = lists_to_compare[0]
+            if maximum_length == 0:
+                s = "Version not found in group `{}'".format(i)
+                if not mute:
+                    logging.error(s)
+                else:
+                    logging.debug(s)
+            else:
 
-            for i in lists_to_compare:
-                if i[0] < most_possible_version[0]:
-                    most_possible_version = i
+                lists_to_compare = []
 
-            logging.debug("most_possible_version: {}".format(repr(most_possible_version)))
-            ret = most_possible_version
+                logging.debug("lists_to_compare: {}".format(repr(lists_to_compare)))
+
+                for j in current_delimiter_group:
+                    l = j[1] - j[0]
+                    if l == maximum_length:
+                        lists_to_compare.append(j)
+
+                l = len(lists_to_compare)
+                if l == 0:
+                    ret = None
+                elif l == 1:
+                    ret = lists_to_compare[0]
+                else:
+
+                    most_possible_version2 = lists_to_compare[0]
+
+                    for j in lists_to_compare:
+                        if j[0] < most_possible_version2[0]:
+                            most_possible_version2 = j
+
+                    logging.debug("most_possible_version2: {}".format(repr(most_possible_version2)))
+                    ret = most_possible_version2
+                    break
+
+    if ret == None:
+        for i in ALL_DELIMITERS:
+
+            if isinstance(ret, (tuple, int)):
+                break
+
+            l_possible_singles_grouped_by_delimeter_i = (
+                len(possible_singles_grouped_by_delimeter[i])
+                )
+
+            if  l_possible_singles_grouped_by_delimeter_i == 0:
+                pass
+
+            elif l_possible_singles_grouped_by_delimeter_i == 1:
+                ret = possible_singles_grouped_by_delimeter[i][0]
+                break
+            else:
+
+                most_possible_version3 = possible_singles_grouped_by_delimeter[i][0]
+
+                for j in possible_singles_grouped_by_delimeter[i]:
+                    if j[0] < most_possible_version3[0]:
+                        most_possible_version3 = j
+
+                logging.debug("most_possible_version3: {}".format(repr(most_possible_version3)))
+                ret = most_possible_version3
+                break
+
+
+    logging.debug("most_possible_version: {}".format(repr(ret)))
 
     return ret
 
@@ -438,7 +530,7 @@ def source_name_parse_delicate(filename, mute=False):
 
             ret['groups']['name'] = ''.join(
                 name_sliced[:most_possible_version[0]]
-                ).strip('.-_')
+                ).strip(''.join(ALL_DELIMITERS))
 
             ret['groups']['version_list_dirty'] = (
                 name_sliced[most_possible_version[0]:most_possible_version[1]]
@@ -450,7 +542,7 @@ def source_name_parse_delicate(filename, mute=False):
 
             org.wayround.utils.list.remove_all_values(
                 ret['groups']['version_list'],
-                ['.', '_']
+                ALL_DELIMITERS
                 )
 
             ret['groups']['version'] = (
@@ -471,7 +563,7 @@ def source_name_parse_delicate(filename, mute=False):
             ret['groups']['status_list'] = (
                 org.wayround.utils.list.list_strip(
                     ret['groups']['status_list'],
-                    ['.', '_', '-', '+']
+                    ALL_DELIMITERS
                     )
                 )
 
@@ -487,7 +579,7 @@ def source_name_parse_delicate(filename, mute=False):
 
                 org.wayround.utils.list.remove_all_values(
                     ret['groups']['status_list'],
-                    ['.', '_', '-', '~']
+                    ALL_DELIMITERS
                     )
 
 
@@ -549,7 +641,9 @@ def source_name_parse(
         else:
 
             groups = ''
-            for i in ret['groups']:
+            groups_names = list(ret['groups'].keys())
+            groups_names.sort()
+            for i in groups_names:
                 groups += "       {group}: {value}\n".format_map(
                     {
                         'group': i,
@@ -601,6 +695,6 @@ def _modify_info_file(src_filename_parsed, mute=True):
 def parse_test():
 
     for i in DIFFICULT_NAMES:
-        logging.info("====== Testing RegExps on `{}' ======".format(i))
+        logging.info("====== Testing parser on `{}' ======".format(i))
         if not isinstance(source_name_parse(i), dict):
-            logging.error("Error parsing file name `{}' - RegExp not matched".format(i))
+            logging.error("Error parsing file name `{}' - parser not matched".format(i))

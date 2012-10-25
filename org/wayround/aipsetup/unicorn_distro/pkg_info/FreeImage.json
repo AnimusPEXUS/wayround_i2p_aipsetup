@@ -1,0 +1,13 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "FreeImage", 
+  "buildscript": "FreeImage", 
+  "description": "", 
+  "home_page": "http://sf.net/projects/freeimage", 
+  "installation_priority": 5, 
+  "reducible": true, 
+  "removable": true, 
+  "version": "\\d*", 
+  "version_mtd": "re"
+}

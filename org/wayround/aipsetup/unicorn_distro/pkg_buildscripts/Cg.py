@@ -2,7 +2,7 @@
 
 import os.path
 import logging
-import subprocess
+import shutil
 
 import org.wayround.utils.file
 
@@ -17,7 +17,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'bootstrap', 'build_and_distribute'],
+            ['extract', 'distribute'],
             action,
             "help"
             )
@@ -32,6 +32,8 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -43,27 +45,25 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'bootstrap' in actions and ret == 0:
-            ret = subprocess.Popen(
-                ['bash', './bootstrap.sh', '--prefix=/usr'],
-                cwd=src_dir
-                ).wait()
+        if 'distribute' in actions and ret == 0:
+            try:
+                os.mkdir(os.path.join(dst_dir, 'usr'), mode=0o755)
+            except:
+                logging.exception("Error making usr dir in dist")
+                ret = 4
+            else:
 
-        if 'build_and_distribute' in actions and ret == 0:
-            ret = subprocess.Popen(
-                [
-                    os.path.join(src_dir, 'bjam'),
-                    '--prefix=' + os.path.join(
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            ),
-                        'usr'
-                        ),
-                    'install',
-                    'threading=multi',
-                    'link=shared'
-                    ],
-                    cwd=src_dir
-                    ).wait()
+                for i in ['bin', 'include', 'lib']:
+                    if ret != 0:
+                        break
+
+                    try:
+                        shutil.move(
+                            os.path.join(src_dir, i),
+                            os.path.join(dst_dir, 'usr')
+                            )
+                    except:
+                        logging.exception("Error moving `{}' dir into dist".format(i))
+                        ret = 5
 
     return ret

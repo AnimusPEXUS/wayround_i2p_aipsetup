@@ -29,6 +29,7 @@ import org.wayround.utils.time
 import org.wayround.utils.archive
 import org.wayround.utils.log
 import org.wayround.utils.file
+import org.wayround.utils.opts
 
 
 import org.wayround.aipsetup.pkgindex
@@ -90,27 +91,34 @@ def package_install(opts, args):
 
     ret = 0
 
-    basedir = '/'
-    if '-b' in opts:
-        basedir = opts['-b']
+    ret = org.wayround.utils.opts.is_wrong_opts(
+        opts,
+        ['-b', '--force']
+        )
 
-    force = '--force' in opts
+    if ret == 0:
 
-    if len(args) == 0:
-        logging.error("Package name(s) required!")
-        ret = 2
-    else:
-        names = args
+        basedir = '/'
+        if '-b' in opts:
+            basedir = opts['-b']
 
-        for name in names:
-            ret = install_package(
-                name, force, basedir
-                )
-            if ret != 0:
-                logging.error("Some package's installation error -- see above")
-                break
+        force = '--force' in opts
 
-        org.wayround.aipsetup.sysupdates.all_actions()
+        if len(args) == 0:
+            logging.error("Package name(s) required!")
+            ret = 2
+        else:
+            names = args
+
+            for name in names:
+                ret = install_package(
+                    name, force, basedir
+                    )
+                if ret != 0:
+                    logging.error("Some package's installation error -- see above")
+                    break
+
+            org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
 

@@ -390,7 +390,7 @@ def get_info_rec_by_base_and_ver(basename, version):
     if name == None:
         ret = {}
     else:
-        ret[name]= get_package_info_record(name)
+        ret[name] = get_package_info_record(name)
 
     return ret
 
@@ -656,7 +656,7 @@ def load_info_records_from_fs(
         name = os.path.basename(i)[:-5]
         if isinstance(struct, dict):
             org.wayround.utils.file.progress_write(
-                "    loading record: {}".format(name)
+                "    loading record: {}\n".format(name)
                 )
 
             set_package_info_record(
@@ -666,7 +666,7 @@ def load_info_records_from_fs(
         else:
             logging.error("Can't get info from file {}".format(i))
     info_db.commit()
-    org.wayround.utils.file.progress_write_finish()
+#    org.wayround.utils.file.progress_write_finish()
 
     logging.info("Totally loaded {} records".format(loaded))
     return

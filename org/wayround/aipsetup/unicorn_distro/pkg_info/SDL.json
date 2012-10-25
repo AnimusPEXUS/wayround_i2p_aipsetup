@@ -2,12 +2,12 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "SDL", 
-  "buildscript": "", 
+  "buildscript": "SDL", 
   "description": "write something here, please", 
-  "home_page": "http://www.cpan.org", 
+  "home_page": "http://www.libsdl.org", 
   "installation_priority": 5, 
   "reducible": true, 
   "removable": true, 
-  "version": ".*", 
+  "version": "\\d*\\.\\d*\\..*", 
   "version_mtd": "re"
 }

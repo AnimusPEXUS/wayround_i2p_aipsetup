@@ -921,10 +921,10 @@ def index_sources_directory(
 
                 org.wayround.utils.file.progress_write_finish()
 
-            logging.info("Saving to DB")
             index = 0
             failed_count = 0
             skipped_count = 0
+            logging.info("Loading DB to save new data")
             src_tag_objects = set(tags.get_objects())
 
             for i in source_index:

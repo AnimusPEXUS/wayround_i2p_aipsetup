@@ -15,9 +15,9 @@ for i in [
     logging.addLevelName(i[0], i[1])
 del i
 
-import org.wayround.utils.getopt2
+import org.wayround.utils.getopt
 
-opts, args = org.wayround.utils.getopt2.getopt_keyed(sys.argv[1:])
+opts, args = org.wayround.utils.getopt.getopt_keyed(sys.argv[1:])
 
 # Setup logging level and format
 log_level = 'INFO'
