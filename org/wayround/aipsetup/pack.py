@@ -13,6 +13,7 @@ import tempfile
 import shutil
 import pprint
 import logging
+import subprocess
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.package
@@ -32,11 +33,11 @@ FUNCTIONS_LIST = [
     'destdir_checksum',
     'destdir_filelist',
     'destdir_deps_c',
-    'remove_source_and_build_dirs',
+#    'remove_source_and_build_dirs',
     'compress_patches_destdir_and_logs',
     'compress_files_in_lists_dir',
-    'remove_patches_destdir_buildlogs_and_temp_dirs',
-    'remove_decompressed_files_from_lists_dir',
+#    'remove_patches_destdir_buildlogs_and_temp_dirs',
+#    'remove_decompressed_files_from_lists_dir',
     'make_checksums_for_building_site',
     'pack_buildingsite'
     ]
@@ -49,7 +50,7 @@ def help_texts(name):
 
     if name == 'destdir_verify_paths_correctness':
         ret = """
-Ensure new package creates with bin, sbin, lib and lib64 symlinkd into
+Ensure new package creates with bin, sbin, lib and lib64 symlinked into
 usr
 """
     elif name == 'destdir_set_modes':
@@ -327,10 +328,27 @@ def destdir_filelist(buildingsite):
         logging.error("LIST dir can't be used")
         ret = 2
     else:
-        org.wayround.utils.file.list_files_recurcive(
-            destdir,
-            output_file
-            )
+        lst = org.wayround.utils.file.files_recurcive_list(destdir)
+
+        lst2 = []
+        for i in lst:
+            lst2.append('/' + os.path.relpath(i, destdir))
+
+        lst = lst2
+
+        del lst2
+
+        lst.sort()
+
+        try:
+            f = open(output_file, 'w')
+        except:
+            logging.exception("Can't rewrite file {}".format(output_file))
+            ret = 3
+        else:
+
+            f.write('\n'.join(lst) + '\n')
+            f.close()
 
     return ret
 
@@ -584,41 +602,64 @@ def make_checksums_for_building_site(buildingsite):
         'package.sha512'
         )
 
-    if os.path.exists(package_checksums):
-        org.wayround.utils.file.remove_if_exists(package_checksums)
+    list_to_checksum = \
+        org.wayround.aipsetup.buildingsite.get_list_of_items_to_pack(
+            buildingsite
+            )
 
-    try:
-        tf = tempfile.mkstemp()
-    except:
-        logging.exception("Error creating temporary file")
-        ret = 1
-    else:
-        f = os.fdopen(tf[0], 'w')
+    if package_checksums in list_to_checksum:
+        list_to_checksum.remove(package_checksums)
 
-        if org.wayround.utils.checksum.make_dir_checksums_fo(
-            buildingsite,
-            f
-            ) != 0:
-            logging.error("Error creating checksums for buildingsite")
-            ret = 2
+    for i in list_to_checksum:
+        if os.path.islink(i) or not os.path.isfile(i):
+            logging.error(
+                "Not exists or not a normal file: {}".format(
+                    os.path.relpath(i, buildingsite)
+                    )
+                )
+            ret = 10
 
+    if ret == 0:
+
+        check_summs = org.wayround.utils.checksum.checksums_by_list(
+            list_to_checksum, method='sha512'
+            )
+
+        check_summs2 = {}
+        paths = list(check_summs.keys())
+
+        for i in paths:
+            check_summs2['/' + os.path.relpath(i, buildingsite)] = check_summs[i]
+
+        check_summs = check_summs2
+
+        del check_summs2
+
+        f = open(package_checksums, 'w')
+        f.write(
+            org.wayround.utils.checksum.render_checksum_dict_to_txt(
+                check_summs,
+                sort=True
+                )
+            )
         f.close()
-        shutil.move(tf[1], package_checksums)
 
     return ret
 
 
 def pack_buildingsite(buildingsite):
 
-    pi = org.wayround.aipsetup.buildingsite.read_package_info(
-        buildingsite, ret_on_error=None
-        )
+    ret = 0
+
+    buildingsite = os.path.abspath(buildingsite)
 
     logging.info("Creating package")
 
-    ret = 0
+    package_info = org.wayround.aipsetup.buildingsite.read_package_info(
+        buildingsite, ret_on_error=None
+        )
 
-    if pi == None:
+    if package_info == None:
         logging.error("error getting information about package")
         ret = 1
     else:
@@ -635,11 +676,11 @@ def pack_buildingsite(buildingsite):
             pack_dir,
             "({pkgname})-({version})-({status})-({timestamp})-({hostinfo}).asp".format_map(
                 {
-                    'pkgname': pi['pkg_info']['name'],
-                    'version': pi['pkg_nameinfo']['groups']['version'],
-                    'status': pi['pkg_nameinfo']['groups']['status'],
+                    'pkgname': package_info['pkg_info']['name'],
+                    'version': package_info['pkg_nameinfo']['groups']['version'],
+                    'status': package_info['pkg_nameinfo']['groups']['status'],
                     'timestamp': org.wayround.utils.time.currenttime_stamp(),
-                    'hostinfo': pi['constitution']['host'],
+                    'hostinfo': package_info['constitution']['host'],
                     }
                 )
             )
@@ -649,12 +690,33 @@ def pack_buildingsite(buildingsite):
         if not os.path.isdir(pack_dir):
             os.makedirs(pack_dir)
 
-        if org.wayround.utils.archive.pack_dir_contents_tar(
-            buildingsite,
-            pack_file_name
-            ) != 0:
-            logging.error("Some error while compressing package")
-            ret = 2
+        list_to_tar = \
+            org.wayround.aipsetup.buildingsite.get_list_of_items_to_pack(
+                buildingsite
+                )
+
+        list_to_tar2 = []
+
+        for i in list_to_tar:
+            list_to_tar2.append('./' + os.path.relpath(i, buildingsite))
+
+        list_to_tar = list_to_tar2
+
+        del list_to_tar2
+
+        list_to_tar.sort()
+
+        try:
+            ret = subprocess.Popen(
+                ['tar', '-vcf', pack_file_name] + list_to_tar,
+                cwd=buildingsite
+                ).wait()
+        except:
+            logging.exception("Error tarring package")
+            ret = 30
+        else:
+            logging.info("ASP package creation complete")
+            ret = 0
 
         # else:
 
@@ -674,11 +736,11 @@ def complete(dirname):
         'destdir_checksum',
         'destdir_filelist',
         'destdir_deps_c',
-        'remove_source_and_build_dirs',
+#        'remove_source_and_build_dirs',
         'compress_patches_destdir_and_logs',
         'compress_files_in_lists_dir',
-        'remove_patches_destdir_buildlogs_and_temp_dirs',
-        'remove_decompressed_files_from_lists_dir',
+#        'remove_patches_destdir_buildlogs_and_temp_dirs',
+#        'remove_decompressed_files_from_lists_dir',
         'make_checksums_for_building_site',
         'pack_buildingsite'
         ]:
