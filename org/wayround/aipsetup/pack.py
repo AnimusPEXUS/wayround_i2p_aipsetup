@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 
 """
 Set of commands to perform package creation sequence
@@ -7,16 +6,12 @@ This module creates checksums, removes garbage, packs file and all
 other preparations and actions needed to build final package
 """
 
-import os
 import os.path
-import tempfile
-import shutil
 import pprint
 import logging
 import subprocess
 
 import org.wayround.aipsetup.buildingsite
-import org.wayround.aipsetup.package
 
 import org.wayround.utils.time
 import org.wayround.utils.checksum

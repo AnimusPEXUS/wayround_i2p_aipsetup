@@ -140,6 +140,10 @@ def get_list_of_items_to_pack(building_site):
     ret.append(building_site + os.path.sep + 'package_info.json')
     ret.append(building_site + os.path.sep + 'package.sha512')
 
+    post_install_script = building_site + os.path.sep + 'post_install.py'
+    if os.path.isfile(post_install_script):
+        ret.append(post_install_script)
+
     tarballs = os.listdir(getDIR_TARBALL(building_site))
 
     for i in tarballs:

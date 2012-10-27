@@ -1,4 +1,5 @@
 
+
 """
 Module for UNIX system related package actions
 
@@ -40,7 +41,6 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.pack
 import org.wayround.aipsetup.sysupdates
-import org.wayround.aipsetup.info
 
 
 ROOT_LINKS = [
@@ -936,11 +936,6 @@ def install_asp(asp_name, destdir='/'):
                             )
                         )
 
-#                    print("dd: " + destdir)
-#                    print("lp: " + logs_path)
-#                    print("pn: " + package_name)
-#                    print("ou: " + out_filename)
-
                     out_filename_dir = os.path.dirname(out_filename)
 
                     if not os.path.exists(out_filename_dir):
@@ -964,8 +959,6 @@ def install_asp(asp_name, destdir='/'):
                         ret = 2
                         break
 
-#                exit(0)
-
                 if ret == 0:
                     logging.info("Installing package's destdir")
 
@@ -977,29 +970,122 @@ def install_asp(asp_name, destdir='/'):
                         logging.error("Can't get package's destdir")
                         ret = 4
                     else:
-                        tec = org.wayround.utils.archive.extract_tar_canonical_fobj(
-                                dd_fobj,
-                                destdir,
-                                'xz',
-                                verbose_tar=True,
-                                verbose_compressor=True,
-                                add_tar_options=[
-                                    '--no-same-owner',
-                                    '--no-same-permissions'
-                                    ]
+                        try:
+                            tec = org.wayround.utils.archive.extract_tar_canonical_fobj(
+                                    dd_fobj,
+                                    destdir,
+                                    'xz',
+                                    verbose_tar=True,
+                                    verbose_compressor=True,
+                                    add_tar_options=[
+                                        '--no-same-owner',
+                                        '--no-same-permissions'
+                                        ]
+                                    )
+                            if tec != 0:
+                                logging.error(
+                                    "Package destdir decompression error:"
+                                    " tar exit code: {}".format(
+                                        tec
+                                    )
                                 )
-                        if tec != 0:
-                            logging.error(
-                                "Package destdir decompression error:"
-                                " tar exit code: {}".format(
-                                    tec
-                                )
+                                ret = 5
+                            else:
+                                ret = 0
+                                logging.info("Installed `{}' ;-)".format(package_name))
+                        finally:
+                            dd_fobj.close()
+
+                if ret == 0:
+                    logging.info("Post installation file ownerships and modes fix")
+                    files = []
+                    dirs = []
+
+                    installed_file_list = org.wayround.utils.archive.\
+                        tar_member_get_extract_file(
+                            tarf, './06.LISTS/DESTDIR.lst.xz'
                             )
-                            ret = 5
-                        else:
-                            ret = 0
-                            logging.info("Installed `{}' ;-)".format(package_name))
-                        dd_fobj.close()
+                    if not isinstance(installed_file_list, tarfile.ExFileObject):
+                        logging.error("Can't get package's file list")
+                        ret = 10
+                    else:
+                        try:
+                            text_lst = org.wayround.utils.archive.xzcat(
+                                installed_file_list, convert_to_str='utf-8'
+                                )
+
+                            files = text_lst.split('\n')
+
+                            files = org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(files)
+                            files.sort()
+
+                            dirs = set()
+                            for i in files:
+                                dirs.add(os.path.dirname(i))
+                            dirs = list(dirs)
+                            dirs.sort()
+
+                            for i in dirs:
+                                f_d_p = os.path.abspath(destdir + os.path.sep + i)
+
+                                while r'//' in f_d_p:
+                                    f_d_p = f_d_p.replace(r'//', '/')
+
+                                if not os.path.islink(f_d_p):
+                                    os.chown(f_d_p, 0, 0)
+                                    os.chmod(f_d_p, 0o755)
+
+                            for i in files:
+                                f_f_p = os.path.abspath(destdir + os.path.sep + i)
+
+                                while r'//' in f_f_p:
+                                    f_f_p = f_f_p.replace(r'//', '/')
+
+                                if not os.path.islink(f_f_p):
+                                    os.chown(f_f_p, 0, 0)
+                                    os.chmod(f_f_p, 0o755)
+                        finally:
+                            installed_file_list.close()
+
+                if ret == 0:
+                    logging.info("Searching post installation script")
+
+                    script_obj = \
+                        org.wayround.utils.archive.tar_member_get_extract_file(
+                            tarf, './post_install.py'
+                            )
+
+                    if not isinstance(script_obj, tarfile.ExFileObject):
+                        logging.info("Can't get package's post installation script")
+                    else:
+                        try:
+                            script_txt = script_obj.read()
+
+                            g = {}
+                            l = g
+                            try:
+                                exec(
+                                    compile(
+                                        script_txt,
+                                        None,
+                                        'exec'
+                                        ),
+                                    g,
+                                    l
+                                    )
+                            except:
+                                logging.exception(
+                                    "Can't load package's post installation script"
+                                    )
+                                ret = 7
+
+                            else:
+                                if l['main'](destdir) != 0:
+                                    logging.error("Post installation script main function returned error")
+                                    ret = 8
+                        finally:
+                            script_obj.close()
+
 
             tarf.close()
 
@@ -1288,7 +1374,7 @@ def list_files_installed_by_asp(
 
         pkg_file_list = pkg_file_list.splitlines()
         pkg_file_list = (
-            org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(pkg_file_list)
+            org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(pkg_file_list)
             )
 
 
