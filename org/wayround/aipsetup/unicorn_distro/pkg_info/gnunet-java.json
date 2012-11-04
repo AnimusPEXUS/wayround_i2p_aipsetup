@@ -1,16 +1,16 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "cups-filters", 
+  "basename": "", 
   "buildscript": "std", 
   "deprecated": false, 
-  "description": "None", 
-  "home_page": "http://www.openprinting.org/download/cups-filters/", 
+  "description": "", 
+  "home_page": "http://www.gnunet.org", 
   "installation_priority": 5, 
-  "non_installable": false, 
+  "non_installable": true, 
   "reducible": true, 
   "removable": true, 
   "src_path_prefix": "", 
-  "version": ".*", 
+  "version": "", 
   "version_mtd": "re"
 }

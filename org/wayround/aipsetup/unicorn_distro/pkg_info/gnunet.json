@@ -2,15 +2,15 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "gnunet", 
-  "buildscript": "", 
+  "buildscript": "std", 
   "deprecated": false, 
   "description": "write something here, please", 
-  "home_page": "http://www.gnu.org", 
+  "home_page": "http://www.gnunet.org", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
+  "src_path_prefix": "/www.gnu.org/", 
   "version": ".*", 
   "version_mtd": "re"
 }

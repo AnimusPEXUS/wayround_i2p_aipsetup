@@ -11,6 +11,6 @@
   "reducible": true, 
   "removable": true, 
   "src_path_prefix": "", 
-  "version": ".*", 
-  "version_mtd": "re"
+  "version": ">= 3.0", 
+  "version_mtd": "lb"
 }

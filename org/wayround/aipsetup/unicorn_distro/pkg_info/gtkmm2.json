@@ -1,16 +1,16 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "gtk+", 
-  "buildscript": "gtk_with_docs", 
+  "basename": "gtkmm", 
+  "buildscript": "std", 
   "deprecated": false, 
-  "description": "write something here, please", 
-  "home_page": "http://www.gnome.org", 
+  "description": "", 
+  "home_page": "http://gnome.org", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
   "src_path_prefix": "", 
-  "version": "< 3.0", 
+  "version": "< 2.90", 
   "version_mtd": "lb"
 }

@@ -1,16 +1,16 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "gtk+", 
-  "buildscript": "gtk_with_docs", 
+  "basename": "farstream", 
+  "buildscript": "std", 
   "deprecated": false, 
-  "description": "write something here, please", 
-  "home_page": "http://www.gnome.org", 
+  "description": "", 
+  "home_page": "http://www.freedesktop.org/", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
   "src_path_prefix": "", 
-  "version": "< 3.0", 
+  "version": ">= 0.2", 
   "version_mtd": "lb"
 }

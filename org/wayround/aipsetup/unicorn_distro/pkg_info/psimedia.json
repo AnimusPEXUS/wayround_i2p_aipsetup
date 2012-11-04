@@ -1,16 +1,16 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "psi", 
-  "buildscript": "psi", 
+  "basename": "psimedia", 
+  "buildscript": "psimedia", 
   "deprecated": false, 
-  "description": "write something here, please", 
-  "home_page": "http://www.sourceforge.net/", 
+  "description": "", 
+  "home_page": "http://delta.affinix.com/", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.sourceforge.net", 
+  "src_path_prefix": "/www.affinix.com/", 
   "version": ".*", 
   "version_mtd": "re"
 }

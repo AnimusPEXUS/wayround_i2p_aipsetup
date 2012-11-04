@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "imake", 
-  "buildscript": "", 
+  "buildscript": "std", 
   "deprecated": false, 
   "description": "write something here, please", 
   "home_page": "http://www.x.org", 
@@ -10,7 +10,7 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
+  "src_path_prefix": "/www.x.org/", 
   "version": ".*", 
   "version_mtd": "re"
 }
