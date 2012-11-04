@@ -16,7 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['extract', 'configure', 'build', 'distribute', 'distribute2'],
             action,
             "help"
             )
@@ -91,6 +91,24 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
+                    'DESTDIR=' + (
+                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+                            buildingsite
+                            )
+                        )
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'distribute2' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install-libs',
                     'DESTDIR=' + (
                         org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
                             buildingsite

@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'configure', 'build', 'distribute'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -50,17 +50,15 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-shared',
-                    '--enable-gpl',
-                    '--enable-libtheora',
-                    '--enable-libvorbis',
-                    '--enable-x11grab',
-                    '--enable-libmp3lame',
-                    '--enable-libx264',
-                    '--enable-libxvid',
-                    '--enable-runtime-cpudetect',
-                    '--enable-doc',
+                    '--disable-meanwhile',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

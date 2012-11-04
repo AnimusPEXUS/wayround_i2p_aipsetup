@@ -15,14 +15,14 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            [
-                'extract', 'configure', 'build', 'distribute',
-                'extract2', 'configure2', 'build2', 'distribute2'
-                ],
-            action,
-            "help"
-            )
+        buildingsite,
+        [
+            'extract', 'configure', 'build', 'distribute',
+            'extract2', 'configure2', 'build2', 'distribute2'
+            ],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -34,13 +34,12 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
-        if os.path.isdir(src_dir):
-            logging.info("cleaningup source dir")
-            org.wayround.utils.file.cleanup_dir(src_dir)
-
         separate_build_dir = False
 
         if 'extract' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
@@ -101,11 +100,11 @@ def main(buildingsite, action=None):
                 )
 
 
-        if os.path.isdir(src_dir):
-            logging.info("cleaningup source dir")
-            org.wayround.utils.file.cleanup_dir(src_dir)
 
         if 'extract2' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],

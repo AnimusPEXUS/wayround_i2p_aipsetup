@@ -2,6 +2,7 @@
 
 import os.path
 import logging
+import subprocess
 
 import org.wayround.utils.file
 
@@ -15,11 +16,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'configure', 'build', 'distribute'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -46,31 +47,28 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+#    RUN[$j]='export CFLAGS=" -march=i486 -mtune=i486  " ; export CXXFLAGS=" -march=i486 -mtune=i486  " #'
         if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--enable-shared',
-                    '--enable-gpl',
-                    '--enable-libtheora',
-                    '--enable-libvorbis',
-                    '--enable-x11grab',
-                    '--enable-libmp3lame',
-                    '--enable-libx264',
-                    '--enable-libxvid',
-                    '--enable-runtime-cpudetect',
-                    '--enable-doc',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+            p = subprocess.Popen(
+                ['./configure'] +
+                    [
+    #                    '-system-nas-sound',
+                    '-opensource',
+                    '-prefix', '/usr/lib/qt4',
+                    '-sysconfdir', pkg_info['constitution']['paths']['config'],
+                    '-bindir', '/usr/bin',
+                    '-libdir', '/usr/lib',
+                    '-headerdir', '/usr/include',
+    #                    '--host=' + pkg_info['constitution']['host'],
+    #                    '--build=' + pkg_info['constitution']['build'],
+    #                    '--target=' + pkg_info['constitution']['target']
                     ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                stdin=subprocess.PIPE,
+                cwd=src_dir
                 )
+            p.communicate(input=b'yes\n')
+            ret = p.wait()
+
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
@@ -89,7 +87,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
+                    'INSTALL_ROOT=' + (
                         org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
                             buildingsite
                             )

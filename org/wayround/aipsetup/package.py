@@ -1506,6 +1506,12 @@ def _complete_info_correctness_check(workdir):
 
 def complete(building_site, main_src_file=None):
 
+    rp = os.path.relpath(building_site, os.getcwd())
+
+    logging.info(
+        "+++++++++++ Starting Complete build in `{}' +++++++++++".format(rp)
+        )
+
     building_site = os.path.abspath(building_site)
 
     ret = 0
@@ -1556,6 +1562,11 @@ def complete(building_site, main_src_file=None):
             shutil.rmtree(building_site)
         except:
             logging.exception("Error removing buildingsite")
+
+
+    logging.info(
+        "+++++++++++ Finished Complete build in `{}' +++++++++++".format(rp)
+        )
 
     return ret
 

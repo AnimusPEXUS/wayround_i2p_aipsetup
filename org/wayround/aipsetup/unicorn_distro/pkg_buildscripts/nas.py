@@ -2,6 +2,7 @@
 
 import os.path
 import logging
+import subprocess
 
 import org.wayround.utils.file
 
@@ -15,11 +16,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'xmkmf', 'build', 'distribute', 'distribute_man'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -46,42 +47,17 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--enable-shared',
-                    '--enable-gpl',
-                    '--enable-libtheora',
-                    '--enable-libvorbis',
-                    '--enable-x11grab',
-                    '--enable-libmp3lame',
-                    '--enable-libx264',
-                    '--enable-libxvid',
-                    '--enable-runtime-cpudetect',
-                    '--enable-doc',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
+        if 'xmkmf' in actions and ret == 0:
+            ret = subprocess.Popen(
+                ['xmkmf'],
+                cwd=src_dir
+                ).wait()
 
         if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+            ret = subprocess.Popen(
+                ['make', 'World'],
+                cwd=src_dir
+                ).wait()
 
         if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
@@ -89,6 +65,24 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
+                    'DESTDIR=' + (
+                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+                            buildingsite
+                            )
+                        )
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'distribute_man' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install.man',
                     'DESTDIR=' + (
                         org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
                             buildingsite

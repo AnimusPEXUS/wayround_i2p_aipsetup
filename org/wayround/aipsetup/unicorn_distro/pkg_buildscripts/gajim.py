@@ -31,13 +31,12 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
-        if os.path.isdir(src_dir):
-            logging.info("cleaningup source dir")
-            org.wayround.utils.file.cleanup_dir(src_dir)
-
         separate_build_dir = False
 
         if 'extract' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
@@ -59,8 +58,8 @@ def main(buildingsite, action=None):
                     '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={},
-#                environment={'PYTHON': '/usr/bin/python3'},
+#                environment={},
+                environment={'PYTHON': '/usr/bin/python3'},
                 environment_mode='copy',
                 source_configure_reldir='.',
                 use_separate_buildding_dir=separate_build_dir,

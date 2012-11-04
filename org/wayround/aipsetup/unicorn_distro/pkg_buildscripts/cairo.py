@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'configure', 'build', 'distribute'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -50,17 +50,45 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-shared',
-                    '--enable-gpl',
-                    '--enable-libtheora',
-                    '--enable-libvorbis',
-                    '--enable-x11grab',
-                    '--enable-libmp3lame',
-                    '--enable-libx264',
-                    '--enable-libxvid',
-                    '--enable-runtime-cpudetect',
-                    '--enable-doc',
+                    '--enable-xlib',
+                    '--enable-xlib-xrender=yes',
+                    '--enable-xcb=yes',
+#                    '--enable-xlib-xcb=yes',
+                    '--enable-xcb-shm=yes',
+#                    '--enable-qt=yes',
+                    '--enable-quartz=auto',
+                    '--enable-quartz-font=auto',
+                    '--enable-quartz-image=auto',
+#                    '--enable-drm=yes',
+                    '--enable-gallium=auto',
+                    '--enable-png=yes',
+                    '--enable-gl=auto',
+                    '--enable-glesv2=auto',
+#                    '--enable-cogl=auto',
+                    '--enable-directfb=auto',
+                    '--enable-vg=auto',
+                    '--enable-egl=auto',
+                    '--enable-glx=auto',
+                    '--enable-wg=auto',
+                    '--enable-script=yes',
+                    '--enable-ft=auto',
+                    '--enable-fc=auto',
+                    '--enable-ps=yes',
+                    '--enable-pdf=yes',
+                    '--enable-svg=yes',
+                    '--enable-tee=yes',
+#                    '--enable-xml=yes',
+
+                    '--with-x',
+
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
