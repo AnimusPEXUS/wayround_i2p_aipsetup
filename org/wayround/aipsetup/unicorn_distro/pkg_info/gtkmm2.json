@@ -5,12 +5,11 @@
   "buildscript": "std", 
   "deprecated": false, 
   "description": "", 
+  "filters": "", 
   "home_page": "http://gnome.org", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
-  "version": "< 2.90", 
-  "version_mtd": "lb"
+  "src_path_prefix": ""
 }

@@ -5,12 +5,11 @@
   "buildscript": "std", 
   "deprecated": false, 
   "description": "None", 
+  "filters": "", 
   "home_page": "http://www.openprinting.org/download/cups-filters/", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
-  "version": ".*", 
-  "version_mtd": "re"
+  "src_path_prefix": ""
 }

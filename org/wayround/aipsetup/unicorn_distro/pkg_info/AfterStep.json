@@ -2,15 +2,14 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "AfterStep", 
-  "buildscript": "", 
+  "buildscript": "None", 
   "deprecated": false, 
   "description": "Simple Window Manager\n", 
+  "filters": "", 
   "home_page": "http://www.afterstep.org", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
-  "version": ".*", 
-  "version_mtd": "re"
+  "src_path_prefix": ""
 }

@@ -5,12 +5,11 @@
   "buildscript": "", 
   "deprecated": false, 
   "description": "write something here, please", 
+  "filters": "", 
   "home_page": "http://www.oetiker.ch", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
-  "version": ".*", 
-  "version_mtd": "re"
+  "src_path_prefix": ""
 }

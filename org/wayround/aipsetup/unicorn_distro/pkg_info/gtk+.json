@@ -5,12 +5,11 @@
   "buildscript": "gtk_with_docs", 
   "deprecated": false, 
   "description": "write something here, please", 
+  "filters": "", 
   "home_page": "http://www.gnome.org", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "", 
-  "version": ">= 3.0", 
-  "version_mtd": "lb"
+  "src_path_prefix": ""
 }
