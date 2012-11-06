@@ -1,9 +1,10 @@
 
-import os.path
-import logging
+import copy
 import fnmatch
-import sys
+import logging
+import os.path
 import re
+import sys
 
 import sqlalchemy
 import sqlalchemy.ext
@@ -45,19 +46,13 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             default=''
             )
 
-        version_mtd = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        version = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
         src_path_prefix = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
+            nullable=False,
+            default=''
+            )
+
+        filter = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False,
             default=''
@@ -228,9 +223,7 @@ def set_package_info_record(name, struct):
     q.home_page = str(struct["home_page"])
     q.buildscript = str(struct["buildscript"])
     q.basename = str(struct["basename"])
-    q.version = str(struct["version"])
-    q.version_mtd = str(struct["version_mtd"])
-    q.src_path_prefix = str(struct["src_path_prefix"])
+    q.filters = str(struct["filters"])
     q.installation_priority = int(struct["installation_priority"])
     q.removable = bool(struct["removable"])
     q.reducible = bool(struct["reducible"])
@@ -395,51 +388,237 @@ def get_outdated_info_records_list(mute=True):
 
     return ret
 
+def get_info_rec_by_tarball_filename(tarball_filenam):
+    name = get_package_name_by_tarball_filename(tarball_filenam)
+    return get_package_info_record(name)
 
-def get_info_rec_by_base_and_ver(basename, version):
+def filter_text_parse(filter_text):
     """
-    Get package info by basename and version strings
+    Returns list of command structures
 
-    Returning {} if nothing found or {'name': get_package_info_record(i.name)}
+    ret = [
+        dict(
+            action   = '-' or '+',
+            subject  = in ['path', 'filename', 'version', 'status'],
+            function = <depends on subject> (no spaces allowed),
+            data     = <depends on subject> (can contain spaces)
+            )
+        ]
+
     """
+    ret = []
 
-    ret = {}
+    lines = filter_text.splitlines()
 
-    name = get_package_name_by_base_and_ver(basename, version)
-    if name == None:
-        ret = {}
-    else:
-        ret[name] = get_package_info_record(name)
+    for i in lines:
+        if not i.isspace():
+            struct = i.split(3)
+            struct = dict(
+                action=struct[0],
+                subject=struct[1],
+                function=struct[2],
+                data=struct[3],
+                )
+            ret.append(struct)
 
     return ret
 
-def get_package_name_by_base_and_ver(basename, version):
+def filter_tarball_list(
+    input_list,
+    filter_text
+    ):
     """
-    Get package name by basename and version strings
+    Filters supplied list with supplied filter
 
-    Returning None if nothing found or str
+    subjects not in check_for_subjects will always be positive (but can be
+    filtered out by proper leading rules)
     """
 
-    info_db = org.wayround.aipsetup.dbconnections.info_db()
+    ret = []
+
+    inp_list = set(copy.copy(input_list))
+    out_list = set(copy.copy(input_list))
+
+    filters = filter_text_parse(filter_text)
+
+    for f in filters:
+
+        action = f['action']
+        subject = f['subject']
+        function = f['function']
+        no = False
+        data = f['data']
+
+        if not action in ['+', '-']:
+            logging.error("Wrong action: `{}'".format(action))
+            ret = 10
+            break
+
+        if function.startswith('!'):
+            no = True
+            function = function[1:]
+
+        if not subject in ['filename', 'version', 'status']:
+            logging.error("Wrong subject : `{}'".format(subject))
+            ret = 1
+            break
+
+        if subject == 'filename':
+
+            if not function in ['begins', 'contains', 'ends']:
+                logging.error("Wrong `filename' function : `{}'".format(function))
+                ret = 3
+                break
+
+        elif subject == 'version':
+
+            if not function in [
+                    '<', '<=', '==', '>=', '>', 're', 'fm',
+                    'begins', 'contains', 'ends'
+                    ]:
+                logging.error("Wrong `path' function : `{}'".format(function))
+                ret = 4
+                break
+
+        elif subject == 'status':
+
+            if not function in ['begins', 'contains', 'ends']:
+                logging.error("Wrong `path' function : `{}'".format(function))
+                ret = 5
+                break
+
+        else:
+            raise Exception("Programming error")
+
+
+        if not isinstance(ret, int):
+
+            working_list = copy.copy(inp_list)
+
+            if action == '+':
+                working_list = copy.copy(inp_list)
+
+            elif action == '-':
+                working_list = copy.copy(out_list)
+            else:
+                raise Exception("Programming Error")
+
+
+            for item in working_list:
+
+                working_item = item
+
+                if subject == 'filename':
+                    working_item = os.path.basename(item)
+
+                elif subject in ['version', 'status']:
+
+                    working_item = None
+
+                    parsed = org.wayround.aipsetup.name.source_name_parse(
+                        os.path.basename(item),
+                        mute=True
+                        )
+
+                    if not isinstance(parsed, dict):
+                        # TODO: it's not error, but may be it's need to do
+                        # something when just a `pass'
+                        pass
+                    else:
+                        if subject == 'version':
+                            working_item = parsed['groups']['version']
+
+                        elif subject == 'status':
+                            working_item = parsed['groups']['status']
+
+                        else:
+                            raise Exception("Programming error")
+
+                else:
+                    raise Exception("Programming error")
+
+                matched = False
+
+                if function == 'begins':
+                    matched = working_item.startswith(data)
+
+                elif function == 'contains':
+                    matched = working_item.find(data) != -1
+
+                elif function == 'end':
+                    matched = working_item.endswith(data)
+
+                elif function == 're':
+                    matched = re.match(data, working_item) != None
+
+                elif function == 'fm':
+                    matched = fnmatch.fnmatch(working_item, data)
+
+                elif function in ['<', '<=', '==', '>=', '>']:
+                    matched = (
+                        org.wayround.aipsetup.version.lb_comparator(
+                            working_item,
+                            function + ' ' + data
+                            )
+                        )
+                else:
+                    raise Exception("Programming error")
+
+                if no:
+                    matched = not matched
+
+                if matched:
+                    if action == '+':
+                        out_list.add(working_item)
+
+                    elif action == '-':
+                        if working_item in out_list:
+                            out_list.remove(working_item)
+
+                    else:
+                        raise Exception("Programming error")
+
+    if not isinstance(ret, int):
+        ret = out_list
+
+    return ret
+
+
+def get_package_name_by_tarball_filename(tarball_filename):
 
     ret = None
 
-    q = info_db.sess.query(info_db.Info).filter_by(basename=basename).all()
+    parsed = org.wayround.aipsetup.name.source_name_parse(
+        tarball_filename,
+        mute=True
+        )
 
-    for i in q:
-        if i.version_mtd == 're':
-            if re.match(i.version, version):
+    if not isinstance(parsed, dict):
+        ret = None
+    else:
+
+        lst = [tarball_filename]
+
+        info_db = org.wayround.aipsetup.dbconnections.info_db()
+
+        q = info_db.sess.query(info_db.Info).filter_by(basename=parsed['groups']['name']).all()
+
+        for i in q:
+
+            res = filter_tarball_list(
+                lst,
+                q.filter
+                )
+
+            if isinstance(res, list) and len(res) != 1:
+                raise Exception("Something wrong")
+
+            elif isinstance(res, list) and len(res) == 1:
                 ret = i.name
                 break
-        elif i.version_mtd == 'lb':
-            if org.wayround.aipsetup.version.lb_comparator(
-                version,
-                i.version
-                ):
-                ret = i.name
-                break
-        else:
-            logging.warning("Wrong version_mtd for package `{}'".format(i.name))
+
+            else:
+                raise Exception("Something wrong 2")
 
     return ret
 
@@ -524,10 +703,9 @@ def print_info_record(name):
         tags.sort()
 
         print("""\
-+---[{name}]---------------------------------------+
++---[{name}]----Overal Information-----------------+
+
                   basename: {basename}
- version comparison method: {version_mtd}
-           version pattern: {version}
         source path prefix: {src_path_prefix}
                buildscript: {buildscript}
                   homepage: {home_page}
@@ -542,9 +720,16 @@ def print_info_record(name):
            auto newest pkg: {auto_newest_pkg}
                 newest src: {newest_src}
                 newest pkg: {newest_pkg}
-+---[{name}]---------------------------------------+
+
++---[{name}]----Tarball Filters--------------------+
+
+{filters}
+
++---[{name}]----Description------------------------+
+
 {description}
-+---[{name}]---------------------------------------+
+
++---[{name}]----Info Block End---------------------+
 """.format_map(
     {
     'tags'                  : ', '.join(tags),
@@ -554,8 +739,7 @@ def print_info_record(name):
     'home_page'             : r['home_page'],
     'buildscript'           : r['buildscript'],
     'basename'              : r['basename'],
-    'version'               : r['version'],
-    'version_mtd'           : r['version_mtd'],
+    'filters'               : r['filters'],
     'src_path_prefix'       : r['src_path_prefix'],
     'installation_priority' : r['installation_priority'],
     'removable'             : r['removable'],

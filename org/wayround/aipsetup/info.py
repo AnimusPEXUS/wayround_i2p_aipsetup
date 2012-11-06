@@ -34,14 +34,12 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # file name base
     basename='',
 
-    # version cmp method
-    version_mtd='re',
-
-    # acceptable version regexp
-    version='',
-
-    # source files filter by  path prefix
+    # prefix for filtering source files
     src_path_prefix='',
+
+    # filters. various filters to provide correct list of acceptable tarballs by
+    # they filenames
+    filters='',
 
     # from 0 to 9. default 5. lower number - higher priority
     installation_priority=5,
@@ -141,6 +139,7 @@ def info_list_files(opts, args, typ='info', mask='*.json'):
         if args_l == 1:
             mask = args[0]
 
+        # FIXME: what's this?
         org.wayround.utils.file.list_files(
             org.wayround.aipsetup.config.config[typ], mask
             )
@@ -190,34 +189,19 @@ def info_editor(opts, args):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
 
-            parsed = org.wayround.aipsetup.name.source_name_parse(
-                file_name, mute=True
+            pkg_name = (
+                org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(file_name)
                 )
 
-            if not isinstance(parsed, dict):
+            if not pkg_name:
                 logging.error(
-                    "Name `{}' can't be parsed".format(file_name)
+                    "Could not find package name of `{}'".format(
+                        file_name
+                        )
                     )
-                ret = 3
-
+                ret = 4
             else:
-
-                pkg_name = (
-                    org.wayround.aipsetup.pkginfo.get_package_name_by_base_and_ver(
-                        parsed['groups']['name'],
-                        parsed['groups']['version']
-                        )
-                    )
-
-                if not pkg_name:
-                    logging.error(
-                        "Could not find package name of `{}'".format(
-                            file_name
-                            )
-                        )
-                    ret = 4
-                else:
-                    file_name = pkg_name
+                file_name = pkg_name
 
         if isinstance(file_name, str):
             if not file_name.endswith('.json'):
@@ -325,49 +309,38 @@ def info_mass_script(opts, args):
 
         for i in sources:
 
-            parsed = org.wayround.aipsetup.name.source_name_parse(i, mute=True)
+            pkg_name = (
+                org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(i)
+                )
 
-            if not isinstance(parsed, dict):
-                logging.error(
-                    "Name `{}' can't be parsed".format(i)
-                    )
-                ret = 3
-
+            if not pkg_name:
+                logging.error("Could not find package name of `{}'".format(i))
+                ret = 4
             else:
 
-                pkg_name = org.wayround.aipsetup.pkginfo.get_package_name_by_base_and_ver(
-                    parsed['groups']['name'],
-                    parsed['groups']['version']
-                    )
+                info_dir = org.wayround.aipsetup.config.config['info']
 
-                if not pkg_name:
-                    logging.error("Could not find package name of `{}'".format(i))
-                    ret = 4
+                p1 = info_dir + os.path.sep + pkg_name + '.json'
+
+                info = read_from_file(p1)
+
+                if not isinstance(info, dict):
+                    logging.error("Wrong info {}".format(p1))
+                    ret = 5
                 else:
 
-                    info_dir = org.wayround.aipsetup.config.config['info']
+                    if force or info['buildscript'] == '':
+                        info['buildscript'] = script_name
 
-                    p1 = info_dir + os.path.sep + pkg_name + '.json'
+                        write_to_file(p1, info)
 
-                    info = read_from_file(p1)
-
-                    if not isinstance(info, dict):
-                        logging.error("Wrong info {}".format(p1))
-                        ret = 5
+                        logging.info("Applied to {}".format(pkg_name))
                     else:
-
-                        if force or info['buildscript'] == '':
-                            info['buildscript'] = script_name
-
-                            write_to_file(p1, info)
-
-                            logging.info("Applied to {}".format(pkg_name))
-                        else:
-                            logging.warning(
-                                "{} already have defined script".format(
-                                    pkg_name
-                                    )
+                        logging.warning(
+                            "{} already have defined script".format(
+                                pkg_name
                                 )
+                            )
 
 
         org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records()
@@ -400,8 +373,7 @@ def is_info_dicts_equal(d1, d2):
         'home_page',
         'buildscript',
         'basename',
-        'version_mtd',
-        'version',
+        'filters',
         'installation_priority',
         'removable',
         'reducible',
@@ -409,11 +381,7 @@ def is_info_dicts_equal(d1, d2):
         'deprecated',
         'auto_newest_src',
         'auto_newest_pkg',
-        'src_path_prefix',
-        # next two items must not participate in
-        # equality checks, as they changing too often
-        # 'newest_src',
-        # 'newest_pkg'
+        'src_path_prefix'
         ]:
         if d1[i] != d2[i]:
             ret = False
@@ -490,13 +458,11 @@ def info_fixes(
     Sometime it will contain checks and fixes for
     info files
     """
+    # TODO: re do all this when aipsetup will be more or less complete
     raise Exception("Outdated")
 
     if info['basename'] == '':
         info['basename'] = pkg_name
-
-    if info['version_re'] == '':
-        info['version_re'] = '.*'
 
     if forced_homepage_fix or info['home_page'] in ['', 'None']:
         possibilities = org.wayround.aipsetup.pkginfo.guess_package_homepage(

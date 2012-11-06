@@ -119,21 +119,9 @@ def name_parse_name(opts, args):
 
         write = '-w' in opts
 
-        parsed = source_name_parse(
-            filename,
-            modify_info_file=write
-            )
+        packagename = org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(filename)
 
-        if not isinstance(parsed, dict):
-            logging.debug("Parsed is: {}".format(parsed))
-            ret = 2
-        else:
-            packagename = org.wayround.aipsetup.pkginfo.get_package_name_by_base_and_ver(
-                parsed['groups']['name'],
-                parsed['groups']['version']
-                )
-
-            print("Package name is: {}".format(packagename))
+        print("Package name is: {}".format(packagename))
 
     return ret
 

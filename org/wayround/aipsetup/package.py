@@ -1400,7 +1400,7 @@ def build(source_files):
         except:
             pass
 
-        package_info = org.wayround.aipsetup.pkginfo.get_info_rec_by_base_and_ver(
+        package_info = org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
             par_res['groups']['name'],
             par_res['groups']['version']
             )

@@ -3,13 +3,14 @@
 Facility for indexing and analyzing sources and packages repository
 """
 
-import os.path
-import sys
+import copy
+import functools
 import glob
 import logging
+import os.path
 import re
 import shutil
-import functools
+import sys
 
 import sqlalchemy
 import sqlalchemy.ext
@@ -185,38 +186,22 @@ def get_package_source_files(name, filtered=True):
         try:
             needed_files = []
             files = tags_object.objects_by_tags([pkg_info['basename']])
+            files2 = []
             for i in files:
 
                 if not filtered or i.startswith(pkg_info['src_path_prefix']):
+                    files2.append(i)
 
-                    parsed_name = (
-                        org.wayround.aipsetup.name.source_name_parse(i, mute=True)
-                        )
-                    if parsed_name:
-                        if pkg_info['version_mtd'] == 're':
-                            try:
-                                re_m = re.match(
-                                    pkg_info['version'],
-                                    parsed_name['groups']['version']
-                                    )
-                            except:
-                                logging.exception(
-                                    "Error matching RE `{}' to `'".format(
-                                        pkg_info['version'],
-                                        parsed_name['groups']['version']
-                                        )
-                                    )
-                            else:
-                                if re_m:
-                                    needed_files.append(i)
+            files = files2
 
-                        elif pkg_info['version_mtd'] == 'lb':
-                            if org.wayround.aipsetup.version.lb_comparator(
-                                parsed_name['groups']['version'],
-                                pkg_info['version']
-                                ):
-                                needed_files.append(i)
+            del files2
 
+            needed_files = (
+                org.wayround.aipsetup.pkginfo.filter_tarball_list(
+                    files,
+                    pkg_info['filter']
+                    )
+                )
 
             needed_files.sort()
 

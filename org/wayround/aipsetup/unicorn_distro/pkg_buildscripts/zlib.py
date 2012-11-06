@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
-import logging
 import os.path
+import logging
 
 import org.wayround.utils.file
 
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 
@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'configure', 'build', 'distribute'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -50,17 +50,8 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-shared',
-                    '--enable-gpl',
-                    '--enable-libtheora',
-                    '--enable-libvorbis',
-                    '--enable-x11grab',
-                    '--enable-libmp3lame',
-                    '--enable-libx264',
-                    '--enable-libxvid',
-                    '--enable-runtime-cpudetect',
-                    '--enable-doc',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--shared',
                     ],
                 arguments=[],
                 environment={},
@@ -76,7 +67,9 @@ def main(buildingsite, action=None):
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
-                arguments=[],
+                arguments=[
+                    'prefix=/usr'
+                    ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
@@ -89,10 +82,10 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
+                    'prefix=' + (
                         org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
                             buildingsite
-                            )
+                            ) + os.path.sep + 'usr'
                         )
                     ],
                 environment={},

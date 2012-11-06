@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 import subprocess
 
 import org.wayround.utils.file
 
-import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.build
+import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 

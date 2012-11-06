@@ -1,17 +1,16 @@
 
 import copy
-import os.path
 import glob
-import subprocess
 import logging
+import os.path
 
 from gi.repository import Gtk
 
 import org.wayround.utils.gtk
 
-import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.gtk
+import org.wayround.aipsetup.info
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
@@ -66,10 +65,6 @@ class MainWindow:
         self.ui['combobox1'].pack_start(r, True)
         self.ui['combobox1'].add_attribute(r, 'text', 0)
 
-
-        mode_selector = Gtk.ListStore(str)
-        for i in ['Regular Expression', 'Version Comparison']:
-            mode_selector.append([i])
 
         r = Gtk.CellRendererText()
         self.ui['combobox2'].pack_start(r, True)
@@ -138,6 +133,11 @@ class MainWindow:
 
                 self.ui['textview2'].set_buffer(b)
 
+                b = Gtk.TextBuffer()
+                b.set_text(data['filters'])
+
+                self.ui['textview4'].set_buffer(b)
+
                 m = self.ui['combobox1'].get_model()
                 name_i = -1
 
@@ -148,14 +148,6 @@ class MainWindow:
                         break
 
                 self.ui['combobox1'].set_active(name_i)
-
-
-                if data['version_mtd'] == 're':
-                    self.ui['combobox2'].set_active(0)
-                elif data['version_mtd'] == 'lb':
-                    self.ui['combobox2'].set_active(1)
-                else:
-                    self.ui['combobox2'].set_active(-1)
 
 
                 self.ui['entry2'].set_text(str(data['basename']))
@@ -229,6 +221,10 @@ class MainWindow:
 
             data['description'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
 
+            b = self.ui['textview4'].get_buffer()
+
+            data['filters'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
+
             data['home_page'] = self.ui['entry7'].get_text()
 
     #        b = self.ui['textview2'].get_buffer()
@@ -246,11 +242,6 @@ class MainWindow:
             if model:
                 if active != -1:
                     name = model[active][0]
-
-            if self.ui['combobox2'].get_active() == 1:
-                data['version_mtd'] = 'lb'
-            else:
-                data['version_mtd'] = 're'
 
             data['buildscript'] = name
 

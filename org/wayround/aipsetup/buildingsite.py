@@ -432,10 +432,12 @@ def apply_pkg_info_on_buildingsite(dirname):
 
         logging.debug("Getting info from index DB")
 
-        res = org.wayround.aipsetup.pkginfo.get_info_rec_by_base_and_ver(
+        res = org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
             package_info['pkg_nameinfo']['groups']['name'],
             package_info['pkg_nameinfo']['groups']['version']
             )
+
+        org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(filename)
 
         offerings = list(res.keys())
         if len(offerings) == 0:
