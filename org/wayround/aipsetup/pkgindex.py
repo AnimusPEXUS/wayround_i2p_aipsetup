@@ -184,26 +184,35 @@ def get_package_source_files(name, filtered=True):
         logging.exception("Can't connect to source file index")
     else:
         try:
-            needed_files = []
+
             files = tags_object.objects_by_tags([pkg_info['basename']])
-            files2 = []
-            for i in files:
 
-                if not filtered or i.startswith(pkg_info['src_path_prefix']):
-                    files2.append(i)
+            if filtered:
+                files2 = []
+                for i in files:
+                    if i.startswith(pkg_info['src_path_prefix']):
+                        files2.append(i)
 
-            files = files2
+                files = files2
 
-            del files2
+                del files2
 
-            needed_files = (
-                org.wayround.aipsetup.pkginfo.filter_tarball_list(
-                    files,
-                    pkg_info['filter']
+            if filtered:
+                files = (
+                    org.wayround.aipsetup.pkginfo.filter_tarball_list(
+                        files,
+                        pkg_info['filters']
+                        )
                     )
-                )
 
-            needed_files.sort()
+            if isinstance(files, list):
+                files.sort()
+            else:
+                logging.error(
+                    "get_package_source_files: filter_tarball_list returned `{}'".format(files)
+                    )
+
+            needed_files = files
 
         finally:
             tags_object.commit()

@@ -39,17 +39,17 @@ class MainWindow:
         self.ui['window1'].show_all()
 
 
-        self.ui['button5'].connect('clicked', self.onListRealoadButtonActivated)
+        self.ui['button1'].connect('clicked', self.onListRealoadButtonActivated)
 
         self.ui['button2'].connect('clicked', self.onSaveAndUpdateButtonActivated)
 
-        self.ui['button1'].connect('clicked', self.onEditLatestButtonActivated)
+        self.ui['button3'].connect('clicked', self.onEditLatestButtonActivated)
 
-        self.ui['button6'].connect('clicked', self.onReloadComboActivated)
+        self.ui['combobox1'].connect('popdown', self.onReloadComboActivated)
 
-        self.ui['button3'].connect('clicked', self.onShowAllSourceFilesButtonActivated)
+        self.ui['button4'].connect('clicked', self.onShowAllSourceFilesButtonActivated)
 
-        self.ui['button4'].connect('clicked', self.onShowFilteredSourceFilesButtonActivated)
+        self.ui['button5'].connect('clicked', self.onShowFilteredSourceFilesButtonActivated)
 
 
         c = Gtk.TreeViewColumn("File Names")
@@ -64,15 +64,6 @@ class MainWindow:
         r = Gtk.CellRendererText()
         self.ui['combobox1'].pack_start(r, True)
         self.ui['combobox1'].add_attribute(r, 'text', 0)
-
-
-        r = Gtk.CellRendererText()
-        self.ui['combobox2'].pack_start(r, True)
-        self.ui['combobox2'].add_attribute(r, 'text', 0)
-
-        self.ui['combobox2'].set_model(mode_selector)
-        self.ui['combobox2'].set_active(0)
-
 
 
         self.load_list()
@@ -130,12 +121,10 @@ class MainWindow:
 
                 b = Gtk.TextBuffer()
                 b.set_text('\n'.join(tag_db.get_tags(name[:-5])))
-
                 self.ui['textview2'].set_buffer(b)
 
                 b = Gtk.TextBuffer()
                 b.set_text(data['filters'])
-
                 self.ui['textview4'].set_buffer(b)
 
                 m = self.ui['combobox1'].get_model()
@@ -152,9 +141,7 @@ class MainWindow:
 
                 self.ui['entry2'].set_text(str(data['basename']))
 
-                self.ui['entry3'].set_text(str(data['version']))
-
-                self.ui['entry5'].set_text(str(data['src_path_prefix']))
+                self.ui['entry3'].set_text(str(data['src_path_prefix']))
 
                 self.ui['spinbutton1'].set_value(float(data['installation_priority']))
 
@@ -170,7 +157,7 @@ class MainWindow:
 
                 self.ui['checkbutton6'].set_active(bool(data['deprecated']))
 
-                self.ui['button1'].set_sensitive(
+                self.ui['button3'].set_sensitive(
                     (
                         not self.ui['checkbutton3'].get_active()
                         or
@@ -247,9 +234,7 @@ class MainWindow:
 
             data['basename'] = self.ui['entry2'].get_text()
 
-            data['version'] = self.ui['entry3'].get_text()
-
-            data['src_path_prefix'] = self.ui['entry5'].get_text()
+            data['src_path_prefix'] = self.ui['entry3'].get_text()
 
             data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
 
@@ -427,6 +412,8 @@ class MainWindow:
                 filtered=False
                 )
 
+            logging.debug("get_package_source_files returned {}".format(lst))
+
             if not isinstance(lst, list):
                 dia = Gtk.MessageDialog(
                     self.ui['window1'],
@@ -460,6 +447,8 @@ class MainWindow:
                 self.ui['entry1'].get_text()[:-5],
                 filtered=True
                 )
+
+            logging.debug("get_package_source_files returned {}".format(lst))
 
             if not isinstance(lst, list):
                 dia = Gtk.MessageDialog(

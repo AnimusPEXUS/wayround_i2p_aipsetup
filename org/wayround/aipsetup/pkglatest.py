@@ -299,7 +299,7 @@ def get_latest_src_from_src_db(name, files=None):
             name
             )
 
-    if len(files) == 0:
+    if not isinstance(files, list) or len(files) == 0:
         ret = None
     else:
         ret = max(

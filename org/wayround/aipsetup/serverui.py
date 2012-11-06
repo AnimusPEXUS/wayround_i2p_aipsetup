@@ -375,6 +375,10 @@ def package_sources_file_list(info_db, name):
 
     files = org.wayround.aipsetup.pkgindex.get_package_source_files(name, info_db=info_db)
 
+    # TODO: rework this
+    if not isinstance(files, list):
+        files = []
+
     files.sort(
         reverse=True,
         key=functools.cmp_to_key(

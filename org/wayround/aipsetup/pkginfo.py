@@ -52,7 +52,7 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             default=''
             )
 
-        filter = sqlalchemy.Column(
+        filters = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False,
             default=''
@@ -412,14 +412,17 @@ def filter_text_parse(filter_text):
 
     for i in lines:
         if not i.isspace():
-            struct = i.split(3)
-            struct = dict(
-                action=struct[0],
-                subject=struct[1],
-                function=struct[2],
-                data=struct[3],
-                )
-            ret.append(struct)
+            struct = i.split(' ', maxsplit=3)
+            if not len(struct) == 4:
+                logging.error("Wrong filter line: `{}'".format(i))
+            else:
+                struct = dict(
+                    action=struct[0],
+                    subject=struct[1],
+                    function=struct[2],
+                    data=struct[3],
+                    )
+                ret.append(struct)
 
     return ret
 
@@ -437,7 +440,7 @@ def filter_tarball_list(
     ret = []
 
     inp_list = set(copy.copy(input_list))
-    out_list = set(copy.copy(input_list))
+    out_list = copy.copy(inp_list)
 
     filters = filter_text_parse(filter_text)
 
@@ -465,7 +468,7 @@ def filter_tarball_list(
 
         if subject == 'filename':
 
-            if not function in ['begins', 'contains', 'ends']:
+            if not function in ['begins', 'contains', 'ends', 'fm', 're']:
                 logging.error("Wrong `filename' function : `{}'".format(function))
                 ret = 3
                 break
@@ -482,7 +485,7 @@ def filter_tarball_list(
 
         elif subject == 'status':
 
-            if not function in ['begins', 'contains', 'ends']:
+            if not function in ['begins', 'contains', 'ends', 'fm', 're']:
                 logging.error("Wrong `path' function : `{}'".format(function))
                 ret = 5
                 break
@@ -493,7 +496,7 @@ def filter_tarball_list(
 
         if not isinstance(ret, int):
 
-            working_list = copy.copy(inp_list)
+            working_list = None
 
             if action == '+':
                 working_list = copy.copy(inp_list)
@@ -552,6 +555,9 @@ def filter_tarball_list(
                     matched = re.match(data, working_item) != None
 
                 elif function == 'fm':
+                    logging.debug(
+                        "filter_tarball_list: fm-matching `{}' and `{}'".format(working_item, data)
+                        )
                     matched = fnmatch.fnmatch(working_item, data)
 
                 elif function in ['<', '<=', '==', '>=', '>']:
@@ -568,18 +574,34 @@ def filter_tarball_list(
                     matched = not matched
 
                 if matched:
+
+                    logging.debug(
+                        "filter_tarball_list: NOT match: `{}'\n       `{}'".format(item, f)
+                        )
+
                     if action == '+':
-                        out_list.add(working_item)
+                        logging.debug("filter_tarball_list: adding: {}".format(item))
+                        out_list.add(item)
 
                     elif action == '-':
-                        if working_item in out_list:
-                            out_list.remove(working_item)
+                        logging.debug("filter_tarball_list: removing: {}".format(item))
+                        if item in out_list:
+                            out_list.remove(item)
 
                     else:
                         raise Exception("Programming error")
 
+                else:
+                    logging.debug(
+                        "filter_tarball_list: NOT match: `{}'\n       `{}'".format(item, f)
+                        )
+
+
     if not isinstance(ret, int):
         ret = out_list
+
+    if isinstance(ret, set):
+        ret = list(ret)
 
     return ret
 
