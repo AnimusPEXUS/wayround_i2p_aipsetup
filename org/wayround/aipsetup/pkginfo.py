@@ -1,4 +1,5 @@
 
+import builtins
 import copy
 import fnmatch
 import logging
@@ -218,19 +219,41 @@ def set_package_info_record(name, struct):
 #            if i in keys:
 #                keys.remove(i)
 
+    keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+
+    for i in keys:
+        kt = type(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE[i])
+
+        if not kt in [builtins.int, builtins.str, builtins.bool]:
+            raise TypeError("Wrong type supplied: {}".format(kt))
+
+        ktt = 'str'
+        if kt == builtins.int:
+            ktt = 'int'
+        elif kt == builtins.str:
+            ktt = 'str'
+        elif kt == builtins.bool:
+            ktt = 'bool'
+        else:
+            raise Exception("Programming Error")
+
+        exec("q.{name} = {type}(struct['{name}'])".format(type=ktt, name=i))
+
     q.name = name
-    q.description = str(struct["description"])
-    q.home_page = str(struct["home_page"])
-    q.buildscript = str(struct["buildscript"])
-    q.basename = str(struct["basename"])
-    q.filters = str(struct["filters"])
-    q.installation_priority = int(struct["installation_priority"])
-    q.removable = bool(struct["removable"])
-    q.reducible = bool(struct["reducible"])
-    q.non_installable = bool(struct["non_installable"])
-    q.deprecated = bool(struct["deprecated"])
-    q.auto_newest_src = bool(struct["auto_newest_src"])
-    q.auto_newest_pkg = bool(struct["auto_newest_pkg"])
+
+#    q.description = str(struct["description"])
+#    q.home_page = str(struct["home_page"])
+#    q.buildscript = str(struct["buildscript"])
+#    q.basename = str(struct["basename"])
+#    q.src_path_prefix = str(struct["src_path_prefix"])
+#    q.filters = str(struct["filters"])
+#    q.installation_priority = int(struct["installation_priority"])
+#    q.removable = bool(struct["removable"])
+#    q.reducible = bool(struct["reducible"])
+#    q.non_installable = bool(struct["non_installable"])
+#    q.deprecated = bool(struct["deprecated"])
+#    q.auto_newest_src = bool(struct["auto_newest_src"])
+#    q.auto_newest_pkg = bool(struct["auto_newest_pkg"])
 
 #        for i in keys:
 #            exec('q.{key} = struct["{key}"]'.format(key=i))
@@ -606,13 +629,13 @@ def filter_tarball_list(
     return ret
 
 
-def get_package_name_by_tarball_filename(tarball_filename):
+def get_package_name_by_tarball_filename(tarball_filename, mute=True):
 
     ret = None
 
     parsed = org.wayround.aipsetup.name.source_name_parse(
         tarball_filename,
-        mute=True
+        mute=mute
         )
 
     if not isinstance(parsed, dict):
@@ -629,7 +652,7 @@ def get_package_name_by_tarball_filename(tarball_filename):
 
             res = filter_tarball_list(
                 lst,
-                q.filter
+                i.filters
                 )
 
             if isinstance(res, list) and len(res) != 1:

@@ -432,40 +432,22 @@ def apply_pkg_info_on_buildingsite(dirname):
 
         logging.debug("Getting info from index DB")
 
-        res = org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
-            package_info['pkg_nameinfo']['groups']['name'],
-            package_info['pkg_nameinfo']['groups']['version']
+        info = org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
+            package_info['pkg_nameinfo']['name']
             )
 
-        org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(filename)
+        if not isinstance(info, dict):
+            logging.error("Can't read info from DB")
+            package_info['pkg_info'] = {}
+            ret = 4
 
-        offerings = list(res.keys())
-        if len(offerings) == 0:
-            logging.error(
-                "Can't find acceptable basename=>version package info offering in package index"
-                )
-            ret = 2
-        elif len(offerings) > 1:
-            logging.error(
-                "To many acceptable basename=>version offerings in package index:\n{}".format(res)
-                )
-            ret = 3
         else:
 
-            info = res[offerings[0]]
+            package_info['pkg_info'] = info
 
-            if not isinstance(info, dict):
-                logging.error("Can't read info from DB")
-                package_info['pkg_info'] = {}
-                ret = 4
+            write_package_info(dirname, package_info)
 
-            else:
-
-                package_info['pkg_info'] = info
-
-                write_package_info(dirname, package_info)
-
-                ret = 0
+            ret = 0
 
     return ret
 

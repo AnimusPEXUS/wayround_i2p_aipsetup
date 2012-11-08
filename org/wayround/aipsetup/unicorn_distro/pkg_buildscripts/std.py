@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")

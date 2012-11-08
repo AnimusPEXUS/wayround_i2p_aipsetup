@@ -172,7 +172,7 @@ def get_package_files(name):
 
 def get_package_source_files(name, filtered=True):
 
-    needed_files = []
+    ret = []
 
     pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(
         name=name
@@ -185,6 +185,7 @@ def get_package_source_files(name, filtered=True):
     else:
         try:
 
+            files = []
             files = tags_object.objects_by_tags([pkg_info['basename']])
 
             if filtered:
@@ -198,26 +199,30 @@ def get_package_source_files(name, filtered=True):
                 del files2
 
             if filtered:
-                files = (
+                ftl_r = (
                     org.wayround.aipsetup.pkginfo.filter_tarball_list(
                         files,
                         pkg_info['filters']
                         )
                     )
+                if isinstance(ftl_r, list):
+                    files = ftl_r
+                else:
+                    logging.error(
+                        "get_package_source_files: filter_tarball_list returned `{}'".format(files)
+                        )
 
-            if isinstance(files, list):
-                files.sort()
-            else:
-                logging.error(
-                    "get_package_source_files: filter_tarball_list returned `{}'".format(files)
-                    )
+            files.sort()
 
-            needed_files = files
+            ret = files
+
+            del(files)
 
         finally:
+            # TODO: commit 0_o?
             tags_object.commit()
 
-    return needed_files
+    return ret
 
 def get_category_by_id(cid):
 

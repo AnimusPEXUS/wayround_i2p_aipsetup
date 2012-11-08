@@ -1388,7 +1388,11 @@ def list_files_installed_by_asp(
 def build(source_files):
     ret = 0
 
-    par_res = org.wayround.aipsetup.name.source_name_parse(source_files[0])
+    par_res = org.wayround.aipsetup.name.source_name_parse(
+        source_files[0],
+        mute=True
+        )
+
 
     if not isinstance(par_res, dict):
         logging.error("Can't parse source file name")
@@ -1401,8 +1405,7 @@ def build(source_files):
             pass
 
         package_info = org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
-            par_res['groups']['name'],
-            par_res['groups']['version']
+            source_files[0]
             )
 
         if package_info == {}:
@@ -1416,7 +1419,7 @@ def build(source_files):
 
             tmp_dir_prefix = "{name}-{version}-{status}-{timestamp}-".format_map(
                 {
-                    'name': package_info[list(package_info.keys())[0]]['name'],
+                    'name': package_info['name'],
                     'version': par_res['groups']['version'],
                     'status': par_res['groups']['status'],
                     'timestamp': org.wayround.utils.time.currenttime_stamp()

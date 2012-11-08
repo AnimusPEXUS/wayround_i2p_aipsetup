@@ -65,6 +65,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Ctrl+r or F5</property>
                 <property name="image">image1</property>
                 <property name="relief">none</property>
                 <property name="image_position">top</property>
@@ -81,6 +82,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Ctrl+s</property>
                 <property name="image">image2</property>
                 <property name="relief">none</property>
                 <property name="image_position">top</property>
@@ -203,6 +205,9 @@
                   <object class="GtkTreeView" id="treeview1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="treeview-selection1"/>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -632,6 +637,7 @@
                           <object class="GtkComboBox" id="combobox1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Ctrl+r or F5 to refresh list</property>
                             <property name="hexpand">True</property>
                             <property name="popup_fixed_width">False</property>
                           </object>

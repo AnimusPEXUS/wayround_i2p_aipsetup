@@ -5,6 +5,7 @@ import logging
 import os.path
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 
 import org.wayround.utils.gtk
 
@@ -39,13 +40,13 @@ class MainWindow:
         self.ui['window1'].show_all()
 
 
+        self.ui['window1'].connect('key-press-event', self.onWindow1KeyPressed)
+
         self.ui['button1'].connect('clicked', self.onListRealoadButtonActivated)
 
         self.ui['button2'].connect('clicked', self.onSaveAndUpdateButtonActivated)
 
         self.ui['button3'].connect('clicked', self.onEditLatestButtonActivated)
-
-        self.ui['combobox1'].connect('popdown', self.onReloadComboActivated)
 
         self.ui['button4'].connect('clicked', self.onShowAllSourceFilesButtonActivated)
 
@@ -377,8 +378,32 @@ class MainWindow:
 
         return
 
-    def onReloadComboActivated(self, button):
-        self.load_buildscript_list()
+    def onWindow1KeyPressed(self, widget, event):
+#        print("keyval ==     {}".format(repr(hex(event.keyval))))
+#        print("state  ==     {}".format(repr(bin(event.state))))
+#
+#        print("CONTROL_MASK: {}".format(repr(bin(event.state & Gdk.ModifierType.CONTROL_MASK))))
+#        print("SHIFT_MASK:   {}".format(repr(bin(event.state & Gdk.ModifierType.SHIFT_MASK))))
+#        print("MOD1_MASK:    {}".format(repr(bin(event.state & Gdk.ModifierType.MOD1_MASK))))
+#        print("")
+
+        if (
+            (event.keyval == Gdk.KEY_s)
+            and
+            (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
+            ):
+            self.onSaveAndUpdateButtonActivated(None)
+
+        if (
+            ((event.keyval == Gdk.KEY_F5))
+            or
+            (
+             (event.keyval == Gdk.KEY_r)
+             and
+             (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
+             )
+            ):
+            self.onListRealoadButtonActivated(None)
 
     def onSaveAndUpdateButtonActivated(self, button):
         if self.ui['entry1'].get_text() == '':
@@ -469,6 +494,7 @@ class MainWindow:
 
 
     def onListRealoadButtonActivated(self, button):
+        self.load_buildscript_list()
         self.load_list()
 
     def onPackageListItemActivated(self, view, path, column):
