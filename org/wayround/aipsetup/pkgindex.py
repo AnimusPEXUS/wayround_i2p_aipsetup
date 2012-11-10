@@ -8,25 +8,21 @@ import functools
 import glob
 import logging
 import os.path
-import pprint
-import re
 import shutil
-import sys
 
-import sqlalchemy
 import sqlalchemy.ext
 
 import org.wayround.utils.db
-import org.wayround.utils.tag
 import org.wayround.utils.file
+import org.wayround.utils.tag
 
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
 
-import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.dbconnections
+import org.wayround.aipsetup.pkginfo
 
-
+s
 class PackageIndex(org.wayround.utils.db.BasicDB):
     """
     Main package index DB handling class
@@ -557,26 +553,13 @@ def get_category_path_string(cid_or_name):
     return ret
 
 
-def create_category(name='name', parent_cid=0):
-
-    index_db = org.wayround.aipsetup.dbconnections.index_db()
-
-    new_cat = index_db.Category(name=name, parent_cid=parent_cid)
-
-    index_db.sess.add(new_cat)
-
-    new_cat_id = new_cat.cid
-
-    return new_cat_id
-
-
-def _srfpac2_pkg_struct(pid, name, cid):
+def _srfpac_pkg_struct(pid, name, cid):
     return dict(pid=pid, name=name, cid=cid)
 
-def _srfpac2_cat_struct(cid, name, parent_cid):
+def _srfpac_cat_struct(cid, name, parent_cid):
     return dict(cid=cid, name=name, parent_cid=parent_cid)
 
-def _srfpac2_get_cat_by_cat_path(category_locations, cat_path):
+def _srfpac_get_cat_by_cat_path(category_locations, cat_path):
 
     ret = None
 
@@ -604,7 +587,7 @@ def scan_repo_for_pkg_and_cat():
 
 
         if root == repo_dir:
-            category_locations[''] = _srfpac2_cat_struct(
+            category_locations[''] = _srfpac_cat_struct(
                 cid=0,
                 name='',
                 parent_cid=None
@@ -615,13 +598,13 @@ def scan_repo_for_pkg_and_cat():
 
             if is_repo_package(root):
 
-                parent_cat = _srfpac2_get_cat_by_cat_path(
+                parent_cat = _srfpac_get_cat_by_cat_path(
                     category_locations,
                     os.path.dirname(relpath)
                     )
                 parent_cat_id = parent_cat['cid']
 
-                package_locations[relpath] = _srfpac2_pkg_struct(
+                package_locations[relpath] = _srfpac_pkg_struct(
                     pid=last_pkg_id,
                     name=os.path.basename(relpath),
                     cid=parent_cat_id
@@ -643,14 +626,14 @@ def scan_repo_for_pkg_and_cat():
 
                 parent_cat_name = os.path.dirname(relpath)
 
-                parent_cat = _srfpac2_get_cat_by_cat_path(
+                parent_cat = _srfpac_get_cat_by_cat_path(
                     category_locations,
                     parent_cat_name
                     )
 
                 parent_cat_id = parent_cat['cid']
 
-                category_locations[relpath] = _srfpac2_cat_struct(
+                category_locations[relpath] = _srfpac_cat_struct(
                     cid=last_cat_id,
                     name=os.path.basename(relpath),
                     parent_cid=parent_cat_id
@@ -665,12 +648,6 @@ def scan_repo_for_pkg_and_cat():
                 )
 
     org.wayround.utils.file.progress_write_finish()
-
-#    print("Categories")
-#    pprint.pprint(category_locations, indent=4)
-#
-#    print("Packages")
-#    pprint.pprint(package_locations, indent=4)
 
     if ret == 0:
         ret = {'cats': category_locations, 'packs':package_locations}
