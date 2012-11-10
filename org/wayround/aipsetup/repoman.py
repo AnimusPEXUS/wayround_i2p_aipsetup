@@ -62,7 +62,29 @@ def repoman_scan_repo_for_pkg_and_cat(opts, args):
     to database
     """
 
-    ret = org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat()
+    ret = 0
+
+    res = org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat()
+
+    if not isinstance(res, dict):
+        ret = 1
+    else:
+        res2 = org.wayround.aipsetup.pkgindex.detect_package_collisions(
+            res['cats'],
+            res['packs']
+            )
+
+        if res2 != 0:
+            ret = 2
+        else:
+
+            res3 = org.wayround.aipsetup.pkgindex.save_cats_and_packs_to_db(
+                res['cats'],
+                res['packs']
+                )
+
+            if res3 != 0:
+                ret = 2
 
     return ret
 

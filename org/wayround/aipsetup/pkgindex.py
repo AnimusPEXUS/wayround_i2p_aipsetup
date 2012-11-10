@@ -8,6 +8,7 @@ import functools
 import glob
 import logging
 import os.path
+import pprint
 import re
 import shutil
 import sys
@@ -46,8 +47,7 @@ class PackageIndex(org.wayround.utils.db.BasicDB):
 
         pid = sqlalchemy.Column(
             sqlalchemy.Integer,
-            primary_key=True,
-            autoincrement=True
+            primary_key=True
             )
 
         name = sqlalchemy.Column(
@@ -74,8 +74,7 @@ class PackageIndex(org.wayround.utils.db.BasicDB):
 
         cid = sqlalchemy.Column(
             sqlalchemy.Integer,
-            primary_key=True,
-            autoincrement=True
+            primary_key=True
             )
 
         name = sqlalchemy.Column(
@@ -120,7 +119,7 @@ def get_sources_connection():
     return ret
 
 
-def get_is_repo_package_dir(path):
+def is_repo_package(path):
 
     return (os.path.isdir(path)
         and os.path.isfile(
@@ -557,52 +556,154 @@ def get_category_path_string(cid_or_name):
 
     return ret
 
-def get_package_collisions_in_db():
+
+def create_category(name='name', parent_cid=0):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
+    new_cat = index_db.Category(name=name, parent_cid=parent_cid)
+
+    index_db.sess.add(new_cat)
+
+    new_cat_id = new_cat.cid
+
+    return new_cat_id
+
+
+def _srfpac2_pkg_struct(pid, name, cid):
+    return dict(pid=pid, name=name, cid=cid)
+
+def _srfpac2_cat_struct(cid, name, parent_cid):
+    return dict(cid=cid, name=name, parent_cid=parent_cid)
+
+def _srfpac2_get_cat_by_cat_path(category_locations, cat_path):
+
+    ret = None
+
+    if cat_path in category_locations:
+        ret = category_locations[cat_path]
+
+    return ret
+
+def scan_repo_for_pkg_and_cat():
     ret = 0
 
-    lst = index_db.sess.query(
-        index_db.Package
-        ).order_by(
-            index_db.Package.name
-            ).all()
+    repo_dir = os.path.abspath(
+        org.wayround.aipsetup.config.config['repository']
+        )
 
-    lst2 = []
+    category_locations = dict()
+    package_locations = dict()
 
-    logging.info("Scanning paths")
-    for each in lst:
-        org.wayround.utils.file.progress_write('       {}'.format(each.name))
-        lst2.append(get_package_path(pid_or_name=each.pid))
+    last_cat_id = 0
+    last_pkg_id = 0
+
+    for root, dirs, files in os.walk(
+        repo_dir
+        ):
+
+
+        if root == repo_dir:
+            category_locations[''] = _srfpac2_cat_struct(
+                cid=0,
+                name='',
+                parent_cid=None
+                )
+
+        else:
+            relpath = os.path.relpath(root, repo_dir)
+
+            if is_repo_package(root):
+
+                parent_cat = _srfpac2_get_cat_by_cat_path(
+                    category_locations,
+                    os.path.dirname(relpath)
+                    )
+                parent_cat_id = parent_cat['cid']
+
+                package_locations[relpath] = _srfpac2_pkg_struct(
+                    pid=last_pkg_id,
+                    name=os.path.basename(relpath),
+                    cid=parent_cat_id
+                    )
+                last_pkg_id += 1
+
+            else:
+
+                already_listed_package = False
+                for i in package_locations.keys():
+                    if relpath.startswith(i):
+                        already_listed_package = True
+                        break
+
+                if already_listed_package:
+                    continue
+
+                last_cat_id += 1
+
+                parent_cat_name = os.path.dirname(relpath)
+
+                parent_cat = _srfpac2_get_cat_by_cat_path(
+                    category_locations,
+                    parent_cat_name
+                    )
+
+                parent_cat_id = parent_cat['cid']
+
+                category_locations[relpath] = _srfpac2_cat_struct(
+                    cid=last_cat_id,
+                    name=os.path.basename(relpath),
+                    parent_cid=parent_cat_id
+                    )
+
+            org.wayround.utils.file.progress_write(
+                "    scanning (found: {} categories, {} packages): {}".format(
+                    len(category_locations.keys()),
+                    len(package_locations.keys()),
+                    relpath
+                    )
+                )
 
     org.wayround.utils.file.progress_write_finish()
 
-    logging.info("Processing {} packages...".format(len(lst)))
-    sys.stdout.flush()
+#    print("Categories")
+#    pprint.pprint(category_locations, indent=4)
+#
+#    print("Packages")
+#    pprint.pprint(package_locations, indent=4)
 
-    del(lst)
+    if ret == 0:
+        ret = {'cats': category_locations, 'packs':package_locations}
+
+    return ret
+
+def detect_package_collisions(category_locations, package_locations):
+
+    ret = 0
 
     lst_dup = {}
     pkg_paths = {}
 
-    for each in lst2:
+    for each in package_locations.keys():
 
-        l = each[-1][1].lower()
+        l = package_locations[each]['name'].lower()
 
         if not l in pkg_paths:
             pkg_paths[l] = []
 
-        pkg_paths[l].append(join_pkg_path(each))
+        pkg_paths[l].append(each)
 
-    for each in list(pkg_paths.keys()):
-        if len(pkg_paths[each]) > 1:
-            lst_dup[each] = pkg_paths[each]
+    for each in package_locations.keys():
+
+        l = package_locations[each]['name'].lower()
+
+        if len(pkg_paths[l]) > 1:
+            lst_dup[l] = pkg_paths[l]
 
 
     if len(lst_dup) == 0:
         logging.info(
-            "Found {} duplicated package names. Package locations look good!".format(
+            "Found {} duplicated package names. Package locations looks good!".format(
                 len(lst_dup)
                 )
             )
@@ -628,108 +729,45 @@ def get_package_collisions_in_db():
 
     return ret
 
-def create_category(name='name', parent_cid=0):
-
-    index_db = org.wayround.aipsetup.dbconnections.index_db()
-
-    new_cat = index_db.Category(name=name, parent_cid=parent_cid)
-
-    index_db.sess.add(new_cat)
-
-    new_cat_id = new_cat.cid
-
-    return new_cat_id
-
-
-def _scan_repo_for_pkg_and_cat(root_dir, cid):
-
-    index_db = org.wayround.aipsetup.dbconnections.index_db()
-
-    files = os.listdir(root_dir)
-
-    files.sort()
-
-    isfiles = 0
-
-    for each in files:
-        full_path = os.path.join(root_dir, each)
-
-        if not os.path.isdir(full_path):
-            isfiles += 1
-
-    if isfiles >= 3:
-        logging.warning(
-            "too many non-dirs : {}\n        skipping".format(root_dir)
-            )
-
-        return 1
-
-    for each in files:
-        if each in ['.', '..']:
-            continue
-
-        full_path = os.path.join(root_dir, each)
-
-        if os.path.islink(full_path):
-            continue
-
-        if get_is_repo_package_dir(full_path):
-
-            pa = index_db.Package(name=each, cid=cid)
-            index_db.sess.add(pa)
-            if sys.stdout.isatty():
-                pcount = index_db.sess.query(index_db.Package).count()
-                line_to_write = (
-                    "       {} packages found: {}".format(pcount, pa.name)
-                    )
-                org.wayround.utils.file.progress_write(line_to_write)
-
-            del(pa)
-
-        elif os.path.isdir(full_path):
-
-            new_cat = index_db.Category(name=each, parent_cid=cid)
-
-            index_db.sess.add(new_cat)
-            index_db.sess.commit()
-
-            new_cat_cid = new_cat.cid
-
-            del(new_cat)
-
-            _scan_repo_for_pkg_and_cat(
-                full_path, new_cat_cid
-                )
-        else:
-            logging.warning("garbage file found: {}".format(full_path))
-
-    return 0
-
-def scan_repo_for_pkg_and_cat():
-
-    index_db = org.wayround.aipsetup.dbconnections.index_db()
+def save_cats_and_packs_to_db(category_locations, package_locations):
 
     ret = 0
 
-    logging.info("Deleting old data")
+    category_locations_internal = copy.copy(category_locations)
+
+    del category_locations_internal['']
+
+    index_db = org.wayround.aipsetup.dbconnections.index_db()
+
+    logging.info("Deleting old data from DB")
     index_db.sess.query(index_db.Category).delete()
     index_db.sess.query(index_db.Package).delete()
 
-    logging.info("Committing")
     index_db.sess.commit()
 
-    logging.info("Scanning repository...")
-    _scan_repo_for_pkg_and_cat(
-        org.wayround.aipsetup.config.config['repository'],
-        0
-        )
+    logging.info("Adding new data to DB")
+    for i in category_locations_internal.keys():
 
-    org.wayround.utils.file.progress_write_finish()
+        new_obj = index_db.Category()
+
+        new_obj.cid = category_locations_internal[i]['cid']
+        new_obj.name = category_locations_internal[i]['name']
+        new_obj.parent_cid = category_locations_internal[i]['parent_cid']
+
+        index_db.sess.add(new_obj)
+
+    for i in package_locations.keys():
+
+        new_obj = index_db.Package()
+
+        new_obj.pid = package_locations[i]['pid']
+        new_obj.name = package_locations[i]['name']
+        new_obj.cid = package_locations[i]['cid']
+
+        index_db.sess.add(new_obj)
+
     index_db.sess.commit()
-
-    logging.info("Searching for errors")
-    get_package_collisions_in_db()
-    logging.info("Search operations finished")
+    logging.info("DB saved")
 
     return ret
 
@@ -763,6 +801,7 @@ def create_required_dirs_at_package(path):
 
     return ret
 
+# TODO: deprecation required for this function
 def join_pkg_path(pkg_path):
     lst = []
 
