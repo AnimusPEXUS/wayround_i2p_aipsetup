@@ -8,8 +8,10 @@ import subprocess
 import sys
 
 import org.wayround.aipsetup.buildingsite
-import org.wayround.utils.osutils
+
 import org.wayround.utils.error
+import org.wayround.utils.log
+import org.wayround.utils.osutils
 import org.wayround.utils.path
 
 
@@ -154,22 +156,7 @@ def cmake_low(
 
     else:
 
-        t1 = org.wayround.utils.stream.lbl_write(
-            p.stdout,
-            log,
-            True
-            )
-        t1.start()
-
-        t2 = org.wayround.utils.stream.lbl_write(
-            p.stderr,
-            log,
-            True,
-            typ='error'
-            )
-        t2.start()
-        t1.join()
-        t2.join()
+        org.wayround.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()

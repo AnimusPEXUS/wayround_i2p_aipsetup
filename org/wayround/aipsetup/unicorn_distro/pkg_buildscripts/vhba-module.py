@@ -88,28 +88,36 @@ def main(buildingsite, action=None):
 
         if 'build' in actions and ret == 0:
             logging.info("Working in `{}'".format(src_dir))
-            ret = subprocess.Popen(
-                [
-                 'make',
-                 'PWD=' + src_dir,
-                 'KERNELRELEASE=' + kern_rel,
-                 'DESTDIR=' + dst_dir
-                 ],
-                cwd=src_dir
-                ).wait()
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'PWD=' + src_dir,
+                    'KERNELRELEASE=' + kern_rel,
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
 
         if 'distribute' in actions and ret == 0:
             logging.info("Working in `{}'".format(src_dir))
-            ret = subprocess.Popen(
-                [
-                 'make',
-                 'install',
-                 'PWD=' + src_dir,
-                 'KERNELRELEASE=' + kern_rel,
-                 'DESTDIR=' + dst_dir
-                 ],
-                cwd=src_dir
-                ).wait()
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install',
+                    'PWD=' + src_dir,
+                    'KERNELRELEASE=' + kern_rel,
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
 
         if 'afterdist' in actions and ret == 0:
 

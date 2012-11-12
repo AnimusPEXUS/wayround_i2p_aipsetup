@@ -3,14 +3,12 @@ import os.path
 import sys
 import subprocess
 
-
-import org.wayround.utils.osutils
 import org.wayround.utils.error
-import org.wayround.utils.stream
+import org.wayround.utils.log
+import org.wayround.utils.osutils
 import org.wayround.utils.path
 
 import org.wayround.aipsetup.buildingsite
-
 
 def export_functions():
     return {
@@ -210,22 +208,7 @@ def _overal(log, buildingsite='.', name='configure'):
 
         else:
 
-            t = org.wayround.utils.stream.lbl_write(
-                p.stdout,
-                log,
-                True
-                )
-            t.start()
-
-            t2 = org.wayround.utils.stream.lbl_write(
-                p.stderr,
-                log,
-                True,
-                typ='error'
-                )
-            t2.start()
-            t.join()
-            t2.join()
+            org.wayround.utils.log.process_output_logger(p, log)
 
             try:
                 p.wait()

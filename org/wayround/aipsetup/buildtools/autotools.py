@@ -10,9 +10,11 @@ import sys
 import tempfile
 
 import org.wayround.aipsetup.buildingsite
-import org.wayround.utils.osutils
+
 import org.wayround.utils.archive
 import org.wayround.utils.error
+import org.wayround.utils.log
+import org.wayround.utils.osutils
 import org.wayround.utils.path
 
 def determine_abs_configure_dir(buildingsite, config_dir):
@@ -295,22 +297,7 @@ def configure_low(
 
     else:
 
-        t = org.wayround.utils.stream.lbl_write(
-            p.stdout,
-            log,
-            True
-            )
-        t.start()
-
-        t2 = org.wayround.utils.stream.lbl_write(
-            p.stderr,
-            log,
-            True,
-            typ='error'
-            )
-        t2.start()
-        t.join()
-        t2.join()
+        org.wayround.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()
@@ -412,22 +399,7 @@ def make_low(
 
     else:
 
-        t = org.wayround.utils.stream.lbl_write(
-            p.stdout,
-            log,
-            True
-            )
-        t.start()
-
-        t2 = org.wayround.utils.stream.lbl_write(
-            p.stderr,
-            log,
-            True,
-            typ='error'
-            )
-        t2.start()
-        t.join()
-        t2.join()
+        org.wayround.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()
