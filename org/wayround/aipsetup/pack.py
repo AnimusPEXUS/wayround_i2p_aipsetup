@@ -17,6 +17,7 @@ import org.wayround.utils.time
 import org.wayround.utils.checksum
 import org.wayround.utils.archive
 import org.wayround.utils.deps_c
+import org.wayround.utils.path
 
 
 # NOTE: this list is suspiciously similar to what in complete
@@ -208,7 +209,7 @@ def destdir_verify_paths_correctness(buildingsite):
         if os.path.islink(p1) or os.path.exists(p1):
             logging.error(
                 "Forbidden path: {}".format(
-                    os.path.relpath(p1, buildingsite)
+                    org.wayround.utils.path.relpath(p1, buildingsite)
                     )
                 )
             ret = 1
@@ -229,7 +230,7 @@ def destdir_verify_paths_correctness(buildingsite):
 
 def destdir_set_modes(buildingsite):
 
-    buildingsite = os.path.abspath(buildingsite)
+    buildingsite = org.wayround.utils.path.abspath(buildingsite)
 
     destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
     ret = 0
@@ -238,7 +239,7 @@ def destdir_set_modes(buildingsite):
         for dirpath, dirnames, filenames in os.walk(destdir):
             filenames.sort()
             dirnames.sort()
-            dirpath = os.path.abspath(dirpath)
+            dirpath = org.wayround.utils.path.abspath(dirpath)
 
             for i in dirnames:
                 f = os.path.join(dirpath, i)
@@ -267,7 +268,7 @@ def destdir_checksum(buildingsite):
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
-    output_file = os.path.abspath(
+    output_file = org.wayround.utils.path.abspath(
         os.path.join(
             lists_dir,
             'DESTDIR.sha512'
@@ -304,7 +305,7 @@ def destdir_filelist(buildingsite):
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
-    output_file = os.path.abspath(
+    output_file = org.wayround.utils.path.abspath(
         os.path.join(
             lists_dir,
             'DESTDIR.lst'
@@ -327,7 +328,7 @@ def destdir_filelist(buildingsite):
 
         lst2 = []
         for i in lst:
-            lst2.append('/' + os.path.relpath(i, destdir))
+            lst2.append('/' + org.wayround.utils.path.relpath(i, destdir))
 
         lst = lst2
 
@@ -355,14 +356,14 @@ def destdir_deps_c(buildingsite):
 
     lists_dir = org.wayround.aipsetup.buildingsite.getDIR_LISTS(buildingsite)
 
-    lists_file = os.path.abspath(
+    lists_file = org.wayround.utils.path.abspath(
         os.path.join(
             lists_dir,
             'DESTDIR.lst'
             )
         )
 
-    deps_file = os.path.abspath(
+    deps_file = org.wayround.utils.path.abspath(
         os.path.join(
             lists_dir,
             'DESTDIR.dep_c'
@@ -397,7 +398,7 @@ def destdir_deps_c(buildingsite):
                 file_list_i += 1
                 filename = destdir + os.path.sep + i
                 filename.replace(os.path.sep * 2, os.path.sep)
-                filename = os.path.abspath(filename)
+                filename = org.wayround.utils.path.abspath(filename)
                 dep = org.wayround.utils.deps_c.elf_deps(filename)
                 if isinstance(dep, list):
                     elfs += 1
@@ -443,7 +444,7 @@ def remove_source_and_build_dirs(buildingsite):
         org.wayround.aipsetup.buildingsite.DIR_SOURCE,
         org.wayround.aipsetup.buildingsite.DIR_BUILDING
         ]:
-        dirname = os.path.abspath(
+        dirname = org.wayround.utils.path.abspath(
             os.path.join(
                 buildingsite,
                 i
@@ -473,7 +474,7 @@ def compress_patches_destdir_and_logs(buildingsite):
         org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
         org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
         ]:
-        dirname = os.path.abspath(
+        dirname = org.wayround.utils.path.abspath(
             os.path.join(
                 buildingsite,
                 i
@@ -550,7 +551,7 @@ def remove_patches_destdir_buildlogs_and_temp_dirs(buildingsite):
         org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS,
         org.wayround.aipsetup.buildingsite.DIR_TEMP
         ]:
-        dirname = os.path.abspath(
+        dirname = org.wayround.utils.path.abspath(
             os.path.join(
                 buildingsite,
                 i
@@ -590,7 +591,7 @@ def make_checksums_for_building_site(buildingsite):
 
     logging.info("Making checksums for buildingsite files")
 
-    buildingsite = os.path.abspath(buildingsite)
+    buildingsite = org.wayround.utils.path.abspath(buildingsite)
 
     package_checksums = os.path.join(
         buildingsite,
@@ -609,7 +610,7 @@ def make_checksums_for_building_site(buildingsite):
         if os.path.islink(i) or not os.path.isfile(i):
             logging.error(
                 "Not exists or not a normal file: {}".format(
-                    os.path.relpath(i, buildingsite)
+                    org.wayround.utils.path.relpath(i, buildingsite)
                     )
                 )
             ret = 10
@@ -624,7 +625,7 @@ def make_checksums_for_building_site(buildingsite):
         paths = list(check_summs.keys())
 
         for i in paths:
-            check_summs2['/' + os.path.relpath(i, buildingsite)] = check_summs[i]
+            check_summs2['/' + org.wayround.utils.path.relpath(i, buildingsite)] = check_summs[i]
 
         check_summs = check_summs2
 
@@ -646,7 +647,7 @@ def pack_buildingsite(buildingsite):
 
     ret = 0
 
-    buildingsite = os.path.abspath(buildingsite)
+    buildingsite = org.wayround.utils.path.abspath(buildingsite)
 
     logging.info("Creating package")
 
@@ -659,7 +660,7 @@ def pack_buildingsite(buildingsite):
         ret = 1
     else:
 
-        pack_dir = os.path.abspath(
+        pack_dir = org.wayround.utils.path.abspath(
             os.path.join(
                 buildingsite,
                 '..',
@@ -693,7 +694,7 @@ def pack_buildingsite(buildingsite):
         list_to_tar2 = []
 
         for i in list_to_tar:
-            list_to_tar2.append('./' + os.path.relpath(i, buildingsite))
+            list_to_tar2.append('./' + org.wayround.utils.path.relpath(i, buildingsite))
 
         list_to_tar = list_to_tar2
 

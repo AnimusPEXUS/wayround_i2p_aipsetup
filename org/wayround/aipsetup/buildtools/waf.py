@@ -7,8 +7,10 @@ import subprocess
 import org.wayround.utils.osutils
 import org.wayround.utils.error
 import org.wayround.utils.stream
+import org.wayround.utils.path
 
 import org.wayround.aipsetup.buildingsite
+
 
 def export_functions():
     return {
@@ -20,7 +22,7 @@ def export_functions():
 
 def determine_source_dir(buildingsite, info):
 
-    source_dir = os.path.abspath(
+    source_dir = org.wayround.utils.path.abspath(
         os.path.join(
             buildingsite,
             org.wayround.aipsetup.buildingsite.DIR_SOURCE,
@@ -35,7 +37,7 @@ def determine_building_dir(buildingsite, source_dir, info):
 
     if info['pkg_buildscript']['waf_configure_opts']['separate_build_dir'] == True:
 
-        building_dir = os.path.abspath(
+        building_dir = org.wayround.utils.path.abspath(
             os.path.join(
                 buildingsite,
                 org.wayround.aipsetup.buildingsite.DIR_BUILDING,
@@ -131,7 +133,7 @@ def _overal(log, buildingsite='.', name='configure'):
             buildingsite, source_dir, info
             )
 
-        destdir = os.path.abspath(
+        destdir = org.wayround.utils.path.abspath(
             os.path.join(
                 buildingsite,
                 org.wayround.aipsetup.buildingsite.DIR_DESTDIR
@@ -145,7 +147,7 @@ def _overal(log, buildingsite='.', name='configure'):
             info
             )
 
-        config_script = os.path.abspath(
+        config_script = org.wayround.utils.path.abspath(
             os.path.join(
                 source_dir,
                 info['pkg_buildscript']['waf_configure_opts']['script_name']

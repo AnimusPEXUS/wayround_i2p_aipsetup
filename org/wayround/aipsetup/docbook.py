@@ -13,8 +13,9 @@ import subprocess
 #import lxml.etree
 
 import org.wayround.utils.file
-
 import org.wayround.utils.archive
+import org.wayround.utils.path
+
 
 def cli_name():
     return 'docbook'
@@ -64,7 +65,7 @@ def set_correct_modes(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = os.path.abspath(os.path.join(each[0], d))
+            fd = org.wayround.utils.path.abspath(os.path.join(each[0], d))
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
@@ -72,7 +73,7 @@ def set_correct_modes(directory):
                      stat.S_IROTH | stat.S_IXOTH)
 
         for f in each[2]:
-            fd = os.path.abspath(os.path.join(each[0], f))
+            fd = org.wayround.utils.path.abspath(os.path.join(each[0], f))
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
@@ -86,12 +87,12 @@ def set_correct_owners(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = os.path.abspath(os.path.join(each[0], d))
+            fd = org.wayround.utils.path.abspath(os.path.join(each[0], d))
             # print fd
             os.chown(fd, 0, 0)
 
         for f in each[2]:
-            fd = os.path.abspath(os.path.join(each[0], f))
+            fd = org.wayround.utils.path.abspath(os.path.join(each[0], f))
             # print fd
             os.chown(fd, 0, 0)
 
@@ -160,7 +161,7 @@ def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
         logging.error("Wrong zip file version")
         return 60
 
-    base_dir_share_docbook_dtd = os.path.abspath(
+    base_dir_share_docbook_dtd = org.wayround.utils.path.abspath(
         os.path.join(
             base_dir_share_docbook,
             'xml-dtd-' + version
@@ -262,7 +263,7 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
                 else:
                     t_joined_path = os.path.join(dtd_dir, src_uri)
                     if os.path.isfile(t_joined_path):
-                        dst_uri = os.path.normpath('/' + os.path.relpath(t_joined_path, base_dir))
+                        dst_uri = org.wayround.utils.path.normpath('/' + org.wayround.utils.path.relpath(t_joined_path, base_dir))
                     else:
                         dst_uri = src_uri
 
@@ -522,7 +523,7 @@ def install(files, base_dir):
     logging.info("XMLs: {};".format(', '.join(docbook_zip_list)))
     logging.info("XSLs: {}.".format(', '.join(docbook_xsl_zip_list)))
 
-    base_dir = os.path.abspath(base_dir)
+    base_dir = org.wayround.utils.path.abspath(base_dir)
 
     base_dir_etc_xml = os.path.join(base_dir, 'etc', 'xml')
 

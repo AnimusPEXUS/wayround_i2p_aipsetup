@@ -7,6 +7,8 @@ import glob
 import logging
 import os.path
 
+import org.wayround.utils.path
+
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
@@ -17,8 +19,8 @@ import org.wayround.aipsetup.pkgtag
 
 def exported_commands():
     return {
-        'scan': repoman_scan_repo_for_pkg_and_cat,
-        'collisions':repoman_find_repository_package_name_collisions_in_database,
+        'scan': repoman_scan_creating_templates,
+        'scan_only': repoman_scan_repo_for_pkg_and_cat,
         'index_src': repoman_index_sources,
         'latests': repoman_latest_editor,
         'missing': repoman_find_missing_pkg_info_records,
@@ -37,7 +39,7 @@ def exported_commands():
 def commands_order():
     return [
         'scan',
-        'collisions',
+        'scan_only',
         'index_src',
         'missing',
         'outdated',
@@ -55,6 +57,38 @@ def commands_order():
 
 def cli_name():
     return 'repo'
+
+def repoman_scan_creating_templates(opts, args):
+    """
+    Perform scan and templates creation
+    """
+
+    ret = 0
+
+    if repoman_scan_repo_for_pkg_and_cat(
+        opts={}, args=[]
+        ) != 0:
+
+        ret = 1
+
+    else:
+
+        if repoman_find_missing_pkg_info_records(
+            opts={'-t': None}, args=[]
+            ) != 0:
+
+            ret = 2
+
+        else:
+
+            if repoman_load_package_info_from_filesystem(
+                opts={}, args=[]
+                ) != 0:
+
+                ret = 3
+
+    return ret
+
 
 def repoman_scan_repo_for_pkg_and_cat(opts, args):
     """
@@ -88,16 +122,6 @@ def repoman_scan_repo_for_pkg_and_cat(opts, args):
 
     return ret
 
-def repoman_find_repository_package_name_collisions_in_database(opts, args):
-    """
-    Scan index for equal package names
-    """
-
-    ret = org.wayround.aipsetup.pkgindex.get_package_collisions_in_db()
-
-    return ret
-
-
 
 def repoman_index_sources(opts, args):
     """
@@ -111,8 +135,8 @@ def repoman_index_sources(opts, args):
     SUBDIR - index only one of subderictories
     """
     ret = 0
-    subdir_name = os.path.realpath(
-        os.path.abspath(
+    subdir_name = org.wayround.utils.path.realpath(
+        org.wayround.utils.path.abspath(
                 org.wayround.aipsetup.config.config['source']
             )
         )
@@ -127,21 +151,21 @@ def repoman_index_sources(opts, args):
 
         if len(args) > 0:
             subdir_name = args[0]
-            subdir_name = os.path.realpath(os.path.abspath(subdir_name))
+            subdir_name = org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(subdir_name))
 
         if (
             not (
-                os.path.realpath(
-                    os.path.abspath(subdir_name)
+                org.wayround.utils.path.realpath(
+                    org.wayround.utils.path.abspath(subdir_name)
                     ) + '/'
                  ).startswith(
-                    os.path.realpath(
-                        os.path.abspath(
+                    org.wayround.utils.path.realpath(
+                        org.wayround.utils.path.abspath(
                             org.wayround.aipsetup.config.config['source']
                             )
                         ) + '/'
                     )
-            or not os.path.isdir(os.path.abspath(subdir_name))
+            or not os.path.isdir(org.wayround.utils.path.abspath(subdir_name))
             ):
             logging.error("Not a subdir of pkg_source")
             logging.debug(
@@ -150,9 +174,9 @@ passed: {}
 config: {}
 exists: {}
 """.format(
-                    os.path.realpath(os.path.abspath(subdir_name)),
-                    os.path.realpath(
-                        os.path.abspath(
+                    org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(subdir_name)),
+                    org.wayround.utils.path.realpath(
+                        org.wayround.utils.path.abspath(
                             org.wayround.aipsetup.config.config['source']
                             )
                         ),
@@ -163,7 +187,7 @@ exists: {}
 
         else:
             ret = org.wayround.aipsetup.pkgindex.index_sources(
-                os.path.realpath(subdir_name),
+                org.wayround.utils.path.realpath(subdir_name),
                 force_reindex=force_reindex,
                 first_delete_found=first_delete_found
                 )

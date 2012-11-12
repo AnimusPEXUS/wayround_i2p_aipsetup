@@ -2,7 +2,6 @@
 import logging
 
 import org.wayround.aipsetup.name
-import org.wayround.aipsetup.config
 
 def source_version_comparator(name1, name2):
 
@@ -99,7 +98,7 @@ def lb_comparator(version_str, pattern_str='== 0.0.0'):
     if ' ' in pattern_str:
         spc_ind = pattern_str.index(' ')
         comparator = pattern_str[0:spc_ind]
-        pattern_str = pattern_str[spc_ind+1:].strip()
+        pattern_str = pattern_str[spc_ind + 1:].strip()
 
     if comparator == '=':
         comparator = '=='

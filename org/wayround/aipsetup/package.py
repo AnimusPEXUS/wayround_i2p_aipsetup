@@ -11,35 +11,36 @@ Module for UNIX system related package actions
  etc.
 """
 
-import sys
-import os.path
-import tarfile
-import glob
-import tempfile
-import shutil
 import copy
-import re
 import fnmatch
-import logging
 import functools
+import glob
+import logging
+import os.path
+import re
+import shutil
+import sys
+import tarfile
+import tempfile
 
 
+import org.wayround.utils.archive
 import org.wayround.utils.checksum
+import org.wayround.utils.file
+import org.wayround.utils.log
+import org.wayround.utils.opts
+import org.wayround.utils.path
 import org.wayround.utils.text
 import org.wayround.utils.time
-import org.wayround.utils.archive
-import org.wayround.utils.log
-import org.wayround.utils.file
-import org.wayround.utils.opts
 
 
-import org.wayround.aipsetup.pkgindex
-import org.wayround.aipsetup.pkginfo
-import org.wayround.aipsetup.name
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.build
+import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pack
+import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.sysupdates
 
 
@@ -88,8 +89,6 @@ def package_install(opts, args):
 
     If -b is given - it is used as destination root
     """
-
-    ret = 0
 
     ret = org.wayround.utils.opts.is_wrong_opts(
         opts,
@@ -470,7 +469,7 @@ def check_package(asp_name, mute=False):
     """
     ret = 0
 
-    asp_name = os.path.abspath(asp_name)
+    asp_name = org.wayround.utils.path.abspath(asp_name)
 
     if not asp_name.endswith('.asp'):
         if not mute:
@@ -617,7 +616,7 @@ def check_package_aipsetup2(filename):
 
     ret = 0
 
-    filename = os.path.abspath(filename)
+    filename = org.wayround.utils.path.abspath(filename)
     if not filename.endswith('.tar.xz'):
         ret = 1
     else:
@@ -831,7 +830,7 @@ def install_package(
                                     )
                                 )
 
-                        full_name = os.path.abspath(
+                        full_name = org.wayround.utils.path.abspath(
                             org.wayround.aipsetup.config.config['repository'] +
                             os.path.sep +
                             latest_in_repo
@@ -849,7 +848,7 @@ def install_package(
 
                         ret = 3
                 else:
-                    full_name = os.path.abspath(
+                    full_name = org.wayround.utils.path.abspath(
                         org.wayround.aipsetup.config.config['repository'] +
                         os.path.sep +
                         latest_in_repo
@@ -882,7 +881,7 @@ def install_asp(asp_name, destdir='/'):
 
     ret = 0
 
-    destdir = os.path.abspath(destdir)
+    destdir = org.wayround.utils.path.abspath(destdir)
 
     logging.info("Performing package checks before it's installation")
     if check_package(asp_name) != 0:
@@ -927,7 +926,7 @@ def install_asp(asp_name, destdir='/'):
                         logs_path = org.wayround.aipsetup.config.config[i[1]]
 
                     out_filename = (
-                        os.path.abspath(
+                        org.wayround.utils.path.abspath(
                             os.path.join(
                                 destdir,
                                 logs_path,
@@ -1026,20 +1025,16 @@ def install_asp(asp_name, destdir='/'):
                             dirs.sort()
 
                             for i in dirs:
-                                f_d_p = os.path.abspath(destdir + os.path.sep + i)
+                                f_d_p = org.wayround.utils.path.abspath(destdir + os.path.sep + i)
 
-                                while r'//' in f_d_p:
-                                    f_d_p = f_d_p.replace(r'//', '/')
 
                                 if not os.path.islink(f_d_p):
                                     os.chown(f_d_p, 0, 0)
                                     os.chmod(f_d_p, 0o755)
 
                             for i in files:
-                                f_f_p = os.path.abspath(destdir + os.path.sep + i)
+                                f_f_p = org.wayround.utils.path.abspath(destdir + os.path.sep + i)
 
-                                while r'//' in f_f_p:
-                                    f_f_p = f_f_p.replace(r'//', '/')
 
                                 if not os.path.islink(f_f_p):
                                     os.chown(f_f_p, 0, 0)
@@ -1101,7 +1096,7 @@ def remove_asp(
 
     ret = 0
 
-    destdir = os.path.abspath(destdir)
+    destdir = org.wayround.utils.path.abspath(destdir)
 
     lines = list_files_installed_by_asp(destdir, asp_name, mute)
 
@@ -1152,12 +1147,10 @@ def remove_asp(
 
             for line in lines:
 
-                rm_file_name = os.path.abspath(
+                rm_file_name = org.wayround.utils.path.abspath(
                     destdir + os.path.sep + line
                     )
 
-                while r'//' in rm_file_name:
-                    rm_file_name.replace(r'//', '/')
 
                 if (
                     (os.path.islink(rm_file_name) and not os.path.exists(rm_file_name))
@@ -1190,7 +1183,7 @@ def remove_asp(
             'installed_pkg_dir_sums',
             'installed_pkg_dir'
             ]:
-            rm_file_name = os.path.abspath(
+            rm_file_name = org.wayround.utils.path.abspath(
                 destdir + os.path.sep +
                 org.wayround.aipsetup.config.config[i] + os.path.sep +
                 asp_name + '.xz'
@@ -1245,9 +1238,9 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 
 
 def list_installed_asps(destdir='/', mute=False):
-    destdir = os.path.abspath(destdir)
+    destdir = org.wayround.utils.path.abspath(destdir)
 
-    listdir = os.path.abspath(destdir + org.wayround.aipsetup.config.config['installed_pkg_dir'])
+    listdir = org.wayround.utils.path.abspath(destdir + org.wayround.aipsetup.config.config['installed_pkg_dir'])
     filelist = glob.glob(os.path.join(listdir, '*.xz'))
 
     ret = 0
@@ -1348,9 +1341,9 @@ def list_files_installed_by_asp(
         ):
     ret = 0
 
-    destdir = os.path.abspath(destdir)
+    destdir = org.wayround.utils.path.abspath(destdir)
 
-    list_dir = os.path.abspath(
+    list_dir = org.wayround.utils.path.abspath(
         destdir + os.path.sep + org.wayround.aipsetup.config.config['installed_pkg_dir']
         )
 
@@ -1430,7 +1423,7 @@ def build(source_files):
                 prefix=tmp_dir_prefix,
                 dir=org.wayround.aipsetup.config.config['buildingsites']
                 )
-            build_site_dir = os.path.abspath(build_site_dir)
+            build_site_dir = org.wayround.utils.path.abspath(build_site_dir)
 
             if org.wayround.aipsetup.buildingsite.init(build_site_dir) != 0:
                 logging.error("Error initiating temporary dir")
@@ -1509,13 +1502,13 @@ def _complete_info_correctness_check(workdir):
 
 def complete(building_site, main_src_file=None):
 
-    rp = os.path.relpath(building_site, os.getcwd())
+    rp = org.wayround.utils.path.relpath(building_site, os.getcwd())
 
     logging.info(
         "+++++++++++ Starting Complete build in `{}' +++++++++++".format(rp)
         )
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     ret = 0
 
@@ -1636,7 +1629,7 @@ def find_file_in_files_installed_by_asp(
 
     ret = 0
 
-    destdir = os.path.abspath(destdir)
+    destdir = org.wayround.utils.path.abspath(destdir)
 
     if not isinstance(instr, list):
         instr = [instr]
@@ -1715,7 +1708,7 @@ def _put_files_to_index(files, subdir):
 
     for file in files:
 
-        full_path = os.path.abspath(
+        full_path = org.wayround.utils.path.abspath(
             repository_path + os.path.sep + subdir
             )
 
@@ -1754,7 +1747,7 @@ def put_file_to_index(filename):
                         )
                     )
             else:
-                file = os.path.abspath(filename)
+                file = org.wayround.utils.path.abspath(filename)
 
                 files = [
                     file

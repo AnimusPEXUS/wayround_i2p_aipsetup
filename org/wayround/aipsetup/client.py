@@ -3,12 +3,8 @@
 Client for searching and getting files on and from aipsetup package server
 """
 
-import os.path
-import sys
 import urllib.request, urllib.parse
-import subprocess
 import logging
-import json
 
 
 import org.wayround.aipsetup.config
@@ -50,8 +46,6 @@ def package_list(category=None):
         logging.exception("Can't get package list in category {}".format(category))
     else:
         txt = u.read()
-
-
 
     return
 

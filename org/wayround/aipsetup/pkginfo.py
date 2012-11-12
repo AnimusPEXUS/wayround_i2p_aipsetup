@@ -7,9 +7,7 @@ import os.path
 import re
 import sys
 
-import sqlalchemy
 import sqlalchemy.ext
-
 
 import org.wayround.utils.file
 import org.wayround.utils.db

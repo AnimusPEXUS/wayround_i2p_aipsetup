@@ -8,7 +8,7 @@ import copy
 import logging
 import pprint
 
-
+import org.wayround.utils.path
 
 CONFIG_FULL_SAMPLE = {
     'editor'             : 'emacs',
@@ -283,7 +283,7 @@ def config_check_after_load(indict):
         ('tags'             , 'tags.json'),
         ('garbage'          , 'garbage')
         ]:
-        indict[i] = os.path.abspath(
+        indict[i] = org.wayround.utils.path.abspath(
             os.path.join(indict['unicorn_root'], j)
             )
 
@@ -291,7 +291,7 @@ def config_check_after_load(indict):
         ('source_index'    , 'sources.sqlite')
         ]:
         indict[i] = 'sqlite:///{path}'.format(
-            path=os.path.abspath(
+            path=org.wayround.utils.path.abspath(
                 os.path.join(indict['unicorn_root'], j)
                 )
             )
@@ -302,7 +302,7 @@ def config_check_after_load(indict):
         ('installed_pkg_dir_buildlogs', 'buildlogs'),
         ('installed_pkg_dir_sums', 'sums')
         ]:
-        indict[i] = os.path.abspath(
+        indict[i] = org.wayround.utils.path.abspath(
             os.path.join(indict['installed_pkg_dir'], j)
             )
 

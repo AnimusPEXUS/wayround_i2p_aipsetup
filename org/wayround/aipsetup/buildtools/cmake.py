@@ -10,20 +10,20 @@ import sys
 import org.wayround.aipsetup.buildingsite
 import org.wayround.utils.osutils
 import org.wayround.utils.error
+import org.wayround.utils.path
+
 
 def determine_abs_configure_dir(buildingsite, config_dir):
     """
     Determine config dir taking in account config_dir
     """
 
-    config_dir = os.path.abspath(
+    config_dir = org.wayround.utils.path.abspath(
         org.wayround.aipsetup.buildingsite.getDIR_SOURCE(
             buildingsite
             ) + os.path.sep + config_dir
         )
 
-    while r'//' in config_dir:
-        config_dir.replace(r'//', '/')
 
     return config_dir
 
@@ -38,7 +38,7 @@ def determine_building_dir(
 
     if separate_build_dir == True:
 
-        building_dir = os.path.abspath(
+        building_dir = org.wayround.utils.path.abspath(
             org.wayround.aipsetup.buildingsite.getDIR_BUILDING(
                 buildingsite
                 )
@@ -65,7 +65,7 @@ def cmake_high(
 
     ret = 0
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
         org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(

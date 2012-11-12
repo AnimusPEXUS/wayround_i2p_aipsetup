@@ -13,20 +13,19 @@ import org.wayround.aipsetup.buildingsite
 import org.wayround.utils.osutils
 import org.wayround.utils.archive
 import org.wayround.utils.error
+import org.wayround.utils.path
 
 def determine_abs_configure_dir(buildingsite, config_dir):
     """
     Determine config dir taking in account config_dir
     """
 
-    config_dir = os.path.abspath(
+    config_dir = org.wayround.utils.path.abspath(
         org.wayround.aipsetup.buildingsite.getDIR_SOURCE(
             buildingsite
             ) + os.path.sep + config_dir
         )
 
-    while r'//' in config_dir:
-        config_dir.replace(r'//', '/')
 
     return config_dir
 
@@ -41,7 +40,7 @@ def determine_building_dir(
 
     if separate_build_dir == True:
 
-        building_dir = os.path.abspath(
+        building_dir = org.wayround.utils.path.abspath(
             org.wayround.aipsetup.buildingsite.getDIR_BUILDING(
                 buildingsite
                 )
@@ -65,14 +64,14 @@ def extract_high(
 
     ret = 0
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
         org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
         'extract'
         )
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     tarball_dir = org.wayround.aipsetup.buildingsite.getDIR_TARBALL(building_site)
 
@@ -192,7 +191,7 @@ def configure_high(
 
     ret = 0
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
         org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
@@ -261,17 +260,8 @@ def configure_low(
 
     ret = 0
 
-    while r'//' in script_name:
-        script_name = script_name.replace(r'//', '/')
-
-    while r'//' in working_dir:
-        working_dir = working_dir.replace(r'//', '/')
-
-    while r'//' in script_path:
-        script_path = script_path.replace(r'//', '/')
-
     if relative_call:
-        script_path = os.path.relpath(script_path, working_dir)
+        script_path = org.wayround.utils.path.relpath(script_path, working_dir)
 
     cmd = []
     if not run_script_not_bash:
@@ -354,7 +344,7 @@ def make_high(
     source_configure_reldir
     ):
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
         org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),

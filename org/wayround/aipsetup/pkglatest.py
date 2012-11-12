@@ -2,9 +2,7 @@
 import logging
 import functools
 
-import sqlalchemy
 import sqlalchemy.ext
-
 
 import org.wayround.utils.db
 

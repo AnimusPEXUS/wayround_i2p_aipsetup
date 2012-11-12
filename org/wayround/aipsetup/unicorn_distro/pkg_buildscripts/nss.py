@@ -8,6 +8,8 @@ import glob
 import re
 
 import org.wayround.utils.file
+import org.wayround.utils.path
+
 
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.build
@@ -126,7 +128,7 @@ def main(buildingsite, action=None):
 
                 logging.info(
                     "Dereferencing links in {}".format(
-                        os.path.relpath(
+                        org.wayround.utils.path.relpath(
                             OBJ_dir,
                             src_dir
                             )

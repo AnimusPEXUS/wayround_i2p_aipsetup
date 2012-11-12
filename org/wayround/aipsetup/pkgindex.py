@@ -14,15 +14,15 @@ import sqlalchemy.ext
 
 import org.wayround.utils.db
 import org.wayround.utils.file
+import org.wayround.utils.path
 import org.wayround.utils.tag
 
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.name
-
 import org.wayround.aipsetup.dbconnections
+import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pkginfo
 
-s
+
 class PackageIndex(org.wayround.utils.db.BasicDB):
     """
     Main package index DB handling class
@@ -140,7 +140,7 @@ def get_package_files(name):
             ret = 2
         else:
 
-            package_dir = os.path.abspath(
+            package_dir = org.wayround.utils.path.abspath(
                 org.wayround.aipsetup.config.config['repository']
                 + os.path.sep + package_path + os.path.sep + 'pack'
                 )
@@ -154,7 +154,7 @@ def get_package_files(name):
                 if parsed and parsed['groups']['name'] == name:
                     needed_files.append(
                         '/' +
-                        os.path.relpath(
+                        org.wayround.utils.path.relpath(
                             i,
                             org.wayround.aipsetup.config.config['repository']
                             )
@@ -571,7 +571,7 @@ def _srfpac_get_cat_by_cat_path(category_locations, cat_path):
 def scan_repo_for_pkg_and_cat():
     ret = 0
 
-    repo_dir = os.path.abspath(
+    repo_dir = org.wayround.utils.path.abspath(
         org.wayround.aipsetup.config.config['repository']
         )
 
@@ -594,7 +594,7 @@ def scan_repo_for_pkg_and_cat():
                 )
 
         else:
-            relpath = os.path.relpath(root, repo_dir)
+            relpath = org.wayround.utils.path.relpath(root, repo_dir)
 
             if is_repo_package(root):
 
@@ -809,7 +809,7 @@ def _index_sources_directory_to_list(
     added_tags=0
     ):
 
-    sub_dir_name = os.path.abspath(sub_dir_name)
+    sub_dir_name = org.wayround.utils.path.abspath(sub_dir_name)
 
     added_tags = added_tags
 
@@ -875,12 +875,12 @@ def index_sources_directory(
     first_delete_found=False
     ):
 
-    root_dir_name = os.path.realpath(os.path.abspath(root_dir_name))
+    root_dir_name = org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(root_dir_name))
     root_dir_name_len = len(root_dir_name)
 
-    sub_dir_name = os.path.realpath(os.path.abspath(sub_dir_name))
+    sub_dir_name = org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(sub_dir_name))
 
-    rel_path = os.path.relpath(sub_dir_name, root_dir_name)
+    rel_path = org.wayround.utils.path.relpath(sub_dir_name, root_dir_name)
     rel_path = os.path.sep + rel_path + os.path.sep
 
     logging.debug("Root dir: {}".format(root_dir_name))
@@ -890,8 +890,6 @@ def index_sources_directory(
     if rel_path == '/./':
         rel_path = ''
 
-    if rel_path == '//':
-        rel_path = ''
 
     added_count = 0
     deleted_count = 0
@@ -997,8 +995,8 @@ def index_sources_directory(
 
                 if i.startswith(rel_path):
                     if not os.path.exists(
-                        os.path.realpath(
-                            os.path.abspath(
+                        org.wayround.utils.path.realpath(
+                            org.wayround.utils.path.abspath(
                                 root_dir_name + os.path.sep + i
                                 )
                             )
@@ -1039,8 +1037,8 @@ def index_sources_directory(
 def index_sources(subdir_name, force_reindex=False, first_delete_found=False):
 
     index_sources_directory(
-        os.path.realpath(os.path.abspath(org.wayround.aipsetup.config.config['source'])),
-        os.path.realpath(os.path.abspath(subdir_name)),
+        org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(org.wayround.aipsetup.config.config['source'])),
+        org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(subdir_name)),
         org.wayround.aipsetup.config.config['acceptable_src_file_extensions'],
         force_reindex=force_reindex,
         first_delete_found=first_delete_found
@@ -1061,10 +1059,8 @@ def cleanup_repo_package_pack(name):
         os.path.sep + 'pack'
         )
 
-    while r'//' in path:
-        path.replace(r'//', '/')
 
-    path = os.path.abspath(path)
+    path = org.wayround.utils.path.abspath(path)
 
     files = os.listdir(path)
     files.sort()
@@ -1132,10 +1128,7 @@ def cleanup_repo_package(name):
         org.wayround.aipsetup.pkgindex.get_package_path_string(name)
         )
 
-    while r'//' in path:
-        path.replace(r'//', '/')
-
-    path = os.path.abspath(path)
+    path = org.wayround.utils.path.abspath(path)
 
     create_required_dirs_at_package(path)
 

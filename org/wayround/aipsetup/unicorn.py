@@ -7,6 +7,7 @@ import os.path
 import logging
 
 import org.wayround.utils.file
+import org.wayround.utils.path
 
 import org.wayround.aipsetup.config
 
@@ -40,7 +41,7 @@ def unicorn_install(opts, args):
     #    if len(args) > 0:
     #        dst_unicorn_dir = args[0]
 
-    dst_unicorn_dir = os.path.abspath(dst_unicorn_dir)
+    dst_unicorn_dir = org.wayround.utils.path.abspath(dst_unicorn_dir)
 
     if org.wayround.utils.file.create_if_not_exists_dir(dst_unicorn_dir) != 0:
         logging.error("Can't create dir `{}'".format(dst_unicorn_dir))
@@ -66,4 +67,4 @@ def unicorn_install(opts, args):
 
 
 def source_unicorn_dir():
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'unicorn_distro'))
+    return org.wayround.utils.path.abspath(os.path.join(os.path.dirname(__file__), 'unicorn_distro'))

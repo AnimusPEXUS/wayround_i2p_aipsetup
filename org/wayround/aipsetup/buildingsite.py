@@ -8,6 +8,8 @@ import logging
 import shutil
 import json
 
+import org.wayround.utils.path
+
 
 import org.wayround.aipsetup.constitution
 import org.wayround.aipsetup.name
@@ -30,14 +32,11 @@ def _getDIR_x(directory, _x='TARBALL'):
     note: this method is generated dinamicly
     '''
 
-    ret = os.path.abspath(
+    ret = org.wayround.utils.path.abspath(
         os.path.join(
             directory,
             eval('DIR_{}'.format(_x)))
         )
-
-    while r'//' in ret:
-        ret = ret.replace(r'//', '/')
 
     return ret
 
@@ -129,7 +128,7 @@ def buildingsite_apply_info(opts, args):
 
 def get_list_of_items_to_pack(building_site):
 
-    building_site = os.path.abspath(building_site)
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     ret = []
 
@@ -175,7 +174,7 @@ def isWdDirRestricted(directory):
 
     exec_dirs = ['/opt', '/var', '/']
 
-    dir_str_abs = os.path.abspath(directory)
+    dir_str_abs = org.wayround.utils.path.abspath(directory)
 
     for i in dirs_begining_with:
         if dir_str_abs.startswith(i):
@@ -196,7 +195,7 @@ def init(buildingsite='build', files=None):
 
     ret = 0
 
-    buildingsite = os.path.abspath(buildingsite)
+    buildingsite = org.wayround.utils.path.abspath(buildingsite)
 
     logging.info("Initiating building site `{}'".format(buildingsite))
 
@@ -225,7 +224,7 @@ def init(buildingsite='build', files=None):
 
         logging.info("Creating required subdirs")
         for i in DIR_ALL:
-            a = os.path.abspath(os.path.join(buildingsite, i))
+            a = org.wayround.utils.path.abspath(os.path.join(buildingsite, i))
 
             if not os.path.exists(a):
                 resh = 'creating'
@@ -454,7 +453,7 @@ def apply_pkg_info_on_buildingsite(dirname):
 
 def apply_info(dirname='.', src_file_name=None):
 
-    dirname = os.path.abspath(dirname)
+    dirname = org.wayround.utils.path.abspath(dirname)
 
     ret = 0
 
@@ -474,7 +473,7 @@ def apply_info(dirname='.', src_file_name=None):
         if read_package_info(dirname, None) == None:
             logging.info(
                 "Applying new package info to dir `{}'".format(
-                    os.path.abspath(
+                    org.wayround.utils.path.abspath(
                         dirname
                         )
                     )

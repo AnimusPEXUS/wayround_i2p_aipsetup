@@ -1,15 +1,10 @@
+
 import os.path
-import glob
-import subprocess
-import logging
 
 from gi.repository import Gtk
 
 import org.wayround.utils.gtk
-import org.wayround.utils.text
-import org.wayround.utils.list
 
-import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
 
@@ -63,10 +58,6 @@ class MainWindow:
 
 
     def fill_left_treeview(self):
-
-        lst = Gtk.ListStorage(str)
-
-        db = org.wayround.aipsetup.pkgindex.PackageIndex()
 
         if self.edit_mode == 0:
             pass

@@ -1,8 +1,6 @@
 
-import os.path
 import logging
 
-import org.wayround.aipsetup
 import org.wayround.aipsetup.modhelp
 import org.wayround.utils.helprenderer
 

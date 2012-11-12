@@ -7,6 +7,7 @@ import urllib.parse
 
 import cherrypy
 
+import org.wayround.utils.path
 import org.wayround.utils.xml
 
 import org.wayround.aipsetup.pkgindex
@@ -254,7 +255,7 @@ def package_file_list(index_db, name):
             + i
             )
 
-        package_filename = os.path.abspath(
+        package_filename = org.wayround.utils.path.abspath(
             org.wayround.aipsetup.config.config['repository']
             + i
             )
@@ -399,7 +400,7 @@ def package_sources_file_list(info_db, name):
 
         source_url = 'files_source' + i
 
-        source_filename = os.path.abspath(
+        source_filename = org.wayround.utils.path.abspath(
             org.wayround.aipsetup.config.config['source']
             + i
             )

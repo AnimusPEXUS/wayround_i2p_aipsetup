@@ -12,11 +12,12 @@ import functools
 import cherrypy
 import cherrypy.lib
 
+import org.wayround.utils.path
 
+import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkgtag
-import org.wayround.aipsetup.config
 import org.wayround.aipsetup.serverui
 
 
@@ -236,7 +237,7 @@ def start_host():
 
     ret = 0
 
-    tpldir = os.path.dirname(os.path.abspath(__file__))
+    tpldir = os.path.dirname(org.wayround.utils.path.abspath(__file__))
 
     serv_config = {
         'global': {
@@ -271,7 +272,7 @@ def start_host():
          '/css': {
              'tools.staticdir.on' : True,
              'tools.staticdir.dir' :
-                os.path.abspath(
+                org.wayround.utils.path.abspath(
                     org.wayround.aipsetup.config.config['server_files']
                     ),
             'tools.staticdir.content_types' : {

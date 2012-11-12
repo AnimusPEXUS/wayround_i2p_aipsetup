@@ -7,6 +7,8 @@ import os.path
 import logging
 import inspect
 
+import org.wayround.utils.path
+
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
 
@@ -45,7 +47,7 @@ def load_buildscript(name):
 
     ret = None
 
-    buildscript_filename = os.path.abspath(
+    buildscript_filename = org.wayround.utils.path.abspath(
         os.path.join(
             org.wayround.aipsetup.config.config['buildscript'],
             '{}.py'.format(name)

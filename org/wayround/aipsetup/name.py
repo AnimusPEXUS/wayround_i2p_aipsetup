@@ -117,8 +117,6 @@ def name_parse_name(opts, args):
 
         filename = args[0]
 
-        write = '-w' in opts
-
         packagename = (
             org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(
                 filename,
