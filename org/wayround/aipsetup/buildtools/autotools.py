@@ -5,7 +5,6 @@ autotools tools and specific to it
 
 import os.path
 import subprocess
-import shutil
 import sys
 import tempfile
 
@@ -107,7 +106,7 @@ def extract_high(
             ret = 2
         else:
 
-            ret = extract_low(
+            ret = org.wayround.utils.archive.extract_low(
                 log,
                 tmpdir,
                 tarball,
@@ -117,63 +116,6 @@ def extract_high(
                 )
 
     log.close()
-
-    return ret
-
-
-def extract_low(
-    log,
-    tmpdir,
-    tarball,
-    outdir,
-    unwrap_dir=False,
-    rename_dir=False
-    ):
-
-    ret = 0
-
-    if not os.path.isdir(outdir):
-        os.makedirs(outdir)
-
-    if not os.path.isdir(tmpdir):
-        os.makedirs(tmpdir)
-
-    log.info("Extracting {}".format(os.path.basename(tarball)))
-    extr_error = org.wayround.utils.archive.extract(
-        tarball, tmpdir
-        )
-
-    if extr_error != 0:
-        log.error(
-            "Extraction error: {}".format(extr_error)
-            )
-        ret = 3
-    else:
-
-        extracted_dir = os.listdir(tmpdir)
-
-        if len(extracted_dir) > 1:
-            log.error("too many extracted files")
-            ret = 4
-        else:
-
-            extracted_dir = tmpdir + os.path.sep + extracted_dir[0]
-
-            if unwrap_dir:
-
-                extracted_dir_files = os.listdir(extracted_dir)
-                for i in extracted_dir_files:
-                    shutil.move(extracted_dir + os.path.sep + i, outdir)
-                shutil.rmtree(extracted_dir)
-
-            else:
-                if rename_dir:
-                    n = outdir + os.path.sep + str(rename_dir)
-                    log.info("moving extracted dir as `{}'".format(n))
-                    shutil.move(extracted_dir, n)
-                else:
-                    log.info("moving extracted dir to `{}'".format(outdir))
-                    shutil.move(extracted_dir, outdir)
 
     return ret
 
