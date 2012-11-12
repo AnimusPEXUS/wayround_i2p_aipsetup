@@ -97,7 +97,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
 
 def exported_commands():
     return {
-        'fix': info_mass_info_fix,
         'list': info_list_files,
         'edit': info_edit_file,
         'editor': info_editor,
@@ -111,7 +110,6 @@ def commands_order():
         'list',
         'edit',
         'copy',
-        'fix',
         'script'
         ]
 
@@ -139,9 +137,19 @@ def info_list_files(opts, args, typ='info', mask='*.json'):
         if args_l == 1:
             mask = args[0]
 
-        # FIXME: what's this?
-        org.wayround.utils.file.list_files(
-            org.wayround.aipsetup.config.config[typ], mask
+        lst = glob.glob(
+            org.wayround.aipsetup.config.config[typ] + os.path.sep + mask
+            )
+
+        for i in range(len(lst)):
+            lst[i] = os.path.basename(lst[i])[:-5]
+
+        lst.sort()
+
+        print(
+            org.wayround.utils.text.return_columned_list(
+                lst
+                )
             )
 
     return 0
@@ -228,48 +236,6 @@ def info_copy(opts, args):
 
     return 0
 
-def info_mass_info_fix(opts, args):
-    """
-    Does various .json info files fixes
-
-    [--forced-homepage-fix]
-
-    --forced-homepage-fix    forces fixes on homepage fields
-    """
-
-    lst = glob.glob(os.path.join(org.wayround.aipsetup.config.config['info'], '*.json'))
-    lst.sort()
-
-    forced_homepage_fix = '--forced-homepage-fix' in opts
-
-    lst_c = len(lst)
-    lst_i = 0
-
-    for i in lst:
-
-        name = os.path.basename(i)[:-5]
-
-        dicti = read_from_file(i)
-
-        info_fixes(dicti, name, forced_homepage_fix)
-
-        write_to_file(i, dicti)
-
-        lst_i += 1
-
-        org.wayround.utils.file.progress_write(
-            "    {:3.0f}% ({}/{})".format(
-                100.0 / (lst_c / lst_i),
-                lst_i,
-                lst_c
-                )
-            )
-
-    org.wayround.utils.file.progress_write_finish()
-
-    logging.info("Processed {} files".format(lst_c))
-
-    return 0
 
 def info_mass_script(opts, args):
     """
@@ -448,39 +414,3 @@ def write_to_file(name, struct):
 
     return ret
 
-def info_fixes(
-    info, pkg_name,
-    forced_homepage_fix=False
-    ):
-    """
-    This function is used by `info_mass_info_fix'
-
-    Sometime it will contain checks and fixes for
-    info files
-    """
-    # TODO: re do all this when aipsetup will be more or less complete
-    raise Exception("Outdated")
-
-    if info['basename'] == '':
-        info['basename'] = pkg_name
-
-    if forced_homepage_fix or info['home_page'] in ['', 'None']:
-        possibilities = org.wayround.aipsetup.pkginfo.guess_package_homepage(
-            pkg_name
-            )
-
-        keys = list(possibilities.keys())
-
-        homepage = None
-        if len(keys) > 0:
-            max_key = keys[0]
-            max = possibilities[max_key]
-
-            for i in keys:
-                if possibilities[i] > max:
-                    max_key = i
-                    max = possibilities[i]
-
-            homepage = max_key
-
-        info['home_page'] = 'http://' + str(homepage)
