@@ -34,8 +34,8 @@ if '--log' in opts:
     del(log_level_u)
 
 logging.basicConfig(
-    format="%(levelname)s %(message)s",
-    level=log_level
+    format = "%(levelname)s %(message)s",
+    level = log_level
     )
 
 import org.wayround.aipsetup

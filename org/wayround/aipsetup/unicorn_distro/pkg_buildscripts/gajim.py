@@ -10,7 +10,7 @@ import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 
-def main(buildingsite, action=None):
+def main(buildingsite, action = None):
 
     ret = 0
 
@@ -40,14 +40,14 @@ def main(buildingsite, action=None):
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+                unwrap_dir = True,
+                rename_dir = False
                 )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
-                options=[
+                options = [
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -57,33 +57,33 @@ def main(buildingsite, action=None):
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']
                     ],
-                arguments=[],
-#                environment={},
-                environment={'PYTHON': '/usr/bin/python3'},
-                environment_mode='copy',
-                source_configure_reldir='.',
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                arguments = [],
+                environment = {},
+#                environment={'PYTHON': '/usr/bin/python3'},
+                environment_mode = 'copy',
+                source_configure_reldir = '.',
+                use_separate_buildding_dir = separate_build_dir,
+                script_name = 'configure',
+                run_script_not_bash = False,
+                relative_call = False
                 )
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                options = [],
+                arguments = [],
+                environment = {},
+                environment_mode = 'copy',
+                use_separate_buildding_dir = separate_build_dir,
+                source_configure_reldir = '.'
                 )
 
         if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options=[],
-                arguments=[
+                options = [],
+                arguments = [
                     'install',
                     'DESTDIR=' + (
                         org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
@@ -91,10 +91,10 @@ def main(buildingsite, action=None):
                             )
                         )
                     ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                environment = {},
+                environment_mode = 'copy',
+                use_separate_buildding_dir = separate_build_dir,
+                source_configure_reldir = '.'
                 )
 
     return ret
