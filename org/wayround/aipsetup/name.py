@@ -3,41 +3,41 @@
 Module with package names parsing facilities
 """
 
-import os.path
-import re
+import copy
 import fnmatch
 import logging
-import copy
+import os.path
+import re
 
+import org.wayround.utils.list
 import org.wayround.utils.tag
 import org.wayround.utils.text
-import org.wayround.utils.list
 
-import org.wayround.aipsetup.info
 import org.wayround.aipsetup.config
+import org.wayround.aipsetup.info
 import org.wayround.aipsetup.pkginfo
 
 #Difficult name examples:
 DIFFICULT_NAMES = [
+    'GeSHi-1.0.2-beta-1.tar.bz2',
+    'Perl-Dist-Strawberry-BuildPerl-5101-2.11_10.tar.gz',
     'bind-9.9.1-P2.tar.gz',
     'boost_1_25_1.tar.bz2',
     'dahdi-linux-complete-2.1.0.3+2.1.0.2.tar.gz',
     'dhcp-4.1.2rc1.tar.gz',
     'dvd+rw-tools-5.5.4.3.4.tar.gz',
-    'GeSHi-1.0.2-beta-1.tar.bz2',
     'lynx2.8.7rel.1.tar.bz2',
     'name.tar.gz',
     'ogre_src_v1-8-1.tar.bz2',
     'openssl-0.9.7a.tar.gz',
     'org.apache.felix.ipojo.manipulator-1.8.4-project.tar.gz',
-    'Perl-Dist-Strawberry-BuildPerl-5101-2.11_10.tar.gz'
     'pkcs11-helper-1.05.tar.bz2',
     'qca-pkcs11-0.1-20070425.tar.bz2',
     'tcl8.4.19-src.tar.gz',
     'wmirq-0.1-source.tar.gz',
     'xc-1.tar.gz',
     'xf86-input-acecad-1.5.0.tar.bz2',
-    'xf86-input-elo2300-1.1.2.tar.bz2',
+    'xf86-input-elo2300-1.1.2.tar.bz2'
     ]
 
 ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
@@ -84,8 +84,8 @@ def exported_commands():
     """
     return {
         'parse': name_parse_name,
-        'pparse': name_parse_package,
-        'parse_test': name_parse_test
+        'parse_test': name_parse_test,
+        'pparse': name_parse_package
         }
 
 def commands_order():
@@ -120,7 +120,7 @@ def name_parse_name(opts, args):
         packagename = (
             org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(
                 filename,
-                mute=False
+                mute = False
                 )
             )
 
@@ -144,7 +144,7 @@ def name_parse_package(opts, args):
 
         filename = args[0]
 
-        p_re = package_name_parse(filename, mute=False)
+        p_re = package_name_parse(filename, mute = False)
 
         if p_re == None:
             ret = 2
@@ -180,7 +180,7 @@ def rm_ext_from_pkg_name(name):
 
     return ret
 
-def package_name_parse(filename, mute=True):
+def package_name_parse(filename, mute = True):
     """
     Parse package name
     """
@@ -287,7 +287,7 @@ def package_name_parse(filename, mute=True):
 
     return ret
 
-def find_possible_chared_versions_and_singles(name_sliced, separator='.'):
+def find_possible_chared_versions_and_singles(name_sliced, separator = '.'):
 
     versions = []
     logging.debug("(internal1) versions delimitered by `{}': {}".format(separator, versions))
@@ -343,7 +343,7 @@ def find_all_versions_and_singles(name_sliced):
         logging.debug("versions delimitered by `{}': {}".format(i, ret[i]))
     return ret
 
-def find_most_possible_version(name_sliced, mute=False):
+def find_most_possible_version(name_sliced, mute = False):
 
     ret = None
 
@@ -463,7 +463,7 @@ def find_most_possible_version(name_sliced, mute=False):
     return ret
 
 
-def source_name_parse_delicate(filename, mute=False):
+def source_name_parse_delicate(filename, mute = False):
 
     """
     Main source name parsing function
@@ -523,6 +523,8 @@ def source_name_parse_delicate(filename, mute=False):
                 name_sliced[:most_possible_version[0]]
                 ).strip(''.join(ALL_DELIMITERS))
 
+            # version operations
+
             ret['groups']['version_list_dirty'] = (
                 name_sliced[most_possible_version[0]:most_possible_version[1]]
                 )
@@ -544,11 +546,27 @@ def source_name_parse_delicate(filename, mute=False):
                 ''.join(ret['groups']['version_list_dirty'])
                 )
 
-            ret['groups']['extension'] = extension
+            # status operations
 
+            ret['groups']['status_list_dirty'] = (
+                name_sliced[most_possible_version[1]:]
+                )
+
+            ret['groups']['status_list_dirty'] = (
+                org.wayround.utils.list.list_strip(
+                    ret['groups']['status_list_dirty'],
+                    ALL_DELIMITERS
+                    )
+                )
 
             ret['groups']['status_list'] = (
-                name_sliced[most_possible_version[1]:]
+                copy.copy(ret['groups']['status_list_dirty'])
+                )
+
+
+            org.wayround.utils.list.remove_all_values(
+                ret['groups']['status_list'],
+                ALL_DELIMITERS
                 )
 
             ret['groups']['status_list'] = (
@@ -558,29 +576,22 @@ def source_name_parse_delicate(filename, mute=False):
                     )
                 )
 
-            if len(ret['groups']['status_list']) > 0:
+            ret['groups']['status'] = '.'.join(ret['groups']['status_list'])
 
-                ret['groups']['status_dirty'] = (
-                    ''.join(ret['groups']['status_list'])
-                    )
+            ret['groups']['status_dirty'] = ''.join(ret['groups']['status_list_dirty'])
 
-                ret['groups']['status_list_dirty'] = (
-                    copy.copy(ret['groups']['status_list'])
-                    )
+            # extension
 
-                org.wayround.utils.list.remove_all_values(
-                    ret['groups']['status_list'],
-                    ALL_DELIMITERS
-                    )
+            ret['groups']['extension'] = extension
 
 
     return ret
 
 def source_name_parse(
     filename,
-    modify_info_file=False,
-    acceptable_version_number=None,
-    mute=False
+    modify_info_file = False,
+    acceptable_version_number = None,
+    mute = False
     ):
     """
     Parse source file name and do some more actions on success
@@ -660,7 +671,7 @@ def source_name_parse(
 
     return ret
 
-def _modify_info_file(src_filename_parsed, mute=True):
+def _modify_info_file(src_filename_parsed, mute = True):
     fn = os.path.join(
         org.wayround.aipsetup.config.config['info'],
         '{}.json'.format(src_filename_parsed['groups']['name'])
