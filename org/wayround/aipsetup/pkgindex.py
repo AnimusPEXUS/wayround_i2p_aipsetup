@@ -43,19 +43,19 @@ class PackageIndex(org.wayround.utils.db.BasicDB):
 
         pid = sqlalchemy.Column(
             sqlalchemy.Integer,
-            primary_key=True
+            primary_key = True
             )
 
         name = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         cid = sqlalchemy.Column(
             sqlalchemy.Integer,
-            nullable=False,
-            default=0
+            nullable = False,
+            default = 0
             )
 
 
@@ -70,19 +70,19 @@ class PackageIndex(org.wayround.utils.db.BasicDB):
 
         cid = sqlalchemy.Column(
             sqlalchemy.Integer,
-            primary_key=True
+            primary_key = True
             )
 
         name = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         parent_cid = sqlalchemy.Column(
             sqlalchemy.Integer,
-            nullable=False,
-            default=0
+            nullable = False,
+            default = 0
             )
 
     def __init__(self):
@@ -90,7 +90,7 @@ class PackageIndex(org.wayround.utils.db.BasicDB):
         org.wayround.utils.db.BasicDB.__init__(
             self,
             org.wayround.aipsetup.config.config['package_index_db_config'],
-            echo=False
+            echo = False
             )
 
         return
@@ -100,7 +100,7 @@ def get_sources_connection():
     try:
         tags = org.wayround.utils.tag.TagEngine(
             org.wayround.aipsetup.config.config['source_index'],
-            commit_every=200
+            commit_every = 200
             )
     except:
         logging.exception(
@@ -165,12 +165,12 @@ def get_package_files(name):
     return ret
 
 
-def get_package_source_files(name, filtered=True):
+def get_package_source_files(name, filtered = True):
 
     ret = []
 
     pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(
-        name=name
+        name = name
         )
 
     try:
@@ -225,7 +225,7 @@ def get_category_by_id(cid):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
-    q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+    q = index_db.sess.query(index_db.Category).filter_by(cid = cid).first()
 
     if q:
         ret = q.name
@@ -238,7 +238,7 @@ def get_category_parent_by_id(cid):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
-    q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+    q = index_db.sess.query(index_db.Category).filter_by(cid = cid).first()
 
     if q:
         ret = q.parent_cid
@@ -291,7 +291,7 @@ def get_package_id(name):
 
     ret = None
 
-    q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
+    q = index_db.sess.query(index_db.Package).filter_by(name = name).first()
     if q != None:
         ret = q.pid
 
@@ -303,7 +303,7 @@ def get_package_category(pid):
 
     ret = None
 
-    q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+    q = index_db.sess.query(index_db.Package).filter_by(pid = pid).first()
     if q != None:
         ret = q.cid
 
@@ -315,7 +315,7 @@ def get_package_category_by_name(name):
 
     ret = None
 
-    q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
+    q = index_db.sess.query(index_db.Package).filter_by(name = name).first()
     if q != None:
         ret = q.cid
 
@@ -328,21 +328,21 @@ def get_package_by_id(pid):
 
     ret = None
 
-    q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+    q = index_db.sess.query(index_db.Package).filter_by(pid = pid).first()
     if q != None:
         ret = q.name
 
     return ret
 
 
-def get_package_name_list(cid=None):
+def get_package_name_list(cid = None):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     if cid == None:
         lst = index_db.sess.query(index_db.Package).all()
     else:
-        lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+        lst = index_db.sess.query(index_db.Package).filter_by(cid = cid).all()
 
     lst_names = []
     for i in lst:
@@ -354,7 +354,7 @@ def get_package_name_list(cid=None):
 
     return lst_names
 
-def get_package_id_list(cid=None):
+def get_package_id_list(cid = None):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
@@ -362,7 +362,7 @@ def get_package_id_list(cid=None):
     if cid == None:
         lst = index_db.sess.query(index_db.Package).all()
     else:
-        lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+        lst = index_db.sess.query(index_db.Package).filter_by(cid = cid).all()
 
     ids = []
     for i in lst:
@@ -372,14 +372,14 @@ def get_package_id_list(cid=None):
 
     return ids
 
-def get_package_idname_dict(cid=None):
+def get_package_idname_dict(cid = None):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     if cid == None:
         lst = index_db.sess.query(index_db.Package).all()
     else:
-        lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+        lst = index_db.sess.query(index_db.Package).filter_by(cid = cid).all()
 
     dic = {}
     for i in lst:
@@ -389,14 +389,14 @@ def get_package_idname_dict(cid=None):
 
     return dic
 
-def get_category_name_list(parent_cid=0):
+def get_category_name_list(parent_cid = 0):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     lst = index_db.sess.query(
         index_db.Category
         ).filter_by(
-            parent_cid=parent_cid
+            parent_cid = parent_cid
             ).order_by(
                 index_db.Category.name
                 ).all()
@@ -411,14 +411,14 @@ def get_category_name_list(parent_cid=0):
 
     return lst_names
 
-def get_category_id_list(parent_cid=0):
+def get_category_id_list(parent_cid = 0):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
     lst = index_db.sess.query(
         index_db.Category
         ).filter_by(
-            parent_cid=parent_cid
+            parent_cid = parent_cid
             ).order_by(
                 index_db.Category.name
                 ).all()
@@ -431,7 +431,7 @@ def get_category_id_list(parent_cid=0):
 
     return ids
 
-def get_category_idname_dict(parent_cid=0):
+def get_category_idname_dict(parent_cid = 0):
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
 
@@ -446,7 +446,7 @@ def get_category_idname_dict(parent_cid=0):
         lst = index_db.sess.query(
             index_db.Category
             ).filter_by(
-                parent_cid=parent_cid
+                parent_cid = parent_cid
                 ).order_by(
                     index_db.Category.name
                     ).all()
@@ -480,7 +480,7 @@ def get_package_path(pid_or_name):
         ret = None
     else:
         index_db = org.wayround.aipsetup.dbconnections.index_db()
-        pkg = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+        pkg = index_db.sess.query(index_db.Package).filter_by(pid = pid).first()
 
         if pkg != None :
 
@@ -489,7 +489,7 @@ def get_package_path(pid_or_name):
             ret.insert(0, (pkg.pid, pkg.name))
 
             while r != 0:
-                cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
+                cat = index_db.sess.query(index_db.Category).filter_by(cid = r).first()
                 ret.insert(0, (cat.cid, cat.name))
                 r = cat.parent_cid
 
@@ -511,7 +511,7 @@ def get_category_path(cid):
             )
         ret = None
     else:
-        categ = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+        categ = index_db.sess.query(index_db.Category).filter_by(cid = cid).first()
 
         if categ != None :
 
@@ -520,7 +520,7 @@ def get_category_path(cid):
             ret.insert(0, (categ.cid, categ.name))
 
             while r != 0:
-                cat = index_db.sess.query(index_db.Category).filter_by(cid=r).first()
+                cat = index_db.sess.query(index_db.Category).filter_by(cid = r).first()
                 ret.insert(0, (cat.cid, cat.name))
                 r = cat.parent_cid
 
@@ -554,10 +554,10 @@ def get_category_path_string(cid_or_name):
 
 
 def _srfpac_pkg_struct(pid, name, cid):
-    return dict(pid=pid, name=name, cid=cid)
+    return dict(pid = pid, name = name, cid = cid)
 
 def _srfpac_cat_struct(cid, name, parent_cid):
-    return dict(cid=cid, name=name, parent_cid=parent_cid)
+    return dict(cid = cid, name = name, parent_cid = parent_cid)
 
 def _srfpac_get_cat_by_cat_path(category_locations, cat_path):
 
@@ -588,9 +588,9 @@ def scan_repo_for_pkg_and_cat():
 
         if root == repo_dir:
             category_locations[''] = _srfpac_cat_struct(
-                cid=0,
-                name='',
-                parent_cid=None
+                cid = 0,
+                name = '',
+                parent_cid = None
                 )
 
         else:
@@ -605,9 +605,9 @@ def scan_repo_for_pkg_and_cat():
                 parent_cat_id = parent_cat['cid']
 
                 package_locations[relpath] = _srfpac_pkg_struct(
-                    pid=last_pkg_id,
-                    name=os.path.basename(relpath),
-                    cid=parent_cat_id
+                    pid = last_pkg_id,
+                    name = os.path.basename(relpath),
+                    cid = parent_cat_id
                     )
                 last_pkg_id += 1
 
@@ -634,9 +634,9 @@ def scan_repo_for_pkg_and_cat():
                 parent_cat_id = parent_cat['cid']
 
                 category_locations[relpath] = _srfpac_cat_struct(
-                    cid=last_cat_id,
-                    name=os.path.basename(relpath),
-                    parent_cid=parent_cat_id
+                    cid = last_cat_id,
+                    name = os.path.basename(relpath),
+                    parent_cid = parent_cat_id
                     )
 
             org.wayround.utils.file.progress_write(
@@ -805,8 +805,8 @@ def _index_sources_directory_to_list(
     root_dir_name,
     sub_dir_name,
     root_dir_name_len,
-    acceptable_endings=None,
-    added_tags=0
+    acceptable_endings = None,
+    added_tags = 0
     ):
 
     sub_dir_name = org.wayround.utils.path.abspath(sub_dir_name)
@@ -837,7 +837,7 @@ def _index_sources_directory_to_list(
                 full_path,
                 root_dir_name_len,
                 acceptable_endings,
-                added_tags=added_tags
+                added_tags = added_tags
                 )
             added_tags = res['added_tags']
 
@@ -870,9 +870,9 @@ def _index_sources_directory_to_list(
 def index_sources_directory(
     root_dir_name,
     sub_dir_name,
-    acceptable_endings=None,
-    force_reindex=False,
-    first_delete_found=False
+    acceptable_endings = None,
+    force_reindex = False,
+    first_delete_found = False
     ):
 
     root_dir_name = org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(root_dir_name))
@@ -955,7 +955,7 @@ def index_sources_directory(
                     parsed_src_filename = (
                         org.wayround.aipsetup.name.source_name_parse(
                             i,
-                            mute=True
+                            mute = True
                             )
                         )
 
@@ -969,7 +969,8 @@ def index_sources_directory(
                         failed_count += 1
 
                 org.wayround.utils.file.progress_write(
-                    "    processing {} out of {} (added {}, failed {}, skipped {})".format(
+                    "    processing ({:5.2f}%) {} out of {} (added {}, failed {}, skipped {})".format(
+                        (100.0 / (found_count / index)),
                         index,
                         found_count,
                         added_count,
@@ -1024,8 +1025,8 @@ def index_sources_directory(
 
             logging.info(
                 "Records: added {added}; deleted {deleted}".format(
-                    added=added_count,
-                    deleted=deleted_count
+                    added = added_count,
+                    deleted = deleted_count
                     )
                 )
             logging.info("DB Size: {} record(s)".format(tags.get_size()))
@@ -1034,14 +1035,14 @@ def index_sources_directory(
 
     return 0
 
-def index_sources(subdir_name, force_reindex=False, first_delete_found=False):
+def index_sources(subdir_name, force_reindex = False, first_delete_found = False):
 
     index_sources_directory(
         org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(org.wayround.aipsetup.config.config['source'])),
         org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(subdir_name)),
         org.wayround.aipsetup.config.config['acceptable_src_file_extensions'],
-        force_reindex=force_reindex,
-        first_delete_found=first_delete_found
+        force_reindex = force_reindex,
+        first_delete_found = first_delete_found
         )
 
     return 0
@@ -1051,7 +1052,7 @@ def cleanup_repo_package_pack(name):
     g_path = org.wayround.aipsetup.config.config['garbage'] + os.path.sep + name
 
     if not os.path.exists(g_path):
-        os.makedirs(g_path, exist_ok=True)
+        os.makedirs(g_path, exist_ok = True)
 
     path = (
         org.wayround.aipsetup.config.config['repository'] + os.path.sep +
@@ -1098,11 +1099,11 @@ def cleanup_repo_package_pack(name):
 
     files = os.listdir(path)
     files.sort(
-        key=functools.cmp_to_key(
+        key = functools.cmp_to_key(
             org.wayround.aipsetup.version.package_version_comparator
             ),
 
-        reverse=True
+        reverse = True
         )
 
     if len(files) > 5:
