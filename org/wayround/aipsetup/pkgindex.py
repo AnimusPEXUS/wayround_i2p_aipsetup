@@ -1090,7 +1090,10 @@ def cleanup_repo_package_pack(name):
                 p1, True
                 ) != 0:
                 logging.warning(
-                    "Wrong package, garbaging: `{}'\n\tas `{}'".format(p1, p2)
+                    "Wrong package, garbaging: `{}'\n\tas `{}'".format(
+                        os.path.basename(p1),
+                        p2
+                        )
                     )
                 try:
                     shutil.move(p1, p2)
@@ -1110,7 +1113,7 @@ def cleanup_repo_package_pack(name):
         for i in files[5:]:
             p1 = path + os.path.sep + i
 
-            logging.warning("Removing outdated package: {}".format(p1))
+            logging.warning("Removing outdated package: {}".format(os.path.basename(p1)))
             try:
                 os.unlink(p1)
             except:
@@ -1142,7 +1145,7 @@ def cleanup_repo_package(name):
             p2 = g_path
             logging.warning(
                 "moving `{}'\n\tto {}".format(
-                    p1,
+                    os.path.basename(p1),
                     p2
                     )
                 )
