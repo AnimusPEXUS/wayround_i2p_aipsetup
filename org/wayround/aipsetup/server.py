@@ -9,8 +9,8 @@ import json
 import copy
 import functools
 
-import cherrypy
-import cherrypy.lib
+#import cherrypy
+#import cherrypy.lib
 
 import org.wayround.utils.path
 
@@ -64,7 +64,7 @@ class Index:
     index.exposed = True
 
 
-    def category(self, path=None, mode=None):
+    def category(self, path = None, mode = None):
 
         if mode == None:
             mode = 'html'
@@ -89,34 +89,34 @@ class Index:
             if path == None:
 
                 pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
-                    None, index_db=index_db
+                    None, index_db = index_db
                     )
 
                 cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
-                    None, index_db=index_db
+                    None, index_db = index_db
                     )
 
             else:
                 cid = org.wayround.aipsetup.pkgindex.get_category_by_path(
-                    path, index_db=index_db
+                    path, index_db = index_db
                     )
 
                 pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
-                    cid, index_db=index_db
+                    cid, index_db = index_db
                     )
 
                 cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
-                    cid, index_db=index_db
+                    cid, index_db = index_db
                     )
 
             for i in list(pkgs.keys()):
                 pkgs[i] = org.wayround.aipsetup.pkgindex.get_package_path_string(
-                    i, index_db=index_db
+                    i, index_db = index_db
                     )
 
             for i in list(cats.keys()):
                 cats[i] = org.wayround.aipsetup.pkgindex.get_category_path_string(
-                    i, index_db=index_db
+                    i, index_db = index_db
                     )
 
             txt = json.dumps(
@@ -124,8 +124,8 @@ class Index:
                     'packages': pkgs,
                     'categories': cats
                     },
-                indent=2,
-                sort_keys=True
+                indent = 2,
+                sort_keys = True
                 )
 
             txt = bytes(txt, 'utf-8')
@@ -136,7 +136,7 @@ class Index:
 
     category.exposed = True
 
-    def package(self, name='', mode='normal'):
+    def package(self, name = '', mode = 'normal'):
 
         if name == '' or name.isspace():
             raise cherrypy.HTTPError(400, "Wrong `name' parameter")
@@ -156,11 +156,11 @@ class Index:
 
         elif mode == 'packages':
 
-            files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db=index_db)
+            files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db = index_db)
 
             files.sort(
-                reverse=True,
-                key=functools.cmp_to_key(
+                reverse = True,
+                key = functools.cmp_to_key(
                     org.wayround.aipsetup.version.package_version_comparator
                     )
                 )
@@ -171,14 +171,14 @@ class Index:
                 i += 1
                 files[i] = 'files_repository' + files[i]
 
-            txt = json.dumps(files, indent=2, sort_keys=True)
+            txt = json.dumps(files, indent = 2, sort_keys = True)
 
             cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
 
 
         elif mode == 'sources':
             files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
-            files.sort(reverse=True)
+            files.sort(reverse = True)
 
             l = len(files)
             i = -1
@@ -186,7 +186,7 @@ class Index:
                 i += 1
                 files[i] = 'files_source' + files[i]
 
-            txt = json.dumps(files, indent=2, sort_keys=True)
+            txt = json.dumps(files, indent = 2, sort_keys = True)
 
             cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
 
@@ -197,11 +197,11 @@ class Index:
             info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
             latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
 
-            r = org.wayround.aipsetup.pkginfo.get_package_info_record(name=name, info_db=info_db)
+            r = org.wayround.aipsetup.pkginfo.get_package_info_record(name = name, info_db = info_db)
 
-            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db=index_db)
+            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db = index_db)
             if cid != None:
-                category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db=index_db)
+                category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db = index_db)
             else:
                 category = "< Package not indexed! >"
 
@@ -210,13 +210,13 @@ class Index:
             info['tags'] = ', '.join(r['tags'])
             info['category'] = category
             info['newest_pkg'] = (
-                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, index_db=index_db, latest_db=latest_db)
+                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, index_db = index_db, latest_db = latest_db)
                 )
             info['newest_src'] = (
-                org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, index_db=index_db, latest_db=latest_db)
+                org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, index_db = index_db, latest_db = latest_db)
                 )
 
-            txt = json.dumps(info, indent=2, sort_keys=True)
+            txt = json.dumps(info, indent = 2, sort_keys = True)
 
             cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
 
@@ -225,7 +225,7 @@ class Index:
 
         if cherrypy.response.headers['Content-Type'] in [TEXT_PLAIN, APPLICATION_JSON]:
             if isinstance(txt, str):
-                txt = txt.encode(encoding='utf-8', errors='strict')
+                txt = txt.encode(encoding = 'utf-8', errors = 'strict')
 
         return txt
 

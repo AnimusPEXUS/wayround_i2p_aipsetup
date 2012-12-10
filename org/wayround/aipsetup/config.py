@@ -22,6 +22,7 @@ CONFIG_FULL_SAMPLE = {
     'info'               : '/mnt/sda3/home/agu/_UNICORN/pkg_info',
     'server_files'       : '/mnt/sda3/home/agu/_UNICORN/server_files',
     'garbage'            : '/mnt/sda3/home/agu/_UNICORN/garbage',
+    'snapshots'          : '/mnt/sda3/home/agu/_UNICORN/snapshots',
     'source_index'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/sources.sqlite',
     'tags'               : '/mnt/sda3/home/agu/_UNICORN/tags.json',
 
@@ -263,7 +264,7 @@ def config_check_after_load(indict):
         if not i in CONFIG_ALLOWED_PARAMETERS:
             raise ConfigWrongParameter(
                 "Wrong parameter `{paramname}'".format(
-                    paramname=i
+                    paramname = i
                     )
                 )
 
@@ -271,7 +272,7 @@ def config_check_after_load(indict):
         if not i in config_keys:
             raise ConfigParameterMissing(
                 "Missing parameter `{paramname}'".format(
-                    paramname=i
+                    paramname = i
                     )
                 )
 
@@ -281,7 +282,8 @@ def config_check_after_load(indict):
         ('info'             , 'pkg_info'),
         ('server_files'     , 'server_files'),
         ('tags'             , 'tags.json'),
-        ('garbage'          , 'garbage')
+        ('garbage'          , 'garbage'),
+        ('snapshots'        , 'snapshots')
         ]:
         indict[i] = org.wayround.utils.path.abspath(
             os.path.join(indict['unicorn_root'], j)
@@ -291,7 +293,7 @@ def config_check_after_load(indict):
         ('source_index'    , 'sources.sqlite')
         ]:
         indict[i] = 'sqlite:///{path}'.format(
-            path=org.wayround.utils.path.abspath(
+            path = org.wayround.utils.path.abspath(
                 os.path.join(indict['unicorn_root'], j)
                 )
             )
@@ -325,10 +327,10 @@ Spare parameters:
 Missing parameters:
 {missing_parameters}
 """.format(
-           needed_parameters=CONFIG_ALL_PARAMETERS,
-           settparameters=ck_set,
-           spare_parameters=ck_set - CONFIG_ALL_PARAMETERS,
-           missing_parameters=CONFIG_ALL_PARAMETERS - ck_set
+           needed_parameters = CONFIG_ALL_PARAMETERS,
+           settparameters = ck_set,
+           spare_parameters = ck_set - CONFIG_ALL_PARAMETERS,
+           missing_parameters = CONFIG_ALL_PARAMETERS - ck_set
            )
             )
 

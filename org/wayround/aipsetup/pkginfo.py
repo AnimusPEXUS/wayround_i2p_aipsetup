@@ -34,87 +34,87 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
 
         name = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            primary_key=True,
-            default=''
+            nullable = False,
+            primary_key = True,
+            default = ''
             )
 
         basename = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         src_path_prefix = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         filters = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         home_page = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         description = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         buildscript = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
+            nullable = False,
+            default = ''
             )
 
         installation_priority = sqlalchemy.Column(
             sqlalchemy.Integer,
-            nullable=False,
-            default=5
+            nullable = False,
+            default = 5
             )
 
         removable = sqlalchemy.Column(
             sqlalchemy.Boolean,
-            nullable=False,
-            default=True
+            nullable = False,
+            default = True
             )
 
         reducible = sqlalchemy.Column(
             sqlalchemy.Boolean,
-            nullable=False,
-            default=True
+            nullable = False,
+            default = True
             )
 
         non_installable = sqlalchemy.Column(
             sqlalchemy.Boolean,
-            nullable=False,
-            default=False
+            nullable = False,
+            default = False
             )
 
         deprecated = sqlalchemy.Column(
             sqlalchemy.Boolean,
-            nullable=False,
-            default=False
+            nullable = False,
+            default = False
             )
 
         auto_newest_src = sqlalchemy.Column(
             sqlalchemy.Boolean,
-            nullable=False,
-            default=True
+            nullable = False,
+            default = True
             )
 
         auto_newest_pkg = sqlalchemy.Column(
             sqlalchemy.Boolean,
-            nullable=False,
-            default=True
+            nullable = False,
+            default = True
             )
 
     def __init__(self):
@@ -122,7 +122,7 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
         org.wayround.utils.db.BasicDB.__init__(
             self,
             org.wayround.aipsetup.config.config['package_info_db_config'],
-            echo=False
+            echo = False
             )
 
         return
@@ -152,7 +152,7 @@ def get_lists_of_packages_missing_and_present_info_records(names):
         names_found = names
 
     for i in names_found:
-        q = info_db.sess.query(info_db.Info).filter_by(name=i).first()
+        q = info_db.sess.query(info_db.Info).filter_by(name = i).first()
 
         if q == None:
             not_found.append(q)
@@ -162,7 +162,7 @@ def get_lists_of_packages_missing_and_present_info_records(names):
     return (found, not_found)
 
 
-def get_package_info_record(name=None, record=None):
+def get_package_info_record(name = None, record = None):
     """
     This method can accept package name or complete record
     instance.
@@ -179,7 +179,7 @@ def get_package_info_record(name=None, record=None):
     ret = None
 
     if name != None:
-        q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
+        q = info_db.sess.query(info_db.Info).filter_by(name = name).first()
     else:
         q = record
 
@@ -204,7 +204,7 @@ def set_package_info_record(name, struct):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
-    q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
+    q = info_db.sess.query(info_db.Info).filter_by(name = name).first()
 
     creating_new = False
     if q == None:
@@ -235,7 +235,7 @@ def set_package_info_record(name, struct):
         else:
             raise Exception("Programming Error")
 
-        exec("q.{name} = {type}(struct['{name}'])".format(type=ktt, name=i))
+        exec("q.{name} = {type}(struct['{name}'])".format(type = ktt, name = i))
 
     q.name = name
 
@@ -263,7 +263,7 @@ def set_package_info_record(name, struct):
     return
 
 
-def get_info_records_list(mask='*', mute=False):
+def get_info_records_list(mask = '*', mute = False):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
@@ -285,7 +285,7 @@ def get_info_records_list(mask='*', mute=False):
     return lst
 
 def get_missing_info_records_list(
-    create_templates=False, force_rewrite=False
+    create_templates = False, force_rewrite = False
     ):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
@@ -306,7 +306,7 @@ def get_missing_info_records_list(
 
         pkgs_checked += 1
 
-        q2 = info_db.sess.query(info_db.Info).filter_by(name=each.name).first()
+        q2 = info_db.sess.query(info_db.Info).filter_by(name = each.name).first()
 
         if q2 == None:
 
@@ -368,7 +368,7 @@ Total records checked     : {n1}
     missing.sort()
     return missing
 
-def get_outdated_info_records_list(mute=True):
+def get_outdated_info_records_list(mute = True):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
@@ -399,7 +399,7 @@ def get_outdated_info_records_list(mute=True):
             ret.append(i.name)
             continue
 
-        d2 = get_package_info_record(record=i)
+        d2 = get_package_info_record(record = i)
         if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
             if not mute:
                 logging.warning(
@@ -410,8 +410,16 @@ def get_outdated_info_records_list(mute=True):
     return ret
 
 def get_info_rec_by_tarball_filename(tarball_filenam):
-    name = get_package_name_by_tarball_filename(tarball_filenam)
-    return get_package_info_record(name)
+    ret = None
+
+    r = get_package_name_by_tarball_filename(tarball_filenam)
+
+    if r:
+        ret = get_package_info_record(r)
+    else:
+        ret = None
+
+    return ret
 
 def filter_text_parse(filter_text):
     """
@@ -433,15 +441,15 @@ def filter_text_parse(filter_text):
 
     for i in lines:
         if not i.isspace():
-            struct = i.split(' ', maxsplit=3)
+            struct = i.split(' ', maxsplit = 3)
             if not len(struct) == 4:
                 logging.error("Wrong filter line: `{}'".format(i))
             else:
                 struct = dict(
-                    action=struct[0],
-                    subject=struct[1],
-                    function=struct[2],
-                    data=struct[3],
+                    action = struct[0],
+                    subject = struct[1],
+                    function = struct[2],
+                    data = struct[3],
                     )
                 ret.append(struct)
 
@@ -541,7 +549,7 @@ def filter_tarball_list(
 
                     parsed = org.wayround.aipsetup.name.source_name_parse(
                         os.path.basename(item),
-                        mute=True
+                        mute = True
                         )
 
                     if not isinstance(parsed, dict):
@@ -597,7 +605,7 @@ def filter_tarball_list(
                 if matched:
 
                     logging.debug(
-                        "filter_tarball_list: NOT match: `{}'\n       `{}'".format(item, f)
+                        "filter_tarball_list: match: `{}'\n       `{}'".format(item, f)
                         )
 
                     if action == '+':
@@ -627,13 +635,13 @@ def filter_tarball_list(
     return ret
 
 
-def get_package_name_by_tarball_filename(tarball_filename, mute=True):
+def get_package_name_by_tarball_filename(tarball_filename, mute = True):
 
     ret = None
 
     parsed = org.wayround.aipsetup.name.source_name_parse(
         tarball_filename,
-        mute=mute
+        mute = mute
         )
 
     if not isinstance(parsed, dict):
@@ -644,7 +652,13 @@ def get_package_name_by_tarball_filename(tarball_filename, mute=True):
 
         info_db = org.wayround.aipsetup.dbconnections.info_db()
 
-        q = info_db.sess.query(info_db.Info).filter_by(basename=parsed['groups']['name']).all()
+        q = info_db.sess.query(
+            info_db.Info
+            ).filter_by(
+                basename = parsed['groups']['name']
+                ).all()
+
+        possible_names = []
 
         for i in q:
 
@@ -653,15 +667,24 @@ def get_package_name_by_tarball_filename(tarball_filename, mute=True):
                 i.filters
                 )
 
-            if isinstance(res, list) and len(res) != 1:
-                raise Exception("Something wrong")
+            if isinstance(res, list) and len(res) == 1:
+                possible_names.append(i.name)
 
-            elif isinstance(res, list) and len(res) == 1:
-                ret = i.name
-                break
+        if len(possible_names) < 1:
+            logging.error("Not found package name for tarball `{}'".format(tarball_filename))
 
-            else:
-                raise Exception("Something wrong 2")
+            ret = None
+
+        elif len(possible_names) > 1:
+            logging.error("Too many possible package names for tarball `{}':".format(tarball_filename))
+
+            for i in q:
+                print("       {}".format(possible_names))
+
+            ret = None
+
+        else:
+            ret = possible_names[0]
 
     return ret
 
@@ -705,7 +728,7 @@ def update_outdated_pkg_info_records():
 
     logging.info("Getting outdated records list")
 
-    oir = get_outdated_info_records_list(mute=True)
+    oir = get_outdated_info_records_list(mute = True)
 
     logging.info("Found {} outdated records".format(len(oir)))
 
@@ -715,8 +738,8 @@ def update_outdated_pkg_info_records():
             oir[i] + '.json'
             )
     load_info_records_from_fs(
-        filenames=oir,
-        rewrite_existing=True
+        filenames = oir,
+        rewrite_existing = True
         )
 
     return
@@ -724,7 +747,7 @@ def update_outdated_pkg_info_records():
 
 def print_info_record(name):
 
-    r = get_package_info_record(name=name)
+    r = get_package_info_record(name = name)
 
     if r == None:
         logging.error("Not found named info record")
@@ -805,7 +828,7 @@ def print_info_record(name):
     )
 )
 
-def delete_info_records(mask='*'):
+def delete_info_records(mask = '*'):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
@@ -828,7 +851,7 @@ def delete_info_records(mask='*'):
     return
 
 def save_info_records_to_fs(
-    mask='*', force_rewrite=False
+    mask = '*', force_rewrite = False
     ):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
@@ -848,7 +871,7 @@ def save_info_records_to_fs(
             if not os.path.exists(filename):
                 logging.info("Writing: {}".format(filename))
 
-            r = get_package_info_record(record=i)
+            r = get_package_info_record(record = i)
             if isinstance(r, dict):
                 if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
                     logging.error("can't write file {}".format(filename))
@@ -856,7 +879,7 @@ def save_info_records_to_fs(
     return
 
 def load_info_records_from_fs(
-    filenames=[], rewrite_existing=False
+    filenames = [], rewrite_existing = False
     ):
     """
     If names list is given - load only named and don't delete
@@ -892,7 +915,7 @@ def load_info_records_from_fs(
 
         if not rewrite_existing:
             q = info_db.sess.query(info_db.Info).filter_by(
-                name=name
+                name = name
                 ).first()
             if q == None:
                 missing.append(i)

@@ -5,7 +5,7 @@ import time
 import functools
 import urllib.parse
 
-import cherrypy
+#import cherrypy
 
 import org.wayround.utils.path
 import org.wayround.utils.xml
@@ -25,15 +25,15 @@ def pathed_js_path_renderer(obj, inname):
 def page_index():
 
     tree = org.wayround.utils.xml.html(
-        title="Unicorn distribution server",
-        content=[]
+        title = "Unicorn distribution server",
+        content = []
         )
 
     a = org.wayround.utils.xml.DictTreeToXMLRenderer(
-        xml_indent_size=2,
-        generate_css=True,
-        generate_js=True,
-        css_and_js_holder=tree['00020_html']['content']['00010_head']
+        xml_indent_size = 2,
+        generate_css = True,
+        generate_js = True,
+        css_and_js_holder = tree['00020_html']['content']['00010_head']
         )
 
     a.set_tree(tree)
@@ -51,7 +51,7 @@ def page_index():
 
 def category(index_db, path):
 
-    cat_id = org.wayround.aipsetup.pkgindex.get_category_by_path(path, index_db=index_db)
+    cat_id = org.wayround.aipsetup.pkgindex.get_category_by_path(path, index_db = index_db)
 
     if cat_id == None:
         raise cherrypy.HTTPError(404, "Category not found")
@@ -59,9 +59,9 @@ def category(index_db, path):
     logging.debug("Category `{}' corresponds to path `{}'".format(cat_id, path))
 
     logging.debug("Getting package ids in cat {}".format(cat_id))
-    pack_ids = org.wayround.aipsetup.pkgindex.get_package_id_list(cat_id, index_db=index_db)
+    pack_ids = org.wayround.aipsetup.pkgindex.get_package_id_list(cat_id, index_db = index_db)
     logging.debug("Getting cat ids in cat {}".format(cat_id))
-    cats_ids = org.wayround.aipsetup.pkgindex.get_category_id_list(cat_id, index_db=index_db)
+    cats_ids = org.wayround.aipsetup.pkgindex.get_category_id_list(cat_id, index_db = index_db)
 
 #    cats_lst = list(cats_ids.keys())
 #    cats_lst.sort()
@@ -73,36 +73,36 @@ def category(index_db, path):
 
     for i in cats_ids:
 
-        cat_path = org.wayround.aipsetup.pkgindex.get_category_path_string(i, index_db=index_db)
+        cat_path = org.wayround.aipsetup.pkgindex.get_category_path_string(i, index_db = index_db)
 
         cats_tags.append(
             org.wayround.utils.xml.tag(
                 'div',
-                attributes={
+                attributes = {
                     'class': 'dir_entry'
                     },
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'div',
-                        module='categories',
-                        uid='single-page-cat-category-div',
-                        content=[
+                        module = 'categories',
+                        uid = 'single-page-cat-category-div',
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'a',
-                                attributes={
+                                attributes = {
                                     'href': 'category?path={}'.format(urllib.parse.quote(cat_path))
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'img',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'alt': 'open',
                                             'src': 'css/icons/icons/folder.png',
                                             },
                                         ),
                                     ' ',
-                                    org.wayround.aipsetup.pkgindex.get_category_by_id(i, index_db=index_db)
+                                    org.wayround.aipsetup.pkgindex.get_category_by_id(i, index_db = index_db)
                                     ]
                                 )
                             ]
@@ -114,23 +114,23 @@ def category(index_db, path):
     logging.debug("Formatting packs in cat {}".format(cat_id))
 
     for i in pack_ids:
-        package_name = org.wayround.aipsetup.pkgindex.get_package_by_id(i, index_db=index_db)
+        package_name = org.wayround.aipsetup.pkgindex.get_package_by_id(i, index_db = index_db)
         pack_tags.append(
             org.wayround.utils.xml.tag(
                 'div',
-                module='categories',
-                uid='single-page-cat-package-div',
-                content=[
+                module = 'categories',
+                uid = 'single-page-cat-package-div',
+                content = [
                     org.wayround.utils.xml.tag(
                         'a',
-                        attributes={
+                        attributes = {
                             'href': 'package?name={}'.format(urllib.parse.quote(package_name))
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'img',
-                                closed=True,
-                                attributes={
+                                closed = True,
+                                attributes = {
                                     'alt': 'open',
                                     'src': 'css/icons/icons/package-x-generic.png',
                                     },
@@ -148,19 +148,19 @@ def category(index_db, path):
 
     double_dot = []
     if cat_id != 0:
-        parent_cat_id = org.wayround.aipsetup.pkgindex.get_category_parent_by_id(cat_id, index_db=index_db)
-        parent_cat_path = org.wayround.aipsetup.pkgindex.get_category_path_string(parent_cat_id, index_db=index_db)
+        parent_cat_id = org.wayround.aipsetup.pkgindex.get_category_parent_by_id(cat_id, index_db = index_db)
+        parent_cat_path = org.wayround.aipsetup.pkgindex.get_category_path_string(parent_cat_id, index_db = index_db)
 
         double_dot = [
             org.wayround.utils.xml.tag(
                 'div',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'a',
-                        attributes={
+                        attributes = {
                             'href': 'category?path={}'.format(parent_cat_path)
                             },
-                        content=".. (Parent Category: '{}')".format(parent_cat_path)
+                        content = ".. (Parent Category: '{}')".format(parent_cat_path)
                         )
                     ]
                 )
@@ -172,16 +172,16 @@ def category(index_db, path):
         0,
         org.wayround.utils.xml.tag(
             'h1',
-            content='Category: {}'.format(org.wayround.aipsetup.pkgindex.get_category_path_string(cat_id, index_db=index_db))
+            content = 'Category: {}'.format(org.wayround.aipsetup.pkgindex.get_category_path_string(cat_id, index_db = index_db))
             )
         )
 
     ret = org.wayround.utils.xml.tag(
         'div',
-        module='categories',
-        uid='single-page-div',
-        required_css=['single-page-div.css'],
-        content=ret
+        module = 'categories',
+        uid = 'single-page-div',
+        required_css = ['single-page-div.css'],
+        content = ret
         )
 
     return ret
@@ -195,18 +195,18 @@ def page_category(index_db, path):
     table = category(index_db, path)
 
     tree = org.wayround.utils.xml.html(
-        head=head,
-        content=[table],
-        body_module='aipsetup_server_basic',
-        body_uid='body',
-        body_css=['body.css']
+        head = head,
+        content = [table],
+        body_module = 'aipsetup_server_basic',
+        body_uid = 'body',
+        body_css = ['body.css']
         )
 
     renderer = org.wayround.utils.xml.DictTreeToXMLRenderer(
-        xml_indent_size=2,
-        generate_css=True,
-        generate_js=True,
-        css_and_js_holder=head
+        xml_indent_size = 2,
+        generate_css = True,
+        generate_js = True,
+        css_and_js_holder = head
         )
 
     renderer.set_tree(tree)
@@ -227,11 +227,11 @@ def page_category(index_db, path):
 
 def package_file_list(index_db, name):
 
-    files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db=index_db)
+    files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db = index_db)
 
     files.sort(
-        reverse=True,
-        key=functools.cmp_to_key(
+        reverse = True,
+        key = functools.cmp_to_key(
             org.wayround.aipsetup.version.package_version_comparator
             )
         )
@@ -247,7 +247,7 @@ def package_file_list(index_db, name):
     for i in files:
 
         parsed = org.wayround.aipsetup.name.package_name_parse(
-            i, mute=True
+            i, mute = True
             )
 
         package_url = (
@@ -269,32 +269,32 @@ def package_file_list(index_db, name):
             package_filesize = package_file_stat.st_size
             t = time.gmtime(package_file_stat.st_mtime)
             package_moddate = "{Y:04}-{M:02}-{D:02} {h:02}:{m:02}:{s:02}".format(
-                Y=t.tm_year,
-                M=t.tm_mon,
-                D=t.tm_mday,
-                h=t.tm_hour,
-                m=t.tm_min,
-                s=t.tm_sec
+                Y = t.tm_year,
+                M = t.tm_mon,
+                D = t.tm_mday,
+                h = t.tm_hour,
+                m = t.tm_min,
+                s = t.tm_sec
                 )
 
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'a',
-                                attributes={
+                                attributes = {
                                     'href': package_url,
                                     'title': "Download File"
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'img',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'alt': 'download',
                                             'src': 'css/icons/icons/document-save.png',
                                             },
@@ -307,17 +307,17 @@ def package_file_list(index_db, name):
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=parsed['groups']['timestamp']
+                        content = parsed['groups']['timestamp']
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="{m:.2f} MiB".format(
-                            m=float(package_filesize) / 1024 / 1024
+                        content = "{m:.2f} MiB".format(
+                            m = float(package_filesize) / 1024 / 1024
                             )
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="{}".format(package_moddate)
+                        content = "{}".format(package_moddate)
                         )
                     ]
                 )
@@ -327,10 +327,10 @@ def package_file_list(index_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="no packages found"
+                        content = "no packages found"
                         )
                     ]
                 )
@@ -340,22 +340,22 @@ def package_file_list(index_db, name):
             0,
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Version"
+                        content = "Version"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Timestamp"
+                        content = "Timestamp"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Size"
+                        content = "Size"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Modify"
+                        content = "Modify"
                         )
                     ]
                 )
@@ -363,10 +363,10 @@ def package_file_list(index_db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
-        module='package-info-module',
-        uid='file-list-table',
-        required_css=['file-list-table.css'],
-        content=rows
+        module = 'package-info-module',
+        uid = 'file-list-table',
+        required_css = ['file-list-table.css'],
+        content = rows
         )
 
     return table
@@ -374,15 +374,15 @@ def package_file_list(index_db, name):
 
 def package_sources_file_list(info_db, name):
 
-    files = org.wayround.aipsetup.pkgindex.get_package_source_files(name, info_db=info_db)
+    files = org.wayround.aipsetup.pkgindex.get_package_source_files(name, info_db = info_db)
 
     # TODO: rework this
     if not isinstance(files, list):
         files = []
 
     files.sort(
-        reverse=True,
-        key=functools.cmp_to_key(
+        reverse = True,
+        key = functools.cmp_to_key(
             org.wayround.aipsetup.version.source_version_comparator
             )
         )
@@ -414,32 +414,32 @@ def package_sources_file_list(info_db, name):
             source_filesize = source_file_stat.st_size
             t = time.gmtime(source_file_stat.st_mtime)
             source_moddate = "{Y:04}-{M:02}-{D:02} {h:02}:{m:02}:{s:02}".format(
-                Y=t.tm_year,
-                M=t.tm_mon,
-                D=t.tm_mday,
-                h=t.tm_hour,
-                m=t.tm_min,
-                s=t.tm_sec
+                Y = t.tm_year,
+                M = t.tm_mon,
+                D = t.tm_mday,
+                h = t.tm_hour,
+                m = t.tm_min,
+                s = t.tm_sec
                 )
 
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'a',
-                                attributes={
+                                attributes = {
                                     'href': source_url,
                                     'title': "Download File"
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'img',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'alt': 'download',
                                             'src': 'css/icons/icons/document-save.png',
                                             },
@@ -452,17 +452,17 @@ def package_sources_file_list(info_db, name):
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=os.path.dirname(i)[1:]
+                        content = os.path.dirname(i)[1:]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="{m:.2f} MiB".format(
-                            m=float(source_filesize) / 1024 / 1024
+                        content = "{m:.2f} MiB".format(
+                            m = float(source_filesize) / 1024 / 1024
                             )
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=str(source_moddate)
+                        content = str(source_moddate)
                         )
                     ]
                 )
@@ -472,10 +472,10 @@ def package_sources_file_list(info_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        content="no sources found"
+                        content = "no sources found"
                         )
                     ]
                 )
@@ -485,22 +485,22 @@ def package_sources_file_list(info_db, name):
             0,
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="File Name"
+                        content = "File Name"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Path"
+                        content = "Path"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Size"
+                        content = "Size"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Modify"
+                        content = "Modify"
                         )
                     ]
                 )
@@ -508,10 +508,10 @@ def package_sources_file_list(info_db, name):
 
     table = org.wayround.utils.xml.tag(
         'table',
-        module='package-info-module',
-        uid='file-list-table',
-        required_css=['file-list-table.css'],
-        content=rows
+        module = 'package-info-module',
+        uid = 'file-list-table',
+        required_css = ['file-list-table.css'],
+        content = rows
         )
 
     return table
@@ -519,7 +519,7 @@ def package_sources_file_list(info_db, name):
 
 def package_info(index_db, info_db, latest_db, tag_db, name):
 
-    pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(name, info_db=info_db)
+    pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(name, info_db = info_db)
     logging.debug(
         "package_info: package_info_record_to_dict({}) == {}".format(
             name,
@@ -535,9 +535,9 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
         raise cherrypy.HTTPError(404, "No page for package `{}'".format(name))
     else:
 
-        cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db=index_db)
+        cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db = index_db)
         if cid != None:
-            category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db=index_db)
+            category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db = index_db)
         else:
             category = "< Package not indexed! >"
 
@@ -557,27 +557,27 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
             rows.append(
                 org.wayround.utils.xml.tag(
                     'tr',
-                    content=[
+                    content = [
                         org.wayround.utils.xml.tag(
                             'td',
-                            attributes={
+                            attributes = {
                                 'align': 'right'
                                 },
-                            content=[
+                            content = [
                                 org.wayround.utils.xml.tag(
                                     'strong',
-                                    content='{}:'.format(i.replace('_', ' ').capitalize())
+                                    content = '{}:'.format(i.replace('_', ' ').capitalize())
                                     )
                                 ]
                             ),
                         org.wayround.utils.xml.tag(
                             'td',
-                            content=[
+                            content = [
                                 org.wayround.utils.xml.tag(
                                     'pre',
-                                    new_line_before_content=False,
-                                    new_line_after_content=False,
-                                    content=str(pkg_info[i])
+                                    new_line_before_content = False,
+                                    new_line_after_content = False,
+                                    content = str(pkg_info[i])
                                     )
                                 ]
                             )
@@ -589,41 +589,41 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
             0,
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'align': 'right'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'strong',
-                                content='Base Name:'
+                                content = 'Base Name:'
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=pkg_info['basename']
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = pkg_info['basename']
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'rowspan': '13'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=pkg_info['description']
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = pkg_info['description']
                                 )
                             ]
                         )
@@ -634,35 +634,35 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'align': 'right'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'strong',
-                                content='Category:'
+                                content = 'Category:'
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=[
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'a',
-                                        new_line_before_start=False,
-                                        new_line_after_end=False,
-                                        attributes={
+                                        new_line_before_start = False,
+                                        new_line_after_end = False,
+                                        attributes = {
                                             'href': "category?path={}".format(category)
                                             },
-                                        content=category
+                                        content = category
                                         )
                                     ]
                                 )
@@ -675,36 +675,36 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'align': 'right'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'strong',
-                                content='Home Page:'
+                                content = 'Home Page:'
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=[
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'a',
-                                        new_line_before_start=False,
-                                        new_line_after_end=False,
-                                        attributes={
+                                        new_line_before_start = False,
+                                        new_line_after_end = False,
+                                        attributes = {
                                             'href': pkg_info['home_page'],
                                             'target': '_blank'
                                             },
-                                        content=pkg_info['home_page']
+                                        content = pkg_info['home_page']
                                         )
                                     ]
                                 )
@@ -717,27 +717,27 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'align': 'right'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'strong',
-                                content='Tags:'
+                                content = 'Tags:'
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=', '.join(tags)
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = ', '.join(tags)
                                 )
                             ]
                         )
@@ -745,7 +745,7 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
                 )
             )
 
-        a = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, latest_db=latest_db, info_db=info_db, index_db=index_db)
+        a = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, latest_db = latest_db, info_db = info_db, index_db = index_db)
         if a == None:
             a = 'None'
         else:
@@ -754,27 +754,27 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'align': 'right'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'strong',
-                                content='Latest Package:'
+                                content = 'Latest Package:'
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=a
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = a
                                 )
                             ]
                         )
@@ -782,7 +782,7 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
                 )
             )
 
-        a = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, latest_db=latest_db, info_db=info_db, index_db=index_db)
+        a = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, latest_db = latest_db, info_db = info_db, index_db = index_db)
         if a == None:
             a = 'None'
         else:
@@ -791,27 +791,27 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
         rows.append(
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'align': 'right'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'strong',
-                                content='Newest src:'
+                                content = 'Newest src:'
                                 )
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'pre',
-                                new_line_before_content=False,
-                                new_line_after_content=False,
-                                content=a
+                                new_line_before_content = False,
+                                new_line_after_content = False,
+                                content = a
                                 )
                             ]
                         )
@@ -821,16 +821,16 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
 
         ret = org.wayround.utils.xml.tag(
             'div',
-            module='package-info-module',
-            uid='info-div',
-            required_css=['info-div.css'],
-            content=[
+            module = 'package-info-module',
+            uid = 'info-div',
+            required_css = ['info-div.css'],
+            content = [
                  org.wayround.utils.xml.tag(
                     'table',
-                    module='package-info-module',
-                    uid='info-info-table',
-                    required_css=['info-info-table.css'],
-                    content=rows
+                    module = 'package-info-module',
+                    uid = 'info-info-table',
+                    required_css = ['info-info-table.css'],
+                    content = rows
                     )
                 ]
             )
@@ -840,30 +840,30 @@ def package_info(index_db, info_db, latest_db, tag_db, name):
 
 def page_package(index_db, info_db, latest_db, tag_db, name):
 
-    cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db=index_db)
+    cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db = index_db)
     if cid != None:
-        category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db=index_db)
+        category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db = index_db)
     else:
         category = "< Package not indexed! >"
 
     table = org.wayround.utils.xml.tag(
         'table',
-        module='package-info-module',
-        uid='info-upper-table',
-        required_css=['info-upper-table.css'],
-        content=[
+        module = 'package-info-module',
+        uid = 'info-upper-table',
+        required_css = ['info-upper-table.css'],
+        content = [
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'colspan': '2'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'h1',
-                                content=name
+                                content = name
                                 ),
                             ]
                         )
@@ -871,33 +871,33 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                 ),
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        module='package-info-module',
-                        uid='info-upper-table-buttons-cell',
-                        required_css=['info-upper-table-buttons-cell.css'],
-                        attributes={
+                        module = 'package-info-module',
+                        uid = 'info-upper-table-buttons-cell',
+                        required_css = ['info-upper-table-buttons-cell.css'],
+                        attributes = {
                             'colspan': '2'
                             },
-                        content=[
+                        content = [
                             org.wayround.utils.xml.tag(
                                 'form',
-                                attributes={
+                                attributes = {
                                     'action': "..",
                                     'mode': 'GET'
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'button',
-                                        attributes={
+                                        attributes = {
                                             'type': 'submit',
                                             },
-                                        content=[
+                                        content = [
                                             org.wayround.utils.xml.tag(
                                                 'img',
-                                                closed=True,
-                                                attributes={
+                                                closed = True,
+                                                attributes = {
                                                     'src': 'css/icons/icons/go-home.png',
                                                     'alt': "Go Home"
                                                     }
@@ -910,23 +910,23 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                 ),
                             org.wayround.utils.xml.tag(
                                 'form',
-                                attributes={
+                                attributes = {
                                     'action': "category",
                                     'mode': 'GET'
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'button',
-                                        attributes={
+                                        attributes = {
                                             'type': 'submit',
                                             'name': 'path',
                                             'value': category
                                             },
-                                        content=[
+                                        content = [
                                             org.wayround.utils.xml.tag(
                                                 'img',
-                                                closed=True,
-                                                attributes={
+                                                closed = True,
+                                                attributes = {
                                                     'src': 'css/icons/icons/go-up.png',
                                                     'alt': "Up to category"
                                                     }
@@ -941,15 +941,15 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
 
                             org.wayround.utils.xml.tag(
                                 'form',
-                                attributes={
+                                attributes = {
                                     'action': "",
                                     'mode': 'GET'
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'input',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'type': 'hidden',
                                             'name': 'name',
                                             'value': name
@@ -957,8 +957,8 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                         ),
                                     org.wayround.utils.xml.tag(
                                         'input',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'type': 'hidden',
                                             'name': 'mode',
                                             'value': 'packages'
@@ -966,14 +966,14 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                         ),
                                     org.wayround.utils.xml.tag(
                                         'button',
-                                        attributes={
+                                        attributes = {
                                             'type': 'submit'
                                             },
-                                        content=[
+                                        content = [
                                             org.wayround.utils.xml.tag(
                                                 'img',
-                                                closed=True,
-                                                attributes={
+                                                closed = True,
+                                                attributes = {
                                                     'src': 'css/icons/icons/gnome-mime-application-x-cd-image.png',
                                                     'alt': "Packages JSON"
                                                     }
@@ -986,15 +986,15 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                 ),
                             org.wayround.utils.xml.tag(
                                 'form',
-                                attributes={
+                                attributes = {
                                     'action': "",
                                     'mode': 'GET'
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'input',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'type': 'hidden',
                                             'name': 'name',
                                             'value': name
@@ -1002,8 +1002,8 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                         ),
                                     org.wayround.utils.xml.tag(
                                         'input',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'type': 'hidden',
                                             'name': 'mode',
                                             'value': 'sources'
@@ -1011,14 +1011,14 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                         ),
                                     org.wayround.utils.xml.tag(
                                         'button',
-                                        attributes={
+                                        attributes = {
                                             'type': 'submit'
                                             },
-                                        content=[
+                                        content = [
                                             org.wayround.utils.xml.tag(
                                                 'img',
-                                                closed=True,
-                                                attributes={
+                                                closed = True,
+                                                attributes = {
                                                     'src': 'css/icons/icons/gnome-mime-application-x-cd-image.png',
                                                     'alt': "Sources JSON"
                                                     }
@@ -1031,15 +1031,15 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                 ),
                             org.wayround.utils.xml.tag(
                                 'form',
-                                attributes={
+                                attributes = {
                                     'action': "",
                                     'mode': 'GET'
                                     },
-                                content=[
+                                content = [
                                     org.wayround.utils.xml.tag(
                                         'input',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'type': 'hidden',
                                             'name': 'name',
                                             'value': name
@@ -1047,8 +1047,8 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                         ),
                                     org.wayround.utils.xml.tag(
                                         'input',
-                                        closed=True,
-                                        attributes={
+                                        closed = True,
+                                        attributes = {
                                             'type': 'hidden',
                                             'name': 'mode',
                                             'value': 'info'
@@ -1056,14 +1056,14 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                                         ),
                                     org.wayround.utils.xml.tag(
                                         'button',
-                                        attributes={
+                                        attributes = {
                                             'type': 'submit'
                                             },
-                                        content=[
+                                        content = [
                                             org.wayround.utils.xml.tag(
                                                 'img',
-                                                closed=True,
-                                                attributes={
+                                                closed = True,
+                                                attributes = {
                                                     'src': 'css/icons/icons/gnome-mime-application-x-cd-image.png',
                                                     'alt': "Info JSON"
                                                     }
@@ -1080,13 +1080,13 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                 ),
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'colspan': '2'
                             },
-                        content=[
+                        content = [
                             package_info(index_db, info_db, latest_db, tag_db, name)
                             ]
                         )
@@ -1094,35 +1094,35 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
                 ),
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Packages"
+                        content = "Packages"
                         ),
                     org.wayround.utils.xml.tag(
                         'th',
-                        content="Sources"
+                        content = "Sources"
                         )
                     ]
                 ),
             org.wayround.utils.xml.tag(
                 'tr',
-                content=[
+                content = [
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'valign':'top'
                             },
-                        content=[
+                        content = [
                             package_file_list(index_db, name)
                             ]
                         ),
                     org.wayround.utils.xml.tag(
                         'td',
-                        attributes={
+                        attributes = {
                             'valign':'top'
                             },
-                        content=[
+                        content = [
                             package_sources_file_list(info_db, name)
                             ]
                         )
@@ -1136,18 +1136,18 @@ def page_package(index_db, info_db, latest_db, tag_db, name):
         )
 
     tree = org.wayround.utils.xml.html(
-        head=head,
-        content=[table],
-        body_module='aipsetup_server_basic',
-        body_uid='body',
-        body_css=['body.css']
+        head = head,
+        content = [table],
+        body_module = 'aipsetup_server_basic',
+        body_uid = 'body',
+        body_css = ['body.css']
         )
 
     renderer = org.wayround.utils.xml.DictTreeToXMLRenderer(
-        xml_indent_size=2,
-        generate_css=True,
-        generate_js=True,
-        css_and_js_holder=head
+        xml_indent_size = 2,
+        generate_css = True,
+        generate_js = True,
+        css_and_js_holder = head
         )
 
     renderer.set_tree(tree)

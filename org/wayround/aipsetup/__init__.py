@@ -10,6 +10,7 @@ AIPSETUP_CLI_MODULE_LIST = [
     'build',
     'pack',
     'package',
+    'pkgsnapshot',
     'server',
     'client',
     'repoman',
@@ -22,7 +23,7 @@ AIPSETUP_CLI_MODULE_LIST = [
     'unicorn'
     ]
 
-# modules allowed to be accessed from CLI without 
+# modules allowed to be accessed from CLI without
 # proper aipsetup.conf
 AIPSETUP_CLI_MODULE_LIST_UNFUSED = [
     'config',
