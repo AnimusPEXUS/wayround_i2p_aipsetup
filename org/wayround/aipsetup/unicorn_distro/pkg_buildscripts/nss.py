@@ -232,12 +232,22 @@ def main(buildingsite, action = None):
                     nss_patch_version = 0
 
                     if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 0:
-                        nss_major_version = pkg_info['pkg_nameinfo']['groups']['version_list'][0],
-                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 1:
-                        nss_minor_version = pkg_info['pkg_nameinfo']['groups']['version_list'][1],
-                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 2:
-                        nss_patch_version = pkg_info['pkg_nameinfo']['groups']['version_list'][2],
+                        nss_major_version = pkg_info['pkg_nameinfo']['groups']['version_list'][0]
 
+                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 1:
+                        nss_minor_version = pkg_info['pkg_nameinfo']['groups']['version_list'][1]
+
+                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 2:
+                        nss_patch_version = pkg_info['pkg_nameinfo']['groups']['version_list'][2]
+
+
+                    logging.info(
+                        "Applying version {}.{}.{}".format(
+                            nss_major_version,
+                            nss_minor_version,
+                            nss_patch_version
+                            )
+                        )
 
                     pkg_config = """
 prefix={prefix}

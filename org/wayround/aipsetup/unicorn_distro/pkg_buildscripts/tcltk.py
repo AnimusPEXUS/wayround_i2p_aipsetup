@@ -35,7 +35,7 @@ def main(buildingsite, action = None):
 
         separate_build_dir = False
 
-        source_configure_reldir = '.'
+        source_configure_reldir = 'unix'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -52,6 +52,7 @@ def main(buildingsite, action = None):
             ret = autotools.configure_high(
                 buildingsite,
                 options = [
+                    '--enable-threads',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -83,11 +84,25 @@ def main(buildingsite, action = None):
                 )
 
         if 'distribute' in actions and ret == 0:
+
             ret = autotools.make_high(
                 buildingsite,
                 options = [],
                 arguments = [
                     'install',
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment = {},
+                environment_mode = 'copy',
+                use_separate_buildding_dir = separate_build_dir,
+                source_configure_reldir = source_configure_reldir
+                )
+
+            ret = autotools.make_high(
+                buildingsite,
+                options = [],
+                arguments = [
+                    'install-private-headers',
                     'DESTDIR=' + dst_dir
                     ],
                 environment = {},

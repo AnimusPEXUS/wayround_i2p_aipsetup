@@ -3,6 +3,7 @@
 import os.path
 import logging
 
+import org.wayround.utils.archive
 import org.wayround.utils.file
 
 import org.wayround.aipsetup.buildingsite
@@ -31,6 +32,8 @@ def main(buildingsite, action = None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
+        tar_dir = org.wayround.aipsetup.buildingsite.getDIR_TARBALL(buildingsite)
+
         dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
@@ -38,27 +41,63 @@ def main(buildingsite, action = None):
         source_configure_reldir = '.'
 
         if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                org.wayround.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir = True,
-                rename_dir = False
-                )
+
+            files = os.listdir(tar_dir)
+
+            tcl_found = False
+            tk_found = False
+            for i in files:
+                if i.startswith('tcl'):
+                    tcl_found = i
+
+                if i.startswith('tk'):
+                    tk_found = i
+
+            if not tcl_found:
+                logging.error("Tcl and Tk source tarballs must be in tarballs dir")
+                ret = 20
+            else:
+
+                if os.path.isdir(src_dir):
+                    logging.info("cleaningup source dir")
+                    org.wayround.utils.file.cleanup_dir(src_dir)
+
+                logging.info("Extracting Tcl")
+                org.wayround.utils.archive.extract(
+                    os.path.join(tar_dir, tcl_found), buildingsite
+                    )
+
+                logging.info("Extracting Tk")
+                org.wayround.utils.archive.extract(
+                    os.path.join(tar_dir, tk_found), buildingsite
+                    )
+
+                ret = autotools.extract_high(
+                    buildingsite,
+                    pkg_info['pkg_info']['basename'],
+                    unwrap_dir = True,
+                    rename_dir = False
+                    )
+
 
         if 'configure' in actions and ret == 0:
+
             ret = autotools.configure_high(
                 buildingsite,
                 options = [
+                    '--enable-threads',
+                    '--enable-64bit',
+                    '--enable-64bit-vis',
+                    '--enable-wince',
+                    '--with-tcl=/usr/lib',
+                    '--with-tk=/usr/lib',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
+                    '--host=' + pkg_info['constitution']['host']
+#                    '--build=' + pkg_info['constitution']['build'],
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments = [],
