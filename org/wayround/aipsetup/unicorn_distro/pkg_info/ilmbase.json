@@ -1,10 +1,10 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "openexr", 
+  "basename": "ilmbase", 
   "buildscript": "std", 
   "deprecated": false, 
-  "description": "write something here, please", 
+  "description": "", 
   "filters": "", 
   "home_page": "http://www.openexr.com", 
   "installation_priority": 5, 

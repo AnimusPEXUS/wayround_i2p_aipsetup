@@ -1,0 +1,80 @@
+#!/usr/bin/python
+
+import logging
+import os.path
+import subprocess
+
+import org.wayround.utils.file
+
+import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
+import org.wayround.aipsetup.buildtools.autotools as autotools
+
+
+def main(buildingsite, action = None):
+
+    ret = 0
+
+    r = org.wayround.aipsetup.build.build_script_wrap(
+        buildingsite,
+        ['extract', 'build', 'distribute'],
+        action,
+        "help"
+        )
+
+    if not isinstance(r, tuple):
+        logging.error("Error")
+        ret = r
+
+    else:
+
+        pkg_info, actions = r
+
+        src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
+
+        if 'extract' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
+            ret = autotools.extract_high(
+                buildingsite,
+                pkg_info['pkg_info']['basename'],
+                unwrap_dir = True,
+                rename_dir = False
+                )
+
+        if 'build' in actions and ret == 0:
+
+            src_dir
+
+            p = subprocess.Popen(
+                [
+                    'python',
+                    'makepanda/makepanda.py',
+                    '--everything',
+                    '--override=HAVE_VIDEO4LINUX=UNDEF'
+                    ],
+                cwd = src_dir
+                )
+
+            ret = p.wait()
+
+
+        if 'distribute' in actions and ret == 0:
+
+            p = subprocess.Popen(
+                [
+                    'python',
+                    'makepanda/installpanda.py',
+                    '--prefix=/usr',
+                    '--destdir=' + dst_dir
+                    ],
+                cwd = src_dir
+                )
+
+            ret = p.wait()
+
+    return ret

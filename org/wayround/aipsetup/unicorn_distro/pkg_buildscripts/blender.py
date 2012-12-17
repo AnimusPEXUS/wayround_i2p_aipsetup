@@ -35,7 +35,7 @@ def main(buildingsite, action = None):
 
         dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir = False
+        separate_build_dir = True
 
         source_configure_reldir = '.'
 

@@ -129,7 +129,7 @@ class MainWindow:
                 self.ui['textview4'].set_buffer(b)
 
                 m = self.ui['combobox1'].get_model()
-                name_i = -1
+                name_i = 0
 
                 for i in range(len(m)):
 
@@ -191,7 +191,7 @@ class MainWindow:
 
         return ret
 
-    def save_data(self, name, update_db=False):
+    def save_data(self, name, update_db = False):
 
         ret = 0
 
@@ -268,7 +268,7 @@ class MainWindow:
                 if update_db:
                     try:
                         org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
-                            [filename], rewrite_existing=True
+                            [filename], rewrite_existing = True
                             )
 
                         dbu = "DB updated"
@@ -330,6 +330,7 @@ class MainWindow:
         self.ui['combobox1'].set_model(None)
 
         lst = Gtk.ListStore(str)
+        lst.append('')
         for i in files:
             lst.append([os.path.basename(i)[:-3]])
 
@@ -388,6 +389,13 @@ class MainWindow:
 #        print("")
 
         if (
+            (event.keyval == Gdk.KEY_q)
+            and
+            (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
+            ):
+            org.wayround.aipsetup.gtk.stop_session()
+
+        if (
             (event.keyval == Gdk.KEY_s)
             and
             (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
@@ -417,7 +425,7 @@ class MainWindow:
             dia.run()
             dia.destroy()
         else:
-            self.save_data(self.currently_opened, update_db=True)
+            self.save_data(self.currently_opened, update_db = True)
 
     def onShowAllSourceFilesButtonActivated(self, button):
 
@@ -434,7 +442,7 @@ class MainWindow:
         else:
             lst = org.wayround.aipsetup.pkgindex.get_package_source_files(
                 self.ui['entry1'].get_text()[:-5],
-                filtered=False
+                filtered = False
                 )
 
             logging.debug("get_package_source_files returned {}".format(lst))
@@ -470,7 +478,7 @@ class MainWindow:
         else:
             lst = org.wayround.aipsetup.pkgindex.get_package_source_files(
                 self.ui['entry1'].get_text()[:-5],
-                filtered=True
+                filtered = True
                 )
 
             logging.debug("get_package_source_files returned {}".format(lst))
@@ -525,7 +533,7 @@ class MainWindow:
             org.wayround.aipsetup.latesteditor.main(self.ui['entry1'].get_text()[:-5])
 
 
-def main(name_to_edit=None):
+def main(name_to_edit = None):
 
     mw = MainWindow()
 

@@ -1,15 +1,15 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "openexr", 
+  "basename": "ode", 
   "buildscript": "std", 
   "deprecated": false, 
-  "description": "write something here, please", 
+  "description": "", 
   "filters": "", 
-  "home_page": "http://www.openexr.com", 
+  "home_page": "", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "src_path_prefix": "/www.sourceforge.net/"
 }

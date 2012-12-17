@@ -31,6 +31,8 @@ def main(buildingsite, action = None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
         separate_build_dir = False
 
         if 'extract' in actions:
@@ -100,16 +102,27 @@ def main(buildingsite, action = None):
                 options = [],
                 arguments = [
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment = {},
                 environment_mode = 'copy',
                 use_separate_buildding_dir = separate_build_dir,
                 source_configure_reldir = '.'
                 )
+
+
+            inc_dir = os.path.join(dst_dir, 'usr', 'include')
+
+            lst = os.listdir(inc_dir)
+
+            sea_inc_dir = None
+
+            if not len(lst) == 1:
+                logging.error("Can't find seamonkey includes dir in {}".format(inc_dir))
+                ret = 30
+            else:
+                sea_inc_dir = lst[0]
+
+                os.symlink(sea_inc_dir, os.path.join(inc_dir, 'npapi'))
 
     return ret

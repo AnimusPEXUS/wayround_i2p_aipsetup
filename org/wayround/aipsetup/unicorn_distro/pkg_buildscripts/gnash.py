@@ -50,7 +50,10 @@ def main(buildingsite, action = None):
             ret = autotools.configure_high(
                 buildingsite,
                 options = [
-                    '--enable-media=ffmpeg',
+                    '--disable-docbook',
+                    '--enable-media=gst',
+                    '--with-npapi-incl=/usr/include/npapi',
+                    '--with-npapi-plugindir=/usr/lib/mozilla/plugins',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -82,11 +85,29 @@ def main(buildingsite, action = None):
                 )
 
         if 'distribute' in actions and ret == 0:
+
             ret = autotools.make_high(
                 buildingsite,
                 options = [],
                 arguments = [
                     'install',
+                    'DESTDIR=' + (
+                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+                            buildingsite
+                            )
+                        )
+                    ],
+                environment = {},
+                environment_mode = 'copy',
+                use_separate_buildding_dir = separate_build_dir,
+                source_configure_reldir = source_configure_reldir
+                )
+
+            ret = autotools.make_high(
+                buildingsite,
+                options = [],
+                arguments = [
+                    'install-plugin',
                     'DESTDIR=' + (
                         org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
                             buildingsite
