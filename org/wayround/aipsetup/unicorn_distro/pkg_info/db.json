@@ -1,6 +1,6 @@
 {
   "auto_newest_pkg": true, 
-  "auto_newest_src": false, 
+  "auto_newest_src": true, 
   "basename": "db", 
   "buildscript": "db", 
   "deprecated": false, 
@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "src_path_prefix": "/www.oracle.com/"
 }

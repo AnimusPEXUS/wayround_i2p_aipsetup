@@ -9,6 +9,8 @@ import copy
 import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.buildscript
 
+import org.wayround.utils.path
+
 def cli_name():
     return 'bd'
 
@@ -79,6 +81,8 @@ def complete(building_site):
 
 
 def start_building_script(building_site, action=None):
+
+    building_site = org.wayround.utils.path.abspath(building_site)
 
     package_info = org.wayround.aipsetup.buildingsite.read_package_info(
         building_site, ret_on_error=None

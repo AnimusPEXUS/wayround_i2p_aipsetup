@@ -1554,18 +1554,6 @@ def complete(building_site, main_src_file = None):
             logging.error("Error on packaging stage")
             ret = 2
 
-    if ret == 0:
-        logging.info(
-            "Building successful -- removing buildingsite: {}".format(
-                building_site
-                )
-            )
-        try:
-            shutil.rmtree(building_site)
-        except:
-            logging.exception("Error removing buildingsite")
-
-
     logging.info(
         "+++++++++++ Finished Complete build in `{}' +++++++++++".format(rp)
         )

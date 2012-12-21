@@ -52,14 +52,14 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-installbuilddir=/usr/share/apr/build-1',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    '--build=' + pkg_info['constitution']['build']
                     ],
                 arguments=[],
                 environment={},

@@ -35,6 +35,9 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
+        apr_1_config = org.wayround.utils.file.which('apr-1-config')
+
+
         source_configure_reldir = '.'
 
         if 'extract' in actions:
@@ -49,27 +52,32 @@ def main(buildingsite, action=None):
                 )
 
         if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
+            if not apr_1_config:
+                logging.error("`apr-1-config' not installed on system")
+                ret = 1
+            else:
+                ret = autotools.configure_high(
+                    buildingsite,
+                    options=[
+                        '--with-apr=' + apr_1_config,
+                        '--with-berkeley-db=/usr',
+                        '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                        '--mandir=' + pkg_info['constitution']['paths']['man'],
+                        '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                        '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                        '--enable-shared',
+                        '--host=' + pkg_info['constitution']['host'],
+                        '--build=' + pkg_info['constitution']['build'],
+                        ],
+                    arguments=[],
+                    environment={},
+                    environment_mode='copy',
+                    source_configure_reldir=source_configure_reldir,
+                    use_separate_buildding_dir=separate_build_dir,
+                    script_name='configure',
+                    run_script_not_bash=False,
+                    relative_call=False
+                    )
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(

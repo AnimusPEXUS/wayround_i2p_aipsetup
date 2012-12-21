@@ -52,6 +52,13 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-tcl',
+                    '--with-tclconfig=/usr/lib',
+                    '--with-perl',
+                    '--with-python',
+                    '--with-openssl',
+                    '--with-libxml',
+                    '--with-libxslt',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -59,7 +66,6 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

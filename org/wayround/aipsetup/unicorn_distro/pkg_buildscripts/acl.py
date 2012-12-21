@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os
 import os.path
 import logging
 
@@ -52,10 +53,10 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--prefix=' + os.path.join(dst_dir, 'usr'),
+                    '--mandir=' + os.path.join(dst_dir, 'usr', 'share', 'man'),
+                    '--sysconfdir=' + os.path.join(dst_dir, 'etc'),
+                    '--localstatedir=' + os.path.join(dst_dir, 'var'),
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -87,7 +88,7 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[],
                 arguments=[
-                    'install',
+                    'install', 'install-dev', 'install-lib',
                     'DESTDIR=' + dst_dir
                     ],
                 environment={},
@@ -95,5 +96,25 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+            try:
+                for i in ['libacl.a', 'libacl.la']:
+                    ffn = os.path.join(dst_dir, 'usr', 'lib', i)
+
+                    if os.path.exists(ffn):
+                        os.unlink(ffn)
+
+                    os.symlink(os.path.join('..', 'libexec', i), ffn)
+
+                for i in ['libacl.so']:
+                    ffn = os.path.join(dst_dir, 'usr', 'libexec', i)
+
+                    if os.path.exists(ffn):
+                        os.unlink(ffn)
+
+                    os.symlink(os.path.join('..', 'lib', i), ffn)
+            except:
+                logging.exception('error')
+                ret = 1
 
     return ret
