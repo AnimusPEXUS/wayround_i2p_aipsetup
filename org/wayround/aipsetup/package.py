@@ -22,10 +22,12 @@ import shutil
 import sys
 import tarfile
 import tempfile
+import pprint
 
 
 import org.wayround.utils.archive
 import org.wayround.utils.checksum
+import org.wayround.utils.deps_c
 import org.wayround.utils.file
 import org.wayround.utils.log
 import org.wayround.utils.opts
@@ -65,7 +67,8 @@ def exported_commands():
         'complete'      : package_complete,
         'build'         : package_build,
         'find'          : package_find_files,
-        'index'         : package_put_to_index_many
+        'index'         : package_put_to_index_many,
+        'so_problems'   : package_find_so_problems
         }
 
 def commands_order():
@@ -78,7 +81,8 @@ def commands_order():
         'complete',
         'build',
         'index',
-        'find'
+        'find',
+        'so_problems'
         ]
 
 def package_install(opts, args):
@@ -151,7 +155,7 @@ def package_list(opts, args):
         lst.sort()
 
         org.wayround.utils.text.columned_list_print(
-            lst, fd = sys.stdout.fileno()
+            lst, fd=sys.stdout.fileno()
         )
 
     return ret
@@ -190,8 +194,8 @@ def package_list_asps(opts, args):
             lst = list_installed_package_s_asps(name, basedir)
 
             lst.sort(
-                reverse = True,
-                key = functools.cmp_to_key(
+                reverse=True,
+                key=functools.cmp_to_key(
                     org.wayround.aipsetup.version.package_version_comparator
                     )
                 )
@@ -390,7 +394,7 @@ def package_find_files(opts, args):
         lookfor = args[0]
 
     ret = find_file_in_files_installed_by_asps(
-        basedir, lookfor, mode = look_meth
+        basedir, lookfor, mode=look_meth
         )
 
     if isinstance(ret, dict):
@@ -463,7 +467,90 @@ def package_check_package(opts, args):
         ret = check_package(file)
     return ret
 
-def check_package(asp_name, mute = False):
+def package_find_so_problems(opts, args):
+    """
+    Find so libraries missing in system and write package names
+    requiring those missing libraries.
+    """
+    ret = 0
+
+    basedir = '/'
+#    if '-b' in opts:
+#        basedir = opts['-b']
+
+    problems = org.wayround.utils.deps_c.find_so_problems_in_linux_system()
+
+    libs = list(problems.keys())
+    libs.sort()
+
+    log = org.wayround.utils.log.Log(
+        os.getcwd(), 'problems'
+        )
+
+    print("Writing log to {}".format(log.log_filename))
+
+    logging.info("Gathering asps file tree. Please wait...")
+    tree = list_installed_asps_and_their_files(basedir, mute=False)
+    logging.info("Now working")
+
+    total_problem_packages_list = set()
+
+    count_checked = 0
+    libs_c = len(libs)
+    for i in libs:
+        log.info("Library `{}' required by following files:".format(i))
+
+        files = problems[i]
+        files.sort()
+
+        for j in files:
+            log.info("    {}".format(j))
+
+
+        pkgs2 = find_file_in_files_installed_by_asps(
+            basedir, files, mode='end', mute=False, predefined_asp_tree=tree
+            )
+
+        pkgs2_l = list(pkgs2.keys())
+        pkgs2_l.sort()
+
+        count_checked += 1
+
+        log.info("  Contained in problem packages:")
+        for j in pkgs2_l:
+            log.info("    {}".format(j))
+
+        total_problem_packages_list |= set(pkgs2_l)
+
+        logging.info("Checked libraries: {} of {}".format(count_checked, libs_c))
+        log.info('---------------------------------')
+
+    pkgs = find_file_in_files_installed_by_asps(
+        basedir, libs, mode='end', mute=False, predefined_asp_tree=tree
+        )
+
+    pkgs_l = list(pkgs.keys())
+    pkgs_l.sort()
+
+    log.info('')
+    log.info("Libs found in packages:")
+    for i in pkgs_l:
+        log.info("    {}".format(i))
+
+    log.info('')
+
+    log.info("Total Problem Packages List:")
+    total_problem_packages_list = list(total_problem_packages_list)
+    total_problem_packages_list.sort()
+    for i in total_problem_packages_list:
+        log.info("    {}".format(i))
+
+    log.stop()
+    print("Log written to {}".format(log.log_filename))
+
+    return ret
+
+def check_package(asp_name, mute=False):
     """
     Check package for errors
     """
@@ -477,7 +564,7 @@ def check_package(asp_name, mute = False):
         ret = 3
     else:
         try:
-            tarf = tarfile.open(asp_name, mode = 'r')
+            tarf = tarfile.open(asp_name, mode='r')
         except:
             logging.exception("Can't open file `{}'".format(asp_name))
             ret = 1
@@ -563,7 +650,7 @@ def check_package(asp_name, mute = False):
                             try:
                                 dest_dir_files_list = org.wayround.utils.archive.xzcat(
                                     fobj,
-                                    convert_to_str = 'utf-8'
+                                    convert_to_str='utf-8'
                                     )
                                 dest_dir_files_list = dest_dir_files_list.splitlines()
 
@@ -671,7 +758,7 @@ def check_package_aipsetup2(filename):
     return ret
 
 
-def remove_package(name, force = False, destdir = '/', mute = False):
+def remove_package(name, force=False, destdir='/', mute=False):
 
     ret = 0
 
@@ -697,8 +784,8 @@ def remove_package(name, force = False, destdir = '/', mute = False):
                 )
 
             lst.sort(
-                reverse = True,
-                key = functools.cmp_to_key(
+                reverse=True,
+                key=functools.cmp_to_key(
                     org.wayround.aipsetup.version.package_version_comparator
                     )
                 )
@@ -719,14 +806,14 @@ def remove_package(name, force = False, destdir = '/', mute = False):
     return ret
 
 def install_package(
-    name, force = False, destdir = '/'
+    name, force=False, destdir='/'
     ):
 
     ret = 0
 
     if os.path.isfile(name):
         name_parsed = org.wayround.aipsetup.name.package_name_parse(
-            name, mute = True
+            name, mute=True
             )
 
         if not force and not isinstance(name_parsed, dict):
@@ -825,8 +912,8 @@ def install_package(
                             logging.info(
                                 "Forced installation of "
                                 "already installed package {name} ({asp_name})".format(
-                                    name = name,
-                                    asp_name = latest_installed_no_ext
+                                    name=name,
+                                    asp_name=latest_installed_no_ext
                                     )
                                 )
 
@@ -841,8 +928,8 @@ def install_package(
                         if latest_installed_no_ext == latest_in_repo_no_ext:
                             logging.info(
                                 "Latest `{name}' already installed ({asp_name})".format(
-                                    name = name,
-                                    asp_name = latest_installed_no_ext
+                                    name=name,
+                                    asp_name=latest_installed_no_ext
                                     )
                                 )
 
@@ -877,7 +964,7 @@ def tarobj_check_member_sum(tarobj, sums, member_name):
     return ret
 
 
-def install_asp(asp_name, destdir = '/'):
+def install_asp(asp_name, destdir='/'):
 
     ret = 0
 
@@ -889,7 +976,7 @@ def install_asp(asp_name, destdir = '/'):
         ret = 1
     else:
         try:
-            tarf = tarfile.open(asp_name, mode = 'r')
+            tarf = tarfile.open(asp_name, mode='r')
         except:
             logging.exception("Can't open file `{}'".format(asp_name))
             ret = 1
@@ -974,9 +1061,9 @@ def install_asp(asp_name, destdir = '/'):
                                     dd_fobj,
                                     destdir,
                                     'xz',
-                                    verbose_tar = True,
-                                    verbose_compressor = True,
-                                    add_tar_options = [
+                                    verbose_tar=True,
+                                    verbose_compressor=True,
+                                    add_tar_options=[
                                         '--no-same-owner',
                                         '--no-same-permissions'
                                         ]
@@ -1010,7 +1097,7 @@ def install_asp(asp_name, destdir = '/'):
                     else:
                         try:
                             text_lst = org.wayround.utils.archive.xzcat(
-                                installed_file_list, convert_to_str = 'utf-8'
+                                installed_file_list, convert_to_str='utf-8'
                                 )
 
                             files = text_lst.split('\n')
@@ -1088,10 +1175,10 @@ def install_asp(asp_name, destdir = '/'):
 
 def remove_asp(
     asp_name,
-    destdir = '/',
-    only_remove_package_registration = False,
-    exclude = None,
-    mute = False
+    destdir='/',
+    only_remove_package_registration=False,
+    exclude=None,
+    mute=False
     ):
 
     ret = 0
@@ -1143,7 +1230,7 @@ def remove_asp(
                         )
                     )
 
-            lines.sort(reverse = True)
+            lines.sort(reverse=True)
 
             for line in lines:
 
@@ -1193,7 +1280,7 @@ def remove_asp(
                 os.unlink(rm_file_name)
     return ret
 
-def reduce_asps(reduce_to, reduce_what = None, destdir = '/', mute = False):
+def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 
     ret = 0
 
@@ -1231,13 +1318,13 @@ def reduce_asps(reduce_to, reduce_what = None, destdir = '/', mute = False):
             remove_asp(
                 i,
                 destdir,
-                exclude = fiba
+                exclude=fiba
                 )
 
     return ret
 
 
-def list_installed_asps(destdir = '/', mute = False):
+def list_installed_asps(destdir='/', mute=False):
     destdir = org.wayround.utils.path.abspath(destdir)
 
     listdir = org.wayround.utils.path.abspath(destdir + org.wayround.aipsetup.config.config['installed_pkg_dir'])
@@ -1262,8 +1349,21 @@ def list_installed_asps(destdir = '/', mute = False):
 
     return ret
 
+def list_installed_asps_and_their_files(destdir='/', mute=True):
 
-def list_installed_packages(mask = '*', destdir = '/', mute = False):
+    lst = list_installed_asps(destdir, mute)
+
+    ret = dict()
+
+    for i in lst:
+        ret[i] = list_files_installed_by_asp(destdir, i, mute)
+
+#    pprint.pprint(ret)
+#    exit(0)
+    return ret
+
+
+def list_installed_packages(mask='*', destdir='/', mute=False):
 
     ret = None
 
@@ -1274,7 +1374,7 @@ def list_installed_packages(mask = '*', destdir = '/', mute = False):
     else:
         lst = set()
         for i in asps:
-            parsed = org.wayround.aipsetup.name.package_name_parse(i, mute = True)
+            parsed = org.wayround.aipsetup.name.package_name_parse(i, mute=True)
 
             if not isinstance(parsed, dict):
                 logging.error("Couldn't parse name `{}'".format(i))
@@ -1290,7 +1390,7 @@ def list_installed_packages(mask = '*', destdir = '/', mute = False):
 
     return ret
 
-def latest_installed_package_s_asp(name, destdir = '/'):
+def latest_installed_package_s_asp(name, destdir='/'):
 
     lst = list_installed_package_s_asps(name, destdir)
 
@@ -1298,7 +1398,7 @@ def latest_installed_package_s_asp(name, destdir = '/'):
     if len(lst) > 0:
         latest = max(
             lst,
-            key = functools.cmp_to_key(
+            key=functools.cmp_to_key(
                 org.wayround.aipsetup.version.package_version_comparator
                 )
             )
@@ -1307,7 +1407,7 @@ def latest_installed_package_s_asp(name, destdir = '/'):
 
     return ret
 
-def list_installed_package_s_asps(name_or_list, destdir = '/'):
+def list_installed_package_s_asps(name_or_list, destdir='/'):
 
     ret = {}
 
@@ -1316,13 +1416,13 @@ def list_installed_package_s_asps(name_or_list, destdir = '/'):
         return_single = True
         name_or_list = [name_or_list]
 
-    asps_list = list_installed_asps(destdir = destdir, mute = True)
+    asps_list = list_installed_asps(destdir=destdir, mute=True)
     asps_list_parsed = {}
 
     for i in asps_list:
         asps_list_parsed[i] = org.wayround.aipsetup.name.package_name_parse(
             i,
-            mute = True
+            mute=True
             )
 
     for i in name_or_list:
@@ -1343,7 +1443,7 @@ def list_installed_package_s_asps(name_or_list, destdir = '/'):
     return ret
 
 def list_files_installed_by_asp(
-        destdir, asp_name, mute = True
+        destdir, asp_name, mute=True
         ):
     ret = 0
 
@@ -1366,7 +1466,7 @@ def list_files_installed_by_asp(
     else:
 
         pkg_file_list = org.wayround.utils.archive.xzcat(
-            f, convert_to_str = True
+            f, convert_to_str=True
             )
 
         f.close()
@@ -1389,7 +1489,7 @@ def build(source_files):
 
     par_res = org.wayround.aipsetup.name.source_name_parse(
         source_files[0],
-        mute = True
+        mute=True
         )
 
 
@@ -1426,8 +1526,8 @@ def build(source_files):
                 )
 
             build_site_dir = tempfile.mkdtemp(
-                prefix = tmp_dir_prefix,
-                dir = org.wayround.aipsetup.config.config['buildingsites']
+                prefix=tmp_dir_prefix,
+                dir=org.wayround.aipsetup.config.config['buildingsites']
                 )
             build_site_dir = org.wayround.utils.path.abspath(build_site_dir)
 
@@ -1506,7 +1606,7 @@ def _complete_info_correctness_check(workdir):
 
     return ret
 
-def complete(building_site, main_src_file = None):
+def complete(building_site, main_src_file=None):
 
     rp = org.wayround.utils.path.relpath(building_site, os.getcwd())
 
@@ -1561,15 +1661,23 @@ def complete(building_site, main_src_file = None):
     return ret
 
 def find_file_in_files_installed_by_asps(
-    destdir, instr, mode = None
+    destdir, instr, mode=None, mute=False, sub_mute=True, predefined_asp_tree=None
     ):
+    """
+    instr can be a single query or list of queries.
+    """
 
     ret = 0
 
-    lst = list_installed_asps(
-        destdir = destdir,
-        mute = True
-        )
+    lst = []
+    if predefined_asp_tree:
+        lst = list(predefined_asp_tree.keys())
+    else:
+        lst = list_installed_asps(
+            destdir=destdir,
+            mute=True
+            )
+
     if not isinstance(lst, list):
         logging.error("Error getting installed packages list")
         ret = 1
@@ -1578,48 +1686,59 @@ def find_file_in_files_installed_by_asps(
 
         ret_dict = dict()
 
-
         lst_l = len(lst)
-        lst_i = -1
+        lst_i = 0
 
         for pkgname in lst:
-
-            lst_i += 1
-
-            perc = 0
-            if lst_i == 0:
-                perc = 0.0
-            else:
-                perc = 100.0 / (float(lst_l) / float(lst_i))
 
             if pkgname.endswith('.xz'):
                 pkgname = pkgname[:-3]
 
-            found = find_file_in_files_installed_by_asp(
-                destdir, pkgname, instr = instr,
-                mode = mode,
-                mute = True
-                )
+            predefined_file_list = None
+            if predefined_asp_tree:
+                predefined_file_list = predefined_asp_tree[pkgname + '.xz']
 
-            org.wayround.utils.file.progress_write(
-                "    {:6.2f}% (found {} packages) ({})".format(
-                    perc,
-                    len(ret_dict.keys()),
-                    pkgname
-                    )
+            found = find_file_in_files_installed_by_asp(
+                destdir, pkgname, instr=instr,
+                mode=mode,
+                mute=sub_mute,
+                predefined_file_list=predefined_file_list
                 )
 
             if len(found) != 0:
                 ret_dict[pkgname] = found
 
-        org.wayround.utils.file.progress_write_finish()
+            if not mute:
+
+                lst_i += 1
+
+                perc = 0
+                if lst_i == 0:
+                    perc = 0.0
+                else:
+                    perc = 100.0 / (float(lst_l) / float(lst_i))
+
+                org.wayround.utils.file.progress_write(
+                    "    {:6.2f}% (found {} packages) ({})".format(
+                        perc,
+                        len(ret_dict.keys()),
+                        pkgname
+                        )
+                    )
+
+        if not mute:
+            org.wayround.utils.file.progress_write_finish()
+
         ret = ret_dict
 
     return ret
 
 def find_file_in_files_installed_by_asp(
-    destdir, pkgname, instr, mode = None, mute = False
+    destdir, pkgname, instr, mode=None, mute=False, predefined_file_list=None
     ):
+    """
+    instr can be a single query or list of queries.
+    """
 
     ret = 0
 
@@ -1631,7 +1750,7 @@ def find_file_in_files_installed_by_asp(
     if mode == None:
         mode = 'sub'
 
-    if not mode in ['re', 'plain', 'sub', 'beg', 'fm']:
+    if not mode in ['re', 'plain', 'sub', 'beg', 'fm', 'end']:
         logging.error("wrong mode")
         ret = 1
     else:
@@ -1639,9 +1758,13 @@ def find_file_in_files_installed_by_asp(
         if not pkgname.endswith('.xz'):
             pkgname += '.xz'
 
-        pkg_file_list = list_files_installed_by_asp(
-            destdir, pkgname
-            )
+        pkg_file_list = []
+        if predefined_file_list:
+            pkg_file_list = predefined_file_list
+        else:
+            pkg_file_list = list_files_installed_by_asp(
+                destdir, pkgname
+                )
 
         if not isinstance(pkg_file_list, list):
             logging.error("Can't get list of files")
@@ -1670,6 +1793,11 @@ def find_file_in_files_installed_by_asp(
                 elif mode == 'beg':
                     for j in instr:
                         if i.startswith(j):
+                            out_list.add(i)
+
+                elif mode == 'end':
+                    for j in instr:
+                        if i.endswith(j):
                             out_list.add(i)
 
                 elif mode == 'fm':
@@ -1731,7 +1859,7 @@ def put_file_to_index(filename):
         ret = 10
     else:
 
-        if check_package(filename, mute = True) == 0:
+        if check_package(filename, mute=True) == 0:
             parsed = org.wayround.aipsetup.name.package_name_parse(filename)
 
             if not isinstance(parsed, dict):
@@ -1775,11 +1903,11 @@ def put_file_to_index(filename):
 
     return ret
 
-def list_installed_packages_and_asps(destdir = '/'):
+def list_installed_packages_and_asps(destdir='/'):
 
-    packages = list_installed_packages(mute = True, destdir = destdir)
+    packages = list_installed_packages(mute=True, destdir=destdir)
 
-    ret = list_installed_package_s_asps(packages, destdir = destdir)
+    ret = list_installed_package_s_asps(packages, destdir=destdir)
 
     return ret
 
