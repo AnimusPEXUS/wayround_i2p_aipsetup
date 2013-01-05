@@ -10,6 +10,7 @@ import os.path
 import org.wayround.utils.path
 
 
+import org.wayround.aipsetup.pkgdeps
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest

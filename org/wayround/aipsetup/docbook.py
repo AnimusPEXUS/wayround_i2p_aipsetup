@@ -9,8 +9,9 @@ import re
 import logging
 import subprocess
 
-# FIXME: look for new lxml releases supporting Python 3.3
-#import lxml.etree
+# FIXME: look for new lxml releases supporting Python 3.3. UP: lxml already
+# supports Py 3.3
+import lxml.etree
 
 import org.wayround.utils.file
 import org.wayround.utils.archive

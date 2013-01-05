@@ -1,15 +1,15 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "acpid", 
-  "buildscript": "acpid", 
+  "basename": "wpa_supplicant", 
+  "buildscript": "wpa_supplicant", 
   "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- version re \\d{8}", 
-  "home_page": "http://www.sourceforge.net", 
+  "filters": "", 
+  "home_page": "http://None", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.sourceforge.net/else/rsync/a/project/ac/acpid/"
+  "src_path_prefix": ""
 }

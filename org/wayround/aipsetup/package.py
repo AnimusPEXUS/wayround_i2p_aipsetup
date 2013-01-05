@@ -22,13 +22,14 @@ import shutil
 import sys
 import tarfile
 import tempfile
-import pprint
 
 
 import org.wayround.utils.archive
 import org.wayround.utils.checksum
 import org.wayround.utils.deps_c
 import org.wayround.utils.file
+import org.wayround.utils.format.elf
+import org.wayround.utils.format.elf_enum
 import org.wayround.utils.log
 import org.wayround.utils.opts
 import org.wayround.utils.path
@@ -1181,13 +1182,18 @@ def remove_asp(
     mute=False
     ):
 
+    """
+    Removes named asp from destdir system.
+
+    exclude - can be None or list of files which is NOT PREPENDED WITH DESTDIR
+    """
+
     ret = 0
 
+    # ensure destdir correctness
     destdir = org.wayround.utils.path.abspath(destdir)
 
     lines = list_files_installed_by_asp(destdir, asp_name, mute)
-
-    logging.info("Removing `{}' files".format(asp_name))
 
     if not isinstance(lines, list):
         logging.error(
@@ -1198,44 +1204,88 @@ def remove_asp(
         ret = 1
     else:
 
+        # from this point we working with other systems' files
+        lines = org.wayround.utils.path.prepend_path(lines, destdir)
+
+        lines = org.wayround.utils.path.realpaths(lines)
+
+        logging.info("Removing `{}' files".format(asp_name))
+
         if not only_remove_package_registration:
 
-            lines_before_ex = len(lines)
+            # FIXME: continue here
 
             if exclude:
+
+                # Some files need to be excluded from removal operation
+
+                lines_before_ex = len(lines)
+
+                exclude = org.wayround.utils.path.prepend_path(exclude, destdir)
+
+                exclude = org.wayround.utils.path.realpaths(exclude)
+
                 lines = list(set(lines) - set(exclude))
 
-                for line in lines[:]:
+                # exclude from removal files starting with one of the ROOT_LINKS
+                # lines, which have corresponding file in /usr-prependet dir
 
-                    for i in ROOT_LINKS:
-                        if line.startswith(i + os.path.sep):
-                            if (os.path.sep + 'usr' + line) in exclude:
+                # This is no longer needed as we working only with real paths
+                # (which excludes duplications), and excluding Sahred Object
+                # files (ET_DYN) little farther
 
-                                while line in lines:
-                                    lines.remove(line)
+                #                for line in lines[:]:
+                #
+                #                    for i in ROOT_LINKS:
+                #                        if line.startswith(i + os.path.sep):
+                #                            if (os.path.sep + 'usr' + line) in exclude:
+                #
+                #                                while line in lines:
+                #                                    lines.remove(line)
 
-            for line in lines[:]:
+                # Statistics about excluded files
+                lines_after_ex = len(lines)
 
-                if line in ROOT_LINKS:
-                    while line in lines:
-                        lines.remove(line)
+                if lines_before_ex != lines_after_ex:
+                    logging.info(
+                        "Excluded {} new files".format(
+                            lines_before_ex - lines_after_ex
+                            )
+                        )
 
-            lines_after_ex = len(lines)
+            # prevent removal of /bin, /sbin, /lib, /lib64 symlinks
+            #            for line in lines[:]:
+            #
+            #                if line in ROOT_LINKS:
+            #                    while line in lines:
+            #                        lines.remove(line)
+
+            logging.info("Excluding shared objects")
+            shared_objects = set()
+            for i in lines:
+                if os.path.isfile(i):
+                    if (org.wayround.utils.format.elf.get_elf_file_type(i) ==
+                        org.wayround.utils.format.elf.ET_DYN):
+                        shared_objects.add(i)
+                        logging.info("    excluded {}".format(i))
 
 
-            if lines_before_ex != lines_after_ex:
+            lines = list(set(lines) - set(shared_objects))
+
+            if len(shared_objects) > 0:
                 logging.info(
-                    "Excluded {} files".format(
-                        lines_before_ex - lines_after_ex
+                    "Excluded {} shared objects".format(
+                        len(shared_objects)
                         )
                     )
+
 
             lines.sort(reverse=True)
 
             for line in lines:
 
                 rm_file_name = org.wayround.utils.path.abspath(
-                    destdir + os.path.sep + line
+                    line
                     )
 
 
@@ -1310,7 +1360,9 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
     fiba = list_files_installed_by_asp(destdir, reduce_to)
 
     if not isinstance(fiba, list):
-        logging.error("Some Error")
+        logging.error(
+            "Some error getting list of files installed by {}".format(reduce_to)
+            )
         ret = 1
     else:
 
@@ -1445,6 +1497,11 @@ def list_installed_package_s_asps(name_or_list, destdir='/'):
 def list_files_installed_by_asp(
         destdir, asp_name, mute=True
         ):
+    """
+    Reads list of files installed by named asp.
+
+    Destdir is not prependet to the list's items. Do it yuorself if needed.
+    """
     ret = 0
 
     destdir = org.wayround.utils.path.abspath(destdir)
@@ -1941,4 +1998,17 @@ def check_list_of_installed_packages_and_asps(in_dict):
         logging.warning("Total erroneous packages: {}".format(errors))
 
     return ret
+
+
+def get_asps_depending_on_asp(destdir, asp_name, mute):
+
+    files = list_files_installed_by_asp(destdir, asp_name, mute)
+
+    files = org.wayround.utils.path.prepend_path(files, destdir)
+
+    files = org.wayround.utils.path.realpaths(files)
+
+    elf_files = []
+
+    # FIXME: finish
 
