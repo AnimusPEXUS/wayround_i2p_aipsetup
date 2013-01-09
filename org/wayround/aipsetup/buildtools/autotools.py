@@ -61,7 +61,7 @@ def extract_high(
     tarball_basename,
     unwrap_dir,
     rename_dir,
-    more_when_one_extracted_ok = False
+    more_when_one_extracted_ok=False
     ):
 
     ret = 0
@@ -84,7 +84,7 @@ def extract_high(
     tarball_dir_files_len = len(tarball_dir_files)
 
     tmpdir = tempfile.mkdtemp(
-        dir = org.wayround.aipsetup.buildingsite.getDIR_TEMP(building_site)
+        dir=org.wayround.aipsetup.buildingsite.getDIR_TEMP(building_site)
         )
 
     if tarball_dir_files_len == 0:
@@ -95,7 +95,7 @@ def extract_high(
         tarball = None
         for i in tarball_dir_files:
             parsed = org.wayround.aipsetup.name.source_name_parse(
-                i, mute = True
+                i, mute=True
                 )
             if isinstance(parsed, dict):
                 if parsed['groups']['name'] == tarball_basename:
@@ -112,9 +112,9 @@ def extract_high(
                 tmpdir,
                 tarball,
                 source_dir,
-                unwrap_dir = unwrap_dir,
-                rename_dir = rename_dir,
-                more_when_one_extracted_ok = more_when_one_extracted_ok
+                unwrap_dir=unwrap_dir,
+                rename_dir=rename_dir,
+                more_when_one_extracted_ok=more_when_one_extracted_ok
                 )
 
     log.close()
@@ -134,6 +134,14 @@ def configure_high(
     run_script_not_bash,
     relative_call
     ):
+    """
+    Start configuration script
+
+    source_configure_reldir - relative path from source dir to configure dir;
+    script_name - configure script name;
+    run_script_not_bash - run {full_path}/configure, not bash {full_path}/configure;
+    relative_call - make {full_path} bee '.'
+    """
 
     ret = 0
 
@@ -223,10 +231,10 @@ def configure_low(
     try:
         p = subprocess.Popen(
             cmd,
-            env = env,
-            stdout = subprocess.PIPE,
-            stderr = subprocess.PIPE,
-            cwd = working_dir
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=working_dir
             )
     except:
         log.error(
@@ -325,10 +333,10 @@ def make_low(
     try:
         p = subprocess.Popen(
             cmd,
-            env = env,
-            stdout = subprocess.PIPE,
-            stderr = subprocess.PIPE,
-            cwd = working_dir
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=working_dir
             )
     except:
         log.error(

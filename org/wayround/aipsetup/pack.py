@@ -383,9 +383,27 @@ def destdir_deps_c(buildingsite):
             deps = {}
             elfs = 0
             n_elfs = 0
+            file_list_i = 0
             file_list_l = len(file_list)
-            file_list_i = 1
             for i in file_list:
+                filename = destdir + os.path.sep + i
+                filename.replace(os.path.sep * 2, os.path.sep)
+                filename = org.wayround.utils.path.abspath(filename)
+
+                if os.path.isfile(filename) and os.path.exists(filename):
+
+                    dep = org.wayround.utils.deps_c.elf_deps(filename)
+
+                    if isinstance(dep, list):
+                        elfs += 1
+                        deps[i] = dep
+                    else:
+                        n_elfs += 1
+                else:
+                    n_elfs += 1
+
+                file_list_i += 1
+
                 org.wayround.utils.file.progress_write(
                     "    ({perc:6.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".format_map(
                         {
@@ -395,16 +413,6 @@ def destdir_deps_c(buildingsite):
                             }
                         )
                     )
-                file_list_i += 1
-                filename = destdir + os.path.sep + i
-                filename.replace(os.path.sep * 2, os.path.sep)
-                filename = org.wayround.utils.path.abspath(filename)
-                dep = org.wayround.utils.deps_c.elf_deps(filename)
-                if isinstance(dep, list):
-                    elfs += 1
-                    deps[i] = dep
-                else:
-                    n_elfs += 1
 
             org.wayround.utils.file.progress_write_finish()
 

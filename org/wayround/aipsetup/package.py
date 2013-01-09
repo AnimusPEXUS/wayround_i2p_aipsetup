@@ -259,10 +259,17 @@ def package_complete(opts, args):
 
        2. Working with multiple dirs. In this mode, tarball can't be
           passed.
+
+    options:
+
+    -d - remove buildingsite on success
     """
 
     dirname = '.'
     file = None
+
+    r_bds = '-d' in opts
+
 
     ret = 0
 
@@ -273,7 +280,9 @@ def package_complete(opts, args):
         dirname = '.'
         file = None
 
-        ret = complete(dirname, file)
+        ret = complete(
+            dirname, file, remove_buildingsite_after_success=r_bds
+            )
 
     elif args_l == 1:
 
@@ -294,7 +303,9 @@ def package_complete(opts, args):
 
         if ret == 0:
 
-            ret = complete(dirname, file)
+            ret = complete(
+                dirname, file, remove_buildingsite_after_success=r_bds
+                )
 
     elif args_l == 2:
 
@@ -303,14 +314,16 @@ def package_complete(opts, args):
             dirname = args[0]
             file = args[1]
 
-            ret = complete(dirname, file)
+            ret = complete(
+                dirname, file, remove_buildingsite_after_success=r_bds
+                )
 
         elif os.path.isdir(args[0]) and os.path.isdir(args[1]):
 
             file = None
             ret = 0
             for i in args[:2]:
-                if complete(i, file) != 0:
+                if complete(i, file, remove_buildingsite_after_success=r_bds) != 0:
                     ret += 1
 
         else:
@@ -323,7 +336,7 @@ def package_complete(opts, args):
 
         ret = 0
         for i in args[2:]:
-            if complete(i, file) != 0:
+            if complete(i, file, remove_buildingsite_after_success=r_bds) != 0:
                 ret += 1
 
     else:
@@ -339,7 +352,11 @@ def package_build(opts, args):
     [-o] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
 
     -o 	    treat all tarballs as for one build.
+    -d      remove buildingsite on success
+
     """
+
+    r_bds = '-d' in opts
 
     sources = []
 
@@ -363,10 +380,10 @@ def package_build(opts, args):
         if multiple_packages:
             sources.sort()
             for i in sources:
-                build([i])
+                build([i], remove_buildingsite_after_success=r_bds)
             ret = 0
         else:
-            ret = build(sources)
+            ret = build(sources, remove_buildingsite_after_success=r_bds)
 
     return ret
 
@@ -887,62 +904,13 @@ def install_package(
                 ret = 3
             else:
 
-                latest_in_repo_no_ext = (
-                    org.wayround.aipsetup.name.rm_ext_from_pkg_name(
-                        os.path.basename(
-                            latest_in_repo
-                            )
-                        )
+                full_name = org.wayround.utils.path.abspath(
+                    org.wayround.aipsetup.config.config['repository'] +
+                    os.path.sep +
+                    latest_in_repo
                     )
 
-                latest_installed = latest_installed_package_s_asp(name)
-
-                latest_installed_no_ext = None
-
-                if latest_installed != None:
-                    latest_installed_no_ext = (
-                        org.wayround.aipsetup.name.rm_ext_from_pkg_name(
-                            latest_installed
-                            )
-                        )
-
-                if latest_installed_no_ext != None:
-                    if force or latest_installed_no_ext != latest_in_repo_no_ext:
-
-                        if latest_installed_no_ext == latest_in_repo_no_ext and force:
-                            logging.info(
-                                "Forced installation of "
-                                "already installed package {name} ({asp_name})".format(
-                                    name=name,
-                                    asp_name=latest_installed_no_ext
-                                    )
-                                )
-
-                        full_name = org.wayround.utils.path.abspath(
-                            org.wayround.aipsetup.config.config['repository'] +
-                            os.path.sep +
-                            latest_in_repo
-                            )
-
-                        ret = install_package(full_name, False, destdir)
-                    else:
-                        if latest_installed_no_ext == latest_in_repo_no_ext:
-                            logging.info(
-                                "Latest `{name}' already installed ({asp_name})".format(
-                                    name=name,
-                                    asp_name=latest_installed_no_ext
-                                    )
-                                )
-
-                        ret = 3
-                else:
-                    full_name = org.wayround.utils.path.abspath(
-                        org.wayround.aipsetup.config.config['repository'] +
-                        os.path.sep +
-                        latest_in_repo
-                        )
-
-                    ret = install_package(full_name, False, destdir)
+                ret = install_package(full_name, False, destdir)
 
 
     return ret
@@ -1188,6 +1156,8 @@ def remove_asp(
     exclude - can be None or list of files which is NOT PREPENDED WITH DESTDIR
     """
 
+    exclude = copy.copy(exclude)
+
     ret = 0
 
     # ensure destdir correctness
@@ -1212,8 +1182,6 @@ def remove_asp(
         logging.info("Removing `{}' files".format(asp_name))
 
         if not only_remove_package_registration:
-
-            # FIXME: continue here
 
             if exclude:
 
@@ -1267,17 +1235,28 @@ def remove_asp(
                     if (org.wayround.utils.format.elf.get_elf_file_type(i) ==
                         org.wayround.utils.format.elf.ET_DYN):
                         shared_objects.add(i)
-                        logging.info("    excluded {}".format(i))
+
+            # this not needed and lines (at this point) already have no
+            # excluded files. but i leave this line just to accent
+            if exclude:
+                shared_objects -= set(exclude)
+
+            shared_objects_tl = list(shared_objects)
+            shared_objects_tl.sort()
+
+            for i in shared_objects_tl:
+                logging.info("    excluded {}".format(i))
+
+            del(shared_objects_tl)
 
 
             lines = list(set(lines) - set(shared_objects))
 
-            if len(shared_objects) > 0:
-                logging.info(
-                    "Excluded {} shared objects".format(
-                        len(shared_objects)
-                        )
+            logging.info(
+                "Excluded {} shared objects".format(
+                    len(shared_objects)
                     )
+                )
 
 
             lines.sort(reverse=True)
@@ -1315,19 +1294,49 @@ def remove_asp(
                                 "Couldn't remove dir: {}".format(rm_file_name)
                                 )
 
-        for i in [
-            'installed_pkg_dir_buildlogs',
-            'installed_pkg_dir_sums',
-            'installed_pkg_dir'
-            ]:
-            rm_file_name = org.wayround.utils.path.abspath(
+        if len(shared_objects) != 0:
+
+            if not os.path.exists(destdir + os.path.sep +
+                org.wayround.aipsetup.config.config['installed_pkg_dir_removing']):
+
+                os.makedirs(destdir + os.path.sep +
+                    org.wayround.aipsetup.config.config['installed_pkg_dir_removing'])
+
+            mv_file_name1 = org.wayround.utils.path.abspath(
                 destdir + os.path.sep +
-                org.wayround.aipsetup.config.config[i] + os.path.sep +
+                org.wayround.aipsetup.config.config['installed_pkg_dir'] +
+                os.path.sep +
                 asp_name + '.xz'
                 )
-            if os.path.isfile(rm_file_name):
-                logging.info("   removing: {}".format(rm_file_name))
-                os.unlink(rm_file_name)
+            mv_file_name2 = org.wayround.utils.path.abspath(
+                destdir + os.path.sep +
+                org.wayround.aipsetup.config.config['installed_pkg_dir_removing'] +
+                os.path.sep +
+                asp_name + '.xz'
+                )
+            if os.path.isfile(mv_file_name1):
+                logging.info("   reserving: {}".format(mv_file_name1))
+                os.rename(mv_file_name1, mv_file_name2)
+
+
+            logging.warning("asp `{}' \n"
+                "    was moved to delayed removal dir,\n"
+                "    because {} of it's shared object elf files\n"
+                "    remained undeleted".format(asp_name, len(shared_objects)))
+        else:
+            for i in [
+                'installed_pkg_dir_buildlogs',
+                'installed_pkg_dir_sums',
+                'installed_pkg_dir'
+                ]:
+                rm_file_name = org.wayround.utils.path.abspath(
+                    destdir + os.path.sep +
+                    org.wayround.aipsetup.config.config[i] + os.path.sep +
+                    asp_name + '.xz'
+                    )
+                if os.path.isfile(rm_file_name):
+                    logging.info("   removing: {}".format(rm_file_name))
+                    os.unlink(rm_file_name)
     return ret
 
 def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
@@ -1541,7 +1550,7 @@ def list_files_installed_by_asp(
     return ret
 
 
-def build(source_files):
+def build(source_files, remove_buildingsite_after_success=False):
     ret = 0
 
     par_res = org.wayround.aipsetup.name.source_name_parse(
@@ -1628,7 +1637,12 @@ def build(source_files):
                 if ret == 0:
 
                     # FIXME: rework this
-                    if complete(build_site_dir, source_files[0]) != 0:
+                    if complete(
+                        build_site_dir,
+                        source_files[0],
+                        remove_buildingsite_after_success=remove_buildingsite_after_success
+                        ) != 0:
+
                         logging.error("Package building failed")
                         ret = 5
 
@@ -1663,7 +1677,11 @@ def _complete_info_correctness_check(workdir):
 
     return ret
 
-def complete(building_site, main_src_file=None):
+def complete(
+    building_site,
+    main_src_file=None,
+    remove_buildingsite_after_success=False
+    ):
 
     rp = org.wayround.utils.path.relpath(building_site, os.getcwd())
 
@@ -1698,7 +1716,8 @@ def complete(building_site, main_src_file=None):
     if ret == 0:
 
         log = org.wayround.utils.log.Log(
-            org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site), 'buildingsite complete'
+            org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+            'buildingsite complete'
             )
         log.info("Buildingsite processes started")
         log.warning("Closing this log now, cause it can't work farther")
@@ -1710,6 +1729,14 @@ def complete(building_site, main_src_file=None):
         elif org.wayround.aipsetup.pack.complete(building_site) != 0:
             logging.error("Error on packaging stage")
             ret = 2
+
+    if ret == 0:
+        if remove_buildingsite_after_success:
+            logging.info("Removing buildingsite after successful build")
+            try:
+                shutil.rmtree(building_site)
+            except:
+                logging.exception("Could not remove `{}'".format(building_site))
 
     logging.info(
         "+++++++++++ Finished Complete build in `{}' +++++++++++".format(rp)
