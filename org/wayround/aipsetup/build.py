@@ -1,6 +1,10 @@
 
 """
 Build software before packaging
+
+This module provides functions for building package using building script (see
+:mod:`buildscript<org.wayround.aipsetup.buildscript>` module for more info on
+building scripts)
 """
 
 import logging
@@ -11,22 +15,37 @@ import org.wayround.aipsetup.buildscript
 
 import org.wayround.utils.path
 
+
 def cli_name():
+    """
+    Represents name for this module in CLI
+    """
     return 'bd'
 
 def exported_commands():
+    """
+    This module commands for CLI interface
+    """
     return {
         's': build_script,
         'complete': build_complete,
         }
 
 def commands_order():
+    """
+    This module commands order for CLI interface
+    """
     return [
         's',
         'complete'
         ]
 
 def build_script(opts, args):
+    """
+    Starts named action from script applied to current building site
+
+    CLI command
+    """
 
     ret = 0
 
@@ -53,6 +72,8 @@ def build_complete(opts, args):
     """
     Configures, builds, distributes and prepares software accordingly to info
 
+    CLI command
+
     [DIRNAME]
 
     DIRNAME - set building site. Default is current directory
@@ -76,11 +97,25 @@ def build_complete(opts, args):
     return ret
 
 
+
 def complete(building_site):
+    """
+    Run all building script commands on selected building site
+
+    See :func:`start_building_script`
+    """
     return start_building_script(building_site, action=None)
 
 
 def start_building_script(building_site, action=None):
+    """
+    Run selected action on building site using particular building script.
+
+    :param building_site: path to building site directory
+    :param action: can be None or concrete name of action in building script
+    :rtype: 0 - if no error occurred
+    """
+
 
     building_site = org.wayround.utils.path.abspath(building_site)
 
@@ -123,94 +158,15 @@ def start_building_script(building_site, action=None):
 
     return ret
 
-def build_actions_selector(actions, action):
 
-    ret = None
+def build_script_wrap(*args, **kwargs):
+    """
+    function build_script_wrap in module build.py is deprecated
 
-    actions = copy.copy(actions)
+    :deprecated:
+    """
+    logging.warning("function build_script_wrap in module build.py is deprecated")
+    logging.warning("press ENTER to continue")
+    input('-->')
+    return org.wayround.aipsetup.buildscript.build_script_wrap(*args, **kwargs)
 
-    if action == 'complete':
-        action = None
-
-    # action == None - indicates all actions! equals to 'complete'
-    if action in [None, 'help']:
-        ret = (actions, action)
-
-    else:
-
-        continued_action = True
-
-        if isinstance(action, str) and action.endswith('+'):
-
-            continued_action = True
-            action = action[:-1]
-
-        else:
-            continued_action = False
-
-        # if not action available - return error
-        if not action in actions:
-
-            ret = 2
-
-        else:
-
-            action_pos = actions.index(action)
-
-            if continued_action:
-                actions = actions[action_pos:]
-            else:
-                actions = [actions[action_pos]]
-
-            ret = (actions, action)
-
-    return ret
-
-def build_script_wrap(buildingsite, desired_actions, action, help_text):
-
-    pkg_info = org.wayround.aipsetup.buildingsite.read_package_info(
-        buildingsite
-        )
-
-    ret = 0
-
-    if not isinstance(pkg_info, dict):
-        logging.error("Can't read package info")
-        ret = 1
-    else:
-
-        actions = copy.copy(desired_actions)
-
-        if action == 'help':
-            print(help_text)
-            print("")
-            print("Available actions: {}".format(actions))
-            ret = 2
-        else:
-
-            r = build_actions_selector(
-                actions,
-                action
-                )
-
-            if not isinstance(r, tuple):
-                logging.error("Wrong command 1")
-                ret = 2
-            else:
-
-                actions, action = r
-
-                if action != None and not isinstance(action, str):
-                    logging.error("Wrong command 2")
-                    ret = 3
-                else:
-
-                    if not isinstance(actions, list):
-                        logging.error("Wrong command 3")
-                        ret = 3
-
-                    else:
-
-                        ret = (pkg_info, actions)
-
-    return ret

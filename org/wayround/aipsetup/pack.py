@@ -606,8 +606,7 @@ def make_checksums_for_building_site(buildingsite):
         'package.sha512'
         )
 
-    list_to_checksum = \
-        org.wayround.aipsetup.buildingsite.get_list_of_items_to_pack(
+    list_to_checksum = get_list_of_items_to_pack(
             buildingsite
             )
 
@@ -694,8 +693,7 @@ def pack_buildingsite(buildingsite):
         if not os.path.isdir(pack_dir):
             os.makedirs(pack_dir)
 
-        list_to_tar = \
-            org.wayround.aipsetup.buildingsite.get_list_of_items_to_pack(
+        list_to_tar = get_list_of_items_to_pack(
                 buildingsite
                 )
 
@@ -753,5 +751,36 @@ def complete(dirname):
             logging.error("Error on {}".format(i))
             ret = 1
             break
+
+    return ret
+
+def get_list_of_items_to_pack(building_site):
+
+    building_site = org.wayround.utils.path.abspath(building_site)
+
+    ret = []
+
+    ret.append(building_site + os.path.sep + DIR_DESTDIR + '.tar.xz')
+    ret.append(building_site + os.path.sep + DIR_PATCHES + '.tar.xz')
+    ret.append(building_site + os.path.sep + DIR_BUILD_LOGS + '.tar.xz')
+
+    ret.append(building_site + os.path.sep + 'package_info.json')
+    ret.append(building_site + os.path.sep + 'package.sha512')
+
+    post_install_script = building_site + os.path.sep + 'post_install.py'
+    if os.path.isfile(post_install_script):
+        ret.append(post_install_script)
+
+    tarballs = os.listdir(getDIR_TARBALL(building_site))
+
+    for i in tarballs:
+        ret.append(building_site + os.path.sep + DIR_TARBALL + os.path.sep + i)
+
+
+    lists = os.listdir(getDIR_LISTS(building_site))
+
+    for i in lists:
+        if i.endswith('.xz'):
+            ret.append(building_site + os.path.sep + DIR_LISTS + os.path.sep + i)
 
     return ret

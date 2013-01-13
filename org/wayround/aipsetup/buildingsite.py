@@ -1,6 +1,7 @@
 
 """
-Module for initiating building site, which required to farver package build.
+Module for initiating building site. Later is required for farther package
+building.
 """
 
 import os
@@ -16,16 +17,49 @@ import org.wayround.aipsetup.name
 
 
 DIR_TARBALL = '00.TARBALL'
+"""
+Directory for storing tarballs used in package building. contents is packed into
+resulting package as it is requirements of most good licenses
+"""
+
 DIR_SOURCE = '01.SOURCE'
+"""
+Directory for detarred sources, which used for building package. This is not
+packed into final package, as we already have original tarballs.
+"""
+
 DIR_PATCHES = '02.PATCHES'
+"""
+Patches stored here. packed.
+"""
+
 DIR_BUILDING = '03.BUILDING'
+"""
+Here package are build. not packed.
+"""
+
 DIR_DESTDIR = '04.DESTDIR'
+"""
+Primary root of files for package. those will be installed into target system.
+"""
+
 DIR_BUILD_LOGS = '05.BUILD_LOGS'
+"""
+Various building logs are stored here. Packed.
+"""
+
 DIR_LISTS = '06.LISTS'
+"""
+Various lists stored here. Packed.
+"""
+
 DIR_TEMP = '07.TEMP'
+"""
+Temporary directory used by aipsetup while building package. Throwed away.
+"""
 
 
-def _getDIR_x(directory, _x='TARBALL'):
+def _getDIR_x(path, _x='TARBALL'):
     '''
     Returns absolute path to DIR_{_x}
 
@@ -34,21 +68,21 @@ def _getDIR_x(directory, _x='TARBALL'):
 
     ret = org.wayround.utils.path.abspath(
         os.path.join(
-            directory,
+            path,
             eval('DIR_{}'.format(_x)))
         )
 
     return ret
 
 
-def getDIR_TARBALL   (directory): return _getDIR_x(directory, 'TARBALL')
-def getDIR_SOURCE    (directory): return _getDIR_x(directory, 'SOURCE')
-def getDIR_PATCHES   (directory): return _getDIR_x(directory, 'PATCHES')
-def getDIR_BUILDING  (directory): return _getDIR_x(directory, 'BUILDING')
-def getDIR_DESTDIR   (directory): return _getDIR_x(directory, 'DESTDIR')
-def getDIR_BUILD_LOGS(directory): return _getDIR_x(directory, 'BUILD_LOGS')
-def getDIR_LISTS     (directory): return _getDIR_x(directory, 'LISTS')
-def getDIR_TEMP      (directory): return _getDIR_x(directory, 'TEMP')
+def getDIR_TARBALL   (path): return _getDIR_x(path, 'TARBALL')
+def getDIR_SOURCE    (path): return _getDIR_x(path, 'SOURCE')
+def getDIR_PATCHES   (path): return _getDIR_x(path, 'PATCHES')
+def getDIR_BUILDING  (path): return _getDIR_x(path, 'BUILDING')
+def getDIR_DESTDIR   (path): return _getDIR_x(path, 'DESTDIR')
+def getDIR_BUILD_LOGS(path): return _getDIR_x(path, 'BUILD_LOGS')
+def getDIR_LISTS     (path): return _getDIR_x(path, 'LISTS')
+def getDIR_TEMP      (path): return _getDIR_x(path, 'TEMP')
 
 
 DIR_ALL = [
@@ -64,28 +98,39 @@ DIR_ALL = [
 'All package directories list in proper order'
 
 DIR_LIST = DIR_ALL
-'DIR_ALL copy'
+':data:`DIR_ALL` copy'
+
+def cli_name():
+    """
+    Represents name for this module in CLI
+    """
+    return 'bsi'
 
 
 def exported_commands():
+    """
+    This module commands for CLI interface
+    """
     return {
         'init': buildingsite_init,
         'apply': buildingsite_apply_info
         }
 
 def commands_order():
+    """
+    This module commands order for CLI interface
+    """
     return [
         'init',
         'apply'
         ]
 
-def cli_name():
-    return 'bsi'
-
 
 def buildingsite_init(opts, args):
     """
     Initiate new building site dir
+
+    CLI command
 
     [DIRNAME]
 
@@ -102,13 +147,15 @@ def buildingsite_init(opts, args):
     if len(args) > 1:
         files = args[1:]
 
-    ret = init(buildingsite=init_dir, files=files)
+    ret = init(path=init_dir, files=files)
 
     return ret
 
 def buildingsite_apply_info(opts, args):
     """
     Apply info to building dir
+
+    CLI command
 
     [DIRNAME [FILENAME]]
     """
@@ -126,41 +173,26 @@ def buildingsite_apply_info(opts, args):
 
     return ret
 
-def get_list_of_items_to_pack(building_site):
-
-    building_site = org.wayround.utils.path.abspath(building_site)
-
-    ret = []
-
-    ret.append(building_site + os.path.sep + DIR_DESTDIR + '.tar.xz')
-    ret.append(building_site + os.path.sep + DIR_PATCHES + '.tar.xz')
-    ret.append(building_site + os.path.sep + DIR_BUILD_LOGS + '.tar.xz')
-
-    ret.append(building_site + os.path.sep + 'package_info.json')
-    ret.append(building_site + os.path.sep + 'package.sha512')
-
-    post_install_script = building_site + os.path.sep + 'post_install.py'
-    if os.path.isfile(post_install_script):
-        ret.append(post_install_script)
-
-    tarballs = os.listdir(getDIR_TARBALL(building_site))
-
-    for i in tarballs:
-        ret.append(building_site + os.path.sep + DIR_TARBALL + os.path.sep + i)
-
-
-    lists = os.listdir(getDIR_LISTS(building_site))
-
-    for i in lists:
-        if i.endswith('.xz'):
-            ret.append(building_site + os.path.sep + DIR_LISTS + os.path.sep + i)
-
-    return ret
-
-def isWdDirRestricted(directory):
+def isWdDirRestricted(path):
     """
-    This function is a routine to check supplied dir is it suitable
-    to be a working dir
+    This function is a routine to check supplied path is it suitable to be a
+    building site.
+
+    List of forbidden path beginnings::
+
+        [
+        '/bin', '/boot' , '/daemons',
+        '/dev', '/etc', '/lib', '/proc',
+        '/sbin', '/sys',
+        '/usr'
+        ]
+
+    This dirs ar directly forbidden, but subdirs are allowed::
+
+        ['/opt', '/var', '/']
+
+    :param path: path to directory
+    :rtype: ``True`` if restricted. ``False`` if not restricted.
     """
 
     ret = False
@@ -170,11 +202,11 @@ def isWdDirRestricted(directory):
         '/dev', '/etc', '/lib', '/proc',
         '/sbin', '/sys',
         '/usr'
-    ]
+        ]
 
     exec_dirs = ['/opt', '/var', '/']
 
-    dir_str_abs = org.wayround.utils.path.abspath(directory)
+    dir_str_abs = org.wayround.utils.path.abspath(path)
 
     for i in dirs_begining_with:
         if dir_str_abs.startswith(i):
@@ -188,22 +220,26 @@ def isWdDirRestricted(directory):
                 break
     return ret
 
-def init(buildingsite='build', files=None):
+def init(path='build', files=None):
     """
-    Initiates building site dir for farcer package build
+    Initiates building site path for farther package build.
+
+    Files in named directory are not deleted if it is already exists.
+
+    :rtype: returns 0 if no errors
     """
 
     ret = 0
 
-    buildingsite = org.wayround.utils.path.abspath(buildingsite)
+    path = org.wayround.utils.path.abspath(path)
 
-    logging.info("Initiating building site `{}'".format(buildingsite))
+    logging.info("Initiating building site `{}'".format(path))
 
     logging.info("Checking dir name safety")
 
-    if isWdDirRestricted(buildingsite):
+    if isWdDirRestricted(path):
         logging.error(
-            "`{}' is restricted working dir -- won't init".format(buildingsite)
+            "`{}' is restricted working dir -- won't init".format(path)
             )
         ret = -1
 
@@ -211,20 +247,20 @@ def init(buildingsite='build', files=None):
     # if exists and not derictory - not continue
     if ret == 0:
 
-        if ((os.path.exists(buildingsite))
-            and not os.path.isdir(buildingsite)):
-            logging.error("File already exists and it is not a buildingsite")
+        if ((os.path.exists(path))
+            and not os.path.isdir(path)):
+            logging.error("File already exists and it is not a building site")
             ret = -2
 
     if ret == 0:
 
-        if not os.path.exists(buildingsite):
+        if not os.path.exists(path):
             logging.info("Building site not exists - creating")
-            os.mkdir(buildingsite)
+            os.mkdir(path)
 
         logging.info("Creating required subdirs")
         for i in DIR_ALL:
-            a = org.wayround.utils.path.abspath(os.path.join(buildingsite, i))
+            a = org.wayround.utils.path.abspath(os.path.join(path, i))
 
             if not os.path.exists(a):
                 resh = 'creating'
@@ -252,13 +288,13 @@ def init(buildingsite='build', files=None):
         if isinstance(files, list):
 
             if len(files) > 0:
-                t_dir = getDIR_TARBALL(buildingsite)
+                t_dir = getDIR_TARBALL(path)
 
                 for i in files:
                     logging.info("Copying file {}".format(i))
                     shutil.copy(i, t_dir)
 
-                apply_info(buildingsite, files[0])
+                apply_info(path, files[0])
 
     else:
         logging.error("Init error")
@@ -266,15 +302,21 @@ def init(buildingsite='build', files=None):
     return ret
 
 
-def read_package_info(directory, ret_on_error=None):
+def read_package_info(path, ret_on_error=None):
+
+    """
+    Reads package info applied to building site
+
+    :rtype: ``ret_on_error`` parameter contents on error (``None`` by default)
+    """
 
     logging.debug(
-        "Trying to read package info in building site `{}'".format(directory)
+        "Trying to read package info in building site `{}'".format(path)
         )
 
     ret = ret_on_error
 
-    pi_filename = os.path.join(directory, 'package_info.json')
+    pi_filename = os.path.join(path, 'package_info.json')
 
     if not os.path.isfile(pi_filename):
         logging.error("`{}' not found".format(pi_filename))
@@ -301,19 +343,25 @@ def read_package_info(directory, ret_on_error=None):
 
     return ret
 
-def write_package_info(directory, info):
+def write_package_info(path, info):
+    """
+    Writes given info to given building site
 
-    pi_filename = os.path.join(directory, 'package_info.json')
+    Raises exceptions in case of errors
+    """
+
+    ret = 0
+
+    package_information_filename = os.path.join(path, 'package_info.json')
 
     f = None
 
     try:
-        f = open(pi_filename, 'w')
+        f = open(package_information_filename, 'w')
     except:
-        logging.error(
-            "Can't open `{}' for writing".format(pi_filename)
+        raise Exception(
+            "Can't open `{}' for writing".format(package_information_filename)
             )
-        raise
     else:
         try:
             txt = ''
@@ -327,13 +375,17 @@ def write_package_info(directory, info):
         finally:
             f.close()
 
-    return
+    return ret
 
 def set_pkg_main_tarball(dirname, filename):
+    """
+    Set main package tarball in case there are many of them.
+    """
 
     r = org.wayround.aipsetup.buildingsite.read_package_info(
         dirname, {}
         )
+
     r['pkg_tarball'] = dict(name=filename)
 
     org.wayround.aipsetup.buildingsite.write_package_info(
@@ -343,6 +395,9 @@ def set_pkg_main_tarball(dirname, filename):
     return 0
 
 def get_pkg_main_tarball(dirname):
+    """
+    Get main package tarball in case there are many of them.
+    """
 
     ret = ''
 
@@ -355,7 +410,21 @@ def get_pkg_main_tarball(dirname):
 
     return ret
 
+APPLY_DESCR = """\
+
+    It is typically used in conjunction with functions
+    :func:`apply_constitution_on_buildingsite`,
+    :func:`apply_pkg_info_on_buildingsite`,
+    :func:`apply_pkg_info_on_buildingsite`
+    in  this order by function :func:`apply_info`
+"""
+
+
 def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
+
+    """
+    Applies package name parsing result on building site package info
+    """
 
     ret = 0
 
@@ -382,9 +451,14 @@ def apply_pkg_nameinfo_on_buildingsite(dirname, filename):
 
     return ret
 
+apply_pkg_nameinfo_on_buildingsite.__doc__ += APPLY_DESCR
+
 
 
 def apply_constitution_on_buildingsite(dirname):
+    """
+    Applies constitution on building site package info
+    """
 
     ret = 0
 
@@ -406,8 +480,14 @@ def apply_constitution_on_buildingsite(dirname):
 
     return ret
 
+apply_constitution_on_buildingsite.__doc__ += APPLY_DESCR
+
 
 def apply_pkg_info_on_buildingsite(dirname):
+
+    """
+    Applies package information on building site package info
+    """
 
     ret = 0
 
@@ -450,8 +530,13 @@ def apply_pkg_info_on_buildingsite(dirname):
 
     return ret
 
+apply_pkg_info_on_buildingsite.__doc__ += APPLY_DESCR
+
 
 def apply_info(dirname='.', src_file_name=None):
+    """
+    Apply package information to building site
+    """
 
     dirname = org.wayround.utils.path.abspath(dirname)
 
@@ -488,7 +573,7 @@ def apply_info(dirname='.', src_file_name=None):
             ret = 2
         elif apply_pkg_info_on_buildingsite(dirname) != 0:
             ret = 3
-    #    elif apply_pkg_buildscript_on_buildingsite(dirname) != 0:
-    #        ret = 4
 
     return ret
+
+apply_info.__doc__ += APPLY_DESCR

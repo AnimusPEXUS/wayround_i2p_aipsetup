@@ -54,15 +54,12 @@ def main(buildingsite, action=None):
             ret = cmake.cmake_high(
                 buildingsite,
                 options=[
-                    '-DCMAKE_INSTALL_PREFIX=' +
-                        pkg_info['constitution']['paths']['usr'],
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
-#                    '--enable-shared',
-#                    '--host=' + pkg_info['constitution']['host'],
-#                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    '-DCMAKE_INSTALL_PREFIX=/usr/lib/mysql',
+                    '-DWITH_SSL=yes',
+                    '-DWITH_READLINE=yes',
+                    '-DWITH_EXTRA_CHARSETS=all',
+                    '-DWITH_EMBEDDED_SERVER=yes',
+                    '-DWITH_CHARSET=utf8'
                     ],
                 arguments=[],
                 environment={},

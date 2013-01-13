@@ -3,9 +3,9 @@
 Perform actions on buildscript scripts
 """
 
-import os.path
+import copy
 import logging
-import inspect
+import os.path
 
 import org.wayround.utils.path
 
@@ -97,7 +97,6 @@ def load_buildscript(name):
             else:
 
                 try:
-#                        ret = module.build_script()
                     ret = globals_dict
                 except:
                     logging.exception(
@@ -113,5 +112,98 @@ def load_buildscript(name):
                             buildscript_filename
                             )
                         )
+
+    return ret
+
+
+def build_script_wrap(buildingsite, desired_actions, action, help_text):
+
+    pkg_info = org.wayround.aipsetup.buildingsite.read_package_info(
+        buildingsite
+        )
+
+    ret = 0
+
+    if not isinstance(pkg_info, dict):
+        logging.error("Can't read package info")
+        ret = 1
+    else:
+
+        actions = copy.copy(desired_actions)
+
+        if action == 'help':
+            print(help_text)
+            print("")
+            print("Available actions: {}".format(actions))
+            ret = 2
+        else:
+
+            r = build_actions_selector(
+                actions,
+                action
+                )
+
+            if not isinstance(r, tuple):
+                logging.error("Wrong command 1")
+                ret = 2
+            else:
+
+                actions, action = r
+
+                if action != None and not isinstance(action, str):
+                    logging.error("Wrong command 2")
+                    ret = 3
+                else:
+
+                    if not isinstance(actions, list):
+                        logging.error("Wrong command 3")
+                        ret = 3
+
+                    else:
+
+                        ret = (pkg_info, actions)
+
+    return ret
+
+def build_actions_selector(actions, action):
+
+    ret = None
+
+    actions = copy.copy(actions)
+
+    if action == 'complete':
+        action = None
+
+    # action == None - indicates all actions! equals to 'complete'
+    if action in [None, 'help']:
+        ret = (actions, action)
+
+    else:
+
+        continued_action = True
+
+        if isinstance(action, str) and action.endswith('+'):
+
+            continued_action = True
+            action = action[:-1]
+
+        else:
+            continued_action = False
+
+        # if not action available - return error
+        if not action in actions:
+
+            ret = 2
+
+        else:
+
+            action_pos = actions.index(action)
+
+            if continued_action:
+                actions = actions[action_pos:]
+            else:
+                actions = [actions[action_pos]]
+
+            ret = (actions, action)
 
     return ret

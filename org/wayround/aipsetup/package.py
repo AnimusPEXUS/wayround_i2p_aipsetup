@@ -119,7 +119,9 @@ def package_install(opts, args):
                     name, force, basedir
                     )
                 if ret != 0:
-                    logging.error("Some package's installation error -- see above")
+                    logging.error(
+                        "Some package's installation error -- see above"
+                        )
                     break
 
             org.wayround.aipsetup.sysupdates.all_actions()
@@ -323,7 +325,10 @@ def package_complete(opts, args):
             file = None
             ret = 0
             for i in args[:2]:
-                if complete(i, file, remove_buildingsite_after_success=r_bds) != 0:
+                if complete(
+                    i, file, remove_buildingsite_after_success=r_bds
+                    ) != 0:
+
                     ret += 1
 
         else:
@@ -496,7 +501,9 @@ def package_find_so_problems(opts, args):
 #    if '-b' in opts:
 #        basedir = opts['-b']
 
-    problems = org.wayround.utils.deps_c.find_so_problems_in_linux_system()
+    problems = org.wayround.utils.deps_c.find_so_problems_in_linux_system(
+        verbose=True
+        )
 
     libs = list(problems.keys())
     libs.sort()
@@ -540,7 +547,10 @@ def package_find_so_problems(opts, args):
 
         total_problem_packages_list |= set(pkgs2_l)
 
-        logging.info("Checked libraries: {} of {}".format(count_checked, libs_c))
+        logging.info(
+            "Checked libraries: {} of {}".format(count_checked, libs_c)
+            )
+
         log.info('---------------------------------')
 
     pkgs = find_file_in_files_installed_by_asps(
@@ -952,9 +962,15 @@ def install_asp(asp_name, destdir='/'):
         else:
 
             package_name = os.path.basename(asp_name)
-            if org.wayround.aipsetup.name.package_name_parse(package_name) == None:
-                logging.error("Can't parse package name `{}'".format(package_name))
+            if org.wayround.aipsetup.name.package_name_parse(
+                package_name
+                ) == None:
+
+                logging.error(
+                    "Can't parse package name `{}'".format(package_name)
+                    )
                 ret = 2
+
             else:
                 package_name = package_name[:-4]
                 for i in [
@@ -1009,7 +1025,9 @@ def install_asp(asp_name, destdir='/'):
                             out_filename
                             ) != 0 :
                         logging.error(
-                            "Can't install asp {} as {}".format(i[2], out_filename)
+                            "Can't install asp {} as {}".format(
+                                i[2], out_filename
+                                )
                             )
                         ret = 2
                         break
@@ -1047,19 +1065,26 @@ def install_asp(asp_name, destdir='/'):
                                 ret = 5
                             else:
                                 ret = 0
-                                logging.info("Installed `{}' ;-)".format(package_name))
+                                logging.info(
+                                    "Installed `{}'".format(package_name)
+                                    )
                         finally:
                             dd_fobj.close()
 
                 if ret == 0:
-                    logging.info("Post installation file ownerships and modes fix")
+                    logging.info(
+                        "Post installation file ownerships and modes fix"
+                        )
+
                     files = []
                     dirs = []
 
-                    installed_file_list = org.wayround.utils.archive.\
-                        tar_member_get_extract_file(
+                    installed_file_list = (
+                        org.wayround.utils.archive.tar_member_get_extract_file(
                             tarf, './06.LISTS/DESTDIR.lst.xz'
                             )
+                        )
+
                     if not isinstance(installed_file_list, tarfile.ExFileObject):
                         logging.error("Can't get package's file list")
                         ret = 10
@@ -1071,7 +1096,10 @@ def install_asp(asp_name, destdir='/'):
 
                             files = text_lst.split('\n')
 
-                            files = org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(files)
+                            files = (
+                                org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(files)
+                                )
+
                             files.sort()
 
                             dirs = set()
@@ -1081,7 +1109,9 @@ def install_asp(asp_name, destdir='/'):
                             dirs.sort()
 
                             for i in dirs:
-                                f_d_p = org.wayround.utils.path.abspath(destdir + os.path.sep + i)
+                                f_d_p = org.wayround.utils.path.abspath(
+                                    destdir + os.path.sep + i
+                                    )
 
 
                                 if not os.path.islink(f_d_p):
@@ -1089,7 +1119,9 @@ def install_asp(asp_name, destdir='/'):
                                     os.chmod(f_d_p, 0o755)
 
                             for i in files:
-                                f_f_p = org.wayround.utils.path.abspath(destdir + os.path.sep + i)
+                                f_f_p = org.wayround.utils.path.abspath(
+                                    destdir + os.path.sep + i
+                                    )
 
 
                                 if not os.path.islink(f_f_p):
@@ -1101,13 +1133,17 @@ def install_asp(asp_name, destdir='/'):
                 if ret == 0:
                     logging.info("Searching post installation script")
 
-                    script_obj = \
+                    script_obj = (
                         org.wayround.utils.archive.tar_member_get_extract_file(
                             tarf, './post_install.py'
                             )
+                        )
 
                     if not isinstance(script_obj, tarfile.ExFileObject):
-                        logging.info("Can't get package's post installation script")
+                        logging.info(
+                            "Can't get package's post installation script"
+                            )
+
                     else:
                         try:
                             script_txt = script_obj.read()
@@ -1132,7 +1168,9 @@ def install_asp(asp_name, destdir='/'):
 
                             else:
                                 if l['main'](destdir) != 0:
-                                    logging.error("Post installation script main function returned error")
+                                    logging.error(
+                                        "Post installation script main function returned error"
+                                        )
                                     ret = 8
                         finally:
                             script_obj.close()
@@ -1195,22 +1233,6 @@ def remove_asp(
 
                 lines = list(set(lines) - set(exclude))
 
-                # exclude from removal files starting with one of the ROOT_LINKS
-                # lines, which have corresponding file in /usr-prependet dir
-
-                # This is no longer needed as we working only with real paths
-                # (which excludes duplications), and excluding Sahred Object
-                # files (ET_DYN) little farther
-
-                #                for line in lines[:]:
-                #
-                #                    for i in ROOT_LINKS:
-                #                        if line.startswith(i + os.path.sep):
-                #                            if (os.path.sep + 'usr' + line) in exclude:
-                #
-                #                                while line in lines:
-                #                                    lines.remove(line)
-
                 # Statistics about excluded files
                 lines_after_ex = len(lines)
 
@@ -1221,13 +1243,6 @@ def remove_asp(
                             )
                         )
 
-            # prevent removal of /bin, /sbin, /lib, /lib64 symlinks
-            #            for line in lines[:]:
-            #
-            #                if line in ROOT_LINKS:
-            #                    while line in lines:
-            #                        lines.remove(line)
-
             logging.info("Excluding shared objects")
             shared_objects = set()
             for i in lines:
@@ -1236,8 +1251,6 @@ def remove_asp(
                         org.wayround.utils.format.elf.ET_DYN):
                         shared_objects.add(i)
 
-            # this not needed and lines (at this point) already have no
-            # excluded files. but i leave this line just to accent
             if exclude:
                 shared_objects -= set(exclude)
 
@@ -1269,16 +1282,23 @@ def remove_asp(
 
 
                 if (
-                    (os.path.islink(rm_file_name) and not os.path.exists(rm_file_name))
+                    (os.path.islink(rm_file_name)
+                     and not os.path.exists(rm_file_name)
+                     )
                     or
-                    (os.path.isfile(rm_file_name))
+                    os.path.isfile(rm_file_name)
                     or
-                    (os.path.isdir(rm_file_name) and org.wayround.utils.file.is_dir_empty(rm_file_name))
+                    (os.path.isdir(rm_file_name)
+                     and org.wayround.utils.file.is_dir_empty(rm_file_name)
+                     )
                     ):
                     if not mute:
                         logging.info("   removing: {}".format(rm_file_name))
 
-                    if os.path.isfile(rm_file_name) or os.path.islink(rm_file_name):
+                    if (
+                        os.path.isfile(rm_file_name)
+                        or os.path.islink(rm_file_name)
+                        ):
 
                         try:
                             os.unlink(rm_file_name)
@@ -1296,47 +1316,25 @@ def remove_asp(
 
         if len(shared_objects) != 0:
 
-            if not os.path.exists(destdir + os.path.sep +
-                org.wayround.aipsetup.config.config['installed_pkg_dir_removing']):
-
-                os.makedirs(destdir + os.path.sep +
-                    org.wayround.aipsetup.config.config['installed_pkg_dir_removing'])
-
-            mv_file_name1 = org.wayround.utils.path.abspath(
-                destdir + os.path.sep +
-                org.wayround.aipsetup.config.config['installed_pkg_dir'] +
-                os.path.sep +
-                asp_name + '.xz'
-                )
-            mv_file_name2 = org.wayround.utils.path.abspath(
-                destdir + os.path.sep +
-                org.wayround.aipsetup.config.config['installed_pkg_dir_removing'] +
-                os.path.sep +
-                asp_name + '.xz'
-                )
-            if os.path.isfile(mv_file_name1):
-                logging.info("   reserving: {}".format(mv_file_name1))
-                os.rename(mv_file_name1, mv_file_name2)
-
-
-            logging.warning("asp `{}' \n"
-                "    was moved to delayed removal dir,\n"
-                "    because {} of it's shared object elf files\n"
-                "    remained undeleted".format(asp_name, len(shared_objects)))
-        else:
-            for i in [
-                'installed_pkg_dir_buildlogs',
-                'installed_pkg_dir_sums',
-                'installed_pkg_dir'
-                ]:
-                rm_file_name = org.wayround.utils.path.abspath(
-                    destdir + os.path.sep +
-                    org.wayround.aipsetup.config.config[i] + os.path.sep +
-                    asp_name + '.xz'
+            logging.warning(
+                "{} shared objects of asp `{}' was remained in system".format(
+                    len(shared_objects), asp_name
                     )
-                if os.path.isfile(rm_file_name):
-                    logging.info("   removing: {}".format(rm_file_name))
-                    os.unlink(rm_file_name)
+                )
+
+        for i in [
+            'installed_pkg_dir_buildlogs',
+            'installed_pkg_dir_sums',
+            'installed_pkg_dir'
+            ]:
+            rm_file_name = org.wayround.utils.path.abspath(
+                destdir + os.path.sep +
+                org.wayround.aipsetup.config.config[i] + os.path.sep +
+                asp_name + '.xz'
+                )
+            if os.path.isfile(rm_file_name):
+                logging.info("   removing: {}".format(rm_file_name))
+                os.unlink(rm_file_name)
     return ret
 
 def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
@@ -1388,7 +1386,10 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 def list_installed_asps(destdir='/', mute=False):
     destdir = org.wayround.utils.path.abspath(destdir)
 
-    listdir = org.wayround.utils.path.abspath(destdir + org.wayround.aipsetup.config.config['installed_pkg_dir'])
+    listdir = org.wayround.utils.path.abspath(
+        destdir + org.wayround.aipsetup.config.config['installed_pkg_dir']
+        )
+
     filelist = glob.glob(os.path.join(listdir, '*.xz'))
 
     ret = 0
@@ -1473,6 +1474,7 @@ def list_installed_package_s_asps(name_or_list, destdir='/'):
     ret = {}
 
     return_single = False
+
     if isinstance(name_or_list, str):
         return_single = True
         name_or_list = [name_or_list]
@@ -1539,7 +1541,9 @@ def list_files_installed_by_asp(
 
         pkg_file_list = pkg_file_list.splitlines()
         pkg_file_list = (
-            org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(pkg_file_list)
+            org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(
+                pkg_file_list
+                )
             )
 
 
@@ -1548,6 +1552,48 @@ def list_files_installed_by_asp(
         ret = copy.copy(pkg_file_list)
 
     return ret
+
+
+
+def list_installed_packages_and_asps(destdir='/'):
+
+    packages = list_installed_packages(mute=True, destdir=destdir)
+
+    ret = list_installed_package_s_asps(packages, destdir=destdir)
+
+    return ret
+
+
+def check_list_of_installed_packages_and_asps(in_dict):
+
+    ret = 0
+
+    keys = list(in_dict.keys())
+
+    keys.sort()
+
+    errors = 0
+
+    for i in keys:
+
+        if len(in_dict[i]) > 1:
+
+            errors += 1
+            ret = 1
+
+            logging.warning("Package with too many ASPs found `{}'".format(i))
+
+            in_dict[i].sort()
+
+            for j in in_dict[i]:
+
+                print("       {}".format(j))
+
+    if errors > 0:
+        logging.warning("Total erroneous packages: {}".format(errors))
+
+    return ret
+
 
 
 def build(source_files, remove_buildingsite_after_success=False):
@@ -1595,6 +1641,7 @@ def build(source_files, remove_buildingsite_after_success=False):
                 prefix=tmp_dir_prefix,
                 dir=org.wayround.aipsetup.config.config['buildingsites']
                 )
+
             build_site_dir = org.wayround.utils.path.abspath(build_site_dir)
 
             if org.wayround.aipsetup.buildingsite.init(build_site_dir) != 0:
@@ -1632,7 +1679,9 @@ def build(source_files, remove_buildingsite_after_success=False):
                                 )
 
                     if ret != 0:
-                        logging.error("Exception while copying one of source files")
+                        logging.error(
+                            "Exception while copying one of source files"
+                            )
 
                 if ret == 0:
 
@@ -1698,7 +1747,10 @@ def complete(
         isinstance(main_src_file, str)
         ):
 
-        logging.warning("buildscript information not available (or new main tarball file forced)")
+        logging.warning(
+            "buildscript information not available "
+            "(or new main tarball file forced)"
+            )
 
         if org.wayround.aipsetup.buildingsite.apply_info(
             building_site,
@@ -1710,7 +1762,9 @@ def complete(
     if ret == 0:
         if _complete_info_correctness_check(building_site) != 0:
 
-            logging.error("`{}' has wrong build script name".format(main_src_file))
+            logging.error(
+                "`{}' has wrong build script name".format(main_src_file)
+                )
             ret = 16
 
     if ret == 0:
@@ -1745,7 +1799,12 @@ def complete(
     return ret
 
 def find_file_in_files_installed_by_asps(
-    destdir, instr, mode=None, mute=False, sub_mute=True, predefined_asp_tree=None
+    destdir,
+    instr,
+    mode=None,
+    mute=False,
+    sub_mute=True,
+    predefined_asp_tree=None
     ):
     """
     instr can be a single query or list of queries.
@@ -1923,7 +1982,12 @@ def _put_files_to_index(files, subdir):
 
         if os.path.dirname(file) != full_path:
 
-            logging.info("Moving {}\n       to {}".format(os.path.basename(file), full_path))
+            logging.info(
+                "Moving {}\n       to {}".format(
+                    os.path.basename(file), full_path
+                    )
+                )
+
             sfile = full_path + os.path.sep + os.path.basename(file)
             if os.path.isfile(sfile):
                 os.unlink(sfile)
@@ -1965,7 +2029,11 @@ def put_file_to_index(filename):
                     )
 
                 if not isinstance(package_path, str):
-                    logging.error("Package path error `{}'".format(parsed['groups']['name']))
+                    logging.error(
+                        "Package path error `{}'".format(
+                            parsed['groups']['name']
+                            )
+                        )
                     ret = 11
                 else:
 
@@ -1983,46 +2051,9 @@ def put_file_to_index(filename):
 
         else:
 
-            logging.error("Action indefined for `{}'".format(os.path.basename(filename)))
-
-    return ret
-
-def list_installed_packages_and_asps(destdir='/'):
-
-    packages = list_installed_packages(mute=True, destdir=destdir)
-
-    ret = list_installed_package_s_asps(packages, destdir=destdir)
-
-    return ret
-
-
-def check_list_of_installed_packages_and_asps(in_dict):
-
-    ret = 0
-
-    keys = list(in_dict.keys())
-
-    keys.sort()
-
-    errors = 0
-
-    for i in keys:
-
-        if len(in_dict[i]) > 1:
-
-            errors += 1
-            ret = 1
-
-            logging.warning("Package with too many ASPs found `{}'".format(i))
-
-            in_dict[i].sort()
-
-            for j in in_dict[i]:
-
-                print("       {}".format(j))
-
-    if errors > 0:
-        logging.warning("Total erroneous packages: {}".format(errors))
+            logging.error(
+                "Action indefined for `{}'".format(os.path.basename(filename))
+                )
 
     return ret
 
