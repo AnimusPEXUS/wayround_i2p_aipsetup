@@ -1,0 +1,1263 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.serverui &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.serverui</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">urllib.parse</span>
+
+<span class="c">#import cherrypy</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.path</span>
+<span class="kn">import</span> <span class="nn">org.wayround.utils.xml</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgindex</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkginfo</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkglatest</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.version</span>
+
+
+<span class="k">def</span> <span class="nf">pathed_css_path_renderer</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">inname</span><span class="p">):</span>
+<div class="viewcode-block" id="pathed_css_path_renderer"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.pathed_css_path_renderer">[docs]</a>    <span class="k">return</span> <span class="s">&#39;css/&#39;</span> <span class="o">+</span> <span class="n">inname</span>
+
+<span class="k">def</span> <span class="nf">pathed_js_path_renderer</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">inname</span><span class="p">):</span></div>
+<div class="viewcode-block" id="pathed_js_path_renderer"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.pathed_js_path_renderer">[docs]</a>    <span class="k">return</span> <span class="s">&#39;js/&#39;</span> <span class="o">+</span> <span class="n">inname</span>
+
+<span class="k">def</span> <span class="nf">page_index</span><span class="p">():</span></div>
+<div class="viewcode-block" id="page_index"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.page_index">[docs]</a>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">html</span><span class="p">(</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s">&quot;Unicorn distribution server&quot;</span><span class="p">,</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="p">)</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">DictTreeToXMLRenderer</span><span class="p">(</span>
+        <span class="n">xml_indent_size</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">generate_css</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">generate_js</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">css_and_js_holder</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="s">&#39;00020_html&#39;</span><span class="p">][</span><span class="s">&#39;content&#39;</span><span class="p">][</span><span class="s">&#39;00010_head&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">a</span><span class="o">.</span><span class="n">set_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">log</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># TODO: rework this</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;Error&#39;</span>
+
+    <span class="k">return</span> <span class="n">txt</span>
+
+
+<span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span></div>
+<div class="viewcode-block" id="category"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.category">[docs]</a>
+    <span class="n">cat_id</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_by_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cat_id</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s">&quot;Category not found&quot;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Category `{}&#39; corresponds to path `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cat_id</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Getting package ids in cat {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cat_id</span><span class="p">))</span>
+    <span class="n">pack_ids</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_id_list</span><span class="p">(</span><span class="n">cat_id</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Getting cat ids in cat {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cat_id</span><span class="p">))</span>
+    <span class="n">cats_ids</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_id_list</span><span class="p">(</span><span class="n">cat_id</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+
+<span class="c">#    cats_lst = list(cats_ids.keys())</span>
+<span class="c">#    cats_lst.sort()</span>
+
+    <span class="n">cats_tags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pack_tags</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Formatting cats in cat {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cat_id</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cats_ids</span><span class="p">:</span>
+
+        <span class="n">cat_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+
+        <span class="n">cats_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;div&#39;</span><span class="p">,</span>
+                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;dir_entry&#39;</span>
+                    <span class="p">},</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;div&#39;</span><span class="p">,</span>
+                        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;categories&#39;</span><span class="p">,</span>
+                        <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;single-page-cat-category-div&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="s">&#39;category?path={}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">cat_path</span><span class="p">))</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&#39;open&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/folder.png&#39;</span><span class="p">,</span>
+                                            <span class="p">},</span>
+                                        <span class="p">),</span>
+                                    <span class="s">&#39; &#39;</span><span class="p">,</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_by_id</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Formatting packs in cat {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cat_id</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pack_ids</span><span class="p">:</span>
+        <span class="n">package_name</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_by_id</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+        <span class="n">pack_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;div&#39;</span><span class="p">,</span>
+                <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;categories&#39;</span><span class="p">,</span>
+                <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;single-page-cat-package-div&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="s">&#39;package?name={}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">package_name</span><span class="p">))</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&#39;open&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/package-x-generic.png&#39;</span><span class="p">,</span>
+                                    <span class="p">},</span>
+                                <span class="p">),</span>
+                            <span class="s">&#39; &#39;</span><span class="p">,</span>
+                            <span class="n">package_name</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">cats_tags</span> <span class="o">+</span> <span class="n">pack_tags</span>
+
+    <span class="n">double_dot</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">cat_id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">parent_cat_id</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_parent_by_id</span><span class="p">(</span><span class="n">cat_id</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+        <span class="n">parent_cat_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span><span class="n">parent_cat_id</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+
+        <span class="n">double_dot</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;div&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="s">&#39;category?path={}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_cat_path</span><span class="p">)</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;.. (Parent Category: &#39;{}&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_cat_path</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">double_dot</span> <span class="o">+</span> <span class="n">ret</span> <span class="o">+</span> <span class="n">double_dot</span>
+
+    <span class="n">ret</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+        <span class="mi">0</span><span class="p">,</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+            <span class="s">&#39;h1&#39;</span><span class="p">,</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Category: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span><span class="n">cat_id</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+        <span class="s">&#39;div&#39;</span><span class="p">,</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;categories&#39;</span><span class="p">,</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;single-page-div&#39;</span><span class="p">,</span>
+        <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;single-page-div.css&#39;</span><span class="p">],</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">ret</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">page_category</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span></div>
+<div class="viewcode-block" id="page_category"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.page_category">[docs]</a>
+    <span class="n">head</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">html_head</span><span class="p">(</span>
+        <span class="n">path</span>
+        <span class="p">)</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">category</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">html</span><span class="p">(</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">head</span><span class="p">,</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span><span class="n">table</span><span class="p">],</span>
+        <span class="n">body_module</span> <span class="o">=</span> <span class="s">&#39;aipsetup_server_basic&#39;</span><span class="p">,</span>
+        <span class="n">body_uid</span> <span class="o">=</span> <span class="s">&#39;body&#39;</span><span class="p">,</span>
+        <span class="n">body_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;body.css&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">DictTreeToXMLRenderer</span><span class="p">(</span>
+        <span class="n">xml_indent_size</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">generate_css</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">generate_js</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">css_and_js_holder</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="p">)</span>
+
+    <span class="n">renderer</span><span class="o">.</span><span class="n">set_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+        <span class="n">pathed_css_path_renderer</span><span class="p">,</span>
+        <span class="n">pathed_js_path_renderer</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">renderer</span><span class="o">.</span><span class="n">log</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># TODO: rework this</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">renderer</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;Error&#39;</span>
+
+    <span class="k">return</span> <span class="n">txt</span>
+
+
+<span class="k">def</span> <span class="nf">package_file_list</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span></div>
+<div class="viewcode-block" id="package_file_list"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.package_file_list">[docs]</a>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_files</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+
+    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+        <span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">cmp_to_key</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">package_version_comparator</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+<span class="c">#    org.wayround.utils.list.list_sort(</span>
+<span class="c">#        files, cmp=org.wayround.aipsetup.version.package_version_comparator</span>
+<span class="c">#        )</span>
+<span class="c">#</span>
+<span class="c">#    files.reverse()</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">package_name_parse</span><span class="p">(</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">mute</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="p">)</span>
+
+        <span class="n">package_url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s">&#39;files_repository&#39;</span>
+            <span class="o">+</span> <span class="n">i</span>
+            <span class="p">)</span>
+
+        <span class="n">package_filename</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">i</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">package_file_stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">package_filename</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">package_filesize</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">package_moddate</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">package_filesize</span> <span class="o">=</span> <span class="n">package_file_stat</span><span class="o">.</span><span class="n">st_size</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">package_file_stat</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+            <span class="n">package_moddate</span> <span class="o">=</span> <span class="s">&quot;{Y:04}-{M:02}-{D:02} {h:02}:{m:02}:{s:02}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_year</span><span class="p">,</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">,</span>
+                <span class="n">D</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">,</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">,</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_min</span><span class="p">,</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_sec</span>
+                <span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="n">package_url</span><span class="p">,</span>
+                                    <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&quot;Download File&quot;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&#39;download&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/document-save.png&#39;</span><span class="p">,</span>
+                                            <span class="p">},</span>
+                                        <span class="p">),</span>
+                                    <span class="s">&#39; &#39;</span><span class="p">,</span>
+                                    <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]</span>
+                                    <span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;timestamp&#39;</span><span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;{m:.2f} MiB&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">m</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">package_filesize</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>
+                            <span class="p">)</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package_moddate</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;no packages found&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Version&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Timestamp&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Size&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Modify&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+        <span class="s">&#39;table&#39;</span><span class="p">,</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;package-info-module&#39;</span><span class="p">,</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;file-list-table&#39;</span><span class="p">,</span>
+        <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;file-list-table.css&#39;</span><span class="p">],</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">rows</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">table</span>
+
+
+<span class="k">def</span> <span class="nf">package_sources_file_list</span><span class="p">(</span><span class="n">info_db</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span></div>
+<div class="viewcode-block" id="package_sources_file_list"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.package_sources_file_list">[docs]</a>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_source_files</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">info_db</span> <span class="o">=</span> <span class="n">info_db</span><span class="p">)</span>
+
+    <span class="c"># TODO: rework this</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+        <span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">cmp_to_key</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">source_version_comparator</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+<span class="c">#    org.wayround.utils.list.list_sort(</span>
+<span class="c">#        files,</span>
+<span class="c">#        cmp=org.wayround.aipsetup.version.source_version_comparator</span>
+<span class="c">#        )</span>
+<span class="c">#</span>
+<span class="c">#    files.reverse()</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+
+        <span class="n">source_url</span> <span class="o">=</span> <span class="s">&#39;files_source&#39;</span> <span class="o">+</span> <span class="n">i</span>
+
+        <span class="n">source_filename</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">i</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">source_file_stat</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">source_filename</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">source_filesize</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">source_moddate</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source_filesize</span> <span class="o">=</span> <span class="n">source_file_stat</span><span class="o">.</span><span class="n">st_size</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">source_file_stat</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+            <span class="n">source_moddate</span> <span class="o">=</span> <span class="s">&quot;{Y:04}-{M:02}-{D:02} {h:02}:{m:02}:{s:02}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_year</span><span class="p">,</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">,</span>
+                <span class="n">D</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">,</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">,</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_min</span><span class="p">,</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">tm_sec</span>
+                <span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="n">source_url</span><span class="p">,</span>
+                                    <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&quot;Download File&quot;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&#39;download&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/document-save.png&#39;</span><span class="p">,</span>
+                                            <span class="p">},</span>
+                                        <span class="p">),</span>
+                                    <span class="s">&#39; &#39;</span><span class="p">,</span>
+                                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;{m:.2f} MiB&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">m</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">source_filesize</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>
+                            <span class="p">)</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source_moddate</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;no sources found&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;File Name&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Path&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Size&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Modify&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+        <span class="s">&#39;table&#39;</span><span class="p">,</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;package-info-module&#39;</span><span class="p">,</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;file-list-table&#39;</span><span class="p">,</span>
+        <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;file-list-table.css&#39;</span><span class="p">],</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">rows</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">table</span>
+
+
+<span class="k">def</span> <span class="nf">package_info</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">info_db</span><span class="p">,</span> <span class="n">latest_db</span><span class="p">,</span> <span class="n">tag_db</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span></div>
+<div class="viewcode-block" id="package_info"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.package_info">[docs]</a>
+    <span class="n">pkg_info</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_package_info_record</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">info_db</span> <span class="o">=</span> <span class="n">info_db</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s">&quot;package_info: package_info_record_to_dict({}) == {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">pkg_info</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">tag_db</span><span class="o">.</span><span class="n">get_tags</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">pkg_info</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s">&quot;No page for package `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">cid</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_category_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cid</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="s">&quot;&lt; Package not indexed! &gt;&quot;</span>
+
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">SAMPLE_PACKAGE_INFO_STRUCTURE</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s">&#39;tags&#39;</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;basename&#39;</span><span class="p">,</span> <span class="s">&#39;home_page&#39;</span><span class="p">,</span>
+            <span class="s">&#39;newest_src&#39;</span><span class="p">,</span> <span class="s">&#39;newest_pkg&#39;</span>
+            <span class="p">]:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                    <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                            <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                            <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                                <span class="p">},</span>
+                            <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                    <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                    <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;{}:&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+                                    <span class="p">)</span>
+                                <span class="p">]</span>
+                            <span class="p">),</span>
+                        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                            <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                            <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                    <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                    <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                    <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                    <span class="n">content</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_info</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                                    <span class="p">)</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Base Name:&#39;</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;basename&#39;</span><span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;rowspan&#39;</span><span class="p">:</span> <span class="s">&#39;13&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Category:&#39;</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                                        <span class="n">new_line_before_start</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="n">new_line_after_end</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="s">&quot;category?path={}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="n">category</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Home Page:&#39;</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;a&#39;</span><span class="p">,</span>
+                                        <span class="n">new_line_before_start</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="n">new_line_after_end</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;href&#39;</span><span class="p">:</span> <span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;home_page&#39;</span><span class="p">],</span>
+                                            <span class="s">&#39;target&#39;</span><span class="p">:</span> <span class="s">&#39;_blank&#39;</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;home_page&#39;</span><span class="p">]</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Tags:&#39;</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">get_latest_pkg_from_record</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">latest_db</span> <span class="o">=</span> <span class="n">latest_db</span><span class="p">,</span> <span class="n">info_db</span> <span class="o">=</span> <span class="n">info_db</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Latest Package:&#39;</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="n">a</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">get_latest_src_from_record</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">latest_db</span> <span class="o">=</span> <span class="n">latest_db</span><span class="p">,</span> <span class="n">info_db</span> <span class="o">=</span> <span class="n">info_db</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="s">&#39;right&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;strong&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;Newest src:&#39;</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;pre&#39;</span><span class="p">,</span>
+                                <span class="n">new_line_before_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">new_line_after_content</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="n">a</span>
+                                <span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+            <span class="s">&#39;div&#39;</span><span class="p">,</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;package-info-module&#39;</span><span class="p">,</span>
+            <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;info-div&#39;</span><span class="p">,</span>
+            <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;info-div.css&#39;</span><span class="p">],</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                 <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                    <span class="s">&#39;table&#39;</span><span class="p">,</span>
+                    <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;package-info-module&#39;</span><span class="p">,</span>
+                    <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;info-info-table&#39;</span><span class="p">,</span>
+                    <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;info-info-table.css&#39;</span><span class="p">],</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">rows</span>
+                    <span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">page_package</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">info_db</span><span class="p">,</span> <span class="n">latest_db</span><span class="p">,</span> <span class="n">tag_db</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span></div>
+<div class="viewcode-block" id="page_package"><a class="viewcode-back" href="../../../../serverui.html#org.wayround.aipsetup.serverui.page_package">[docs]</a>
+    <span class="n">cid</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_category_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cid</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s">&quot;&lt; Package not indexed! &gt;&quot;</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+        <span class="s">&#39;table&#39;</span><span class="p">,</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;package-info-module&#39;</span><span class="p">,</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;info-upper-table&#39;</span><span class="p">,</span>
+        <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;info-upper-table.css&#39;</span><span class="p">],</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;colspan&#39;</span><span class="p">:</span> <span class="s">&#39;2&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;h1&#39;</span><span class="p">,</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="n">name</span>
+                                <span class="p">),</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;package-info-module&#39;</span><span class="p">,</span>
+                        <span class="n">uid</span> <span class="o">=</span> <span class="s">&#39;info-upper-table-buttons-cell&#39;</span><span class="p">,</span>
+                        <span class="n">required_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;info-upper-table-buttons-cell.css&#39;</span><span class="p">],</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;colspan&#39;</span><span class="p">:</span> <span class="s">&#39;2&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;form&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&quot;..&quot;</span><span class="p">,</span>
+                                    <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&#39;GET&#39;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;button&#39;</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;submit&#39;</span><span class="p">,</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                                <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                                <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                                    <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/go-home.png&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&quot;Go Home&quot;</span>
+                                                    <span class="p">}</span>
+                                                <span class="p">),</span>
+                                            <span class="s">&quot; &quot;</span><span class="p">,</span>
+                                            <span class="s">&quot;Go Home&quot;</span>
+                                            <span class="p">]</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">),</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;form&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&quot;category&quot;</span><span class="p">,</span>
+                                    <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&#39;GET&#39;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;button&#39;</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;submit&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;path&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">category</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                                <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                                <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                                    <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/go-up.png&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&quot;Up to category&quot;</span>
+                                                    <span class="p">}</span>
+                                                <span class="p">),</span>
+                                            <span class="s">&quot; &quot;</span><span class="p">,</span>
+                                            <span class="s">&quot;{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+                                            <span class="p">]</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">),</span>
+
+
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;form&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">,</span>
+                                    <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&#39;GET&#39;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;hidden&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;name&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">name</span>
+                                            <span class="p">}</span>
+                                        <span class="p">),</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;hidden&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;mode&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;packages&#39;</span>
+                                            <span class="p">}</span>
+                                        <span class="p">),</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;button&#39;</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;submit&#39;</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                                <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                                <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                                    <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/gnome-mime-application-x-cd-image.png&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&quot;Packages JSON&quot;</span>
+                                                    <span class="p">}</span>
+                                                <span class="p">),</span>
+                                            <span class="s">&quot; &quot;</span><span class="p">,</span>
+                                            <span class="s">&quot;Packages JSON&quot;</span>
+                                            <span class="p">]</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">),</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;form&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">,</span>
+                                    <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&#39;GET&#39;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;hidden&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;name&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">name</span>
+                                            <span class="p">}</span>
+                                        <span class="p">),</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;hidden&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;mode&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;sources&#39;</span>
+                                            <span class="p">}</span>
+                                        <span class="p">),</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;button&#39;</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;submit&#39;</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                                <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                                <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                                    <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/gnome-mime-application-x-cd-image.png&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&quot;Sources JSON&quot;</span>
+                                                    <span class="p">}</span>
+                                                <span class="p">),</span>
+                                            <span class="s">&quot; &quot;</span><span class="p">,</span>
+                                            <span class="s">&quot;Sources JSON&quot;</span>
+                                            <span class="p">]</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">),</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                <span class="s">&#39;form&#39;</span><span class="p">,</span>
+                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">,</span>
+                                    <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="s">&#39;GET&#39;</span>
+                                    <span class="p">},</span>
+                                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;hidden&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;name&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">name</span>
+                                            <span class="p">}</span>
+                                        <span class="p">),</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+                                        <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;hidden&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;mode&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;info&#39;</span>
+                                            <span class="p">}</span>
+                                        <span class="p">),</span>
+                                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                        <span class="s">&#39;button&#39;</span><span class="p">,</span>
+                                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;submit&#39;</span>
+                                            <span class="p">},</span>
+                                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                                                <span class="s">&#39;img&#39;</span><span class="p">,</span>
+                                                <span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                                <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                                                    <span class="s">&#39;src&#39;</span><span class="p">:</span> <span class="s">&#39;css/icons/icons/gnome-mime-application-x-cd-image.png&#39;</span><span class="p">,</span>
+                                                    <span class="s">&#39;alt&#39;</span><span class="p">:</span> <span class="s">&quot;Info JSON&quot;</span>
+                                                    <span class="p">}</span>
+                                                <span class="p">),</span>
+                                            <span class="s">&quot; &quot;</span><span class="p">,</span>
+                                            <span class="s">&quot;Info JSON&quot;</span>
+                                            <span class="p">]</span>
+                                        <span class="p">)</span>
+                                    <span class="p">]</span>
+                                <span class="p">),</span>
+                             <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;colspan&#39;</span><span class="p">:</span> <span class="s">&#39;2&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">package_info</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">info_db</span><span class="p">,</span> <span class="n">latest_db</span><span class="p">,</span> <span class="n">tag_db</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Packages&quot;</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;th&#39;</span><span class="p">,</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="s">&quot;Sources&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                <span class="s">&#39;tr&#39;</span><span class="p">,</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;valign&#39;</span><span class="p">:</span><span class="s">&#39;top&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">package_file_list</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span>
+                        <span class="s">&#39;td&#39;</span><span class="p">,</span>
+                        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s">&#39;valign&#39;</span><span class="p">:</span><span class="s">&#39;top&#39;</span>
+                            <span class="p">},</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">package_sources_file_list</span><span class="p">(</span><span class="n">info_db</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">head</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">html_head</span><span class="p">(</span>
+        <span class="n">name</span>
+        <span class="p">)</span>
+
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">html</span><span class="p">(</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">head</span><span class="p">,</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="p">[</span><span class="n">table</span><span class="p">],</span>
+        <span class="n">body_module</span> <span class="o">=</span> <span class="s">&#39;aipsetup_server_basic&#39;</span><span class="p">,</span>
+        <span class="n">body_uid</span> <span class="o">=</span> <span class="s">&#39;body&#39;</span><span class="p">,</span>
+        <span class="n">body_css</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;body.css&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">xml</span><span class="o">.</span><span class="n">DictTreeToXMLRenderer</span><span class="p">(</span>
+        <span class="n">xml_indent_size</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">generate_css</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">generate_js</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">css_and_js_holder</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="p">)</span>
+
+    <span class="n">renderer</span><span class="o">.</span><span class="n">set_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+        <span class="n">pathed_css_path_renderer</span><span class="p">,</span>
+        <span class="n">pathed_js_path_renderer</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">renderer</span><span class="o">.</span><span class="n">log</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># TODO: rework this</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">renderer</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;Error&#39;</span>
+
+    <span class="k">del</span> <span class="n">renderer</span>
+
+<span class="c">#    print(pprint.pformat(tree, 4))</span>
+
+    <span class="k">return</span> <span class="n">txt</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

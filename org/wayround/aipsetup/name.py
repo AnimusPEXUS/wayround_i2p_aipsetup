@@ -39,6 +39,9 @@ DIFFICULT_NAMES = [
     'xf86-input-acecad-1.5.0.tar.bz2',
     'xf86-input-elo2300-1.1.2.tar.bz2'
     ]
+"""
+Testing tarbal names
+"""
 
 ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
     '.tar.gz',
@@ -51,14 +54,23 @@ ACCEPTABLE_SOURCE_NAME_EXTENSIONS = [
     '.tbz2',
     '.tbz'
     ]
+"""
+Acceptable source name extensions
+"""
 
 ASP_NAME_REGEXPS = {
     'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$',
     'aipsetup3':
         r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$'
     }
+"""
+Regexps for parsing package names
+"""
 
 ASP_NAME_REGEXPS_COMPILED = {}
+"""
+same as :data:`ASP_NAME_REGEXPS` but compiled
+"""
 
 for i in ASP_NAME_REGEXPS:
     logging.debug("Compiling `{}'".format(i))
@@ -120,7 +132,7 @@ def name_parse_name(opts, args):
         packagename = (
             org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(
                 filename,
-                mute = False
+                mute=False
                 )
             )
 
@@ -144,7 +156,7 @@ def name_parse_package(opts, args):
 
         filename = args[0]
 
-        p_re = package_name_parse(filename, mute = False)
+        p_re = package_name_parse(filename, mute=False)
 
         if p_re == None:
             ret = 2
@@ -180,7 +192,7 @@ def rm_ext_from_pkg_name(name):
 
     return ret
 
-def package_name_parse(filename, mute = True):
+def package_name_parse(filename, mute=True):
     """
     Parse package name
     """
@@ -287,7 +299,10 @@ def package_name_parse(filename, mute = True):
 
     return ret
 
-def find_possible_chared_versions_and_singles(name_sliced, separator = '.'):
+def find_possible_chared_versions_and_singles(name_sliced, separator='.'):
+    """
+    From sliced package name, return all possible versions
+    """
 
     versions = []
     logging.debug("(internal1) versions delimitered by `{}': {}".format(separator, versions))
@@ -337,13 +352,20 @@ def find_possible_chared_versions_and_singles(name_sliced, separator = '.'):
     return {'singles': singles, 'version': multiples}
 
 def find_all_versions_and_singles(name_sliced):
+    """
+    Find all versions using :func:`find_possible_chared_versions_and_singles`
+    function
+    """
     ret = dict()
     for i in ALL_DELIMITERS:
         ret[i] = find_possible_chared_versions_and_singles(name_sliced, i)
         logging.debug("versions delimitered by `{}': {}".format(i, ret[i]))
     return ret
 
-def find_most_possible_version(name_sliced, mute = False):
+def find_most_possible_version(name_sliced, mute=False):
+    """
+    Find most possible version in sliced package name
+    """
 
     ret = None
 
@@ -463,7 +485,7 @@ def find_most_possible_version(name_sliced, mute = False):
     return ret
 
 
-def source_name_parse_delicate(filename, mute = False):
+def source_name_parse_delicate(filename, mute=False):
 
     """
     Main source name parsing function
@@ -589,9 +611,9 @@ def source_name_parse_delicate(filename, mute = False):
 
 def source_name_parse(
     filename,
-    modify_info_file = False,
-    acceptable_version_number = None,
-    mute = False
+    modify_info_file=False,
+    acceptable_version_number=None,
+    mute=False
     ):
     """
     Parse source file name and do some more actions on success
@@ -600,10 +622,10 @@ def source_name_parse(
     return None.
 
     If this function succided, passeed version check and
-    `modify_info_file' is True -
+    \`modify_info_file\' is True -
     update infofile in info directory.
 
-    If this function succided, return dict:
+    If this function succided, return dict::
 
         ret = {
             'name': None,
@@ -623,7 +645,7 @@ def source_name_parse(
                 }
             }
 
-    NOTO: version numbers are always joined with `.'
+    .. NOTE:: version numbers are always joined with \`.\'
     """
 
     ret = source_name_parse_delicate(filename, mute)
@@ -671,7 +693,7 @@ def source_name_parse(
 
     return ret
 
-def _modify_info_file(src_filename_parsed, mute = True):
+def _modify_info_file(src_filename_parsed, mute=True):
     fn = os.path.join(
         org.wayround.aipsetup.config.config['info'],
         '{}.json'.format(src_filename_parsed['groups']['name'])
@@ -695,8 +717,13 @@ def _modify_info_file(src_filename_parsed, mute = True):
     return
 
 def parse_test():
+    """
+    Run parser on all difficult names (:data:`DIFFICULT_NAMES`) in test purposes
+    """
 
     for i in DIFFICULT_NAMES:
         logging.info("====== Testing parser on `{}' ======".format(i))
         if not isinstance(source_name_parse(i), dict):
             logging.error("Error parsing file name `{}' - parser not matched".format(i))
+
+    return

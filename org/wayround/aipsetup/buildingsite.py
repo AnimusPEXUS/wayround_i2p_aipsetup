@@ -1,7 +1,8 @@
 
 """
-Module for initiating building site. Later is required for farther package
-building.
+Module for initiating building site
+
+Later is required for farther package building.
 """
 
 import os
@@ -102,14 +103,14 @@ DIR_LIST = DIR_ALL
 
 def cli_name():
     """
-    Represents name for this module in CLI
+    aipsetup CLI interface part
     """
     return 'bsi'
 
 
 def exported_commands():
     """
-    This module commands for CLI interface
+    aipsetup CLI interface part
     """
     return {
         'init': buildingsite_init,
@@ -118,7 +119,7 @@ def exported_commands():
 
 def commands_order():
     """
-    This module commands order for CLI interface
+    aipsetup CLI interface part
     """
     return [
         'init',
@@ -129,8 +130,6 @@ def commands_order():
 def buildingsite_init(opts, args):
     """
     Initiate new building site dir
-
-    CLI command
 
     [DIRNAME]
 
@@ -154,8 +153,6 @@ def buildingsite_init(opts, args):
 def buildingsite_apply_info(opts, args):
     """
     Apply info to building dir
-
-    CLI command
 
     [DIRNAME [FILENAME]]
     """

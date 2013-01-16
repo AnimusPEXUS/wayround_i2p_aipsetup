@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.server &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.server</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">UNICORN distro serving related stuff</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">xml.sax.saxutils</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="c">#import cherrypy</span>
+<span class="c">#import cherrypy.lib</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.path</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.config</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgindex</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkginfo</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgtag</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.serverui</span>
+
+
+<span class="n">TEXT_PLAIN</span> <span class="o">=</span> <span class="s">&#39;text/plain; codepage=utf-8&#39;</span>
+<span class="n">APPLICATION_JSON</span> <span class="o">=</span> <span class="s">&#39;application/json; codepage=utf-8&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">edefault</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">traceback</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+<div class="viewcode-block" id="edefault"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.edefault">[docs]</a>
+    <span class="k">return</span> <span class="s">&quot;{}: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">message</span><span class="p">),</span>
+        <span class="n">status</span>
+        <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span></div>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.cli_name">[docs]</a>    <span class="k">return</span> <span class="s">&#39;srv&#39;</span>
+
+<span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span></div>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.exported_commands">[docs]</a>    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">&#39;start&#39;</span><span class="p">:</span> <span class="n">server_start_host</span>
+        <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.commands_order">[docs]</a>    <span class="k">return</span> <span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span>
+
+
+
+<span class="k">def</span> <span class="nf">server_start_host</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="server_start_host"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.server_start_host">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start serving UNICORN Web Host</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">start_host</span><span class="p">()</span>
+
+
+
+<span class="k">class</span> <span class="nc">Index</span><span class="p">:</span></div>
+<div class="viewcode-block" id="Index"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.Index">[docs]</a>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Index.index"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.Index.index">[docs]</a>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">serverui</span><span class="o">.</span><span class="n">page_index</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">txt</span>
+
+    <span class="n">index</span><span class="o">.</span><span class="n">exposed</span> <span class="o">=</span> <span class="bp">True</span></div>
+
+
+    <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Index.category"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.Index.category">[docs]</a>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;html&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;html&#39;</span><span class="p">,</span> <span class="s">&#39;json&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="s">&quot;Wrong `mode&#39; parameter&quot;</span><span class="p">)</span>
+
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;html&#39;</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">path</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+            <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">PackageIndex</span><span class="p">()</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">serverui</span><span class="o">.</span><span class="n">page_category</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;json&#39;</span><span class="p">:</span>
+
+            <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">PackageIndex</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">path</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+
+                <span class="n">pkgs</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_idname_dict</span><span class="p">(</span>
+                    <span class="bp">None</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+                <span class="n">cats</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_idname_dict</span><span class="p">(</span>
+                    <span class="bp">None</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cid</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_by_path</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+                <span class="n">pkgs</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_idname_dict</span><span class="p">(</span>
+                    <span class="n">cid</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+                <span class="n">cats</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_idname_dict</span><span class="p">(</span>
+                    <span class="n">cid</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">pkgs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">pkgs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_path_string</span><span class="p">(</span>
+                    <span class="n">i</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">cats</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">cats</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span>
+                    <span class="n">i</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span>
+                    <span class="p">)</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s">&#39;packages&#39;</span><span class="p">:</span> <span class="n">pkgs</span><span class="p">,</span>
+                    <span class="s">&#39;categories&#39;</span><span class="p">:</span> <span class="n">cats</span>
+                    <span class="p">},</span>
+                <span class="n">indent</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">sort_keys</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="p">)</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+
+            <span class="n">cherrypy</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">APPLICATION_JSON</span>
+
+        <span class="k">return</span> <span class="n">txt</span>
+
+    <span class="n">category</span><span class="o">.</span><span class="n">exposed</span> <span class="o">=</span> <span class="bp">True</span></div>
+
+    <span class="k">def</span> <span class="nf">package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;normal&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Index.package"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.Index.package">[docs]</a>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="s">&quot;Wrong `name&#39; parameter&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="s">&#39;sources&#39;</span><span class="p">,</span> <span class="s">&#39;packages&#39;</span><span class="p">,</span> <span class="s">&#39;info&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="s">&quot;Wrong `mode&#39; parameter&quot;</span><span class="p">)</span>
+
+        <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;normal&#39;</span><span class="p">:</span>
+
+            <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">PackageIndex</span><span class="p">()</span>
+            <span class="n">info_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">PackageInfo</span><span class="p">()</span>
+            <span class="n">latest_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">PackageLatest</span><span class="p">()</span>
+            <span class="n">tag_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgtag</span><span class="o">.</span><span class="n">package_tags_connection</span><span class="p">()</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">serverui</span><span class="o">.</span><span class="n">page_package</span><span class="p">(</span><span class="n">index_db</span><span class="p">,</span> <span class="n">info_db</span><span class="p">,</span> <span class="n">latest_db</span><span class="p">,</span> <span class="n">tag_db</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;packages&#39;</span><span class="p">:</span>
+
+            <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_files</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+
+            <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">cmp_to_key</span><span class="p">(</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">package_version_comparator</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;files_repository&#39;</span> <span class="o">+</span> <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+            <span class="n">cherrypy</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">APPLICATION_JSON</span>
+
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;sources&#39;</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_source_files</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+            <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;files_source&#39;</span> <span class="o">+</span> <span class="n">files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+            <span class="n">cherrypy</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">APPLICATION_JSON</span>
+
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;info&#39;</span><span class="p">:</span>
+
+            <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">PackageIndex</span><span class="p">()</span>
+            <span class="n">info_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">PackageInfo</span><span class="p">()</span>
+            <span class="n">latest_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">PackageLatest</span><span class="p">()</span>
+
+            <span class="n">r</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_package_info_record</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span> <span class="n">info_db</span> <span class="o">=</span> <span class="n">info_db</span><span class="p">)</span>
+
+            <span class="n">cid</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_category_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cid</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_category_path_string</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="s">&quot;&lt; Package not indexed! &gt;&quot;</span>
+
+
+            <span class="n">info</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+            <span class="n">info</span><span class="p">[</span><span class="s">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;tags&#39;</span><span class="p">])</span>
+            <span class="n">info</span><span class="p">[</span><span class="s">&#39;category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">category</span>
+            <span class="n">info</span><span class="p">[</span><span class="s">&#39;newest_pkg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">get_latest_pkg_from_record</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">,</span> <span class="n">latest_db</span> <span class="o">=</span> <span class="n">latest_db</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">info</span><span class="p">[</span><span class="s">&#39;newest_src&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">get_latest_src_from_record</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index_db</span> <span class="o">=</span> <span class="n">index_db</span><span class="p">,</span> <span class="n">latest_db</span> <span class="o">=</span> <span class="n">latest_db</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">txt</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+            <span class="n">cherrypy</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">APPLICATION_JSON</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">cherrypy</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">TEXT_PLAIN</span><span class="p">,</span> <span class="n">APPLICATION_JSON</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span> <span class="o">=</span> <span class="s">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="s">&#39;strict&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">txt</span>
+
+    <span class="n">package</span><span class="o">.</span><span class="n">exposed</span> <span class="o">=</span> <span class="bp">True</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">start_host</span><span class="p">():</span></div>
+<div class="viewcode-block" id="start_host"><a class="viewcode-back" href="../../../../server.html#org.wayround.aipsetup.server.start_host">[docs]</a>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">tpldir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+    <span class="n">serv_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;global&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;server.bind_addr&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;server_ip&#39;</span><span class="p">],</span>
+                                  <span class="nb">int</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;server_port&#39;</span><span class="p">])),</span>
+            <span class="c"># &#39;server.socket_port&#39; : port,</span>
+            <span class="s">&#39;global.server.thread_pool&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="s">&#39;error_page.default&#39;</span><span class="p">:</span> <span class="n">edefault</span>
+            <span class="p">},</span>
+        <span class="s">&#39;/files_info&#39;</span> <span class="p">:{</span>
+            <span class="s">&#39;tools.staticdir.on&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;tools.staticdir.dir&#39;</span> <span class="p">:</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;info&#39;</span><span class="p">]</span>
+            <span class="p">},</span>
+        <span class="s">&#39;/files_repository&#39;</span> <span class="p">:{</span>
+            <span class="s">&#39;tools.staticdir.on&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;tools.staticdir.dir&#39;</span> <span class="p">:</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">],</span>
+            <span class="s">&#39;tools.staticdir.content_types&#39;</span> <span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;asp&#39;</span><span class="p">:</span> <span class="s">&#39;binary&#39;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+        <span class="s">&#39;/files_source&#39;</span> <span class="p">:{</span>
+            <span class="s">&#39;tools.staticdir.on&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;tools.staticdir.dir&#39;</span> <span class="p">:</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">],</span>
+            <span class="s">&#39;tools.staticdir.content_types&#39;</span> <span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;gz&#39;</span><span class="p">:</span> <span class="s">&#39;binary&#39;</span><span class="p">,</span>
+                <span class="s">&#39;bz2&#39;</span><span class="p">:</span> <span class="s">&#39;binary&#39;</span><span class="p">,</span>
+                <span class="s">&#39;xz&#39;</span><span class="p">:</span> <span class="s">&#39;binary&#39;</span><span class="p">,</span>
+                <span class="s">&#39;7z&#39;</span><span class="p">:</span> <span class="s">&#39;binary&#39;</span><span class="p">,</span>
+                <span class="s">&#39;lzma&#39;</span><span class="p">:</span> <span class="s">&#39;binary&#39;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+         <span class="s">&#39;/css&#39;</span><span class="p">:</span> <span class="p">{</span>
+             <span class="s">&#39;tools.staticdir.on&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+             <span class="s">&#39;tools.staticdir.dir&#39;</span> <span class="p">:</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;server_files&#39;</span><span class="p">]</span>
+                    <span class="p">),</span>
+            <span class="s">&#39;tools.staticdir.content_types&#39;</span> <span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;css&#39;</span><span class="p">:</span> <span class="s">&#39;text/css; codepage=utf-8&#39;</span><span class="p">,</span>
+                <span class="p">}</span>
+             <span class="p">},</span>
+        <span class="c"># &#39;/js&#39;: {</span>
+        <span class="c">#     &#39;tools.staticdir.on&#39; : True,</span>
+        <span class="c">#     &#39;tools.staticdir.dir&#39; : PPWD + &#39;/js&#39;</span>
+        <span class="c">#     }</span>
+        <span class="p">}</span>
+
+
+    <span class="n">cherrypy</span><span class="o">.</span><span class="n">quickstart</span><span class="p">(</span>
+        <span class="n">Index</span><span class="p">(),</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;server_path&#39;</span><span class="p">],</span>
+        <span class="n">serv_config</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

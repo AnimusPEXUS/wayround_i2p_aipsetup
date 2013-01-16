@@ -1,0 +1,682 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.docbook &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.docbook</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Install docbook data into current (or selected) system</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">stat</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="c"># FIXME: look for new lxml releases supporting Python 3.3. UP: lxml already</span>
+<span class="c"># supports Py 3.3</span>
+<span class="kn">import</span> <span class="nn">lxml.etree</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.file</span>
+<span class="kn">import</span> <span class="nn">org.wayround.utils.archive</span>
+<span class="kn">import</span> <span class="nn">org.wayround.utils.path</span>
+
+
+<span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.cli_name">[docs]</a>    <span class="k">return</span> <span class="s">&#39;docbook&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span></div>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.exported_commands">[docs]</a>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">&#39;install&#39;</span><span class="p">:</span> <span class="n">docbook_install_files</span>
+        <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.commands_order">[docs]</a>    <span class="k">return</span> <span class="p">[</span><span class="s">&#39;install&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">docbook_install_files</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="docbook_install_files"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.docbook_install_files">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analyze supplied archives and install them if they are correct</span>
+
+<span class="sd">    [-b=DIR] [FILE1] [FILE2] .. [FILEn]</span>
+
+<span class="sd">    -b - Change basedir. Default is `/&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s">&quot;docbook-xml zip or docbook-xsl-*.tar* archive filenames &quot;</span> <span class="o">+</span>
+            <span class="s">&quot;reaquired as arguments&quot;</span>
+            <span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span>
+
+        <span class="k">if</span> <span class="s">&#39;-b&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">base_dir</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s">&#39;-b&#39;</span><span class="p">]</span>
+
+        <span class="n">install</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">base_dir</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+
+<span class="k">def</span> <span class="nf">set_correct_modes</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span></div>
+<div class="viewcode-block" id="set_correct_modes"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.set_correct_modes">[docs]</a>
+    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">each</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">each</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">))</span>
+            <span class="c"># print fd</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span>
+                     <span class="n">stat</span><span class="o">.</span><span class="n">S_IRUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXUSR</span> <span class="o">|</span>
+                     <span class="n">stat</span><span class="o">.</span><span class="n">S_IRGRP</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXGRP</span> <span class="o">|</span>
+                     <span class="n">stat</span><span class="o">.</span><span class="n">S_IROTH</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXOTH</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">each</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">each</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="p">))</span>
+            <span class="c"># print fd</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span>
+                     <span class="n">stat</span><span class="o">.</span><span class="n">S_IRUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IWUSR</span> <span class="o">|</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IXUSR</span> <span class="o">|</span>
+                     <span class="n">stat</span><span class="o">.</span><span class="n">S_IRGRP</span> <span class="o">|</span>
+                     <span class="n">stat</span><span class="o">.</span><span class="n">S_IROTH</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">set_correct_owners</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span></div>
+<div class="viewcode-block" id="set_correct_owners"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.set_correct_owners">[docs]</a>
+    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">each</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">each</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">))</span>
+            <span class="c"># print fd</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">each</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">each</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="p">))</span>
+            <span class="c"># print fd</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chown</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+
+<span class="k">def</span> <span class="nf">prepare_base</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">base_dir_etc_xml</span><span class="p">,</span> <span class="n">base_dir_share_docbook</span><span class="p">):</span></div>
+<div class="viewcode-block" id="prepare_base"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.prepare_base">[docs]</a>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Preparing base dir: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_dir</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">base_dir_etc_xml</span><span class="p">,</span> <span class="n">base_dir_share_docbook</span><span class="p">]:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;   checking: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;      not a dir {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">unpack_tar</span><span class="p">(</span><span class="n">docbook_xsl_tar</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">):</span></div>
+<div class="viewcode-block" id="unpack_tar"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.unpack_tar">[docs]</a>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">archive</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span>
+        <span class="n">docbook_xsl_tar</span><span class="p">,</span> <span class="n">dir_name</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">r</span>
+
+
+<span class="k">def</span> <span class="nf">unpack_zip</span><span class="p">(</span><span class="n">docbook_zip</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">base_dir_etc_xml</span><span class="p">,</span> <span class="n">base_dir_share_docbook</span><span class="p">):</span></div>
+<div class="viewcode-block" id="unpack_zip"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.unpack_zip">[docs]</a>    <span class="c"># TODO: use aipsetup.utils</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">docbook_zip</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong zip file&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">10</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">docbook_zip</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong zip file&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">20</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">docbook_zip</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.zip&#39;</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Not a zip file: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">docbook_zip</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">30</span>
+
+    <span class="n">docbook_no_zip</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">docbook_no_zip</span> <span class="o">=</span> <span class="n">docbook_zip</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong zip file&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">40</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">docbook_no_zip</span><span class="p">[</span><span class="n">docbook_no_zip</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong zip file version&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">50</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong zip file version&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">60</span>
+
+    <span class="n">base_dir_share_docbook_dtd</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">base_dir_share_docbook</span><span class="p">,</span>
+            <span class="s">&#39;xml-dtd-&#39;</span> <span class="o">+</span> <span class="n">version</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;making dtd dir: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_dir_share_docbook_dtd</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">base_dir_share_docbook_dtd</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">base_dir_share_docbook_dtd</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s">&quot;   can not create dtd dir: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">base_dir_share_docbook_dtd</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">70</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;   unzipping...&quot;</span><span class="p">)</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">archive</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span>
+        <span class="n">docbook_zip</span><span class="p">,</span> <span class="n">base_dir_share_docbook_dtd</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;   error unzipping {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">docbook_zip</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">80</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;   ok&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">base_dir_share_docbook_dtd</span>
+
+
+
+<span class="k">def</span> <span class="nf">prepare_catalog</span><span class="p">(</span><span class="n">base_dir_etc_xml_catalog</span><span class="p">):</span></div>
+<div class="viewcode-block" id="prepare_catalog"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.prepare_catalog">[docs]</a>
+    <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Checking for catalog {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_dir_etc_xml_catalog</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">base_dir_etc_xml_catalog</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;   creating new&quot;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--create&#39;</span><span class="p">,</span> <span class="n">base_dir_etc_xml_catalog</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;   already exists&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">r</span>
+
+
+<span class="k">def</span> <span class="nf">import_dtd_to_docbook</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">base_dir_etc_xml_catalog_docbook</span><span class="p">,</span> <span class="n">dtd_dir</span><span class="p">):</span></div>
+<div class="viewcode-block" id="import_dtd_to_docbook"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.import_dtd_to_docbook">[docs]</a>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s">&quot;   Importing into docbook: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dtd_dir</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">specific_cat_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dtd_dir</span><span class="p">,</span> <span class="s">&#39;catalog.xml&#39;</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">specific_cat_file</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;   {} not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">specific_cat_file</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">10</span>
+
+    <span class="n">tmp_cat_lxml</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tmp_cat_lxml</span> <span class="o">=</span> <span class="n">lxml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">specific_cat_file</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t parse catalog file&quot;</span><span class="p">)</span>
+
+    <span class="n">tmp_cat_lxml_ns</span> <span class="o">=</span> <span class="s">&#39;{{{}}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tmp_cat_lxml</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span><span class="o">.</span><span class="n">nsmap</span><span class="p">[</span><span class="bp">None</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;public&#39;</span><span class="p">,</span> <span class="s">&#39;system&#39;</span><span class="p">]:</span>
+
+        <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">tmp_cat_lxml</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">tmp_cat_lxml_ns</span> <span class="o">+</span> <span class="n">tag</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">each</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">tmp_cat_lxml_ns</span> <span class="o">+</span> <span class="n">tag</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s">&quot;      {tag} - {Id}&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s">&#39;Id&#39;</span><span class="p">:</span> <span class="n">each</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span> <span class="o">+</span> <span class="s">&#39;Id&#39;</span><span class="p">),</span>
+                            <span class="s">&#39;tag&#39;</span><span class="p">:</span> <span class="n">tag</span>
+                            <span class="p">}</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">src_uri</span> <span class="o">=</span> <span class="n">each</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;uri&#39;</span><span class="p">)</span>
+                <span class="n">dst_uri</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+                <span class="k">if</span> <span class="n">src_uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;http://&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">src_uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;https://&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">src_uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;file://&#39;</span><span class="p">):</span>
+                    <span class="n">dst_uri</span> <span class="o">=</span> <span class="n">src_uri</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">t_joined_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dtd_dir</span><span class="p">,</span> <span class="n">src_uri</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">t_joined_path</span><span class="p">):</span>
+                        <span class="n">dst_uri</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">t_joined_path</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">dst_uri</span> <span class="o">=</span> <span class="n">src_uri</span>
+
+                <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span>
+                        <span class="n">tag</span><span class="p">,</span>
+                        <span class="n">each</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span> <span class="o">+</span> <span class="s">&#39;Id&#39;</span><span class="p">),</span>
+                        <span class="s">&#39;file://{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dst_uri</span><span class="p">),</span>
+                        <span class="n">base_dir_etc_xml_catalog_docbook</span><span class="p">,</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;         error&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">import_docbook_to_catalog</span><span class="p">(</span><span class="n">base_dir_etc_xml_catalog</span><span class="p">):</span></div>
+<div class="viewcode-block" id="import_docbook_to_catalog"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.import_docbook_to_catalog">[docs]</a>
+    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="p">[</span>
+            <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span> <span class="s">&#39;delegatePublic&#39;</span><span class="p">,</span>
+            <span class="s">&#39;-//OASIS//ENTITIES DocBook XML&#39;</span><span class="p">,</span>
+            <span class="s">&#39;file:///etc/xml/docbook&#39;</span>
+            <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span> <span class="s">&#39;delegatePublic&#39;</span><span class="p">,</span>
+            <span class="s">&#39;-//OASIS//DTD DocBook XML&#39;</span><span class="p">,</span>
+            <span class="s">&#39;file:///etc/xml/docbook&#39;</span>
+            <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span> <span class="s">&#39;delegateSystem&#39;</span><span class="p">,</span>
+            <span class="s">&#39;http://www.oasis-open.org/docbook/&#39;</span><span class="p">,</span>
+            <span class="s">&#39;file:///etc/xml/docbook&#39;</span>
+            <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span> <span class="s">&#39;delegateURI&#39;</span><span class="p">,</span>
+            <span class="s">&#39;http://www.oasis-open.org/docbook/&#39;</span><span class="p">,</span>
+            <span class="s">&#39;file:///etc/xml/docbook&#39;</span>
+            <span class="p">]</span>
+        <span class="p">]:</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">each</span> <span class="o">+</span> <span class="p">[</span><span class="n">base_dir_etc_xml_catalog</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">():</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;error doing {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">each</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">install_docbook_zips</span><span class="p">(</span></div>
+<div class="viewcode-block" id="install_docbook_zips"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.install_docbook_zips">[docs]</a>    <span class="n">docbook_zip_list</span><span class="p">,</span>
+    <span class="n">base_dir</span><span class="p">,</span>
+    <span class="n">base_dir_etc_xml</span><span class="p">,</span>
+    <span class="n">base_dir_etc_xml_catalog</span><span class="p">,</span>
+    <span class="n">base_dir_etc_xml_catalog_docbook</span><span class="p">,</span>
+    <span class="n">base_dir_share_docbook</span>
+    <span class="p">):</span>
+
+    <span class="n">dtd_dirs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">docbook_zip_list</span><span class="p">:</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">unpack_zip</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">base_dir_etc_xml</span><span class="p">,</span>
+                       <span class="n">base_dir_share_docbook</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;error processing file {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">continue</span>
+
+        <span class="n">dtd_dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="n">dtd_dirs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dtd_dirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;no DTD directories created. Nothing to do farther...&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">10</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Installing DTDs:&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dtd_dirs</span><span class="p">:</span>
+        <span class="n">import_dtd_to_docbook</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="p">,</span> <span class="n">base_dir_etc_xml_catalog_docbook</span><span class="p">,</span> <span class="n">i</span>
+            <span class="p">)</span>
+
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Installing docbook into catalog&quot;</span><span class="p">)</span>
+    <span class="n">import_docbook_to_catalog</span><span class="p">(</span><span class="n">base_dir_etc_xml_catalog</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+
+<span class="k">def</span> <span class="nf">install_docbook_xsl_zips</span><span class="p">(</span></div>
+<div class="viewcode-block" id="install_docbook_xsl_zips"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.install_docbook_xsl_zips">[docs]</a>    <span class="n">docbook_xsl_zip_list</span><span class="p">,</span>
+    <span class="n">base_dir</span><span class="p">,</span>
+    <span class="n">base_dir_etc_xml_catalog</span><span class="p">,</span>
+    <span class="n">base_dir_share_docbook</span>
+    <span class="p">):</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Installing XSLs&quot;</span><span class="p">)</span>
+
+    <span class="n">installed_versions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">docbook_xsl_zip</span> <span class="ow">in</span> <span class="n">docbook_xsl_zip_list</span><span class="p">:</span>
+
+        <span class="n">bn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">docbook_xsl_zip</span><span class="p">)</span>
+        <span class="n">r_res</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;(docbook-xsl-(\d\.?)*)tar\.(.*)&#39;</span><span class="p">,</span> <span class="n">bn</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">r_res</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+
+
+        <span class="n">base_dir_share_docbook_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">base_dir_share_docbook</span><span class="p">,</span> <span class="n">name</span>
+            <span class="p">)</span>
+
+        <span class="n">base_dir_share_docbook_xsl_stylesheets</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">base_dir_share_docbook</span><span class="p">,</span>
+                <span class="s">&#39;xsl-stylesheets-{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s">&quot;Installing XSL {xsl_name} into {xsl_dest}&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s">&#39;xsl_name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="s">&#39;xsl_dest&#39;</span><span class="p">:</span> <span class="n">base_dir_share_docbook_xsl_stylesheets</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;   preparing dirs&quot;</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">remove_if_exists</span><span class="p">(</span>
+                    <span class="n">base_dir_share_docbook_name</span>
+                    <span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;      error&quot;</span><span class="p">)</span>
+            <span class="c"># return 10</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">remove_if_exists</span><span class="p">(</span>
+                    <span class="n">base_dir_share_docbook_xsl_stylesheets</span>
+                    <span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;      error&quot;</span><span class="p">)</span>
+            <span class="c"># return 20</span>
+            <span class="k">continue</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Extracting into {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_dir_share_docbook_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">unpack_tar</span><span class="p">(</span><span class="n">docbook_xsl_zip</span><span class="p">,</span> <span class="n">base_dir_share_docbook</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;   Extraction error&quot;</span><span class="p">)</span>
+
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;extracted&quot;</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s">&quot;renaming {one} to {another}&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s">&#39;one&#39;</span><span class="p">:</span>     <span class="n">base_dir_share_docbook_name</span><span class="p">,</span>
+                    <span class="s">&#39;another&#39;</span><span class="p">:</span> <span class="n">base_dir_share_docbook_xsl_stylesheets</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">base_dir_share_docbook_name</span><span class="p">,</span>
+                      <span class="n">base_dir_share_docbook_xsl_stylesheets</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="s">&quot;Can&#39;t rename file `{}&#39; to `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">base_dir_share_docbook_name</span><span class="p">,</span>
+                    <span class="n">base_dir_share_docbook_xsl_stylesheets</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="c"># return 30</span>
+            <span class="k">continue</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;XSL extraction complited&quot;</span><span class="p">)</span>
+
+        <span class="n">installed_versions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+    <span class="n">installed_versions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">version</span><span class="o">.</span><span class="n">standard_comparison</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Installed XSL: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">installed_versions</span><span class="p">)))</span>
+
+
+    <span class="n">iv_l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">installed_versions</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">iv_l</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;no versions&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">40</span>
+
+    <span class="n">current</span> <span class="o">=</span> <span class="n">installed_versions</span><span class="p">[</span><span class="n">iv_l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Presuming current XSL: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current</span><span class="p">))</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Updating XML catalog&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">installed_versions</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span> <span class="s">&#39;rewriteSystem&#39;</span><span class="p">,</span>
+                <span class="s">&#39;http://docbook.sourceforge.net/release/xsl/&#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s">&#39;/usr/share/xml/docbook/xsl-stylesheets-&#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                <span class="n">base_dir_etc_xml_catalog</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s">&#39;xmlcatalog&#39;</span> <span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span> <span class="p">,</span> <span class="s">&#39;rewriteURI&#39;</span><span class="p">,</span>
+                <span class="s">&#39;http://docbook.sourceforge.net/release/xsl/&#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s">&#39;/usr/share/xml/docbook/xsl-stylesheets-&#39;</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                 <span class="n">base_dir_etc_xml_catalog</span>
+                 <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span> <span class="p">,</span> <span class="s">&#39;--add&#39;</span> <span class="p">,</span> <span class="s">&#39;rewriteSystem&#39;</span><span class="p">,</span>
+            <span class="s">&#39;http://docbook.sourceforge.net/release/xsl/current&#39;</span><span class="p">,</span>
+            <span class="s">&#39;/usr/share/xml/docbook/xsl-stylesheets-&#39;</span> <span class="o">+</span> <span class="n">current</span><span class="p">,</span>
+            <span class="n">base_dir_etc_xml_catalog</span>
+            <span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s">&#39;xmlcatalog&#39;</span><span class="p">,</span> <span class="s">&#39;--noout&#39;</span><span class="p">,</span> <span class="s">&#39;--add&#39;</span><span class="p">,</span> <span class="s">&#39;rewriteURI&#39;</span><span class="p">,</span>
+            <span class="s">&#39;http://docbook.sourceforge.net/release/xsl/current&#39;</span><span class="p">,</span>
+            <span class="s">&#39;/usr/share/xml/docbook/xsl-stylesheets-&#39;</span> <span class="o">+</span> <span class="n">current</span><span class="p">,</span>
+            <span class="n">base_dir_etc_xml_catalog</span>
+        <span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">install</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">):</span></div>
+<div class="viewcode-block" id="install"><a class="viewcode-back" href="../../../../docbook.html#org.wayround.aipsetup.docbook.install">[docs]</a>
+    <span class="n">docbook_zip_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">docbook_xsl_zip_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;docbook-xml-(\d\.?)*zip&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">i</span><span class="p">)):</span>
+            <span class="n">docbook_zip_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;docbook-xsl-(\d\.?)*tar\.(.*)&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">i</span><span class="p">)):</span>
+            <span class="n">docbook_xsl_zip_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;-w- {} is not a correct package&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="n">docbook_zip_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">docbook_xsl_zip_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;XMLs: {};&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docbook_zip_list</span><span class="p">)))</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;XSLs: {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docbook_xsl_zip_list</span><span class="p">)))</span>
+
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span>
+
+    <span class="n">base_dir_etc_xml</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s">&#39;etc&#39;</span><span class="p">,</span> <span class="s">&#39;xml&#39;</span><span class="p">)</span>
+
+    <span class="n">base_dir_etc_xml_catalog</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir_etc_xml</span><span class="p">,</span> <span class="s">&#39;catalog&#39;</span><span class="p">)</span>
+
+    <span class="n">base_dir_etc_xml_catalog_docbook</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir_etc_xml</span><span class="p">,</span> <span class="s">&#39;docbook&#39;</span><span class="p">)</span>
+
+    <span class="n">base_dir_share_docbook</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s">&#39;usr&#39;</span><span class="p">,</span> <span class="s">&#39;share&#39;</span><span class="p">,</span> <span class="s">&#39;xml&#39;</span><span class="p">,</span> <span class="s">&#39;docbook&#39;</span><span class="p">)</span>
+
+    <span class="c"># leave next comment line for visibility</span>
+    <span class="c"># base_dir_share_docbook_xsl_stylesheets = \</span>
+    <span class="c">#     os.path.join(base_dir_share_docbook, &#39;xsl-stylesheets&#39;)</span>
+
+
+
+    <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">prepare_base</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">base_dir_etc_xml</span><span class="p">,</span> <span class="n">base_dir_share_docbook</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Error preparing base dir&quot;</span><span class="p">)</span>
+        <span class="nb">exit</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">base_dir_etc_xml_catalog_docbook</span><span class="p">,</span> <span class="n">base_dir_etc_xml_catalog</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">prepare_catalog</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Error creating catalog&quot;</span><span class="p">)</span>
+            <span class="nb">exit</span> <span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">install_docbook_zips</span><span class="p">(</span><span class="n">docbook_zip_list</span><span class="p">,</span>
+                                 <span class="n">base_dir</span><span class="p">,</span>
+                                 <span class="n">base_dir_etc_xml</span><span class="p">,</span>
+                                 <span class="n">base_dir_etc_xml_catalog</span><span class="p">,</span>
+                                 <span class="n">base_dir_etc_xml_catalog_docbook</span><span class="p">,</span>
+                                 <span class="n">base_dir_share_docbook</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Error installing XML&quot;</span><span class="p">)</span>
+        <span class="nb">exit</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="mi">0</span> <span class="o">!=</span> <span class="n">install_docbook_xsl_zips</span><span class="p">(</span><span class="n">docbook_xsl_zip_list</span><span class="p">,</span>
+                                     <span class="n">base_dir</span><span class="p">,</span>
+                                     <span class="n">base_dir_etc_xml_catalog</span><span class="p">,</span>
+                                     <span class="n">base_dir_share_docbook</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Error installing XSL&quot;</span><span class="p">)</span>
+        <span class="nb">exit</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Setting correct modes&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">set_correct_modes</span><span class="p">(</span><span class="n">base_dir_etc_xml</span><span class="p">)</span>
+        <span class="n">set_correct_modes</span><span class="p">(</span><span class="n">base_dir_share_docbook</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t set correct file modes&quot;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Setting correct owners&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">set_correct_owners</span><span class="p">(</span><span class="n">base_dir_etc_xml</span><span class="p">)</span>
+        <span class="n">set_correct_owners</span><span class="p">(</span><span class="n">base_dir_share_docbook</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t set correct file owner&quot;</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;All operations complited. Bye!&quot;</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="mi">0</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

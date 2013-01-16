@@ -1,4 +1,10 @@
 
+"""
+Global aipsetup database connection facility
+
+Allows minimize DB access requests
+"""
+
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest
@@ -11,6 +17,9 @@ _tag_db_connection = None
 _src_db_connection = None
 
 def info_db():
+    """
+    Returns info database connection creating it if needed
+    """
 
     global _info_db_connection
 
@@ -20,6 +29,9 @@ def info_db():
     return _info_db_connection
 
 def index_db():
+    """
+    Returns index database connection creating it if needed
+    """
 
     global _index_db_connection
 
@@ -29,6 +41,9 @@ def index_db():
     return _index_db_connection
 
 def latest_db():
+    """
+    Returns latests database connection creating it if needed
+    """
 
     global _latest_db_connection
 
@@ -38,6 +53,9 @@ def latest_db():
     return _latest_db_connection
 
 def tag_db():
+    """
+    Returns tag database connection creating it if needed
+    """
 
     global _tag_db_connection
 
@@ -47,6 +65,9 @@ def tag_db():
     return _tag_db_connection
 
 def src_db():
+    """
+    Returns sources database connection creating it if needed
+    """
 
     global _src_db_connection
 
@@ -56,6 +77,9 @@ def src_db():
     return _src_db_connection
 
 def close_all():
+    """
+    Closes all open DB connections
+    """
     global _info_db_connection
     global _index_db_connection
     global _latest_db_connection
@@ -77,3 +101,4 @@ def close_all():
     if _src_db_connection:
         _src_db_connection.close()
 
+    return

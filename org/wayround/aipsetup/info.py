@@ -1,6 +1,6 @@
 
 """
-XML info files manipulations.
+Module to work with package info files on disk
 
 Print, read, write, fix info files.
 """
@@ -68,6 +68,9 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # status)
     auto_newest_pkg=True,
     )
+"""
+Package info skeleton.
+"""
 
 #pkg_info_file_template = Template(text="""\
 #<package>
@@ -95,7 +98,11 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
 #</package>
 #""")
 
+
 def exported_commands():
+    """
+    aipsetup CLI interface related function
+    """
     return {
         'list': info_list_files,
         'edit': info_edit_file,
@@ -105,6 +112,9 @@ def exported_commands():
         }
 
 def commands_order():
+    """
+    aipsetup CLI interface related function
+    """
     return [
         'editor',
         'list',
@@ -114,6 +124,9 @@ def commands_order():
         ]
 
 def cli_name():
+    """
+    aipsetup CLI interface related function
+    """
     return 'i'
 
 def info_list_files(opts, args, typ='info', mask='*.json'):
@@ -125,7 +138,7 @@ def info_list_files(opts, args, typ='info', mask='*.json'):
     One argument is allowed - FILEMASK, which defaults to '*.json'
 
     example:
-    aipsetup info list '*doc*.json'
+    aipsetup info list '\*doc\*.json'
     """
 
     args_l = len(args)
@@ -332,6 +345,12 @@ def _find_list(tree, tag, field):
 
 def is_info_dicts_equal(d1, d2):
 
+    """
+    Compare two package info structures
+
+    :rtype: ``bool``
+    """
+
     ret = True
 
     for i in [
@@ -356,6 +375,11 @@ def is_info_dicts_equal(d1, d2):
     return ret
 
 def read_from_file(name):
+    """
+    Read package info structure from named file. Return dict. On error return
+    ``None``
+    """
+
     ret = None
 
     txt = ''
@@ -391,6 +415,9 @@ def read_from_file(name):
     return ret
 
 def write_to_file(name, struct):
+    """
+    Write package info structure into named file
+    """
 
     ret = 0
 

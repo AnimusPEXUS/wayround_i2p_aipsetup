@@ -1,0 +1,795 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.name &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.name</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module with package names parsing facilities</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.list</span>
+<span class="kn">import</span> <span class="nn">org.wayround.utils.tag</span>
+<span class="kn">import</span> <span class="nn">org.wayround.utils.text</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.config</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.info</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkginfo</span>
+
+<span class="c">#Difficult name examples:</span>
+<span class="n">DIFFICULT_NAMES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;GeSHi-1.0.2-beta-1.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Perl-Dist-Strawberry-BuildPerl-5101-2.11_10.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;bind-9.9.1-P2.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;boost_1_25_1.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;dahdi-linux-complete-2.1.0.3+2.1.0.2.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;dhcp-4.1.2rc1.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;dvd+rw-tools-5.5.4.3.4.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;lynx2.8.7rel.1.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;name.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;ogre_src_v1-8-1.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;openssl-0.9.7a.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;org.apache.felix.ipojo.manipulator-1.8.4-project.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;pkcs11-helper-1.05.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;qca-pkcs11-0.1-20070425.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;tcl8.4.19-src.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;wmirq-0.1-source.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;xc-1.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;xf86-input-acecad-1.5.0.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;xf86-input-elo2300-1.1.2.tar.bz2&#39;</span>
+    <span class="p">]</span>
+
+<span class="n">ACCEPTABLE_SOURCE_NAME_EXTENSIONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;.tar.gz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.tar.bz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.tar.xz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.tar.lzma&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.zip&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.7z&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.tgz&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.tbz2&#39;</span><span class="p">,</span>
+    <span class="s">&#39;.tbz&#39;</span>
+    <span class="p">]</span>
+
+<span class="n">ASP_NAME_REGEXPS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;aipsetup2&#39;</span><span class="p">:</span> <span class="s">r&#39;^(?P&lt;name&gt;.+?)-(?P&lt;version&gt;(\d+\.??)+)-(?P&lt;timestamp&gt;\d{14})-(?P&lt;host&gt;.*)$&#39;</span><span class="p">,</span>
+    <span class="s">&#39;aipsetup3&#39;</span><span class="p">:</span>
+        <span class="s">r&#39;^\((?P&lt;name&gt;.+?)\)-\((?P&lt;version&gt;(\d+\.??)+)\)-\((?P&lt;status&gt;.*?)\)-\((?P&lt;timestamp&gt;\d{8}\.\d{6}\.\d{7})\)-\((?P&lt;host&gt;.*)\)$&#39;</span>
+    <span class="p">}</span>
+
+<span class="n">ASP_NAME_REGEXPS_COMPILED</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ASP_NAME_REGEXPS</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Compiling `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">ASP_NAME_REGEXPS_COMPILED</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ASP_NAME_REGEXPS</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+<span class="k">del</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+<span class="c">#VERSION_DELIMITERS = [&#39;.&#39;, &#39;_&#39;]</span>
+<span class="c">#STATUS_DELIMITERS = [&#39;.&#39;, &#39;_&#39;, &#39;-&#39;, &#39;+&#39;, &#39;~&#39;]</span>
+<span class="c">#ALL_DELIMITERS = list(set(VERSION_DELIMITERS + STATUS_DELIMITERS))</span>
+<span class="n">ALL_DELIMITERS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="s">&#39;~&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.cli_name">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Internally used by aipsetup</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;n&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span></div>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.exported_commands">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Internally used by aipsetup</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">&#39;parse&#39;</span><span class="p">:</span> <span class="n">name_parse_name</span><span class="p">,</span>
+        <span class="s">&#39;parse_test&#39;</span><span class="p">:</span> <span class="n">name_parse_test</span><span class="p">,</span>
+        <span class="s">&#39;pparse&#39;</span><span class="p">:</span> <span class="n">name_parse_package</span>
+        <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.commands_order">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Internally used by aipsetup</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="s">&#39;parse&#39;</span><span class="p">,</span>
+        <span class="s">&#39;pparse&#39;</span><span class="p">,</span>
+        <span class="s">&#39;parse_test&#39;</span>
+        <span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">name_parse_name</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="name_parse_name"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.name_parse_name">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse name</span>
+
+<span class="sd">    [-w] NAME</span>
+
+<span class="sd">    if -w is set - change &lt;name&gt;.json info file nametype value to</span>
+<span class="sd">    result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;File name required&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">packagename</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_package_name_by_tarball_filename</span><span class="p">(</span>
+                <span class="n">filename</span><span class="p">,</span>
+                <span class="n">mute</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Package name is: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">packagename</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">name_parse_package</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="name_parse_package"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.name_parse_package">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse package name</span>
+
+<span class="sd">    NAME</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;File name required&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">p_re</span> <span class="o">=</span> <span class="n">package_name_parse</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mute</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p_re</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">name_parse_test</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">opts</span><span class="p">):</span></div>
+<div class="viewcode-block" id="name_parse_test"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.name_parse_test">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test Name Parsing Facilities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parse_test</span><span class="p">()</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">rm_ext_from_pkg_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
+<div class="viewcode-block" id="rm_ext_from_pkg_name"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.rm_ext_from_pkg_name">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove extension from package name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.tar.xz&#39;</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.asp&#39;</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.xz&#39;</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">package_name_parse</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mute</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span></div>
+<div class="viewcode-block" id="package_name_parse"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.package_name_parse">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse package name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Parsing package file name {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">rm_ext_from_pkg_name</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ASP_NAME_REGEXPS</span><span class="p">:</span>
+        <span class="n">re_res</span> <span class="o">=</span> <span class="n">ASP_NAME_REGEXPS_COMPILED</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">re_res</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;re&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+                <span class="s">&#39;groups&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">re_res</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">),</span>
+                    <span class="s">&#39;version&#39;</span><span class="p">:</span> <span class="n">re_res</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;version&#39;</span><span class="p">),</span>
+                    <span class="s">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">re_res</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;timestamp&#39;</span><span class="p">),</span>
+                    <span class="s">&#39;host&#39;</span><span class="p">:</span> <span class="n">re_res</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;host&#39;</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="s">&#39;re&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;aipsetup3&#39;</span><span class="p">:</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">re_res</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;status&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="s">&#39;status&#39;</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">]</span>
+                <span class="ow">or</span> <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">None</span>
+                <span class="ow">or</span> <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;None&#39;</span>
+                <span class="p">):</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">slice_string_to_sections</span><span class="p">(</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">list_strip</span><span class="p">(</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">],</span>
+                    <span class="n">ALL_DELIMITERS</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">remove_all_values</span><span class="p">(</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list&#39;</span><span class="p">],</span>
+               <span class="n">ALL_DELIMITERS</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">slice_string_to_sections</span><span class="p">(</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">list_strip</span><span class="p">(</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">],</span>
+                    <span class="n">ALL_DELIMITERS</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">remove_all_values</span><span class="p">(</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">],</span>
+                <span class="n">ALL_DELIMITERS</span>
+                <span class="p">)</span>
+
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">ret</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">]:</span>
+            <span class="n">groups</span> <span class="o">+=</span> <span class="s">&quot;       {group}: {value}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s">&#39;group&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                    <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="nb">repr</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Match `{filename}&#39;</span><span class="se">\n</span><span class="s">{groups}&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">({</span>
+            <span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+            <span class="s">&#39;groups&#39;</span><span class="p">:</span> <span class="n">groups</span>
+            <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">mute</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Parsing package file name {} result</span><span class="se">\n</span><span class="s">{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">find_possible_chared_versions_and_singles</span><span class="p">(</span><span class="n">name_sliced</span><span class="p">,</span> <span class="n">separator</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="p">):</span></div>
+<div class="viewcode-block" id="find_possible_chared_versions_and_singles"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.find_possible_chared_versions_and_singles">[docs]</a>
+    <span class="n">versions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;(internal1) versions delimitered by `{}&#39;: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">separator</span><span class="p">,</span> <span class="n">versions</span><span class="p">))</span>
+
+    <span class="n">version_started</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">version_ended</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">name_sliced</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">isdecimal</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">version_started</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">version_started</span> <span class="o">=</span> <span class="n">index</span>
+
+            <span class="n">version_ended</span> <span class="o">=</span> <span class="n">index</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">version_started</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">separator</span><span class="p">:</span>
+                    <span class="n">versions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">version_started</span><span class="p">,</span> <span class="n">version_ended</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,))</span>
+                    <span class="n">version_started</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+    <span class="k">if</span> <span class="n">version_started</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">versions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">version_started</span><span class="p">,</span> <span class="n">version_ended</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,))</span>
+        <span class="n">version_started</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;(internal2) versions delimitered by `{}&#39;: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">separator</span><span class="p">,</span> <span class="n">versions</span><span class="p">))</span>
+
+    <span class="n">singles</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">multiples</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">singles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">multiples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Programming error&quot;</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;(internal3) versions delimitered by `{}&#39;: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">separator</span><span class="p">,</span> <span class="n">versions</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;singles&#39;</span><span class="p">:</span> <span class="n">singles</span><span class="p">,</span> <span class="s">&#39;version&#39;</span><span class="p">:</span> <span class="n">multiples</span><span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">find_all_versions_and_singles</span><span class="p">(</span><span class="n">name_sliced</span><span class="p">):</span></div>
+<div class="viewcode-block" id="find_all_versions_and_singles"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.find_all_versions_and_singles">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ALL_DELIMITERS</span><span class="p">:</span>
+        <span class="n">ret</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_possible_chared_versions_and_singles</span><span class="p">(</span><span class="n">name_sliced</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;versions delimitered by `{}&#39;: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">find_most_possible_version</span><span class="p">(</span><span class="n">name_sliced</span><span class="p">,</span> <span class="n">mute</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span></div>
+<div class="viewcode-block" id="find_most_possible_version"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.find_most_possible_version">[docs]</a>
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">possible_versions_and_singles_grouped_by_delimeter</span> <span class="o">=</span> \
+        <span class="n">find_all_versions_and_singles</span><span class="p">(</span><span class="n">name_sliced</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s">&quot;possible_versions_and_singles_grouped_by_delimeter: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="nb">repr</span><span class="p">(</span>
+                 <span class="n">possible_versions_and_singles_grouped_by_delimeter</span>
+                 <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">possible_versions_grouped_by_delimeter</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">possible_singles_grouped_by_delimeter</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ALL_DELIMITERS</span><span class="p">:</span>
+
+        <span class="n">possible_versions_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">possible_versions_and_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]</span>
+
+        <span class="n">possible_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">possible_versions_and_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;singles&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ALL_DELIMITERS</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+            <span class="k">break</span>
+
+        <span class="n">l_possible_versions_grouped_by_delimeter_i</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">possible_versions_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span>  <span class="n">l_possible_versions_grouped_by_delimeter_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">elif</span> <span class="n">l_possible_versions_grouped_by_delimeter_i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">possible_versions_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">current_delimiter_group</span> <span class="o">=</span> <span class="n">possible_versions_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">maximum_length</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">current_delimiter_group</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">l</span> <span class="o">&gt;</span> <span class="n">maximum_length</span><span class="p">:</span>
+                    <span class="n">maximum_length</span> <span class="o">=</span> <span class="n">l</span>
+
+            <span class="k">if</span> <span class="n">maximum_length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Version not found in group `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">mute</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">lists_to_compare</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;lists_to_compare: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">lists_to_compare</span><span class="p">)))</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">current_delimiter_group</span><span class="p">:</span>
+                    <span class="n">l</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="n">maximum_length</span><span class="p">:</span>
+                        <span class="n">lists_to_compare</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+                <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lists_to_compare</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">elif</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">lists_to_compare</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="n">most_possible_version2</span> <span class="o">=</span> <span class="n">lists_to_compare</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">lists_to_compare</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">most_possible_version2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="n">most_possible_version2</span> <span class="o">=</span> <span class="n">j</span>
+
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;most_possible_version2: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">most_possible_version2</span><span class="p">)))</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">most_possible_version2</span>
+                    <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ALL_DELIMITERS</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                <span class="k">break</span>
+
+            <span class="n">l_possible_singles_grouped_by_delimeter_i</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">possible_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span>  <span class="n">l_possible_singles_grouped_by_delimeter_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="n">l_possible_singles_grouped_by_delimeter_i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">possible_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">most_possible_version3</span> <span class="o">=</span> <span class="n">possible_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">possible_singles_grouped_by_delimeter</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">most_possible_version3</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="n">most_possible_version3</span> <span class="o">=</span> <span class="n">j</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;most_possible_version3: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">most_possible_version3</span><span class="p">)))</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">most_possible_version3</span>
+                <span class="k">break</span>
+
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;most_possible_version: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">ret</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">source_name_parse_delicate</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mute</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span></div>
+<div class="viewcode-block" id="source_name_parse_delicate"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.source_name_parse_delicate">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main source name parsing function</span>
+
+<span class="sd">    Do not use this directly, use source_name_parse() instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Parsing source file name {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">extension</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ACCEPTABLE_SOURCE_NAME_EXTENSIONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">extension</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Wrong extension&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mute</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">without_extension</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">extension</span><span class="p">)]</span>
+
+        <span class="n">name_sliced</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">slice_string_to_sections</span><span class="p">(</span><span class="n">without_extension</span><span class="p">)</span>
+
+        <span class="n">most_possible_version</span> <span class="o">=</span> <span class="n">find_most_possible_version</span><span class="p">(</span><span class="n">name_sliced</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">most_possible_version</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s">&#39;groups&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s">&#39;name&#39;</span>              <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;extension&#39;</span>         <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+
+                    <span class="s">&#39;version&#39;</span>           <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;version_list_dirty&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;version_list&#39;</span>      <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;version_dirty&#39;</span>     <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+
+                    <span class="s">&#39;status&#39;</span>            <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;status_list_dirty&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;status_dirty&#39;</span>      <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="s">&#39;status_list&#39;</span>       <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">name_sliced</span><span class="p">[:</span><span class="n">most_possible_version</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ALL_DELIMITERS</span><span class="p">))</span>
+
+            <span class="c"># version operations</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">name_sliced</span><span class="p">[</span><span class="n">most_possible_version</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">most_possible_version</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">remove_all_values</span><span class="p">(</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list&#39;</span><span class="p">],</span>
+                <span class="n">ALL_DELIMITERS</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version_list_dirty&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+
+            <span class="c"># status operations</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">name_sliced</span><span class="p">[</span><span class="n">most_possible_version</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">list_strip</span><span class="p">(</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">],</span>
+                    <span class="n">ALL_DELIMITERS</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+
+
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">remove_all_values</span><span class="p">(</span>
+                <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">],</span>
+                <span class="n">ALL_DELIMITERS</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">list_strip</span><span class="p">(</span>
+                    <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">],</span>
+                    <span class="n">ALL_DELIMITERS</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list&#39;</span><span class="p">])</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_dirty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;status_list_dirty&#39;</span><span class="p">])</span>
+
+            <span class="c"># extension</span>
+
+            <span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;extension&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extension</span>
+
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">source_name_parse</span><span class="p">(</span></div>
+<div class="viewcode-block" id="source_name_parse"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.source_name_parse">[docs]</a>    <span class="n">filename</span><span class="p">,</span>
+    <span class="n">modify_info_file</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="n">acceptable_version_number</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="n">mute</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse source file name and do some more actions on success</span>
+
+<span class="sd">    If this function succeeded but not passed version check -</span>
+<span class="sd">    return None.</span>
+
+<span class="sd">    If this function succided, passeed version check and</span>
+<span class="sd">    `modify_info_file&#39; is True -</span>
+<span class="sd">    update infofile in info directory.</span>
+
+<span class="sd">    If this function succided, return dict:</span>
+
+<span class="sd">        ret = {</span>
+<span class="sd">            &#39;name&#39;: None,</span>
+<span class="sd">            &#39;groups&#39;: {</span>
+<span class="sd">                &#39;name&#39;              : None,</span>
+<span class="sd">                &#39;extension&#39;         : None,</span>
+
+<span class="sd">                &#39;version&#39;           : None,</span>
+<span class="sd">                &#39;version_list_dirty&#39;: None,</span>
+<span class="sd">                &#39;version_list&#39;      : None,</span>
+<span class="sd">                &#39;version_dirty&#39;     : None,</span>
+
+<span class="sd">                &#39;status&#39;            : None,</span>
+<span class="sd">                &#39;status_list_dirty&#39; : None,</span>
+<span class="sd">                &#39;status_dirty&#39;      : None,</span>
+<span class="sd">                &#39;status_list&#39;       : None,</span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+
+<span class="sd">    NOTO: version numbers are always joined with `.&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">source_name_parse_delicate</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
+
+    <span class="n">fnmatched</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">acceptable_version_number</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;version&#39;</span><span class="p">],</span> <span class="n">acceptable_version_number</span><span class="p">):</span>
+            <span class="n">fnmatched</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+    <span class="k">if</span> <span class="n">acceptable_version_number</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">acceptable_version_number</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fnmatched</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;No match `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">groups</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">groups_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">groups_names</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">groups_names</span><span class="p">:</span>
+                <span class="n">groups</span> <span class="o">+=</span> <span class="s">&quot;       {group}: {value}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s">&#39;group&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                        <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="nb">repr</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+
+            <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Match `{filename}&#39;</span><span class="se">\n</span><span class="s">{groups}&quot;</span><span class="o">.</span><span class="n">format_map</span><span class="p">({</span>
+                <span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+                <span class="s">&#39;groups&#39;</span><span class="p">:</span> <span class="n">groups</span>
+                <span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">mute</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ret</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">modify_info_file</span><span class="p">:</span>
+            <span class="n">_modify_info_file</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">_modify_info_file</span><span class="p">(</span><span class="n">src_filename_parsed</span><span class="p">,</span> <span class="n">mute</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span></div>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;info&#39;</span><span class="p">],</span>
+        <span class="s">&#39;{}.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_filename_parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;Updating info file {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mute</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">read_from_file</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Error reading file. Creating new. {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">SAMPLE_PACKAGE_INFO_STRUCTURE</span>
+
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">write_to_file</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+<span class="k">def</span> <span class="nf">parse_test</span><span class="p">():</span>
+<div class="viewcode-block" id="parse_test"><a class="viewcode-back" href="../../../../name.html#org.wayround.aipsetup.name.parse_test">[docs]</a>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">DIFFICULT_NAMES</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;====== Testing parser on `{}&#39; ======&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_name_parse</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Error parsing file name `{}&#39; - parser not matched&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

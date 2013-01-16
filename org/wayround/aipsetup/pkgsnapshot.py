@@ -11,6 +11,7 @@ import re
 
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.package
+import org.wayround.aipsetup.sysclean
 
 import org.wayround.utils.time
 
@@ -58,7 +59,7 @@ def create_snapshot():
 
     content = org.wayround.aipsetup.package.list_installed_packages_and_asps()
 
-    if org.wayround.aipsetup.package.check_list_of_installed_packages_and_asps(content) != 0:
+    if org.wayround.aipsetup.sysclean.check_list_of_installed_packages_and_asps(content) != 0:
         logging.error("Snapshot with errors can't be created")
         ret = 1
 

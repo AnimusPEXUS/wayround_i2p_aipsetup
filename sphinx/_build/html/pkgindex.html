@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pkgindex Module &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-org.wayround.aipsetup.pkgindex">
+<span id="pkgindex-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">pkgindex</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.pkgindex" title="Permalink to this headline">¶</a></h1>
+<p>Facility for indexing and analyzing sources and packages repository</p>
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex">
+<em class="property">class </em><tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">PackageIndex</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#PackageIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">org.wayround.utils.db.BasicDB</span></tt></p>
+<p>Main package index DB handling class</p>
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Base">
+<em class="property">class </em><tt class="descname">Base</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Base.metadata">
+<tt class="descname">metadata</tt><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Base.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Category">
+<em class="property">class </em><tt class="descclassname">PackageIndex.</tt><tt class="descname">Category</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#PackageIndex.Category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.Base</span></tt></p>
+<p>Class for package categories</p>
+<p>There can be categories with same names</p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Category.cid">
+<tt class="descname">cid</tt><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Category.cid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Category.name">
+<tt class="descname">name</tt><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Category.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Category.parent_cid">
+<tt class="descname">parent_cid</tt><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Category.parent_cid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Package">
+<em class="property">class </em><tt class="descclassname">PackageIndex.</tt><tt class="descname">Package</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#PackageIndex.Package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Package" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.Base</span></tt></p>
+<p>Package class</p>
+<p>There can be many packages with same name, but this
+is only for tucking down duplicates and eradicate
+them.</p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Package.cid">
+<tt class="descname">cid</tt><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Package.cid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Package.name">
+<tt class="descname">name</tt><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Package.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkgindex.PackageIndex.Package.pid">
+<tt class="descname">pid</tt><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.PackageIndex.Package.pid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.cleanup_repo">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">cleanup_repo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#cleanup_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.cleanup_repo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.cleanup_repo_package">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">cleanup_repo_package</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#cleanup_repo_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.cleanup_repo_package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.cleanup_repo_package_pack">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">cleanup_repo_package_pack</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#cleanup_repo_package_pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.cleanup_repo_package_pack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.create_required_dirs_at_package">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">create_required_dirs_at_package</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#create_required_dirs_at_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.create_required_dirs_at_package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.detect_package_collisions">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">detect_package_collisions</tt><big>(</big><em>category_locations</em>, <em>package_locations</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#detect_package_collisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.detect_package_collisions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_by_id">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_by_id</tt><big>(</big><em>cid</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_by_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_by_path">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_by_path</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_by_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_by_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_id_list">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_id_list</tt><big>(</big><em>parent_cid=0</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_id_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_id_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_idname_dict">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_idname_dict</tt><big>(</big><em>parent_cid=0</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_idname_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_idname_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_name_list">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_name_list</tt><big>(</big><em>parent_cid=0</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_name_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_name_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_parent_by_id">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_parent_by_id</tt><big>(</big><em>cid</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_parent_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_parent_by_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_path">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_path</tt><big>(</big><em>cid</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_category_path_string">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_category_path_string</tt><big>(</big><em>cid_or_name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_category_path_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_category_path_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_by_id">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_by_id</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_by_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_category">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_category</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_category" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_category_by_name">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_category_by_name</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_category_by_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_category_by_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_files">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_files</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_id">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_id</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_id_list">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_id_list</tt><big>(</big><em>cid=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_id_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_id_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_idname_dict">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_idname_dict</tt><big>(</big><em>cid=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_idname_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_idname_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_name_list">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_name_list</tt><big>(</big><em>cid=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_name_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_name_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_path">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_path</tt><big>(</big><em>pid_or_name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_path_string">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_path_string</tt><big>(</big><em>pid_or_name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_path_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_path_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_package_source_files">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_source_files</tt><big>(</big><em>name</em>, <em>filtered=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_source_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_source_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_sources_connection">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_sources_connection</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_sources_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_sources_connection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.index_sources">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">index_sources</tt><big>(</big><em>subdir_name</em>, <em>force_reindex=False</em>, <em>first_delete_found=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#index_sources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.index_sources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.index_sources_directory">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">index_sources_directory</tt><big>(</big><em>root_dir_name</em>, <em>sub_dir_name</em>, <em>acceptable_endings=None</em>, <em>force_reindex=False</em>, <em>first_delete_found=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#index_sources_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.index_sources_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.is_repo_package">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">is_repo_package</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#is_repo_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.is_repo_package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.join_pkg_path">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">join_pkg_path</tt><big>(</big><em>pkg_path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#join_pkg_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.join_pkg_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.save_cats_and_packs_to_db">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">save_cats_and_packs_to_db</tt><big>(</big><em>category_locations</em>, <em>package_locations</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#save_cats_and_packs_to_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.save_cats_and_packs_to_db" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">scan_repo_for_pkg_and_cat</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#scan_repo_for_pkg_and_cat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pkgindex.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

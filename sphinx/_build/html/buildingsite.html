@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>buildingsite Module &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-org.wayround.aipsetup.buildingsite">
+<span id="buildingsite-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">buildingsite</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.buildingsite" title="Permalink to this headline">¶</a></h1>
+<p>Module for initiating building site</p>
+<p>Later is required for farther package building.</p>
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_ALL">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_ALL</tt><em class="property"> = ['00.TARBALL', '01.SOURCE', '02.PATCHES', '03.BUILDING', '04.DESTDIR', '05.BUILD_LOGS', '06.LISTS', '07.TEMP']</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_ALL" title="Permalink to this definition">¶</a></dt>
+<dd><p>All package directories list in proper order</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_BUILDING">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_BUILDING</tt><em class="property"> = '03.BUILDING'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_BUILDING" title="Permalink to this definition">¶</a></dt>
+<dd><p>Here package are build. not packed.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_BUILD_LOGS</tt><em class="property"> = '05.BUILD_LOGS'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Various building logs are stored here. Packed.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_DESTDIR">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_DESTDIR</tt><em class="property"> = '04.DESTDIR'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_DESTDIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Primary root of files for package. those will be installed into target system.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_LIST">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_LIST</tt><em class="property"> = ['00.TARBALL', '01.SOURCE', '02.PATCHES', '03.BUILDING', '04.DESTDIR', '05.BUILD_LOGS', '06.LISTS', '07.TEMP']</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_LIST" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#org.wayround.aipsetup.buildingsite.DIR_ALL" title="org.wayround.aipsetup.buildingsite.DIR_ALL"><tt class="xref py py-data docutils literal"><span class="pre">DIR_ALL</span></tt></a> copy</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_LISTS">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_LISTS</tt><em class="property"> = '06.LISTS'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_LISTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Various lists stored here. Packed.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_PATCHES">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_PATCHES</tt><em class="property"> = '02.PATCHES'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_PATCHES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patches stored here. packed.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_SOURCE">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_SOURCE</tt><em class="property"> = '01.SOURCE'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_SOURCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directory for detarred sources, which used for building package. This is not
+packed into final package, as we already have original tarballs.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_TARBALL">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_TARBALL</tt><em class="property"> = '00.TARBALL'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_TARBALL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directory for storing tarballs used in package building. contents is packed into
+resulting package as it is requirements of most good licenses</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.buildingsite.DIR_TEMP">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">DIR_TEMP</tt><em class="property"> = '07.TEMP'</em><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.DIR_TEMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporary directory used by aipsetup while building package. Throwed away.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">apply_constitution_on_buildingsite</tt><big>(</big><em>dirname</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#apply_constitution_on_buildingsite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies constitution on building site package info</p>
+<p>It is typically used in conjunction with functions
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_constitution_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>
+in  this order by function <a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_info" title="org.wayround.aipsetup.buildingsite.apply_info"><tt class="xref py py-func docutils literal"><span class="pre">apply_info()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.apply_info">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">apply_info</tt><big>(</big><em>dirname='.'</em>, <em>src_file_name=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#apply_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.apply_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply package information to building site</p>
+<p>It is typically used in conjunction with functions
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_constitution_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>
+in  this order by function <a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_info" title="org.wayround.aipsetup.buildingsite.apply_info"><tt class="xref py py-func docutils literal"><span class="pre">apply_info()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">apply_pkg_info_on_buildingsite</tt><big>(</big><em>dirname</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#apply_pkg_info_on_buildingsite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies package information on building site package info</p>
+<p>It is typically used in conjunction with functions
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_constitution_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>
+in  this order by function <a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_info" title="org.wayround.aipsetup.buildingsite.apply_info"><tt class="xref py py-func docutils literal"><span class="pre">apply_info()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.apply_pkg_nameinfo_on_buildingsite">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">apply_pkg_nameinfo_on_buildingsite</tt><big>(</big><em>dirname</em>, <em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#apply_pkg_nameinfo_on_buildingsite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.apply_pkg_nameinfo_on_buildingsite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies package name parsing result on building site package info</p>
+<p>It is typically used in conjunction with functions
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_constitution_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_constitution_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>,
+<a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite" title="org.wayround.aipsetup.buildingsite.apply_pkg_info_on_buildingsite"><tt class="xref py py-func docutils literal"><span class="pre">apply_pkg_info_on_buildingsite()</span></tt></a>
+in  this order by function <a class="reference internal" href="#org.wayround.aipsetup.buildingsite.apply_info" title="org.wayround.aipsetup.buildingsite.apply_info"><tt class="xref py py-func docutils literal"><span class="pre">apply_info()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.buildingsite_apply_info">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">buildingsite_apply_info</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#buildingsite_apply_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.buildingsite_apply_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply info to building dir</p>
+<p>[DIRNAME [FILENAME]]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.buildingsite_init">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">buildingsite_init</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#buildingsite_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.buildingsite_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiate new building site dir</p>
+<p>[DIRNAME]</p>
+<p>One optional argument is dir in which initiation need to be done.
+Default is current dir</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.cli_name">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">cli_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#cli_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.cli_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface part</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.commands_order">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">commands_order</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#commands_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.commands_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface part</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.exported_commands">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">exported_commands</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#exported_commands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.exported_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface part</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_BUILDING">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_BUILDING</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_BUILDING"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_BUILDING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_BUILD_LOGS</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_BUILD_LOGS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_DESTDIR">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_DESTDIR</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_DESTDIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_DESTDIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_LISTS">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_LISTS</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_LISTS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_LISTS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_PATCHES">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_PATCHES</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_PATCHES"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_PATCHES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_SOURCE">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_SOURCE</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_SOURCE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_SOURCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_TARBALL">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_TARBALL</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_TARBALL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_TARBALL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.getDIR_TEMP">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">getDIR_TEMP</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#getDIR_TEMP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.getDIR_TEMP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.get_pkg_main_tarball">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">get_pkg_main_tarball</tt><big>(</big><em>dirname</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#get_pkg_main_tarball"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.get_pkg_main_tarball" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get main package tarball in case there are many of them.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.init">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">init</tt><big>(</big><em>path='build'</em>, <em>files=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiates building site path for farther package build.</p>
+<p>Files in named directory are not deleted if it is already exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">returns 0 if no errors</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.isWdDirRestricted">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">isWdDirRestricted</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#isWdDirRestricted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.isWdDirRestricted" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a routine to check supplied path is it suitable to be a
+building site.</p>
+<p>List of forbidden path beginnings:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span>
+<span class="s">&#39;/bin&#39;</span><span class="p">,</span> <span class="s">&#39;/boot&#39;</span> <span class="p">,</span> <span class="s">&#39;/daemons&#39;</span><span class="p">,</span>
+<span class="s">&#39;/dev&#39;</span><span class="p">,</span> <span class="s">&#39;/etc&#39;</span><span class="p">,</span> <span class="s">&#39;/lib&#39;</span><span class="p">,</span> <span class="s">&#39;/proc&#39;</span><span class="p">,</span>
+<span class="s">&#39;/sbin&#39;</span><span class="p">,</span> <span class="s">&#39;/sys&#39;</span><span class="p">,</span>
+<span class="s">&#39;/usr&#39;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>This dirs ar directly forbidden, but subdirs are allowed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="s">&#39;/opt&#39;</span><span class="p">,</span> <span class="s">&#39;/var&#39;</span><span class="p">,</span> <span class="s">&#39;/&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; path to directory</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><tt class="docutils literal"><span class="pre">True</span></tt> if restricted. <tt class="docutils literal"><span class="pre">False</span></tt> if not restricted.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.read_package_info">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">read_package_info</tt><big>(</big><em>path</em>, <em>ret_on_error=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#read_package_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.read_package_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads package info applied to building site</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="docutils literal"><span class="pre">ret_on_error</span></tt> parameter contents on error (<tt class="docutils literal"><span class="pre">None</span></tt> by default)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.set_pkg_main_tarball">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">set_pkg_main_tarball</tt><big>(</big><em>dirname</em>, <em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#set_pkg_main_tarball"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.set_pkg_main_tarball" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set main package tarball in case there are many of them.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildingsite.write_package_info">
+<tt class="descclassname">org.wayround.aipsetup.buildingsite.</tt><tt class="descname">write_package_info</tt><big>(</big><em>path</em>, <em>info</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildingsite.html#write_package_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildingsite.write_package_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes given info to given building site</p>
+<p>Raises exceptions in case of errors</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/buildingsite.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

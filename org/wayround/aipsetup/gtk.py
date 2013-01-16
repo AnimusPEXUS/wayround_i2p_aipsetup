@@ -7,6 +7,9 @@ import org.wayround.utils.gtk
 _gtk_session = None
 
 def start_session():
+    """
+    Start GTK session
+    """
 
     from gi.repository import Gtk
 
@@ -32,7 +35,9 @@ def start_session():
         _gtk_session = None
 
 def stop_session():
-
+    """
+    Stop GTK session
+    """
 
     global _gtk_session
 
@@ -43,6 +48,13 @@ def stop_session():
         Gtk.main_quit()
 
 class MainWindow:
+    """
+    Overal aipsetup system window
+
+    Exists ensure everything is Ok
+
+    This window created and shown on :func:`start_session`
+    """
 
     def __init__(self):
 

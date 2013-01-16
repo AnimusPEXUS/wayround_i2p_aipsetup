@@ -37,8 +37,14 @@ FUNCTIONS_LIST = [
     'make_checksums_for_building_site',
     'pack_buildingsite'
     ]
+"""
+aipsetup CLI related functionality
+"""
 
 FUNCTIONS_SET = frozenset(FUNCTIONS_LIST)
+"""
+aipsetup CLI related functionality
+"""
 
 def help_texts(name):
 
@@ -116,9 +122,15 @@ Makes final packaging and creates UNICORN software package
     return ret
 
 def cli_name():
+    """
+    aipsetup CLI related functionality
+    """
     return 'pk'
 
 def exported_commands():
+    """
+    aipsetup CLI related functionality
+    """
 
     commands = {}
 
@@ -130,6 +142,9 @@ def exported_commands():
     return commands
 
 def commands_order():
+    """
+    aipsetup CLI related functionality
+    """
     return ['complete'] + FUNCTIONS_LIST
 
 def _pack_x(opts, args, action):
@@ -188,7 +203,15 @@ def pack_complete(opts, args):
 
 def destdir_verify_paths_correctness(buildingsite):
 
-    # TODO: Maybe this function need to be rewriten to be more
+    """
+    Check for forbidden files in destdir
+
+    Files ``['bin', 'sbin', 'lib', 'lib64', 'mnt']`` are forbidden to be in
+    DESTDIR root. This is a rule for aipsetup based distributions. Except is
+    special cases, when this function is avoided.
+    """
+
+    # TODO: Maybe this function need to be rewritten to be more
     #       flexible
 
     ret = 0
@@ -214,21 +237,19 @@ def destdir_verify_paths_correctness(buildingsite):
                 )
             ret = 1
 
-    # if ret == 0:
-    #     for i in [
-    #         'bin',
-    #         'lib',
-    #         'sbin',
-    #         'lib64'
-    #         ]:
-
-    #         p1 = destdir + os.path.sep + i
-
-    #         os.symlink('usr'+os.path.sep+i, p1)
-
     return ret
 
 def destdir_set_modes(buildingsite):
+
+    """
+    Ensure all files (and dirs) in DESTDIR have ``0o755`` mode.
+
+    If You interested in defferent modes for files after package installation,
+    read about post_install.py (script, which need to be placed in package and
+    will be executed after package installation)
+
+    .. TODO: link to info about post_install.py
+    """
 
     buildingsite = org.wayround.utils.path.abspath(buildingsite)
 
@@ -259,6 +280,9 @@ def destdir_set_modes(buildingsite):
 
 
 def destdir_checksum(buildingsite):
+    """
+    Create checksums for DESTDIR contents
+    """
 
     ret = 0
 
@@ -296,6 +320,9 @@ def destdir_checksum(buildingsite):
 
 
 def destdir_filelist(buildingsite):
+    """
+    Create file list for DESTDIR contents
+    """
 
     ret = 0
 
@@ -348,7 +375,13 @@ def destdir_filelist(buildingsite):
 
     return ret
 
+
 def destdir_deps_c(buildingsite):
+
+    """
+    Create dependency tree listing for ELFs in DESTDIR
+    """
+
     ret = 0
     logging.info("Generating C deps lists")
 
@@ -652,6 +685,10 @@ def make_checksums_for_building_site(buildingsite):
 
 def pack_buildingsite(buildingsite):
 
+    """
+    Create new package from building site and place it under ../pack deirectory
+    """
+
     ret = 0
 
     buildingsite = org.wayround.utils.path.abspath(buildingsite)
@@ -730,6 +767,10 @@ def pack_buildingsite(buildingsite):
 
 def complete(dirname):
 
+    """
+    Do all specter of pack operations on building site
+    """
+
     ret = 0
 
     for i in [
@@ -760,9 +801,20 @@ def get_list_of_items_to_pack(building_site):
 
     ret = []
 
-    ret.append(building_site + os.path.sep + DIR_DESTDIR + '.tar.xz')
-    ret.append(building_site + os.path.sep + DIR_PATCHES + '.tar.xz')
-    ret.append(building_site + os.path.sep + DIR_BUILD_LOGS + '.tar.xz')
+    ret.append(
+        building_site + os.path.sep +
+        org.wayround.aipsetup.buildingsite.DIR_DESTDIR + '.tar.xz'
+        )
+
+    ret.append(
+        building_site + os.path.sep +
+        org.wayround.aipsetup.buildingsite.DIR_PATCHES + '.tar.xz'
+        )
+
+    ret.append(
+        building_site + os.path.sep +
+        org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS + '.tar.xz'
+        )
 
     ret.append(building_site + os.path.sep + 'package_info.json')
     ret.append(building_site + os.path.sep + 'package.sha512')
@@ -771,16 +823,26 @@ def get_list_of_items_to_pack(building_site):
     if os.path.isfile(post_install_script):
         ret.append(post_install_script)
 
-    tarballs = os.listdir(getDIR_TARBALL(building_site))
+    tarballs = os.listdir(
+        org.wayround.aipsetup.buildingsite.getDIR_TARBALL(building_site)
+        )
 
     for i in tarballs:
-        ret.append(building_site + os.path.sep + DIR_TARBALL + os.path.sep + i)
+        ret.append(
+            building_site + os.path.sep +
+            org.wayround.aipsetup.buildingsite.DIR_TARBALL + os.path.sep + i
+            )
 
 
-    lists = os.listdir(getDIR_LISTS(building_site))
+    lists = os.listdir(
+        org.wayround.aipsetup.buildingsite.getDIR_LISTS(building_site)
+        )
 
     for i in lists:
         if i.endswith('.xz'):
-            ret.append(building_site + os.path.sep + DIR_LISTS + os.path.sep + i)
+            ret.append(
+                building_site + os.path.sep +
+                org.wayround.aipsetup.buildingsite.DIR_LISTS + os.path.sep + i
+                )
 
     return ret

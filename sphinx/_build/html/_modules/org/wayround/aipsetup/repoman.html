@@ -1,0 +1,497 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.repoman &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.repoman</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Repository manipulations CLI module</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.path</span>
+
+
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgdeps</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgindex</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkginfo</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkglatest</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgtag</span>
+
+
+
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.exported_commands">[docs]</a><span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">&#39;scan&#39;</span><span class="p">:</span> <span class="n">repoman_scan_creating_templates</span><span class="p">,</span>
+        <span class="s">&#39;scan_only&#39;</span><span class="p">:</span> <span class="n">repoman_scan_repo_for_pkg_and_cat</span><span class="p">,</span>
+        <span class="s">&#39;index_src&#39;</span><span class="p">:</span> <span class="n">repoman_index_sources</span><span class="p">,</span>
+        <span class="s">&#39;latests&#39;</span><span class="p">:</span> <span class="n">repoman_latest_editor</span><span class="p">,</span>
+        <span class="s">&#39;missing&#39;</span><span class="p">:</span> <span class="n">repoman_find_missing_pkg_info_records</span><span class="p">,</span>
+        <span class="s">&#39;outdated&#39;</span><span class="p">:</span> <span class="n">repoman_find_outdated_pkg_info_records</span><span class="p">,</span>
+        <span class="s">&#39;update&#39;</span><span class="p">:</span> <span class="n">repoman_update_outdated_pkg_info_records</span><span class="p">,</span>
+        <span class="s">&#39;delete&#39;</span><span class="p">:</span> <span class="n">repoman_delete_pkg_info_records</span><span class="p">,</span>
+        <span class="s">&#39;backup&#39;</span><span class="p">:</span> <span class="n">repoman_backup_package_info_to_filesystem</span><span class="p">,</span>
+        <span class="s">&#39;load&#39;</span><span class="p">:</span> <span class="n">repoman_load_package_info_from_filesystem</span><span class="p">,</span>
+        <span class="s">&#39;list&#39;</span><span class="p">:</span> <span class="n">repoman_list_pkg_info_records</span><span class="p">,</span>
+        <span class="s">&#39;print&#39;</span><span class="p">:</span> <span class="n">repoman_print_pkg_info_record</span><span class="p">,</span>
+        <span class="s">&#39;loadt&#39;</span><span class="p">:</span> <span class="n">repoman_load_tags</span><span class="p">,</span>
+        <span class="s">&#39;savet&#39;</span><span class="p">:</span> <span class="n">repoman_save_tags</span><span class="p">,</span>
+        <span class="s">&#39;clean&#39;</span><span class="p">:</span> <span class="n">repoman_cleanup_repo</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.commands_order">[docs]</a><span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="s">&#39;scan&#39;</span><span class="p">,</span>
+        <span class="s">&#39;scan_only&#39;</span><span class="p">,</span>
+        <span class="s">&#39;index_src&#39;</span><span class="p">,</span>
+        <span class="s">&#39;missing&#39;</span><span class="p">,</span>
+        <span class="s">&#39;outdated&#39;</span><span class="p">,</span>
+        <span class="s">&#39;update&#39;</span><span class="p">,</span>
+        <span class="s">&#39;delete&#39;</span><span class="p">,</span>
+        <span class="s">&#39;backup&#39;</span><span class="p">,</span>
+        <span class="s">&#39;load&#39;</span><span class="p">,</span>
+        <span class="s">&#39;list&#39;</span><span class="p">,</span>
+        <span class="s">&#39;print&#39;</span><span class="p">,</span>
+        <span class="s">&#39;latests&#39;</span><span class="p">,</span>
+        <span class="s">&#39;loadt&#39;</span><span class="p">,</span>
+        <span class="s">&#39;savet&#39;</span><span class="p">,</span>
+        <span class="s">&#39;clean&#39;</span>
+        <span class="p">]</span>
+</div>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.cli_name">[docs]</a><span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">&#39;repo&#39;</span>
+</div>
+<div class="viewcode-block" id="repoman_scan_creating_templates"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_scan_creating_templates">[docs]</a><span class="k">def</span> <span class="nf">repoman_scan_creating_templates</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform scan and templates creation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">repoman_scan_repo_for_pkg_and_cat</span><span class="p">(</span>
+        <span class="n">opts</span><span class="o">=</span><span class="p">{},</span> <span class="n">args</span><span class="o">=</span><span class="p">[]</span>
+        <span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">repoman_find_missing_pkg_info_records</span><span class="p">(</span>
+            <span class="n">opts</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;-t&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">},</span> <span class="n">args</span><span class="o">=</span><span class="p">[]</span>
+            <span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">repoman_load_package_info_from_filesystem</span><span class="p">(</span>
+                <span class="n">opts</span><span class="o">=</span><span class="p">{},</span> <span class="n">args</span><span class="o">=</span><span class="p">[]</span>
+                <span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+
+                <span class="n">ret</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+</div>
+<div class="viewcode-block" id="repoman_scan_repo_for_pkg_and_cat"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_scan_repo_for_pkg_and_cat">[docs]</a><span class="k">def</span> <span class="nf">repoman_scan_repo_for_pkg_and_cat</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scan repository and save it&#39;s categories and packages indexes</span>
+<span class="sd">    to database</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">scan_repo_for_pkg_and_cat</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res2</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">detect_package_collisions</span><span class="p">(</span>
+            <span class="n">res</span><span class="p">[</span><span class="s">&#39;cats&#39;</span><span class="p">],</span>
+            <span class="n">res</span><span class="p">[</span><span class="s">&#39;packs&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">res2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">res3</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">save_cats_and_packs_to_db</span><span class="p">(</span>
+                <span class="n">res</span><span class="p">[</span><span class="s">&#39;cats&#39;</span><span class="p">],</span>
+                <span class="n">res</span><span class="p">[</span><span class="s">&#39;packs&#39;</span><span class="p">]</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">res3</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+</div>
+<div class="viewcode-block" id="repoman_index_sources"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_index_sources">[docs]</a><span class="k">def</span> <span class="nf">repoman_index_sources</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create sources and repositories indexes</span>
+
+<span class="sd">    [-f] [SUBDIR]</span>
+
+<span class="sd">    -d - before saving delete all found files from index</span>
+<span class="sd">    -f - force reindexation of already indexed files</span>
+
+<span class="sd">    SUBDIR - index only one of subderictories</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">subdir_name</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">first_delete_found</span> <span class="o">=</span> <span class="s">&#39;-d&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
+    <span class="n">force_reindex</span> <span class="o">=</span> <span class="s">&#39;-f&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong argument count: can be only one&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">subdir_name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">subdir_name</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">)</span>
+                    <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span>
+                 <span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span>
+                        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span>
+                    <span class="p">)</span>
+            <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">))</span>
+            <span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Not a subdir of pkg_source&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+<span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">passed: {}</span>
+<span class="sd">config: {}</span>
+<span class="sd">exists: {}</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">)),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span>
+                        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">]</span>
+                            <span class="p">)</span>
+                        <span class="p">),</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">index_sources</span><span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">),</span>
+                <span class="n">force_reindex</span><span class="o">=</span><span class="n">force_reindex</span><span class="p">,</span>
+                <span class="n">first_delete_found</span><span class="o">=</span><span class="n">first_delete_found</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_latest_editor"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_latest_editor">[docs]</a><span class="k">def</span> <span class="nf">repoman_latest_editor</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">len_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">len_args</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">len_args</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkglatest</span><span class="o">.</span><span class="n">latest_editor</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_find_missing_pkg_info_records"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_find_missing_pkg_info_records">[docs]</a><span class="k">def</span> <span class="nf">repoman_find_missing_pkg_info_records</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search packages which have no corresponding info records</span>
+
+<span class="sd">    [-t] [-f]</span>
+
+<span class="sd">    -t creates non-existing .json file templates in info dir</span>
+
+<span class="sd">    -f forces rewrite existing .json files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="s">&#39;-t&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="s">&#39;-f&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_missing_info_records_list</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error while searching for missing records&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_find_outdated_pkg_info_records"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_find_outdated_pkg_info_records">[docs]</a><span class="k">def</span> <span class="nf">repoman_find_outdated_pkg_info_records</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds pkg info records which differs to FS .json files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_outdated_info_records_list</span><span class="p">(</span>
+            <span class="n">mute</span><span class="o">=</span><span class="bp">False</span>
+            <span class="p">)</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error getting outdated info records list&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">raise</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Total {} warnings&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;No warnings&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_update_outdated_pkg_info_records"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_update_outdated_pkg_info_records">[docs]</a><span class="k">def</span> <span class="nf">repoman_update_outdated_pkg_info_records</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads pkg info records which differs to FS .json files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">update_outdated_pkg_info_records</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="repoman_delete_pkg_info_records"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_delete_pkg_info_records">[docs]</a><span class="k">def</span> <span class="nf">repoman_delete_pkg_info_records</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    mask must be given or operation will fail</span>
+
+<span class="sd">    MASK</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">mask</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">delete_info_records</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Mask is not given&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_backup_package_info_to_filesystem"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_backup_package_info_to_filesystem">[docs]</a><span class="k">def</span> <span class="nf">repoman_backup_package_info_to_filesystem</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save package information from database to info directory.</span>
+
+<span class="sd">    [-f] [MASK]</span>
+
+<span class="sd">    Existing files are skipped, unless -f is set</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">force</span> <span class="o">=</span> <span class="s">&#39;-f&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">save_info_records_to_fs</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">force</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_load_package_info_from_filesystem"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_load_package_info_from_filesystem">[docs]</a><span class="k">def</span> <span class="nf">repoman_load_package_info_from_filesystem</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load missing package information from named files</span>
+
+<span class="sd">    [-a] [file names]</span>
+
+<span class="sd">    If no files listed - assume all files in info dir.</span>
+
+<span class="sd">    -a force load all records, not only missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;info&#39;</span><span class="p">]</span> <span class="o">+</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span>
+                <span class="s">&#39;*&#39;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">rewrite_all</span> <span class="o">=</span> <span class="s">&#39;-a&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
+
+
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">load_info_records_from_fs</span><span class="p">(</span>
+        <span class="n">filenames</span><span class="p">,</span> <span class="n">rewrite_all</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_list_pkg_info_records"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_list_pkg_info_records">[docs]</a><span class="k">def</span> <span class="nf">repoman_list_pkg_info_records</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List records containing in index</span>
+
+<span class="sd">    [FILEMASK]</span>
+
+<span class="sd">    Default MASK is *</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_info_records_list</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="repoman_print_pkg_info_record"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_print_pkg_info_record">[docs]</a><span class="k">def</span> <span class="nf">repoman_print_pkg_info_record</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print package info record information</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">print_info_record</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Name is not given&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</div>
+<div class="viewcode-block" id="repoman_load_tags"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_load_tags">[docs]</a><span class="k">def</span> <span class="nf">repoman_load_tags</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgtag</span><span class="o">.</span><span class="n">load_tags_from_fs</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="repoman_save_tags"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_save_tags">[docs]</a><span class="k">def</span> <span class="nf">repoman_save_tags</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgtag</span><span class="o">.</span><span class="n">save_tags_to_fs</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="repoman_cleanup_repo"><a class="viewcode-back" href="../../../../repoman.html#org.wayround.aipsetup.repoman.repoman_cleanup_repo">[docs]</a><span class="k">def</span> <span class="nf">repoman_cleanup_repo</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">cleanup_repo</span><span class="p">()</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 AIPSETUP_VERSION = '3.0'
 
-# modules allowed to be accessed from CLI (only if aipsetup.conf setup properly)
+
 AIPSETUP_CLI_MODULE_LIST = [
     'info',
     'buildscript',
@@ -22,9 +22,14 @@ AIPSETUP_CLI_MODULE_LIST = [
     'config',
     'unicorn'
     ]
+"""
+modules able to be accessed from CLI
+"""
 
-# modules allowed to be accessed from CLI without
-# proper aipsetup.conf
 AIPSETUP_CLI_MODULE_LIST_UNFUSED = [
     'config',
     ]
+"""
+modules allowed to be accessed from CLI without
+proper aipsetup.conf
+"""

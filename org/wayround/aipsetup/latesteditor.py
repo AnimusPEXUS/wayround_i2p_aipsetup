@@ -1,3 +1,8 @@
+
+"""
+Latests pacakges editor
+"""
+
 import os.path
 import functools
 import subprocess

@@ -1,6 +1,9 @@
 
 """
 Actions related to constitution file
+
+Constitution is gathering of settings, targeted to build packages for particular
+hadware's software platform, e.g. i486-pc-linux-gnu
 """
 
 import logging
@@ -12,15 +15,24 @@ import org.wayround.aipsetup.config
 
 
 def exported_commands():
+    """
+    Part of aipsetup CLI interface
+    """
     return {
         'edit': constitution_edit,
         'cat': constitution_cat
         }
 
 def commands_order():
+    """
+    Part of aipsetup CLI interface
+    """
     return ['edit', 'cat']
 
 def cli_name():
+    """
+    Part of aipsetup CLI interface
+    """
     return 'const'
 
 def constitution_edit(opts, args):
@@ -37,7 +49,7 @@ def constitution_edit(opts, args):
 
 def constitution_cat(opts, args):
     """
-    cat contents of constitution.py file
+    Print contents of constitution.py file
     """
     try:
         f = open(org.wayround.aipsetup.config.config['constitution'], 'r')
@@ -55,10 +67,14 @@ def constitution_cat(opts, args):
             f.close()
 
     print(txt)
+
     return 0
 
 
 def read_constitution():
+    """
+    Read constitution and return it's dict. Return ``None`` in case of error.
+    """
 
     ret = None
 
@@ -83,6 +99,9 @@ def read_constitution():
     return ret
 
 def parse_triplet(string):
+    """
+    Parse constitution triplet (``(.*?)-(.*?)-(.*)``), and return 3-tuple
+    """
     ret = None
     a = re.match(r'(.*?)-(.*?)-(.*)', string)
     if a:

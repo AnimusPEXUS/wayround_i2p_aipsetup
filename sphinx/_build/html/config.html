@@ -1,0 +1,276 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>config Module &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-org.wayround.aipsetup.config">
+<span id="config-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">config</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.config" title="Permalink to this headline">¶</a></h1>
+<p>aipsetup configuration manipulations</p>
+<dl class="data">
+<dt id="org.wayround.aipsetup.config.CONFIG_ALLOWED_PARAMETERS">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">CONFIG_ALLOWED_PARAMETERS</tt><em class="property"> = frozenset({'unicorn_root', 'server_path', 'package_index_db_config', 'client_path', 'client_port', 'buildingsites', 'server_port', 'tags', 'repository', 'source', 'package_tags_db_config', 'package_info_db_config', 'server_password', 'client_host', 'client_proto', 'server_ip', 'installed_pkg_dir', 'editor', 'package_latest_db_config'})</em><a class="headerlink" href="#org.wayround.aipsetup.config.CONFIG_ALLOWED_PARAMETERS" title="Permalink to this definition">¶</a></dt>
+<dd><p>allowed parameters set</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.config.CONFIG_ALL_PARAMETERS">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">CONFIG_ALL_PARAMETERS</tt><em class="property"> = frozenset({'client_port', 'buildingsites', 'server_ip', 'installed_pkg_dir_buildlogs', 'server_files', 'installed_pkg_dir_sums', 'tags', 'source_index', 'source', 'info', 'acceptable_src_file_extensions', 'client_host', 'client_proto', 'package_latest_db_config', 'installed_pkg_dir', 'editor', 'server_port', 'client_path', 'buildscript', 'server_path', 'package_index_db_config', 'unicorn_root', 'snapshots', 'repository', 'package_tags_db_config', 'package_info_db_config', 'constitution', 'garbage', 'server_password'})</em><a class="headerlink" href="#org.wayround.aipsetup.config.CONFIG_ALL_PARAMETERS" title="Permalink to this definition">¶</a></dt>
+<dd><p>all parameters set</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.config.CONFIG_FULL_SAMPLE">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">CONFIG_FULL_SAMPLE</tt><em class="property"> = {'client_path': '/', 'client_port': '8005', 'buildingsites': '/mnt/sda3/home/agu/_UNICORN/pkg_buildingsites', 'server_port': '8005', 'repository': '/mnt/sda3/home/agu/_UNICORN/pkg_repository', 'client_host': '127.0.0.1', 'installed_pkg_dir_buildlogs': '/var/log/packages/buildlogs', 'buildscript': '/mnt/sda3/home/agu/_UNICORN/pkg_buildscripts', 'source': '/mnt/sda3/home/agu/_UNICORN/pkg_source', 'server_path': '/', 'installed_pkg_dir_sums': '/var/log/packages/sums', 'package_latest_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkglatest.sqlite', 'unicorn_root': '/mnt/sda3/home/agu/_UNICORN', 'snapshots': '/mnt/sda3/home/agu/_UNICORN/snapshots', 'package_index_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgindex.sqlite', 'tags': '/mnt/sda3/home/agu/_UNICORN/tags.json', 'source_index': 'sqlite:////mnt/sda3/home/agu/_UNICORN/sources.sqlite', 'server_files': '/mnt/sda3/home/agu/_UNICORN/server_files', 'package_tags_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgtags.sqlite', 'package_info_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkginfo.sqlite', 'constitution': '/mnt/sda3/home/agu/_UNICORN/system_constitution.py', 'info': '/mnt/sda3/home/agu/_UNICORN/pkg_info', 'acceptable_src_file_extensions': ['.tar.gz', '.tar.bz2', '.zip', '.7z', '.tgz', '.tar.xz', '.tar.lzma', '.tbz2'], 'garbage': '/mnt/sda3/home/agu/_UNICORN/garbage', 'server_ip': '127.0.0.1', 'client_proto': 'http', 'installed_pkg_dir': '/var/log/packages', 'editor': 'emacs', 'server_password': '123456789'}</em><a class="headerlink" href="#org.wayround.aipsetup.config.CONFIG_FULL_SAMPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full configuration sample. Parameters allowed to be configured through config
+file are in list (set) <a class="reference internal" href="#org.wayround.aipsetup.config.CONFIG_ALLOWED_PARAMETERS" title="org.wayround.aipsetup.config.CONFIG_ALLOWED_PARAMETERS"><tt class="xref py py-data docutils literal"><span class="pre">CONFIG_ALLOWED_PARAMETERS</span></tt></a>.</p>
+<p>If You interested in subject of how nocconfigurable parameters are calculated,
+see <a class="reference internal" href="#org.wayround.aipsetup.config.config_check_after_load" title="org.wayround.aipsetup.config.config_check_after_load"><tt class="xref py py-func docutils literal"><span class="pre">config_check_after_load()</span></tt></a> function source.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.config.CONFIG_REQUIRED_PARAMETERS">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">CONFIG_REQUIRED_PARAMETERS</tt><em class="property"> = frozenset({'unicorn_root', 'server_path', 'package_index_db_config', 'client_path', 'client_port', 'buildingsites', 'server_port', 'tags', 'repository', 'source', 'package_tags_db_config', 'package_info_db_config', 'server_password', 'client_host', 'client_proto', 'server_ip', 'installed_pkg_dir', 'editor', 'package_latest_db_config'})</em><a class="headerlink" href="#org.wayround.aipsetup.config.CONFIG_REQUIRED_PARAMETERS" title="Permalink to this definition">¶</a></dt>
+<dd><p>all allowed parameters are all required parameters</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="org.wayround.aipsetup.config.ConfigCheckProgrammingError">
+<em class="property">exception </em><tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">ConfigCheckProgrammingError</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#ConfigCheckProgrammingError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.ConfigCheckProgrammingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="org.wayround.aipsetup.config.ConfigLoadError">
+<em class="property">exception </em><tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">ConfigLoadError</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#ConfigLoadError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.ConfigLoadError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="org.wayround.aipsetup.config.ConfigParameterMissing">
+<em class="property">exception </em><tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">ConfigParameterMissing</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#ConfigParameterMissing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.ConfigParameterMissing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="org.wayround.aipsetup.config.ConfigSaveError">
+<em class="property">exception </em><tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">ConfigSaveError</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#ConfigSaveError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.ConfigSaveError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="org.wayround.aipsetup.config.ConfigWrongParameter">
+<em class="property">exception </em><tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">ConfigWrongParameter</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#ConfigWrongParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.ConfigWrongParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.check_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">check_config</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#check_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.check_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks named file is it truly aipsetup configuration file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="docutils literal"><span class="pre">0</span></tt> if no error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.cli_name">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">cli_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#cli_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.cli_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Part of aipsetup CLI interface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.commands_order">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">commands_order</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#commands_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.commands_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Part of aipsetup CLI interface</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="org.wayround.aipsetup.config.config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">config</tt><em class="property"> = {}</em><a class="headerlink" href="#org.wayround.aipsetup.config.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>here aipsetup runtime configuration is stored. all modules uses it. it is loaded
+at time of aipsetup initialization</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.config_check_after_load">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">config_check_after_load</tt><big>(</big><em>indict</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#config_check_after_load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.config_check_after_load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration checker</p>
+<p>Configures non-configurable parameters</p>
+<p>Raises exceptions on wrong parameters</p>
+<p>Print info on wrong parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.config_check_before_saving">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">config_check_before_saving</tt><big>(</big><em>indict</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#config_check_before_saving"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.config_check_before_saving" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares config dict before it&#8217;s saving to file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.config_check_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">config_check_config</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#config_check_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.config_check_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check current configuration file (/etc/aipsetup.conf) and report errors</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="docutils literal"><span class="pre">0</span></tt> - if no errors.</td>
+</tr>
+</tbody>
+</table>
+<p>uses <a class="reference internal" href="#org.wayround.aipsetup.config.check_config" title="org.wayround.aipsetup.config.check_config"><tt class="xref py py-func docutils literal"><span class="pre">check_config()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.config_print_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">config_print_config</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#config_print_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.config_print_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print current configuration and calculated unconfigurable parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.config_print_example">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">config_print_example</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#config_print_example"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.config_print_example" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print example aipsetup.conf file</p>
+<p>Interface for <a class="reference internal" href="#org.wayround.aipsetup.config.print_example_config" title="org.wayround.aipsetup.config.print_example_config"><tt class="xref py py-func docutils literal"><span class="pre">print_example_config()</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.execution_fuse">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">execution_fuse</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#execution_fuse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.execution_fuse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.exported_commands">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">exported_commands</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#exported_commands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.exported_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Part of aipsetup CLI interface</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.format_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">format_config</tt><big>(</big><em>config</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#format_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.format_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats and returns text for configuration described with config parameter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.load_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">load_config</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#load_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.load_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads configuration from named file and returns it as dict. Exception is
+raised in case of error.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.print_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">print_config</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#print_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.print_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints current configuration and calculated unconfigurable parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.print_example_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">print_example_config</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#print_example_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.print_example_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints example config file using <a class="reference internal" href="#org.wayround.aipsetup.config.format_config" title="org.wayround.aipsetup.config.format_config"><tt class="xref py py-func docutils literal"><span class="pre">format_config()</span></tt></a> function for it&#8217;s
+formatting</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.config.save_config">
+<tt class="descclassname">org.wayround.aipsetup.config.</tt><tt class="descname">save_config</tt><big>(</big><em>filename</em>, <em>config</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/config.html#save_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.config.save_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save configuration to named file</p>
+<p>Raise exception on error.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/config.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

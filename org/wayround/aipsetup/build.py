@@ -18,13 +18,13 @@ import org.wayround.utils.path
 
 def cli_name():
     """
-    Represents name for this module in CLI
+    aipsetup CLI interface part
     """
     return 'bd'
 
 def exported_commands():
     """
-    This module commands for CLI interface
+    aipsetup CLI interface part
     """
     return {
         's': build_script,
@@ -33,7 +33,7 @@ def exported_commands():
 
 def commands_order():
     """
-    This module commands order for CLI interface
+    aipsetup CLI interface part
     """
     return [
         's',
@@ -44,7 +44,12 @@ def build_script(opts, args):
     """
     Starts named action from script applied to current building site
 
-    CLI command
+    [-b=DIR] action_name
+    
+    -b - set building site
+    
+    if action name ends with + (plus) all remaining actions will be also started
+    (if not error will occur)
     """
 
     ret = 0
@@ -71,8 +76,6 @@ def build_script(opts, args):
 def build_complete(opts, args):
     """
     Configures, builds, distributes and prepares software accordingly to info
-
-    CLI command
 
     [DIRNAME]
 
@@ -112,7 +115,11 @@ def start_building_script(building_site, action=None):
     Run selected action on building site using particular building script.
 
     :param building_site: path to building site directory
-    :param action: can be None or concrete name of action in building script
+
+    :param action: can be None or concrete name of action in building script.
+        if action name ends with + (plus) all remaining actions will be also
+        started (if not error will occur)
+
     :rtype: 0 - if no error occurred
     """
 
@@ -158,15 +165,4 @@ def start_building_script(building_site, action=None):
 
     return ret
 
-
-def build_script_wrap(*args, **kwargs):
-    """
-    function build_script_wrap in module build.py is deprecated
-
-    :deprecated:
-    """
-    logging.warning("function build_script_wrap in module build.py is deprecated")
-    logging.warning("press ENTER to continue")
-    input('-->')
-    return org.wayround.aipsetup.buildscript.build_script_wrap(*args, **kwargs)
 

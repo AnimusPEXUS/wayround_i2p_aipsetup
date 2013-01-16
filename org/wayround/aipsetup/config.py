@@ -67,10 +67,18 @@ CONFIG_FULL_SAMPLE = {
     'installed_pkg_dir_buildlogs': '/var/log/packages/buildlogs',
     'installed_pkg_dir_sums': '/var/log/packages/sums'
     }
+"""
+Full configuration sample. Parameters allowed to be configured through config
+file are in list (set) :data:`CONFIG_ALLOWED_PARAMETERS`.
+
+If You interested in subject of how nocconfigurable parameters are calculated,
+see :func:`config_check_after_load` function source.
+"""
 
 CONFIG_ALL_PARAMETERS = frozenset(
     CONFIG_FULL_SAMPLE.keys()
     )
+'all parameters set'
 
 CONFIG_ALLOWED_PARAMETERS = frozenset([
     'editor',
@@ -93,10 +101,16 @@ CONFIG_ALLOWED_PARAMETERS = frozenset([
     'client_path',
     'installed_pkg_dir'
     ])
+'allowed parameters set'
 
 CONFIG_REQUIRED_PARAMETERS = CONFIG_ALLOWED_PARAMETERS
+'all allowed parameters are all required parameters'
 
 config = {}
+"""
+here aipsetup runtime configuration is stored. all modules uses it. it is loaded
+at time of aipsetup initialization
+"""
 
 
 class ConfigParameterMissing(Exception): pass
@@ -108,6 +122,9 @@ class ConfigLoadError(Exception): pass
 
 
 def exported_commands():
+    """
+    Part of aipsetup CLI interface
+    """
     return {
         'check_config': config_check_config,
         'print_example': config_print_example,
@@ -115,6 +132,9 @@ def exported_commands():
         }
 
 def commands_order():
+    """
+    Part of aipsetup CLI interface
+    """
     return [
         'check_config',
         'print_example',
@@ -122,21 +142,30 @@ def commands_order():
         ]
 
 def cli_name():
+    """
+    Part of aipsetup CLI interface
+    """
     return 'cfg'
 
 
 def config_print_example(opts, args):
     """
     Print example aipsetup.conf file
+
+    Interface for :func:`print_example_config`
     """
 
-    ret = print_example_config()
+    print_example_config()
 
-    return ret
+    return 0
 
 def config_check_config(opts, args):
     """
-    Check current configuration and report errors
+    Check current configuration file (/etc/aipsetup.conf) and report errors
+
+    :rtype: ``0`` - if no errors.
+
+    uses :func:`check_config`
     """
     filename = '/etc/aipsetup.conf'
 
@@ -149,7 +178,7 @@ def config_check_config(opts, args):
 
 def config_print_config(opts, args):
     """
-    Print current configuration
+    Print current configuration and calculated unconfigurable parameters
     """
     filename = '/etc/aipsetup.conf'
 
@@ -162,6 +191,11 @@ def config_print_config(opts, args):
 
 
 def check_config(filename):
+    """
+    Checks named file is it truly aipsetup configuration file
+
+    :rtype: ``0`` if no error
+    """
     ret = 0
     try:
         load_config(filename)
@@ -174,14 +208,28 @@ def check_config(filename):
     return ret
 
 def print_config(filename):
-    c = load_config(filename)
-    print(format_config(c))
-    cc = {}
-    for i in CONFIG_ALL_PARAMETERS - CONFIG_ALLOWED_PARAMETERS:
-        cc[i] = c[i]
+    """
+    Prints current configuration and calculated unconfigurable parameters
+    """
+    ret = 0
 
-    print("Additionally {} non-configurable parameters:".format(len(cc)))
-    print(pprint.pformat(cc))
+    c = None
+
+    try:
+        c = load_config(filename)
+    except:
+        ret = 1
+    else:
+
+        print(format_config(c))
+        cc = {}
+        for i in CONFIG_ALL_PARAMETERS - CONFIG_ALLOWED_PARAMETERS:
+            cc[i] = c[i]
+
+        print("Additionally {} non-configurable parameters:".format(len(cc)))
+        print(pprint.pformat(cc))
+
+    return ret
 
 def execution_fuse():
     ret = 0
@@ -194,6 +242,9 @@ def execution_fuse():
     return ret
 
 def format_config(config):
+    """
+    Formats and returns text for configuration described with config parameter
+    """
     return """\
 #!/usr/bin/python3
 
@@ -247,15 +298,24 @@ def format_config(config):
 """.format_map(config)
 
 def print_example_config():
+    """
+    Prints example config file using :func:`format_config` function for it's
+    formatting
+    """
 
     print(format_config(copy.copy(CONFIG_FULL_SAMPLE)))
+
+    return
 
 def config_check_after_load(indict):
     """
     Configuration checker
 
     Configures non-configurable parameters
-    Error on wrong parameters
+
+    Raises exceptions on wrong parameters
+
+    Print info on wrong parameters
     """
 
     config_keys = list(indict.keys())
@@ -264,7 +324,7 @@ def config_check_after_load(indict):
         if not i in CONFIG_ALLOWED_PARAMETERS:
             raise ConfigWrongParameter(
                 "Wrong parameter `{paramname}'".format(
-                    paramname = i
+                    paramname=i
                     )
                 )
 
@@ -272,7 +332,7 @@ def config_check_after_load(indict):
         if not i in config_keys:
             raise ConfigParameterMissing(
                 "Missing parameter `{paramname}'".format(
-                    paramname = i
+                    paramname=i
                     )
                 )
 
@@ -293,12 +353,10 @@ def config_check_after_load(indict):
         ('source_index'    , 'sources.sqlite')
         ]:
         indict[i] = 'sqlite:///{path}'.format(
-            path = org.wayround.utils.path.abspath(
+            path=org.wayround.utils.path.abspath(
                 os.path.join(indict['unicorn_root'], j)
                 )
             )
-
-# sqlite:////mnt/sda3/home/agu/_UNICORN/
 
     for i, j in [
         ('installed_pkg_dir_buildlogs', 'buildlogs'),
@@ -308,7 +366,9 @@ def config_check_after_load(indict):
             os.path.join(indict['installed_pkg_dir'], j)
             )
 
-    indict['acceptable_src_file_extensions'] = copy.copy(CONFIG_FULL_SAMPLE['acceptable_src_file_extensions'])
+    indict['acceptable_src_file_extensions'] = copy.copy(
+        CONFIG_FULL_SAMPLE['acceptable_src_file_extensions']
+        )
 
     ck_set = set(list(indict.keys()))
 
@@ -327,10 +387,10 @@ Spare parameters:
 Missing parameters:
 {missing_parameters}
 """.format(
-           needed_parameters = CONFIG_ALL_PARAMETERS,
-           settparameters = ck_set,
-           spare_parameters = ck_set - CONFIG_ALL_PARAMETERS,
-           missing_parameters = CONFIG_ALL_PARAMETERS - ck_set
+           needed_parameters=CONFIG_ALL_PARAMETERS,
+           settparameters=ck_set,
+           spare_parameters=ck_set - CONFIG_ALL_PARAMETERS,
+           missing_parameters=CONFIG_ALL_PARAMETERS - ck_set
            )
             )
 
@@ -339,7 +399,7 @@ Missing parameters:
 
 def config_check_before_saving(indict):
     """
-    Prepares config dict before saving
+    Prepares config dict before it's saving to file
     """
 
     config_keys = list(indict.keys())
@@ -350,15 +410,16 @@ def config_check_before_saving(indict):
 
 
 def load_config(filename):
+    """
+    Loads configuration from named file and returns it as dict. Exception is
+    raised in case of error.
+    """
     ret = {}
 
     try:
         f = open(filename, 'r')
     except:
-        logging.exception(
-            "Can't read config file {}".format(filename)
-            )
-        raise
+        raise Exception("Can't read config file {}".format(filename))
     else:
         try:
             text = f.read()
@@ -368,18 +429,18 @@ def load_config(filename):
             try:
                 conf_dict = eval(text, {}, {})
             except:
-                logging.exception(
+                raise Exception(
                     "Can't load config file contents {}".format(filename)
                     )
-                raise
             else:
                 try:
                     config_check_after_load(conf_dict)
                 except:
-                    logging.exception(
-                        "Errors found while checking loadable config {}".format(filename)
+                    raise Exception(
+                        "Errors found while checking loadable config {}".format(
+                            filename
+                            )
                         )
-                    raise
                 else:
                     ret = conf_dict
 
@@ -392,12 +453,18 @@ def load_config(filename):
 
 
 def save_config(filename, config):
+    """
+    Save configuration to named file
+
+    Raise exception on error.
+    """
 
     try:
         config_check_before_saving(config)
     except:
-        logging.exception("Errors found while checking loadable config {}".format(filename))
-        raise
+        raise Exception(
+            "Errors found while checking loadable config {}".format(filename)
+            )
     else:
         try:
             f = open(filename, 'w')
@@ -406,3 +473,4 @@ def save_config(filename, config):
         else:
             f.write(format_config(config))
 
+    return

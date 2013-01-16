@@ -1,14 +1,7 @@
 
 
 """
-Module for UNIX system related package actions
-
- * install_asp into system;
- * list installed;
- * find issues;
- * remove from system;
- * completely build new package from source...
- etc.
+Module for GNU/Linux system related package actions
 """
 
 import copy
@@ -68,8 +61,7 @@ def exported_commands():
         'complete'      : package_complete,
         'build'         : package_build,
         'find'          : package_find_files,
-        'index'         : package_put_to_index_many,
-        'so_problems'   : package_find_so_problems
+        'index'         : package_put_to_index_many
         }
 
 def commands_order():
@@ -82,8 +74,7 @@ def commands_order():
         'complete',
         'build',
         'index',
-        'find',
-        'so_problems'
+        'find'
         ]
 
 def package_install(opts, args):
@@ -356,9 +347,12 @@ def package_build(opts, args):
 
     [-o] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
 
-    -o 	    treat all tarballs as for one build.
+    ======= ====================================
+    options meaning
+    ======= ====================================
+    -o 	    treat all tarballs as for one build
     -d      remove buildingsite on success
-
+    ======= ====================================
     """
 
     r_bds = '-d' in opts
@@ -398,11 +392,15 @@ def package_find_files(opts, args):
 
     [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
 
-       sub   - (default) filename contains LOOKFOR
-       re    - LOOKFOR is RegExp
-       beg   - file name starts with LOOKFOR
-       plain - Exact LOOKFOR match
-       fm    - LOOKFOR is file mask
+    ================ ===================================
+    -m option values meanings
+    ================ ===================================
+    sub              (default) filename contains LOOKFOR
+    re               LOOKFOR is RegExp
+    beg              file name starts with LOOKFOR
+    plain            Exact LOOKFOR match
+    fm               LOOKFOR is file mask
+    ================ ===================================
     """
     basedir = '/'
     if '-b' in opts:
@@ -475,7 +473,12 @@ def package_put_to_index_many(opts, args):
     return ret
 
 def package_check_package(opts, args):
+    """
+    Check package for errors
+    """
+
     ret = 0
+
     file = None
 
     if len(args) == 1:
@@ -488,95 +491,9 @@ def package_check_package(opts, args):
     else:
 
         ret = check_package(file)
-    return ret
-
-def package_find_so_problems(opts, args):
-    """
-    Find so libraries missing in system and write package names
-    requiring those missing libraries.
-    """
-    ret = 0
-
-    basedir = '/'
-#    if '-b' in opts:
-#        basedir = opts['-b']
-
-    problems = org.wayround.utils.deps_c.find_so_problems_in_linux_system(
-        verbose=True
-        )
-
-    libs = list(problems.keys())
-    libs.sort()
-
-    log = org.wayround.utils.log.Log(
-        os.getcwd(), 'problems'
-        )
-
-    print("Writing log to {}".format(log.log_filename))
-
-    logging.info("Gathering asps file tree. Please wait...")
-    tree = list_installed_asps_and_their_files(basedir, mute=False)
-    logging.info("Now working")
-
-    total_problem_packages_list = set()
-
-    count_checked = 0
-    libs_c = len(libs)
-    for i in libs:
-        log.info("Library `{}' required by following files:".format(i))
-
-        files = problems[i]
-        files.sort()
-
-        for j in files:
-            log.info("    {}".format(j))
-
-
-        pkgs2 = find_file_in_files_installed_by_asps(
-            basedir, files, mode='end', mute=False, predefined_asp_tree=tree
-            )
-
-        pkgs2_l = list(pkgs2.keys())
-        pkgs2_l.sort()
-
-        count_checked += 1
-
-        log.info("  Contained in problem packages:")
-        for j in pkgs2_l:
-            log.info("    {}".format(j))
-
-        total_problem_packages_list |= set(pkgs2_l)
-
-        logging.info(
-            "Checked libraries: {} of {}".format(count_checked, libs_c)
-            )
-
-        log.info('---------------------------------')
-
-    pkgs = find_file_in_files_installed_by_asps(
-        basedir, libs, mode='end', mute=False, predefined_asp_tree=tree
-        )
-
-    pkgs_l = list(pkgs.keys())
-    pkgs_l.sort()
-
-    log.info('')
-    log.info("Libs found in packages:")
-    for i in pkgs_l:
-        log.info("    {}".format(i))
-
-    log.info('')
-
-    log.info("Total Problem Packages List:")
-    total_problem_packages_list = list(total_problem_packages_list)
-    total_problem_packages_list.sort()
-    for i in total_problem_packages_list:
-        log.info("    {}".format(i))
-
-    log.stop()
-    print("Log written to {}".format(log.log_filename))
 
     return ret
+
 
 def check_package(asp_name, mute=False):
     """
@@ -728,6 +645,11 @@ def check_package(asp_name, mute=False):
     return ret
 
 def check_package_aipsetup2(filename):
+    """
+    Check aipsetup v2 package consistency
+
+    :rtype: ``0`` - if no errors.
+    """
 
     ret = 0
 
@@ -786,7 +708,58 @@ def check_package_aipsetup2(filename):
     return ret
 
 
+def tarobj_check_member_sum(tarobj, sums, member_name):
+
+    """
+    Check tarball member checksum.
+
+    Sums must be supplied with sums parameter, which must be dict of building::
+
+        sums == {'filename':'checksum'}
+    """
+
+    ret = True
+
+    fobj = org.wayround.utils.archive.tar_member_get_extract_file(
+        tarobj,
+        member_name
+        )
+
+    if not isinstance(fobj, tarfile.ExFileObject):
+        ret = False
+    else:
+
+        summ = org.wayround.utils.checksum.make_fileobj_checksum(fobj)
+
+        if summ == sums[member_name]:
+            ret = True
+        else:
+            ret = False
+
+        fobj.close()
+
+    return ret
+
+
+
 def remove_package(name, force=False, destdir='/', mute=False):
+    """
+    Remove named package (all it's installed asps) from system.
+
+    Before package removal, aipsetup checks whatever package removal is
+    restricted. This can be overridden with ``force=True`` option.
+
+    :param name: package name. e.g. ``gajim``, ``php`` or ``ruby``. List of
+        installed package names can be retrieved with command ``aipsetup pkg
+        list``
+
+    :param destdir: path to root directory of target system
+
+    :param force: force package removal even if it is not registered in info
+        record system
+
+    :param mute: suppress status output
+    """
 
     ret = 0
 
@@ -833,9 +806,32 @@ def remove_package(name, force=False, destdir='/', mute=False):
 
     return ret
 
+
+
 def install_package(
     name, force=False, destdir='/'
     ):
+
+    """
+    Install package
+
+    This function works in two modes:
+
+        One mode, is when name is package name registered with package database
+        records. In this case, aipsetup finds latest asp package located in
+        package index directory and calls this(install_package) function with
+        ``name == 'full path to asp'``
+
+        Second mode, is when name is pointing on existing file. In this case
+        next sequence is done:
+
+            # install package using :func:`install_asp`
+
+            # check whatever package is reducible, and if it is — reduce older
+              asps from system using :func:`reduce_asps`
+
+    """
+
 
     ret = 0
 
@@ -925,25 +921,13 @@ def install_package(
 
     return ret
 
-def tarobj_check_member_sum(tarobj, sums, member_name):
-    ret = True
-    fobj = org.wayround.utils.archive.tar_member_get_extract_file(
-        tarobj,
-        member_name
-        )
-    if not isinstance(fobj, tarfile.ExFileObject):
-        ret = False
-    else:
-        summ = org.wayround.utils.checksum.make_fileobj_checksum(fobj)
-        if summ == sums[member_name]:
-            ret = True
-        else:
-            ret = False
-        fobj.close()
-    return ret
-
-
 def install_asp(asp_name, destdir='/'):
+
+    """
+    Install asp package pointed by ``asp_name`` path.
+
+    See also :func:`install_package`
+    """
 
     ret = 0
 
@@ -1191,7 +1175,11 @@ def remove_asp(
     """
     Removes named asp from destdir system.
 
-    exclude - can be None or list of files which is NOT PREPENDED WITH DESTDIR
+    :param exclude: - can be ``None`` or ``list`` of files which is NOT
+        PREPENDED WITH DESTDIR
+
+    :param only_remove_package_registration: do not actually remove files from
+        system, only remove it's registration
     """
 
     exclude = copy.copy(exclude)
@@ -1339,12 +1327,18 @@ def remove_asp(
 
 def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 
+    """
+    Reduces(removes) packages listed in ``reduce_what`` list, remaining all
+    files belonging to package named in ``reduce_to`` string parameter
+    """
+
     ret = 0
 
     if not isinstance(reduce_what, list):
         raise ValueError("reduce_what must be a list of strings")
 
     reduce_to = os.path.basename(reduce_to)
+
     reduce_to = (
         org.wayround.aipsetup.name.rm_ext_from_pkg_name(reduce_to)
         )
@@ -1384,6 +1378,7 @@ def reduce_asps(reduce_to, reduce_what=None, destdir='/', mute=False):
 
 
 def list_installed_asps(destdir='/', mute=False):
+
     destdir = org.wayround.utils.path.abspath(destdir)
 
     listdir = org.wayround.utils.path.abspath(
@@ -1409,19 +1404,6 @@ def list_installed_asps(destdir='/', mute=False):
 
         ret = bases
 
-    return ret
-
-def list_installed_asps_and_their_files(destdir='/', mute=True):
-
-    lst = list_installed_asps(destdir, mute)
-
-    ret = dict()
-
-    for i in lst:
-        ret[i] = list_files_installed_by_asp(destdir, i, mute)
-
-#    pprint.pprint(ret)
-#    exit(0)
     return ret
 
 
@@ -1506,8 +1488,8 @@ def list_installed_package_s_asps(name_or_list, destdir='/'):
     return ret
 
 def list_files_installed_by_asp(
-        destdir, asp_name, mute=True
-        ):
+    destdir, asp_name, mute=True
+    ):
     """
     Reads list of files installed by named asp.
 
@@ -1518,7 +1500,8 @@ def list_files_installed_by_asp(
     destdir = org.wayround.utils.path.abspath(destdir)
 
     list_dir = org.wayround.utils.path.abspath(
-        destdir + os.path.sep + org.wayround.aipsetup.config.config['installed_pkg_dir']
+        destdir + os.path.sep +
+        org.wayround.aipsetup.config.config['installed_pkg_dir']
         )
 
     pkg_list_file = os.path.join(list_dir, asp_name)
@@ -1563,40 +1546,27 @@ def list_installed_packages_and_asps(destdir='/'):
 
     return ret
 
+def list_installed_asps_and_their_files(destdir='/', mute=True):
 
-def check_list_of_installed_packages_and_asps(in_dict):
+    lst = list_installed_asps(destdir, mute)
 
-    ret = 0
+    ret = dict()
 
-    keys = list(in_dict.keys())
-
-    keys.sort()
-
-    errors = 0
-
-    for i in keys:
-
-        if len(in_dict[i]) > 1:
-
-            errors += 1
-            ret = 1
-
-            logging.warning("Package with too many ASPs found `{}'".format(i))
-
-            in_dict[i].sort()
-
-            for j in in_dict[i]:
-
-                print("       {}".format(j))
-
-    if errors > 0:
-        logging.warning("Total erroneous packages: {}".format(errors))
+    for i in lst:
+        ret[i] = list_files_installed_by_asp(destdir, i, mute)
 
     return ret
 
 
-
 def build(source_files, remove_buildingsite_after_success=False):
+    """
+    Gathering function for all package building process
+
+    Uses :func:`org.wayround.aipsetup.buildingsite.init` to create building site.
+    Farther process controlled by :func:`complete`.
+
+    :param source_files: tarball name or list of them.
+    """
     ret = 0
 
     par_res = org.wayround.aipsetup.name.source_name_parse(
@@ -1615,8 +1585,10 @@ def build(source_files, remove_buildingsite_after_success=False):
         except:
             pass
 
-        package_info = org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
-            source_files[0]
+        package_info = (
+            org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
+                source_files[0]
+                )
             )
 
         if not package_info:
@@ -1732,6 +1704,14 @@ def complete(
     remove_buildingsite_after_success=False
     ):
 
+    """
+    Applies package information on building site, does building and packaging
+    and optionally deletes building site after everything is done.
+
+    :param main_src_file: used with function
+    :func:`buildingsite.apply_info <org.wayround.aipsetup.buildingsite.apply_info>`
+    """
+
     rp = org.wayround.utils.path.relpath(building_site, os.getcwd())
 
     logging.info(
@@ -1808,6 +1788,12 @@ def find_file_in_files_installed_by_asps(
     ):
     """
     instr can be a single query or list of queries.
+
+    :param mode: see in :func:`find_file_in_files_installed_by_asp`
+    :param sub_mute: passed to :func:`find_file_in_files_installed_by_asp`
+
+    :param predefined_asp_tree: if this paramter passed, use it instead of
+        manually creating it
     """
 
     ret = 0
@@ -1881,6 +1867,21 @@ def find_file_in_files_installed_by_asp(
     ):
     """
     instr can be a single query or list of queries.
+
+    :param instr: data which function must look for
+    :param mode: mode inf which function must operate:
+        ===== ======================================
+        name  meaning
+        ===== ======================================
+        re    instr is or list of regular expresions
+        plain instr is or list of plain texts
+        sub   instr is or list of substrings
+        beg   instr is or list of beginnings
+        fm    instr is or list of file masks
+        end   instr is or list of endings
+        ===== ======================================
+    :param predefined_file_list: use existing file list instead of creating own
+    :param pkgname: take file list from this asp package
     """
 
     ret = 0
@@ -1958,6 +1959,12 @@ def find_file_in_files_installed_by_asp(
 
 def put_files_to_index(files):
 
+    """
+    Put many files to aipsetup package index
+
+    Uses :func:`put_file_to_index`
+    """
+
     for i in files:
         if os.path.exists(i):
             put_file_to_index(i)
@@ -1996,6 +2003,11 @@ def _put_files_to_index(files, subdir):
     return ret
 
 def put_file_to_index(filename):
+
+    """
+    Moves file to aipsetup package index
+    """
+
     ret = 0
 
     logging.info("Processing file `{}'".format(os.path.basename(filename)))

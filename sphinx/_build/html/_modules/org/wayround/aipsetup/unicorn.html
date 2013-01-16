@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.unicorn &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.unicorn</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Manipulate UNICORN installation base dir</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.file</span>
+<span class="kn">import</span> <span class="nn">org.wayround.utils.path</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.config</span>
+
+<span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../unicorn.html#org.wayround.aipsetup.unicorn.exported_commands">[docs]</a>    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">&#39;install&#39;</span><span class="p">:</span> <span class="n">unicorn_install</span>
+        <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../unicorn.html#org.wayround.aipsetup.unicorn.commands_order">[docs]</a>    <span class="k">return</span> <span class="p">[</span>
+        <span class="s">&#39;install&#39;</span>
+        <span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span></div>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../unicorn.html#org.wayround.aipsetup.unicorn.cli_name">[docs]</a>    <span class="k">return</span> <span class="s">&#39;unicorn&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">unicorn_install</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="unicorn_install"><a class="viewcode-back" href="../../../../unicorn.html#org.wayround.aipsetup.unicorn.unicorn_install">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Install new (initial) UNICORN distribution into selected directory.</span>
+
+<span class="sd">    Directory pointed by unicorn_root in aipsetup.conf will be used.</span>
+
+<span class="sd">    Directory MUST BE empty!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">dst_unicorn_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;unicorn_root&#39;</span><span class="p">]</span>
+
+    <span class="c">#    if len(args) &gt; 0:</span>
+    <span class="c">#        dst_unicorn_dir = args[0]</span>
+
+    <span class="n">dst_unicorn_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dst_unicorn_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">create_if_not_exists_dir</span><span class="p">(</span><span class="n">dst_unicorn_dir</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Can&#39;t create dir `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dst_unicorn_dir</span><span class="p">))</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">isdirempty</span><span class="p">(</span><span class="n">dst_unicorn_dir</span><span class="p">):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Dir `{}&#39; isn&#39;t empty&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dst_unicorn_dir</span><span class="p">))</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">src_unicorn_dir</span> <span class="o">=</span> <span class="n">source_unicorn_dir</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span>
+                <span class="n">src_unicorn_dir</span><span class="p">,</span> <span class="n">dst_unicorn_dir</span><span class="p">,</span>
+                <span class="n">overwrite_files</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">clear_before_copy</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">dst_must_be_empty</span><span class="o">=</span><span class="bp">False</span>
+                <span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Error while copying UNICORN files&quot;</span><span class="p">)</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;UNICORN distro installation completed&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">source_unicorn_dir</span><span class="p">():</span></div>
+<div class="viewcode-block" id="source_unicorn_dir"><a class="viewcode-back" href="../../../../unicorn.html#org.wayround.aipsetup.unicorn.source_unicorn_dir">[docs]</a>    <span class="k">return</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s">&#39;unicorn_distro&#39;</span><span class="p">))</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

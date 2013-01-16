@@ -1,0 +1,182 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>buildscript Module &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-org.wayround.aipsetup.buildscript">
+<span id="buildscript-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">buildscript</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.buildscript" title="Permalink to this headline">¶</a></h1>
+<p>Perform actions on building scripts</p>
+<p>List them or edit with editor configured in aipsetup config file.</p>
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.build_actions_selector">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">build_actions_selector</tt><big>(</big><em>actions</em>, <em>action</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#build_actions_selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.build_actions_selector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used by <a class="reference internal" href="#org.wayround.aipsetup.buildscript.build_script_wrap" title="org.wayround.aipsetup.buildscript.build_script_wrap"><tt class="xref py py-func docutils literal"><span class="pre">build_script_wrap()</span></tt></a> to build it&#8217;s valid return action list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="docutils literal"><span class="pre">None</span></tt> if error. tuple (actions, action), where <tt class="docutils literal"><span class="pre">action</span> <span class="pre">=</span> <span class="pre">None</span></tt> if
+<tt class="docutils literal"><span class="pre">action</span> <span class="pre">==</span> <span class="pre">'complete'</span></tt>. If <tt class="docutils literal"><span class="pre">action</span> <span class="pre">==</span> <span class="pre">'help'</span></tt>, both values returned
+without changes. If action is one of actions, <tt class="docutils literal"><span class="pre">actions</span> <span class="pre">=</span> <span class="pre">[action]</span></tt>. If
+action is one of actions and action ends with + sign, <tt class="docutils literal"><span class="pre">actions</span> <span class="pre">=</span>
+<span class="pre">actions[(action</span> <span class="pre">position):]</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.build_script_wrap">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">build_script_wrap</tt><big>(</big><em>buildingsite</em>, <em>desired_actions</em>, <em>action</em>, <em>help_text</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#build_script_wrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.build_script_wrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used by building scripts for parsing action command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>buildingsite</strong> &#8211; path to building site</li>
+<li><strong>desired_actions</strong> &#8211; list of possible actions</li>
+<li><strong>action</strong> &#8211; action selected by building script user</li>
+<li><strong>help_text</strong> &#8211; if action == &#8216;help&#8217;, help_text is text to show before list
+of available actions</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><tt class="docutils literal"><span class="pre">int</span></tt> if error. <tt class="docutils literal"><span class="pre">tuple</span></tt> (package_info, actions), where
+<tt class="docutils literal"><span class="pre">package_info</span></tt> is package info readen from building site package info
+file, <tt class="docutils literal"><span class="pre">actions</span></tt> - list of actions, needed to be run by building script</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.buildscript_edit_file">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">buildscript_edit_file</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#buildscript_edit_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.buildscript_edit_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit building script</p>
+<p>FILENAME</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.buildscript_list_files">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">buildscript_list_files</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#buildscript_list_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.buildscript_list_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>List building scripts files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.cli_name">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">cli_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#cli_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.cli_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface part</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.commands_order">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">commands_order</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#commands_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.commands_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface part</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.exported_commands">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">exported_commands</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#exported_commands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.exported_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface part</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.buildscript.load_buildscript">
+<tt class="descclassname">org.wayround.aipsetup.buildscript.</tt><tt class="descname">load_buildscript</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/buildscript.html#load_buildscript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.buildscript.load_buildscript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads building script with exec function and returns it&#8217;s global dictionary.
+<tt class="docutils literal"><span class="pre">None</span></tt> is returned in case of error.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/buildscript.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

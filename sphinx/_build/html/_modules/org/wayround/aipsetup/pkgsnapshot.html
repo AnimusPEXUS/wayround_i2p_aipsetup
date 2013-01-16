@@ -1,0 +1,194 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>org.wayround.aipsetup.pkgsnapshot &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for org.wayround.aipsetup.pkgsnapshot</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Installed Packages Snapshots Operations</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.config</span>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.package</span>
+
+<span class="kn">import</span> <span class="nn">org.wayround.utils.time</span>
+
+
+<span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.exported_commands">[docs]</a>    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">&#39;list&#39;</span><span class="p">:</span><span class="n">pkgsnapshots_print_list</span><span class="p">,</span>
+        <span class="s">&#39;create&#39;</span><span class="p">:</span><span class="n">pkgsnapshots_create</span>
+        <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.commands_order">[docs]</a>    <span class="k">return</span> <span class="p">[</span>
+        <span class="s">&#39;list&#39;</span><span class="p">,</span>
+        <span class="s">&#39;create&#39;</span>
+        <span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span></div>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.cli_name">[docs]</a>    <span class="k">return</span> <span class="s">&#39;snap&#39;</span>
+
+<span class="k">def</span> <span class="nf">pkgsnapshots_print_list</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="pkgsnapshots_print_list"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.pkgsnapshots_print_list">[docs]</a>
+    <span class="n">lst</span> <span class="o">=</span> <span class="n">list_snapshots</span><span class="p">()</span>
+
+    <span class="n">lst</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">return</span>
+
+<span class="k">def</span> <span class="nf">pkgsnapshots_create</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="pkgsnapshots_create"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.pkgsnapshots_create">[docs]</a>
+    <span class="n">create_snapshot</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">create_snapshot</span><span class="p">():</span></div>
+<div class="viewcode-block" id="create_snapshot"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.create_snapshot">[docs]</a>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">currenttime_stamp</span><span class="p">()</span>
+
+    <span class="n">snapshots_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;snapshots&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">snapshots_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">snapshots_dir</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">list_installed_packages_and_asps</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">check_list_of_installed_packages_and_asps</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Snapshot with errors can&#39;t be created&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">full_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">snapshots_dir</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.json&#39;</span><span class="p">)</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_file_name</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">4</span><span class="p">))</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+<span class="k">def</span> <span class="nf">list_snapshots</span><span class="p">():</span></div>
+<div class="viewcode-block" id="list_snapshots"><a class="viewcode-back" href="../../../../pkgsnapshot.html#org.wayround.aipsetup.pkgsnapshot.list_snapshots">[docs]</a>
+    <span class="n">snapshots_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;snapshots&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">snapshots_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">snapshots_dir</span><span class="p">)</span>
+
+    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_lst</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">snapshots_dir</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_lst</span><span class="p">:</span>
+
+        <span class="n">re_m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">TIMESTAMP_RE_PATTERN</span> <span class="o">+</span> <span class="s">&#39;\.json&#39;</span><span class="p">,</span>
+            <span class="n">i</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">re_m</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Wrong snapshot name `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lst</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">aipsetup 3 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pkginfo Module &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-org.wayround.aipsetup.pkginfo">
+<span id="pkginfo-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">pkginfo</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.pkginfo" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo">
+<em class="property">class </em><tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">PackageInfo</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#PackageInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">org.wayround.utils.db.BasicDB</span></tt></p>
+<p>Main package index DB handling class</p>
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Base">
+<em class="property">class </em><tt class="descname">Base</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Base.metadata">
+<tt class="descname">metadata</tt><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Base.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info">
+<em class="property">class </em><tt class="descclassname">PackageInfo.</tt><tt class="descname">Info</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#PackageInfo.Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.Base</span></tt></p>
+<p>Class for holding package information</p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.auto_newest_pkg">
+<tt class="descname">auto_newest_pkg</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.auto_newest_pkg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.auto_newest_src">
+<tt class="descname">auto_newest_src</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.auto_newest_src" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.basename">
+<tt class="descname">basename</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.buildscript">
+<tt class="descname">buildscript</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.buildscript" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.deprecated">
+<tt class="descname">deprecated</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.deprecated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.description">
+<tt class="descname">description</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.filters">
+<tt class="descname">filters</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.filters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.home_page">
+<tt class="descname">home_page</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.home_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.installation_priority">
+<tt class="descname">installation_priority</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.installation_priority" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.name">
+<tt class="descname">name</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.non_installable">
+<tt class="descname">non_installable</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.non_installable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.reducible">
+<tt class="descname">reducible</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.reducible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.removable">
+<tt class="descname">removable</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.removable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.src_path_prefix">
+<tt class="descname">src_path_prefix</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.src_path_prefix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.delete_info_records">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">delete_info_records</tt><big>(</big><em>mask='*'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#delete_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.delete_info_records" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.filter_tarball_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">filter_tarball_list</tt><big>(</big><em>input_list</em>, <em>filter_text</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#filter_tarball_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.filter_tarball_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters supplied list with supplied filter</p>
+<p>subjects not in check_for_subjects will always be positive (but can be
+filtered out by proper leading rules)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.filter_text_parse">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">filter_text_parse</tt><big>(</big><em>filter_text</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#filter_text_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.filter_text_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of command structures</p>
+<dl class="docutils">
+<dt>ret = [</dt>
+<dd><dl class="first docutils">
+<dt>dict(</dt>
+<dd>action   = &#8216;-&#8216; or &#8216;+&#8217;,
+subject  = in [&#8216;path&#8217;, &#8216;filename&#8217;, &#8216;version&#8217;, &#8216;status&#8217;],
+function = &lt;depends on subject&gt; (no spaces allowed),
+data     = &lt;depends on subject&gt; (can contain spaces)
+)</dd>
+</dl>
+<p class="last">]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_info_rec_by_tarball_filename</tt><big>(</big><em>tarball_filenam</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_info_rec_by_tarball_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_info_records_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_info_records_list</tt><big>(</big><em>mask='*'</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_info_records_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_lists_of_packages_missing_and_present_info_records</tt><big>(</big><em>names</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_lists_of_packages_missing_and_present_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>names can be a list of names to check. if names is None -
+check all.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_missing_info_records_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_missing_info_records_list</tt><big>(</big><em>create_templates=False</em>, <em>force_rewrite=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_missing_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_missing_info_records_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_non_automatic_packages_info_list</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_non_automatic_packages_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_outdated_info_records_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_outdated_info_records_list</tt><big>(</big><em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_outdated_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_outdated_info_records_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_package_info_record">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_package_info_record</tt><big>(</big><em>name=None</em>, <em>record=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_package_info_record" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method can accept package name or complete record
+instance.</p>
+<p>If name is given, record is not used and method does db query
+itself.</p>
+<p>If name is not given, record is used as if it were this method&#8217;s
+query result.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_package_name_by_tarball_filename</tt><big>(</big><em>tarball_filename</em>, <em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_package_name_by_tarball_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.guess_package_homepage">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">guess_package_homepage</tt><big>(</big><em>pkg_name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#guess_package_homepage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.guess_package_homepage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.load_info_records_from_fs">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">load_info_records_from_fs</tt><big>(</big><em>filenames=</em><span class="optional">[</span><span class="optional">]</span>, <em>rewrite_existing=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#load_info_records_from_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.load_info_records_from_fs" title="Permalink to this definition">¶</a></dt>
+<dd><p>If names list is given - load only named and don&#8217;t delete
+existing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.print_info_record">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">print_info_record</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#print_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.print_info_record" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.save_info_records_to_fs">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">save_info_records_to_fs</tt><big>(</big><em>mask='*'</em>, <em>force_rewrite=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#save_info_records_to_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.save_info_records_to_fs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.set_package_info_record">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">set_package_info_record</tt><big>(</big><em>name</em>, <em>struct</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#set_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.set_package_info_record" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">update_outdated_pkg_info_records</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#update_outdated_pkg_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pkginfo.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

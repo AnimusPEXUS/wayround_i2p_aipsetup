@@ -1,0 +1,199 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>info Module &mdash; aipsetup 3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="aipsetup 3 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-org.wayround.aipsetup.info">
+<span id="info-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">info</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.info" title="Permalink to this headline">¶</a></h1>
+<p>Module to work with package info files on disk</p>
+<p>Print, read, write, fix info files.</p>
+<dl class="data">
+<dt id="org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">SAMPLE_PACKAGE_INFO_STRUCTURE</tt><em class="property"> = {'installation_priority': 5, 'non_installable': False, 'removable': True, 'auto_newest_pkg': True, 'filters': '', 'src_path_prefix': '', 'reducible': True, 'home_page': '', 'buildscript': '', 'auto_newest_src': True, 'description': '', 'basename': '', 'deprecated': False}</em><a class="headerlink" href="#org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Package info skeleton.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.cli_name">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">cli_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#cli_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.cli_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface related function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.commands_order">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">commands_order</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#commands_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.commands_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface related function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.exported_commands">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">exported_commands</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#exported_commands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.exported_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>aipsetup CLI interface related function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.info_copy">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">info_copy</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#info_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.info_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a copy of one info file into another</p>
+<p>OLDNAME NEWNAME</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.info_edit_file">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">info_edit_file</tt><big>(</big><em>opts</em>, <em>args</em>, <em>typ='info'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#info_edit_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.info_edit_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit selected info-file in editor designated in aipsetup.conf</p>
+<p>FILENAME</p>
+<p>One argument required - FILENAME</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.info_editor">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">info_editor</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#info_editor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.info_editor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start special info-file editor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.info_list_files">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">info_list_files</tt><big>(</big><em>opts</em>, <em>args</em>, <em>typ='info'</em>, <em>mask='*.json'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#info_list_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.info_list_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>List XML files in pkg_info dir of UNICORN dir</p>
+<p>[FILEMASK]</p>
+<p>One argument is allowed - FILEMASK, which defaults to &#8216;<a href="#id1"><span class="problematic" id="id2">*</span></a>.json&#8217;</p>
+<p>example:
+aipsetup info list &#8216;*doc*.json&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.info_mass_script">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">info_mass_script</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#info_mass_script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.info_mass_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mass buildscript applience</p>
+<p>scriptname [-f] [tarballs list]</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-f</span></kbd></td>
+<td>force (by default new script name will not be applied to
+records with existing ones)</td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.is_info_dicts_equal">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">is_info_dicts_equal</tt><big>(</big><em>d1</em>, <em>d2</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#is_info_dicts_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.is_info_dicts_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two package info structures</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><tt class="docutils literal"><span class="pre">bool</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.read_from_file">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">read_from_file</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#read_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.read_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read package info structure from named file. Return dict. On error return
+<tt class="docutils literal"><span class="pre">None</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.info.write_to_file">
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">write_to_file</tt><big>(</big><em>name</em>, <em>struct</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#write_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.write_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write package info structure into named file</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/info.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">aipsetup 3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, AnimusPEXUS.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

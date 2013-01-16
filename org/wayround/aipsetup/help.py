@@ -1,4 +1,8 @@
 
+"""
+aipsetup help system module
+"""
+
 import logging
 
 import org.wayround.aipsetup.modhelp
@@ -6,6 +10,9 @@ import org.wayround.utils.helprenderer
 
 
 def aipsetup_help(opts, args):
+    """
+    Show help for aipsetup, it's module or module's command
+    """
 
     args_l = len(args)
 
@@ -106,3 +113,4 @@ Commands:
                             print(help_text)
 
 
+    return

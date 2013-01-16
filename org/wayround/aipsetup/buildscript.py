@@ -1,6 +1,8 @@
 
 """
-Perform actions on buildscript scripts
+Perform actions on building scripts
+
+List them or edit with editor configured in aipsetup config file.
 """
 
 import copy
@@ -14,21 +16,30 @@ import org.wayround.aipsetup.config
 
 
 def exported_commands():
+    """
+    aipsetup CLI interface part
+    """
     return {
         'list': buildscript_list_files,
         'edit': buildscript_edit_file
         }
 
 def commands_order():
+    """
+    aipsetup CLI interface part
+    """
     return ['list', 'edit']
 
 def cli_name():
+    """
+    aipsetup CLI interface part
+    """
     return 'sc'
 
 
 def buildscript_list_files(opts, args):
     """
-    List buildscript files
+    List building scripts files
     """
     return org.wayround.aipsetup.info.info_list_files(
         opts, args, 'buildscript', mask='*.py'
@@ -36,7 +47,7 @@ def buildscript_list_files(opts, args):
 
 def buildscript_edit_file(opts, args):
     """
-    Edit buildscript script
+    Edit building script
 
     FILENAME
     """
@@ -44,6 +55,10 @@ def buildscript_edit_file(opts, args):
 
 
 def load_buildscript(name):
+    """
+    Loads building script with exec function and returns it's global dictionary.
+    ``None`` is returned in case of error.
+    """
 
     ret = None
 
@@ -56,7 +71,7 @@ def load_buildscript(name):
 
     if not os.path.isfile(buildscript_filename):
         logging.error(
-            "Can't find buildscript Python script `{}'".format(buildscript_filename)
+            "Can't find building script `{}'".format(buildscript_filename)
             )
         ret = 1
 
@@ -66,7 +81,9 @@ def load_buildscript(name):
         try:
             f = open(buildscript_filename, 'r')
         except:
-            logging.exception("Can't read file `{}'".format(buildscript_filename))
+            logging.exception(
+                "Can't read file `{}'".format(buildscript_filename)
+                )
             ret = 2
         else:
             txt = f.read()
@@ -88,7 +105,7 @@ def load_buildscript(name):
 
             except:
                 logging.exception(
-                    "Can't load buildscript Python script `{}'".format(
+                    "Can't load building script `{}'".format(
                         buildscript_filename
                         )
                     )
@@ -117,6 +134,18 @@ def load_buildscript(name):
 
 
 def build_script_wrap(buildingsite, desired_actions, action, help_text):
+    """
+    Used by building scripts for parsing action command
+
+    :param buildingsite: path to building site
+    :param desired_actions: list of possible actions
+    :param action: action selected by building script user
+    :param help_text: if action == 'help', help_text is text to show before list
+        of available actions
+    :rtype: ``int`` if error. ``tuple`` (package_info, actions), where
+        ``package_info`` is package info readen from building site package info
+        file, ``actions`` - list of actions, needed to be run by building script
+    """
 
     pkg_info = org.wayround.aipsetup.buildingsite.read_package_info(
         buildingsite
@@ -166,6 +195,15 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
     return ret
 
 def build_actions_selector(actions, action):
+    """
+    Used by :func:`build_script_wrap` to build it's valid return action list
+
+    :rtype: ``None`` if error. tuple (actions, action), where ``action = None`` if
+        ``action == 'complete'``. If ``action == 'help'``, both values returned
+        without changes. If action is one of actions, ``actions = [action]``. If
+        action is one of actions and action ends with + sign, ``actions =
+        actions[(action position):]``
+    """
 
     ret = None
 
