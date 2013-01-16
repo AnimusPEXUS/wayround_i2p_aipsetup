@@ -1,4 +1,8 @@
 
+"""
+Update system bindings and such
+"""
+
 import subprocess
 
 def exported_commands():

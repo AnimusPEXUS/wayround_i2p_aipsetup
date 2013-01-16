@@ -30,13 +30,13 @@ def info_db():
 
 def index_db():
     """
-    Returns index database connection creating it if needed
+    Returns package index database connection creating it if needed
     """
 
     global _index_db_connection
 
     if not _index_db_connection:
-        _index_db_connection = org.wayround.aipsetup.pkgindex.PackageIndex()
+        _index_db_connection = org.wayround.aipsetup.pkgindex.get_index_connection()
 
     return _index_db_connection
 
@@ -75,6 +75,8 @@ def src_db():
         _src_db_connection = org.wayround.aipsetup.pkgindex.get_sources_connection()
 
     return _src_db_connection
+
+
 
 def close_all():
     """

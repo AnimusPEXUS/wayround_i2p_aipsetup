@@ -2,6 +2,10 @@
 import logging
 import functools
 
+"""
+Control on information about latest source tarballs or latest asp packages
+"""
+
 import sqlalchemy.ext
 
 import org.wayround.utils.db

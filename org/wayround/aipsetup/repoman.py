@@ -1,3 +1,4 @@
+
 """
 Repository manipulations CLI module
 """
@@ -10,31 +11,31 @@ import os.path
 import org.wayround.utils.path
 
 
-import org.wayround.aipsetup.pkgdeps
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest
 import org.wayround.aipsetup.pkgtag
+import org.wayround.aipsetup.clean
 
 
 
 def exported_commands():
     return {
-        'scan': repoman_scan_creating_templates,
-        'scan_only': repoman_scan_repo_for_pkg_and_cat,
-        'index_src': repoman_index_sources,
-        'latests': repoman_latest_editor,
-        'missing': repoman_find_missing_pkg_info_records,
-        'outdated': repoman_find_outdated_pkg_info_records,
-        'update': repoman_update_outdated_pkg_info_records,
-        'delete': repoman_delete_pkg_info_records,
-        'backup': repoman_backup_package_info_to_filesystem,
-        'load': repoman_load_package_info_from_filesystem,
-        'list': repoman_list_pkg_info_records,
-        'print': repoman_print_pkg_info_record,
-        'loadt': repoman_load_tags,
-        'savet': repoman_save_tags,
-        'clean': repoman_cleanup_repo
+        'scan'          : repoman_scan_creating_templates,
+        'scan_only'     : repoman_scan_repo_for_pkg_and_cat,
+        'index_src'     : repoman_index_sources,
+        'latests'       : repoman_latest_editor,
+        'missing'       : repoman_find_missing_pkg_info_records,
+        'outdated'      : repoman_find_outdated_pkg_info_records,
+        'update'        : repoman_update_outdated_pkg_info_records,
+        'delete'        : repoman_delete_pkg_info_records,
+        'backup'        : repoman_backup_package_info_to_filesystem,
+        'load'          : repoman_load_package_info_from_filesystem,
+        'list'          : repoman_list_pkg_info_records,
+        'print'         : repoman_print_pkg_info_record,
+        'loadt'         : repoman_load_tags,
+        'savet'         : repoman_save_tags,
+        'index'         : repoman_put_asps_to_index
         }
 
 def commands_order():
@@ -53,7 +54,7 @@ def commands_order():
         'latests',
         'loadt',
         'savet',
-        'clean'
+        'index'
         ]
 
 def cli_name():
@@ -104,7 +105,7 @@ def repoman_scan_repo_for_pkg_and_cat(opts, args):
     if not isinstance(res, dict):
         ret = 1
     else:
-        res2 = org.wayround.aipsetup.pkgindex.detect_package_collisions(
+        res2 = org.wayround.aipsetup.clean.detect_package_collisions(
             res['cats'],
             res['packs']
             )
@@ -398,6 +399,22 @@ def repoman_save_tags(opts, args):
 
     return 0
 
-def repoman_cleanup_repo(opts, args):
-    org.wayround.aipsetup.pkgindex.cleanup_repo()
-    return 0
+
+def repoman_put_asps_to_index(opts, args):
+    """
+    Put package to repository and add it to index
+    """
+
+    ret = 0
+
+    files = []
+    if len(args) > 0:
+        files = args[:]
+
+    if len(files) == 0:
+        logging.error("Filenames required")
+        ret = 2
+    else:
+        ret = org.wayround.aipsetup.pkgindex.put_asps_to_index(files)
+
+    return ret

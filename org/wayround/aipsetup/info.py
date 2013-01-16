@@ -135,7 +135,7 @@ def info_list_files(opts, args, typ='info', mask='*.json'):
 
     [FILEMASK]
 
-    One argument is allowed - FILEMASK, which defaults to '*.json'
+    One argument is allowed - FILEMASK, which defaults to '\*.json'
 
     example:
     aipsetup info list '\*doc\*.json'

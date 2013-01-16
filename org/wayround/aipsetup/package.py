@@ -19,7 +19,6 @@ import tempfile
 
 import org.wayround.utils.archive
 import org.wayround.utils.checksum
-import org.wayround.utils.deps_c
 import org.wayround.utils.file
 import org.wayround.utils.format.elf
 import org.wayround.utils.format.elf_enum
@@ -60,8 +59,7 @@ def exported_commands():
         'remove'        : package_remove,
         'complete'      : package_complete,
         'build'         : package_build,
-        'find'          : package_find_files,
-        'index'         : package_put_to_index_many
+        'find'          : package_find_files
         }
 
 def commands_order():
@@ -73,7 +71,6 @@ def commands_order():
         'remove',
         'complete',
         'build',
-        'index',
         'find'
         ]
 
@@ -248,7 +245,7 @@ def package_complete(opts, args):
        1. Working with single dir, which is pointed or not pointed by
           first parameter. In this mode, a tarball can be passed,
           which name will be used to apply new package info to pointed
-          dir. By default DIRNAME is `.' (current dir)
+          dir. By default DIRNAME is \`.\' (current dir)
 
        2. Working with multiple dirs. In this mode, tarball can't be
           passed.
@@ -450,25 +447,6 @@ def package_find_files(opts, args):
 
     else:
         ret = 1
-
-    return ret
-
-def package_put_to_index_many(opts, args):
-    """
-    Put package to repository and add it to index
-    """
-
-    ret = 0
-
-    files = []
-    if len(args) > 0:
-        files = args[:]
-
-    if len(files) == 0:
-        logging.error("Filenames required")
-        ret = 2
-    else:
-        ret = put_files_to_index(files)
 
     return ret
 
@@ -825,10 +803,10 @@ def install_package(
         Second mode, is when name is pointing on existing file. In this case
         next sequence is done:
 
-            # install package using :func:`install_asp`
+            #. install package using :func:`install_asp`
 
-            # check whatever package is reducible, and if it is — reduce older
-              asps from system using :func:`reduce_asps`
+            #. check whatever package is reducible, and if it is — reduce older
+               asps from system using :func:`reduce_asps`
 
     """
 
@@ -1175,7 +1153,7 @@ def remove_asp(
     """
     Removes named asp from destdir system.
 
-    :param exclude: - can be ``None`` or ``list`` of files which is NOT
+    :param exclude: can be ``None`` or ``list`` of files which is NOT
         PREPENDED WITH DESTDIR
 
     :param only_remove_package_registration: do not actually remove files from
@@ -1435,6 +1413,8 @@ def list_installed_packages(mask='*', destdir='/', mute=False):
     return ret
 
 def latest_installed_package_s_asp(name, destdir='/'):
+
+    # TODO: attention to this function is required
 
     lst = list_installed_package_s_asps(name, destdir)
 
@@ -1709,7 +1689,7 @@ def complete(
     and optionally deletes building site after everything is done.
 
     :param main_src_file: used with function
-    :func:`buildingsite.apply_info <org.wayround.aipsetup.buildingsite.apply_info>`
+        :func:`buildingsite.apply_info <org.wayround.aipsetup.buildingsite.apply_info>`
     """
 
     rp = org.wayround.utils.path.relpath(building_site, os.getcwd())
@@ -1868,18 +1848,19 @@ def find_file_in_files_installed_by_asp(
     """
     instr can be a single query or list of queries.
 
+    ===== ======================================
+    name  meaning
+    ===== ======================================
+    re    instr is or list of regular expresions
+    plain instr is or list of plain texts
+    sub   instr is or list of substrings
+    beg   instr is or list of beginnings
+    fm    instr is or list of file masks
+    end   instr is or list of endings
+    ===== ======================================
+
     :param instr: data which function must look for
     :param mode: mode inf which function must operate:
-        ===== ======================================
-        name  meaning
-        ===== ======================================
-        re    instr is or list of regular expresions
-        plain instr is or list of plain texts
-        sub   instr is or list of substrings
-        beg   instr is or list of beginnings
-        fm    instr is or list of file masks
-        end   instr is or list of endings
-        ===== ======================================
     :param predefined_file_list: use existing file list instead of creating own
     :param pkgname: take file list from this asp package
     """
@@ -1956,129 +1937,4 @@ def find_file_in_files_installed_by_asp(
 
     return ret
 
-
-def put_files_to_index(files):
-
-    """
-    Put many files to aipsetup package index
-
-    Uses :func:`put_file_to_index`
-    """
-
-    for i in files:
-        if os.path.exists(i):
-            put_file_to_index(i)
-
-    return 0
-
-def _put_files_to_index(files, subdir):
-
-    ret = 0
-
-    repository_path = org.wayround.aipsetup.config.config['repository']
-
-
-    for file in files:
-
-        full_path = org.wayround.utils.path.abspath(
-            repository_path + os.path.sep + subdir
-            )
-
-        if not os.path.exists(full_path):
-            os.makedirs(full_path)
-
-        if os.path.dirname(file) != full_path:
-
-            logging.info(
-                "Moving {}\n       to {}".format(
-                    os.path.basename(file), full_path
-                    )
-                )
-
-            sfile = full_path + os.path.sep + os.path.basename(file)
-            if os.path.isfile(sfile):
-                os.unlink(sfile)
-            shutil.move(file, full_path)
-
-    return ret
-
-def put_file_to_index(filename):
-
-    """
-    Moves file to aipsetup package index
-    """
-
-    ret = 0
-
-    logging.info("Processing file `{}'".format(os.path.basename(filename)))
-
-    if os.path.isdir(filename) or os.path.islink(filename):
-        logging.error(
-            "Wrong file type `{}'".format(filename)
-            )
-        ret = 10
-    else:
-
-        if check_package(filename, mute=True) == 0:
-            parsed = org.wayround.aipsetup.name.package_name_parse(filename)
-
-            if not isinstance(parsed, dict):
-                logging.error(
-                    "Can't parse file name {}".format(
-                        os.path.basename(filename)
-                        )
-                    )
-            else:
-                file = org.wayround.utils.path.abspath(filename)
-
-                files = [
-                    file
-                    ]
-
-
-                package_path = org.wayround.aipsetup.pkgindex.get_package_path_string(
-                    parsed['groups']['name']
-                    )
-
-                if not isinstance(package_path, str):
-                    logging.error(
-                        "Package path error `{}'".format(
-                            parsed['groups']['name']
-                            )
-                        )
-                    ret = 11
-                else:
-
-                    path = package_path + os.path.sep + 'pack'
-
-                    if not isinstance(path, str):
-                        logging.error(
-                            "Can't get package `{}' path string".format(
-                                parsed['groups']['name']
-                                )
-                            )
-                        ret = 12
-                    else:
-                        _put_files_to_index(files, path)
-
-        else:
-
-            logging.error(
-                "Action indefined for `{}'".format(os.path.basename(filename))
-                )
-
-    return ret
-
-
-def get_asps_depending_on_asp(destdir, asp_name, mute):
-
-    files = list_files_installed_by_asp(destdir, asp_name, mute)
-
-    files = org.wayround.utils.path.prepend_path(files, destdir)
-
-    files = org.wayround.utils.path.realpaths(files)
-
-    elf_files = []
-
-    # FIXME: finish
 

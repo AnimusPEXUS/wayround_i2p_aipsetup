@@ -38,7 +38,7 @@ def docbook_install_files(opts, args):
 
     [-b=DIR] [FILE1] [FILE2] .. [FILEn]
 
-    -b - Change basedir. Default is `/'
+    -b - Change basedir. Default is \`/\'
     """
 
     if len(args) == 1:

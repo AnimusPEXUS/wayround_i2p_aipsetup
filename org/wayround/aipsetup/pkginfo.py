@@ -1,4 +1,8 @@
 
+"""
+Package info related functions
+"""
+
 import builtins
 import copy
 import fnmatch
@@ -131,8 +135,8 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
 
 def get_lists_of_packages_missing_and_present_info_records(names):
     """
-    names can be a list of names to check. if names is None -
-    check all.
+    :param names: can be a string or a ``list`` of names to check. if names is
+    ``None`` - check all.
     """
 
     index_db = org.wayround.aipsetup.dbconnections.index_db()
@@ -164,14 +168,12 @@ def get_lists_of_packages_missing_and_present_info_records(names):
 
 def get_package_info_record(name=None, record=None):
     """
-    This method can accept package name or complete record
-    instance.
+    This method can accept package name or complete record instance.
 
-    If name is given, record is not used and method does db query
-    itself.
+    If name is given, record is not used and method does db query itself.
 
-    If name is not given, record is used as if it were this method's
-    query result.
+    If name is not given, record is used as if it were this method's query
+    result.
     """
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
@@ -184,12 +186,16 @@ def get_package_info_record(name=None, record=None):
         q = record
 
     if q == None:
+
         ret = None
+
     else:
 
         ret = dict()
 
-        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+        keys = set(
+            org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
+            )
 
         for i in keys:
             ret[i] = eval('q.{}'.format(i))
@@ -210,12 +216,6 @@ def set_package_info_record(name, struct):
     if q == None:
         q = info_db.Info()
         creating_new = True
-
-#        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
-#
-#        for i in ['tags', 'name']:
-#            if i in keys:
-#                keys.remove(i)
 
     keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
 
@@ -239,24 +239,6 @@ def set_package_info_record(name, struct):
 
     q.name = name
 
-#    q.description = str(struct["description"])
-#    q.home_page = str(struct["home_page"])
-#    q.buildscript = str(struct["buildscript"])
-#    q.basename = str(struct["basename"])
-#    q.src_path_prefix = str(struct["src_path_prefix"])
-#    q.filters = str(struct["filters"])
-#    q.installation_priority = int(struct["installation_priority"])
-#    q.removable = bool(struct["removable"])
-#    q.reducible = bool(struct["reducible"])
-#    q.non_installable = bool(struct["non_installable"])
-#    q.deprecated = bool(struct["deprecated"])
-#    q.auto_newest_src = bool(struct["auto_newest_src"])
-#    q.auto_newest_pkg = bool(struct["auto_newest_pkg"])
-
-#        for i in keys:
-#            exec('q.{key} = struct["{key}"]'.format(key=i))
-
-
     if creating_new:
         info_db.sess.add(q)
 
@@ -267,7 +249,7 @@ def get_info_records_list(mask='*', mute=False):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db()
 
-    lst = []
+    ret = []
 
     q = info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
 
@@ -277,12 +259,13 @@ def get_info_records_list(mask='*', mute=False):
 
         if fnmatch.fnmatch(i.name, mask):
             found += 1
-            lst.append(i.name)
+            ret.append(i.name)
 
     if not mute:
-        org.wayround.utils.text.columned_list_print(lst)
+        org.wayround.utils.text.columned_list_print(ret)
         logging.info("Total found {} records".format(found))
-    return lst
+        
+    return ret
 
 def get_missing_info_records_list(
     create_templates=False, force_rewrite=False
@@ -797,36 +780,36 @@ def print_info_record(name):
 
 +---[{name}]----Info Block End---------------------+
 """.format_map(
-    {
-    'tags'                  : ', '.join(tags),
-    'category'              : category,
-    'name'                  : name,
-    'description'           : r['description'],
-    'home_page'             : r['home_page'],
-    'buildscript'           : r['buildscript'],
-    'basename'              : r['basename'],
-    'filters'               : r['filters'],
-    'src_path_prefix'       : r['src_path_prefix'],
-    'installation_priority' : r['installation_priority'],
-    'removable'             : r['removable'],
-    'reducible'             : r['reducible'],
-    'non_installable'       : r['non_installable'],
-    'deprecated'            : r['deprecated'],
-    'auto_newest_src'       : r['auto_newest_src'],
-    'auto_newest_pkg'       : r['auto_newest_pkg'],
-    'newest_src'            : (
-        org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-            name,
+            {
+            'tags'                  : ', '.join(tags),
+            'category'              : category,
+            'name'                  : name,
+            'description'           : r['description'],
+            'home_page'             : r['home_page'],
+            'buildscript'           : r['buildscript'],
+            'basename'              : r['basename'],
+            'filters'               : r['filters'],
+            'src_path_prefix'       : r['src_path_prefix'],
+            'installation_priority' : r['installation_priority'],
+            'removable'             : r['removable'],
+            'reducible'             : r['reducible'],
+            'non_installable'       : r['non_installable'],
+            'deprecated'            : r['deprecated'],
+            'auto_newest_src'       : r['auto_newest_src'],
+            'auto_newest_pkg'       : r['auto_newest_pkg'],
+            'newest_src'            : (
+                org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+                    name,
+                    )
+                ),
+            'newest_pkg'            : (
+                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+                    name,
+                    )
+                ),
+            }
             )
-        ),
-    'newest_pkg'            : (
-        org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-            name,
-            )
-        ),
-    }
-    )
-)
+        )
 
 def delete_info_records(mask='*'):
 

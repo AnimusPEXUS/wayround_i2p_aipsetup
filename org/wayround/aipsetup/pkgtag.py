@@ -1,4 +1,8 @@
 
+"""
+Packages tagging functionality
+"""
+
 import logging
 import json
 
