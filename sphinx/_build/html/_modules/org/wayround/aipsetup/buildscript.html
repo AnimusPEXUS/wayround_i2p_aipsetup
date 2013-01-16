@@ -50,7 +50,9 @@
             
   <h1>Source code for org.wayround.aipsetup.buildscript</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Perform actions on buildscript scripts</span>
+<span class="sd">Perform actions on building scripts</span>
+
+<span class="sd">List them or edit with editor configured in aipsetup config file.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -64,21 +66,30 @@
 
 
 <span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span>
-<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.exported_commands">[docs]</a>    <span class="k">return</span> <span class="p">{</span>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.exported_commands">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    aipsetup CLI interface part</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
         <span class="s">&#39;list&#39;</span><span class="p">:</span> <span class="n">buildscript_list_files</span><span class="p">,</span>
         <span class="s">&#39;edit&#39;</span><span class="p">:</span> <span class="n">buildscript_edit_file</span>
         <span class="p">}</span>
 
 <span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
-<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.commands_order">[docs]</a>    <span class="k">return</span> <span class="p">[</span><span class="s">&#39;list&#39;</span><span class="p">,</span> <span class="s">&#39;edit&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.commands_order">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    aipsetup CLI interface part</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s">&#39;list&#39;</span><span class="p">,</span> <span class="s">&#39;edit&#39;</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span></div>
-<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.cli_name">[docs]</a>    <span class="k">return</span> <span class="s">&#39;sc&#39;</span>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.cli_name">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    aipsetup CLI interface part</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;sc&#39;</span>
 
 
 <span class="k">def</span> <span class="nf">buildscript_list_files</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
 <div class="viewcode-block" id="buildscript_list_files"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.buildscript_list_files">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    List buildscript files</span>
+<span class="sd">    List building scripts files</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">info_list_files</span><span class="p">(</span>
         <span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="s">&#39;buildscript&#39;</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s">&#39;*.py&#39;</span>
@@ -86,7 +97,7 @@
 
 <span class="k">def</span> <span class="nf">buildscript_edit_file</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
 <div class="viewcode-block" id="buildscript_edit_file"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.buildscript_edit_file">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Edit buildscript script</span>
+<span class="sd">    Edit building script</span>
 
 <span class="sd">    FILENAME</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -94,7 +105,11 @@
 
 
 <span class="k">def</span> <span class="nf">load_buildscript</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
-<div class="viewcode-block" id="load_buildscript"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.load_buildscript">[docs]</a>
+<div class="viewcode-block" id="load_buildscript"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.load_buildscript">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads building script with exec function and returns it&#39;s global dictionary.</span>
+<span class="sd">    ``None`` is returned in case of error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="n">buildscript_filename</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
@@ -106,7 +121,7 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">buildscript_filename</span><span class="p">):</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="s">&quot;Can&#39;t find buildscript Python script `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">buildscript_filename</span><span class="p">)</span>
+            <span class="s">&quot;Can&#39;t find building script `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">buildscript_filename</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -116,7 +131,9 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">buildscript_filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t read file `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">buildscript_filename</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="s">&quot;Can&#39;t read file `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">buildscript_filename</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -138,7 +155,7 @@
 
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
-                    <span class="s">&quot;Can&#39;t load buildscript Python script `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s">&quot;Can&#39;t load building script `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">buildscript_filename</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
@@ -167,7 +184,19 @@
 
 
 <span class="k">def</span> <span class="nf">build_script_wrap</span><span class="p">(</span><span class="n">buildingsite</span><span class="p">,</span> <span class="n">desired_actions</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">help_text</span><span class="p">):</span></div>
-<div class="viewcode-block" id="build_script_wrap"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.build_script_wrap">[docs]</a>
+<div class="viewcode-block" id="build_script_wrap"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.build_script_wrap">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used by building scripts for parsing action command</span>
+
+<span class="sd">    :param buildingsite: path to building site</span>
+<span class="sd">    :param desired_actions: list of possible actions</span>
+<span class="sd">    :param action: action selected by building script user</span>
+<span class="sd">    :param help_text: if action == &#39;help&#39;, help_text is text to show before list</span>
+<span class="sd">        of available actions</span>
+<span class="sd">    :rtype: ``int`` if error. ``tuple`` (package_info, actions), where</span>
+<span class="sd">        ``package_info`` is package info readen from building site package info</span>
+<span class="sd">        file, ``actions`` - list of actions, needed to be run by building script</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">pkg_info</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">buildingsite</span><span class="o">.</span><span class="n">read_package_info</span><span class="p">(</span>
         <span class="n">buildingsite</span>
         <span class="p">)</span>
@@ -216,7 +245,16 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">build_actions_selector</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span></div>
-<div class="viewcode-block" id="build_actions_selector"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.build_actions_selector">[docs]</a>
+<div class="viewcode-block" id="build_actions_selector"><a class="viewcode-back" href="../../../../buildscript.html#org.wayround.aipsetup.buildscript.build_actions_selector">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used by :func:`build_script_wrap` to build it&#39;s valid return action list</span>
+
+<span class="sd">    :rtype: ``None`` if error. tuple (actions, action), where ``action = None`` if</span>
+<span class="sd">        ``action == &#39;complete&#39;``. If ``action == &#39;help&#39;``, both values returned</span>
+<span class="sd">        without changes. If action is one of actions, ``actions = [action]``. If</span>
+<span class="sd">        action is one of actions and action ends with + sign, ``actions =</span>
+<span class="sd">        actions[(action position):]``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="n">actions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>

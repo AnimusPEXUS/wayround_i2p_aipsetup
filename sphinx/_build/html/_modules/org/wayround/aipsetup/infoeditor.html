@@ -49,6 +49,10 @@
           <div class="body">
             
   <h1>Source code for org.wayround.aipsetup.infoeditor</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Edit package info on disk and update pkginfo database</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -241,7 +245,7 @@
 
         <span class="k">return</span> <span class="n">ret</span>
 
-    <span class="k">def</span> <span class="nf">save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">update_db</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span></div>
+    <span class="k">def</span> <span class="nf">save_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">update_db</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span></div>
 <div class="viewcode-block" id="MainWindow.save_data"><a class="viewcode-back" href="../../../../infoeditor.html#org.wayround.aipsetup.infoeditor.MainWindow.save_data">[docs]</a>
         <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -318,7 +322,7 @@
                 <span class="k">if</span> <span class="n">update_db</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">load_info_records_from_fs</span><span class="p">(</span>
-                            <span class="p">[</span><span class="n">filename</span><span class="p">],</span> <span class="n">rewrite_existing</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="p">[</span><span class="n">filename</span><span class="p">],</span> <span class="n">rewrite_existing</span><span class="o">=</span><span class="bp">True</span>
                             <span class="p">)</span>
 
                         <span class="n">dbu</span> <span class="o">=</span> <span class="s">&quot;DB updated&quot;</span>
@@ -475,7 +479,7 @@
             <span class="n">dia</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
             <span class="n">dia</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_opened</span><span class="p">,</span> <span class="n">update_db</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_opened</span><span class="p">,</span> <span class="n">update_db</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">onShowAllSourceFilesButtonActivated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span></div>
 <div class="viewcode-block" id="MainWindow.onShowAllSourceFilesButtonActivated"><a class="viewcode-back" href="../../../../infoeditor.html#org.wayround.aipsetup.infoeditor.MainWindow.onShowAllSourceFilesButtonActivated">[docs]</a>
@@ -492,7 +496,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lst</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_source_files</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">[</span><span class="s">&#39;entry1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()[:</span><span class="o">-</span><span class="mi">5</span><span class="p">],</span>
-                <span class="n">filtered</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">filtered</span><span class="o">=</span><span class="bp">False</span>
                 <span class="p">)</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;get_package_source_files returned {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span>
@@ -528,7 +532,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lst</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_source_files</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">[</span><span class="s">&#39;entry1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()[:</span><span class="o">-</span><span class="mi">5</span><span class="p">],</span>
-                <span class="n">filtered</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">filtered</span><span class="o">=</span><span class="bp">True</span>
                 <span class="p">)</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;get_package_source_files returned {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span>
@@ -583,7 +587,7 @@
             <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">latesteditor</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">[</span><span class="s">&#39;entry1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()[:</span><span class="o">-</span><span class="mi">5</span><span class="p">])</span>
 
 
-<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">name_to_edit</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span></div></div>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">name_to_edit</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div></div>
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../infoeditor.html#org.wayround.aipsetup.infoeditor.main">[docs]</a>
     <span class="n">mw</span> <span class="o">=</span> <span class="n">MainWindow</span><span class="p">()</span>
 

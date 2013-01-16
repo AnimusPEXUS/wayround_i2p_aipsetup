@@ -1,9 +1,9 @@
 .. This document is automatically generated with create_all.py script
 
-:mod:`sysclean` Module
+:mod:`clean` Module
 -------------------
 
-.. automodule:: org.wayround.aipsetup.sysclean
+.. automodule:: org.wayround.aipsetup.clean
     :members:
     :undoc-members:
     :show-inheritance:

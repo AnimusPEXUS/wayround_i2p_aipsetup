@@ -52,12 +52,18 @@
 <dl class="function">
 <dt id="org.wayround.aipsetup.package.build">
 <tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">build</tt><big>(</big><em>source_files</em>, <em>remove_buildingsite_after_success=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.build" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.package.check_list_of_installed_packages_and_asps">
-<tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">check_list_of_installed_packages_and_asps</tt><big>(</big><em>in_dict</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#check_list_of_installed_packages_and_asps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.check_list_of_installed_packages_and_asps" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gathering function for all package building process</p>
+<p>Uses <a class="reference internal" href="buildingsite.html#org.wayround.aipsetup.buildingsite.init" title="org.wayround.aipsetup.buildingsite.init"><tt class="xref py py-func docutils literal"><span class="pre">org.wayround.aipsetup.buildingsite.init()</span></tt></a> to create building site.
+Farther process controlled by <a class="reference internal" href="#org.wayround.aipsetup.package.complete" title="org.wayround.aipsetup.package.complete"><tt class="xref py py-func docutils literal"><span class="pre">complete()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source_files</strong> &#8211; tarball name or list of them.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.package.check_package">
@@ -92,7 +98,18 @@
 <dl class="function">
 <dt id="org.wayround.aipsetup.package.complete">
 <tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">complete</tt><big>(</big><em>building_site</em>, <em>main_src_file=None</em>, <em>remove_buildingsite_after_success=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#complete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.complete" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Applies package information on building site, does building and packaging
+and optionally deletes building site after everything is done.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>main_src_file</strong> &#8211; used with function
+<a class="reference internal" href="buildingsite.html#org.wayround.aipsetup.buildingsite.apply_info" title="org.wayround.aipsetup.buildingsite.apply_info"><tt class="xref py py-func docutils literal"><span class="pre">buildingsite.apply_info</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.package.exported_commands">
@@ -103,18 +120,72 @@
 <dt id="org.wayround.aipsetup.package.find_file_in_files_installed_by_asp">
 <tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">find_file_in_files_installed_by_asp</tt><big>(</big><em>destdir</em>, <em>pkgname</em>, <em>instr</em>, <em>mode=None</em>, <em>mute=False</em>, <em>predefined_file_list=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#find_file_in_files_installed_by_asp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.find_file_in_files_installed_by_asp" title="Permalink to this definition">¶</a></dt>
 <dd><p>instr can be a single query or list of queries.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="88%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">name</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>re</td>
+<td>instr is or list of regular expresions</td>
+</tr>
+<tr class="row-odd"><td>plain</td>
+<td>instr is or list of plain texts</td>
+</tr>
+<tr class="row-even"><td>sub</td>
+<td>instr is or list of substrings</td>
+</tr>
+<tr class="row-odd"><td>beg</td>
+<td>instr is or list of beginnings</td>
+</tr>
+<tr class="row-even"><td>fm</td>
+<td>instr is or list of file masks</td>
+</tr>
+<tr class="row-odd"><td>end</td>
+<td>instr is or list of endings</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>instr</strong> &#8211; data which function must look for</li>
+<li><strong>mode</strong> &#8211; mode inf which function must operate:</li>
+<li><strong>predefined_file_list</strong> &#8211; use existing file list instead of creating own</li>
+<li><strong>pkgname</strong> &#8211; take file list from this asp package</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.package.find_file_in_files_installed_by_asps">
 <tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">find_file_in_files_installed_by_asps</tt><big>(</big><em>destdir</em>, <em>instr</em>, <em>mode=None</em>, <em>mute=False</em>, <em>sub_mute=True</em>, <em>predefined_asp_tree=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#find_file_in_files_installed_by_asps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.find_file_in_files_installed_by_asps" title="Permalink to this definition">¶</a></dt>
 <dd><p>instr can be a single query or list of queries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mode</strong> &#8211; see in <a class="reference internal" href="#org.wayround.aipsetup.package.find_file_in_files_installed_by_asp" title="org.wayround.aipsetup.package.find_file_in_files_installed_by_asp"><tt class="xref py py-func docutils literal"><span class="pre">find_file_in_files_installed_by_asp()</span></tt></a></li>
+<li><strong>sub_mute</strong> &#8211; passed to <a class="reference internal" href="#org.wayround.aipsetup.package.find_file_in_files_installed_by_asp" title="org.wayround.aipsetup.package.find_file_in_files_installed_by_asp"><tt class="xref py py-func docutils literal"><span class="pre">find_file_in_files_installed_by_asp()</span></tt></a></li>
+<li><strong>predefined_asp_tree</strong> &#8211; if this paramter passed, use it instead of
+manually creating it</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.package.get_asps_depending_on_asp">
-<tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">get_asps_depending_on_asp</tt><big>(</big><em>destdir</em>, <em>asp_name</em>, <em>mute</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#get_asps_depending_on_asp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.get_asps_depending_on_asp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.package.install_asp">
@@ -136,11 +207,11 @@ package index directory and calls this(install_package) function with
 <p>Second mode, is when name is pointing on existing file. In this case
 next sequence is done:</p>
 <blockquote>
-<div><p># install package using <a class="reference internal" href="#org.wayround.aipsetup.package.install_asp" title="org.wayround.aipsetup.package.install_asp"><tt class="xref py py-func docutils literal"><span class="pre">install_asp()</span></tt></a></p>
-<dl class="docutils">
-<dt># check whatever package is reducible, and if it is — reduce older</dt>
-<dd>asps from system using <a class="reference internal" href="#org.wayround.aipsetup.package.reduce_asps" title="org.wayround.aipsetup.package.reduce_asps"><tt class="xref py py-func docutils literal"><span class="pre">reduce_asps()</span></tt></a></dd>
-</dl>
+<div><ol class="arabic simple">
+<li>install package using <a class="reference internal" href="#org.wayround.aipsetup.package.install_asp" title="org.wayround.aipsetup.package.install_asp"><tt class="xref py py-func docutils literal"><span class="pre">install_asp()</span></tt></a></li>
+<li>check whatever package is reducible, and if it is — reduce older
+asps from system using <a class="reference internal" href="#org.wayround.aipsetup.package.reduce_asps" title="org.wayround.aipsetup.package.reduce_asps"><tt class="xref py py-func docutils literal"><span class="pre">reduce_asps()</span></tt></a></li>
+</ol>
 </div></blockquote>
 </div></blockquote>
 </dd></dl>
@@ -227,7 +298,7 @@ package from them.</p>
 <li>Working with single dir, which is pointed or not pointed by
 first parameter. In this mode, a tarball can be passed,
 which name will be used to apply new package info to pointed
-dir. By default DIRNAME is <a href="#id1"><span class="problematic" id="id2">`</span></a>.&#8217; (current dir)</li>
+dir. By default DIRNAME is `.&#8217; (current dir)</li>
 <li>Working with multiple dirs. In this mode, tarball can&#8217;t be
 passed.</li>
 </ol>
@@ -296,12 +367,6 @@ passed.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="org.wayround.aipsetup.package.package_put_to_index_many">
-<tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">package_put_to_index_many</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#package_put_to_index_many"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.package_put_to_index_many" title="Permalink to this definition">¶</a></dt>
-<dd><p>Put package to repository and add it to index</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="org.wayround.aipsetup.package.package_remove">
 <tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">package_remove</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#package_remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.package_remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes package matching NAME.</p>
@@ -319,20 +384,10 @@ available or which is not removable</td></tr>
 </dd></dl>
 
 <dl class="function">
-<dt id="org.wayround.aipsetup.package.put_file_to_index">
-<tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">put_file_to_index</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#put_file_to_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.put_file_to_index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.package.put_files_to_index">
-<tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">put_files_to_index</tt><big>(</big><em>files</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#put_files_to_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.put_files_to_index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="org.wayround.aipsetup.package.reduce_asps">
 <tt class="descclassname">org.wayround.aipsetup.package.</tt><tt class="descname">reduce_asps</tt><big>(</big><em>reduce_to</em>, <em>reduce_what=None</em>, <em>destdir='/'</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/package.html#reduce_asps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.package.reduce_asps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reduces(removes) packages listed in <tt class="docutils literal"><span class="pre">reduce_what</span></tt> list, remaining all
-files belonging to package named in <tt class="docutils literal"><span class="pre">reduce_to</span></tt> string param</p>
+files belonging to package named in <tt class="docutils literal"><span class="pre">reduce_to</span></tt> string parameter</p>
 </dd></dl>
 
 <dl class="function">
@@ -344,11 +399,8 @@ files belonging to package named in <tt class="docutils literal"><span class="pr
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>exclude</strong> &#8211; <ul>
-<li>can be <tt class="docutils literal"><span class="pre">None</span></tt> or <tt class="docutils literal"><span class="pre">list</span></tt> of files which is NOT</li>
-</ul>
-<p>PREPENDED WITH DESTDIR</p>
-</li>
+<li><strong>exclude</strong> &#8211; can be <tt class="docutils literal"><span class="pre">None</span></tt> or <tt class="docutils literal"><span class="pre">list</span></tt> of files which is NOT
+PREPENDED WITH DESTDIR</li>
 <li><strong>only_remove_package_registration</strong> &#8211; do not actually remove files from
 system, only remove it&#8217;s registration</li>
 </ul>

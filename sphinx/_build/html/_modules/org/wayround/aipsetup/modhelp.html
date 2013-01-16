@@ -49,6 +49,11 @@
           <div class="body">
             
   <h1>Source code for org.wayround.aipsetup.modhelp</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module is used by :mod:`help &lt;org.wayround.aipsetup.help&gt;` module and other</span>
+<span class="sd">modules, which need to list or help with other modules</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">org.wayround.aipsetup</span>
@@ -56,7 +61,24 @@
 <span class="k">class</span> <span class="nc">HelpModuleImportErrors</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="k">pass</span>
 <div class="viewcode-block" id="HelpModuleImportErrors"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.HelpModuleImportErrors">[docs]</a>
 <span class="k">def</span> <span class="nf">modules_tuple_list</span><span class="p">():</span></div>
-<div class="viewcode-block" id="modules_tuple_list"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.modules_tuple_list">[docs]</a>
+<div class="viewcode-block" id="modules_tuple_list"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.modules_tuple_list">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return list of tubles describing modules.</span>
+
+<span class="sd">    Each tuple in list have next structure:</span>
+
+<span class="sd">    ==================== ======================================================</span>
+<span class="sd">    accessor             meaning</span>
+<span class="sd">    ==================== ======================================================</span>
+<span class="sd">    t[0]                 short_name</span>
+<span class="sd">    t[1]                 dict</span>
+<span class="sd">    t[1][&#39;name&#39;]         full module name ({} from </span>
+<span class="sd">                         &#39;org.wayround.aipsetup.{}.cli_name&#39;)</span>
+<span class="sd">    t[1][&#39;short_name&#39;]   result of org.wayround.aipsetup.{}.cli_name() call</span>
+<span class="sd">    t[1][&#39;module&#39;]       module object</span>
+<span class="sd">    ==================== ======================================================</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">import_errors</span> <span class="o">=</span> <span class="bp">False</span>
@@ -75,17 +97,17 @@
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">AIPSETUP_CLI_MODULE_LIST</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&#39;org.wayround.aipsetup.{}.cli_name()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">short_name</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s">&#39;org.wayround.aipsetup.{}.cli_name()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Couldn&#39;t call org.wayround.aipsetup.{}.cli_name()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="n">name</span><span class="p">,</span>
+                    <span class="n">short_name</span><span class="p">,</span>
                     <span class="nb">dict</span><span class="p">(</span>
                         <span class="n">name</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
-                        <span class="n">short_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">short_name</span><span class="o">=</span><span class="n">short_name</span><span class="p">,</span>
                         <span class="n">module</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="s">&#39;org.wayround.aipsetup.{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
@@ -94,10 +116,16 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">modules_dict</span><span class="p">():</span></div>
-<div class="viewcode-block" id="modules_dict"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.modules_dict">[docs]</a>    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">modules_tuple_list</span><span class="p">())</span>
+<div class="viewcode-block" id="modules_dict"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.modules_dict">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Turn tuple list returned by :func:`modules_tuple_list` to dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">modules_tuple_list</span><span class="p">())</span>
 
 <span class="k">def</span> <span class="nf">short_name_to_long</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
-<div class="viewcode-block" id="short_name_to_long"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.short_name_to_long">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="short_name_to_long"><a class="viewcode-back" href="../../../../modhelp.html#org.wayround.aipsetup.modhelp.short_name_to_long">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert short module name to normal module name using :func:`modules_dict`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">modules_dict</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>

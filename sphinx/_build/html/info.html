@@ -52,7 +52,7 @@
 <p>Print, read, write, fix info files.</p>
 <dl class="data">
 <dt id="org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE">
-<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">SAMPLE_PACKAGE_INFO_STRUCTURE</tt><em class="property"> = {'installation_priority': 5, 'non_installable': False, 'removable': True, 'auto_newest_pkg': True, 'filters': '', 'src_path_prefix': '', 'reducible': True, 'home_page': '', 'buildscript': '', 'auto_newest_src': True, 'description': '', 'basename': '', 'deprecated': False}</em><a class="headerlink" href="#org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">SAMPLE_PACKAGE_INFO_STRUCTURE</tt><em class="property"> = {'auto_newest_pkg': True, 'src_path_prefix': '', 'basename': '', 'deprecated': False, 'auto_newest_src': True, 'description': '', 'buildscript': '', 'filters': '', 'reducible': True, 'non_installable': False, 'removable': True, 'installation_priority': 5, 'home_page': ''}</em><a class="headerlink" href="#org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Package info skeleton.</p>
 </dd></dl>
 
@@ -100,7 +100,7 @@
 <tt class="descclassname">org.wayround.aipsetup.info.</tt><tt class="descname">info_list_files</tt><big>(</big><em>opts</em>, <em>args</em>, <em>typ='info'</em>, <em>mask='*.json'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/info.html#info_list_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.info.info_list_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>List XML files in pkg_info dir of UNICORN dir</p>
 <p>[FILEMASK]</p>
-<p>One argument is allowed - FILEMASK, which defaults to &#8216;<a href="#id1"><span class="problematic" id="id2">*</span></a>.json&#8217;</p>
+<p>One argument is allowed - FILEMASK, which defaults to &#8216;*.json&#8217;</p>
 <p>example:
 aipsetup info list &#8216;*doc*.json&#8217;</p>
 </dd></dl>

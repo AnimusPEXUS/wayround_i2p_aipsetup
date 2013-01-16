@@ -48,6 +48,7 @@
             
   <div class="section" id="module-org.wayround.aipsetup.pkginfo">
 <span id="pkginfo-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">pkginfo</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.pkginfo" title="Permalink to this headline">¶</a></h1>
+<p>Package info related functions</p>
 <dl class="class">
 <dt id="org.wayround.aipsetup.pkginfo.PackageInfo">
 <em class="property">class </em><tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">PackageInfo</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#PackageInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo" title="Permalink to this definition">¶</a></dt>
@@ -188,8 +189,15 @@ data     = &lt;depends on subject&gt; (can contain spaces)
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records">
 <tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_lists_of_packages_missing_and_present_info_records</tt><big>(</big><em>names</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_lists_of_packages_missing_and_present_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records" title="Permalink to this definition">¶</a></dt>
-<dd><p>names can be a list of names to check. if names is None -
-check all.</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>names</strong> &#8211; can be a string or a <tt class="docutils literal"><span class="pre">list</span></tt> of names to check. if names is</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">None</span></tt> - check all.</p>
 </dd></dl>
 
 <dl class="function">
@@ -210,12 +218,10 @@ check all.</p>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkginfo.get_package_info_record">
 <tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_package_info_record</tt><big>(</big><em>name=None</em>, <em>record=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_package_info_record" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method can accept package name or complete record
-instance.</p>
-<p>If name is given, record is not used and method does db query
-itself.</p>
-<p>If name is not given, record is used as if it were this method&#8217;s
-query result.</p>
+<dd><p>This method can accept package name or complete record instance.</p>
+<p>If name is given, record is not used and method does db query itself.</p>
+<p>If name is not given, record is used as if it were this method&#8217;s query
+result.</p>
 </dd></dl>
 
 <dl class="function">

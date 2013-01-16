@@ -57,7 +57,10 @@
 <span class="n">_gtk_session</span> <span class="o">=</span> <span class="bp">None</span>
 
 <span class="k">def</span> <span class="nf">start_session</span><span class="p">():</span>
-<div class="viewcode-block" id="start_session"><a class="viewcode-back" href="../../../../gtk.html#org.wayround.aipsetup.gtk.start_session">[docs]</a>
+<div class="viewcode-block" id="start_session"><a class="viewcode-back" href="../../../../gtk.html#org.wayround.aipsetup.gtk.start_session">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start GTK session</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="kn">from</span> <span class="nn">gi.repository</span> <span class="kn">import</span> <span class="n">Gtk</span>
 
     <span class="k">global</span> <span class="n">_gtk_session</span>
@@ -82,7 +85,9 @@
         <span class="n">_gtk_session</span> <span class="o">=</span> <span class="bp">None</span>
 
 <span class="k">def</span> <span class="nf">stop_session</span><span class="p">():</span></div>
-<div class="viewcode-block" id="stop_session"><a class="viewcode-back" href="../../../../gtk.html#org.wayround.aipsetup.gtk.stop_session">[docs]</a>
+<div class="viewcode-block" id="stop_session"><a class="viewcode-back" href="../../../../gtk.html#org.wayround.aipsetup.gtk.stop_session">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stop GTK session</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">global</span> <span class="n">_gtk_session</span>
 
@@ -93,7 +98,14 @@
         <span class="n">Gtk</span><span class="o">.</span><span class="n">main_quit</span><span class="p">()</span>
 
 <span class="k">class</span> <span class="nc">MainWindow</span><span class="p">:</span></div>
-<div class="viewcode-block" id="MainWindow"><a class="viewcode-back" href="../../../../gtk.html#org.wayround.aipsetup.gtk.MainWindow">[docs]</a>
+<div class="viewcode-block" id="MainWindow"><a class="viewcode-back" href="../../../../gtk.html#org.wayround.aipsetup.gtk.MainWindow">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Overal aipsetup system window</span>
+
+<span class="sd">    Exists ensure everything is Ok</span>
+
+<span class="sd">    This window created and shown on :func:`start_session`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="kn">from</span> <span class="nn">gi.repository</span> <span class="kn">import</span> <span class="n">Gtk</span>

@@ -50,7 +50,7 @@
             
   <h1>Source code for org.wayround.aipsetup.info</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">XML info files manipulations.</span>
+<span class="sd">Module to work with package info files on disk</span>
 
 <span class="sd">Print, read, write, fix info files.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -118,6 +118,9 @@
     <span class="c"># status)</span>
     <span class="n">auto_newest_pkg</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
     <span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Package info skeleton.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c">#pkg_info_file_template = Template(text=&quot;&quot;&quot;\</span>
 <span class="c">#&lt;package&gt;</span>
@@ -145,8 +148,12 @@
 <span class="c">#&lt;/package&gt;</span>
 <span class="c">#&quot;&quot;&quot;)</span>
 
+
 <span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span>
-<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.exported_commands">[docs]</a>    <span class="k">return</span> <span class="p">{</span>
+<div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.exported_commands">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    aipsetup CLI interface related function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
         <span class="s">&#39;list&#39;</span><span class="p">:</span> <span class="n">info_list_files</span><span class="p">,</span>
         <span class="s">&#39;edit&#39;</span><span class="p">:</span> <span class="n">info_edit_file</span><span class="p">,</span>
         <span class="s">&#39;editor&#39;</span><span class="p">:</span> <span class="n">info_editor</span><span class="p">,</span>
@@ -155,7 +162,10 @@
         <span class="p">}</span>
 
 <span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
-<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.commands_order">[docs]</a>    <span class="k">return</span> <span class="p">[</span>
+<div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.commands_order">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    aipsetup CLI interface related function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span>
         <span class="s">&#39;editor&#39;</span><span class="p">,</span>
         <span class="s">&#39;list&#39;</span><span class="p">,</span>
         <span class="s">&#39;edit&#39;</span><span class="p">,</span>
@@ -164,7 +174,10 @@
         <span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span></div>
-<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.cli_name">[docs]</a>    <span class="k">return</span> <span class="s">&#39;i&#39;</span>
+<div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.cli_name">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    aipsetup CLI interface related function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;i&#39;</span>
 
 <span class="k">def</span> <span class="nf">info_list_files</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s">&#39;*.json&#39;</span><span class="p">):</span></div>
 <div class="viewcode-block" id="info_list_files"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.info_list_files">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
@@ -172,10 +185,10 @@
 
 <span class="sd">    [FILEMASK]</span>
 
-<span class="sd">    One argument is allowed - FILEMASK, which defaults to &#39;*.json&#39;</span>
+<span class="sd">    One argument is allowed - FILEMASK, which defaults to &#39;\*.json&#39;</span>
 
 <span class="sd">    example:</span>
-<span class="sd">    aipsetup info list &#39;*doc*.json&#39;</span>
+<span class="sd">    aipsetup info list &#39;\*doc\*.json&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">args_l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -382,6 +395,12 @@
 
 <span class="k">def</span> <span class="nf">is_info_dicts_equal</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
 <div class="viewcode-block" id="is_info_dicts_equal"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.is_info_dicts_equal">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare two package info structures</span>
+
+<span class="sd">    :rtype: ``bool``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span>
@@ -406,7 +425,12 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">read_from_file</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
-<div class="viewcode-block" id="read_from_file"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.read_from_file">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="read_from_file"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.read_from_file">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read package info structure from named file. Return dict. On error return</span>
+<span class="sd">    ``None``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="n">txt</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
     <span class="n">tree</span> <span class="o">=</span> <span class="bp">None</span>
@@ -441,7 +465,10 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">write_to_file</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">struct</span><span class="p">):</span></div>
-<div class="viewcode-block" id="write_to_file"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.write_to_file">[docs]</a>
+<div class="viewcode-block" id="write_to_file"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.write_to_file">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write package info structure into named file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">struct</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>

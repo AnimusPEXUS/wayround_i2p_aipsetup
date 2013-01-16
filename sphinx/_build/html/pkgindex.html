@@ -116,28 +116,8 @@ them.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="org.wayround.aipsetup.pkgindex.cleanup_repo">
-<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">cleanup_repo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#cleanup_repo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.cleanup_repo" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkgindex.cleanup_repo_package">
-<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">cleanup_repo_package</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#cleanup_repo_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.cleanup_repo_package" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkgindex.cleanup_repo_package_pack">
-<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">cleanup_repo_package_pack</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#cleanup_repo_package_pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.cleanup_repo_package_pack" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.create_required_dirs_at_package">
 <tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">create_required_dirs_at_package</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#create_required_dirs_at_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.create_required_dirs_at_package" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkgindex.detect_package_collisions">
-<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">detect_package_collisions</tt><big>(</big><em>category_locations</em>, <em>package_locations</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#detect_package_collisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.detect_package_collisions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -181,6 +161,12 @@ them.</p>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.get_index_connection">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_index_connection</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_index_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_index_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>used by <a class="reference internal" href="dbconnections.html#module-org.wayround.aipsetup.dbconnections" title="org.wayround.aipsetup.dbconnections"><tt class="xref py py-mod docutils literal"><span class="pre">dbconnections</span></tt></a> module</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.get_package_by_id">
 <tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_by_id</tt><big>(</big><em>pid</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_by_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -198,7 +184,8 @@ them.</p>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.get_package_files">
 <tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_files</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns list of indexed package&#8217;s asps</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.get_package_id">
@@ -233,12 +220,14 @@ them.</p>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.get_package_source_files">
 <tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_package_source_files</tt><big>(</big><em>name</em>, <em>filtered=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_package_source_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_package_source_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get tarball filenames from source index</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.get_sources_connection">
 <tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">get_sources_connection</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#get_sources_connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.get_sources_connection" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>used by <a class="reference internal" href="dbconnections.html#module-org.wayround.aipsetup.dbconnections" title="org.wayround.aipsetup.dbconnections"><tt class="xref py py-mod docutils literal"><span class="pre">dbconnections</span></tt></a> module</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.index_sources">
@@ -253,12 +242,21 @@ them.</p>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.is_repo_package">
 <tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">is_repo_package</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#is_repo_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.is_repo_package" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Check whatever path is [aipsetup package index] package</p>
+</dd></dl>
 
 <dl class="function">
-<dt id="org.wayround.aipsetup.pkgindex.join_pkg_path">
-<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">join_pkg_path</tt><big>(</big><em>pkg_path</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#join_pkg_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.join_pkg_path" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="org.wayround.aipsetup.pkgindex.put_asp_to_index">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">put_asp_to_index</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#put_asp_to_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.put_asp_to_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves file to aipsetup package index</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkgindex.put_asps_to_index">
+<tt class="descclassname">org.wayround.aipsetup.pkgindex.</tt><tt class="descname">put_asps_to_index</tt><big>(</big><em>files</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkgindex.html#put_asps_to_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkgindex.put_asps_to_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put many asps to aipsetup package index</p>
+<p>Uses <a class="reference internal" href="#org.wayround.aipsetup.pkgindex.put_asp_to_index" title="org.wayround.aipsetup.pkgindex.put_asp_to_index"><tt class="xref py py-func docutils literal"><span class="pre">put_asp_to_index()</span></tt></a></p>
+</dd></dl>
 
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkgindex.save_cats_and_packs_to_db">

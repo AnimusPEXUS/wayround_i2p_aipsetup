@@ -93,19 +93,19 @@
 
         <span class="n">pid</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span>
             <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span>
-            <span class="n">primary_key</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span>
             <span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span>
             <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">UnicodeText</span><span class="p">,</span>
-            <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span>
             <span class="p">)</span>
 
         <span class="n">cid</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span>
             <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span>
-            <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
             <span class="p">)</span>
 
 
@@ -120,19 +120,19 @@
 
         <span class="n">cid</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span>
             <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span>
-            <span class="n">primary_key</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span>
             <span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span>
             <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">UnicodeText</span><span class="p">,</span>
-            <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span>
             <span class="p">)</span>
 
         <span class="n">parent_cid</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span>
             <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span>
-            <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
@@ -140,17 +140,28 @@
         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">BasicDB</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;package_index_db_config&#39;</span><span class="p">],</span>
-            <span class="n">echo</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">echo</span><span class="o">=</span><span class="bp">False</span>
             <span class="p">)</span>
 
         <span class="k">return</span>
 
+<span class="k">def</span> <span class="nf">get_index_connection</span><span class="p">():</span></div>
+<div class="viewcode-block" id="get_index_connection"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_index_connection">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    used by :mod:`dbconnections &lt;org.wayround.aipsetup.dbconnections&gt;` module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">PackageIndex</span><span class="p">()</span>
+
 <span class="k">def</span> <span class="nf">get_sources_connection</span><span class="p">():</span></div>
-<div class="viewcode-block" id="get_sources_connection"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_sources_connection">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="get_sources_connection"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_sources_connection">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    used by :mod:`dbconnections &lt;org.wayround.aipsetup.dbconnections&gt;` module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">tags</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">TagEngine</span><span class="p">(</span>
             <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source_index&#39;</span><span class="p">],</span>
-            <span class="n">commit_every</span> <span class="o">=</span> <span class="mi">200</span>
+            <span class="n">commit_every</span><span class="o">=</span><span class="mi">200</span>
             <span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
@@ -167,6 +178,10 @@
 
 <span class="k">def</span> <span class="nf">is_repo_package</span><span class="p">(</span><span class="n">path</span><span class="p">):</span></div>
 <div class="viewcode-block" id="is_repo_package"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.is_repo_package">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check whatever path is [aipsetup package index] package</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span>
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&#39;.package&#39;</span><span class="p">)</span>
@@ -174,7 +189,10 @@
         <span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">get_package_files</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
-<div class="viewcode-block" id="get_package_files"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_package_files">[docs]</a>
+<div class="viewcode-block" id="get_package_files"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_package_files">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns list of indexed package&#39;s asps</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">pid</span> <span class="o">=</span> <span class="n">get_package_id</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -199,11 +217,14 @@
             <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_dir</span><span class="p">,</span> <span class="s">&#39;*.asp&#39;</span><span class="p">))</span>
 
             <span class="n">needed_files</span> <span class="o">=</span> <span class="p">[]</span>
+
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+
                 <span class="n">parsed</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">package_name_parse</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">parsed</span> <span class="ow">and</span> <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                     <span class="n">needed_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="s">&#39;/&#39;</span> <span class="o">+</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span>
                         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span>
                             <span class="n">i</span><span class="p">,</span>
                             <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span>
@@ -215,12 +236,16 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<span class="k">def</span> <span class="nf">get_package_source_files</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filtered</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_package_source_files</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filtered</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_package_source_files"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_package_source_files">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get tarball filenames from source index</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">pkg_info</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_package_info_record</span><span class="p">(</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span>
         <span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -228,44 +253,39 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t connect to source file index&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
 
-            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="n">tags_object</span><span class="o">.</span><span class="n">objects_by_tags</span><span class="p">([</span><span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;basename&#39;</span><span class="p">]])</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">tags_object</span><span class="o">.</span><span class="n">objects_by_tags</span><span class="p">([</span><span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;basename&#39;</span><span class="p">]])</span>
 
-            <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
-                <span class="n">files2</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;src_path_prefix&#39;</span><span class="p">]):</span>
-                        <span class="n">files2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
+            <span class="n">files2</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;src_path_prefix&#39;</span><span class="p">]):</span>
+                    <span class="n">files2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-                <span class="n">files</span> <span class="o">=</span> <span class="n">files2</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">files2</span>
 
-                <span class="k">del</span> <span class="n">files2</span>
+            <span class="k">del</span> <span class="n">files2</span>
 
-            <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
-                <span class="n">ftl_r</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">filter_tarball_list</span><span class="p">(</span>
-                        <span class="n">files</span><span class="p">,</span>
-                        <span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;filters&#39;</span><span class="p">]</span>
-                        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
+            <span class="n">ftl_r</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">filter_tarball_list</span><span class="p">(</span>
+                    <span class="n">files</span><span class="p">,</span>
+                    <span class="n">pkg_info</span><span class="p">[</span><span class="s">&#39;filters&#39;</span><span class="p">]</span>
                     <span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ftl_r</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">files</span> <span class="o">=</span> <span class="n">ftl_r</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="s">&quot;get_package_source_files: filter_tarball_list returned `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-                        <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ftl_r</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">ftl_r</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s">&quot;get_package_source_files: &quot;</span>
+                    <span class="s">&quot;filter_tarball_list returned `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+                    <span class="p">)</span>
 
-            <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">files</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">files</span>
 
-            <span class="k">del</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="c"># TODO: commit 0_o?</span>
-            <span class="n">tags_object</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 
@@ -275,7 +295,7 @@
 
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">q</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">name</span>
@@ -288,7 +308,7 @@
 
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">q</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">parent_cid</span>
@@ -341,7 +361,7 @@
 
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">q</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">pid</span>
 
@@ -353,7 +373,7 @@
 
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">q</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">cid</span>
 
@@ -365,7 +385,7 @@
 
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">q</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">cid</span>
 
@@ -378,21 +398,21 @@
 
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">q</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<span class="k">def</span> <span class="nf">get_package_name_list</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_package_name_list</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_package_name_list"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_package_name_list">[docs]</a>
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">cid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 
     <span class="n">lst_names</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
@@ -404,7 +424,7 @@
 
     <span class="k">return</span> <span class="n">lst_names</span>
 
-<span class="k">def</span> <span class="nf">get_package_id_list</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_package_id_list</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_package_id_list"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_package_id_list">[docs]</a>
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
@@ -412,7 +432,7 @@
     <span class="k">if</span> <span class="n">cid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 
     <span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
@@ -422,14 +442,14 @@
 
     <span class="k">return</span> <span class="n">ids</span>
 
-<span class="k">def</span> <span class="nf">get_package_idname_dict</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_package_idname_dict</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_package_idname_dict"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_package_idname_dict">[docs]</a>
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">cid</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 
     <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
@@ -439,14 +459,14 @@
 
     <span class="k">return</span> <span class="n">dic</span>
 
-<span class="k">def</span> <span class="nf">get_category_name_list</span><span class="p">(</span><span class="n">parent_cid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_category_name_list</span><span class="p">(</span><span class="n">parent_cid</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_category_name_list"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_category_name_list">[docs]</a>
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
     <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
         <span class="n">index_db</span><span class="o">.</span><span class="n">Category</span>
         <span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
-            <span class="n">parent_cid</span> <span class="o">=</span> <span class="n">parent_cid</span>
+            <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cid</span>
             <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
                 <span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
@@ -461,14 +481,14 @@
 
     <span class="k">return</span> <span class="n">lst_names</span>
 
-<span class="k">def</span> <span class="nf">get_category_id_list</span><span class="p">(</span><span class="n">parent_cid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_category_id_list</span><span class="p">(</span><span class="n">parent_cid</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_category_id_list"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_category_id_list">[docs]</a>
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
     <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
         <span class="n">index_db</span><span class="o">.</span><span class="n">Category</span>
         <span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
-            <span class="n">parent_cid</span> <span class="o">=</span> <span class="n">parent_cid</span>
+            <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cid</span>
             <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
                 <span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
@@ -481,7 +501,7 @@
 
     <span class="k">return</span> <span class="n">ids</span>
 
-<span class="k">def</span> <span class="nf">get_category_idname_dict</span><span class="p">(</span><span class="n">parent_cid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">get_category_idname_dict</span><span class="p">(</span><span class="n">parent_cid</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span></div>
 <div class="viewcode-block" id="get_category_idname_dict"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.get_category_idname_dict">[docs]</a>
     <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
 
@@ -496,7 +516,7 @@
         <span class="n">lst</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
             <span class="n">index_db</span><span class="o">.</span><span class="n">Category</span>
             <span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
-                <span class="n">parent_cid</span> <span class="o">=</span> <span class="n">parent_cid</span>
+                <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cid</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
                     <span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span>
                     <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
@@ -530,7 +550,7 @@
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">index_db</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">index_db</span><span class="p">()</span>
-        <span class="n">pkg</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">pkg</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Package</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">pkg</span> <span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
 
@@ -539,7 +559,7 @@
             <span class="n">ret</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">pkg</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">pkg</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
             <span class="k">while</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">cat</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+                <span class="n">cat</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">parent_cid</span>
 
@@ -561,7 +581,7 @@
             <span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">categ</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">categ</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">categ</span> <span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
 
@@ -570,7 +590,7 @@
             <span class="n">ret</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">categ</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">categ</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
             <span class="k">while</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">cat</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+                <span class="n">cat</span> <span class="o">=</span> <span class="n">index_db</span><span class="o">.</span><span class="n">sess</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">index_db</span><span class="o">.</span><span class="n">Category</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">cat</span><span class="o">.</span><span class="n">cid</span><span class="p">,</span> <span class="n">cat</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">parent_cid</span>
 
@@ -586,7 +606,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">join_pkg_path</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">_join_pkg_path</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">get_category_path_string</span><span class="p">(</span><span class="n">cid_or_name</span><span class="p">):</span></div>
@@ -598,16 +618,27 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">join_pkg_path</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">_join_pkg_path</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="c"># TODO: I don&#39;t like this function</span>
+<span class="k">def</span> <span class="nf">_join_pkg_path</span><span class="p">(</span><span class="n">pkg_path</span><span class="p">):</span></div>
+    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pkg_path</span><span class="p">:</span>
+        <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<span class="k">def</span> <span class="nf">_srfpac_pkg_struct</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span> <span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_srfpac_pkg_struct</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_srfpac_cat_struct</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cid</span> <span class="o">=</span> <span class="n">cid</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span> <span class="o">=</span> <span class="n">parent_cid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cid</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_srfpac_get_cat_by_cat_path</span><span class="p">(</span><span class="n">category_locations</span><span class="p">,</span> <span class="n">cat_path</span><span class="p">):</span>
 
@@ -638,9 +669,9 @@
 
         <span class="k">if</span> <span class="n">root</span> <span class="o">==</span> <span class="n">repo_dir</span><span class="p">:</span>
             <span class="n">category_locations</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_srfpac_cat_struct</span><span class="p">(</span>
-                <span class="n">cid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
-                <span class="n">parent_cid</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="n">cid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                <span class="n">parent_cid</span><span class="o">=</span><span class="bp">None</span>
                 <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -655,9 +686,9 @@
                 <span class="n">parent_cat_id</span> <span class="o">=</span> <span class="n">parent_cat</span><span class="p">[</span><span class="s">&#39;cid&#39;</span><span class="p">]</span>
 
                 <span class="n">package_locations</span><span class="p">[</span><span class="n">relpath</span><span class="p">]</span> <span class="o">=</span> <span class="n">_srfpac_pkg_struct</span><span class="p">(</span>
-                    <span class="n">pid</span> <span class="o">=</span> <span class="n">last_pkg_id</span><span class="p">,</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">relpath</span><span class="p">),</span>
-                    <span class="n">cid</span> <span class="o">=</span> <span class="n">parent_cat_id</span>
+                    <span class="n">pid</span><span class="o">=</span><span class="n">last_pkg_id</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">relpath</span><span class="p">),</span>
+                    <span class="n">cid</span><span class="o">=</span><span class="n">parent_cat_id</span>
                     <span class="p">)</span>
                 <span class="n">last_pkg_id</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -684,9 +715,9 @@
                 <span class="n">parent_cat_id</span> <span class="o">=</span> <span class="n">parent_cat</span><span class="p">[</span><span class="s">&#39;cid&#39;</span><span class="p">]</span>
 
                 <span class="n">category_locations</span><span class="p">[</span><span class="n">relpath</span><span class="p">]</span> <span class="o">=</span> <span class="n">_srfpac_cat_struct</span><span class="p">(</span>
-                    <span class="n">cid</span> <span class="o">=</span> <span class="n">last_cat_id</span><span class="p">,</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">relpath</span><span class="p">),</span>
-                    <span class="n">parent_cid</span> <span class="o">=</span> <span class="n">parent_cat_id</span>
+                    <span class="n">cid</span><span class="o">=</span><span class="n">last_cat_id</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">relpath</span><span class="p">),</span>
+                    <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cat_id</span>
                     <span class="p">)</span>
 
             <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">progress_write</span><span class="p">(</span>
@@ -704,57 +735,7 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">detect_package_collisions</span><span class="p">(</span><span class="n">category_locations</span><span class="p">,</span> <span class="n">package_locations</span><span class="p">):</span></div>
-<div class="viewcode-block" id="detect_package_collisions"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.detect_package_collisions">[docs]</a>
-    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">lst_dup</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">pkg_paths</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">package_locations</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-        <span class="n">l</span> <span class="o">=</span> <span class="n">package_locations</span><span class="p">[</span><span class="n">each</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">pkg_paths</span><span class="p">:</span>
-            <span class="n">pkg_paths</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="n">pkg_paths</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">package_locations</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-        <span class="n">l</span> <span class="o">=</span> <span class="n">package_locations</span><span class="p">[</span><span class="n">each</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkg_paths</span><span class="p">[</span><span class="n">l</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">lst_dup</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">pkg_paths</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst_dup</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s">&quot;Found {} duplicated package names. Package locations looks good!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">lst_dup</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s">&quot;Found {} duplicated package names</span><span class="se">\n</span><span class="s">        listing:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">lst_dup</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-
-        <span class="n">sorted_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lst_dup</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">sorted_keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-        <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">sorted_keys</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">&quot;          {}:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">each</span><span class="p">))</span>
-
-            <span class="n">lst_dup</span><span class="p">[</span><span class="n">each</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-            <span class="k">for</span> <span class="n">each2</span> <span class="ow">in</span> <span class="n">lst_dup</span><span class="p">[</span><span class="n">each</span><span class="p">]:</span>
-                <span class="k">print</span><span class="p">(</span><span class="s">&quot;             {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">each2</span><span class="p">))</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">save_cats_and_packs_to_db</span><span class="p">(</span><span class="n">category_locations</span><span class="p">,</span> <span class="n">package_locations</span><span class="p">):</span></div>
 <div class="viewcode-block" id="save_cats_and_packs_to_db"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.save_cats_and_packs_to_db">[docs]</a>
@@ -828,16 +809,6 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="c"># TODO: deprecation required for this function</span>
-<span class="k">def</span> <span class="nf">join_pkg_path</span><span class="p">(</span><span class="n">pkg_path</span><span class="p">):</span></div>
-<div class="viewcode-block" id="join_pkg_path"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.join_pkg_path">[docs]</a>    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pkg_path</span><span class="p">:</span>
-        <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="n">ret</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
 
 
 <span class="k">def</span> <span class="nf">_index_progress</span><span class="p">(</span><span class="n">added_tags</span><span class="p">,</span> <span class="n">sub_dir_name</span><span class="p">,</span> <span class="n">root_dir_name_len</span><span class="p">):</span></div>
@@ -855,8 +826,8 @@
     <span class="n">root_dir_name</span><span class="p">,</span>
     <span class="n">sub_dir_name</span><span class="p">,</span>
     <span class="n">root_dir_name_len</span><span class="p">,</span>
-    <span class="n">acceptable_endings</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-    <span class="n">added_tags</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">acceptable_endings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">added_tags</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
 
     <span class="n">sub_dir_name</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">sub_dir_name</span><span class="p">)</span>
@@ -887,7 +858,7 @@
                 <span class="n">full_path</span><span class="p">,</span>
                 <span class="n">root_dir_name_len</span><span class="p">,</span>
                 <span class="n">acceptable_endings</span><span class="p">,</span>
-                <span class="n">added_tags</span> <span class="o">=</span> <span class="n">added_tags</span>
+                <span class="n">added_tags</span><span class="o">=</span><span class="n">added_tags</span>
                 <span class="p">)</span>
             <span class="n">added_tags</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s">&#39;added_tags&#39;</span><span class="p">]</span>
 
@@ -920,9 +891,9 @@
 <span class="k">def</span> <span class="nf">index_sources_directory</span><span class="p">(</span>
 <div class="viewcode-block" id="index_sources_directory"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.index_sources_directory">[docs]</a>    <span class="n">root_dir_name</span><span class="p">,</span>
     <span class="n">sub_dir_name</span><span class="p">,</span>
-    <span class="n">acceptable_endings</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
-    <span class="n">force_reindex</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-    <span class="n">first_delete_found</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">acceptable_endings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="n">force_reindex</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="n">first_delete_found</span><span class="o">=</span><span class="bp">False</span>
     <span class="p">):</span>
 
     <span class="n">root_dir_name</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root_dir_name</span><span class="p">))</span>
@@ -966,7 +937,7 @@
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Found {} indexable objects&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">found_count</span><span class="p">))</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">tags</span> <span class="o">=</span> <span class="n">get_sources_connection</span><span class="p">()</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">dbconnections</span><span class="o">.</span><span class="n">src_db</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t connect to source index DB&quot;</span><span class="p">)</span>
         <span class="k">raise</span>
@@ -1005,7 +976,7 @@
                     <span class="n">parsed_src_filename</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">source_name_parse</span><span class="p">(</span>
                             <span class="n">i</span><span class="p">,</span>
-                            <span class="n">mute</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">mute</span><span class="o">=</span><span class="bp">True</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
 
@@ -1075,8 +1046,8 @@
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s">&quot;Records: added {added}; deleted {deleted}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">added</span> <span class="o">=</span> <span class="n">added_count</span><span class="p">,</span>
-                    <span class="n">deleted</span> <span class="o">=</span> <span class="n">deleted_count</span>
+                    <span class="n">added</span><span class="o">=</span><span class="n">added_count</span><span class="p">,</span>
+                    <span class="n">deleted</span><span class="o">=</span><span class="n">deleted_count</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;DB Size: {} record(s)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tags</span><span class="o">.</span><span class="n">get_size</span><span class="p">()))</span>
@@ -1085,179 +1056,130 @@
 
     <span class="k">return</span> <span class="mi">0</span>
 
-<span class="k">def</span> <span class="nf">index_sources</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">,</span> <span class="n">force_reindex</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">first_delete_found</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span></div>
+<span class="k">def</span> <span class="nf">index_sources</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">,</span> <span class="n">force_reindex</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">first_delete_found</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span></div>
 <div class="viewcode-block" id="index_sources"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.index_sources">[docs]</a>
     <span class="n">index_sources_directory</span><span class="p">(</span>
         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;source&#39;</span><span class="p">])),</span>
         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">subdir_name</span><span class="p">)),</span>
         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;acceptable_src_file_extensions&#39;</span><span class="p">],</span>
-        <span class="n">force_reindex</span> <span class="o">=</span> <span class="n">force_reindex</span><span class="p">,</span>
-        <span class="n">first_delete_found</span> <span class="o">=</span> <span class="n">first_delete_found</span>
+        <span class="n">force_reindex</span><span class="o">=</span><span class="n">force_reindex</span><span class="p">,</span>
+        <span class="n">first_delete_found</span><span class="o">=</span><span class="n">first_delete_found</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="mi">0</span>
 
-<span class="k">def</span> <span class="nf">cleanup_repo_package_pack</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
-<div class="viewcode-block" id="cleanup_repo_package_pack"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.cleanup_repo_package_pack">[docs]</a>
-    <span class="n">g_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;garbage&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">name</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">g_path</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">g_path</span><span class="p">,</span> <span class="n">exist_ok</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">put_asps_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">):</span></div>
+<div class="viewcode-block" id="put_asps_to_index"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.put_asps_to_index">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Put many asps to aipsetup package index</span>
 
-    <span class="n">path</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span>
-        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_path_string</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&#39;pack&#39;</span>
-        <span class="p">)</span>
-
-
-    <span class="n">path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
-    <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="sd">    Uses :func:`put_asp_to_index`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-        <span class="n">p1</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">put_asp_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">0</span>
 
-            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">put_file_to_index</span><span class="p">(</span>
-                <span class="n">path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
-                <span class="p">)</span>
+<span class="k">def</span> <span class="nf">_put_asps_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">subdir</span><span class="p">):</span></div>
 
-    <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-
-        <span class="n">p1</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
-
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p1</span><span class="p">):</span>
-
-            <span class="n">p2</span> <span class="o">=</span> <span class="n">g_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
-
-            <span class="k">if</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">check_package</span><span class="p">(</span>
-                <span class="n">p1</span><span class="p">,</span> <span class="bp">True</span>
-                <span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s">&quot;Wrong package, garbaging: `{}&#39;</span><span class="se">\n\t</span><span class="s">as `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p1</span><span class="p">),</span>
-                        <span class="n">p2</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t garbage&quot;</span><span class="p">)</span>
-
-    <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">cmp_to_key</span><span class="p">(</span>
-            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">package_version_comparator</span>
-            <span class="p">),</span>
-
-        <span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">[</span><span class="mi">5</span><span class="p">:]:</span>
-            <span class="n">p1</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
-
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Removing outdated package: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p1</span><span class="p">)))</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error&quot;</span><span class="p">)</span>
+    <span class="n">repository_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">cleanup_repo_package</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></div>
-<div class="viewcode-block" id="cleanup_repo_package"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.cleanup_repo_package">[docs]</a>
-    <span class="n">g_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;garbage&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">name</span>
+    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">g_path</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">g_path</span><span class="p">)</span>
-
-    <span class="n">path</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span>
-        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_path_string</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="n">path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
-    <span class="n">create_required_dirs_at_package</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
-    <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;.package&#39;</span><span class="p">,</span> <span class="s">&#39;pack&#39;</span><span class="p">]:</span>
-
-            <span class="n">p1</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
-            <span class="n">p2</span> <span class="o">=</span> <span class="n">g_path</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s">&quot;moving `{}&#39;</span><span class="se">\n\t</span><span class="s">to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">p1</span><span class="p">),</span>
-                    <span class="n">p2</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Can&#39;t move file or dir&quot;</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">cleanup_repo</span><span class="p">():</span></div>
-<div class="viewcode-block" id="cleanup_repo"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.cleanup_repo">[docs]</a>
-    <span class="n">garbage_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;garbage&#39;</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">garbage_dir</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">garbage_dir</span><span class="p">)</span>
-
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Getting packages information from DB&quot;</span><span class="p">)</span>
-
-    <span class="n">pkgs</span> <span class="o">=</span> <span class="n">get_package_idname_dict</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
-
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Scanning repository for garbage in packages&quot;</span><span class="p">)</span>
-
-    <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pkgs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="n">lst</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="n">lst_l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
-    <span class="n">lst_i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-
-        <span class="n">lst_i</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">perc</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="k">if</span> <span class="n">lst_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">perc</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">perc</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lst_l</span><span class="p">)</span> <span class="o">/</span> <span class="n">lst_i</span><span class="p">)</span>
-
-        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">progress_write</span><span class="p">(</span>
-                <span class="s">&quot;    {:6.2f}% (package {})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">perc</span><span class="p">,</span>
-                    <span class="n">pkgs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="p">)</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+            <span class="n">repository_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">subdir</span>
             <span class="p">)</span>
 
-        <span class="n">cleanup_repo_package</span><span class="p">(</span><span class="n">pkgs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">cleanup_repo_package_pack</span><span class="p">(</span><span class="n">pkgs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
 
-    <span class="n">g_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">garbage_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> <span class="o">!=</span> <span class="n">full_path</span><span class="p">:</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">g_files</span><span class="p">:</span>
-        <span class="n">p1</span> <span class="o">=</span> <span class="n">garbage_dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">i</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">p1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">p1</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">isdirempty</span><span class="p">(</span><span class="n">p1</span><span class="p">):</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s">&quot;Moving {}</span><span class="se">\n</span><span class="s">       to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">file</span><span class="p">),</span> <span class="n">full_path</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
-<span class="c">#        pkgs[i] = org.wayround.aipsetup.pkgindex.get_package_path_string(</span>
-<span class="c">#            i, index_db=index_db</span>
-<span class="c">#            )</span>
+            <span class="n">sfile</span> <span class="o">=</span> <span class="n">full_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">sfile</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">sfile</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">full_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+<span class="k">def</span> <span class="nf">put_asp_to_index</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="put_asp_to_index"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.put_asp_to_index">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Moves file to aipsetup package index</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Processing file `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s">&quot;Wrong file type `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">check_package</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">parsed</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">package_name_parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s">&quot;Can&#39;t parse file name {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">file</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">file</span>
+                    <span class="p">]</span>
+
+
+                <span class="n">package_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_path_string</span><span class="p">(</span>
+                    <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">package_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s">&quot;Package path error `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="mi">11</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">package_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&#39;pack&#39;</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s">&quot;Can&#39;t get package `{}&#39; path string&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="n">ret</span> <span class="o">=</span> <span class="mi">12</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">_put_asps_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s">&quot;Action indefined for `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
 </pre></div></div>
 
           </div>

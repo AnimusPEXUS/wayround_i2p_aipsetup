@@ -50,8 +50,9 @@
             
   <h1>Source code for org.wayround.aipsetup.buildingsite</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Module for initiating building site. Later is required for farther package</span>
-<span class="sd">building.</span>
+<span class="sd">Module for initiating building site</span>
+
+<span class="sd">Later is required for farther package building.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -152,14 +153,14 @@
 
 <span class="k">def</span> <span class="nf">cli_name</span><span class="p">():</span>
 <div class="viewcode-block" id="cli_name"><a class="viewcode-back" href="../../../../buildingsite.html#org.wayround.aipsetup.buildingsite.cli_name">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents name for this module in CLI</span>
+<span class="sd">    aipsetup CLI interface part</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s">&#39;bsi&#39;</span>
 
 
 <span class="k">def</span> <span class="nf">exported_commands</span><span class="p">():</span></div>
 <div class="viewcode-block" id="exported_commands"><a class="viewcode-back" href="../../../../buildingsite.html#org.wayround.aipsetup.buildingsite.exported_commands">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This module commands for CLI interface</span>
+<span class="sd">    aipsetup CLI interface part</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="s">&#39;init&#39;</span><span class="p">:</span> <span class="n">buildingsite_init</span><span class="p">,</span>
@@ -168,7 +169,7 @@
 
 <span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span></div>
 <div class="viewcode-block" id="commands_order"><a class="viewcode-back" href="../../../../buildingsite.html#org.wayround.aipsetup.buildingsite.commands_order">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This module commands order for CLI interface</span>
+<span class="sd">    aipsetup CLI interface part</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span>
         <span class="s">&#39;init&#39;</span><span class="p">,</span>
@@ -179,8 +180,6 @@
 <span class="k">def</span> <span class="nf">buildingsite_init</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
 <div class="viewcode-block" id="buildingsite_init"><a class="viewcode-back" href="../../../../buildingsite.html#org.wayround.aipsetup.buildingsite.buildingsite_init">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initiate new building site dir</span>
-
-<span class="sd">    CLI command</span>
 
 <span class="sd">    [DIRNAME]</span>
 
@@ -204,8 +203,6 @@
 <span class="k">def</span> <span class="nf">buildingsite_apply_info</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span></div>
 <div class="viewcode-block" id="buildingsite_apply_info"><a class="viewcode-back" href="../../../../buildingsite.html#org.wayround.aipsetup.buildingsite.buildingsite_apply_info">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply info to building dir</span>
-
-<span class="sd">    CLI command</span>
 
 <span class="sd">    [DIRNAME [FILENAME]]</span>
 <span class="sd">    &quot;&quot;&quot;</span>

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>org.wayround.aipsetup.__init__ &mdash; aipsetup 3 documentation</title>
+    <title>org.wayround.aipsetup.pkgdeps &mdash; aipsetup 3 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -48,43 +48,27 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <h1>Source code for org.wayround.aipsetup.__init__</h1><div class="highlight"><pre>
-<span class="n">AIPSETUP_VERSION</span> <span class="o">=</span> <span class="s">&#39;3.0&#39;</span>
-
-
-<span class="n">AIPSETUP_CLI_MODULE_LIST</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s">&#39;info&#39;</span><span class="p">,</span>
-    <span class="s">&#39;buildscript&#39;</span><span class="p">,</span>
-    <span class="s">&#39;constitution&#39;</span><span class="p">,</span>
-
-    <span class="s">&#39;buildingsite&#39;</span><span class="p">,</span>
-    <span class="s">&#39;build&#39;</span><span class="p">,</span>
-    <span class="s">&#39;pack&#39;</span><span class="p">,</span>
-    <span class="s">&#39;package&#39;</span><span class="p">,</span>
-    <span class="s">&#39;pkgsnapshot&#39;</span><span class="p">,</span>
-    <span class="s">&#39;server&#39;</span><span class="p">,</span>
-    <span class="s">&#39;client&#39;</span><span class="p">,</span>
-    <span class="s">&#39;repoman&#39;</span><span class="p">,</span>
-
-    <span class="s">&#39;name&#39;</span><span class="p">,</span>
-    <span class="s">&#39;docbook&#39;</span><span class="p">,</span>
-    <span class="s">&#39;sysupdates&#39;</span><span class="p">,</span>
-
-    <span class="s">&#39;config&#39;</span><span class="p">,</span>
-    <span class="s">&#39;unicorn&#39;</span>
-    <span class="p">]</span>
+  <h1>Source code for org.wayround.aipsetup.pkgdeps</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">modules able to be accessed from CLI</span>
+<span class="sd">Package dependecy tools</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">AIPSETUP_CLI_MODULE_LIST_UNFUSED</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s">&#39;config&#39;</span><span class="p">,</span>
-    <span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">modules allowed to be accessed from CLI without</span>
-<span class="sd">proper aipsetup.conf</span>
-<span class="sd">&quot;&quot;&quot;</span>
-</pre></div>
+<span class="kn">import</span> <span class="nn">org.wayround.aipsetup.package</span>
+
+<span class="k">def</span> <span class="nf">get_asps_depending_on_asp</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span><span class="p">):</span>
+<div class="viewcode-block" id="get_asps_depending_on_asp"><a class="viewcode-back" href="../../../../pkgdeps.html#org.wayround.aipsetup.pkgdeps.get_asps_depending_on_asp">[docs]</a>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">package</span><span class="o">.</span><span class="n">list_files_installed_by_asp</span><span class="p">(</span>
+        <span class="n">destdir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span>
+        <span class="p">)</span>
+
+    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">prepend_path</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">destdir</span><span class="p">)</span>
+
+    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpaths</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+    <span class="n">elf_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c"># FIXME: finish</span>
+</pre></div></div>
 
           </div>
         </div>

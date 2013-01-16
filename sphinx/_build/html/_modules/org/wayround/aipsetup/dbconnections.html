@@ -49,6 +49,12 @@
           <div class="body">
             
   <h1>Source code for org.wayround.aipsetup.dbconnections</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Global aipsetup database connection facility</span>
+
+<span class="sd">Allows minimize DB access requests</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkgindex</span>
 <span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkginfo</span>
 <span class="kn">import</span> <span class="nn">org.wayround.aipsetup.pkglatest</span>
@@ -61,7 +67,10 @@
 <span class="n">_src_db_connection</span> <span class="o">=</span> <span class="bp">None</span>
 
 <span class="k">def</span> <span class="nf">info_db</span><span class="p">():</span>
-<div class="viewcode-block" id="info_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.info_db">[docs]</a>
+<div class="viewcode-block" id="info_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.info_db">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns info database connection creating it if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">global</span> <span class="n">_info_db_connection</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_info_db_connection</span><span class="p">:</span>
@@ -70,16 +79,22 @@
     <span class="k">return</span> <span class="n">_info_db_connection</span>
 
 <span class="k">def</span> <span class="nf">index_db</span><span class="p">():</span></div>
-<div class="viewcode-block" id="index_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.index_db">[docs]</a>
+<div class="viewcode-block" id="index_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.index_db">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns package index database connection creating it if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">global</span> <span class="n">_index_db_connection</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_index_db_connection</span><span class="p">:</span>
-        <span class="n">_index_db_connection</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">PackageIndex</span><span class="p">()</span>
+        <span class="n">_index_db_connection</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_index_connection</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">_index_db_connection</span>
 
 <span class="k">def</span> <span class="nf">latest_db</span><span class="p">():</span></div>
-<div class="viewcode-block" id="latest_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.latest_db">[docs]</a>
+<div class="viewcode-block" id="latest_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.latest_db">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns latests database connection creating it if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">global</span> <span class="n">_latest_db_connection</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_latest_db_connection</span><span class="p">:</span>
@@ -88,7 +103,10 @@
     <span class="k">return</span> <span class="n">_latest_db_connection</span>
 
 <span class="k">def</span> <span class="nf">tag_db</span><span class="p">():</span></div>
-<div class="viewcode-block" id="tag_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.tag_db">[docs]</a>
+<div class="viewcode-block" id="tag_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.tag_db">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns tag database connection creating it if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">global</span> <span class="n">_tag_db_connection</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_tag_db_connection</span><span class="p">:</span>
@@ -97,7 +115,10 @@
     <span class="k">return</span> <span class="n">_tag_db_connection</span>
 
 <span class="k">def</span> <span class="nf">src_db</span><span class="p">():</span></div>
-<div class="viewcode-block" id="src_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.src_db">[docs]</a>
+<div class="viewcode-block" id="src_db"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.src_db">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns sources database connection creating it if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">global</span> <span class="n">_src_db_connection</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_src_db_connection</span><span class="p">:</span>
@@ -105,8 +126,13 @@
 
     <span class="k">return</span> <span class="n">_src_db_connection</span>
 
+
+
 <span class="k">def</span> <span class="nf">close_all</span><span class="p">():</span></div>
-<div class="viewcode-block" id="close_all"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.close_all">[docs]</a>    <span class="k">global</span> <span class="n">_info_db_connection</span>
+<div class="viewcode-block" id="close_all"><a class="viewcode-back" href="../../../../dbconnections.html#org.wayround.aipsetup.dbconnections.close_all">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Closes all open DB connections</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_info_db_connection</span>
     <span class="k">global</span> <span class="n">_index_db_connection</span>
     <span class="k">global</span> <span class="n">_latest_db_connection</span>
     <span class="k">global</span> <span class="n">_tag_db_connection</span>
@@ -126,6 +152,8 @@
 
     <span class="k">if</span> <span class="n">_src_db_connection</span><span class="p">:</span>
         <span class="n">_src_db_connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span>
 </pre></div></div>
 
           </div>

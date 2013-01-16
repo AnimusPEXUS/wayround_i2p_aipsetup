@@ -50,14 +50,7 @@
             
   <h1>Source code for org.wayround.aipsetup.package</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Module for UNIX system related package actions</span>
-
-<span class="sd"> * install_asp into system;</span>
-<span class="sd"> * list installed;</span>
-<span class="sd"> * find issues;</span>
-<span class="sd"> * remove from system;</span>
-<span class="sd"> * completely build new package from source...</span>
-<span class="sd"> etc.</span>
+<span class="sd">Module for GNU/Linux system related package actions</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -75,7 +68,6 @@
 
 <span class="kn">import</span> <span class="nn">org.wayround.utils.archive</span>
 <span class="kn">import</span> <span class="nn">org.wayround.utils.checksum</span>
-<span class="kn">import</span> <span class="nn">org.wayround.utils.deps_c</span>
 <span class="kn">import</span> <span class="nn">org.wayround.utils.file</span>
 <span class="kn">import</span> <span class="nn">org.wayround.utils.format.elf</span>
 <span class="kn">import</span> <span class="nn">org.wayround.utils.format.elf_enum</span>
@@ -116,9 +108,7 @@
         <span class="s">&#39;remove&#39;</span>        <span class="p">:</span> <span class="n">package_remove</span><span class="p">,</span>
         <span class="s">&#39;complete&#39;</span>      <span class="p">:</span> <span class="n">package_complete</span><span class="p">,</span>
         <span class="s">&#39;build&#39;</span>         <span class="p">:</span> <span class="n">package_build</span><span class="p">,</span>
-        <span class="s">&#39;find&#39;</span>          <span class="p">:</span> <span class="n">package_find_files</span><span class="p">,</span>
-        <span class="s">&#39;index&#39;</span>         <span class="p">:</span> <span class="n">package_put_to_index_many</span><span class="p">,</span>
-        <span class="s">&#39;so_problems&#39;</span>   <span class="p">:</span> <span class="n">package_find_so_problems</span>
+        <span class="s">&#39;find&#39;</span>          <span class="p">:</span> <span class="n">package_find_files</span>
         <span class="p">}</span>
 
 <span class="k">def</span> <span class="nf">commands_order</span><span class="p">():</span>
@@ -130,9 +120,7 @@
         <span class="s">&#39;remove&#39;</span><span class="p">,</span>
         <span class="s">&#39;complete&#39;</span><span class="p">,</span>
         <span class="s">&#39;build&#39;</span><span class="p">,</span>
-        <span class="s">&#39;index&#39;</span><span class="p">,</span>
-        <span class="s">&#39;find&#39;</span><span class="p">,</span>
-        <span class="s">&#39;so_problems&#39;</span>
+        <span class="s">&#39;find&#39;</span>
         <span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">package_install</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
@@ -306,7 +294,7 @@
 <span class="sd">       1. Working with single dir, which is pointed or not pointed by</span>
 <span class="sd">          first parameter. In this mode, a tarball can be passed,</span>
 <span class="sd">          which name will be used to apply new package info to pointed</span>
-<span class="sd">          dir. By default DIRNAME is `.&#39; (current dir)</span>
+<span class="sd">          dir. By default DIRNAME is \`.\&#39; (current dir)</span>
 
 <span class="sd">       2. Working with multiple dirs. In this mode, tarball can&#39;t be</span>
 <span class="sd">          passed.</span>
@@ -405,9 +393,12 @@
 
 <span class="sd">    [-o] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]</span>
 
-<span class="sd">    -o 	    treat all tarballs as for one build.</span>
+<span class="sd">    ======= ====================================</span>
+<span class="sd">    options meaning</span>
+<span class="sd">    ======= ====================================</span>
+<span class="sd">    -o 	    treat all tarballs as for one build</span>
 <span class="sd">    -d      remove buildingsite on success</span>
-
+<span class="sd">    ======= ====================================</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">r_bds</span> <span class="o">=</span> <span class="s">&#39;-d&#39;</span> <span class="ow">in</span> <span class="n">opts</span>
@@ -447,11 +438,15 @@
 
 <span class="sd">    [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR</span>
 
-<span class="sd">       sub   - (default) filename contains LOOKFOR</span>
-<span class="sd">       re    - LOOKFOR is RegExp</span>
-<span class="sd">       beg   - file name starts with LOOKFOR</span>
-<span class="sd">       plain - Exact LOOKFOR match</span>
-<span class="sd">       fm    - LOOKFOR is file mask</span>
+<span class="sd">    ================ ===================================</span>
+<span class="sd">    -m option values meanings</span>
+<span class="sd">    ================ ===================================</span>
+<span class="sd">    sub              (default) filename contains LOOKFOR</span>
+<span class="sd">    re               LOOKFOR is RegExp</span>
+<span class="sd">    beg              file name starts with LOOKFOR</span>
+<span class="sd">    plain            Exact LOOKFOR match</span>
+<span class="sd">    fm               LOOKFOR is file mask</span>
+<span class="sd">    ================ ===================================</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">basedir</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span>
     <span class="k">if</span> <span class="s">&#39;-b&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
@@ -504,28 +499,14 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">package_put_to_index_many</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">package_check_package</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span></div>
-<div class="viewcode-block" id="package_put_to_index_many"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.package_put_to_index_many">[docs]</a><span class="sd">    Put package to repository and add it to index</span>
+<div class="viewcode-block" id="package_check_package"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.package_check_package">[docs]</a><span class="sd">    Check package for errors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:]</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Filenames required&quot;</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">put_files_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
-
-<span class="k">def</span> <span class="nf">package_check_package</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span></div>
-<div class="viewcode-block" id="package_check_package"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.package_check_package">[docs]</a>    <span class="nb">file</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nb">file</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="nb">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -537,95 +518,9 @@
     <span class="k">else</span><span class="p">:</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="n">check_package</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ret</span>
-
-<span class="k">def</span> <span class="nf">package_find_so_problems</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span></div>
-<div class="viewcode-block" id="package_find_so_problems"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.package_find_so_problems">[docs]</a><span class="sd">    Find so libraries missing in system and write package names</span>
-<span class="sd">    requiring those missing libraries.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="n">basedir</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span>
-<span class="c">#    if &#39;-b&#39; in opts:</span>
-<span class="c">#        basedir = opts[&#39;-b&#39;]</span>
-
-    <span class="n">problems</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deps_c</span><span class="o">.</span><span class="n">find_so_problems_in_linux_system</span><span class="p">(</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span>
-        <span class="p">)</span>
-
-    <span class="n">libs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">problems</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="n">libs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-    <span class="n">log</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">Log</span><span class="p">(</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&#39;problems&#39;</span>
-        <span class="p">)</span>
-
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Writing log to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">log_filename</span><span class="p">))</span>
-
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Gathering asps file tree. Please wait...&quot;</span><span class="p">)</span>
-    <span class="n">tree</span> <span class="o">=</span> <span class="n">list_installed_asps_and_their_files</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Now working&quot;</span><span class="p">)</span>
-
-    <span class="n">total_problem_packages_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
-    <span class="n">count_checked</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">libs_c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">libs</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">libs</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Library `{}&#39; required by following files:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-        <span class="n">files</span> <span class="o">=</span> <span class="n">problems</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;    {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
-
-
-        <span class="n">pkgs2</span> <span class="o">=</span> <span class="n">find_file_in_files_installed_by_asps</span><span class="p">(</span>
-            <span class="n">basedir</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;end&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">predefined_asp_tree</span><span class="o">=</span><span class="n">tree</span>
-            <span class="p">)</span>
-
-        <span class="n">pkgs2_l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pkgs2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">pkgs2_l</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-        <span class="n">count_checked</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;  Contained in problem packages:&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">pkgs2_l</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;    {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
-
-        <span class="n">total_problem_packages_list</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkgs2_l</span><span class="p">)</span>
-
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s">&quot;Checked libraries: {} of {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count_checked</span><span class="p">,</span> <span class="n">libs_c</span><span class="p">)</span>
-            <span class="p">)</span>
-
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;---------------------------------&#39;</span><span class="p">)</span>
-
-    <span class="n">pkgs</span> <span class="o">=</span> <span class="n">find_file_in_files_installed_by_asps</span><span class="p">(</span>
-        <span class="n">basedir</span><span class="p">,</span> <span class="n">libs</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;end&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">predefined_asp_tree</span><span class="o">=</span><span class="n">tree</span>
-        <span class="p">)</span>
-
-    <span class="n">pkgs_l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pkgs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-    <span class="n">pkgs_l</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Libs found in packages:&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pkgs_l</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;    {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
-
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Total Problem Packages List:&quot;</span><span class="p">)</span>
-    <span class="n">total_problem_packages_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">total_problem_packages_list</span><span class="p">)</span>
-    <span class="n">total_problem_packages_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">total_problem_packages_list</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;    {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-    <span class="n">log</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Log written to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">log_filename</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">ret</span>
+
 
 <span class="k">def</span> <span class="nf">check_package</span><span class="p">(</span><span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span></div>
@@ -777,8 +672,13 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">check_package_aipsetup2</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-</div>
-<div class="viewcode-block" id="check_package_aipsetup2"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.check_package_aipsetup2">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="check_package_aipsetup2"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.check_package_aipsetup2">[docs]</a><span class="sd">    Check aipsetup v2 package consistency</span>
+
+<span class="sd">    :rtype: ``0`` - if no errors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">filename</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.tar.xz&#39;</span><span class="p">):</span>
@@ -835,9 +735,60 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<span class="k">def</span> <span class="nf">remove_package</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">tarobj_check_member_sum</span><span class="p">(</span><span class="n">tarobj</span><span class="p">,</span> <span class="n">sums</span><span class="p">,</span> <span class="n">member_name</span><span class="p">):</span>
 </div>
-<div class="viewcode-block" id="remove_package"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.remove_package">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="viewcode-block" id="tarobj_check_member_sum"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.tarobj_check_member_sum">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check tarball member checksum.</span>
+
+<span class="sd">    Sums must be supplied with sums parameter, which must be dict of building::</span>
+
+<span class="sd">        sums == {&#39;filename&#39;:&#39;checksum&#39;}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">fobj</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">archive</span><span class="o">.</span><span class="n">tar_member_get_extract_file</span><span class="p">(</span>
+        <span class="n">tarobj</span><span class="p">,</span>
+        <span class="n">member_name</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fobj</span><span class="p">,</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">ExFileObject</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">summ</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">checksum</span><span class="o">.</span><span class="n">make_fileobj_checksum</span><span class="p">(</span><span class="n">fobj</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">summ</span> <span class="o">==</span> <span class="n">sums</span><span class="p">[</span><span class="n">member_name</span><span class="p">]:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="n">fobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
+
+<span class="k">def</span> <span class="nf">remove_package</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="remove_package"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.remove_package">[docs]</a><span class="sd">    Remove named package (all it&#39;s installed asps) from system.</span>
+
+<span class="sd">    Before package removal, aipsetup checks whatever package removal is</span>
+<span class="sd">    restricted. This can be overridden with ``force=True`` option.</span>
+
+<span class="sd">    :param name: package name. e.g. ``gajim``, ``php`` or ``ruby``. List of</span>
+<span class="sd">        installed package names can be retrieved with command ``aipsetup pkg</span>
+<span class="sd">        list``</span>
+
+<span class="sd">    :param destdir: path to root directory of target system</span>
+
+<span class="sd">    :param force: force package removal even if it is not registered in info</span>
+<span class="sd">        record system</span>
+
+<span class="sd">    :param mute: suppress status output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">info</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_package_info_record</span><span class="p">(</span>
         <span class="n">name</span>
@@ -882,9 +833,32 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
+
+
 <span class="k">def</span> <span class="nf">install_package</span><span class="p">(</span>
     <span class="n">name</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span></div>
 <div class="viewcode-block" id="install_package"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.install_package">[docs]</a>    <span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Install package</span>
+
+<span class="sd">    This function works in two modes:</span>
+
+<span class="sd">        One mode, is when name is package name registered with package database</span>
+<span class="sd">        records. In this case, aipsetup finds latest asp package located in</span>
+<span class="sd">        package index directory and calls this(install_package) function with</span>
+<span class="sd">        ``name == &#39;full path to asp&#39;``</span>
+
+<span class="sd">        Second mode, is when name is pointing on existing file. In this case</span>
+<span class="sd">        next sequence is done:</span>
+
+<span class="sd">            #. install package using :func:`install_asp`</span>
+
+<span class="sd">            #. check whatever package is reducible, and if it is — reduce older</span>
+<span class="sd">               asps from system using :func:`reduce_asps`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
 
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -974,27 +948,15 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">tarobj_check_member_sum</span><span class="p">(</span><span class="n">tarobj</span><span class="p">,</span> <span class="n">sums</span><span class="p">,</span> <span class="n">member_name</span><span class="p">):</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="bp">True</span></div>
-<div class="viewcode-block" id="tarobj_check_member_sum"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.tarobj_check_member_sum">[docs]</a>    <span class="n">fobj</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">archive</span><span class="o">.</span><span class="n">tar_member_get_extract_file</span><span class="p">(</span>
-        <span class="n">tarobj</span><span class="p">,</span>
-        <span class="n">member_name</span>
-        <span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fobj</span><span class="p">,</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">ExFileObject</span><span class="p">):</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">summ</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">checksum</span><span class="o">.</span><span class="n">make_fileobj_checksum</span><span class="p">(</span><span class="n">fobj</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">summ</span> <span class="o">==</span> <span class="n">sums</span><span class="p">[</span><span class="n">member_name</span><span class="p">]:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="n">fobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">ret</span>
-
-
 <span class="k">def</span> <span class="nf">install_asp</span><span class="p">(</span><span class="n">asp_name</span><span class="p">,</span> <span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">):</span>
 </div>
-<div class="viewcode-block" id="install_asp"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.install_asp">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="viewcode-block" id="install_asp"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.install_asp">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Install asp package pointed by ``asp_name`` path.</span>
+
+<span class="sd">    See also :func:`install_package`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">destdir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">destdir</span><span class="p">)</span>
 
@@ -1240,7 +1202,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removes named asp from destdir system.</span>
 
-<span class="sd">    exclude - can be None or list of files which is NOT PREPENDED WITH DESTDIR</span>
+<span class="sd">    :param exclude: can be ``None`` or ``list`` of files which is NOT</span>
+<span class="sd">        PREPENDED WITH DESTDIR</span>
+
+<span class="sd">    :param only_remove_package_registration: do not actually remove files from</span>
+<span class="sd">        system, only remove it&#39;s registration</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">exclude</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">exclude</span><span class="p">)</span>
@@ -1388,12 +1354,18 @@
 
 <span class="k">def</span> <span class="nf">reduce_asps</span><span class="p">(</span><span class="n">reduce_to</span><span class="p">,</span> <span class="n">reduce_what</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 </div>
-<div class="viewcode-block" id="reduce_asps"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.reduce_asps">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="viewcode-block" id="reduce_asps"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.reduce_asps">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduces(removes) packages listed in ``reduce_what`` list, remaining all</span>
+<span class="sd">    files belonging to package named in ``reduce_to`` string parameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reduce_what</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;reduce_what must be a list of strings&quot;</span><span class="p">)</span>
 
     <span class="n">reduce_to</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">reduce_to</span><span class="p">)</span>
+
     <span class="n">reduce_to</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">rm_ext_from_pkg_name</span><span class="p">(</span><span class="n">reduce_to</span><span class="p">)</span>
         <span class="p">)</span>
@@ -1433,8 +1405,9 @@
 
 
 <span class="k">def</span> <span class="nf">list_installed_asps</span><span class="p">(</span><span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="n">destdir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">destdir</span><span class="p">)</span></div>
-<div class="viewcode-block" id="list_installed_asps"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.list_installed_asps">[docs]</a>
+</div>
+<div class="viewcode-block" id="list_installed_asps"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.list_installed_asps">[docs]</a>    <span class="n">destdir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">destdir</span><span class="p">)</span>
+
     <span class="n">listdir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
         <span class="n">destdir</span> <span class="o">+</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;installed_pkg_dir&#39;</span><span class="p">]</span>
         <span class="p">)</span>
@@ -1458,19 +1431,6 @@
 
         <span class="n">ret</span> <span class="o">=</span> <span class="n">bases</span>
 
-    <span class="k">return</span> <span class="n">ret</span>
-
-<span class="k">def</span> <span class="nf">list_installed_asps_and_their_files</span><span class="p">(</span><span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-</div>
-<div class="viewcode-block" id="list_installed_asps_and_their_files"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.list_installed_asps_and_their_files">[docs]</a>    <span class="n">lst</span> <span class="o">=</span> <span class="n">list_installed_asps</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
-
-    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-        <span class="n">ret</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">list_files_installed_by_asp</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
-
-<span class="c">#    pprint.pprint(ret)</span>
-<span class="c">#    exit(0)</span>
     <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -1555,8 +1515,8 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">list_files_installed_by_asp</span><span class="p">(</span>
-        <span class="n">destdir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">True</span></div>
-<div class="viewcode-block" id="list_files_installed_by_asp"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.list_files_installed_by_asp">[docs]</a>        <span class="p">):</span>
+    <span class="n">destdir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">True</span></div>
+<div class="viewcode-block" id="list_files_installed_by_asp"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.list_files_installed_by_asp">[docs]</a>    <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads list of files installed by named asp.</span>
 
@@ -1567,7 +1527,8 @@
     <span class="n">destdir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">destdir</span><span class="p">)</span>
 
     <span class="n">list_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
-        <span class="n">destdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;installed_pkg_dir&#39;</span><span class="p">]</span>
+        <span class="n">destdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span>
+        <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;installed_pkg_dir&#39;</span><span class="p">]</span>
         <span class="p">)</span>
 
     <span class="n">pkg_list_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_dir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">)</span>
@@ -1612,42 +1573,29 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-
-<span class="k">def</span> <span class="nf">check_list_of_installed_packages_and_asps</span><span class="p">(</span><span class="n">in_dict</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">list_installed_asps_and_their_files</span><span class="p">(</span><span class="n">destdir</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 </div>
-<div class="viewcode-block" id="check_list_of_installed_packages_and_asps"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.check_list_of_installed_packages_and_asps">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="viewcode-block" id="list_installed_asps_and_their_files"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.list_installed_asps_and_their_files">[docs]</a>    <span class="n">lst</span> <span class="o">=</span> <span class="n">list_installed_asps</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
 
-    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">in_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-    <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-    <span class="n">errors</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_dict</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-
-            <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span>
-
-            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Package with too many ASPs found `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-            <span class="n">in_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-
-                <span class="k">print</span><span class="p">(</span><span class="s">&quot;       {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="n">errors</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Total erroneous packages: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">errors</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+        <span class="n">ret</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">list_files_installed_by_asp</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
 
 
-
 <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">source_files</span><span class="p">,</span> <span class="n">remove_buildingsite_after_success</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span></div>
-<div class="viewcode-block" id="build"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.build">[docs]</a>
+    <span class="sd">&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="build"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.build">[docs]</a><span class="sd">    Gathering function for all package building process</span>
+
+<span class="sd">    Uses :func:`org.wayround.aipsetup.buildingsite.init` to create building site.</span>
+<span class="sd">    Farther process controlled by :func:`complete`.</span>
+
+<span class="sd">    :param source_files: tarball name or list of them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+
     <span class="n">par_res</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">source_name_parse</span><span class="p">(</span>
         <span class="n">source_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">mute</span><span class="o">=</span><span class="bp">True</span>
@@ -1664,8 +1612,10 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
 
-        <span class="n">package_info</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_info_rec_by_tarball_filename</span><span class="p">(</span>
-            <span class="n">source_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">package_info</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkginfo</span><span class="o">.</span><span class="n">get_info_rec_by_tarball_filename</span><span class="p">(</span>
+                <span class="n">source_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">package_info</span><span class="p">:</span>
@@ -1781,6 +1731,14 @@
     <span class="n">remove_buildingsite_after_success</span><span class="o">=</span><span class="bp">False</span>
     <span class="p">):</span>
 
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies package information on building site, does building and packaging</span>
+<span class="sd">    and optionally deletes building site after everything is done.</span>
+
+<span class="sd">    :param main_src_file: used with function</span>
+<span class="sd">        :func:`buildingsite.apply_info &lt;org.wayround.aipsetup.buildingsite.apply_info&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">rp</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">building_site</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
 
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -1857,6 +1815,12 @@
     <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    instr can be a single query or list of queries.</span>
+
+<span class="sd">    :param mode: see in :func:`find_file_in_files_installed_by_asp`</span>
+<span class="sd">    :param sub_mute: passed to :func:`find_file_in_files_installed_by_asp`</span>
+
+<span class="sd">    :param predefined_asp_tree: if this paramter passed, use it instead of</span>
+<span class="sd">        manually creating it</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1930,6 +1894,22 @@
 <div class="viewcode-block" id="find_file_in_files_installed_by_asp"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.find_file_in_files_installed_by_asp">[docs]</a>    <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    instr can be a single query or list of queries.</span>
+
+<span class="sd">    ===== ======================================</span>
+<span class="sd">    name  meaning</span>
+<span class="sd">    ===== ======================================</span>
+<span class="sd">    re    instr is or list of regular expresions</span>
+<span class="sd">    plain instr is or list of plain texts</span>
+<span class="sd">    sub   instr is or list of substrings</span>
+<span class="sd">    beg   instr is or list of beginnings</span>
+<span class="sd">    fm    instr is or list of file masks</span>
+<span class="sd">    end   instr is or list of endings</span>
+<span class="sd">    ===== ======================================</span>
+
+<span class="sd">    :param instr: data which function must look for</span>
+<span class="sd">    :param mode: mode inf which function must operate:</span>
+<span class="sd">    :param predefined_file_list: use existing file list instead of creating own</span>
+<span class="sd">    :param pkgname: take file list from this asp package</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2003,121 +1983,6 @@
             <span class="n">ret</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">out_list</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ret</span>
-
-
-<span class="k">def</span> <span class="nf">put_files_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
-</div>
-<div class="viewcode-block" id="put_files_to_index"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.put_files_to_index">[docs]</a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
-            <span class="n">put_file_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="mi">0</span>
-
-<span class="k">def</span> <span class="nf">_put_files_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">subdir</span><span class="p">):</span>
-</div>
-    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="n">repository_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span>
-
-
-    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-
-        <span class="n">full_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
-            <span class="n">repository_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">subdir</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> <span class="o">!=</span> <span class="n">full_path</span><span class="p">:</span>
-
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s">&quot;Moving {}</span><span class="se">\n</span><span class="s">       to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">file</span><span class="p">),</span> <span class="n">full_path</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-
-            <span class="n">sfile</span> <span class="o">=</span> <span class="n">full_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">sfile</span><span class="p">):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">sfile</span><span class="p">)</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">full_path</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
-
-<span class="k">def</span> <span class="nf">put_file_to_index</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
-<div class="viewcode-block" id="put_file_to_index"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.put_file_to_index">[docs]</a>
-    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Processing file `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)))</span>
-
-    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="s">&quot;Wrong file type `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="mi">10</span>
-    <span class="k">else</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="n">check_package</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">parsed</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">package_name_parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="s">&quot;Can&#39;t parse file name {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">file</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-                <span class="n">files</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="nb">file</span>
-                    <span class="p">]</span>
-
-
-                <span class="n">package_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">pkgindex</span><span class="o">.</span><span class="n">get_package_path_string</span><span class="p">(</span>
-                    <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
-                    <span class="p">)</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">package_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="s">&quot;Package path error `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                            <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
-                            <span class="p">)</span>
-                        <span class="p">)</span>
-                    <span class="n">ret</span> <span class="o">=</span> <span class="mi">11</span>
-                <span class="k">else</span><span class="p">:</span>
-
-                    <span class="n">path</span> <span class="o">=</span> <span class="n">package_path</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s">&#39;pack&#39;</span>
-
-                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="s">&quot;Can&#39;t get package `{}&#39; path string&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                                <span class="n">parsed</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
-                                <span class="p">)</span>
-                            <span class="p">)</span>
-                        <span class="n">ret</span> <span class="o">=</span> <span class="mi">12</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">_put_files_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s">&quot;Action indefined for `{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-                <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ret</span>
-
-
-<span class="k">def</span> <span class="nf">get_asps_depending_on_asp</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span><span class="p">):</span>
-</div>
-<div class="viewcode-block" id="get_asps_depending_on_asp"><a class="viewcode-back" href="../../../../package.html#org.wayround.aipsetup.package.get_asps_depending_on_asp">[docs]</a>    <span class="n">files</span> <span class="o">=</span> <span class="n">list_files_installed_by_asp</span><span class="p">(</span><span class="n">destdir</span><span class="p">,</span> <span class="n">asp_name</span><span class="p">,</span> <span class="n">mute</span><span class="p">)</span>
-
-    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">prepend_path</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">destdir</span><span class="p">)</span>
-
-    <span class="n">files</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpaths</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-
-    <span class="n">elf_files</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c"># FIXME: finish</span>
 </pre></div></div>
 
           </div>
