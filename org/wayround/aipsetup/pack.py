@@ -18,6 +18,7 @@ import org.wayround.utils.checksum
 import org.wayround.utils.archive
 import org.wayround.utils.deps_c
 import org.wayround.utils.path
+import org.wayround.utils.format.elf
 
 
 # NOTE: this list is suspiciously similar to what in complete
@@ -125,7 +126,7 @@ def cli_name():
     """
     aipsetup CLI related functionality
     """
-    return 'pk'
+    return 'pack'
 
 def exported_commands():
     """
@@ -425,7 +426,8 @@ def destdir_deps_c(buildingsite):
 
                 if os.path.isfile(filename) and os.path.exists(filename):
 
-                    dep = org.wayround.utils.deps_c.elf_deps(filename)
+                    elf = org.wayround.utils.format.elf.ELF(filename)
+                    dep = elf.needed_libs_list
 
                     if isinstance(dep, list):
                         elfs += 1

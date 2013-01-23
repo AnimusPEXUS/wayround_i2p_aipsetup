@@ -1,4 +1,8 @@
 
+"""
+Version comparison utilities
+"""
+
 import logging
 
 import org.wayround.aipsetup.name

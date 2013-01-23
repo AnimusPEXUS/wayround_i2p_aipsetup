@@ -1,4 +1,8 @@
 
+"""
+Package tags editor
+"""
+
 import os.path
 
 from gi.repository import Gtk

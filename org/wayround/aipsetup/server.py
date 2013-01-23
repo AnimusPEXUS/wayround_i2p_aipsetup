@@ -33,7 +33,7 @@ def edefault(status, message, traceback, version):
         )
 
 def cli_name():
-    return 'srv'
+    return 'server'
 
 def exported_commands():
     return {

@@ -1,4 +1,5 @@
 AIPSETUP_VERSION = '3.0'
+print("AIP Setup version {}".format(AIPSETUP_VERSION))
 
 
 AIPSETUP_CLI_MODULE_LIST = [
@@ -14,6 +15,8 @@ AIPSETUP_CLI_MODULE_LIST = [
     'server',
     'client',
     'repoman',
+    'pkgdeps',
+    'clean',
 
     'name',
     'docbook',

@@ -145,7 +145,7 @@ def cli_name():
     """
     Part of aipsetup CLI interface
     """
-    return 'cfg'
+    return 'config'
 
 
 def config_print_example(opts, args):

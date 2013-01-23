@@ -105,7 +105,7 @@ def cli_name():
     """
     aipsetup CLI interface part
     """
-    return 'bsi'
+    return 'bsite'
 
 
 def exported_commands():

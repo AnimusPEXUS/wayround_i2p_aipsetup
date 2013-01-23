@@ -87,7 +87,7 @@ def cli_name():
     """
     Internally used by aipsetup
     """
-    return 'n'
+    return 'name'
 
 
 def exported_commands():

@@ -7,10 +7,15 @@ Detecting collisions and various errors and garbage
 
 import logging
 import os
+import shutil
+import functools
 
 import org.wayround.aipsetup.package
+import org.wayround.aipsetup.pkgindex
 
+import org.wayround.utils.path
 import org.wayround.utils.deps_c
+import org.wayround.utils.format.elf
 
 def cli_name():
     return 'clean'
@@ -21,15 +26,25 @@ def exported_commands():
         'so_problems':  clean_find_so_problems,
         'packages_with_not_reduced_asps':
                         clean_check_list_of_installed_packages_and_asps_auto,
-        'repo_clean':   repoman_cleanup_repo
+        'repo_clean':   clean_cleanup_repo,
+        'check_elfs_readiness':
+                        clean_check_elfs_readiness
         }
 
 def commands_order():
     return [
         'packages_with_not_reduced_asps',
         'so_problems',
-        'repo_clean'
+        'repo_clean',
+        'check_elfs_readiness'
         ]
+
+def clean_check_elfs_readiness(opts, args):
+
+
+    check_elfs_readiness()
+
+    return 0
 
 def clean_find_so_problems(opts, args):
     """
@@ -126,11 +141,39 @@ def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
     Searches for packages with more when one asp installed
     """
 
+    logging.info("Working. Please wait, it will be not long...")
+
     return check_list_of_installed_packages_and_asps_auto()
 
-def repoman_cleanup_repo(opts, args):
-    org.wayround.aipsetup.clean.cleanup_repo()
+
+def clean_cleanup_repo(opts, args):
+    cleanup_repo()
     return 0
+
+def check_elfs_readiness(mute=False):
+
+    # TODO: complete
+
+    paths = org.wayround.utils.deps_c.elf_paths()
+    elfs = org.wayround.utils.deps_c.find_all_elf_files(paths, verbose=True)
+
+    elfs = org.wayround.utils.path.realpaths(elfs)
+
+    elfs.sort()
+
+    elfs_c = len(elfs)
+    elfs_i = 0
+
+    for i in elfs:
+        elfs_i += 1
+
+        if not mute:
+            logging.info("({} of {}) Trying to read file {}".format(elfs_i, elfs_c , i))
+
+        org.wayround.utils.format.elf.ELF(i)
+
+    return 0
+
 
 def check_list_of_installed_packages_and_asps_auto():
 
@@ -247,7 +290,7 @@ def cleanup_repo_package_pack(name):
 
         if os.path.exists(p1):
 
-            put_asp_to_index(
+            org.wayround.aipsetup.pkgindex.put_asp_to_index(
                 path + os.path.sep + i
                 )
 
@@ -310,7 +353,7 @@ def cleanup_repo_package(name):
 
     path = org.wayround.utils.path.abspath(path)
 
-    create_required_dirs_at_package(path)
+    org.wayround.aipsetup.pkgindex.create_required_dirs_at_package(path)
 
     files = os.listdir(path)
 
@@ -340,7 +383,7 @@ def cleanup_repo():
 
     logging.info("Getting packages information from DB")
 
-    pkgs = get_package_idname_dict(None)
+    pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(None)
 
     logging.info("Scanning repository for garbage in packages")
 

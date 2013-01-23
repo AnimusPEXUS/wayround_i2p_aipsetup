@@ -122,7 +122,7 @@ else:
                                 try:
                                     ret = commands[args[1]](opts, args[2:])
                                 except KeyboardInterrupt:
-                                    raise
+                                    logging.error("Interrupted by user")
                                 except:
                                     logging.exception("Some error. See below")
                                     ret = 102

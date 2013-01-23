@@ -16,7 +16,7 @@ def commands_order():
         ]
 
 def cli_name():
-    return 'up'
+    return 'sys_updates'
 
 
 def sysupdates_all_actions(opts, args):

@@ -34,7 +34,7 @@ def cli_name():
     """
     aipsetup CLI interface part
     """
-    return 'sc'
+    return 'script'
 
 
 def buildscript_list_files(opts, args):

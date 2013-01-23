@@ -20,7 +20,7 @@ def cli_name():
     """
     aipsetup CLI interface part
     """
-    return 'bd'
+    return 'build'
 
 def exported_commands():
     """

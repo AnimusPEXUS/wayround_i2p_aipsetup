@@ -21,7 +21,6 @@ import org.wayround.utils.archive
 import org.wayround.utils.checksum
 import org.wayround.utils.file
 import org.wayround.utils.format.elf
-import org.wayround.utils.format.elf_enum
 import org.wayround.utils.log
 import org.wayround.utils.opts
 import org.wayround.utils.path
@@ -1212,10 +1211,9 @@ def remove_asp(
             logging.info("Excluding shared objects")
             shared_objects = set()
             for i in lines:
-                if os.path.isfile(i):
-                    if (org.wayround.utils.format.elf.get_elf_file_type(i) ==
-                        org.wayround.utils.format.elf.ET_DYN):
-                        shared_objects.add(i)
+                e = org.wayround.utils.format.elf.ELF(i)
+                if e.elf_type_name == 'ET_DYN':
+                    shared_objects.add(i)
 
             if exclude:
                 shared_objects -= set(exclude)
@@ -1394,7 +1392,9 @@ def list_installed_packages(mask='*', destdir='/', mute=False):
     if not isinstance(asps, list):
         logging.error("Error getting list of installed ASPs")
     else:
+
         lst = set()
+
         for i in asps:
             parsed = org.wayround.aipsetup.name.package_name_parse(i, mute=True)
 
@@ -1409,25 +1409,6 @@ def list_installed_packages(mask='*', destdir='/', mute=False):
         lst.sort()
 
         ret = lst
-
-    return ret
-
-def latest_installed_package_s_asp(name, destdir='/'):
-
-    # TODO: attention to this function is required
-
-    lst = list_installed_package_s_asps(name, destdir)
-
-    ret = None
-    if len(lst) > 0:
-        latest = max(
-            lst,
-            key=functools.cmp_to_key(
-                org.wayround.aipsetup.version.package_version_comparator
-                )
-            )
-
-        ret = latest
 
     return ret
 
@@ -1528,12 +1509,55 @@ def list_installed_packages_and_asps(destdir='/'):
 
 def list_installed_asps_and_their_files(destdir='/', mute=True):
 
+    """
+    Returns dict with asp names as keys and list of files whey installs as
+    contents
+    """
+
     lst = list_installed_asps(destdir, mute)
+    lst_c = len(lst)
 
     ret = dict()
 
+    lst_i = 0
+
+    if not mute:
+        logging.info("Getting file lists of all asps ")
+
     for i in lst:
         ret[i] = list_files_installed_by_asp(destdir, i, mute)
+
+
+        lst_i += 1
+
+        if not mute:
+            org.wayround.utils.file.progress_write(
+                "    {} of {} ({:.2f}%)".format(
+                    lst_i,
+                    lst_c,
+                    100.0 / (lst_c / lst_i)
+                    )
+                )
+    print()
+
+    return ret
+
+def latest_installed_package_s_asp(name, destdir='/'):
+
+    # TODO: attention to this function is required
+
+    lst = list_installed_package_s_asps(name, destdir)
+
+    ret = None
+    if len(lst) > 0:
+        latest = max(
+            lst,
+            key=functools.cmp_to_key(
+                org.wayround.aipsetup.version.package_version_comparator
+                )
+            )
+
+        ret = latest
 
     return ret
 
