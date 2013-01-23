@@ -23,7 +23,7 @@ Modules
 All module names are relative to org.wayround.aipsetup package
 
 
-* Package building modules
+* Package building modules:
 
  * :mod:`buildscript <org.wayround.aipsetup.buildscript>`
 
@@ -39,86 +39,105 @@ All module names are relative to org.wayround.aipsetup package
 
   * :func:`package.complete() <org.wayround.aipsetup.package.complete>`
 
-* Package Installing and Uninstalling modules
+* Package Installing and Uninstalling modules:
 
  * :mod:`package <org.wayround.aipsetup.package>`
 
- * :mod:`pkgsnapshot <org.wayround.aipsetup.pkgsnapshot>` - installation 
-   environment snapshots
-   
-* Other package tools:
-  
-  * :mod:`pkgdeps <org.wayround.aipsetup.pkgdeps>`
-  
-  * :mod:`pkgindex <org.wayround.aipsetup.pkgindex>` index sources, maintain 
-    repository
+ * :mod:`pkgsnapshot <org.wayround.aipsetup.pkgsnapshot>`
+   - installation environment snapshots
 
-* Modules for serving and getting packages
+* Other package tools:
+
+  * :mod:`pkgdeps <org.wayround.aipsetup.pkgdeps>`
+
+  * :mod:`pkgindex <org.wayround.aipsetup.pkgindex>`
+    - index sources, maintain repository
+
+* Modules for serving and getting packages:
 
  * :mod:`server <org.wayround.aipsetup.server>`
 
-  * :mod:`serverui <org.wayround.aipsetup.serverui>` - server UI module
+  * :mod:`serverui <org.wayround.aipsetup.serverui>`
+    - server UI module
 
  * :mod:`client <org.wayround.aipsetup.client>`
+ 
+ * :mod:`unicorn <org.wayround.aipsetup.unicorn>`
+   - manipulate UNICORN installation base dir
 
 * GNU/Linux system tools:
 
- * :mod:`docbook <org.wayround.aipsetup.docbook>` - automated docbook 
-   schemas installed
+ * :mod:`docbook <org.wayround.aipsetup.docbook>`
+   - automated docbook schemas installed
 
- * :mod:`clean <org.wayround.aipsetup.clean>` - system and aipsetup internals 
-   cleaning utilities
+ * :mod:`clean <org.wayround.aipsetup.clean>`
+   - system and aipsetup internals cleaning utilities
+
+ * :mod:`sysupdates <org.wayround.aipsetup.sysupdates>`
+   - Update system bindings and such
 
 * Configuration
 
- * :mod:`config <org.wayround.aipsetup.config>` - aipsetup config tools
+ * :mod:`config <org.wayround.aipsetup.config>`
+   - aipsetup config tools
 
- * :mod:`constitution <org.wayround.aipsetup.constitution>` - host, build, 
-   target
+ * :mod:`constitution <org.wayround.aipsetup.constitution>`
+   - host, build, target
 
 * Package info related modules
 
- * :mod:`info <org.wayround.aipsetup.info>` - module to work with package info 
-   files on disk
+ * :mod:`info <org.wayround.aipsetup.info>`
+   - module to work with package info files on disk
 
- * :mod:`name <org.wayround.aipsetup.name>` - package name parsing functions
+ * :mod:`name <org.wayround.aipsetup.name>`
+   - package name parsing functions
 
- * :mod:`pkginfo <org.wayround.aipsetup.pkginfo>` - package info related 
-   functions
-   
- * :mod:`pkglatest <org.wayround.aipsetup.pkglatest>` - control on information 
-   about latest source tarballs or latest asp packages
+ * :mod:`pkginfo <org.wayround.aipsetup.pkginfo>`
+   - package info related functions
 
- * :mod:`pkgtag <org.wayround.aipsetup.pkgtag>` - packages tagging functionality
+ * :mod:`pkglatest <org.wayround.aipsetup.pkglatest>`
+   - control on information about latest source tarballs or latest asp packages
+
+ * :mod:`pkgtag <org.wayround.aipsetup.pkgtag>`
+   - packages tagging functionality
+
+ * :mod:`version <org.wayround.aipsetup.version>`
+   - version comparison utilities
 
  * Editors
 
-  * :mod:`infoeditor <org.wayround.aipsetup.infoeditor>` - edit package info on 
-    disk and update pkginfo database
+  * :mod:`infoeditor <org.wayround.aipsetup.infoeditor>`
+    - edit package info on disk and update pkginfo database
 
-  * :mod:`latesteditor <org.wayround.aipsetup.latesteditor>` - latests pacakges 
-    editor
-    
+  * :mod:`latesteditor <org.wayround.aipsetup.latesteditor>`
+    - latests pacakges editor
+
+  * :mod:`tageditor <org.wayround.aipsetup.tageditor>`
+    - package tags editor
+
 
 * aipsetup internals:
 
- * :mod:`dbconnections <org.wayround.aipsetup.dbconnections>` - aipsetup global 
-   database connector
+ * :mod:`dbconnections <org.wayround.aipsetup.dbconnections>`
+   - aipsetup global database connector
 
- * :mod:`gtk <org.wayround.aipsetup.gtk>` - aipsetup global gtk connection 	 
+ * :mod:`gtk <org.wayround.aipsetup.gtk>`
+   - aipsetup global gtk connection
 
- * :mod:`help <org.wayround.aipsetup.help>` - aipsetup help system 	 
- 	
- * :mod:`repoman <org.wayround.aipsetup.repoman>` - gathering aipsetup CLI 
-   interface for 
-   :mod:`pkgindex <org.wayround.aipsetup.pkgindex>`,
-   :mod:`pkginfo <org.wayround.aipsetup.pkginfo>`,
-   :mod:`pkglatest <org.wayround.aipsetup.pkglatest>` 
-   and 
-   :mod:`pkgtag <org.wayround.aipsetup.pkgtag>` 
-   modules
-  	 
- 	
+ * :mod:`help <org.wayround.aipsetup.help>`
+   - aipsetup help system
+
+ * :mod:`repoman <org.wayround.aipsetup.repoman>`
+   - gathering aipsetup CLI interface for following modules:
+
+   * :mod:`pkgindex <org.wayround.aipsetup.pkgindex>`;
+
+   * :mod:`pkginfo <org.wayround.aipsetup.pkginfo>`;
+
+   * :mod:`pkglatest <org.wayround.aipsetup.pkglatest>`;
+
+   * :mod:`pkgtag <org.wayround.aipsetup.pkgtag>`
+
 
 
 Indices and tables
@@ -127,4 +146,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
