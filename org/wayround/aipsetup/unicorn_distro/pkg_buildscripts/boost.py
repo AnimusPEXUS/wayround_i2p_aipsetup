@@ -17,7 +17,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.buildscript.build_script_wrap(
             buildingsite,
-            ['extract', 'bootstrap', 'build_and_distribute'],
+            ['extract', 'bootstrap', 'build', 'distribute'],
             action,
             "help"
             )
@@ -49,7 +49,24 @@ def main(buildingsite, action=None):
                 cwd=src_dir
                 ).wait()
 
-        if 'build_and_distribute' in actions and ret == 0:
+        if 'build' in actions and ret == 0:
+            ret = subprocess.Popen(
+                [
+                    os.path.join(src_dir, 'bjam'),
+                    '--prefix=' + os.path.join(
+                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+                            buildingsite
+                            ),
+                        'usr'
+                        ),
+                    'stage',
+                    'threading=multi',
+                    'link=shared'
+                    ],
+                    cwd=src_dir
+                    ).wait()
+
+        if 'distribute' in actions and ret == 0:
             ret = subprocess.Popen(
                 [
                     os.path.join(src_dir, 'bjam'),

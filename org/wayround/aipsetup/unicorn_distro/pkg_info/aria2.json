@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "aria2", 
-  "buildscript": "", 
+  "buildscript": "aria2", 
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "", 
