@@ -134,17 +134,20 @@ def clean_find_so_problems(opts, args):
 
     return ret
 
-
-def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
-
+def clean_find_package_so_problems(opts, args):
     """
-    Searches for packages with more when one asp installed
+    List packages, requiring dependencies, not installed by other packages
     """
+    ret = 0
 
-    logging.info("Working. Please wait, it will be not long...")
+    basedir = '/'
+#    if '-b' in opts:
+#        basedir = opts['-b']
 
-    return check_list_of_installed_packages_and_asps_auto()
 
+    
+
+    return ret
 
 def clean_cleanup_repo(opts, args):
     cleanup_repo()
@@ -173,6 +176,17 @@ def check_elfs_readiness(mute=False):
         org.wayround.utils.format.elf.ELF(i)
 
     return 0
+
+
+def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
+
+    """
+    Searches for packages with more when one asp installed
+    """
+
+    logging.info("Working. Please wait, it will be not long...")
+
+    return check_list_of_installed_packages_and_asps_auto()
 
 
 def check_list_of_installed_packages_and_asps_auto():

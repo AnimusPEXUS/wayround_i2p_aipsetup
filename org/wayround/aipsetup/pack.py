@@ -427,6 +427,7 @@ def destdir_deps_c(buildingsite):
                 if os.path.isfile(filename) and os.path.exists(filename):
 
                     elf = org.wayround.utils.format.elf.ELF(filename)
+
                     dep = elf.needed_libs_list
 
                     if isinstance(dep, list):

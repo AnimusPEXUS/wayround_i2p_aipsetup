@@ -162,6 +162,8 @@ def start_building_script(building_site, action=None):
                         )
                     )
                 ret = 3
+                
+            logging.info("action `{}' ended with code {}".format(action, ret));
 
     return ret
 

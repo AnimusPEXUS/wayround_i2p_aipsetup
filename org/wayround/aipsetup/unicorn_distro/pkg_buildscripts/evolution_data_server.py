@@ -1,9 +1,7 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 import os.path
 import logging
-import time
 
 import org.wayround.utils.file
 
@@ -17,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.buildscript.build_script_wrap(
-            buildingsite,
-            ['extract', 'extract2', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -33,6 +31,11 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
+        separate_build_dir = False
+
+        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -45,24 +48,14 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'extract2' in actions:
-            ret = autotools.extract_high(
-                buildingsite,
-                'glibc-ports',
-                unwrap_dir=False,
-                rename_dir='ports'
-                )
-            if ret != 0:
-                logging.warning("glibc-ports are not found. this is Ok starting from glibc-2.17")
-                logging.info("sleeping for 10 seconds and continuing")
-                time.sleep(10)
-                ret = 0
-
-
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+#                    '--with-nspr-includes=/usr',
+#                    '--with-nspr-libs=/usr',
+#                    '--with-nss-includes=/usr',
+#                    '--with-nss-libs=/usr',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -70,17 +63,13 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target'],
-                    '--enable-kernel=2.6.39.3',
-                    '--enable-tls',
-                    '--with-elf',
-                    '--enable-multi-arch'
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
-                use_separate_buildding_dir=True,
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
@@ -93,8 +82,8 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=True,
-                source_configure_reldir='.'
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -103,16 +92,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=True,
-                source_configure_reldir='.'
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

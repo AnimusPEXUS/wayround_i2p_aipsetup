@@ -49,6 +49,9 @@ def source_version_comparator(name1, name2):
     return ret
 
 def package_version_comparator(name1, name2):
+    """
+    Compares package names by timestamps
+    """
 
     ret = 0
 

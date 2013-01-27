@@ -58,7 +58,8 @@ def exported_commands():
         'remove'        : package_remove,
         'complete'      : package_complete,
         'build'         : package_build,
-        'find'          : package_find_files
+        'find'          : package_find_files,
+        'reduce'        : package_asp_reduce_to_latest
         }
 
 def commands_order():
@@ -70,7 +71,8 @@ def commands_order():
         'remove',
         'complete',
         'build',
-        'find'
+        'find',
+        'reduce'
         ]
 
 def package_install(opts, args):
@@ -468,6 +470,54 @@ def package_check_package(opts, args):
     else:
 
         ret = check_package(file)
+
+    return ret
+
+def package_asp_reduce_to_latest(opts, args):
+    """
+    Forcibly reduces named asp, excluding files installed by latest package's asp
+
+    [-b=DESTDIR] ASP_NAME
+    """
+
+    ret = 0
+
+    destdir = '/'
+    if '-b' in opts:
+        destdir = opts['-b']
+
+    if len(args) < 1:
+        logging.error("One or more argument required")
+        ret = 1
+    else:
+
+        asp_name = args
+
+        for asp_name in args:
+            package_name_parsed = org.wayround.aipsetup.name.package_name_parse(asp_name)
+            package_name = None
+
+            if not isinstance(package_name_parsed, dict):
+                logging.error("Can't parse package name {}".fomat(asp_name))
+
+                ret = 2
+            else:
+                package_name = package_name_parsed['groups']['name']
+
+                logging.info(
+                    "Looking for latest installed asp of package {}".format(
+                        package_name
+                        )
+                    )
+
+                asp_name_latest = (
+                    org.wayround.aipsetup.package.latest_installed_package_s_asp(
+                        package_name,
+                        destdir
+                        )
+                    )
+
+                reduce_asps(asp_name_latest, [asp_name], destdir)
 
     return ret
 
