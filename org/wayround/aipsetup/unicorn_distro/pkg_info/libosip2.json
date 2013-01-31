@@ -1,15 +1,15 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "liboil", 
+  "basename": "libosip2", 
   "buildscript": "std", 
   "deprecated": false, 
-  "description": "write something here, please", 
+  "description": "", 
   "filters": "", 
-  "home_page": "http://www.freedesktop.org", 
+  "home_page": "http://www.gnu.org", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.freedesktop.org/liboil/"
+  "src_path_prefix": "/www.gnu.org/"
 }

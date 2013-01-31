@@ -16,9 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.buildscript.build_script_wrap(
         buildingsite,
-        [
-        'extract', 'configure', 'build', 'distribute',
-        ],
+        ['extract', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -33,19 +31,11 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
         separate_build_dir = False
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                org.wayround.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
+        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -69,16 +59,16 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={'PYTHON': '/usr/bin/python3'},
+                environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
+                source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                run_script_not_bash=True,
+                relative_call=True
                 )
 
         if 'build' in actions and ret == 0:
@@ -89,7 +79,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -98,16 +88,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

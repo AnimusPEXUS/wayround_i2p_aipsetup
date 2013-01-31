@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "shared-mime-info", 
-  "buildscript": "", 
+  "buildscript": "std", 
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "", 
@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "src_path_prefix": "/www.freedesktop.org/"
 }

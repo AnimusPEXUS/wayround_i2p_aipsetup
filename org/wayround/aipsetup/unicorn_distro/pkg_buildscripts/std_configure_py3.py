@@ -2,6 +2,7 @@
 
 import os.path
 import logging
+import subprocess
 
 import org.wayround.utils.file
 
@@ -16,9 +17,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.buildscript.build_script_wrap(
         buildingsite,
-        [
-        'extract', 'configure', 'build', 'distribute'
-        ],
+        ['extract', 'configure.py', 'build', 'distribute'],
         action,
         "help"
         )
@@ -33,7 +32,11 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+
         separate_build_dir = False
+
+        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -46,28 +49,12 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={'PYTHON': '/usr/bin/python2'},
-                environment_mode='copy',
-                source_configure_reldir='.',
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
+        if 'configure.py' in actions and ret == 0:
+
+            p = subprocess.Popen(['python2', './configure.py'], cwd=src_dir)
+            ret = p.wait()
+
+
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
@@ -77,7 +64,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -86,16 +73,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

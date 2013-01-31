@@ -65,7 +65,7 @@ def main(buildingsite, action=None):
 #                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     ],
                 arguments=['configure'],
-                environment={'PYTHON': '/usr/bin/python3'},
+                environment={'PYTHON': '/usr/bin/python2'},
                 environment_mode='copy',
                 log=log
                 )
@@ -87,7 +87,7 @@ def main(buildingsite, action=None):
 #                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     ],
                 arguments=['build'],
-                environment={'PYTHON': '/usr/bin/python3'},
+                environment={'PYTHON': '/usr/bin/python2'},
                 environment_mode='copy',
                 log=log
                 )
@@ -112,7 +112,7 @@ def main(buildingsite, action=None):
                 arguments=[
                     'install'
                     ],
-                environment={'PYTHON': '/usr/bin/python3'},
+                environment={'PYTHON': '/usr/bin/python2'},
                 environment_mode='copy',
                 log=log
                 )
