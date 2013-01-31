@@ -34,8 +34,8 @@ if '--log' in opts:
     del(log_level_u)
 
 logging.basicConfig(
-    format = "%(levelname)s %(message)s",
-    level = log_level
+    format="%(levelname)s %(message)s",
+    level=log_level
     )
 
 import org.wayround.aipsetup
@@ -81,8 +81,13 @@ else:
     items = org.wayround.aipsetup.modhelp.modules_dict()
 
     if long_name == None:
-        logging.error("Can't get long module name by short(`{}').".format(args[0]))
-        logging.info("Available modules: {}".format(', '.join(list(items.keys()))))
+        _tls = list(items.keys())
+        _tls.sort()
+        logging.error("Can't get long module name `{}'".format(args[0]))
+        logging.info("Available modules:")
+        for i in _tls:
+            print("        {}".format(i))
+        del(_tls)
         ret = 2
 
     else:
@@ -94,10 +99,13 @@ else:
 
             if org.wayround.aipsetup.config.config == {} \
                 and not long_name in org.wayround.aipsetup.AIPSETUP_CLI_MODULE_LIST_UNFUSED:
+                _tls = list(org.wayround.aipsetup.AIPSETUP_CLI_MODULE_LIST_UNFUSED)
+                _tls.sort()
                 logging.error("Configuration error. Only allowed modules are {}".format(
-                        org.wayround.aipsetup.AIPSETUP_CLI_MODULE_LIST_UNFUSED
+                        _tls
                         )
                     )
+                del(_tls)
             else:
 
                 try:

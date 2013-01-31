@@ -7,12 +7,16 @@ import copy
 import logging
 import os.path
 import pprint
+import io
 
 import org.wayround.utils.deps_c
 import org.wayround.utils.format.elf
+import org.wayround.utils.path
+import org.wayround.utils.archive
 
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.name
+import org.wayround.aipsetup.config
 
 def cli_name():
     """
@@ -78,7 +82,6 @@ def pkgdeps_print_asps_depending_on_asp(opts, args):
 
     return 0
 
-
 def get_asps_depending_on_asp(destdir, asp_name, mute=False):
 
     ret = 0
@@ -90,7 +93,7 @@ def get_asps_depending_on_asp(destdir, asp_name, mute=False):
 
     if not isinstance(package_name_parsed, dict):
         if not mute:
-            logging.error("Can't parse package name {}".fomat(asp_name))
+            logging.error("Can't parse package name {}".format(asp_name))
 
         ret = 0
     else:
@@ -115,49 +118,51 @@ def get_asps_depending_on_asp(destdir, asp_name, mute=False):
 
         asp_name_latest_files = []
 
-        if asp_name_latest == asp_name:
-            if not mute:
-                logging.info("Selected asp is latest")
-        else:
+        if asp_name_latest:
 
-            if not mute:
-                logging.info("Loading it's file list")
+            if asp_name_latest == asp_name:
+                if not mute:
+                    logging.info("Selected asp is latest")
+            else:
 
-            asp_name_latest_files = (
-                org.wayround.aipsetup.package.list_files_installed_by_asp(
-                    destdir,
-                    asp_name_latest
+                if not mute:
+                    logging.info("Loading it's file list")
+
+                asp_name_latest_files = (
+                    org.wayround.aipsetup.package.list_files_installed_by_asp(
+                        destdir,
+                        asp_name_latest
+                        )
                     )
-                )
 
-            asp_name_latest_files = org.wayround.utils.path.prepend_path(
-                asp_name_latest_files, destdir
-                )
+                asp_name_latest_files = org.wayround.utils.path.prepend_path(
+                    asp_name_latest_files, destdir
+                    )
 
-            asp_name_latest_files = org.wayround.utils.path.realpaths(
-                asp_name_latest_files
-                )
+                asp_name_latest_files = org.wayround.utils.path.realpaths(
+                    asp_name_latest_files
+                    )
 
-            asp_name_latest_files2 = []
-            for i in asp_name_latest_files:
-                if os.path.isfile(i):
-                    asp_name_latest_files2.append(i)
+                asp_name_latest_files2 = []
+                for i in asp_name_latest_files:
+                    if os.path.isfile(i):
+                        asp_name_latest_files2.append(i)
 
-            asp_name_latest_files = asp_name_latest_files2
+                asp_name_latest_files = asp_name_latest_files2
 
-            del(asp_name_latest_files2)
+                del(asp_name_latest_files2)
 
-            asp_name_latest_files2 = []
+                asp_name_latest_files2 = []
 
-            for i in range(len(asp_name_latest_files)):
+                for i in range(len(asp_name_latest_files)):
 
-                e = org.wayround.utils.format.elf.ELF(asp_name_latest_files[i])
-                if e.is_elf:
-                    asp_name_latest_files2.append(asp_name_latest_files[i])
+                    e = org.wayround.utils.format.elf.ELF(asp_name_latest_files[i])
+                    if e.is_elf:
+                        asp_name_latest_files2.append(asp_name_latest_files[i])
 
-            asp_name_latest_files = asp_name_latest_files2
+                asp_name_latest_files = asp_name_latest_files2
 
-            del(asp_name_latest_files2)
+                del(asp_name_latest_files2)
 
         if not mute:
             logging.info("Loading file list of {}".format(asp_name))
@@ -378,29 +383,71 @@ def get_asp_dependencies(
     destdir,
     asp_name,
     mute=False,
-    predefined_asp_name_files=None
+    predefined_asp_name_files=None,
+    force=False
     ):
 
     """
     Build dependency list for each elf in asp
 
-    On success returns ``dict``
+    On success returns ``dict``, in which each key is file name not prepended
+    with destdir
+
     """
 
     ret = 0
 
-    if not mute:
-        logging.info("Getting list of files installed by {}".format(asp_name))
+    destdir = org.wayround.utils.path.abspath(destdir)
 
-    asp_name_files = list()
-    if predefined_asp_name_files:
-        asp_name_files = list(predefined_asp_name_files)
-    else:
-        asp_name_files = (
-            org.wayround.aipsetup.package.list_files_installed_by_asp(
-                destdir, asp_name, mute=mute
+    if not force:
+        ret = org.wayround.aipsetup.package.load_asp_deps(destdir, asp_name, mute)
+
+    if not isinstance(ret, dict):
+
+        if not mute:
+            logging.warning("asp requiring deps list regeneration: {}".format(asp_name))
+
+        ret = 0
+
+        if not mute:
+            logging.info("Getting list of files installed by {}".format(asp_name))
+
+        asp_name_files = list()
+        if predefined_asp_name_files:
+            asp_name_files = list(predefined_asp_name_files)
+        else:
+            asp_name_files = (
+                org.wayround.aipsetup.package.list_files_installed_by_asp(
+                    destdir, asp_name, mute=mute
+                    )
                 )
-            )
+
+            if not isinstance(asp_name_files, list):
+                if not mute:
+                    logging.error(
+                        "Can't get list of files installed by {}".format(
+                            asp_name
+                            )
+                        )
+                ret = 1
+            else:
+
+                asp_name_files = org.wayround.utils.path.prepend_path(
+                    asp_name_files, destdir
+                    )
+
+                asp_name_files = org.wayround.utils.path.realpaths(
+                    asp_name_files
+                    )
+
+                asp_name_files2 = []
+                for i in asp_name_files:
+                    if os.path.isfile(i):
+                        asp_name_files2.append(i)
+
+                asp_name_files = asp_name_files2
+
+                del(asp_name_files2)
 
         if not isinstance(asp_name_files, list):
             if not mute:
@@ -412,65 +459,50 @@ def get_asp_dependencies(
             ret = 1
         else:
 
-            asp_name_files = org.wayround.utils.path.prepend_path(
-                asp_name_files, destdir
-                )
+            if not mute:
+                logging.info("{} files".format(len(asp_name_files)))
 
-            asp_name_files = org.wayround.utils.path.realpaths(
-                asp_name_files
-                )
 
-            asp_name_files2 = []
+            if not mute:
+                logging.info("getting list of elf files from files installed by asp")
+
+            asp_name_elfs = set()
             for i in asp_name_files:
-                if os.path.isfile(i):
-                    asp_name_files2.append(i)
 
-            asp_name_files = asp_name_files2
+                e = org.wayround.utils.format.elf.ELF(i)
+                if e.is_elf:
+                    asp_name_elfs.add(os.path.realpath(i))
 
-            del(asp_name_files2)
+            asp_name_elf_deps = {}
 
-    if not isinstance(asp_name_files, list):
-        if not mute:
-            logging.error(
-                "Can't get list of files installed by {}".format(
-                    asp_name
-                    )
-                )
-        ret = 1
-    else:
+            if not mute:
+                logging.info("getting elf deps")
 
-        if not mute:
-            logging.info("{} files".format(len(asp_name_files)))
+            for i in asp_name_elfs:
 
+                i_normal = i
 
-        if not mute:
-            logging.info("getting list of elf files from files installed by asp")
+                if i_normal.startswith(destdir):
+                    i_normal = i_normal[len(destdir):]
 
-        asp_name_elfs = set()
-        for i in asp_name_files:
+                    if not i_normal.startswith(os.path.sep):
+                        i_normal = os.path.sep + i_normal
 
-            e = org.wayround.utils.format.elf.ELF(i)
-            if e.is_elf:
-                asp_name_elfs.add(os.path.realpath(i))
+                if not i_normal in asp_name_elf_deps:
+                    asp_name_elf_deps[i_normal] = set()
 
-        asp_name_elf_deps = {}
+                e = org.wayround.utils.format.elf.ELF(i_normal)
+                i_libs_list = e.needed_libs_list
 
-        if not mute:
-            logging.info("getting elf deps")
+                if isinstance(i_libs_list, (list, set)):
+                    asp_name_elf_deps[i_normal] |= set(
+                        i_libs_list
+                        )
 
-        for i in asp_name_elfs:
+            for i in list(asp_name_elf_deps.keys()):
+                asp_name_elf_deps[i] = list(asp_name_elf_deps[i])
 
-            if not i in asp_name_elf_deps:
-                asp_name_elf_deps[i] = set()
-
-            e = org.wayround.utils.format.elf.ELF(i)
-            i_libs_list = e.needed_libs_list
-
-            if isinstance(i_libs_list, (list, set)):
-                asp_name_elf_deps[i] |= set(
-                    i_libs_list
-                    )
-
-        ret = asp_name_elf_deps
+            ret = asp_name_elf_deps
 
     return ret
+

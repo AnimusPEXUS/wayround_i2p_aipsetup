@@ -12,10 +12,12 @@ import functools
 
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkgdeps
 
 import org.wayround.utils.path
 import org.wayround.utils.deps_c
 import org.wayround.utils.format.elf
+import org.wayround.utils.file
 
 def cli_name():
     return 'clean'
@@ -28,7 +30,8 @@ def exported_commands():
                         clean_check_list_of_installed_packages_and_asps_auto,
         'repo_clean':   clean_cleanup_repo,
         'check_elfs_readiness':
-                        clean_check_elfs_readiness
+                        clean_check_elfs_readiness,
+        'make_deps_lists_for_asps':clean_make_deps_lists_for_asps
         }
 
 def commands_order():
@@ -36,7 +39,8 @@ def commands_order():
         'packages_with_not_reduced_asps',
         'so_problems',
         'repo_clean',
-        'check_elfs_readiness'
+        'check_elfs_readiness',
+        'make_deps_lists_for_asps'
         ]
 
 def clean_check_elfs_readiness(opts, args):
@@ -145,13 +149,53 @@ def clean_find_package_so_problems(opts, args):
 #        basedir = opts['-b']
 
 
-    
+
 
     return ret
 
 def clean_cleanup_repo(opts, args):
     cleanup_repo()
     return 0
+
+def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
+
+    """
+    Searches for packages with more when one asp installed
+    """
+
+    logging.info("Working. Please wait, it will be not long...")
+
+    return check_list_of_installed_packages_and_asps_auto()
+
+def clean_make_deps_lists_for_asps(opts, args):
+
+    destdir = '/'
+
+    asp_list = org.wayround.aipsetup.package.list_installed_asps(destdir, mute=False)
+    asp_list.sort()
+    asp_list_c = len(asp_list)
+    asp_list_i = 0
+
+    for asp_name in asp_list:
+
+        deps = org.wayround.aipsetup.package.load_asp_deps(destdir, asp_name, mute=True)
+
+        if not isinstance(deps, dict):
+            logging.info("Creating deps listing for {}".format(asp_name))
+            org.wayround.aipsetup.package.make_asp_deps(destdir, asp_name, mute=True)
+
+        asp_list_i += 1
+
+        org.wayround.utils.file.progress_write(
+            "    {} of {} ({}%)".format(
+                asp_list_i,
+                asp_list_c,
+                100.0 / (asp_list_c / asp_list_i)
+                )
+            )
+
+    return 0
+
 
 def check_elfs_readiness(mute=False):
 
@@ -176,18 +220,6 @@ def check_elfs_readiness(mute=False):
         org.wayround.utils.format.elf.ELF(i)
 
     return 0
-
-
-def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
-
-    """
-    Searches for packages with more when one asp installed
-    """
-
-    logging.info("Working. Please wait, it will be not long...")
-
-    return check_list_of_installed_packages_and_asps_auto()
-
 
 def check_list_of_installed_packages_and_asps_auto():
 

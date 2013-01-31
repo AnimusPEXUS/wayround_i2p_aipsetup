@@ -15,7 +15,8 @@ import shutil
 import sys
 import tarfile
 import tempfile
-
+import io
+import pprint
 
 import org.wayround.utils.archive
 import org.wayround.utils.checksum
@@ -33,7 +34,7 @@ import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pack
-import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.pkgdeps
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.sysupdates
 
@@ -59,7 +60,8 @@ def exported_commands():
         'complete'      : package_complete,
         'build'         : package_build,
         'find'          : package_find_files,
-        'reduce'        : package_asp_reduce_to_latest
+        'reduce'        : package_asp_reduce_to_latest,
+        'deps'          : package_make_asp_deps
         }
 
 def commands_order():
@@ -72,7 +74,8 @@ def commands_order():
         'complete',
         'build',
         'find',
-        'reduce'
+        'reduce',
+        'deps'
         ]
 
 def package_install(opts, args):
@@ -521,6 +524,26 @@ def package_asp_reduce_to_latest(opts, args):
 
     return ret
 
+def package_make_asp_deps(opts, args):
+
+    ret = 0
+
+    destdir = '/'
+
+    if '-b' in opts:
+        destdir = opts['-b']
+
+    if len(args) != 1:
+        logging.error("Must be exactly one argument")
+        ret = 1
+    else:
+
+        asp_name = args[0]
+
+        ret = make_asp_deps(destdir, asp_name, mute=False)
+
+    return ret
+
 
 def check_package(asp_name, mute=False):
     """
@@ -886,37 +909,48 @@ def install_package(
                 ret = 2
             else:
 
-                asps = list_installed_package_s_asps(
-                    name_parsed['groups']['name'], destdir
+                if info['deprecated'] or info['non_installable']:
+                    logging.error(
+                        "Package is deprecated({}) or non-installable({})".format(
+                        info['deprecated'],
+                        info['non_installable']
+                        )
                     )
-
-                ret = install_asp(name, destdir)
-
-                if len(asps) == 0:
-                    if ret == 0:
-                        logging.info("New ASP installation finished")
-                    else:
-                        logging.error("Some ASP installation errors")
+                    ret = 3
                 else:
-                    if ret != 0:
-                        logging.error(
-                            "Some ASP installation errors encountered,"
-                            " so no updation following"
-                            )
+
+                    asps = list_installed_package_s_asps(
+                        name_parsed['groups']['name'], destdir
+                        )
+
+
+                    ret = install_asp(name, destdir)
+
+                    if len(asps) == 0:
+                        if ret == 0:
+                            logging.info("New ASP installation finished")
+                        else:
+                            logging.error("Some ASP installation errors")
                     else:
-                        if isinstance(info, dict):
-                            if info['reducible']:
-                                logging.info(
-                                    "Reducing `{}' ASPs".format(
-                                        name_parsed['groups']['name']
+                        if ret != 0:
+                            logging.error(
+                                "Some ASP installation errors encountered,"
+                                " so no updation following"
+                                )
+                        else:
+                            if isinstance(info, dict):
+                                if info['reducible']:
+                                    logging.info(
+                                        "Reducing `{}' ASPs".format(
+                                            name_parsed['groups']['name']
+                                            )
                                         )
-                                    )
-                                reduce_asps(name, asps, destdir)
-                                logging.info(
-                                    "Reduced `{}' ASPs".format(
-                                        name_parsed['groups']['name']
+                                    reduce_asps(name, asps, destdir)
+                                    logging.info(
+                                        "Reduced `{}' ASPs".format(
+                                            name_parsed['groups']['name']
+                                            )
                                         )
-                                    )
 
     else:
         info = org.wayround.aipsetup.pkginfo.get_package_info_record(
@@ -928,22 +962,32 @@ def install_package(
             ret = 2
         else:
 
-            latest_in_repo = (
-                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name)
+            if info['deprecated'] or info['non_installable']:
+                logging.error(
+                    "Package is deprecated({}) or non-installable({})".format(
+                    info['deprecated'],
+                    info['non_installable']
+                    )
                 )
-
-            if latest_in_repo == None:
-                logging.error("Repo has no latest package")
                 ret = 3
             else:
 
-                full_name = org.wayround.utils.path.abspath(
-                    org.wayround.aipsetup.config.config['repository'] +
-                    os.path.sep +
-                    latest_in_repo
+                latest_in_repo = (
+                    org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name)
                     )
 
-                ret = install_package(full_name, False, destdir)
+                if latest_in_repo == None:
+                    logging.error("Repo has no latest package")
+                    ret = 3
+                else:
+
+                    full_name = org.wayround.utils.path.abspath(
+                        org.wayround.aipsetup.config.config['repository'] +
+                        os.path.sep +
+                        latest_in_repo
+                        )
+
+                    ret = install_package(full_name, False, destdir)
 
 
     return ret
@@ -999,6 +1043,11 @@ def install_asp(asp_name, destdir='/'):
                          './05.BUILD_LOGS.tar.xz',
                          'installed_pkg_dir_buildlogs',
                          "package's buildlogs"
+                         ),
+                    (
+                         './06.LISTS/DESTDIR.dep_c.xz',
+                         'installed_pkg_dir_deps',
+                         "package's dependencies listing"
                          )
                     ]:
 
@@ -1261,9 +1310,10 @@ def remove_asp(
             logging.info("Excluding shared objects")
             shared_objects = set()
             for i in lines:
-                e = org.wayround.utils.format.elf.ELF(i)
-                if e.elf_type_name == 'ET_DYN':
-                    shared_objects.add(i)
+                if os.path.isfile(i):
+                    e = org.wayround.utils.format.elf.ELF(i)
+                    if e.elf_type_name == 'ET_DYN':
+                        shared_objects.add(i)
 
             if exclude:
                 shared_objects -= set(exclude)
@@ -1339,6 +1389,7 @@ def remove_asp(
         for i in [
             'installed_pkg_dir_buildlogs',
             'installed_pkg_dir_sums',
+            'installed_pkg_dir_deps',
             'installed_pkg_dir'
             ]:
             rm_file_name = org.wayround.utils.path.abspath(
@@ -1511,8 +1562,10 @@ def list_files_installed_by_asp(
     destdir = org.wayround.utils.path.abspath(destdir)
 
     list_dir = org.wayround.utils.path.abspath(
-        destdir + os.path.sep +
-        org.wayround.aipsetup.config.config['installed_pkg_dir']
+        org.wayround.utils.path.join(
+            destdir,
+            org.wayround.aipsetup.config.config['installed_pkg_dir']
+            )
         )
 
     pkg_list_file = os.path.join(list_dir, asp_name)
@@ -2008,6 +2061,99 @@ def find_file_in_files_installed_by_asp(
             out_list.sort()
 
             ret = copy.copy(out_list)
+
+    return ret
+
+
+def make_asp_deps(destdir, asp_name, mute=True):
+
+    """
+    generates dependencies listing for named asp and places it under
+    /destdir/var/log/packages/deps
+
+    returns ``0`` if all okay
+    """
+
+    ret = None
+
+    deps = org.wayround.aipsetup.pkgdeps.get_asp_dependencies(destdir, asp_name, mute)
+
+    deps_dir = org.wayround.utils.path.join(
+        destdir,
+        org.wayround.aipsetup.config.config['installed_pkg_dir_deps']
+        )
+
+    file_name = org.wayround.utils.path.join(
+        deps_dir, asp_name
+        )
+
+    if not file_name.endswith('.xz'):
+        file_name += '.xz'
+
+    if not os.path.isdir(deps_dir):
+
+        os.makedirs(deps_dir)
+
+    else:
+        vf = io.BytesIO()
+
+        try:
+            vf.write(bytes(pprint.pformat(deps), 'utf-8'))
+            vf.seek(0)
+            f = open(file_name, 'wb')
+
+            try:
+                ret = org.wayround.utils.archive.canonical_compressor(
+                    'xz',
+                    vf,
+                    f,
+                    verbose=False,
+                    options=['-9'],
+                    close_output_on_eof=False
+                    )
+
+            finally:
+                f.close()
+        finally:
+            vf.close()
+
+    return ret
+
+
+def load_asp_deps(destdir, asp_name, mute=True):
+    ret = None
+
+    dir = org.wayround.utils.path.join(
+        destdir,
+        org.wayround.aipsetup.config.config['installed_pkg_dir_deps']
+        )
+
+    file_name = org.wayround.utils.path.join(
+        dir, asp_name
+        )
+
+    if not file_name.endswith('.xz'):
+        file_name += '.xz'
+
+    if not os.path.isfile(file_name):
+        if not mute:
+            logging.error("File not found: {}".format(file_name))
+        ret = 1
+    else:
+        f = open(file_name, 'rb')
+        try:
+            txt = org.wayround.utils.archive.xzcat(f, convert_to_str=True)
+        except:
+            raise
+        else:
+            try:
+                ret = eval(txt, {}, {})
+            except:
+                ret = None
+
+        finally:
+            f.close()
+
 
     return ret
 

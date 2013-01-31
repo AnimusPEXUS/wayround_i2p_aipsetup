@@ -65,7 +65,8 @@ CONFIG_FULL_SAMPLE = {
 
     # this two are non-configurable and will be in `installed_pkg_dir' always
     'installed_pkg_dir_buildlogs': '/var/log/packages/buildlogs',
-    'installed_pkg_dir_sums': '/var/log/packages/sums'
+    'installed_pkg_dir_sums': '/var/log/packages/sums',
+    'installed_pkg_dir_deps': '/var/log/packages/deps'
     }
 """
 Full configuration sample. Parameters allowed to be configured through config
@@ -360,7 +361,8 @@ def config_check_after_load(indict):
 
     for i, j in [
         ('installed_pkg_dir_buildlogs', 'buildlogs'),
-        ('installed_pkg_dir_sums', 'sums')
+        ('installed_pkg_dir_sums', 'sums'),
+        ('installed_pkg_dir_deps', 'deps')
         ]:
         indict[i] = org.wayround.utils.path.abspath(
             os.path.join(indict['installed_pkg_dir'], j)
