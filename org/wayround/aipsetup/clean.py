@@ -75,7 +75,7 @@ def clean_find_so_problems(opts, args):
     print("Writing log to {}".format(log.log_filename))
 
     logging.info("Gathering asps file tree. Please wait...")
-    tree = org.wayround.aipestup.package.list_installed_asps_and_their_files(basedir, mute=False)
+    tree = org.wayround.aipsetup.package.list_installed_asps_and_their_files(basedir, mute=False)
     logging.info("Now working")
 
     total_problem_packages_list = set()
@@ -92,7 +92,7 @@ def clean_find_so_problems(opts, args):
             log.info("    {}".format(j))
 
 
-        pkgs2 = org.wayround.aipestup.package.find_file_in_files_installed_by_asps(
+        pkgs2 = org.wayround.aipsetup.package.find_file_in_files_installed_by_asps(
             basedir, files, mode='end', mute=False, predefined_asp_tree=tree
             )
 
@@ -113,7 +113,7 @@ def clean_find_so_problems(opts, args):
 
         log.info('---------------------------------')
 
-    pkgs = org.wayround.aipestup.package.find_file_in_files_installed_by_asps(
+    pkgs = org.wayround.aipsetup.package.find_file_in_files_installed_by_asps(
         basedir, libs, mode='end', mute=False, predefined_asp_tree=tree
         )
 
