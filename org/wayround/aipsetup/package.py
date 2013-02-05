@@ -200,6 +200,11 @@ def package_list_asps(opts, args):
 
     return ret
 
+def package_list_files(opts, args):
+
+    ret = 0
+
+    return ret
 
 def package_remove(opts, args):
     """
