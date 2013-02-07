@@ -49,67 +49,35 @@
   <div class="section" id="module-org.wayround.aipsetup.name">
 <span id="name-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">name</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.name" title="Permalink to this headline">¶</a></h1>
 <p>Module with package names parsing facilities</p>
-<dl class="data">
-<dt id="org.wayround.aipsetup.name.ACCEPTABLE_SOURCE_NAME_EXTENSIONS">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">ACCEPTABLE_SOURCE_NAME_EXTENSIONS</tt><em class="property"> = ['.tar.gz', '.tar.bz2', '.tar.xz', '.tar.lzma', '.zip', '.7z', '.tgz', '.tbz2', '.tbz']</em><a class="headerlink" href="#org.wayround.aipsetup.name.ACCEPTABLE_SOURCE_NAME_EXTENSIONS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acceptable source name extensions</p>
-</dd></dl>
-
-<dl class="data">
-<dt id="org.wayround.aipsetup.name.ASP_NAME_REGEXPS">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">ASP_NAME_REGEXPS</tt><em class="property"> = {'aipsetup3': '^\\((?P&lt;name&gt;.+?)\\)-\\((?P&lt;version&gt;(\\d+\\.??)+)\\)-\\((?P&lt;status&gt;.*?)\\)-\\((?P&lt;timestamp&gt;\\d{8}\\.\\d{6}\\.\\d{7})\\)-\\((?P&lt;host&gt;.*)\\)$', 'aipsetup2': '^(?P&lt;name&gt;.+?)-(?P&lt;version&gt;(\\d+\\.??)+)-(?P&lt;timestamp&gt;\\d{14})-(?P&lt;host&gt;.*)$'}</em><a class="headerlink" href="#org.wayround.aipsetup.name.ASP_NAME_REGEXPS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regexps for parsing package names</p>
-</dd></dl>
-
-<dl class="data">
-<dt id="org.wayround.aipsetup.name.ASP_NAME_REGEXPS_COMPILED">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">ASP_NAME_REGEXPS_COMPILED</tt><em class="property"> = {'aipsetup3': &lt;_sre.SRE_Pattern object at 0xa079698&gt;, 'aipsetup2': &lt;_sre.SRE_Pattern object at 0xb60c4d20&gt;}</em><a class="headerlink" href="#org.wayround.aipsetup.name.ASP_NAME_REGEXPS_COMPILED" title="Permalink to this definition">¶</a></dt>
-<dd><p>same as <a class="reference internal" href="#org.wayround.aipsetup.name.ASP_NAME_REGEXPS" title="org.wayround.aipsetup.name.ASP_NAME_REGEXPS"><tt class="xref py py-data docutils literal"><span class="pre">ASP_NAME_REGEXPS</span></tt></a> but compiled</p>
-</dd></dl>
-
-<dl class="data">
-<dt id="org.wayround.aipsetup.name.DIFFICULT_NAMES">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">DIFFICULT_NAMES</tt><em class="property"> = ['GeSHi-1.0.2-beta-1.tar.bz2', 'Perl-Dist-Strawberry-BuildPerl-5101-2.11_10.tar.gz', 'bind-9.9.1-P2.tar.gz', 'boost_1_25_1.tar.bz2', 'dahdi-linux-complete-2.1.0.3+2.1.0.2.tar.gz', 'dhcp-4.1.2rc1.tar.gz', 'dvd+rw-tools-5.5.4.3.4.tar.gz', 'lynx2.8.7rel.1.tar.bz2', 'name.tar.gz', 'ogre_src_v1-8-1.tar.bz2', 'openssl-0.9.7a.tar.gz', 'org.apache.felix.ipojo.manipulator-1.8.4-project.tar.gz', 'pkcs11-helper-1.05.tar.bz2', 'qca-pkcs11-0.1-20070425.tar.bz2', 'tcl8.4.19-src.tar.gz', 'wmirq-0.1-source.tar.gz', 'xc-1.tar.gz', 'xf86-input-acecad-1.5.0.tar.bz2', 'xf86-input-elo2300-1.1.2.tar.bz2']</em><a class="headerlink" href="#org.wayround.aipsetup.name.DIFFICULT_NAMES" title="Permalink to this definition">¶</a></dt>
-<dd><p>Testing tarbal names</p>
-</dd></dl>
-
+<div class="section" id="cli-name-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.cli_name" title="org.wayround.aipsetup.name.cli_name"><tt class="xref py py-func docutils literal"><span class="pre">cli_name()</span></tt></a> Function<a class="headerlink" href="#cli-name-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.cli_name">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">cli_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#cli_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.cli_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Internally used by aipsetup</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="org.wayround.aipsetup.name.commands_order">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">commands_order</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#commands_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.commands_order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Internally used by aipsetup</p>
-</dd></dl>
-
+</div>
+<div class="section" id="exported-commands-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.exported_commands" title="org.wayround.aipsetup.name.exported_commands"><tt class="xref py py-func docutils literal"><span class="pre">exported_commands()</span></tt></a> Function<a class="headerlink" href="#exported-commands-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.exported_commands">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">exported_commands</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#exported_commands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.exported_commands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Internally used by aipsetup</p>
 </dd></dl>
 
+</div>
+<div class="section" id="commands-order-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.commands_order" title="org.wayround.aipsetup.name.commands_order"><tt class="xref py py-func docutils literal"><span class="pre">commands_order()</span></tt></a> Function<a class="headerlink" href="#commands-order-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="org.wayround.aipsetup.name.find_all_versions_and_singles">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">find_all_versions_and_singles</tt><big>(</big><em>name_sliced</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#find_all_versions_and_singles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.find_all_versions_and_singles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find all versions using <a class="reference internal" href="#org.wayround.aipsetup.name.find_possible_chared_versions_and_singles" title="org.wayround.aipsetup.name.find_possible_chared_versions_and_singles"><tt class="xref py py-func docutils literal"><span class="pre">find_possible_chared_versions_and_singles()</span></tt></a>
-function</p>
+<dt id="org.wayround.aipsetup.name.commands_order">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">commands_order</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#commands_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.commands_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internally used by aipsetup</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="org.wayround.aipsetup.name.find_most_possible_version">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">find_most_possible_version</tt><big>(</big><em>name_sliced</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#find_most_possible_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.find_most_possible_version" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find most possible version in sliced package name</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.name.find_possible_chared_versions_and_singles">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">find_possible_chared_versions_and_singles</tt><big>(</big><em>name_sliced</em>, <em>separator='.'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#find_possible_chared_versions_and_singles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.find_possible_chared_versions_and_singles" title="Permalink to this definition">¶</a></dt>
-<dd><p>From sliced package name, return all possible versions</p>
-</dd></dl>
-
+</div>
+<div class="section" id="name-parse-name-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.name_parse_name" title="org.wayround.aipsetup.name.name_parse_name"><tt class="xref py py-func docutils literal"><span class="pre">name_parse_name()</span></tt></a> Function<a class="headerlink" href="#name-parse-name-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.name_parse_name">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">name_parse_name</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#name_parse_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.name_parse_name" title="Permalink to this definition">¶</a></dt>
@@ -119,6 +87,9 @@ function</p>
 result</p>
 </dd></dl>
 
+</div>
+<div class="section" id="name-parse-package-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.name_parse_package" title="org.wayround.aipsetup.name.name_parse_package"><tt class="xref py py-func docutils literal"><span class="pre">name_parse_package()</span></tt></a> Function<a class="headerlink" href="#name-parse-package-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.name_parse_package">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">name_parse_package</tt><big>(</big><em>opts</em>, <em>args</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#name_parse_package"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.name_parse_package" title="Permalink to this definition">¶</a></dt>
@@ -126,30 +97,74 @@ result</p>
 <p>NAME</p>
 </dd></dl>
 
+</div>
+<div class="section" id="name-parse-test-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.name_parse_test" title="org.wayround.aipsetup.name.name_parse_test"><tt class="xref py py-func docutils literal"><span class="pre">name_parse_test()</span></tt></a> Function<a class="headerlink" href="#name-parse-test-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.name_parse_test">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">name_parse_test</tt><big>(</big><em>args</em>, <em>opts</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#name_parse_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.name_parse_test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test Name Parsing Facilities</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="org.wayround.aipsetup.name.package_name_parse">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">package_name_parse</tt><big>(</big><em>filename</em>, <em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#package_name_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.package_name_parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse package name</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.name.parse_test">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">parse_test</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#parse_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.parse_test" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run parser on all difficult names (<a class="reference internal" href="#org.wayround.aipsetup.name.DIFFICULT_NAMES" title="org.wayround.aipsetup.name.DIFFICULT_NAMES"><tt class="xref py py-data docutils literal"><span class="pre">DIFFICULT_NAMES</span></tt></a>) in test purposes</p>
-</dd></dl>
-
+</div>
+<div class="section" id="rm-ext-from-pkg-name-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.rm_ext_from_pkg_name" title="org.wayround.aipsetup.name.rm_ext_from_pkg_name"><tt class="xref py py-func docutils literal"><span class="pre">rm_ext_from_pkg_name()</span></tt></a> Function<a class="headerlink" href="#rm-ext-from-pkg-name-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.rm_ext_from_pkg_name">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">rm_ext_from_pkg_name</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#rm_ext_from_pkg_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.rm_ext_from_pkg_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove extension from package name</p>
 </dd></dl>
 
+</div>
+<div class="section" id="package-name-parse-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.package_name_parse" title="org.wayround.aipsetup.name.package_name_parse"><tt class="xref py py-func docutils literal"><span class="pre">package_name_parse()</span></tt></a> Function<a class="headerlink" href="#package-name-parse-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.name.package_name_parse">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">package_name_parse</tt><big>(</big><em>filename</em>, <em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#package_name_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.package_name_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse package name</p>
+</dd></dl>
+
+</div>
+<div class="section" id="find-possible-chared-versions-and-singles-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.find_possible_chared_versions_and_singles" title="org.wayround.aipsetup.name.find_possible_chared_versions_and_singles"><tt class="xref py py-func docutils literal"><span class="pre">find_possible_chared_versions_and_singles()</span></tt></a> Function<a class="headerlink" href="#find-possible-chared-versions-and-singles-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.name.find_possible_chared_versions_and_singles">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">find_possible_chared_versions_and_singles</tt><big>(</big><em>name_sliced</em>, <em>separator='.'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#find_possible_chared_versions_and_singles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.find_possible_chared_versions_and_singles" title="Permalink to this definition">¶</a></dt>
+<dd><p>From sliced package name, return all possible versions</p>
+</dd></dl>
+
+</div>
+<div class="section" id="find-all-versions-and-singles-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.find_all_versions_and_singles" title="org.wayround.aipsetup.name.find_all_versions_and_singles"><tt class="xref py py-func docutils literal"><span class="pre">find_all_versions_and_singles()</span></tt></a> Function<a class="headerlink" href="#find-all-versions-and-singles-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.name.find_all_versions_and_singles">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">find_all_versions_and_singles</tt><big>(</big><em>name_sliced</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#find_all_versions_and_singles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.find_all_versions_and_singles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all versions using <a class="reference internal" href="#org.wayround.aipsetup.name.find_possible_chared_versions_and_singles" title="org.wayround.aipsetup.name.find_possible_chared_versions_and_singles"><tt class="xref py py-func docutils literal"><span class="pre">find_possible_chared_versions_and_singles()</span></tt></a>
+function</p>
+</dd></dl>
+
+</div>
+<div class="section" id="find-most-possible-version-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.find_most_possible_version" title="org.wayround.aipsetup.name.find_most_possible_version"><tt class="xref py py-func docutils literal"><span class="pre">find_most_possible_version()</span></tt></a> Function<a class="headerlink" href="#find-most-possible-version-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.name.find_most_possible_version">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">find_most_possible_version</tt><big>(</big><em>name_sliced</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#find_most_possible_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.find_most_possible_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find most possible version in sliced package name</p>
+</dd></dl>
+
+</div>
+<div class="section" id="source-name-parse-delicate-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.source_name_parse_delicate" title="org.wayround.aipsetup.name.source_name_parse_delicate"><tt class="xref py py-func docutils literal"><span class="pre">source_name_parse_delicate()</span></tt></a> Function<a class="headerlink" href="#source-name-parse-delicate-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.name.source_name_parse_delicate">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">source_name_parse_delicate</tt><big>(</big><em>filename</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#source_name_parse_delicate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.source_name_parse_delicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main source name parsing function</p>
+<p>Do not use this directly, use source_name_parse() instead.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="source-name-parse-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.source_name_parse" title="org.wayround.aipsetup.name.source_name_parse"><tt class="xref py py-func docutils literal"><span class="pre">source_name_parse()</span></tt></a> Function<a class="headerlink" href="#source-name-parse-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.name.source_name_parse">
 <tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">source_name_parse</tt><big>(</big><em>filename</em>, <em>modify_info_file=False</em>, <em>acceptable_version_number=None</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#source_name_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.source_name_parse" title="Permalink to this definition">¶</a></dt>
@@ -185,13 +200,24 @@ update infofile in info directory.</p>
 </div>
 </dd></dl>
 
+</div>
+<div class="section" id="modify-info-file-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name._modify_info_file" title="org.wayround.aipsetup.name._modify_info_file"><tt class="xref py py-func docutils literal"><span class="pre">_modify_info_file()</span></tt></a> Function<a class="headerlink" href="#modify-info-file-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="org.wayround.aipsetup.name.source_name_parse_delicate">
-<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">source_name_parse_delicate</tt><big>(</big><em>filename</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#source_name_parse_delicate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.source_name_parse_delicate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main source name parsing function</p>
-<p>Do not use this directly, use source_name_parse() instead.</p>
+<dt id="org.wayround.aipsetup.name._modify_info_file">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">_modify_info_file</tt><big>(</big><em>src_filename_parsed</em>, <em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#_modify_info_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name._modify_info_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="parse-test-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.name.parse_test" title="org.wayround.aipsetup.name.parse_test"><tt class="xref py py-func docutils literal"><span class="pre">parse_test()</span></tt></a> Function<a class="headerlink" href="#parse-test-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.name.parse_test">
+<tt class="descclassname">org.wayround.aipsetup.name.</tt><tt class="descname">parse_test</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/name.html#parse_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.name.parse_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run parser on all difficult names (<tt class="xref py py-data docutils literal"><span class="pre">DIFFICULT_NAMES</span></tt>) in test purposes</p>
 </dd></dl>
 
+</div>
 </div>
 
 
@@ -200,6 +226,28 @@ update infofile in info directory.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">name</span></tt> Module</a><ul>
+<li><a class="reference internal" href="#cli-name-function"><tt class="docutils literal"><span class="pre">cli_name()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#exported-commands-function"><tt class="docutils literal"><span class="pre">exported_commands()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#commands-order-function"><tt class="docutils literal"><span class="pre">commands_order()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#name-parse-name-function"><tt class="docutils literal"><span class="pre">name_parse_name()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#name-parse-package-function"><tt class="docutils literal"><span class="pre">name_parse_package()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#name-parse-test-function"><tt class="docutils literal"><span class="pre">name_parse_test()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#rm-ext-from-pkg-name-function"><tt class="docutils literal"><span class="pre">rm_ext_from_pkg_name()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#package-name-parse-function"><tt class="docutils literal"><span class="pre">package_name_parse()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#find-possible-chared-versions-and-singles-function"><tt class="docutils literal"><span class="pre">find_possible_chared_versions_and_singles()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#find-all-versions-and-singles-function"><tt class="docutils literal"><span class="pre">find_all_versions_and_singles()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#find-most-possible-version-function"><tt class="docutils literal"><span class="pre">find_most_possible_version()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#source-name-parse-delicate-function"><tt class="docutils literal"><span class="pre">source_name_parse_delicate()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#source-name-parse-function"><tt class="docutils literal"><span class="pre">source_name_parse()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#modify-info-file-function"><tt class="docutils literal"><span class="pre">_modify_info_file()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#parse-test-function"><tt class="docutils literal"><span class="pre">parse_test()</span></tt> Function</a></li>
+</ul>
+</li>
+</ul>
+
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/name.txt"

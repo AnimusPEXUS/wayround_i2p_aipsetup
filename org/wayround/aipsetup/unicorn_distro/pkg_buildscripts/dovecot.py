@@ -52,13 +52,13 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    ' --with-shadow',
+                    '--with-shadow',
                     '--with-pam',
                     '--with-bzlib',
                     '--with-ldap=yes',
                     '--with-sql=yes',
-                    '--with-pgsql',
-                    '--with-mysql',
+                    '--without-pgsql',
+                    '--without-mysql',
                     '--with-sqlite',
                     '--with-zlib',
                     '--with-ssl=openssl',

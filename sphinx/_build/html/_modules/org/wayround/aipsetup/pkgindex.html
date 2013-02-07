@@ -624,7 +624,7 @@
 
 <span class="c"># TODO: I don&#39;t like this function</span>
 <span class="k">def</span> <span class="nf">_join_pkg_path</span><span class="p">(</span><span class="n">pkg_path</span><span class="p">):</span></div>
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="viewcode-block" id="_join_pkg_path"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._join_pkg_path">[docs]</a>    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pkg_path</span><span class="p">:</span>
         <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -634,14 +634,14 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<span class="k">def</span> <span class="nf">_srfpac_pkg_struct</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_srfpac_pkg_struct</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="p">):</span></div>
+<div class="viewcode-block" id="_srfpac_pkg_struct"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._srfpac_pkg_struct">[docs]</a>    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="n">pid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">_srfpac_cat_struct</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cid</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_srfpac_cat_struct</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span><span class="p">):</span></div>
+<div class="viewcode-block" id="_srfpac_cat_struct"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._srfpac_cat_struct">[docs]</a>    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cid</span><span class="o">=</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parent_cid</span><span class="o">=</span><span class="n">parent_cid</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">_srfpac_get_cat_by_cat_path</span><span class="p">(</span><span class="n">category_locations</span><span class="p">,</span> <span class="n">cat_path</span><span class="p">):</span>
-
+<span class="k">def</span> <span class="nf">_srfpac_get_cat_by_cat_path</span><span class="p">(</span><span class="n">category_locations</span><span class="p">,</span> <span class="n">cat_path</span><span class="p">):</span></div>
+<div class="viewcode-block" id="_srfpac_get_cat_by_cat_path"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._srfpac_get_cat_by_cat_path">[docs]</a>
     <span class="n">ret</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="k">if</span> <span class="n">cat_path</span> <span class="ow">in</span> <span class="n">category_locations</span><span class="p">:</span>
@@ -649,7 +649,7 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">scan_repo_for_pkg_and_cat</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">scan_repo_for_pkg_and_cat</span><span class="p">():</span></div>
 <div class="viewcode-block" id="scan_repo_for_pkg_and_cat"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat">[docs]</a>    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">repo_dir</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
@@ -812,7 +812,7 @@
 
 
 <span class="k">def</span> <span class="nf">_index_progress</span><span class="p">(</span><span class="n">added_tags</span><span class="p">,</span> <span class="n">sub_dir_name</span><span class="p">,</span> <span class="n">root_dir_name_len</span><span class="p">):</span></div>
-    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">progress_write</span><span class="p">(</span>
+<div class="viewcode-block" id="_index_progress"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._index_progress">[docs]</a>    <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">progress_write</span><span class="p">(</span>
         <span class="s">&quot;    scanning (found {}): {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">added_tags</span><span class="p">,</span>
             <span class="n">sub_dir_name</span><span class="p">[</span><span class="n">root_dir_name_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
@@ -821,8 +821,8 @@
 
     <span class="k">return</span>
 
-<span class="k">def</span> <span class="nf">_index_sources_directory_to_list</span><span class="p">(</span>
-    <span class="n">list_buffer</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_index_sources_directory_to_list</span><span class="p">(</span></div>
+<div class="viewcode-block" id="_index_sources_directory_to_list"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._index_sources_directory_to_list">[docs]</a>    <span class="n">list_buffer</span><span class="p">,</span>
     <span class="n">root_dir_name</span><span class="p">,</span>
     <span class="n">sub_dir_name</span><span class="p">,</span>
     <span class="n">root_dir_name_len</span><span class="p">,</span>
@@ -888,7 +888,7 @@
     <span class="k">return</span> <span class="p">{</span><span class="s">&#39;added_tags&#39;</span><span class="p">:</span> <span class="n">added_tags</span><span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">index_sources_directory</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">index_sources_directory</span><span class="p">(</span></div>
 <div class="viewcode-block" id="index_sources_directory"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.index_sources_directory">[docs]</a>    <span class="n">root_dir_name</span><span class="p">,</span>
     <span class="n">sub_dir_name</span><span class="p">,</span>
     <span class="n">acceptable_endings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -1084,7 +1084,7 @@
     <span class="k">return</span> <span class="mi">0</span>
 
 <span class="k">def</span> <span class="nf">_put_asps_to_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">subdir</span><span class="p">):</span></div>
-
+<div class="viewcode-block" id="_put_asps_to_index"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex._put_asps_to_index">[docs]</a>
     <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">repository_path</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">wayround</span><span class="o">.</span><span class="n">aipsetup</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;repository&#39;</span><span class="p">]</span>
@@ -1114,7 +1114,7 @@
 
     <span class="k">return</span> <span class="n">ret</span>
 
-<span class="k">def</span> <span class="nf">put_asp_to_index</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">put_asp_to_index</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span></div>
 <div class="viewcode-block" id="put_asp_to_index"><a class="viewcode-back" href="../../../../pkgindex.html#org.wayround.aipsetup.pkgindex.put_asp_to_index">[docs]</a>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Moves file to aipsetup package index</span>

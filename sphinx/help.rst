@@ -4,6 +4,9 @@
 ------------------
 
 .. automodule:: org.wayround.aipsetup.help
-    :members:
-    :undoc-members:
-    :show-inheritance:
+
+
+:func:`aipsetup_help` Function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. autofunction:: org.wayround.aipsetup.help.aipsetup_help
+

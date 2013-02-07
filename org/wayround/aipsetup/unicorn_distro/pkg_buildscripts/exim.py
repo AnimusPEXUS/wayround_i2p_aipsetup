@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
 import logging
+import os
 import os.path
-import subprocess
 import shutil
+import subprocess
 
 import org.wayround.utils.file
 
@@ -152,6 +153,8 @@ def main(buildingsite, action=None):
 #                        '# USE_GNUTLS_PC=gnutls',
 #                        '# TLS_LIBS=-lgnutls -ltasn1 -lgcrypt'
 
+                        '# WITH_CONTENT_SCAN=yes',
+                        '# SUPPORT_PAM=yes',
                         ]:
 
                         if ftl[i].startswith(j):
@@ -164,15 +167,8 @@ def main(buildingsite, action=None):
 
                         ftl.insert(i + 1, 'AUTH_LIBS=-lsasl2 -lgsasl')
 
-#                    for j in [
-#                        ]:
-#
-#                        if ftl[i].startswith(j):
-#                            ftl[i] = j[2:]
 
-
-#                ftl.append('EXIM_CHMOD=@false\n')
-
+                ftl.append('EXTRALIBS+=-lpam')
 
                 if ret == 0:
 
@@ -229,6 +225,11 @@ def main(buildingsite, action=None):
                         i + '.example'
                         )
 
-            os.symlink('./exim', os.path.join(dst_dir, 'usr', 'bin', 'sendmail'))
+            lnk = os.path.join(dst_dir, 'usr', 'bin', 'sendmail')
+
+            if os.path.exists(lnk) or os.path.islink(lnk):
+                os.unlink(lnk)
+
+            os.symlink('./exim', lnk)
 
     return ret

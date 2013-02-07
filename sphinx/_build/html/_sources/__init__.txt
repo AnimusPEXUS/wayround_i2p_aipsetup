@@ -4,6 +4,4 @@
 ----------------------
 
 .. automodule:: org.wayround.aipsetup.__init__
-    :members:
-    :undoc-members:
-    :show-inheritance:
+

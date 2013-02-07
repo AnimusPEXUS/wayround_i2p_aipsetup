@@ -1018,7 +1018,7 @@ def index_sources(subdir_name, force_reindex=False, first_delete_found=False):
     return 0
 
 
-def put_asps_to_index(files):
+def put_asps_to_index(files, move=False):
 
     """
     Put many asps to aipsetup package index
@@ -1028,11 +1028,11 @@ def put_asps_to_index(files):
 
     for i in files:
         if os.path.exists(i):
-            put_asp_to_index(i)
+            put_asp_to_index(i, move=move)
 
     return 0
 
-def _put_asps_to_index(files, subdir):
+def _put_asps_to_index(files, subdir, move=False):
 
     ret = 0
 
@@ -1050,8 +1050,13 @@ def _put_asps_to_index(files, subdir):
 
         if os.path.dirname(file) != full_path:
 
+            action = 'Copying'
+            if move:
+                action = 'Moving'
+
             logging.info(
-                "Moving {}\n       to {}".format(
+                "{} {}\n       to {}".format(
+                    action,
                     os.path.basename(file), full_path
                     )
                 )
@@ -1059,11 +1064,14 @@ def _put_asps_to_index(files, subdir):
             sfile = full_path + os.path.sep + os.path.basename(file)
             if os.path.isfile(sfile):
                 os.unlink(sfile)
-            shutil.move(file, full_path)
+            if move:
+                shutil.move(file, full_path)
+            else:
+                shutil.copy(file, full_path)
 
     return ret
 
-def put_asp_to_index(filename):
+def put_asp_to_index(filename, move=False):
 
     """
     Moves file to aipsetup package index
@@ -1120,7 +1128,7 @@ def put_asp_to_index(filename):
                             )
                         ret = 12
                     else:
-                        _put_asps_to_index(files, path)
+                        _put_asps_to_index(files, path, move=move)
 
         else:
 

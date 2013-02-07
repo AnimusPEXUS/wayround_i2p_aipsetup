@@ -49,6 +49,8 @@
   <div class="section" id="module-org.wayround.aipsetup.pkginfo">
 <span id="pkginfo-module"></span><h1><tt class="xref py py-mod docutils literal"><span class="pre">pkginfo</span></tt> Module<a class="headerlink" href="#module-org.wayround.aipsetup.pkginfo" title="Permalink to this headline">¶</a></h1>
 <p>Package info related functions</p>
+<div class="section" id="packageinfo-class">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.PackageInfo" title="org.wayround.aipsetup.pkginfo.PackageInfo"><tt class="xref py py-class docutils literal"><span class="pre">PackageInfo</span></tt></a> Class<a class="headerlink" href="#packageinfo-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="org.wayround.aipsetup.pkginfo.PackageInfo">
 <em class="property">class </em><tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">PackageInfo</tt><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#PackageInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo" title="Permalink to this definition">¶</a></dt>
@@ -58,6 +60,11 @@
 <dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Base">
 <em class="property">class </em><tt class="descname">Base</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Base" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Base._decl_class_registry">
+<tt class="descname">_decl_class_registry</tt><em class="property"> = {'Info': &lt;class 'org.wayround.aipsetup.pkginfo.PackageInfo.Info'&gt;}</em><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Base._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Base.metadata">
 <tt class="descname">metadata</tt><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Base.metadata" title="Permalink to this definition">¶</a></dt>
@@ -70,6 +77,11 @@
 <em class="property">class </em><tt class="descclassname">PackageInfo.</tt><tt class="descname">Info</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#PackageInfo.Info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.Base</span></tt></p>
 <p>Class for holding package information</p>
+<dl class="attribute">
+<dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info._sa_class_manager">
+<tt class="descname">_sa_class_manager</tt><em class="property"> = &lt;ClassManager of &lt;class 'org.wayround.aipsetup.pkginfo.PackageInfo.Info'&gt; at b5e46c0c&gt;</em><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="org.wayround.aipsetup.pkginfo.PackageInfo.Info.auto_newest_pkg">
 <tt class="descname">auto_newest_pkg</tt><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.PackageInfo.Info.auto_newest_pkg" title="Permalink to this definition">¶</a></dt>
@@ -144,19 +156,78 @@
 
 </dd></dl>
 
+</div>
+<div class="section" id="get-lists-of-packages-missing-and-present-info-records-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records" title="org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records"><tt class="xref py py-func docutils literal"><span class="pre">get_lists_of_packages_missing_and_present_info_records()</span></tt></a> Function<a class="headerlink" href="#get-lists-of-packages-missing-and-present-info-records-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.delete_info_records">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">delete_info_records</tt><big>(</big><em>mask='*'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#delete_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.delete_info_records" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.filter_tarball_list">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">filter_tarball_list</tt><big>(</big><em>input_list</em>, <em>filter_text</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#filter_tarball_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.filter_tarball_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filters supplied list with supplied filter</p>
-<p>subjects not in check_for_subjects will always be positive (but can be
-filtered out by proper leading rules)</p>
+<dt id="org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_lists_of_packages_missing_and_present_info_records</tt><big>(</big><em>names</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_lists_of_packages_missing_and_present_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>names</strong> &#8211; can be a string or a <tt class="docutils literal"><span class="pre">list</span></tt> of names to check. if names is</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">None</span></tt> - check all.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="get-package-info-record-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_package_info_record" title="org.wayround.aipsetup.pkginfo.get_package_info_record"><tt class="xref py py-func docutils literal"><span class="pre">get_package_info_record()</span></tt></a> Function<a class="headerlink" href="#get-package-info-record-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_package_info_record">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_package_info_record</tt><big>(</big><em>name=None</em>, <em>record=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_package_info_record" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method can accept package name or complete record instance.</p>
+<p>If name is given, record is not used and method does db query itself.</p>
+<p>If name is not given, record is used as if it were this method&#8217;s query
+result.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="set-package-info-record-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.set_package_info_record" title="org.wayround.aipsetup.pkginfo.set_package_info_record"><tt class="xref py py-func docutils literal"><span class="pre">set_package_info_record()</span></tt></a> Function<a class="headerlink" href="#set-package-info-record-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.set_package_info_record">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">set_package_info_record</tt><big>(</big><em>name</em>, <em>struct</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#set_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.set_package_info_record" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-info-records-list-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_info_records_list" title="org.wayround.aipsetup.pkginfo.get_info_records_list"><tt class="xref py py-func docutils literal"><span class="pre">get_info_records_list()</span></tt></a> Function<a class="headerlink" href="#get-info-records-list-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_info_records_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_info_records_list</tt><big>(</big><em>mask='*'</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_info_records_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-missing-info-records-list-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_missing_info_records_list" title="org.wayround.aipsetup.pkginfo.get_missing_info_records_list"><tt class="xref py py-func docutils literal"><span class="pre">get_missing_info_records_list()</span></tt></a> Function<a class="headerlink" href="#get-missing-info-records-list-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_missing_info_records_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_missing_info_records_list</tt><big>(</big><em>create_templates=False</em>, <em>force_rewrite=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_missing_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_missing_info_records_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-outdated-info-records-list-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_outdated_info_records_list" title="org.wayround.aipsetup.pkginfo.get_outdated_info_records_list"><tt class="xref py py-func docutils literal"><span class="pre">get_outdated_info_records_list()</span></tt></a> Function<a class="headerlink" href="#get-outdated-info-records-list-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_outdated_info_records_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_outdated_info_records_list</tt><big>(</big><em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_outdated_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_outdated_info_records_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="get-info-rec-by-tarball-filename-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename" title="org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename"><tt class="xref py py-func docutils literal"><span class="pre">get_info_rec_by_tarball_filename()</span></tt></a> Function<a class="headerlink" href="#get-info-rec-by-tarball-filename-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_info_rec_by_tarball_filename</tt><big>(</big><em>tarball_filenam</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_info_rec_by_tarball_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="filter-text-parse-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.filter_text_parse" title="org.wayround.aipsetup.pkginfo.filter_text_parse"><tt class="xref py py-func docutils literal"><span class="pre">filter_text_parse()</span></tt></a> Function<a class="headerlink" href="#filter-text-parse-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkginfo.filter_text_parse">
 <tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">filter_text_parse</tt><big>(</big><em>filter_text</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#filter_text_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.filter_text_parse" title="Permalink to this definition">¶</a></dt>
@@ -176,64 +247,76 @@ data     = &lt;depends on subject&gt; (can contain spaces)
 </dl>
 </dd></dl>
 
+</div>
+<div class="section" id="filter-tarball-list-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.filter_tarball_list" title="org.wayround.aipsetup.pkginfo.filter_tarball_list"><tt class="xref py py-func docutils literal"><span class="pre">filter_tarball_list()</span></tt></a> Function<a class="headerlink" href="#filter-tarball-list-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_info_rec_by_tarball_filename</tt><big>(</big><em>tarball_filenam</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_info_rec_by_tarball_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_info_records_list">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_info_records_list</tt><big>(</big><em>mask='*'</em>, <em>mute=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_info_records_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_lists_of_packages_missing_and_present_info_records</tt><big>(</big><em>names</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_lists_of_packages_missing_and_present_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_lists_of_packages_missing_and_present_info_records" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>names</strong> &#8211; can be a string or a <tt class="docutils literal"><span class="pre">list</span></tt> of names to check. if names is</td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">None</span></tt> - check all.</p>
+<dt id="org.wayround.aipsetup.pkginfo.filter_tarball_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">filter_tarball_list</tt><big>(</big><em>input_list</em>, <em>filter_text</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#filter_tarball_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.filter_tarball_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters supplied list with supplied filter</p>
+<p>subjects not in check_for_subjects will always be positive (but can be
+filtered out by proper leading rules)</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_missing_info_records_list">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_missing_info_records_list</tt><big>(</big><em>create_templates=False</em>, <em>force_rewrite=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_missing_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_missing_info_records_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_non_automatic_packages_info_list</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_non_automatic_packages_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_outdated_info_records_list">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_outdated_info_records_list</tt><big>(</big><em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_outdated_info_records_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_outdated_info_records_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.get_package_info_record">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_package_info_record</tt><big>(</big><em>name=None</em>, <em>record=None</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_package_info_record" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method can accept package name or complete record instance.</p>
-<p>If name is given, record is not used and method does db query itself.</p>
-<p>If name is not given, record is used as if it were this method&#8217;s query
-result.</p>
-</dd></dl>
-
+</div>
+<div class="section" id="get-package-name-by-tarball-filename-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename" title="org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename"><tt class="xref py py-func docutils literal"><span class="pre">get_package_name_by_tarball_filename()</span></tt></a> Function<a class="headerlink" href="#get-package-name-by-tarball-filename-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename">
 <tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_package_name_by_tarball_filename</tt><big>(</big><em>tarball_filename</em>, <em>mute=True</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_package_name_by_tarball_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</div>
+<div class="section" id="get-non-automatic-packages-info-list-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list" title="org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list"><tt class="xref py py-func docutils literal"><span class="pre">get_non_automatic_packages_info_list()</span></tt></a> Function<a class="headerlink" href="#get-non-automatic-packages-info-list-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">get_non_automatic_packages_info_list</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#get_non_automatic_packages_info_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.get_non_automatic_packages_info_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="guess-package-homepage-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.guess_package_homepage" title="org.wayround.aipsetup.pkginfo.guess_package_homepage"><tt class="xref py py-func docutils literal"><span class="pre">guess_package_homepage()</span></tt></a> Function<a class="headerlink" href="#guess-package-homepage-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkginfo.guess_package_homepage">
 <tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">guess_package_homepage</tt><big>(</big><em>pkg_name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#guess_package_homepage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.guess_package_homepage" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</div>
+<div class="section" id="update-outdated-pkg-info-records-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records" title="org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records"><tt class="xref py py-func docutils literal"><span class="pre">update_outdated_pkg_info_records()</span></tt></a> Function<a class="headerlink" href="#update-outdated-pkg-info-records-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">update_outdated_pkg_info_records</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#update_outdated_pkg_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="print-info-record-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.print_info_record" title="org.wayround.aipsetup.pkginfo.print_info_record"><tt class="xref py py-func docutils literal"><span class="pre">print_info_record()</span></tt></a> Function<a class="headerlink" href="#print-info-record-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.print_info_record">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">print_info_record</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#print_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.print_info_record" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="delete-info-records-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.delete_info_records" title="org.wayround.aipsetup.pkginfo.delete_info_records"><tt class="xref py py-func docutils literal"><span class="pre">delete_info_records()</span></tt></a> Function<a class="headerlink" href="#delete-info-records-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.delete_info_records">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">delete_info_records</tt><big>(</big><em>mask='*'</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#delete_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.delete_info_records" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="save-info-records-to-fs-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.save_info_records_to_fs" title="org.wayround.aipsetup.pkginfo.save_info_records_to_fs"><tt class="xref py py-func docutils literal"><span class="pre">save_info_records_to_fs()</span></tt></a> Function<a class="headerlink" href="#save-info-records-to-fs-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="org.wayround.aipsetup.pkginfo.save_info_records_to_fs">
+<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">save_info_records_to_fs</tt><big>(</big><em>mask='*'</em>, <em>force_rewrite=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#save_info_records_to_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.save_info_records_to_fs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="load-info-records-from-fs-function">
+<h2><a class="reference internal" href="#org.wayround.aipsetup.pkginfo.load_info_records_from_fs" title="org.wayround.aipsetup.pkginfo.load_info_records_from_fs"><tt class="xref py py-func docutils literal"><span class="pre">load_info_records_from_fs()</span></tt></a> Function<a class="headerlink" href="#load-info-records-from-fs-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="org.wayround.aipsetup.pkginfo.load_info_records_from_fs">
 <tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">load_info_records_from_fs</tt><big>(</big><em>filenames=</em><span class="optional">[</span><span class="optional">]</span>, <em>rewrite_existing=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#load_info_records_from_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.load_info_records_from_fs" title="Permalink to this definition">¶</a></dt>
@@ -241,26 +324,7 @@ result.</p>
 existing</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.print_info_record">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">print_info_record</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#print_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.print_info_record" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.save_info_records_to_fs">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">save_info_records_to_fs</tt><big>(</big><em>mask='*'</em>, <em>force_rewrite=False</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#save_info_records_to_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.save_info_records_to_fs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.set_package_info_record">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">set_package_info_record</tt><big>(</big><em>name</em>, <em>struct</em><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#set_package_info_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.set_package_info_record" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records">
-<tt class="descclassname">org.wayround.aipsetup.pkginfo.</tt><tt class="descname">update_outdated_pkg_info_records</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/org/wayround/aipsetup/pkginfo.html#update_outdated_pkg_info_records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+</div>
 </div>
 
 
@@ -269,6 +333,31 @@ existing</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">pkginfo</span></tt> Module</a><ul>
+<li><a class="reference internal" href="#packageinfo-class"><tt class="docutils literal"><span class="pre">PackageInfo</span></tt> Class</a></li>
+<li><a class="reference internal" href="#get-lists-of-packages-missing-and-present-info-records-function"><tt class="docutils literal"><span class="pre">get_lists_of_packages_missing_and_present_info_records()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-package-info-record-function"><tt class="docutils literal"><span class="pre">get_package_info_record()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#set-package-info-record-function"><tt class="docutils literal"><span class="pre">set_package_info_record()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-info-records-list-function"><tt class="docutils literal"><span class="pre">get_info_records_list()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-missing-info-records-list-function"><tt class="docutils literal"><span class="pre">get_missing_info_records_list()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-outdated-info-records-list-function"><tt class="docutils literal"><span class="pre">get_outdated_info_records_list()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-info-rec-by-tarball-filename-function"><tt class="docutils literal"><span class="pre">get_info_rec_by_tarball_filename()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#filter-text-parse-function"><tt class="docutils literal"><span class="pre">filter_text_parse()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#filter-tarball-list-function"><tt class="docutils literal"><span class="pre">filter_tarball_list()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-package-name-by-tarball-filename-function"><tt class="docutils literal"><span class="pre">get_package_name_by_tarball_filename()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#get-non-automatic-packages-info-list-function"><tt class="docutils literal"><span class="pre">get_non_automatic_packages_info_list()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#guess-package-homepage-function"><tt class="docutils literal"><span class="pre">guess_package_homepage()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#update-outdated-pkg-info-records-function"><tt class="docutils literal"><span class="pre">update_outdated_pkg_info_records()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#print-info-record-function"><tt class="docutils literal"><span class="pre">print_info_record()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#delete-info-records-function"><tt class="docutils literal"><span class="pre">delete_info_records()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#save-info-records-to-fs-function"><tt class="docutils literal"><span class="pre">save_info_records_to_fs()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#load-info-records-from-fs-function"><tt class="docutils literal"><span class="pre">load_info_records_from_fs()</span></tt> Function</a></li>
+</ul>
+</li>
+</ul>
+
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/pkginfo.txt"

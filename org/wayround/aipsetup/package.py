@@ -914,7 +914,7 @@ def install_package(
                 ret = 2
             else:
 
-                if info['deprecated'] or info['non_installable']:
+                if not force and (info['deprecated'] or info['non_installable']):
                     logging.error(
                         "Package is deprecated({}) or non-installable({})".format(
                         info['deprecated'],

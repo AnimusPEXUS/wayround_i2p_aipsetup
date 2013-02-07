@@ -402,10 +402,16 @@ def repoman_save_tags(opts, args):
 
 def repoman_put_asps_to_index(opts, args):
     """
-    Put package to repository and add it to index
+    Copy package to index repository
+
+    -m      move, not copy
     """
 
     ret = 0
+
+    move = False
+    if '-m' in opts:
+        move = True
 
     files = []
     if len(args) > 0:
@@ -415,6 +421,6 @@ def repoman_put_asps_to_index(opts, args):
         logging.error("Filenames required")
         ret = 2
     else:
-        ret = org.wayround.aipsetup.pkgindex.put_asps_to_index(files)
+        ret = org.wayround.aipsetup.pkgindex.put_asps_to_index(files, move=move)
 
     return ret

@@ -377,14 +377,14 @@
     <span class="k">return</span> <span class="n">ret</span>
 
 <span class="k">def</span> <span class="nf">_find_latest</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span></div>
-    <span class="n">y</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="_find_latest"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info._find_latest">[docs]</a>    <span class="n">y</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span>
 
-<span class="k">def</span> <span class="nf">_find_list</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">def</span> <span class="nf">_find_list</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span></div>
+<div class="viewcode-block" id="_find_list"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info._find_list">[docs]</a>    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
     <span class="n">lx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lx</span><span class="p">):</span>
@@ -393,7 +393,7 @@
             <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span>
 
-<span class="k">def</span> <span class="nf">is_info_dicts_equal</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">is_info_dicts_equal</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span></div>
 <div class="viewcode-block" id="is_info_dicts_equal"><a class="viewcode-back" href="../../../../info.html#org.wayround.aipsetup.info.is_info_dicts_equal">[docs]</a>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compare two package info structures</span>
