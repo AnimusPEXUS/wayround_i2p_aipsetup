@@ -33,9 +33,16 @@ CONFIG_FULL_SAMPLE = {
 
 
     # other non-configurable
-    'acceptable_src_file_extensions':['.tar.gz', '.tar.bz2', '.zip',
-         '.7z', '.tgz', '.tar.xz', '.tar.lzma',
-         '.tbz2'],
+    'acceptable_src_file_extensions':[
+        '.tar.gz',
+        '.tar.bz2',
+        '.zip',
+        '.7z',
+        '.tgz',
+        '.tar.xz',
+        '.tar.lzma',
+        '.tbz2'
+        ],
 
     # DB config
     'package_index_db_config'       : 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgindex.sqlite',
