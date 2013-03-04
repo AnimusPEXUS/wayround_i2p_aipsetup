@@ -163,6 +163,7 @@ def main(buildingsite, action = None):
 export PATH=$PATH:/usr/lib/java/jdk/bin:/usr/lib/java/jdk/jre/bin
 export JAVA_HOME=/usr/lib/java/jdk
 export MANPATH=$MANPATH:$JAVA_HOME/man
+export LD_LIBRARY_PATH+=":$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
 """
 )
 

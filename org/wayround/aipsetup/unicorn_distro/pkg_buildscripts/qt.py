@@ -54,7 +54,7 @@ def main(buildingsite, action=None):
                     [
     #                    '-system-nas-sound',
                     '-opensource',
-                    '-prefix', '/usr/lib/qt4',
+                    '-prefix', '/usr/lib/qt_w_toolkit',
                     '-sysconfdir', pkg_info['constitution']['paths']['config'],
                     '-bindir', '/usr/bin',
                     '-libdir', '/usr/lib',
