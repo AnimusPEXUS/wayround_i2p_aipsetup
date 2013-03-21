@@ -239,6 +239,8 @@ def package_remove(opts, args):
     if ret == 0:
         ret = remove_package(name, force, basedir)
 
+        org.wayround.aipsetup.sysupdates.all_actions()
+
     return ret
 
 def package_complete(opts, args):

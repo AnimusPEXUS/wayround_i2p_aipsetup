@@ -16,7 +16,7 @@ import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 
-def main(buildingsite, action = None):
+def main(buildingsite, action=None):
 
     ret = 0
 
@@ -47,8 +47,8 @@ def main(buildingsite, action = None):
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
-                unwrap_dir = True,
-                rename_dir = False
+                unwrap_dir=True,
+                rename_dir=False
                 )
 
         if 'configure' in actions and ret == 0:
@@ -59,11 +59,9 @@ def main(buildingsite, action = None):
                 )
 
             f = open(makefile, 'r')
-            lines = f.readlines()
+            lines = f.read().splitlines()
             f.close()
 
-            for i in range(len(lines)):
-                lines[i] = lines[i].rstrip('\n')
 
             for i in range(len(lines)):
 
@@ -83,18 +81,16 @@ def main(buildingsite, action = None):
 
                     lines[i] = ' '.join(line)
 
-            for i in range(len(lines)):
-                lines[i] = lines[i] + '\n'
 
             f = open(makefile, 'w')
-            f.writelines(lines)
+            f.write('\n'.join(lines))
             f.close()
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options = [],
-                arguments = [
+                options=[],
+                arguments=[
                     'nss_build_all',
                     'BUILD_OPT=1',
                     'NSPR_INCLUDE_DIR=/usr/include/nspr',
@@ -102,10 +98,10 @@ def main(buildingsite, action = None):
                     'ZLIB_LIBS=-lz',
                     'NSS_USE_SYSTEM_SQLITE=1'
                     ],
-                environment = {},
-                environment_mode = 'copy',
-                use_separate_buildding_dir = separate_build_dir,
-                source_configure_reldir = source_configure_reldir
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -157,7 +153,7 @@ def main(buildingsite, action = None):
                     try:
                         os.mkdir(
                             os.path.join(OBJ_dir, 'include'),
-                            mode = 0o755
+                            mode=0o755
                             )
                     except:
                         pass
@@ -165,7 +161,7 @@ def main(buildingsite, action = None):
                     try:
                         os.mkdir(
                             os.path.join(OBJ_dir, 'usr'),
-                            mode = 0o755
+                            mode=0o755
                             )
                     except:
                         pass
@@ -207,7 +203,7 @@ def main(buildingsite, action = None):
                     try:
                         os.mkdir(
                             os.path.join(OBJ_dir, 'usr', 'include', 'nss'),
-                            mode = 0o755
+                            mode=0o755
                             )
                     except:
                         pass
@@ -222,7 +218,7 @@ def main(buildingsite, action = None):
                         org.wayround.utils.file.files_by_mask_copy_to_dir(
                             os.path.join(dist_dir, i, 'nss'),
                             os.path.join(OBJ_dir, 'usr', 'include', 'nss'),
-                            mask = '*'
+                            mask='*'
                             )
 
                     logging.info("Writing package config files")
@@ -261,11 +257,11 @@ Version: {nss_major_version}.{nss_minor_version}.{nss_patch_version}
 Libs: -L${{libdir}} {libs}
 Cflags: -I${{includedir}}
 """.format(
-                        prefix = '/usr',
-                        nss_major_version = nss_major_version,
-                        nss_minor_version = nss_minor_version,
-                        nss_patch_version = nss_patch_version,
-                        libs = libs
+                        prefix='/usr',
+                        nss_major_version=nss_major_version,
+                        nss_minor_version=nss_minor_version,
+                        nss_patch_version=nss_patch_version,
+                        libs=libs
                         )
 # -lnss{nss_major_version} -lnssutil{nss_major_version} -lsmime{nss_major_version} -lssl{nss_major_version} -lsoftokn{nss_major_version}
 
@@ -273,7 +269,7 @@ Cflags: -I${{includedir}}
                         os.mkdir(
                             OBJ_dir + os.path.sep + 'usr' + os.path.sep +
                             'lib' + os.path.sep + 'pkgconfig',
-                            mode = 0o755
+                            mode=0o755
                             )
                     except:
                         pass
@@ -442,10 +438,10 @@ if test "$echo_libs" = "yes"; then
       echo $libdirs
 fi
 """.format(
-                        prefix = '/usr',
-                        nss_major_version = nss_major_version,
-                        nss_minor_version = nss_minor_version,
-                        nss_patch_version = nss_patch_version
+                        prefix='/usr',
+                        nss_major_version=nss_major_version,
+                        nss_minor_version=nss_minor_version,
+                        nss_patch_version=nss_patch_version
                         )
 
                     f = open(
@@ -465,7 +461,7 @@ fi
                         os.chmod(
                             OBJ_dir + os.path.sep + 'usr' + os.path.sep +
                             'bin' + os.path.sep + i,
-                            mode = 0o755
+                            mode=0o755
                             )
 
                     logging.info("Moving files to distribution dir")

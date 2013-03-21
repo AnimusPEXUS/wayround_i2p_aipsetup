@@ -1097,6 +1097,7 @@ def put_asp_to_index(filename, move=False):
                         os.path.basename(filename)
                         )
                     )
+                ret = 13
             else:
                 file = org.wayround.utils.path.abspath(filename)
 
@@ -1133,7 +1134,7 @@ def put_asp_to_index(filename, move=False):
         else:
 
             logging.error(
-                "Action indefined for `{}'".format(os.path.basename(filename))
+                "Action undefined for `{}'".format(os.path.basename(filename))
                 )
 
     return ret

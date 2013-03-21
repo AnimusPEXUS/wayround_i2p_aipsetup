@@ -336,9 +336,13 @@ def cleanup_repo_package_pack(name):
 
         if os.path.exists(p1):
 
-            org.wayround.aipsetup.pkgindex.put_asp_to_index(
+            if org.wayround.aipsetup.pkgindex.put_asp_to_index(
                 path + os.path.sep + i
-                )
+                ) != 0:
+
+                logging.warning("Can't move file to index. moving to garbage")
+
+                shutil.move(path + os.path.sep + i, g_path + os.path.sep + i)
 
     files = os.listdir(path)
     files.sort()

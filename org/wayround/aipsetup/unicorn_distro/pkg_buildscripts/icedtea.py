@@ -159,11 +159,15 @@ def main(buildingsite, action = None):
 
             fi.write(
                 """\
-#!/bin/bash
+#!/bin/bash                                                                                                                                                             
 export PATH=$PATH:/usr/lib/java/jdk/bin:/usr/lib/java/jdk/jre/bin
 export JAVA_HOME=/usr/lib/java/jdk
 export MANPATH=$MANPATH:$JAVA_HOME/man
-export LD_LIBRARY_PATH+=":$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
+if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
+    LD_LIBRARY_PATH+=":"
+fi
+export LD_LIBRARY_PATH+="$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
+
 """
 )
 

@@ -17,7 +17,8 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.buildscript.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'configure', 'build', 'distribute',
+         'fix_symlinks', 'fix_la_file'],
         action,
         "help"
         )
@@ -97,6 +98,8 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
+        if 'fix_symlinks' in actions and ret == 0:
+
             try:
                 for i in ['libacl.a', 'libacl.la']:
                     ffn = os.path.join(dst_dir, 'usr', 'lib', i)
@@ -116,5 +119,23 @@ def main(buildingsite, action=None):
             except:
                 logging.exception('error')
                 ret = 1
+
+        if 'fix_la_file' in actions and ret == 0:
+
+            la_file_name = os.path.join(dst_dir, 'usr', 'lib', 'libacl.la')
+
+            print("la_file_name == {}".format(la_file_name))
+
+            la_file = open(la_file_name)
+            lines = la_file.read().splitlines()
+            la_file.close()
+
+            for i in range(len(lines)):
+                while dst_dir in lines[i]:
+                    lines[i] = lines[i].replace(dst_dir, '')
+
+            la_file = open(la_file_name, 'w')
+            la_file.write('\n'.join(lines))
+            la_file.close()
 
     return ret

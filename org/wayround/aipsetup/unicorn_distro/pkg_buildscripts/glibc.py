@@ -63,6 +63,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--enable-obsolete-rpc',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],

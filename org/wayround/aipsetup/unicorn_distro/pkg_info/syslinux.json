@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "syslinux", 
-  "buildscript": "", 
+  "buildscript": "syslinux", 
   "deprecated": false, 
   "description": "linux kernel boot loader used in this distribution", 
   "filters": "", 
