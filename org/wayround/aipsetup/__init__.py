@@ -13,7 +13,7 @@ AIPSETUP_CLI_MODULE_LIST = [
     'package',
     'pkgsnapshot',
     'server',
-    'client',
+#    'client',
     'repoman',
     'pkgdeps',
     'clean',

@@ -1,36 +1,21 @@
 
-"""
-UNICORN distro serving related stuff
-"""
-
-import os.path
-import xml.sax.saxutils
 import json
-import copy
-import functools
+import os.path
 
-#import cherrypy
-#import cherrypy.lib
+import bottle
 
-import org.wayround.utils.path
-
-import org.wayround.aipsetup.config
 import org.wayround.aipsetup.pkgindex
-import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.pkglatest
 import org.wayround.aipsetup.pkgtag
-import org.wayround.aipsetup.serverui
+import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.info
 
+# imported in server_start_host()
+#import org.wayround.aipsetup.serverui
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'
 
-
-def edefault(status, message, traceback, version):
-
-    return "{}: {}".format(
-        xml.sax.saxutils.escape(message),
-        status
-        )
 
 def cli_name():
     return 'server'
@@ -49,247 +34,284 @@ def server_start_host(opts, args):
     """
     Start serving UNICORN Web Host
     """
-    return start_host()
+
+    import org.wayround.aipsetup.serverui
+
+    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    css_dir = os.path.join(os.path.dirname(__file__), 'css')
+    js_dir = os.path.join(os.path.dirname(__file__), 'js')
+
+    app = AipsetupASPServer(
+        templates_dir=templates_dir,
+        css_dir=css_dir,
+        js_dir=js_dir
+        )
+
+    app.start()
+
+    return
 
 
+class AipsetupASPServer:
 
-class Index:
+    def __init__(
+        self,
+        host='localhost',
+        port=8080,
+        templates_dir='.',
+        css_dir='./css',
+        js_dir='./js'
+        ):
+
+        self.host = host
+        self.port = port
+
+        self.templates_dir = templates_dir
+        self.css_dir = css_dir
+        self.js_dir = js_dir
+
+        self.ui = org.wayround.aipsetup.serverui.UI(templates_dir)
+
+        self.app = bottle.Bottle()
+
+        self.app.route('/', 'GET', self.index)
+
+        self.app.route('/js/<filename>', 'GET', self.js)
+        self.app.route('/css/<filename>', 'GET', self.css)
+
+        self.app.route('/category', 'GET', self.category_redirect)
+        self.app.route('/category/', 'GET', self.category)
+        self.app.route('/category/<path:path>', 'GET', self.category)
+        self.app.route('/package/<name>', 'GET', self.package)
+
+        return
+
+    def start(self):
+        return bottle.run(self.app, host=self.host, port=self.port)
 
     def index(self):
+        return ''
 
-        txt = org.wayround.aipsetup.serverui.page_index()
+    def css(self, filename):
+        return bottle.static_file(filename, root=self.css_dir)
 
-        return txt
+    def js(self, filename):
+        return bottle.static_file(filename, root=self.js_dir)
 
-    index.exposed = True
+    def category_redirect(self):
+        bottle.response.set_header('Location', '/category/')
+        bottle.response.status = 303
 
+    def category(self, path=None):
 
-    def category(self, path = None, mode = None):
+        decoded_params = bottle.request.params.decode('utf-8')
 
-        if mode == None:
+        mode = None
+
+        if not 'mode' in decoded_params:
             mode = 'html'
+        else:
+            mode = decoded_params['mode']
+            if not mode in ['html', 'json']:
+                raise bottle.HTTPError(400, "Invalid mode")
 
-        if not mode in ['html', 'json']:
-            raise cherrypy.HTTPError(400, "Wrong `mode' parameter")
-
-        txt = ''
+        ret = ''
         if mode == 'html':
 
-            if path == None:
+            if path in [None, '/']:
                 path = ''
 
-            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
+            cat_id = org.wayround.aipsetup.pkgindex.get_category_by_path(
+                path
+                )
 
-            txt = org.wayround.aipsetup.serverui.page_category(index_db, path)
+            if cat_id == None:
+                return bottle.HTTPError(404, "Category not found")
+
+            double_dot = ''
+
+            if cat_id != 0:
+
+                parent_id = org.wayround.aipsetup.pkgindex.get_category_parent_by_id(
+                    cat_id
+                    )
+
+
+                parent_path = org.wayround.aipsetup.pkgindex.get_category_path_string(
+                    parent_id
+                    )
+
+                double_dot = self.ui.category_double_dot(parent_path)
+
+            categories = []
+            packages = []
+
+            cats_ids = org.wayround.aipsetup.pkgindex.get_category_id_list(
+                cat_id
+                )
+
+            pack_ids = org.wayround.aipsetup.pkgindex.get_package_id_list(
+                cat_id
+                )
+
+
+            for i in cats_ids:
+                categories.append(
+                    {'path':
+                        org.wayround.aipsetup.pkgindex.get_category_path_string(
+                            i
+                            ),
+                     'name':org.wayround.aipsetup.pkgindex.get_category_by_id(
+                            i
+                            )
+                    }
+                )
+
+            for i in pack_ids:
+                packages.append(
+                    org.wayround.aipsetup.pkgindex.get_package_by_id(
+                        i
+                        )
+                    )
+
+            txt = self.ui.category(path, double_dot, categories, packages)
+
+            ret = self.ui.html(
+                title="Category: '{}'".format(path),
+                body=txt
+                )
+
 
         elif mode == 'json':
-
-            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
 
             if path == None:
 
                 pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
-                    None, index_db = index_db
+                    None
                     )
 
                 cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
-                    None, index_db = index_db
+                    None
                     )
 
             else:
                 cid = org.wayround.aipsetup.pkgindex.get_category_by_path(
-                    path, index_db = index_db
+                    path
                     )
 
                 pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
-                    cid, index_db = index_db
+                    cid
                     )
 
                 cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
-                    cid, index_db = index_db
+                    cid
                     )
 
             for i in list(pkgs.keys()):
                 pkgs[i] = org.wayround.aipsetup.pkgindex.get_package_path_string(
-                    i, index_db = index_db
+                    i
                     )
 
             for i in list(cats.keys()):
                 cats[i] = org.wayround.aipsetup.pkgindex.get_category_path_string(
-                    i, index_db = index_db
+                    i
                     )
 
-            txt = json.dumps(
+            ret = json.dumps(
                 {
                     'packages': pkgs,
                     'categories': cats
                     },
-                indent = 2,
-                sort_keys = True
+                indent=2,
+                sort_keys=True
                 )
 
-            txt = bytes(txt, 'utf-8')
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
 
-            cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
+        return ret
 
-        return txt
+    def package(self, name):
 
-    category.exposed = True
+        decoded_params = bottle.request.params.decode('utf-8')
 
-    def package(self, name = '', mode = 'normal'):
+        mode = None
 
-        if name == '' or name.isspace():
-            raise cherrypy.HTTPError(400, "Wrong `name' parameter")
+        ret = ''
 
-        if not mode in ['normal', 'sources', 'packages', 'info']:
-            raise cherrypy.HTTPError(400, "Wrong `mode' parameter")
+        if not 'mode' in decoded_params:
+            mode = 'normal'
+        else:
+            mode = decoded_params['mode']
+            if not mode in ['normal', 'json']:
+                raise bottle.HTTPError(400, "Invalid mode")
 
-        txt = ''
         if mode == 'normal':
 
-            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
-            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
-            tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+            pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(name)
 
-            txt = org.wayround.aipsetup.serverui.page_package(index_db, info_db, latest_db, tag_db, name)
+            keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
 
-        elif mode == 'packages':
+            rows = []
 
-            files = org.wayround.aipsetup.pkgindex.get_package_files(name, index_db = index_db)
+            for i in [
+                'tags', 'name', 'description', 'basename', 'home_page',
+                'newest_src', 'newest_pkg'
+                ]:
+                if i in keys:
+                    keys.remove(i)
 
-            files.sort(
-                reverse = True,
-                key = functools.cmp_to_key(
-                    org.wayround.aipsetup.version.package_version_comparator
+
+            for i in keys:
+                rows.append(
+                    (
+                        '{}'.format(i.replace('_', ' ').capitalize()),
+                        str(pkg_info[i])
+                        )
                     )
-                )
 
-            l = len(files)
-            i = -1
-            while i != l - 1:
-                i += 1
-                files[i] = 'files_repository' + files[i]
-
-            txt = json.dumps(files, indent = 2, sort_keys = True)
-
-            cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
-
-
-        elif mode == 'sources':
-            files = org.wayround.aipsetup.pkgindex.get_package_source_files(name)
-            files.sort(reverse = True)
-
-            l = len(files)
-            i = -1
-            while i != l - 1:
-                i += 1
-                files[i] = 'files_source' + files[i]
-
-            txt = json.dumps(files, indent = 2, sort_keys = True)
-
-            cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
-
-
-        elif mode == 'info':
-
-            index_db = org.wayround.aipsetup.pkgindex.PackageIndex()
-            info_db = org.wayround.aipsetup.pkginfo.PackageInfo()
-            latest_db = org.wayround.aipsetup.pkglatest.PackageLatest()
-
-            r = org.wayround.aipsetup.pkginfo.get_package_info_record(name = name, info_db = info_db)
-
-            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name, index_db = index_db)
+            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name)
             if cid != None:
-                category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid, index_db = index_db)
+                category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid)
             else:
                 category = "< Package not indexed! >"
 
 
-            info = copy.copy(r)
-            info['tags'] = ', '.join(r['tags'])
-            info['category'] = category
-            info['newest_pkg'] = (
-                org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(name, index_db = index_db, latest_db = latest_db)
-                )
-            info['newest_src'] = (
-                org.wayround.aipsetup.pkglatest.get_latest_src_from_record(name, index_db = index_db, latest_db = latest_db)
+            latest_pkg = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
+                name
                 )
 
-            txt = json.dumps(info, indent = 2, sort_keys = True)
+            latest_src = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
+                name
+                )
 
-            cherrypy.response.headers['Content-Type'] = APPLICATION_JSON
+            latest_asp_basename = 'None'
+            if latest_pkg:
+                latest_asp_basename = os.path.basename(latest_pkg)
 
-        else:
-            txt = ''
-
-        if cherrypy.response.headers['Content-Type'] in [TEXT_PLAIN, APPLICATION_JSON]:
-            if isinstance(txt, str):
-                txt = txt.encode(encoding = 'utf-8', errors = 'strict')
-
-        return txt
-
-    package.exposed = True
+            latest_src_basename = 'None'
+            if latest_src:
+                latest_src_basename = os.path.basename(latest_src)
 
 
+            tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+            tags = tag_db.get_tags(name)
 
-def start_host():
+            txt = self.ui.package(
+                autorows=rows,
+                basename=pkg_info['basename'],
+                category=category,
+                homepage=pkg_info['home_page'],
+                description=pkg_info['description'],
+                tags=tags,
+                latest_asp_basename=latest_asp_basename,
+                latest_src_basename=latest_src_basename,
+                asp_list='',
+                tarball_list=''
+                )
 
-    ret = 0
+            ret = self.ui.html(
+                title="Package: '{}'".format(name),
+                body=txt
+                )
 
-    tpldir = os.path.dirname(org.wayround.utils.path.abspath(__file__))
-
-    serv_config = {
-        'global': {
-            'server.bind_addr' : (org.wayround.aipsetup.config.config['server_ip'],
-                                  int(org.wayround.aipsetup.config.config['server_port'])),
-            # 'server.socket_port' : port,
-            'global.server.thread_pool' : 10,
-            'error_page.default': edefault
-            },
-        '/files_info' :{
-            'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : org.wayround.aipsetup.config.config['info']
-            },
-        '/files_repository' :{
-            'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : org.wayround.aipsetup.config.config['repository'],
-            'tools.staticdir.content_types' : {
-                'asp': 'binary',
-                }
-            },
-        '/files_source' :{
-            'tools.staticdir.on' : True,
-            'tools.staticdir.dir' : org.wayround.aipsetup.config.config['source'],
-            'tools.staticdir.content_types' : {
-                'gz': 'binary',
-                'bz2': 'binary',
-                'xz': 'binary',
-                '7z': 'binary',
-                'lzma': 'binary'
-                }
-            },
-         '/css': {
-             'tools.staticdir.on' : True,
-             'tools.staticdir.dir' :
-                org.wayround.utils.path.abspath(
-                    org.wayround.aipsetup.config.config['server_files']
-                    ),
-            'tools.staticdir.content_types' : {
-                'css': 'text/css; codepage=utf-8',
-                }
-             },
-        # '/js': {
-        #     'tools.staticdir.on' : True,
-        #     'tools.staticdir.dir' : PPWD + '/js'
-        #     }
-        }
-
-
-    cherrypy.quickstart(
-        Index(),
-        org.wayround.aipsetup.config.config['server_path'],
-        serv_config
-        )
-
-    return ret
+        return ret

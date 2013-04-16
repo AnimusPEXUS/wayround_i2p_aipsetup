@@ -9,8 +9,10 @@ import logging
 import os
 import shutil
 import functools
+import datetime
 
 import org.wayround.aipsetup.package
+import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkgdeps
 
@@ -26,6 +28,7 @@ def cli_name():
 def exported_commands():
     return {
         'so_problems':  clean_find_so_problems,
+        'old_packages': clean_find_old_packages,
         'packages_with_not_reduced_asps':
                         clean_check_list_of_installed_packages_and_asps_auto,
         'repo_clean':   clean_cleanup_repo,
@@ -38,6 +41,7 @@ def commands_order():
     return [
         'packages_with_not_reduced_asps',
         'so_problems',
+        'old_packages',
         'repo_clean',
         'check_elfs_readiness',
         'make_deps_lists_for_asps'
@@ -135,6 +139,93 @@ def clean_find_so_problems(opts, args):
 
     log.stop()
     print("Log written to {}".format(log.log_filename))
+
+    return ret
+
+def clean_find_old_packages(opts, args):
+
+    ret = 0
+
+    res = find_old_packages()
+
+    res.sort()
+
+    for i in res:
+        parsed_name = org.wayround.aipsetup.name.package_name_parse(i)
+
+        if not parsed_name:
+            logging.warning("Can't parse package name `{}'".format(i))
+        else:
+
+            package_date = org.wayround.aipsetup.name.parse_timestamp(
+                parsed_name['groups']['timestamp']
+                )
+
+            if not package_date:
+                logging.error(
+                    "Can't parse timestamp {} in {}".format(
+                        parsed_name['groups']['timestamp'],
+                        i
+                        )
+                    )
+            else:
+
+                print(
+                    "    {:30}: {}: {}".format(
+                        datetime.datetime.now() - package_date,
+                        org.wayround.aipsetup.name.parse_timestamp(
+                            parsed_name['groups']['timestamp']
+                            ),
+                        i
+                        )
+                      )
+
+    return ret
+
+def find_old_packages(age=None, destdir='/', mute=True):
+
+    if age == None:
+        age = (60 * 60 * 24 * 30)  # 30 days
+
+    ret = []
+
+    asps = org.wayround.aipsetup.package.list_installed_asps(destdir, mute=mute)
+
+    for i in asps:
+
+        parsed_name = org.wayround.aipsetup.name.package_name_parse(i, mute=mute)
+
+        if not parsed_name:
+            logging.warning("Can't parse package name `{}'".format(i))
+        else:
+
+            package_date = org.wayround.aipsetup.name.parse_timestamp(
+                parsed_name['groups']['timestamp']
+                )
+
+            if not package_date:
+                logging.error(
+                    "Can't parse timestamp {} in {}".format(
+                        parsed_name['groups']['timestamp'],
+                        i
+                        )
+                    )
+            else:
+
+                if datetime.datetime.now() - package_date > datetime.timedelta(seconds=age):
+                    ret.append(i)
+
+#            if datetime
+#            print(
+#                "timestamp: {}: {}: {}".format(
+#                    parsed_name['groups']['timestamp'],
+#                    org.wayround.aipsetup.name.parse_timestamp(
+#                        parsed_name['groups']['timestamp']
+#                        ),
+#                    i
+#                    )
+#                  )
+
 
     return ret
 

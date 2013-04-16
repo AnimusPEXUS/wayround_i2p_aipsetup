@@ -14,6 +14,7 @@ import org.wayround.aipsetup.config
 
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkgindex
+import org.wayround.aipsetup.version
 
 
 class PackageLatest(org.wayround.utils.db.BasicDB):

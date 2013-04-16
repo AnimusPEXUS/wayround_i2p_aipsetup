@@ -8,6 +8,7 @@ import fnmatch
 import logging
 import os.path
 import re
+import datetime
 
 import org.wayround.utils.list
 import org.wayround.utils.tag
@@ -59,9 +60,9 @@ Acceptable source name extensions
 """
 
 ASP_NAME_REGEXPS = {
-    'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$',
     'aipsetup3':
-        r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$'
+        r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$',
+    'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$'
     }
 """
 Regexps for parsing package names
@@ -82,6 +83,19 @@ del(i)
 #STATUS_DELIMITERS = ['.', '_', '-', '+', '~']
 #ALL_DELIMITERS = list(set(VERSION_DELIMITERS + STATUS_DELIMITERS))
 ALL_DELIMITERS = ['.', '_', '-', '+', '~']
+
+TIMESTAMPS = {
+    'aipsetup3': r'^(?P<year>\d+)(?P<month>\d{2})(?P<day>\d{2})\.(?P<hour>\d{2})(?P<minute>\d{2})(?P<second>\d{2})\.(?P<micro>\d{7})$',
+    'aipsetup2': r'^(?P<year>\d+)(?P<month>\d{2})(?P<day>\d{2})(?P<hour>\d{2})(?P<minute>\d{2})(?P<second>\d{2})$'
+    }
+
+TIMESTAMPS_COMPILED = {}
+
+for i in TIMESTAMPS:
+    logging.debug("Compiling `{}'".format(i))
+    TIMESTAMPS_COMPILED[i] = re.compile(TIMESTAMPS[i])
+
+del(i)
 
 def cli_name():
     """
@@ -727,3 +741,32 @@ def parse_test():
             logging.error("Error parsing file name `{}' - parser not matched".format(i))
 
     return
+
+def parse_timestamp(timestamp):
+
+    ret = None
+
+    for i in TIMESTAMPS_COMPILED.keys():
+
+        res = TIMESTAMPS_COMPILED[i].match(timestamp)
+
+        if res:
+
+            micro = 0
+
+            if i == 'aipsetup3':
+                micro = res.group('micro')
+
+            ret = datetime.datetime(
+                int(res.group('year')),
+                int(res.group('month')),
+                int(res.group('day')),
+                int(res.group('hour')),
+                int(res.group('minute')),
+                int(res.group('second')),
+                int(micro)
+                )
+
+            break
+
+    return ret
