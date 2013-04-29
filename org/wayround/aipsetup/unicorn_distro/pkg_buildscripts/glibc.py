@@ -11,6 +11,9 @@ import org.wayround.aipsetup.buildingsite
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
+# For history
+# RUN[$j]='echo "CFLAGS += -march=i486 -mtune=native" > configparms
+
 
 def main(buildingsite, action=None):
 
@@ -72,10 +75,11 @@ def main(buildingsite, action=None):
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target'],
-                    '--enable-kernel=2.6.39.3',
+                    '--enable-kernel=3.8',
                     '--enable-tls',
                     '--with-elf',
-                    '--enable-multi-arch'
+                    '--enable-multi-arch',
+#                    '--with-headers=/usr/src/linux/usr/include'
                     ],
                 arguments=[],
                 environment={},

@@ -54,8 +54,8 @@ def main(buildingsite, action = None):
             ret = cmake.cmake_high(
                 buildingsite,
                 options = [
-                    '-DCMAKE_INSTALL_PREFIX=' +
-                        pkg_info['constitution']['paths']['usr'],
+#                    '-DCMAKE_INSTALL_PREFIX=' +
+#                        pkg_info['constitution']['paths']['usr'],
 #                    '--mandir=' + pkg_info['constitution']['paths']['man'],
 #                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
 #                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
@@ -81,6 +81,9 @@ def main(buildingsite, action = None):
                 use_separate_buildding_dir = separate_build_dir,
                 source_configure_reldir = source_configure_reldir
                 )
+            
+            ret = 1
+            print("Debugging needed")
 
         if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(

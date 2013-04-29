@@ -1,0 +1,15 @@
+{
+  "auto_newest_pkg": true, 
+  "auto_newest_src": true, 
+  "basename": "bluez-hcidump", 
+  "buildscript": "std", 
+  "deprecated": true, 
+  "description": "", 
+  "filters": "integrated into bluez", 
+  "home_page": "", 
+  "installation_priority": 5, 
+  "non_installable": true, 
+  "reducible": true, 
+  "removable": true, 
+  "src_path_prefix": ""
+}

@@ -786,9 +786,9 @@ def tarobj_check_member_sum(tarobj, sums, member_name):
         ret = False
     else:
 
-        summ = org.wayround.utils.checksum.make_fileobj_checksum(fobj)
+        sum = org.wayround.utils.checksum.make_fileobj_checksum(fobj)
 
-        if summ == sums[member_name]:
+        if sum == sums[member_name]:
             ret = True
         else:
             ret = False
@@ -796,6 +796,33 @@ def tarobj_check_member_sum(tarobj, sums, member_name):
         fobj.close()
 
     return ret
+
+def check_installed_asp(
+    asp_name,
+    destdir='/',
+    mute=True
+    ):
+
+    ret = 0
+
+    # ensure destdir correctness
+    destdir = org.wayround.utils.path.abspath(destdir)
+
+    lines = list_files_installed_by_asp(destdir, asp_name, mute)
+
+    if not isinstance(lines, list):
+        logging.error(
+            "Some errors while getting ASP's file list for `{}'".format(
+                asp_name
+                )
+            )
+        ret = 1
+    else:
+
+        # from this point we working with other system's files
+        lines = org.wayround.utils.path.prepend_path(lines, destdir)
+
+        lines = org.wayround.utils.path.realpaths(lines)
 
 
 
@@ -1219,11 +1246,7 @@ def install_asp(asp_name, destdir='/'):
                             l = g
                             try:
                                 exec(
-                                    compile(
-                                        script_txt,
-                                        None,
-                                        'exec'
-                                        ),
+                                    script_txt,
                                     g,
                                     l
                                     )
@@ -1283,7 +1306,7 @@ def remove_asp(
         ret = 1
     else:
 
-        # from this point we working with other systems' files
+        # from this point we working with other system's files
         lines = org.wayround.utils.path.prepend_path(lines, destdir)
 
         lines = org.wayround.utils.path.realpaths(lines)
@@ -1562,7 +1585,7 @@ def list_files_installed_by_asp(
     """
     Reads list of files installed by named asp.
 
-    Destdir is not prependet to the list's items. Do it yuorself if needed.
+    Destdir is not prependet to the list's items. Do it yourself if needed.
     """
     ret = 0
 
@@ -1603,7 +1626,57 @@ def list_files_installed_by_asp(
 
         pkg_file_list.sort()
 
-        ret = copy.copy(pkg_file_list)
+        ret = pkg_file_list
+
+    return ret
+
+def list_file_sums_installed_by_asp(
+    destdir, asp_name, mute=True
+    ):
+
+    """
+    Reads list of file checksums installed by named asp.
+
+    Destdir is not prependet to the list's items. Do it yourself if needed.
+    """
+
+    ret = 0
+
+    destdir = org.wayround.utils.path.abspath(destdir)
+
+    list_dir = org.wayround.utils.path.abspath(
+        org.wayround.utils.path.join(
+            destdir,
+            org.wayround.aipsetup.config.config['installed_pkg_dir_sums']
+            )
+        )
+
+    pkg_list_file = os.path.join(list_dir, asp_name)
+
+    if not pkg_list_file.endswith('.xz'):
+        pkg_list_file += '.xz'
+
+    try:
+        f = open(pkg_list_file, 'rb')
+    except:
+        logging.warning("Can't open sum file: `{}'".format(pkg_list_file))
+        ret = 2
+    else:
+
+        pkg_file_list = org.wayround.utils.archive.xzcat(
+            f, convert_to_str=True
+            )
+
+        f.close()
+
+        if not isinstance(pkg_file_list, str):
+            pkg_file_list = str(pkg_file_list, 'utf-8')
+
+        pkg_file_list = org.wayround.utils.checksum.parse_checksums_text(
+            pkg_file_list
+            )
+
+        ret = pkg_file_list
 
     return ret
 
@@ -1636,6 +1709,41 @@ def list_installed_asps_and_their_files(destdir='/', mute=True):
 
     for i in lst:
         ret[i] = list_files_installed_by_asp(destdir, i, mute)
+
+
+        lst_i += 1
+
+        if not mute:
+            org.wayround.utils.file.progress_write(
+                "    {} of {} ({:.2f}%)".format(
+                    lst_i,
+                    lst_c,
+                    100.0 / (lst_c / lst_i)
+                    )
+                )
+    print()
+
+    return ret
+
+def list_installed_asps_and_their_sums(destdir='/', mute=True):
+
+    """
+    Returns dict with asp names as keys and list of files whey installs as
+    contents
+    """
+
+    lst = list_installed_asps(destdir, mute)
+    lst_c = len(lst)
+
+    ret = dict()
+
+    lst_i = 0
+
+    if not mute:
+        logging.info("Getting precalculated file check sums of all asps ")
+
+    for i in lst:
+        ret[i] = list_file_sums_installed_by_asp(destdir, i, mute)
 
 
         lst_i += 1
@@ -2067,7 +2175,7 @@ def find_file_in_files_installed_by_asp(
             out_list = list(out_list)
             out_list.sort()
 
-            ret = copy.copy(out_list)
+            ret = out_list
 
     return ret
 

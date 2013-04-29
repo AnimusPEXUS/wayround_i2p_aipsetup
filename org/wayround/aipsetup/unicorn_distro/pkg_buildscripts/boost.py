@@ -59,9 +59,11 @@ def main(buildingsite, action=None):
                             ),
                         'usr'
                         ),
-                    'stage',
+#                    '--build-type=complete',
+#                    '--layout=versioned',
                     'threading=multi',
-                    'link=shared'
+                    'link=shared',
+                    'stage',
                     ],
                     cwd=src_dir
                     ).wait()
@@ -76,9 +78,11 @@ def main(buildingsite, action=None):
                             ),
                         'usr'
                         ),
-                    'install',
+#                    '--build-type=complete',
+#                    '--layout=versioned',
                     'threading=multi',
-                    'link=shared'
+                    'link=shared',
+                    'install',
                     ],
                     cwd=src_dir
                     ).wait()

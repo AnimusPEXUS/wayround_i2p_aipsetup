@@ -388,7 +388,7 @@ def read_from_file(name):
     try:
         f = open(name, 'r')
     except:
-        logging.exception(
+        logging.error(
             "Can't open file `{}'".format(name)
             )
         ret = 1

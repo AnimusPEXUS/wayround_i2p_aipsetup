@@ -16,7 +16,10 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.buildscript.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['extract', 
+             'configure', 'build', 'distribute',
+             'configure_xul', 'build_xul', 'distribute_xul'
+             ],
             action,
             "help"
             )
@@ -124,5 +127,60 @@ def main(buildingsite, action=None):
                 sea_inc_dir = lst[0]
 
                 os.symlink(sea_inc_dir, os.path.join(inc_dir, 'npapi'))
+
+        if 'configure_xul' in actions and ret == 0:
+            ret = autotools.configure_high(
+                buildingsite,
+                options=[
+                    '--with-system-nspr',
+                    '--with-system-nss',
+                    '--enable-shared',
+                    '--enable-optimize',
+                    '--enable-default-toolkit=cairo-gtk2',
+                    '--enable-xft',
+                    '--enable-freetype2',
+                    '--enable-application=xulrunner',
+                    '--enable-shared-js',
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build']
+                    ],
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                source_configure_reldir='./mozilla',
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
+                )
+
+        if 'build_xul' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir='./mozilla'
+                )
+
+        if 'distribute_xul' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install',
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir='./mozilla'
+                )
 
     return ret

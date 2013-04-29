@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "xorg-sgml-doctools", 
-  "buildscript": "", 
+  "buildscript": "std", 
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "", 

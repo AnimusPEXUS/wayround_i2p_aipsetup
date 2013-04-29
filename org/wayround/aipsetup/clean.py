@@ -10,6 +10,7 @@ import os
 import shutil
 import functools
 import datetime
+import pprint
 
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.name
@@ -20,6 +21,7 @@ import org.wayround.utils.path
 import org.wayround.utils.deps_c
 import org.wayround.utils.format.elf
 import org.wayround.utils.file
+import org.wayround.utils.checksum
 
 def cli_name():
     return 'clean'
@@ -31,10 +33,11 @@ def exported_commands():
         'old_packages': clean_find_old_packages,
         'packages_with_not_reduced_asps':
                         clean_check_list_of_installed_packages_and_asps_auto,
+        'packages_with_broken_files':
+                        clean_packages_with_broken_files,
         'repo_clean':   clean_cleanup_repo,
         'check_elfs_readiness':
-                        clean_check_elfs_readiness,
-        'make_deps_lists_for_asps':clean_make_deps_lists_for_asps
+                        clean_check_elfs_readiness
         }
 
 def commands_order():
@@ -42,23 +45,118 @@ def commands_order():
         'packages_with_not_reduced_asps',
         'so_problems',
         'old_packages',
+        'packages_with_broken_files',
         'repo_clean',
-        'check_elfs_readiness',
-        'make_deps_lists_for_asps'
+        'check_elfs_readiness'
         ]
+
+def clean_packages_with_broken_files(opts, args):
+
+    """
+    Find packages with broken files
+    """
+
+    r = org.wayround.aipsetup.package.list_installed_asps_and_their_sums(mute=False)
+
+    logging.info("Checking Packages")
+
+    asps = list(r.keys())
+    asps_c = len(asps)
+
+    problems = {}
+
+    b = 0
+    m = 0
+
+    for i in range(asps_c):
+
+        asp_name = asps[i]
+
+        asp = r[asp_name]
+
+        if isinstance(asp, dict):
+
+            problems[asp_name] = {'missing':[], 'broken':[]}
+
+            files = list(asp.keys())
+            fc = len(files)
+            fi = 0
+
+            perc = 0
+            if i != 0:
+                perc = (100.0 / (asps_c / i))
+
+            for j in files:
+
+                if not os.path.exists(j):
+                    problems[asp_name]['missing'].append(j)
+                    m += 1
+
+                else:
+
+                    sum = org.wayround.utils.checksum.make_file_checksum(
+                        j, method='sha512'
+                        )
+
+                    if sum != asp[j]:
+                        problems[asp_name]['broken'].append(j)
+                        b += 1
+
+                fi += 1
+
+                org.wayround.utils.file.progress_write(
+                    "    ({perc:5.2f}%) {p} packages of {pc}, {f} files of {fc}. found {b} broken, {m} missing".format(
+                        perc=perc,
+                        p=i,
+                        pc=asps_c,
+                        f=fi,
+                        fc=fc,
+                        m=m,
+                        b=b
+                        )
+                    )
+
+    for i in list(problems.keys()):
+
+        if len(problems[i]['missing']) == 0 and len(problems[i]['broken']) == 0:
+            del problems[i]
+
+    print()
+
+    log = org.wayround.utils.log.Log(
+        os.getcwd(), 'problems'
+        )
+
+    log.info(pprint.pformat(problems))
+
+    log_name = log.log_filename
+
+    log.close()
+
+    logging.info("Log saved to {}".format(log_name))
+
+    return 0
 
 def clean_check_elfs_readiness(opts, args):
 
+    """
+    Performs system ELF files read checks
+
+    This is mainly needed to test aipsetup elf reader, but on the other hand it
+    can be used to detect broken elf files.
+    """
 
     check_elfs_readiness()
 
     return 0
 
 def clean_find_so_problems(opts, args):
+
     """
     Find so libraries missing in system and write package names requiring those
     missing libraries.
     """
+
     ret = 0
 
     basedir = '/'
@@ -144,6 +242,12 @@ def clean_find_so_problems(opts, args):
 
 def clean_find_old_packages(opts, args):
 
+    """
+    Find packages older then month
+    """
+
+    # TODO: add arguments
+
     ret = 0
 
     res = find_old_packages()
@@ -182,70 +286,17 @@ def clean_find_old_packages(opts, args):
 
     return ret
 
-def find_old_packages(age=None, destdir='/', mute=True):
-
-    if age == None:
-        age = (60 * 60 * 24 * 30)  # 30 days
-
-    ret = []
-
-    asps = org.wayround.aipsetup.package.list_installed_asps(destdir, mute=mute)
-
-    for i in asps:
-
-        parsed_name = org.wayround.aipsetup.name.package_name_parse(i, mute=mute)
-
-        if not parsed_name:
-            logging.warning("Can't parse package name `{}'".format(i))
-        else:
-
-            package_date = org.wayround.aipsetup.name.parse_timestamp(
-                parsed_name['groups']['timestamp']
-                )
-
-            if not package_date:
-                logging.error(
-                    "Can't parse timestamp {} in {}".format(
-                        parsed_name['groups']['timestamp'],
-                        i
-                        )
-                    )
-            else:
-
-                if datetime.datetime.now() - package_date > datetime.timedelta(seconds=age):
-                    ret.append(i)
-
-#            if datetime
-#            print(
-#                "timestamp: {}: {}: {}".format(
-#                    parsed_name['groups']['timestamp'],
-#                    org.wayround.aipsetup.name.parse_timestamp(
-#                        parsed_name['groups']['timestamp']
-#                        ),
-#                    i
-#                    )
-#                  )
-
-
-    return ret
-
-def clean_find_package_so_problems(opts, args):
-    """
-    List packages, requiring dependencies, not installed by other packages
-    """
-    ret = 0
-
-    basedir = '/'
-#    if '-b' in opts:
-#        basedir = opts['-b']
-
-
-
-
-    return ret
 
 def clean_cleanup_repo(opts, args):
+
+    """
+    Removes old packages from package repository
+    """
+
+    # TODO: more descriptive help text required
+
     cleanup_repo()
+
     return 0
 
 def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
@@ -257,35 +308,6 @@ def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
     logging.info("Working. Please wait, it will be not long...")
 
     return check_list_of_installed_packages_and_asps_auto()
-
-def clean_make_deps_lists_for_asps(opts, args):
-
-    destdir = '/'
-
-    asp_list = org.wayround.aipsetup.package.list_installed_asps(destdir, mute=False)
-    asp_list.sort()
-    asp_list_c = len(asp_list)
-    asp_list_i = 0
-
-    for asp_name in asp_list:
-
-        deps = org.wayround.aipsetup.package.load_asp_deps(destdir, asp_name, mute=True)
-
-        if not isinstance(deps, dict):
-            logging.info("Creating deps listing for {}".format(asp_name))
-            org.wayround.aipsetup.package.make_asp_deps(destdir, asp_name, mute=True)
-
-        asp_list_i += 1
-
-        org.wayround.utils.file.progress_write(
-            "    {} of {} ({}%)".format(
-                asp_list_i,
-                asp_list_c,
-                100.0 / (asp_list_c / asp_list_i)
-                )
-            )
-
-    return 0
 
 
 def check_elfs_readiness(mute=False):
@@ -350,6 +372,54 @@ def check_list_of_installed_packages_and_asps(in_dict):
         logging.warning("Total erroneous packages: {}".format(errors))
 
     return ret
+
+def find_old_packages(age=None, destdir='/', mute=True):
+
+    if age == None:
+        age = (60 * 60 * 24 * 30)  # 30 days
+
+    ret = []
+
+    asps = org.wayround.aipsetup.package.list_installed_asps(destdir, mute=mute)
+
+    for i in asps:
+
+        parsed_name = org.wayround.aipsetup.name.package_name_parse(i, mute=mute)
+
+        if not parsed_name:
+            logging.warning("Can't parse package name `{}'".format(i))
+        else:
+
+            package_date = org.wayround.aipsetup.name.parse_timestamp(
+                parsed_name['groups']['timestamp']
+                )
+
+            if not package_date:
+                logging.error(
+                    "Can't parse timestamp {} in {}".format(
+                        parsed_name['groups']['timestamp'],
+                        i
+                        )
+                    )
+            else:
+
+                if datetime.datetime.now() - package_date > datetime.timedelta(seconds=age):
+                    ret.append(i)
+
+#            if datetime
+#            print(
+#                "timestamp: {}: {}: {}".format(
+#                    parsed_name['groups']['timestamp'],
+#                    org.wayround.aipsetup.name.parse_timestamp(
+#                        parsed_name['groups']['timestamp']
+#                        ),
+#                    i
+#                    )
+#                  )
+
+
+    return ret
+
 
 def detect_package_collisions(category_locations, package_locations):
 

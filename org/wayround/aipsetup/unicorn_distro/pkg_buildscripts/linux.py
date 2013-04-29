@@ -4,6 +4,7 @@ import glob
 import logging
 import os.path
 import shutil
+import subprocess
 
 import org.wayround.utils.file
 
@@ -20,8 +21,9 @@ def main(buildingsite, action=None):
         buildingsite,
         [
          'extract', 'configure', 'build',
-         'distr_kernel', 'distr_modules', 'distr_firmware', 'distr_headers',
-         #'distr_man', 
+         'distr_kernel', 'distr_modules', 'distr_firmware', 'distr_headers_internal',
+         'distr_headers', 'remove_install_files_from_includes',
+         #'distr_man',
          'copy_source'
          ],
         action,
@@ -62,7 +64,7 @@ def main(buildingsite, action=None):
         if 'configure' in actions and ret == 0:
             logging.info("You now need to configure kernel by your needs and")
             logging.info("continue building procedure with command")
-            logging.info("aipsetup3 build s build+")
+            logging.info("'aipsetup3 build s build+'")
             ret = 1
 
         if 'build' in actions and ret == 0:
@@ -166,12 +168,23 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
+        if 'distr_headers_internal' in actions and ret == 0:
+
+            org.wayround.utils.file.copytree(
+                os.path.join(src_dir, 'include'),
+                os.path.join(dst_dir, 'usr', 'include'),
+                overwrite_files=False,
+                clear_before_copy=False,
+                dst_must_be_empty=False
+                )
+
+
         if 'distr_headers' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[
-                    'headers_install',
+                    'headers_install_all',
                     'INSTALL_HDR_PATH=' + os.path.join(dst_dir, 'usr')
                     ],
                 environment={},
@@ -179,6 +192,28 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+            print("""
+Please make correct usr/include/asm by 'ln -s' manually.
+
+Continue with command 'aipsetup3 build s remove_install_files_from_includes+'
+""")
+
+            ret = 1
+
+        if 'remove_install_files_from_includes' in actions and ret == 0:
+            p = subprocess.Popen(
+                ['find',
+                 '(', '-name', '.install',
+                 '-o', '-name', '..install.cmd',
+                 '-o', '-name', '.check',
+                 '-o', '-name', '..check.cmd',
+                 '-o', '-name', 'Kbuild',
+                 ')',
+                 '-delete'],
+                cwd=os.path.join(dst_dir, 'usr', 'include')
+                )
+            p.wait()
 
         if 'distr_man' in actions and ret == 0:
             ret = autotools.make_high(

@@ -8,10 +8,12 @@ import stat
 import re
 import logging
 import subprocess
+import functools
+import shutil
 
-# FIXME: look for new lxml releases supporting Python 3.3. UP: lxml already
-# supports Py 3.3
 import lxml.etree
+
+import org.wayround.aipsetup.version
 
 import org.wayround.utils.file
 import org.wayround.utils.archive
@@ -41,7 +43,9 @@ def docbook_install_files(opts, args):
     -b - Change basedir. Default is \`/\'
     """
 
-    if len(args) == 1:
+    ret = 0
+
+    if len(args) == 0:
         logging.error(
             "docbook-xml zip or docbook-xsl-*.tar* archive filenames " +
             "reaquired as arguments"
@@ -54,7 +58,7 @@ def docbook_install_files(opts, args):
         if '-b' in opts:
             base_dir = opts['-b']
 
-        install(args[1:], base_dir)
+        install(args, base_dir)
 
 
     return ret
@@ -128,7 +132,6 @@ def unpack_tar(docbook_xsl_tar, dir_name):
 
 
 def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
-    # TODO: use aipsetup.utils
 
     if not os.path.isfile(docbook_zip):
         logging.error("Wrong zip file")
@@ -259,12 +262,23 @@ def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
                 src_uri = each.get('uri')
                 dst_uri = ''
 
-                if src_uri.startswith('http://') or src_uri.startswith('https://') or src_uri.startswith('file://'):
+                if (src_uri.startswith('http://')
+                    or src_uri.startswith('https://')
+                    or src_uri.startswith('file://')):
+
                     dst_uri = src_uri
+
                 else:
+
                     t_joined_path = os.path.join(dtd_dir, src_uri)
+
                     if os.path.isfile(t_joined_path):
-                        dst_uri = org.wayround.utils.path.normpath('/' + org.wayround.utils.path.relpath(t_joined_path, base_dir))
+                        dst_uri = org.wayround.utils.path.normpath(
+                            '/' + org.wayround.utils.path.relpath(
+                                t_joined_path,
+                                base_dir
+                                )
+                            )
                     else:
                         dst_uri = src_uri
 
@@ -443,11 +457,13 @@ def install_docbook_xsl_zips(
             # return 30
             continue
 
-        logging.info("XSL extraction complited")
+        logging.info("XSL extraction completed")
 
         installed_versions.append(version)
 
-    installed_versions.sort(version.standard_comparison)
+    installed_versions.sort(
+        key=functools.cmp_to_key(org.wayround.aipsetup.version.standard_comparator)
+        )
 
     logging.info("Installed XSL: {}".format(', '.join(installed_versions)))
 
@@ -506,15 +522,59 @@ def install_docbook_xsl_zips(
 
 def install(files, base_dir):
 
+    ret = 0
+
     docbook_zip_list = []
     docbook_xsl_zip_list = []
 
+    files_len = len(files)
+
+    for i in files[:]:
+
+        r_res = re.match(
+            r'docbkx?(?P<maj>\d)(?P<min>\d?)(?P<patch>\d?)\.zip',
+            os.path.basename(i)
+            )
+
+        if r_res:
+
+            dirname = os.path.dirname(i)
+
+            new_name = 'docbook-xml-{}'.format(r_res.group('maj'))
+
+            if r_res.group('min'):
+                new_name += '.{}'.format(r_res.group('min'))
+
+            if r_res.group('patch'):
+                new_name += '.{}'.format(r_res.group('patch'))
+
+            new_name += '.zip'
+
+            new_f_name = os.path.join(dirname, new_name)
+
+            logging.warning("Renaming {} to {}".format(i, new_f_name))
+
+            os.rename(i, new_f_name)
+
+            for j in range(files_len):
+                if files[j] == i:
+                    files[j] = new_name
+
+    files = list(set(files))
+    files.sort()
+
     for i in files:
+
         if re.match(r'docbook-xml-(\d\.?)*zip', os.path.basename(i)):
+
             docbook_zip_list.append(i)
+
         elif re.match(r'docbook-xsl-(\d\.?)*tar\.(.*)', os.path.basename(i)):
+
             docbook_xsl_zip_list.append(i)
+
         else:
+
             print("-w- {} is not a correct package".format(i))
 
     docbook_zip_list.sort()
@@ -523,6 +583,8 @@ def install(files, base_dir):
 
     logging.info("XMLs: {};".format(', '.join(docbook_zip_list)))
     logging.info("XSLs: {}.".format(', '.join(docbook_xsl_zip_list)))
+
+    logging.info("Requested base dir: {}".format(base_dir))
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
 
@@ -542,48 +604,52 @@ def install(files, base_dir):
 
     if 0 != prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
         logging.error("Error preparing base dir")
-        exit(20)
+        ret = 20
 
 
-    for i in [base_dir_etc_xml_catalog_docbook, base_dir_etc_xml_catalog]:
-        if 0 != prepare_catalog(i):
-            logging.error("Error creating catalog")
-            exit (25)
+    if ret == 0:
+        for i in [base_dir_etc_xml_catalog_docbook, base_dir_etc_xml_catalog]:
+            if 0 != prepare_catalog(i):
+                logging.error("Error creating catalog")
+                ret = 25
 
 
-    if 0 != install_docbook_zips(docbook_zip_list,
-                                 base_dir,
-                                 base_dir_etc_xml,
-                                 base_dir_etc_xml_catalog,
-                                 base_dir_etc_xml_catalog_docbook,
-                                 base_dir_share_docbook):
-        logging.error("Error installing XML")
-        exit(30)
-
-
-    if 0 != install_docbook_xsl_zips(docbook_xsl_zip_list,
+    if ret == 0:
+        if 0 != install_docbook_zips(docbook_zip_list,
                                      base_dir,
+                                     base_dir_etc_xml,
                                      base_dir_etc_xml_catalog,
+                                     base_dir_etc_xml_catalog_docbook,
                                      base_dir_share_docbook):
-        logging.error("Error installing XSL")
-        exit(40)
+            logging.error("Error installing XML")
+            ret = 30
 
-    logging.info("Setting correct modes")
-    try:
-        set_correct_modes(base_dir_etc_xml)
-        set_correct_modes(base_dir_share_docbook)
-    except:
-        logging.exception("Can't set correct file modes")
 
-    logging.info("Setting correct owners")
-    try:
-        set_correct_owners(base_dir_etc_xml)
-        set_correct_owners(base_dir_share_docbook)
-    except:
-        logging.exception("Can't set correct file owner")
+    if ret == 0:
+        if 0 != install_docbook_xsl_zips(docbook_xsl_zip_list,
+                                         base_dir,
+                                         base_dir_etc_xml_catalog,
+                                         base_dir_share_docbook):
+            logging.error("Error installing XSL")
+            ret = 40
 
-    print()
-    logging.info("All operations complited. Bye!")
+    if ret == 0:
+        logging.info("Setting correct modes")
+        try:
+            set_correct_modes(base_dir_etc_xml)
+            set_correct_modes(base_dir_share_docbook)
+        except:
+            logging.exception("Can't set correct file modes")
+
+        logging.info("Setting correct owners")
+        try:
+            set_correct_owners(base_dir_etc_xml)
+            set_correct_owners(base_dir_share_docbook)
+        except:
+            logging.exception("Can't set correct file owner")
+
+        print()
+        logging.info("All operations completed. Bye!")
 
 
     return 0
