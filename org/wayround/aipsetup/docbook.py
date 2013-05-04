@@ -8,62 +8,43 @@ import stat
 import re
 import logging
 import subprocess
-import functools
-import shutil
+import copy
 
-import lxml.etree
-
-import org.wayround.aipsetup.version
+try:
+    import lxml.etree
+except:
+    logging.error("Error importing XML parser. reinstall lxml!")
+    raise
 
 import org.wayround.utils.file
 import org.wayround.utils.archive
 import org.wayround.utils.path
 
-
 def cli_name():
+    """
+    Internally used by aipsetup
+    """
     return 'docbook'
 
 
 def exported_commands():
-
+    """
+    Internally used by aipsetup
+    """
     return {
-        'install': docbook_install_files
+        'install': docbook_install
         }
 
 def commands_order():
-    return ['install']
-
-
-def docbook_install_files(opts, args):
     """
-    Analyze supplied archives and install them if they are correct
-
-    [-b=DIR] [FILE1] [FILE2] .. [FILEn]
-
-    -b - Change basedir. Default is \`/\'
+    Internally used by aipsetup
     """
+    return [
+        'install'
+        ]
 
-    ret = 0
-
-    if len(args) == 0:
-        logging.error(
-            "docbook-xml zip or docbook-xsl-*.tar* archive filenames " +
-            "reaquired as arguments"
-            )
-        ret = 10
-    else:
-
-        base_dir = '/'
-
-        if '-b' in opts:
-            base_dir = opts['-b']
-
-        install(args, base_dir)
-
-
-    return ret
-
-
+def docbook_install(opts, args):
+    install()
 
 def set_correct_modes(directory):
 
@@ -122,88 +103,9 @@ def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
     return 0
 
-def unpack_tar(docbook_xsl_tar, dir_name):
-
-    r = org.wayround.utils.archive.extract(
-        docbook_xsl_tar, dir_name
-        )
-
-    return r
 
 
-def unpack_zip(docbook_zip, base_dir, base_dir_etc_xml, base_dir_share_docbook):
-
-    if not os.path.isfile(docbook_zip):
-        logging.error("Wrong zip file")
-        return 10
-
-    if len(docbook_zip) == 0:
-        logging.error("Wrong zip file")
-        return 20
-
-    if not docbook_zip.endswith('.zip'):
-        logging.error("Not a zip file: {}".format(docbook_zip))
-        return 30
-
-    docbook_no_zip = ''
-
-    try:
-        docbook_no_zip = docbook_zip[:-4]
-    except:
-        logging.error("Wrong zip file")
-        return 40
-
-    version = ''
-
-    try:
-        version = docbook_no_zip[docbook_no_zip.rfind('-') + 1:]
-    except:
-        logging.error("Wrong zip file version")
-        return 50
-
-    if version == '':
-        logging.error("Wrong zip file version")
-        return 60
-
-    base_dir_share_docbook_dtd = org.wayround.utils.path.abspath(
-        os.path.join(
-            base_dir_share_docbook,
-            'xml-dtd-' + version
-            )
-        )
-
-    logging.info("making dtd dir: {}".format(base_dir_share_docbook_dtd))
-
-    try:
-        os.makedirs(base_dir_share_docbook_dtd)
-    except:
-        pass
-
-    if not os.path.isdir(base_dir_share_docbook_dtd):
-        logging.error(
-            "   can not create dtd dir: {}".format(
-                base_dir_share_docbook_dtd
-                )
-            )
-        return 70
-
-    logging.info("   unzipping...")
-
-    e = org.wayround.utils.archive.extract(
-        docbook_zip, base_dir_share_docbook_dtd
-        )
-
-    if e != 0:
-        logging.error("   error unzipping {}".format(docbook_zip))
-        return 80
-
-    logging.info("   ok")
-
-    return base_dir_share_docbook_dtd
-
-
-
-def prepare_catalog(base_dir_etc_xml_catalog):
+def prepare_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
 
     r = 0
 
@@ -218,83 +120,20 @@ def prepare_catalog(base_dir_etc_xml_catalog):
     else:
         logging.info("   already exists")
 
+    logging.info("Checking for catalog {}".format(base_dir_etc_xml_docbook))
+    if not os.path.isfile(base_dir_etc_xml_docbook):
+        logging.info("   creating new")
+        r = subprocess.Popen(
+            [
+                'xmlcatalog', '--noout', '--create', base_dir_etc_xml_docbook
+                ]
+            ).wait()
+    else:
+        logging.info("   already exists")
+
     return r
 
 
-def import_dtd_to_docbook(base_dir, base_dir_etc_xml_catalog_docbook, dtd_dir):
-
-    logging.info(
-        "   Importing into docbook: {}".format(
-            os.path.basename(dtd_dir)
-            )
-        )
-
-    specific_cat_file = os.path.join(dtd_dir, 'catalog.xml')
-
-
-    if not os.path.isfile(specific_cat_file):
-        logging.error("   {} not found".format(specific_cat_file))
-        return 10
-
-    tmp_cat_lxml = None
-
-    try:
-        tmp_cat_lxml = lxml.etree.parse(specific_cat_file)
-    except:
-        logging.exception("Can't parse catalog file")
-
-    tmp_cat_lxml_ns = '{{{}}}'.format(tmp_cat_lxml.getroot().nsmap[None])
-
-    for tag in ['public', 'system']:
-
-        for each in tmp_cat_lxml.findall(tmp_cat_lxml_ns + tag):
-
-            if each.tag == tmp_cat_lxml_ns + tag:
-                logging.info(
-                    "      {tag} - {Id}".format_map(
-                        {
-                            'Id': each.get(tag + 'Id'),
-                            'tag': tag
-                            }
-                        )
-                    )
-
-                src_uri = each.get('uri')
-                dst_uri = ''
-
-                if (src_uri.startswith('http://')
-                    or src_uri.startswith('https://')
-                    or src_uri.startswith('file://')):
-
-                    dst_uri = src_uri
-
-                else:
-
-                    t_joined_path = os.path.join(dtd_dir, src_uri)
-
-                    if os.path.isfile(t_joined_path):
-                        dst_uri = org.wayround.utils.path.normpath(
-                            '/' + org.wayround.utils.path.relpath(
-                                t_joined_path,
-                                base_dir
-                                )
-                            )
-                    else:
-                        dst_uri = src_uri
-
-                r = subprocess.Popen(
-                    [
-                        'xmlcatalog', '--noout', '--add',
-                        tag,
-                        each.get(tag + 'Id'),
-                        'file://{}'.format(dst_uri),
-                        base_dir_etc_xml_catalog_docbook,
-                        ]
-                    ).wait()
-                if r != 0:
-                    logging.error("         error")
-
-    return 0
 
 def import_docbook_to_catalog(base_dir_etc_xml_catalog):
 
@@ -329,328 +168,386 @@ def import_docbook_to_catalog(base_dir_etc_xml_catalog):
     return 0
 
 
-def install_docbook_zips(
-    docbook_zip_list,
-    base_dir,
-    base_dir_etc_xml,
-    base_dir_etc_xml_catalog,
-    base_dir_etc_xml_catalog_docbook,
-    base_dir_share_docbook
+
+
+def import_docbook_xsl_to_catalog(
+    target_xsl_dir, base_dir='/', current=False, super_xml_catalog='/etc/xml/catalog'
     ):
+    """
+    target_xsl_dir: [/base_dir]/usr/share/xml/docbook/docbook-xsl-1.78.1
+    super_xml_catalog: [/base_dir]/etc/xml/catalog
+    """
 
-    dtd_dirs = []
+    target_xsl_dir = org.wayround.utils.path.abspath(target_xsl_dir)
+    base_dir = org.wayround.utils.path.abspath(base_dir)
+    super_xml_catalog = org.wayround.utils.path.abspath(super_xml_catalog)
 
-    for i in docbook_zip_list:
+    target_xsl_dir_fn = org.wayround.utils.path.join(base_dir, target_xsl_dir)
+    target_xsl_dir_fn_no_base = org.wayround.utils.path.remove_base(target_xsl_dir_fn, base_dir)
 
-        r = unpack_zip(i, base_dir, base_dir_etc_xml,
-                       base_dir_share_docbook)
+    super_xml_catalog_fn = org.wayround.utils.path.join(base_dir, super_xml_catalog)
 
-        if isinstance(r, int):
-            logging.warning("error processing file {}".format(i))
-            continue
+    bn = os.path.basename(target_xsl_dir)
 
-        dtd_dirs.append(r)
-
-    dtd_dirs.sort()
-
-    if len(dtd_dirs) == 0:
-        logging.error("no DTD directories created. Nothing to do farther...")
-        return 10
-
-    logging.info("Installing DTDs:")
-
-    for i in dtd_dirs:
-        import_dtd_to_docbook(
-            base_dir, base_dir_etc_xml_catalog_docbook, i
-            )
-
-
-    logging.info("Installing docbook into catalog")
-    import_docbook_to_catalog(base_dir_etc_xml_catalog)
-
-    return 0
-
-
-
-def install_docbook_xsl_zips(
-    docbook_xsl_zip_list,
-    base_dir,
-    base_dir_etc_xml_catalog,
-    base_dir_share_docbook
-    ):
-
-    logging.info("Installing XSLs")
-
-    installed_versions = []
-
-    for docbook_xsl_zip in docbook_xsl_zip_list:
-
-        bn = os.path.basename(docbook_xsl_zip)
-        r_res = re.match(r'(docbook-xsl-(\d\.?)*)tar\.(.*)', bn)
-        name = r_res.group(1)[:-1]
-        version = name[name.rfind('-') + 1:]
-
-
-        base_dir_share_docbook_name = os.path.join(
-            base_dir_share_docbook, name
-            )
-
-        base_dir_share_docbook_xsl_stylesheets = (
-            os.path.join(
-                base_dir_share_docbook,
-                'xsl-stylesheets-{}'.format(version)
-                )
-            )
-
-        logging.info(
-            "Installing XSL {xsl_name} into {xsl_dest}".format_map(
-                {
-                    'xsl_name': name,
-                    'xsl_dest': base_dir_share_docbook_xsl_stylesheets
-                    }
-                )
-            )
-
-        logging.info("   preparing dirs")
-
-
-        if 0 != org.wayround.utils.file.remove_if_exists(
-                    base_dir_share_docbook_name
-                    ):
-            logging.error("      error")
-            # return 10
-            continue
-
-        if 0 != org.wayround.utils.file.remove_if_exists(
-                    base_dir_share_docbook_xsl_stylesheets
-                    ):
-            logging.error("      error")
-            # return 20
-            continue
-
-        logging.info("Extracting into {}".format(base_dir_share_docbook_name))
-
-        if 0 != unpack_tar(docbook_xsl_zip, base_dir_share_docbook):
-            logging.error("   Extraction error")
-
-
-        logging.info("extracted")
-
-        logging.info(
-            "renaming {one} to {another}".format_map(
-                {
-                    'one':     base_dir_share_docbook_name,
-                    'another': base_dir_share_docbook_xsl_stylesheets
-                    }
-                )
-            )
-        try:
-            os.rename(base_dir_share_docbook_name,
-                      base_dir_share_docbook_xsl_stylesheets)
-        except:
-            logging.exception(
-                "Can't rename file `{}' to `{}'".format(
-                    base_dir_share_docbook_name,
-                    base_dir_share_docbook_xsl_stylesheets
-                    )
-                )
-            # return 30
-            continue
-
-        logging.info("XSL extraction completed")
-
-        installed_versions.append(version)
-
-    installed_versions.sort(
-        key=functools.cmp_to_key(org.wayround.aipsetup.version.standard_comparator)
-        )
-
-    logging.info("Installed XSL: {}".format(', '.join(installed_versions)))
-
-
-    iv_l = len(installed_versions)
-
-    if iv_l == 0:
-        logging.error("no versions")
-        return 40
-
-    current = installed_versions[iv_l - 1]
-
-    logging.info("Presuming current XSL: {}".format(current))
-
-    logging.info("Updating XML catalog")
-
-    for i in installed_versions:
-        subprocess.Popen(
-            [
-                'xmlcatalog', '--noout', '--add', 'rewriteSystem',
-                'http://docbook.sourceforge.net/release/xsl/' + i,
-                '/usr/share/xml/docbook/xsl-stylesheets-' + i,
-                base_dir_etc_xml_catalog
-                ]
-            ).wait()
-
-        subprocess.Popen(
-            [
-                'xmlcatalog' , '--noout', '--add' , 'rewriteURI',
-                'http://docbook.sourceforge.net/release/xsl/' + i,
-                '/usr/share/xml/docbook/xsl-stylesheets-' + i,
-                 base_dir_etc_xml_catalog
-                 ]
-            ).wait()
-
+    version = bn.replace('docbook-xsl-', '')
+    logging.info("Importing version: {}".format(version))
 
     subprocess.Popen(
         [
-            'xmlcatalog', '--noout' , '--add' , 'rewriteSystem',
-            'http://docbook.sourceforge.net/release/xsl/current',
-            '/usr/share/xml/docbook/xsl-stylesheets-' + current,
-            base_dir_etc_xml_catalog
+            'xmlcatalog', '--noout', '--add', 'rewriteSystem',
+            'http://docbook.sourceforge.net/release/xsl/' + version,
+            target_xsl_dir_fn_no_base,
+            super_xml_catalog_fn
             ]
         ).wait()
 
     subprocess.Popen(
         [
-            'xmlcatalog', '--noout', '--add', 'rewriteURI',
-            'http://docbook.sourceforge.net/release/xsl/current',
-            '/usr/share/xml/docbook/xsl-stylesheets-' + current,
-            base_dir_etc_xml_catalog
-        ]
+            'xmlcatalog' , '--noout', '--add', 'rewriteURI',
+            'http://docbook.sourceforge.net/release/xsl/' + version,
+            target_xsl_dir_fn_no_base,
+            super_xml_catalog_fn
+            ]
         ).wait()
 
-    return 0
+    if current:
+        subprocess.Popen(
+            [
+                'xmlcatalog', '--noout' , '--add', 'rewriteSystem',
+                'http://docbook.sourceforge.net/release/xsl/current',
+                target_xsl_dir_fn_no_base,
+                super_xml_catalog_fn
+                ]
+            ).wait()
 
-def install(files, base_dir):
+        subprocess.Popen(
+            [
+                'xmlcatalog', '--noout', '--add', 'rewriteURI',
+                'http://docbook.sourceforge.net/release/xsl/current',
+                target_xsl_dir_fn_no_base,
+                super_xml_catalog_fn
+            ]
+            ).wait()
+
+    return
+
+
+def import_catalog_xml_to_super_docbook_catalog(
+    target_catalog_xml,
+    base_dir='/',
+    super_docbook_catalog_xml='/etc/xml/docbook'
+    ):
+    """
+    target_catalog_xml: [/base_dir]/usr/share/xml/docbook/docbook-xml-4.5/catalog.xml
+
+    super_docbook_catalog_xml: [/base_dir]/etc/xml/docbook
+    """
+
+    target_catalog_xml = org.wayround.utils.path.abspath(target_catalog_xml)
+    base_dir = org.wayround.utils.path.abspath(base_dir)
+    super_docbook_catalog_xml = org.wayround.utils.path.abspath(super_docbook_catalog_xml)
+
+    target_catalog_xml_fn = org.wayround.utils.path.abspath(
+        org.wayround.utils.path.join(base_dir, target_catalog_xml)
+        )
+    target_catalog_xml_fn_dir = os.path.dirname(target_catalog_xml_fn)
+
+    target_catalog_xml_fn_dir_virtual = target_catalog_xml_fn_dir
+    target_catalog_xml_fn_dir_virtual = org.wayround.utils.path.remove_base(
+        target_catalog_xml_fn_dir_virtual, base_dir
+        )
+
+    super_docbook_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_docbook_catalog_xml)
+    super_docbook_catalog_xml_fn_dir = os.path.dirname(super_docbook_catalog_xml_fn)
+
+    if not os.path.exists(super_docbook_catalog_xml_fn_dir):
+        os.makedirs(super_docbook_catalog_xml_fn_dir)
+
+    tmp_cat_lxml = None
+
+    try:
+        tmp_cat_lxml = lxml.etree.parse(target_catalog_xml_fn)
+    except:
+        logging.exception("Can't parse catalog file {}".format(target_catalog_xml_fn))
+
+
+    for i in tmp_cat_lxml.getroot():
+
+        if type(i) == lxml.etree._Element:
+
+            qname = lxml.etree.QName(i.tag)
+
+            tag = qname.localname
+
+
+            src_uri = i.get('uri')
+
+            if src_uri:
+
+                dst_uri = ''
+
+                if (src_uri.startswith('http://')
+                    or src_uri.startswith('https://')
+                    or src_uri.startswith('file://')):
+
+                    dst_uri = src_uri
+
+                else:
+
+                    dst_uri = org.wayround.utils.path.join(
+                        '/', target_catalog_xml_fn_dir_virtual, src_uri
+                        )
+
+                logging.info(
+                    "    adding {}".format(
+                        i.get(tag + 'Id')
+                        )
+                    )
+
+                p = subprocess.Popen(
+                    [
+                        'xmlcatalog', '--noout', '--add',
+                        tag,
+                        i.get(tag + 'Id'),
+                        'file://{}'.format(dst_uri),
+                        super_docbook_catalog_xml_fn,
+                        ]
+                    )
+
+                p.wait()
+
+    return
+
+def import_to_super_docbook_catalog(
+    target_dir,
+    base_dir='/',
+    super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
+    super_catalog_xml='/etc/xml/docbook'
+    ):
+    """
+    target_dir: [/base_dir]/usr/share/xml/docbook/docbook-xml-4.5
+
+    super_catalog_sgml: [/base_dir]/etc/sgml/sgml-docbook.cat
+    super_catalog_xml: [/base_dir]/etc/xml/docbook
+    """
+
+    target_dir = org.wayround.utils.path.abspath(target_dir)
+    base_dir = org.wayround.utils.path.abspath(base_dir)
+    super_catalog_sgml = org.wayround.utils.path.abspath(super_catalog_sgml)
+    super_catalog_xml = org.wayround.utils.path.abspath(super_catalog_xml)
+
+    target_dir_fd = org.wayround.utils.path.join(base_dir, target_dir)
+
+#    super_catalog_sgml_fd = org.wayround.utils.path.join(base_dir, super_catalog_sgml)
+#    super_catalog_xml_fd = org.wayround.utils.path.join(base_dir, super_catalog_xml)
+
+    files = os.listdir(target_dir_fd)
+
+    if 'docbook.cat' in files:
+
+        p = subprocess.Popen(
+            [
+                'xmlcatalog',
+                '--sgml',
+                '--noout',
+                '--add',
+                org.wayround.utils.path.join(target_dir, 'docbook.cat'),
+                super_catalog_sgml
+                ]
+            )
+        p.wait()
+
+    if 'catalog.xml' in files:
+
+        target_catalog_xml = org.wayround.utils.path.join(target_dir, 'catalog.xml')
+
+        import_catalog_xml_to_super_docbook_catalog(
+            target_catalog_xml, base_dir, super_catalog_xml
+            )
+
+def make_new_docbook_xml_look_like_old(
+    base_dir='/',
+    installed_docbook_xml_dir='/usr/share/xml/docbook/docbook-xml-4.5',
+    super_catalog_xml='/etc/xml/docbook',
+    xml_catalog='/etc/xml/catalog'
+    ):
+
+    base_dir = org.wayround.utils.path.abspath(base_dir)
+    installed_docbook_xml_dir = org.wayround.utils.path.abspath(installed_docbook_xml_dir)
+    super_catalog_xml = org.wayround.utils.path.abspath(super_catalog_xml)
+    xml_catalog = org.wayround.utils.path.abspath(xml_catalog)
+
+#    installed_docbook_xml_dir_fn = org.wayround.utils.path.join(base_dir, installed_docbook_xml_dir)
+
+    super_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_catalog_xml)
+    xml_catalog_fn = org.wayround.utils.path.join(base_dir, xml_catalog)
+
+    logging.info("Adding support for older docbook-xml versions")
+
+    for i in ['4.1.2', '4.2', '4.3', '4.4']:
+
+        logging.info("    {}".format(i))
+
+        p = subprocess.Popen(
+            [
+             'xmlcatalog', '--noout', '--add', 'public',
+             '-//OASIS//DTD DocBook XML V{}//EN'.format(i),
+             "http://www.oasis-open.org/docbook/xml/{}/docbookx.dtd".format(i),
+             super_catalog_xml_fn
+             ]
+            )
+        p.wait()
+
+        p = subprocess.Popen(
+            [
+             'xmlcatalog', '--noout', '--add', "rewriteSystem",
+             "http://www.oasis-open.org/docbook/xml/{}".format(i),
+             "file://{}".format(installed_docbook_xml_dir),
+             super_catalog_xml_fn
+             ]
+            )
+        p.wait()
+
+        p = subprocess.Popen(
+            [
+             'xmlcatalog', '--noout', '--add', "rewriteURI",
+             "http://www.oasis-open.org/docbook/xml/{}".format(i),
+             "file://{}".format(installed_docbook_xml_dir),
+             super_catalog_xml_fn
+             ]
+            )
+        p.wait()
+
+        p = subprocess.Popen(
+            [
+             'xmlcatalog', '--noout', '--add', "delegateSystem",
+             "http://www.oasis-open.org/docbook/xml/{}".format(i),
+             "file://{}".format(super_catalog_xml),
+             super_catalog_xml_fn
+             ]
+            )
+        p.wait()
+
+        p = subprocess.Popen(
+            [
+             'xmlcatalog', '--noout', '--add', "delegateURI",
+             "http://www.oasis-open.org/docbook/xml/{}".format(i),
+             "file://{}".format(super_catalog_xml),
+             super_catalog_xml_fn
+             ]
+            )
+
+        p.wait()
+
+    return
+
+def install(
+    base_dir='/',
+    super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
+    super_catalog_xml='/etc/xml/docbook',
+    sys_sgml_dir='/usr/share/sgml/docbook',
+    sys_xml_dir='/usr/share/xml/docbook',
+    xml_catalog='/etc/xml/catalog'
+    ):
+
 
     ret = 0
 
-    docbook_zip_list = []
-    docbook_xsl_zip_list = []
-
-    files_len = len(files)
-
-    for i in files[:]:
-
-        r_res = re.match(
-            r'docbkx?(?P<maj>\d)(?P<min>\d?)(?P<patch>\d?)\.zip',
-            os.path.basename(i)
-            )
-
-        if r_res:
-
-            dirname = os.path.dirname(i)
-
-            new_name = 'docbook-xml-{}'.format(r_res.group('maj'))
-
-            if r_res.group('min'):
-                new_name += '.{}'.format(r_res.group('min'))
-
-            if r_res.group('patch'):
-                new_name += '.{}'.format(r_res.group('patch'))
-
-            new_name += '.zip'
-
-            new_f_name = os.path.join(dirname, new_name)
-
-            logging.warning("Renaming {} to {}".format(i, new_f_name))
-
-            os.rename(i, new_f_name)
-
-            for j in range(files_len):
-                if files[j] == i:
-                    files[j] = new_name
-
-    files = list(set(files))
-    files.sort()
-
-    for i in files:
-
-        if re.match(r'docbook-xml-(\d\.?)*zip', os.path.basename(i)):
-
-            docbook_zip_list.append(i)
-
-        elif re.match(r'docbook-xsl-(\d\.?)*tar\.(.*)', os.path.basename(i)):
-
-            docbook_xsl_zip_list.append(i)
-
-        else:
-
-            print("-w- {} is not a correct package".format(i))
-
-    docbook_zip_list.sort()
-    docbook_xsl_zip_list.sort()
-
-
-    logging.info("XMLs: {};".format(', '.join(docbook_zip_list)))
-    logging.info("XSLs: {}.".format(', '.join(docbook_xsl_zip_list)))
-
-    logging.info("Requested base dir: {}".format(base_dir))
-
     base_dir = org.wayround.utils.path.abspath(base_dir)
+    super_catalog_sgml = org.wayround.utils.path.abspath(super_catalog_sgml)
+    super_catalog_xml = org.wayround.utils.path.abspath(super_catalog_xml)
+    sys_xml_dir = org.wayround.utils.path.abspath(sys_xml_dir)
+    xml_catalog = org.wayround.utils.path.abspath(xml_catalog)
 
-    base_dir_etc_xml = os.path.join(base_dir, 'etc', 'xml')
+#    super_catalog_sgml_fn = org.wayround.utils.path.join(base_dir, super_catalog_sgml)
+    super_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_catalog_xml)
+    sys_sgml_dir_fn = org.wayround.utils.path.join(base_dir, sys_sgml_dir)
+    sys_xml_dir_fn = org.wayround.utils.path.join(base_dir, sys_xml_dir)
+    xml_catalog_fn = org.wayround.utils.path.join(base_dir, xml_catalog)
 
-    base_dir_etc_xml_catalog = os.path.join(base_dir_etc_xml, 'catalog')
+    prepare_catalog(xml_catalog_fn, super_catalog_xml_fn)
 
-    base_dir_etc_xml_catalog_docbook = os.path.join(base_dir_etc_xml, 'docbook')
+    dirs = os.listdir(sys_sgml_dir_fn)
+    xml_dirs = os.listdir(sys_xml_dir_fn)
+    xsl_dirs = copy.copy(xml_dirs)
 
-    base_dir_share_docbook = os.path.join(base_dir, 'usr', 'share', 'xml', 'docbook')
+    for i in dirs[:]:
+        if not re.match(r'docbook-(\d+\.?)+', i):
+            dirs.remove(i)
 
-    # leave next comment line for visibility
-    # base_dir_share_docbook_xsl_stylesheets = \
-    #     os.path.join(base_dir_share_docbook, 'xsl-stylesheets')
+    for i in xml_dirs[:]:
+        if not re.match(r'docbook-xml-(\d+\.?)+', i):
+            xml_dirs.remove(i)
 
-
-
-    if 0 != prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
-        logging.error("Error preparing base dir")
-        ret = 20
-
-
-    if ret == 0:
-        for i in [base_dir_etc_xml_catalog_docbook, base_dir_etc_xml_catalog]:
-            if 0 != prepare_catalog(i):
-                logging.error("Error creating catalog")
-                ret = 25
-
-
-    if ret == 0:
-        if 0 != install_docbook_zips(docbook_zip_list,
-                                     base_dir,
-                                     base_dir_etc_xml,
-                                     base_dir_etc_xml_catalog,
-                                     base_dir_etc_xml_catalog_docbook,
-                                     base_dir_share_docbook):
-            logging.error("Error installing XML")
-            ret = 30
+    for i in xsl_dirs[:]:
+        if not re.match(r'docbook-xsl-(\d+\.?)+', i):
+            xsl_dirs.remove(i)
 
 
-    if ret == 0:
-        if 0 != install_docbook_xsl_zips(docbook_xsl_zip_list,
-                                         base_dir,
-                                         base_dir_etc_xml_catalog,
-                                         base_dir_share_docbook):
-            logging.error("Error installing XSL")
-            ret = 40
-
-    if ret == 0:
-        logging.info("Setting correct modes")
-        try:
-            set_correct_modes(base_dir_etc_xml)
-            set_correct_modes(base_dir_share_docbook)
-        except:
-            logging.exception("Can't set correct file modes")
-
-        logging.info("Setting correct owners")
-        try:
-            set_correct_owners(base_dir_etc_xml)
-            set_correct_owners(base_dir_share_docbook)
-        except:
-            logging.exception("Can't set correct file owner")
-
-        print()
-        logging.info("All operations completed. Bye!")
+    if len(dirs) != 2 or not 'docbook-3.1' in dirs or not 'docbook-4.5' in dirs:
+        logging.error("docbook-[version] dirs must be exacly: docbook-3.1 and docbook-4.5")
+        ret = 1
 
 
-    return 0
+    if len(xml_dirs) != 1:
+        logging.error("Exacly one docbook-xml-[version] dir required")
+        ret = 1
+
+    if len(xsl_dirs) != 1:
+        logging.error("Exacly one docbook-xsl-[version] dir required")
+        ret = 1
+
+
+    if ret != 0:
+        pass
+    else:
+
+        logging.info("Installing docbook")
+
+        for i in dirs:
+            logging.info("Installing {}".format(i))
+
+            target_dir = org.wayround.utils.path.join(sys_sgml_dir_fn, i)
+            target_dir = org.wayround.utils.path.remove_base(target_dir, base_dir)
+
+            import_to_super_docbook_catalog(
+                target_dir, base_dir, super_catalog_sgml, super_catalog_xml
+                )
+
+        logging.info("Installing docbook-xml")
+
+        for i in xml_dirs:
+            logging.info("Installing {}".format(i))
+
+            target_dir = org.wayround.utils.path.join(sys_xml_dir_fn, i)
+            target_dir = org.wayround.utils.path.remove_base(target_dir, base_dir)
+
+            import_to_super_docbook_catalog(
+                target_dir, base_dir, super_catalog_sgml, super_catalog_xml
+                )
+
+            make_new_docbook_xml_look_like_old(
+                base_dir, target_dir, super_catalog_xml, xml_catalog
+                )
+
+        logging.info("Installing docbook-xsl")
+
+        for i in xsl_dirs:
+            logging.info("Installing {}".format(i))
+
+            target_dir = org.wayround.utils.path.join(sys_xml_dir_fn, i)
+            target_dir = org.wayround.utils.path.remove_base(target_dir, base_dir)
+
+    #        import_to_super_docbook_catalog(
+    #            target_dir, base_dir, super_catalog_sgml, super_catalog_xml
+    #            )
+
+            import_docbook_xsl_to_catalog(
+                target_dir, base_dir, xml_catalog
+                )
+
+        import_docbook_to_catalog(xml_catalog_fn)
+
+
+    return
 
