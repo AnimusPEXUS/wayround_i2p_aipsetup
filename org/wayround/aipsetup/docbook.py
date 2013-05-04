@@ -86,19 +86,25 @@ def set_correct_owners(directory):
 
 
 
-def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
+def make_directories(base_dir, lst):
+
+    base_dir = org.wayround.utils.path.abspath(base_dir)
 
     logging.info("Preparing base dir: {}".format(base_dir))
 
-    for i in [base_dir_etc_xml, base_dir_share_docbook]:
-        logging.info("   checking: {}".format(i))
+    for i in lst:
+
+        i_ap = org.wayround.utils.path.abspath(i)
+        i_ap_fn = org.wayround.utils.path.join(base_dir, i_ap)
+
+        logging.info("   checking: {}".format(i_ap_fn))
         try:
-            os.makedirs(i)
+            os.makedirs(i_ap_fn)
         except:
             pass
 
-        if not os.path.isdir(i):
-            logging.error("      not a dir {}".format(i))
+        if not os.path.isdir(i_ap_fn):
+            logging.error("      not a dir {}".format(i_ap_fn))
             return 1
 
     return 0
@@ -107,32 +113,20 @@ def prepare_base(base_dir, base_dir_etc_xml, base_dir_share_docbook):
 
 def prepare_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
 
-    r = 0
+    ret = 0
 
-    logging.info("Checking for catalog {}".format(base_dir_etc_xml_catalog))
-    if not os.path.isfile(base_dir_etc_xml_catalog):
-        logging.info("   creating new")
-        r = subprocess.Popen(
-            [
-                'xmlcatalog', '--noout', '--create', base_dir_etc_xml_catalog
-                ]
-            ).wait()
-    else:
-        logging.info("   already exists")
+    for i in [base_dir_etc_xml_catalog, base_dir_etc_xml_docbook]:
 
-    logging.info("Checking for catalog {}".format(base_dir_etc_xml_docbook))
-    if not os.path.isfile(base_dir_etc_xml_docbook):
-        logging.info("   creating new")
-        r = subprocess.Popen(
-            [
-                'xmlcatalog', '--noout', '--create', base_dir_etc_xml_docbook
-                ]
-            ).wait()
-    else:
-        logging.info("   already exists")
+        logging.info("Checking for catalog {}".format(i))
+        if not os.path.isfile(i):
+            logging.info("   creating new")
+            ret = subprocess.Popen(
+                ['xmlcatalog', '--noout', '--create', i]
+                ).wait()
+        else:
+            logging.info("   already exists")
 
-    return r
-
+    return ret
 
 
 def import_docbook_to_catalog(base_dir_etc_xml_catalog):
@@ -338,9 +332,6 @@ def import_to_super_docbook_catalog(
 
     target_dir_fd = org.wayround.utils.path.join(base_dir, target_dir)
 
-#    super_catalog_sgml_fd = org.wayround.utils.path.join(base_dir, super_catalog_sgml)
-#    super_catalog_xml_fd = org.wayround.utils.path.join(base_dir, super_catalog_xml)
-
     files = os.listdir(target_dir_fd)
 
     if 'docbook.cat' in files:
@@ -377,10 +368,7 @@ def make_new_docbook_xml_look_like_old(
     super_catalog_xml = org.wayround.utils.path.abspath(super_catalog_xml)
     xml_catalog = org.wayround.utils.path.abspath(xml_catalog)
 
-#    installed_docbook_xml_dir_fn = org.wayround.utils.path.join(base_dir, installed_docbook_xml_dir)
-
     super_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_catalog_xml)
-    xml_catalog_fn = org.wayround.utils.path.join(base_dir, xml_catalog)
 
     logging.info("Adding support for older docbook-xml versions")
 
@@ -441,6 +429,80 @@ def make_new_docbook_xml_look_like_old(
 
     return
 
+def make_new_docbook_4_5_look_like_old(
+    base_dir='/',
+    installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-4.5',
+    ):
+
+    base_dir = org.wayround.utils.path.abspath(base_dir)
+    installed_docbook_xml_dir = org.wayround.utils.path.abspath(installed_docbook_sgml_dir)
+
+    installed_docbook_xml_dir_fn = org.wayround.utils.path.join(base_dir, installed_docbook_xml_dir)
+
+    catalog_fn = org.wayround.utils.path.join(installed_docbook_xml_dir_fn, 'docbook.cat')
+
+    f = open(catalog_fn)
+
+    lines = f.read().splitlines()
+
+    f.close()
+
+    logging.info("Adding support for older docbook-4.* versions")
+
+    for i in ['4.4', '4.3', '4.2', '4.1', '4.0']:
+
+        logging.info("    {}".format(i))
+
+        new_line = 'PUBLIC "-//OASIS//DTD DocBook V{}//EN" "docbook.dtd"'.format(i)
+
+        if not new_line in lines:
+            lines.append(new_line)
+
+    f = open(catalog_fn, 'w')
+
+    f.write('\n'.join(lines))
+
+    f.close()
+
+    return
+
+def make_new_docbook_3_1_look_like_old(
+    base_dir='/',
+    installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-3.1',
+    ):
+
+    base_dir = org.wayround.utils.path.abspath(base_dir)
+    installed_docbook_xml_dir = org.wayround.utils.path.abspath(installed_docbook_sgml_dir)
+
+    installed_docbook_xml_dir_fn = org.wayround.utils.path.join(base_dir, installed_docbook_xml_dir)
+
+    catalog_fn = org.wayround.utils.path.join(installed_docbook_xml_dir_fn, 'docbook.cat')
+
+    f = open(catalog_fn)
+
+    lines = f.read().splitlines()
+
+    f.close()
+
+    logging.info("Adding support for older docbook-3.* versions")
+
+    for i in ['3.0']:
+
+        logging.info("    {}".format(i))
+
+        new_line = 'PUBLIC "-//Davenport//DTD DocBook V{}//EN" "docbook.dtd"'.format(i)
+
+        if not new_line in lines:
+            lines.append(new_line)
+
+    f = open(catalog_fn, 'w')
+
+    f.write('\n'.join(lines))
+
+    f.close()
+
+    return
+
 def install(
     base_dir='/',
     super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
@@ -465,6 +527,14 @@ def install(
     sys_xml_dir_fn = org.wayround.utils.path.join(base_dir, sys_xml_dir)
     xml_catalog_fn = org.wayround.utils.path.join(base_dir, xml_catalog)
 
+    make_directories(
+        base_dir,
+        [
+         '/etc/xml',
+         '/usr/share/xml/docbook',
+         '/usr/share/sgml/docbook'
+         ]
+        )
     prepare_catalog(xml_catalog_fn, super_catalog_xml_fn)
 
     dirs = os.listdir(sys_sgml_dir_fn)
@@ -513,6 +583,12 @@ def install(
             import_to_super_docbook_catalog(
                 target_dir, base_dir, super_catalog_sgml, super_catalog_xml
                 )
+
+            if target_dir.endswith('4.5'):
+                make_new_docbook_4_5_look_like_old(base_dir, target_dir)
+
+            if target_dir.endswith('3.1'):
+                make_new_docbook_3_1_look_like_old(base_dir, target_dir)
 
         logging.info("Installing docbook-xml")
 
