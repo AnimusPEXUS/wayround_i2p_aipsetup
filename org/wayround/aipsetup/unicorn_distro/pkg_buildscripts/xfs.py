@@ -96,7 +96,7 @@ def main(buildingsite, action=None):
 
             commands = ['install', 'install-dev']
 
-            if not basename in ['xfsprogs', 'xfsdump']:
+            if not basename in ['xfsprogs', 'xfsdump', 'dmapi']:
                 commands.append('install-lib')
 
             ret = autotools.make_high(
@@ -111,7 +111,7 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'fix_symlinks' in actions and ret == 0 and not basename in ['xfsprogs', 'xfsdump']:
+        if 'fix_symlinks' in actions and ret == 0 and not basename in ['xfsprogs', 'xfsdump', 'dmapi']:
 
             try:
                 for i in ['lib{}.a'.format(basename), 'lib{}.la'.format(basename)]:
@@ -133,7 +133,7 @@ def main(buildingsite, action=None):
                 logging.exception('error')
                 ret = 1
 
-        if 'fix_la_file' in actions and ret == 0 and not basename in ['xfsprogs', 'xfsdump']:
+        if 'fix_la_file' in actions and ret == 0 and not basename in ['xfsprogs', 'xfsdump', 'dmapi']:
 
             la_file_name = os.path.join(dst_dir, 'usr', 'lib', 'lib{}.la'.format(basename))
 

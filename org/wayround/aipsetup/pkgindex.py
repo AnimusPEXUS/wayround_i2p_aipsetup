@@ -956,7 +956,7 @@ def index_sources_directory(
             tags.commit()
             org.wayround.utils.file.progress_write_finish()
             logging.info("Cleaning wrong DB entries")
-            src_tag_objects = tags.get_objects()
+            src_tag_objects = tags.get_objects(order='object')
             deleted_count = 0
             found_scanned_count = 0
             skipped_count = 0
