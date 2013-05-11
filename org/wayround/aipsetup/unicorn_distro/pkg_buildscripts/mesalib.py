@@ -50,14 +50,16 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--enable-gallium-egl',
                     '--enable-gles1',
                     '--enable-gles2',
                     '--enable-openvg',
                     '--enable-osmesa',
                     '--enable-xorg',
                     '--enable-xa',
-                    '--enable-d3d1x',
-                    '--enable-opencl',
+#                    '--enable-d3d1x',
+#                    '--enable-opencl',
+                    '--with-egl-platforms=x11,drm,wayland,fbdev,null',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],

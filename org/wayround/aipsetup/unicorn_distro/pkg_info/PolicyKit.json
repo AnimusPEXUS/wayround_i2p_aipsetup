@@ -3,7 +3,7 @@
   "auto_newest_src": true, 
   "basename": "PolicyKit", 
   "buildscript": "", 
-  "deprecated": false, 
+  "deprecated": true, 
   "description": "write something here, please", 
   "filters": "", 
   "home_page": "http://www.freedesktop.org", 

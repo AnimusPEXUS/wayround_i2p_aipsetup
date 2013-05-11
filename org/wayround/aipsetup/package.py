@@ -1,5 +1,4 @@
 
-
 """
 Module for GNU/Linux system related package actions
 """
@@ -106,15 +105,28 @@ def package_install(opts, args):
         else:
             names = args
 
+            fpi = []
+
             for name in names:
                 ret = install_package(
                     name, force, basedir
                     )
                 if ret != 0:
-                    logging.error(
-                        "Some package's installation error -- see above"
-                        )
-                    break
+                    logging.error("Failed to install package: `{}'".format(name))
+                    fpi.append(name)
+
+
+            if len(fpi) != 0:
+                logging.error(
+                    "Failed installing packages:"
+                    )
+
+                fpi.sort()
+
+                for i in fpi:
+                    logging.error("       {}".format(i))
+
+                ret = 3
 
             org.wayround.aipsetup.sysupdates.all_actions()
 
@@ -796,35 +808,6 @@ def tarobj_check_member_sum(tarobj, sums, member_name):
         fobj.close()
 
     return ret
-
-def check_installed_asp(
-    asp_name,
-    destdir='/',
-    mute=True
-    ):
-
-    ret = 0
-
-    # ensure destdir correctness
-    destdir = org.wayround.utils.path.abspath(destdir)
-
-    lines = list_files_installed_by_asp(destdir, asp_name, mute)
-
-    if not isinstance(lines, list):
-        logging.error(
-            "Some errors while getting ASP's file list for `{}'".format(
-                asp_name
-                )
-            )
-        ret = 1
-    else:
-
-        # from this point we working with other system's files
-        lines = org.wayround.utils.path.prepend_path(lines, destdir)
-
-        lines = org.wayround.utils.path.realpaths(lines)
-
-
 
 def remove_package(name, force=False, destdir='/', mute=False):
     """
@@ -2271,5 +2254,3 @@ def load_asp_deps(destdir, asp_name, mute=True):
 
 
     return ret
-
-

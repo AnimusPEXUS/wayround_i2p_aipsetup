@@ -24,14 +24,21 @@ def sysupdates_all_actions(opts, args):
     return 0
 
 def all_actions():
-    ldconfig()
-    update_mime_database()
-    gdk_pixbuf_query_loaders()
-    pango_querymodules()
-    glib_compile_schemas()
-    gtk_query_immodules_2_0()
-    gtk_query_immodules_3_0()
-    return 0
+    ret = 0
+
+    try:
+        ldconfig()
+        update_mime_database()
+        gdk_pixbuf_query_loaders()
+        pango_querymodules()
+        glib_compile_schemas()
+        gtk_query_immodules_2_0()
+        gtk_query_immodules_3_0()
+
+    except:
+        ret = 1
+
+    return ret
 
 
 def ldconfig():

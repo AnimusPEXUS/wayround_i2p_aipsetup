@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "commoncpp", 
-  "buildscript": null, 
+  "buildscript": "", 
   "deprecated": true, 
   "description": "see commoncpp2", 
   "filters": "", 

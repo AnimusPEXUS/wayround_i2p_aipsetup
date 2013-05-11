@@ -56,6 +56,7 @@ def main(buildingsite, action=None):
 #                    '--with-nspr-libs=/usr',
 #                    '--with-nss-includes=/usr',
 #                    '--with-nss-libs=/usr',
+#                    '--disable-uoa',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],

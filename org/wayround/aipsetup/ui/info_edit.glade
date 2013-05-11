@@ -588,7 +588,7 @@ session</property>
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes">Ctrl+r or F5 to refresh list</property>
                                 <property name="hexpand">True</property>
-                                <property name="wrap_width">6</property>
+                                <property name="wrap_width">8</property>
                                 <property name="popup_fixed_width">False</property>
                               </object>
                               <packing>

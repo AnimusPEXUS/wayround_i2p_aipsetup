@@ -53,6 +53,7 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '--enable-vala',
+                    '--with-daemon-user=colord',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
