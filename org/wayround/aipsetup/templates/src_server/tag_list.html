@@ -1,0 +1,8 @@
+<div>
+    <div>${"{} Item(s) Found".format(len(tags))|x}</div>
+    % for i in tags:
+    <div>
+        <a href="/files?name=${ i | u,x }">${ i | x }</a>
+    </div>
+    % endfor
+</div>

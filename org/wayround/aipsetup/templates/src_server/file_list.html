@@ -1,0 +1,12 @@
+<div>
+    <div>${"{} File(s) Found".format(len(files))|x}</div>
+    <table>
+        <tbody>
+            % for i in files:
+            <tr>
+                <td><a href="/download${ i | x }">${ i | x }</a></td>
+            </tr>
+            % endfor
+        </tbody>
+    </table>
+</div>

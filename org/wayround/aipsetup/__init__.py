@@ -23,7 +23,9 @@ AIPSETUP_CLI_MODULE_LIST = [
     'sysupdates',
 
     'config',
-    'unicorn'
+    'unicorn',
+
+    'src_server'
     ]
 """
 modules able to be accessed from CLI

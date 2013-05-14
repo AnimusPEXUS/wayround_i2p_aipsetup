@@ -6,10 +6,10 @@
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "", 
-  "home_page": "http://www.gnu.org", 
+  "home_page": "http://www.mpfr.org/", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
-  "removable": true, 
+  "removable": false, 
   "src_path_prefix": "/www.mpfr.org/www.mpfr.org/"
 }
