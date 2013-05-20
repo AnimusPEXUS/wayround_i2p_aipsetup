@@ -134,7 +134,6 @@ class Index:
 
         return txt
 
-    category.exposed = True
 
     def package(self, name = '', mode = 'normal'):
 
@@ -229,7 +228,6 @@ class Index:
 
         return txt
 
-    package.exposed = True
 
 
 

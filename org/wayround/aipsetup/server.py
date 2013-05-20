@@ -10,8 +10,6 @@ import org.wayround.aipsetup.pkgtag
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.info
 
-# imported in server_start_host()
-#import org.wayround.aipsetup.serverui
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'

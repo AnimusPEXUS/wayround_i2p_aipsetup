@@ -8,7 +8,6 @@ Allows minimize DB access requests
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest
-import org.wayround.aipsetup.pkgtag
 
 _info_db_connection = None
 _index_db_connection = None

@@ -20,6 +20,14 @@ import org.wayround.utils.deps_c
 import org.wayround.utils.path
 import org.wayround.utils.format.elf
 
+ROOT_LINKS = [
+    'bin',
+    'sbin',
+    'lib',
+    'lib64',
+    'mnt'
+    ]
+
 
 # NOTE: this list is suspiciously similar to what in complete
 # function, but actually they must be separate
@@ -219,14 +227,7 @@ def destdir_verify_paths_correctness(buildingsite):
 
     destdir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
 
-    # TODO: change constants to constitution values instances
-    for i in [
-        'bin',
-        'lib',
-        'sbin',
-        'lib64',
-        'mnt'
-        ]:
+    for i in ROOT_LINKS:
 
         p1 = destdir + os.path.sep + i
 

@@ -16,29 +16,6 @@ import org.wayround.aipsetup.buildscript
 import org.wayround.utils.path
 
 
-def cli_name():
-    """
-    aipsetup CLI interface part
-    """
-    return 'build'
-
-def exported_commands():
-    """
-    aipsetup CLI interface part
-    """
-    return {
-        's': build_script,
-        'complete': build_complete,
-        }
-
-def commands_order():
-    """
-    aipsetup CLI interface part
-    """
-    return [
-        's',
-        'complete'
-        ]
 
 def build_script(opts, args):
     """
@@ -168,3 +145,113 @@ def start_building_script(building_site, action=None):
     return ret
 
 
+def build(source_files, remove_buildingsite_after_success=False):
+    """
+    Gathering function for all package building process
+
+    Uses :func:`org.wayround.aipsetup.buildingsite.init` to create building site.
+    Farther process controlled by :func:`complete`.
+
+    :param source_files: tarball name or list of them.
+    """
+    ret = 0
+
+    par_res = org.wayround.aipsetup.name.source_name_parse(
+        source_files[0],
+        mute=True
+        )
+
+
+    if not isinstance(par_res, dict):
+        logging.error("Can't parse source file name")
+        ret = 1
+    else:
+
+        try:
+            os.makedirs(org.wayround.aipsetup.config.config['buildingsites'])
+        except:
+            pass
+
+        package_info = (
+            org.wayround.aipsetup.pkginfo.get_info_rec_by_tarball_filename(
+                source_files[0]
+                )
+            )
+
+        if not package_info:
+            logging.error(
+                "Can't find package information for tarball `{}'".format(
+                    source_files[0]
+                    )
+                )
+            ret = 2
+        else:
+
+            tmp_dir_prefix = "{name}-{version}-{status}-{timestamp}-".format_map(
+                {
+                    'name': package_info['name'],
+                    'version': par_res['groups']['version'],
+                    'status': par_res['groups']['status'],
+                    'timestamp': org.wayround.utils.time.currenttime_stamp()
+                    }
+                )
+
+            build_site_dir = tempfile.mkdtemp(
+                prefix=tmp_dir_prefix,
+                dir=org.wayround.aipsetup.config.config['buildingsites']
+                )
+
+            build_site_dir = org.wayround.utils.path.abspath(build_site_dir)
+
+            if org.wayround.aipsetup.buildingsite.init(build_site_dir) != 0:
+                logging.error("Error initiating temporary dir")
+                ret = 3
+            else:
+                if source_files != None and isinstance(source_files, list):
+
+                    logging.info("Copying sources...")
+
+                    for source_file in source_files:
+
+                        logging.info("    {}".format(source_file))
+
+                        if (os.path.isfile(source_file)
+                            and not os.path.islink(source_file)):
+
+                            try:
+                                shutil.copy(
+                                    source_file, os.path.join(
+                                        build_site_dir,
+                                        org.wayround.aipsetup.buildingsite.DIR_TARBALL
+                                        )
+                                    )
+                            except:
+                                logging.exception("Couldn't copy source file")
+                                ret = 4
+
+                        else:
+
+                            logging.error(
+                                "file {} - not dir and not file. skipping copy".format(
+                                    source_file
+                                    )
+                                )
+
+                    if ret != 0:
+                        logging.error(
+                            "Exception while copying one of source files"
+                            )
+
+                if ret == 0:
+
+                    # FIXME: rework this
+                    if complete(
+                        build_site_dir,
+                        source_files[0],
+                        remove_buildingsite_after_success=remove_buildingsite_after_success
+                        ) != 0:
+
+                        logging.error("Package building failed")
+                        ret = 5
+
+    return ret
