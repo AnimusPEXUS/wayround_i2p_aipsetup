@@ -58,7 +58,8 @@ DEFAULT_CONFIG = {
         },
 
     'builder_repo': {
-        'building_scripts_dir': '/mnt/sda3/home/agu/_UNICORN/pkg_buildingsites',
+        'building_scripts_dir': '/mnt/sda3/home/agu/_UNICORN/pkg_buildscripts',
+        'building_sites_dir': '/mnt/sda3/home/agu/_UNICORN/b'
         },
 
     'web_server_config': {

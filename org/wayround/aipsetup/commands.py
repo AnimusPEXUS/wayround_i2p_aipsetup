@@ -13,6 +13,9 @@ def commands():
         'build': build_build
         },
 
+    'package': {
+        },
+
     'bsite': {
         'init': building_site_init
         },
@@ -356,6 +359,9 @@ def build_build(config, opts, args):
     ======= ====================================
     """
 
+    import org.wayround.aipsetup.build
+    import org.wayround.aipsetup.info
+
     r_bds = '-d' in opts
 
     sources = []
@@ -364,22 +370,37 @@ def build_build(config, opts, args):
 
     ret = 0
 
+    building_site_dir = config['builder_repo']['building_scripts_dir']
+
     if len(args) > 0:
         sources = args
+        building_site_dir = org.wayround.utils.path.abspath(
+            os.path.dirname(sources[0])
+            )
 
     if len(sources) == 0:
-        logging.error("No source files named")
+        logging.error("No source files supplied")
         ret = 2
 
     if ret == 0:
-
+        
         if multiple_packages:
             sources.sort()
             for i in sources:
-                build([i], remove_buildingsite_after_success=r_bds)
+                org.wayround.aipsetup.build.build(
+                    config,
+                    [i],
+                    remove_buildingsite_after_success=r_bds,
+                    buildingsites_dir=building_site_dir
+                    )
             ret = 0
         else:
-            ret = build(sources, remove_buildingsite_after_success=r_bds)
+            ret = org.wayround.aipsetup.build.build(
+                config,
+                sources,
+                remove_buildingsite_after_success=r_bds,
+                buildingsites_dir=building_site_dir
+                )
 
     return ret
 
@@ -1209,3 +1230,107 @@ def buildingsite_apply_info(opts, args):
     ret = apply_info(dirname, file)
 
     return ret
+
+def build_script(opts, args):
+    """
+    Starts named action from script applied to current building site
+
+    [-b=DIR] action_name
+
+    -b - set building site
+
+    if action name ends with + (plus) all remaining actions will be also started
+    (if not error will occur)
+    """
+
+    ret = 0
+
+    args_l = len(args)
+
+    if args_l != 1:
+        logging.error("one argument must be")
+        ret = 1
+    else:
+
+        action = args[0]
+
+        bs = '.'
+        if '-b' in opts:
+            bs = opts['-b']
+
+        ret = start_building_script(bs, action)
+
+    return ret
+
+
+
+def build_complete(opts, args):
+    """
+    Configures, builds, distributes and prepares software accordingly to info
+
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+    """
+
+    ret = 0
+
+    dir_name = '.'
+    args_l = len(args)
+
+
+    if args_l > 1:
+        logging.error("Too many parameters")
+
+    else:
+        if args_l == 1:
+            dir_name = args[0]
+
+        ret = complete(dir_name)
+
+    return ret
+
+
+def pack_complete(opts, args):
+    """
+    Fullcircle action set for creating package
+
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+    """
+    ret = 0
+
+    dir_name = '.'
+    args_l = len(args)
+
+
+    if args_l > 1:
+        logging.error("Too many parameters")
+
+    else:
+        if args_l == 1:
+            dir_name = args[0]
+
+        ret = complete(dir_name)
+
+    return ret
+
+
+
+def buildscript_list_files(opts, args):
+    """
+    List building scripts files
+    """
+    return org.wayround.aipsetup.info.info_list_files(
+        opts, args, 'buildscript', mask='*.py'
+        )
+
+def buildscript_edit_file(opts, args):
+    """
+    Edit building script
+
+    FILENAME
+    """
+    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
+

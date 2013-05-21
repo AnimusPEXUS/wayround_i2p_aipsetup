@@ -10,16 +10,18 @@ import logging
 import os.path
 import re
 import sys
+import json
 
-import sqlalchemy.ext
+import sqlalchemy.ext.declarative
 
 import org.wayround.utils.file
 import org.wayround.utils.db
+import org.wayround.utils.path
+import org.wayround.utils.tarball_name_parser
 
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.info
 
-import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkglatest
 
 
@@ -211,23 +213,20 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
 
 class PackageInfoControl:
 
-    def __init__(self, info_dir, info_db, tags_json, tags_db, index_db):
+    def __init__(self, info_dir, info_db):
 
-        self.info_dir = info_dir,
-        self.info_db = info_db,
-        self.tags_json = tags_json,
-        self.tags_db = tags_db
-        self.index_db = index_db
+        self.info_dir = org.wayround.utils.path.abspath(info_dir)
+        self.info_db = info_db
 
 
-    def get_lists_of_packages_missing_and_present_info_records(self, names):
+    def get_lists_of_packages_missing_and_present_info_records(self, names, pkg_index_ctl):
         """
         :param names: can be a string or a ``list`` of names to check. if names is
         ``None`` - check all.
         """
 
-        index_db = org.wayround.aipsetup.dbconnections.index_db()
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        index_db = pkg_index_ctl.db_connection
+        info_db = self.info_db
 
         found = []
 
@@ -263,7 +262,7 @@ class PackageInfoControl:
         result.
         """
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         ret = None
 
@@ -281,7 +280,7 @@ class PackageInfoControl:
             ret = dict()
 
             keys = set(
-                org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
+                SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
                 )
 
             for i in keys:
@@ -295,7 +294,7 @@ class PackageInfoControl:
 
     def set_package_info_record(self, name, struct):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
 
@@ -304,10 +303,10 @@ class PackageInfoControl:
             q = info_db.Info()
             creating_new = True
 
-        keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+        keys = set(SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
 
         for i in keys:
-            kt = type(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE[i])
+            kt = type(SAMPLE_PACKAGE_INFO_STRUCTURE[i])
 
             if not kt in [builtins.int, builtins.str, builtins.bool]:
                 raise TypeError("Wrong type supplied: {}".format(kt))
@@ -334,7 +333,7 @@ class PackageInfoControl:
 
     def get_info_records_list(self, mask='*', mute=False):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         ret = []
 
@@ -355,11 +354,11 @@ class PackageInfoControl:
         return ret
 
     def get_missing_info_records_list(
-        self, create_templates=False, force_rewrite=False
+        self, pkg_index_ctl, create_templates=False, force_rewrite=False
         ):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
-        index_db = org.wayround.aipsetup.dbconnections.index_db()
+        info_db = self.info_db
+        index_db = pkg_index_ctl.db_connection
 
         q = index_db.sess.query(index_db.Package).order_by(index_db.Package.name).all()
 
@@ -390,7 +389,7 @@ class PackageInfoControl:
                 if create_templates:
 
                     filename = os.path.join(
-                        org.wayround.aipsetup.config.config['info'],
+                        self.info_dir,
                         '{}.json'.format(each.name)
                         )
 
@@ -405,9 +404,10 @@ class PackageInfoControl:
                     if force_rewrite:
                         logging.info("Forced template rewriting: {}".format(filename))
 
-                    if org.wayround.aipsetup.info.write_to_file(
+                    if self.write_to_file(
                         filename,
-                        org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE) != 0:
+                        SAMPLE_PACKAGE_INFO_STRUCTURE
+                        ) != 0:
                         pkgs_failed += 1
                         logging.error(
                             "failed writing template to `{}'".format(filename)
@@ -436,11 +436,12 @@ class PackageInfoControl:
             )
 
         missing.sort()
+
         return missing
 
     def get_outdated_info_records_list(self, mute=True):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         ret = []
 
@@ -451,7 +452,7 @@ class PackageInfoControl:
         for i in query_result:
 
             filename = os.path.join(
-                org.wayround.aipsetup.config.config['info'],
+                self.info_dir,
                 '{}.json'.format(i.name)
                 )
 
@@ -461,7 +462,7 @@ class PackageInfoControl:
                 ret.append(i.name)
                 continue
 
-            d1 = org.wayround.aipsetup.info.read_from_file(filename)
+            d1 = self.read_from_file(filename)
 
             if not isinstance(d1, dict):
                 if not mute:
@@ -469,8 +470,8 @@ class PackageInfoControl:
                 ret.append(i.name)
                 continue
 
-            d2 = get_package_info_record(record=i)
-            if not org.wayround.aipsetup.info.is_info_dicts_equal(d1, d2):
+            d2 = self.get_package_info_record(record=i)
+            if not is_info_dicts_equal(d1, d2):
                 if not mute:
                     logging.warning(
                         "xml init file differs to `{}' record".format(i.name)
@@ -479,13 +480,13 @@ class PackageInfoControl:
 
         return ret
 
-    def get_info_rec_by_tarball_filename(self, tarball_filenam):
+    def get_info_rec_by_tarball_filename(self, tarball_filename):
         ret = None
 
-        r = get_package_name_by_tarball_filename(tarball_filenam)
+        r = self.get_package_name_by_tarball_filename(tarball_filename)
 
         if r:
-            ret = get_package_info_record(r)
+            ret = self.get_package_info_record(r)
         else:
             ret = None
 
@@ -526,7 +527,7 @@ class PackageInfoControl:
         return ret
 
     def filter_tarball_list(
-        self, 
+        self,
         input_list,
         filter_text
         ):
@@ -542,7 +543,7 @@ class PackageInfoControl:
         inp_list = set(copy.copy(input_list))
         out_list = copy.copy(inp_list)
 
-        filters = filter_text_parse(filter_text)
+        filters = self.filter_text_parse(filter_text)
 
         for f in filters:
 
@@ -618,7 +619,7 @@ class PackageInfoControl:
 
                         working_item = None
 
-                        parsed = org.wayround.aipsetup.name.source_name_parse(
+                        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
                             os.path.basename(item),
                             mute=True
                             )
@@ -710,7 +711,7 @@ class PackageInfoControl:
 
         ret = None
 
-        parsed = org.wayround.aipsetup.name.source_name_parse(
+        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
             tarball_filename,
             mute=mute
             )
@@ -721,7 +722,7 @@ class PackageInfoControl:
 
             lst = [tarball_filename]
 
-            info_db = org.wayround.aipsetup.dbconnections.info_db()
+            info_db = self.info_db
 
             q = info_db.sess.query(
                 info_db.Info
@@ -733,7 +734,7 @@ class PackageInfoControl:
 
             for i in q:
 
-                res = filter_tarball_list(
+                res = self.filter_tarball_list(
                     lst,
                     i.filters
                     )
@@ -761,7 +762,7 @@ class PackageInfoControl:
 
     def get_non_automatic_packages_info_list(self):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         q = info_db.sess.query(
             info_db.Info
@@ -772,14 +773,14 @@ class PackageInfoControl:
 
         lst = []
         for i in q:
-            lst.append(get_package_info_record(i.name, i))
+            lst.append(self.get_package_info_record(i.name, i))
 
         return lst
 
 
     def guess_package_homepage(self, pkg_name):
 
-        src_db = org.wayround.aipsetup.dbconnections.src_db()
+        src_db = self.info_db
 
         files = src_db.objects_by_tags([pkg_name])
 
@@ -799,16 +800,16 @@ class PackageInfoControl:
 
         logging.info("Getting outdated records list")
 
-        oir = get_outdated_info_records_list(mute=True)
+        oir = self.get_outdated_info_records_list(mute=True)
 
         logging.info("Found {} outdated records".format(len(oir)))
 
         for i in range(len(oir)):
             oir[i] = os.path.join(
-                org.wayround.aipsetup.config.config['info'],
+                self.info_dir,
                 oir[i] + '.json'
                 )
-        load_info_records_from_fs(
+        self.load_info_records_from_fs(
             filenames=oir,
             rewrite_existing=True
             )
@@ -816,25 +817,25 @@ class PackageInfoControl:
         return
 
 
-    def print_info_record(self, name):
+    def print_info_record(self, name, pkg_index_ctl, tag_ctl):
 
-        r = get_package_info_record(name=name)
+        r = self.get_package_info_record(name=name)
 
         if r == None:
             logging.error("Not found named info record")
         else:
 
-            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(
+            cid = pkg_index_ctl.get_package_category_by_name(
                 name
                 )
             if cid != None:
-                category = org.wayround.aipsetup.pkgindex.get_category_path_string(
+                category = pkg_index_ctl.get_category_path_string(
                     cid
                     )
             else:
                 category = "< Package not indexed! >"
 
-            tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+            tag_db = tag_ctl.tag_db_connection
 
             tags = tag_db.get_tags(name[:-4])
             tags.sort()
@@ -901,7 +902,7 @@ class PackageInfoControl:
 
     def delete_info_records(self, mask='*'):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         q = info_db.sess.query(info_db.Info).all()
 
@@ -925,14 +926,14 @@ class PackageInfoControl:
         self, mask='*', force_rewrite=False
         ):
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         q = info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
 
         for i in q:
             if fnmatch.fnmatch(i.name, mask):
                 filename = os.path.join(
-                    org.wayround.aipsetup.config.config['info'],
+                    self.info_dir,
                     '{}.json'.format(i.name))
                 if not force_rewrite and os.path.exists(filename):
                     logging.warning("File exists - skipping: {}".format(filename))
@@ -942,9 +943,9 @@ class PackageInfoControl:
                 if not os.path.exists(filename):
                     logging.info("Writing: {}".format(filename))
 
-                r = get_package_info_record(record=i)
+                r = self.get_package_info_record(record=i)
                 if isinstance(r, dict):
-                    if org.wayround.aipsetup.info.write_to_file(filename, r) != 0:
+                    if self.write_to_file(filename, r) != 0:
                         logging.error("can't write file {}".format(filename))
 
         return
@@ -957,7 +958,7 @@ class PackageInfoControl:
         existing
         """
 
-        info_db = org.wayround.aipsetup.dbconnections.info_db()
+        info_db = self.info_db
 
         files = []
         loaded = 0
@@ -998,14 +999,14 @@ class PackageInfoControl:
         org.wayround.utils.file.progress_write("-i- Loading missing records")
 
         for i in missing:
-            struct = org.wayround.aipsetup.info.read_from_file(i)
+            struct = self.read_from_file(i)
             name = os.path.basename(i)[:-5]
             if isinstance(struct, dict):
                 org.wayround.utils.file.progress_write(
                     "    loading record: {}\n".format(name)
                     )
 
-                set_package_info_record(
+                self.set_package_info_record(
                     name, struct
                     )
                 loaded += 1
@@ -1020,17 +1021,17 @@ class PackageInfoControl:
 
 class InfoFile:
 
-    def read_from_file(name):
+    def read_from_file(self, name):
         """
         Read package info structure from named file. Return dict. On error return
         ``None``
         """
-    
+
         ret = None
-    
+
         txt = ''
         tree = None
-    
+
         try:
             f = open(name, 'r')
         except:
@@ -1041,39 +1042,39 @@ class InfoFile:
         else:
             try:
                 txt = f.read()
-    
+
                 try:
                     tree = json.loads(txt)
                 except:
                     logging.exception("Can't parse file `{}'".format(name))
                     ret = 2
-    
+
                 else:
                     ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
-    
+
                     ret.update(tree)
-    
+
                     ret['name'] = name
                     del(tree)
             finally:
                 f.close()
-    
+
         return ret
-    
-    def write_to_file(name, struct):
+
+    def write_to_file(self, name, struct):
         """
         Write package info structure into named file
         """
-    
+
         ret = 0
-    
+
         struct = copy.copy(struct)
-    
+
         if 'name' in struct:
             del struct['name']
-    
+
         txt = json.dumps(struct, indent=2, sort_keys=True)
-    
+
         try:
             f = open(name, 'w')
         except:
@@ -1084,39 +1085,9 @@ class InfoFile:
                 f.write(txt)
             finally:
                 f.close()
-    
+
         return ret
-    
-    def is_info_dicts_equal(d1, d2):
-    
-        """
-        Compare two package info structures
-    
-        :rtype: ``bool``
-        """
-    
-        ret = True
-    
-        for i in [
-            'description',
-            'home_page',
-            'buildscript',
-            'basename',
-            'filters',
-            'installation_priority',
-            'removable',
-            'reducible',
-            'non_installable',
-            'deprecated',
-            'auto_newest_src',
-            'auto_newest_pkg',
-            'src_path_prefix'
-            ]:
-            if d1[i] != d2[i]:
-                ret = False
-                break
-    
-        return ret
+
 
 class TagsControl:
 
@@ -1196,3 +1167,34 @@ class TagsControl:
                 f.close()
 
         return
+
+def is_info_dicts_equal(d1, d2):
+
+    """
+    Compare two package info structures
+
+    :rtype: ``bool``
+    """
+
+    ret = True
+
+    for i in [
+        'description',
+        'home_page',
+        'buildscript',
+        'basename',
+        'filters',
+        'installation_priority',
+        'removable',
+        'reducible',
+        'non_installable',
+        'deprecated',
+        'auto_newest_src',
+        'auto_newest_pkg',
+        'src_path_prefix'
+        ]:
+        if d1[i] != d2[i]:
+            ret = False
+            break
+
+    return ret

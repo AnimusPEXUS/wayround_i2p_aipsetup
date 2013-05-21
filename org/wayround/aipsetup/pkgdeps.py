@@ -15,8 +15,6 @@ import org.wayround.utils.path
 import org.wayround.utils.archive
 
 import org.wayround.aipsetup.package
-import org.wayround.aipsetup.name
-import org.wayround.aipsetup.config
 
 def cli_name():
     """

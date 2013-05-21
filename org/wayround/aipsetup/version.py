@@ -5,18 +5,18 @@ Version comparison utilities
 
 import logging
 
-import org.wayround.aipsetup.name
+import org.wayround.utils.tarball_name_parser
 
 def source_version_comparator(name1, name2):
 
     ret = 0
 
-    d1 = org.wayround.aipsetup.name.source_name_parse(
+    d1 = org.wayround.utils.tarball_name_parser.parse_tarball_name(
         name1,
         mute=True
         )
 
-    d2 = org.wayround.aipsetup.name.source_name_parse(
+    d2 = org.wayround.utils.tarball_name_parser.parse_tarball_name(
         name2,
         mute=True
         )

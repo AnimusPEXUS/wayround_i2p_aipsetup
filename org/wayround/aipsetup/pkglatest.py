@@ -12,7 +12,6 @@ import org.wayround.utils.db
 
 import org.wayround.aipsetup.config
 
-import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.version
 

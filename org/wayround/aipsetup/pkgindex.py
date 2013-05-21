@@ -15,11 +15,11 @@ import org.wayround.utils.db
 import org.wayround.utils.file
 import org.wayround.utils.path
 import org.wayround.utils.tag
+import org.wayround.utils.tarball_name_parser
 
-import org.wayround.aipsetup.config
 import org.wayround.aipsetup.dbconnections
-import org.wayround.aipsetup.name
-import org.wayround.aipsetup.pkginfo
+import org.wayround.aipsetup.package_name_parser
+import org.wayround.aipsetup.package
 
 
 class PackageIndex(org.wayround.utils.db.BasicDB):
@@ -178,7 +178,7 @@ class PkgIndexController:
 
                 for i in files:
 
-                    parsed = org.wayround.aipsetup.name.package_name_parse(i)
+                    parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
 
                     if parsed and parsed['groups']['name'] == name:
                         needed_files.append(
@@ -795,8 +795,12 @@ class PkgIndexController:
             ret = 10
         else:
 
-            if org.wayround.aipsetup.package.check_package(filename, mute=True) == 0:
-                parsed = org.wayround.aipsetup.name.package_name_parse(filename)
+            asp = org.wayround.aipsetup.package.ASPackage(filename)
+
+            if asp.check_package(mute=True) == 0:
+                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    filename
+                    )
 
                 if not isinstance(parsed, dict):
                     logging.error(
@@ -1042,7 +1046,7 @@ class SrcIndexController:
                     else:
 
                         parsed_src_filename = (
-                            org.wayround.aipsetup.name.source_name_parse(
+                            org.wayround.utils.tarball_name_parser.parse_tarball_name(
                                 i,
                                 mute=True
                                 )

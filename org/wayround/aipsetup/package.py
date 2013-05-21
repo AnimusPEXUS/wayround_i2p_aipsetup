@@ -3,29 +3,13 @@
 Module for GNU/Linux system related package actions
 """
 
-import logging
 import os.path
+import logging
 import tarfile
 
 import org.wayround.utils.archive
 import org.wayround.utils.checksum
-import org.wayround.utils.file
-import org.wayround.utils.format.elf
-import org.wayround.utils.log
-import org.wayround.utils.opts
 import org.wayround.utils.path
-import org.wayround.utils.text
-import org.wayround.utils.time
-
-
-import org.wayround.aipsetup.build
-import org.wayround.aipsetup.buildingsite
-import org.wayround.aipsetup.config
-import org.wayround.aipsetup.name
-import org.wayround.aipsetup.pack
-import org.wayround.aipsetup.pkgdeps
-import org.wayround.aipsetup.pkginfo
-import org.wayround.aipsetup.sysupdates
 
 
 class ASPackage:
