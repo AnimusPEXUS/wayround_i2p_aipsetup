@@ -7,7 +7,7 @@ import os.path
 import subprocess
 import sys
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 
 import org.wayround.utils.error
 import org.wayround.utils.log
@@ -21,7 +21,7 @@ def determine_abs_configure_dir(buildingsite, config_dir):
     """
 
     config_dir = org.wayround.utils.path.abspath(
-        org.wayround.aipsetup.buildingsite.getDIR_SOURCE(
+        org.wayround.aipsetup.build.getDIR_SOURCE(
             buildingsite
             ) + os.path.sep + config_dir
         )
@@ -41,13 +41,13 @@ def determine_building_dir(
     if separate_build_dir == True:
 
         building_dir = org.wayround.utils.path.abspath(
-            org.wayround.aipsetup.buildingsite.getDIR_BUILDING(
+            org.wayround.aipsetup.build.getDIR_BUILDING(
                 buildingsite
                 )
             )
     else:
         building_dir = (
-            org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+            org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
             + os.path.sep
             + config_dir
             )
@@ -70,7 +70,7 @@ def cmake_high(
     building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(
+        org.wayround.aipsetup.build.getDIR_BUILD_LOGS(
             building_site
             ),
         'cmake'

@@ -8,13 +8,14 @@ import subprocess
 import sys
 import tempfile
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 
 import org.wayround.utils.archive
 import org.wayround.utils.error
 import org.wayround.utils.log
 import org.wayround.utils.osutils
 import org.wayround.utils.path
+import org.wayround.utils.tarball_name_parser
 
 def determine_abs_configure_dir(buildingsite, config_dir):
     """
@@ -22,7 +23,7 @@ def determine_abs_configure_dir(buildingsite, config_dir):
     """
 
     config_dir = org.wayround.utils.path.abspath(
-        org.wayround.aipsetup.buildingsite.getDIR_SOURCE(
+        org.wayround.aipsetup.build.getDIR_SOURCE(
             buildingsite
             ) + os.path.sep + config_dir
         )
@@ -42,13 +43,13 @@ def determine_building_dir(
     if separate_build_dir == True:
 
         building_dir = org.wayround.utils.path.abspath(
-            org.wayround.aipsetup.buildingsite.getDIR_BUILDING(
+            org.wayround.aipsetup.build.getDIR_BUILDING(
                 buildingsite
                 )
             )
     else:
         building_dir = (
-            org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+            org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
             + os.path.sep
             + config_dir
             )
@@ -69,22 +70,22 @@ def extract_high(
     building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+        org.wayround.aipsetup.build.getDIR_BUILD_LOGS(building_site),
         'extract'
         )
 
     building_site = org.wayround.utils.path.abspath(building_site)
 
-    tarball_dir = org.wayround.aipsetup.buildingsite.getDIR_TARBALL(building_site)
+    tarball_dir = org.wayround.aipsetup.build.getDIR_TARBALL(building_site)
 
-    source_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(building_site)
+    source_dir = org.wayround.aipsetup.build.getDIR_SOURCE(building_site)
 
     tarball_dir_files = os.listdir(tarball_dir)
 
     tarball_dir_files_len = len(tarball_dir_files)
 
     tmpdir = tempfile.mkdtemp(
-        dir=org.wayround.aipsetup.buildingsite.getDIR_TEMP(building_site)
+        dir=org.wayround.aipsetup.build.getDIR_TEMP(building_site)
         )
 
     if tarball_dir_files_len == 0:
@@ -94,7 +95,7 @@ def extract_high(
 
         tarball = None
         for i in tarball_dir_files:
-            parsed = org.wayround.aipsetup.name.source_name_parse(
+            parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
                 i, mute=True
                 )
             if isinstance(parsed, dict):
@@ -148,13 +149,11 @@ def configure_high(
     building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+        org.wayround.aipsetup.build.getDIR_BUILD_LOGS(building_site),
         'configure'
         )
 
-    pkg_info = org.wayround.aipsetup.buildingsite.read_package_info(
-        building_site
-        )
+    pkg_info = org.wayround.aipsetup.build.BuildingSiteCtl(building_site).read_package_info()
 
     if not isinstance(pkg_info, dict):
         log.error("Can't read package info")
@@ -286,7 +285,7 @@ def make_high(
     building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
-        org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(building_site),
+        org.wayround.aipsetup.build.getDIR_BUILD_LOGS(building_site),
         'make'
         )
 

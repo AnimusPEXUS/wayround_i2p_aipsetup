@@ -10,7 +10,9 @@ def commands():
         ],
 
     'build': {
-        'build': build_build
+        'full': build_full,
+#        'build': build_build,
+        'pack': build_pack
         },
 
     'package': {
@@ -345,22 +347,24 @@ def package_complete(config, opts, args):
 
     return ret
 
-def build_build(config, opts, args):
+def build_full(config, opts, args):
     """
     Place named source files in new building site and build new package from them
 
-    [-d] [-o] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
+    [-d] [-o] [--host=HOST-NAME-TRIPLET] TARBALL[, TARBALL[, TARBALL[, TARBALL...]]]
 
-    ======= ====================================
-    options meaning
-    ======= ====================================
-    -d      remove building site on success
-    -o      treat all tarballs as for one build
-    ======= ====================================
+    ================ ====================================
+    options          meaning
+    ================ ====================================
+    -d               remove building site on success
+    -o               treat all tarballs as for one build
+    --host=TRIPLET
+    --build=TRIPLET
+    --target=TRIPLET
+    ================ ====================================
     """
 
     import org.wayround.aipsetup.build
-    import org.wayround.aipsetup.info
 
     r_bds = '-d' in opts
 
@@ -372,6 +376,10 @@ def build_build(config, opts, args):
 
     building_site_dir = config['builder_repo']['building_scripts_dir']
 
+    host = config['system_settings']['host']
+    build = config['system_settings']['build']
+    target = config['system_settings']['target']
+
     if len(args) > 0:
         sources = args
         building_site_dir = org.wayround.utils.path.abspath(
@@ -382,25 +390,81 @@ def build_build(config, opts, args):
         logging.error("No source files supplied")
         ret = 2
 
+    if '--host' in opts:
+        host = opts['--host']
+
+    if '--build' in opts:
+        build = opts['--build']
+
+    if '--target' in opts:
+        target = opts['--target']
+
     if ret == 0:
-        
-        if multiple_packages:
-            sources.sort()
-            for i in sources:
-                org.wayround.aipsetup.build.build(
-                    config,
-                    [i],
-                    remove_buildingsite_after_success=r_bds,
-                    buildingsites_dir=building_site_dir
-                    )
-            ret = 0
-        else:
-            ret = org.wayround.aipsetup.build.build(
-                config,
-                sources,
-                remove_buildingsite_after_success=r_bds,
-                buildingsites_dir=building_site_dir
+
+        try:
+            const = org.wayround.aipsetup.build.Constitution(
+                host_str=host,
+                build_str=build,
+                target_str=target
                 )
+        except org.wayround.aipsetup.build.SystemTypeInvalidFullName:
+            logging.error("Wrong host: {}".format(host))
+            ret = 1
+        else:
+
+            const.paths = dict(config['system_paths'])
+
+            if multiple_packages:
+                sources.sort()
+                for i in sources:
+                    org.wayround.aipsetup.build.build(
+                        config,
+                        [i],
+                        remove_buildingsite_after_success=r_bds,
+                        buildingsites_dir=building_site_dir,
+                        const=const
+                        )
+                ret = 0
+            else:
+                ret = org.wayround.aipsetup.build.build(
+                    config,
+                    sources,
+                    remove_buildingsite_after_success=r_bds,
+                    buildingsites_dir=building_site_dir,
+                    const=const
+                    )
+
+    return ret
+
+def build_pack(config, opts, args):
+    """
+    Fullcircle action set for creating package
+
+    [DIRNAME]
+
+    DIRNAME - set building site. Default is current directory
+    """
+
+    import org.wayround.aipsetup.build
+
+    ret = 0
+
+    dir_name = '.'
+    args_l = len(args)
+
+
+    if args_l > 1:
+        logging.error("Too many parameters")
+
+    else:
+        if args_l == 1:
+            dir_name = args[0]
+
+        bs = org.wayround.aipsetup.build.BuildingSiteCtl(dir_name)
+
+        packer = org.wayround.aipsetup.build.PackCtl(bs)
+
+        ret = packer.complete()
 
     return ret
 
@@ -1206,7 +1270,7 @@ def building_site_init(config, opts, args):
         files = args[1:]
 
 
-    bs = org.wayround.aipsetup.buildingsite.BuildingSite(init_dir)
+    bs = org.wayround.aipsetup.buildingsite.BuildingSiteCtl(init_dir)
     ret = bs.init(files)
 
     return ret
@@ -1290,31 +1354,6 @@ def build_complete(opts, args):
 
     return ret
 
-
-def pack_complete(opts, args):
-    """
-    Fullcircle action set for creating package
-
-    [DIRNAME]
-
-    DIRNAME - set building site. Default is current directory
-    """
-    ret = 0
-
-    dir_name = '.'
-    args_l = len(args)
-
-
-    if args_l > 1:
-        logging.error("Too many parameters")
-
-    else:
-        if args_l == 1:
-            dir_name = args[0]
-
-        ret = complete(dir_name)
-
-    return ret
 
 
 

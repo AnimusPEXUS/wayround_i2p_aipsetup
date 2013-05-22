@@ -19,15 +19,40 @@ DEFAULT_CONFIG = {
         },
 
     'system_settings': {
+        'system_title': 'UNICORN',
+        'system_version': '2.0',
+
         'installed_pkg_dir': '/var/log/packages',
 
         'installed_pkg_dir_buildlogs': '%(installed_pkg_dir)s/buildlogs',
         'installed_pkg_dir_sums': '%(installed_pkg_dir)s/sums',
         'installed_pkg_dir_deps': '%(installed_pkg_dir)s/deps',
+
         'host': 'i486-pc-linux-gnu',
-        'cpu': 'i486',
-        'type': 'pc',
-        'os': 'linux-gnu'
+        'build': 'i486-pc-linux-gnu',
+        'target': 'i486-pc-linux-gnu'
+        },
+
+    'system_paths': {
+        'root'              :   '/',
+        'usr'               :   '/usr',
+
+        'basic_bin'         :   '/bin',
+        'basic_sbin'        :   '/sbin',
+        'bin'               :   '/usr/bin',
+        'sbin'              :   '/usr/sbin',
+
+        'basic_lib'         :   '/lib',
+        'lib'               :   '/usr/lib',
+
+        'man'               :   '/usr/share/man',
+        'include'           :   '/usr/include',
+
+        'devices'           :   '/dev',
+        'config'            :   '/etc',
+        'daemons'           :   '/daemons',
+        'var'               :   '/var',
+        'temp'              :   '/tmp'
         },
 
     'package_repo': {

@@ -15,11 +15,15 @@ import subprocess
 import shutil
 import json
 import copy
+import re
 
+
+import org.wayround.aipsetup.info
 
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 import org.wayround.utils.time
+import org.wayround.utils.format.elf
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -124,6 +128,30 @@ APPLY_DESCR = """\
     in  this order by function :func:`apply_info`
 """
 
+class Constitution:
+
+    def __init__(
+        self,
+        host_str='i486-pc-linux-gnu',
+        build_str='i486-pc-linux-gnu',
+        target_str='i486-pc-linux-gnu'
+        ):
+
+        self.host = SystemType(host_str)
+        self.build = SystemType(build_str)
+        self.target = SystemType(target_str)
+
+        self.paths = {}
+
+    def return_aipsetup3_compliant(self):
+        return {
+            'host': str(self.host),
+            'build': str(self.build),
+            'target': str(self.target),
+            'paths': copy.copy(self.paths),
+            'system_title': 'UNICORN',
+            'system_version': '2.0'
+            }
 
 class BuildCtl:
 
@@ -134,27 +162,27 @@ class BuildCtl:
 
         if not isinstance(
             buildingsite_ctl,
-            BuildingSite
+            BuildingSiteCtl
             ):
             raise TypeError(
                 "buildingsite_ctl must be an instance of "
-                "org.wayround.aipsetup.build.BuildingSite"
+                "org.wayround.aipsetup.build.BuildingSiteCtl"
                 )
 
         self.buildingsite_ctl = buildingsite_ctl
         self.path = org.wayround.utils.path.abspath(buildingsite_ctl.path)
 
 
-    def complete(self):
+    def complete(self, buildscript_ctl):
         """
         Run all building script commands on selected building site
 
         See :func:`start_building_script`
         """
-        return self.start_building_script(action=None)
+        return self.start_building_script(buildscript_ctl, action=None)
 
 
-    def start_building_script(self, action=None):
+    def start_building_script(self, buildscript_ctl, action=None):
         """
         Run selected action on building site using particular building script.
 
@@ -167,6 +195,11 @@ class BuildCtl:
         :rtype: 0 - if no error occurred
         """
 
+        if not isinstance(buildscript_ctl, BuildScriptCtrl):
+            raise ValueError(
+                "buildscript_ctl must be of type "
+                "org.wayround.aipsetup.build.BuildScriptCtrl"
+                )
 
         building_site = org.wayround.utils.path.abspath(self.path)
 
@@ -187,7 +220,7 @@ class BuildCtl:
         else:
 
             script = (
-                org.wayround.aipsetup.buildscript.load_buildscript(
+                buildscript_ctl.load_buildscript(
                     package_info['pkg_info']['buildscript']
                     )
                 )
@@ -224,11 +257,11 @@ class PackCtl:
 
         if not isinstance(
             buildingsite_ctl,
-            org.wayround.aipsetup.build.BuildingSite
+            BuildingSiteCtl
             ):
             raise TypeError(
                 "buildingsite_ctl must be an instance of "
-                "org.wayround.aipsetup.build.BuildingSite"
+                "org.wayround.aipsetup.build.BuildingSiteCtl"
                 )
 
         self.buildingsite_ctl = buildingsite_ctl
@@ -506,14 +539,14 @@ class PackCtl:
 
         logging.info(
             "Removing {} and {}".format(
-                org.wayround.aipsetup.buildingsite.DIR_SOURCE,
-                org.wayround.aipsetup.buildingsite.DIR_BUILDING
+                DIR_SOURCE,
+                DIR_BUILDING
                 )
             )
 
         for i in [
-            org.wayround.aipsetup.buildingsite.DIR_SOURCE,
-            org.wayround.aipsetup.buildingsite.DIR_BUILDING
+            DIR_SOURCE,
+            DIR_BUILDING
             ]:
             dirname = org.wayround.utils.path.abspath(
                 os.path.join(
@@ -534,16 +567,16 @@ class PackCtl:
 
         logging.info(
             "Compressing {}, {} and {}".format(
-                org.wayround.aipsetup.buildingsite.DIR_PATCHES,
-                org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
-                org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+                DIR_PATCHES,
+                DIR_DESTDIR,
+                DIR_BUILD_LOGS
                 )
             )
 
         for i in [
-            org.wayround.aipsetup.buildingsite.DIR_PATCHES,
-            org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
-            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS
+            DIR_PATCHES,
+            DIR_DESTDIR,
+            DIR_BUILD_LOGS
             ]:
             dirname = org.wayround.utils.path.abspath(
                 os.path.join(
@@ -609,18 +642,18 @@ class PackCtl:
 
         logging.info(
             "Removing {}, {}, {} and {}".format(
-                org.wayround.aipsetup.buildingsite.DIR_PATCHES,
-                org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
-                org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS,
-                org.wayround.aipsetup.buildingsite.DIR_TEMP
+                DIR_PATCHES,
+                DIR_DESTDIR,
+                DIR_BUILD_LOGS,
+                DIR_TEMP
                 )
             )
 
         for i in [
-            org.wayround.aipsetup.buildingsite.DIR_PATCHES,
-            org.wayround.aipsetup.buildingsite.DIR_DESTDIR,
-            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS,
-            org.wayround.aipsetup.buildingsite.DIR_TEMP
+            DIR_PATCHES,
+            DIR_DESTDIR,
+            DIR_BUILD_LOGS,
+            DIR_TEMP
             ]:
             dirname = org.wayround.utils.path.abspath(
                 os.path.join(
@@ -826,24 +859,45 @@ class PackCtl:
         ret = []
 
         ret.append(
-            building_site + os.path.sep +
-            org.wayround.aipsetup.buildingsite.DIR_DESTDIR + '.tar.xz'
+            org.wayround.utils.path.join(
+                building_site,
+                DIR_DESTDIR + '.tar.xz'
+                )
             )
 
         ret.append(
-            building_site + os.path.sep +
-            org.wayround.aipsetup.buildingsite.DIR_PATCHES + '.tar.xz'
+            org.wayround.utils.path.join(
+                building_site,
+                DIR_PATCHES + '.tar.xz'
+                )
             )
 
         ret.append(
-            building_site + os.path.sep +
-            org.wayround.aipsetup.buildingsite.DIR_BUILD_LOGS + '.tar.xz'
+            org.wayround.utils.path.join(
+                building_site,
+                DIR_BUILD_LOGS + '.tar.xz'
+                )
             )
 
-        ret.append(building_site + os.path.sep + 'package_info.json')
-        ret.append(building_site + os.path.sep + 'package.sha512')
+        ret.append(
+            org.wayround.utils.path.join(
+                building_site,
+                'package_info.json'
+                )
+            )
 
-        post_install_script = building_site + os.path.sep + 'post_install.py'
+        ret.append(
+            org.wayround.utils.path.join(
+                building_site,
+                'package.sha512'
+                )
+            )
+
+
+        post_install_script = org.wayround.utils.path.join(
+            building_site, 'post_install.py'
+            )
+
         if os.path.isfile(post_install_script):
             ret.append(post_install_script)
 
@@ -853,8 +907,10 @@ class PackCtl:
 
         for i in tarballs:
             ret.append(
-                building_site + os.path.sep +
-                org.wayround.aipsetup.buildingsite.DIR_TARBALL + os.path.sep + i
+                org.wayround.utils.path.join(
+                    building_site,
+                    DIR_TARBALL, i
+                    )
                 )
 
 
@@ -865,17 +921,16 @@ class PackCtl:
         for i in lists:
             if i.endswith('.xz'):
                 ret.append(
-                    building_site + os.path.sep +
-                    org.wayround.aipsetup.buildingsite.DIR_LISTS + os.path.sep + i
+                    org.wayround.utils.path.join(
+                        building_site,
+                        DIR_LISTS, i
+                        )
                     )
 
         return ret
 
 
-
-
-
-class BuildingSite:
+class BuildingSiteCtl:
 
     def __init__(self, path):
         self.path = org.wayround.utils.path.abspath(path)
@@ -887,13 +942,7 @@ class BuildingSite:
         note: this method is generated dinamicly
         '''
 
-        ret = org.wayround.utils.path.abspath(
-            os.path.join(
-                self.path,
-                eval('DIR_{}'.format(_x)))
-            )
-
-        return ret
+        return _getDIR_x(self.path, _x)
 
 
     def getDIR_TARBALL   (self): return self._getDIR_x('TARBALL')
@@ -910,6 +959,7 @@ class BuildingSite:
 
 
     def init(self, info_ctl, files=None):
+#, system_type=None
         """
         Initiates building site path for farther package build.
 
@@ -917,6 +967,12 @@ class BuildingSite:
 
         :rtype: returns 0 if no errors
         """
+
+#        if not isinstance(system_type, SystemType):
+#            raise ValueError(
+#                 "system_type must be of type "
+#                 "org.wayround.aipsetup.build.SystemType"
+#                 )
 
         if not isinstance(
             info_ctl,
@@ -992,7 +1048,7 @@ class BuildingSite:
                         logging.info("Copying file {}".format(i))
                         shutil.copy(i, t_dir)
 
-                    self.apply_info(info_ctl, src_file_name=files[0])
+#                    self.apply_info(info_ctl, src_file_name=files[0])
 
         else:
             logging.error("Init error")
@@ -1136,16 +1192,22 @@ class BuildingSite:
 
     apply_pkg_nameinfo_on_buildingsite.__doc__ += APPLY_DESCR
 
-    def apply_constitution_on_buildingsite(self):
+    def apply_constitution_on_buildingsite(self, const):
         """
         Applies constitution on building site package info
         """
+
+        if not isinstance(const, Constitution):
+            raise ValueError(
+                "const must be of type "
+                "org.wayround.aipsetup.build.Constitution"
+                )
+
         ret = 0
 
         package_info = self.read_package_info(ret_on_error={})
 
-        # FIXME: fix constitition functionality
-        const = org.wayround.aipsetup.constitution.read_constitution()
+        const = const.return_aipsetup3_compliant()
 
         if const == None:
             ret = 1
@@ -1218,10 +1280,16 @@ class BuildingSite:
     apply_pkg_info_on_buildingsite.__doc__ += APPLY_DESCR
 
 
-    def apply_info(self, info_ctl, src_file_name=None):
+    def apply_info(self, info_ctl, const, src_file_name=None):
         """
         Apply package information to building site
         """
+
+        if not isinstance(const, Constitution):
+            raise ValueError(
+                "const must be of type "
+                "org.wayround.aipsetup.build.Constitution"
+                )
 
         if not isinstance(
             info_ctl,
@@ -1264,8 +1332,8 @@ class BuildingSite:
                     src_file_name
                     ) != 0:
                 ret = 1
-#            elif self.apply_constitution_on_buildingsite() != 0:
-#                ret = 2
+            elif self.apply_constitution_on_buildingsite(const) != 0:
+                ret = 2
             elif self.apply_pkg_info_on_buildingsite(info_ctl) != 0:
                 ret = 3
 
@@ -1305,7 +1373,9 @@ class BuildingSite:
         build_ctl,
         pack_ctl,
         buildscript_ctl,
+        info_ctl,
         main_src_file=None,
+        const=None,
         remove_buildingsite_after_success=False,
         ):
 
@@ -1317,14 +1387,36 @@ class BuildingSite:
             :func:`buildingsite.apply_info <org.wayround.aipsetup.buildingsite.apply_info>`
         """
 
+        if not isinstance(const, Constitution):
+            raise ValueError(
+                "const must be of type "
+                "org.wayround.aipsetup.build.Constitution"
+                )
+
         if not isinstance(build_ctl, BuildCtl):
-            raise ValueError("build_ctl must be of type org.wayround.aipsetup.build.BuildCtl")
+            raise ValueError(
+                "build_ctl must be of type org.wayround.aipsetup.build.BuildCtl"
+                )
 
         if not isinstance(pack_ctl, PackCtl):
-            raise ValueError("pack_ctl must be of type org.wayround.aipsetup.build.PackCtl")
+            raise ValueError(
+                "pack_ctl must be of type org.wayround.aipsetup.build.PackCtl"
+                )
 
         if not isinstance(buildscript_ctl, BuildScriptCtrl):
-            raise ValueError("buildscript_ctl must be of type org.wayround.aipsetup.build.BuildScriptCtrl")
+            raise ValueError(
+                "buildscript_ctl must be of type "
+                "org.wayround.aipsetup.build.BuildScriptCtrl"
+                )
+
+        if not isinstance(
+            info_ctl,
+            org.wayround.aipsetup.info.PackageInfoControl
+            ):
+            raise TypeError(
+                "info_ctl must be of type "
+                "org.wayround.aipsetup.info.PackageInfoControl"
+                )
 
         rp = org.wayround.utils.path.relpath(self.path, os.getcwd())
 
@@ -1348,7 +1440,8 @@ class BuildingSite:
                 )
 
             if self.apply_info(
-                building_site,
+                info_ctl,
+                const,
                 main_src_file
                 ) != 0 :
                 logging.error("Can't apply build information to site")
@@ -1365,14 +1458,14 @@ class BuildingSite:
         if ret == 0:
 
             log = org.wayround.utils.log.Log(
-                self.getDIR_BUILD_LOGS(building_site),
+                self.getDIR_BUILD_LOGS(),
                 'buildingsite complete'
                 )
             log.info("Buildingsite processes started")
             log.warning("Closing this log now, cause it can't work farther")
             log.stop()
 
-            if build_ctl.complete() != 0:
+            if build_ctl.complete(buildscript_ctl) != 0:
                 logging.error("Error on building stage")
                 ret = 1
             elif pack_ctl.complete() != 0:
@@ -1479,6 +1572,83 @@ class BuildScriptCtrl:
         return ret
 
 
+class SystemTypeInvalidFullName(Exception): pass
+class SystemType:
+
+    def __init__(self, fullname=None, cpu='i486', company='pc', kernel='linux', os='gnu'):
+
+
+        self.fullname = fullname
+
+        if isinstance(self.fullname, str):
+
+            self._sane(self.fullname)
+
+        else:
+            self.cpu = cpu
+            self.company = company
+            self.os = os
+            self.kernel = kernel
+
+            self._sane(
+                format_triplet(
+                    cpu=cpu, company=company, kernel=kernel, os=os
+                    )
+                )
+
+        return
+
+    def _sane(self, string):
+
+        if not isinstance(string, str):
+            raise SystemTypeInvalidFullName(
+                "Not valid fullname type: {}".format(type(string))
+                )
+
+        res = parse_triplet(string)
+
+        if not res:
+            raise SystemTypeInvalidFullName(
+                "Not valid fullname: {}".format(string)
+                )
+        else:
+            self.cpu = res[0]
+            self.company = res[1]
+            self.kernel = res[2]
+            self.os = res[3]
+            self.fullname = res[4]
+
+        return
+
+    def __str__(self):
+        return self.fullname
+
+
+def _getDIR_x(path, _x='TARBALL'):
+    '''
+    Returns absolute path to DIR_{_x}
+
+    note: this method is generated dinamicly
+    '''
+
+    ret = org.wayround.utils.path.abspath(
+        os.path.join(
+            path,
+            eval('DIR_{}'.format(_x)))
+        )
+
+    return ret
+
+
+def getDIR_TARBALL   (path): return _getDIR_x(path, 'TARBALL')
+def getDIR_SOURCE    (path): return _getDIR_x(path, 'SOURCE')
+def getDIR_PATCHES   (path): return _getDIR_x(path, 'PATCHES')
+def getDIR_BUILDING  (path): return _getDIR_x(path, 'BUILDING')
+def getDIR_DESTDIR   (path): return _getDIR_x(path, 'DESTDIR')
+def getDIR_BUILD_LOGS(path): return _getDIR_x(path, 'BUILD_LOGS')
+def getDIR_LISTS     (path): return _getDIR_x(path, 'LISTS')
+def getDIR_TEMP      (path): return _getDIR_x(path, 'TEMP')
+
 
 def build_script_wrap(buildingsite, desired_actions, action, help_text):
     """
@@ -1494,7 +1664,7 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
         file, ``actions`` - list of actions, needed to be run by building script
     """
 
-    bs = org.wayround.aipsetup.buildingsite.BuildingSite(buildingsite)
+    bs = BuildingSiteCtl(buildingsite)
 
     pkg_info = bs.read_package_info()
 
@@ -1645,7 +1815,8 @@ def build(
     config,
     source_files,
     buildingsites_dir,
-    remove_buildingsite_after_success=False
+    remove_buildingsite_after_success=False,
+    const=None
     ):
 
     """
@@ -1656,6 +1827,12 @@ def build(
 
     :param source_files: tarball name or list of them.
     """
+
+    if not isinstance(const, Constitution):
+        raise ValueError(
+            "system_type must be of type "
+            "org.wayround.aipsetup.build.Constitution"
+            )
 
     ret = 0
 
@@ -1722,14 +1899,14 @@ def build(
 
 
 
-                bs = BuildingSite(build_site_dir)
+                bs = BuildingSiteCtl(build_site_dir)
 
                 buildscript_ctl = BuildScriptCtrl(
                     config['builder_repo']['building_scripts_dir']
                     )
 
-                builder = BuildCtl(bs)
-                packer = PackCtl(bs)
+                build_ctl = BuildCtl(bs)
+                pack_ctl = PackCtl(bs)
 
                 if bs.init(info_ctl, source_files) != 0:
                     logging.error("Error initiating temporary dir")
@@ -1738,10 +1915,12 @@ def build(
 
 
                     if bs.complete(
-                        builder,
-                        packer,
+                        build_ctl,
+                        pack_ctl,
                         buildscript_ctl,
+                        info_ctl,
                         source_files[0],
+                        const=const,
                         remove_buildingsite_after_success=remove_buildingsite_after_success
                         ) != 0:
 
@@ -1750,6 +1929,76 @@ def build(
 
                     else:
                         logging.info("Complete package building ended with no error")
+
+    return ret
+
+
+def format_triplet(cpu='i486', company='pc', kernel='linux', os='gnu'):
+
+    system = os
+
+    if kernel:
+        system = kernel + '-' + system
+
+    return '{cpu}-{company}-{system}'.format(
+        cpu=cpu,
+        company=company,
+        system=system
+        )
+
+
+def parse_triplet(string):
+    """
+    Parse constitution triplet (``(.*?)-(.*?)-(.*)``), and return 3-tuple
+
+    cpu-company-system
+
+    where system can have one of these forms:
+
+     os
+     kernel-os
+
+    """
+
+    ret = None
+
+    wd = os.path.dirname(org.wayround.utils.path.abspath(__file__))
+
+    p = subprocess.Popen(
+        ['bash',
+         os.path.join(wd, 'config.sub'),
+         string
+         ],
+        cwd=wd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL
+        )
+
+    res = p.wait()
+
+    if res != 0:
+        ret = None
+    else:
+        com_res = p.communicate()
+
+        out = str(com_res[0].splitlines()[0].strip(), 'utf-8')
+
+        a = re.match(r'(?P<cpu>.*?)-(?P<company>.*?)-(?P<system>.*)', out)
+        if a:
+
+            system = a.group('system')
+
+            b = re.match(r'((?P<kernel>.*?)-)?(?P<os>.*)', system)
+
+            if b:
+
+                ret = (
+                    a.group('cpu'),
+                    a.group('company'),
+                    b.group('kernel'),
+                    b.group('os'),
+                    out
+                    )
 
     return ret
 
