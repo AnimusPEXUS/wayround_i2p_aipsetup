@@ -6,7 +6,7 @@ import subprocess
 
 import org.wayround.utils.file
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 
 from org.wayround.aipsetup.buildtools import autotools
@@ -17,7 +17,7 @@ def main(buildingsite, action=None):
 
     ret = 0
 
-    r = org.wayround.aipsetup.buildscript.build_script_wrap(
+    r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
             ['extract', 'scons', 'distribute'],
             action,
@@ -32,9 +32,9 @@ def main(buildingsite, action=None):
 
         pkg_info, actions = r
 
-        src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+        src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
-        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 

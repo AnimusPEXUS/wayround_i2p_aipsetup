@@ -11,7 +11,7 @@ import org.wayround.utils.file
 import org.wayround.utils.path
 
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
@@ -20,7 +20,7 @@ def main(buildingsite, action=None):
 
     ret = 0
 
-    r = org.wayround.aipsetup.buildscript.build_script_wrap(
+    r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
             ['extract', 'configure', 'build', 'distribute'],
             action,
@@ -35,7 +35,7 @@ def main(buildingsite, action=None):
 
         pkg_info, actions = r
 
-        src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+        src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         separate_build_dir = False
         source_configure_reldir = 'mozilla/security/nss'
@@ -106,7 +106,7 @@ def main(buildingsite, action=None):
 
         if 'distribute' in actions and ret == 0:
 
-            dest_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(
+            dest_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(
                             buildingsite
                             )
 

@@ -9,7 +9,7 @@ import tempfile
 import org.wayround.utils.archive
 import org.wayround.utils.file
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
@@ -18,7 +18,7 @@ def main(buildingsite, action=None):
 
     ret = 0
 
-    r = org.wayround.aipsetup.buildscript.build_script_wrap(
+    r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
 #        ['extract', 'exctract_install-tl', 'configure', 'build', 'distribute', 'install-tl'],
         ['extract', 'configure', 'build', 'distribute'],
@@ -34,11 +34,11 @@ def main(buildingsite, action=None):
 
         pkg_info, actions = r
 
-        src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+        src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
-        tar_dir = org.wayround.aipsetup.buildingsite.getDIR_TARBALL(buildingsite)
+        tar_dir = org.wayround.aipsetup.build.getDIR_TARBALL(buildingsite)
 
-        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         install_tl_dir = os.path.join(buildingsite, 'install-tl')
 
@@ -80,12 +80,12 @@ def main(buildingsite, action=None):
                 logging.error("install-tl archive not found")
 
             log = org.wayround.utils.log.Log(
-                org.wayround.aipsetup.buildingsite.getDIR_BUILD_LOGS(buildingsite),
+                org.wayround.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
                 'extract'
                 )
 
             tmpdir = tempfile.mkdtemp(
-                dir=org.wayround.aipsetup.buildingsite.getDIR_TEMP(buildingsite)
+                dir=org.wayround.aipsetup.build.getDIR_TEMP(buildingsite)
                 )
 
             ret = org.wayround.utils.archive.extract_low(

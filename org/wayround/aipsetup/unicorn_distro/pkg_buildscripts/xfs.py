@@ -10,7 +10,7 @@ import logging
 
 import org.wayround.utils.file
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
@@ -19,7 +19,7 @@ def main(buildingsite, action=None):
 
     ret = 0
 
-    r = org.wayround.aipsetup.buildscript.build_script_wrap(
+    r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
         ['extract', 'configure', 'build', 'distribute',
          'fix_symlinks', 'fix_la_file'],
@@ -39,9 +39,9 @@ def main(buildingsite, action=None):
 
         logging.info("Detected (and accepted) basename is: [{}]".format(basename))
 
-        src_dir = org.wayround.aipsetup.buildingsite.getDIR_SOURCE(buildingsite)
+        src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
-        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 

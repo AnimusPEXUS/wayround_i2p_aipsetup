@@ -6,14 +6,14 @@ import logging
 import org.wayround.utils.file
 import org.wayround.utils.archive
 
-import org.wayround.aipsetup.buildingsite
+import org.wayround.aipsetup.build
 
 
 def main(buildingsite, action=None):
 
     ret = 0
 
-    r = org.wayround.aipsetup.buildscript.build_script_wrap(
+    r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
         ['distribute'],
         action,
@@ -28,9 +28,9 @@ def main(buildingsite, action=None):
 
         pkg_info, actions = r
 
-        tar_dir = org.wayround.aipsetup.buildingsite.getDIR_TARBALL(buildingsite)
+        tar_dir = org.wayround.aipsetup.build.getDIR_TARBALL(buildingsite)
 
-        dst_dir = org.wayround.aipsetup.buildingsite.getDIR_DESTDIR(buildingsite)
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         if 'distribute' in actions and ret == 0:
 
