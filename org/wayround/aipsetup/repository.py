@@ -8,6 +8,7 @@ import glob
 import logging
 import os.path
 import shutil
+import functools
 
 import sqlalchemy.ext
 
@@ -17,12 +18,11 @@ import org.wayround.utils.path
 import org.wayround.utils.tag
 import org.wayround.utils.tarball_name_parser
 
-import org.wayround.aipsetup.dbconnections
 import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.package
 
 
-class PackageIndex(org.wayround.utils.db.BasicDB):
+class PackageRepo(org.wayround.utils.db.BasicDB):
     """
     Main package index DB handling class
     """
@@ -94,42 +94,15 @@ class PackageIndex(org.wayround.utils.db.BasicDB):
 
         return
 
-def get_index_connection(config):
-    """
-    used by :mod:`dbconnections <org.wayround.aipsetup.dbconnections>` module
-    """
-    return PackageIndex(config)
+class SourceRepo(org.wayround.utils.tag.TagEngine): pass
 
-def get_sources_connection(config):
-    """
-    used by :mod:`dbconnections <org.wayround.aipsetup.dbconnections>` module
-    """
+class PackageRepoCtl:
 
-    ret = None
+    def __init__(self, repository_dir, db_connection, garbage_dir):
 
-    try:
-        tags = org.wayround.utils.tag.TagEngine(
-            config,
-            commit_every=200
-            )
-    except:
-        logging.exception(
-            "Can't connect to source index DB `{}'".format(
-                config
-                )
-            )
-    else:
-        ret = tags
-
-    return ret
-
-
-class PkgIndexController:
-
-    def __init__(self, repository_dir, db_connection):
-
-        self.repository_dir = repository_dir
+        self.repository_dir = org.wayround.utils.path.abspath(repository_dir)
         self.db_connection = db_connection
+        self.garbage_dir = org.wayround.utils.path.abspath(garbage_dir)
 
     def is_repo_package(self, path):
 
@@ -853,7 +826,226 @@ class PkgIndexController:
         return ret
 
 
-class SrcIndexController:
+    def detect_package_collisions(self, category_locations, package_locations):
+
+        ret = 0
+
+        lst_dup = {}
+        pkg_paths = {}
+
+        for each in package_locations.keys():
+
+            l = package_locations[each]['name'].lower()
+
+            if not l in pkg_paths:
+                pkg_paths[l] = []
+
+            pkg_paths[l].append(each)
+
+        for each in package_locations.keys():
+
+            l = package_locations[each]['name'].lower()
+
+            if len(pkg_paths[l]) > 1:
+                lst_dup[l] = pkg_paths[l]
+
+
+        if len(lst_dup) == 0:
+            logging.info(
+                "Found {} duplicated package names. Package locations looks good!".format(
+                    len(lst_dup)
+                    )
+                )
+            ret = 0
+        else:
+            logging.warning(
+                "Found {} duplicated package names\n        listing:".format(
+                    len(lst_dup)
+                    )
+                )
+
+            sorted_keys = list(lst_dup.keys())
+            sorted_keys.sort()
+
+            for each in sorted_keys:
+                print("          {}:".format(each))
+
+                lst_dup[each].sort()
+
+                for each2 in lst_dup[each]:
+                    print("             {}".format(each2))
+            ret = 1
+
+        return ret
+
+
+    def cleanup_repo_package_pack(self, name):
+
+        g_path = org.wayround.utils.path.join(self.garbage_dir, name)
+
+        if not os.path.exists(g_path):
+            os.makedirs(g_path, exist_ok=True)
+
+        path = org.wayround.utils.path.join(
+            self.repository_dir,
+            self.get_package_path_string(name), 'pack'
+            )
+
+
+        path = org.wayround.utils.path.abspath(path)
+
+        files = os.listdir(path)
+        files.sort()
+
+        for i in files:
+            p1 = org.wayround.utils.path.join(path, i)
+
+            if os.path.exists(p1):
+
+                t = org.wayround.utils.path.join(path, i)
+
+                if self.put_asp_to_index(t) != 0:
+
+                    logging.warning("Can't move file to index. moving to garbage")
+
+                    shutil.move(t, org.wayround.utils.path.join(g_path, i))
+
+        files = os.listdir(path)
+        files.sort()
+
+        for i in files:
+
+            p1 = path + os.path.sep + i
+
+            if os.path.exists(p1):
+
+                p2 = org.wayround.utils.path.join(g_path, i)
+
+                pkg = org.wayround.aipsetup.package.ASPackage(p1)
+
+                if pkg.check_package(True) != 0:
+                    logging.warning(
+                        "Wrong package, garbaging: `{}'\n\tas `{}'".format(
+                            os.path.basename(p1),
+                            p2
+                            )
+                        )
+                    try:
+                        shutil.move(p1, p2)
+                    except:
+                        logging.exception("Can't garbage")
+
+        files = os.listdir(path)
+        files.sort(
+            key=functools.cmp_to_key(
+                org.wayround.aipsetup.version.package_version_comparator
+                ),
+
+            reverse=True
+            )
+
+        if len(files) > 5:
+            for i in files[5:]:
+                p1 = path + os.path.sep + i
+
+                logging.warning("Removing outdated package: {}".format(os.path.basename(p1)))
+                try:
+                    os.unlink(p1)
+                except:
+                    logging.exception("Error")
+
+
+    def cleanup_repo_package(self, name):
+
+        g_path = org.wayround.utils.path.join(self.garbage_dir, name)
+
+        if not os.path.exists(g_path):
+            os.makedirs(g_path)
+
+        path = org.wayround.utils.path.join(
+            self.garbage_dir,
+            self.get_package_path_string(name)
+            )
+
+        path = org.wayround.utils.path.abspath(path)
+
+        self.create_required_dirs_at_package(path)
+
+        files = os.listdir(path)
+
+        for i in files:
+            if not i in ['.package', 'pack']:
+
+                p1 = org.wayround.utils.path.join(path, i)
+                p2 = g_path
+                logging.warning(
+                    "moving `{}'\n\tto {}".format(
+                        os.path.basename(p1),
+                        p2
+                        )
+                    )
+
+                try:
+                    shutil.move(p1, p2)
+                except:
+                    logging.exception("Can't move file or dir")
+
+
+    def cleanup_repo(self):
+
+        garbage_dir = self.garbage_dir
+
+        if not os.path.exists(garbage_dir):
+            os.makedirs(garbage_dir)
+
+        logging.info("Getting packages information from DB")
+
+        pkgs = self.get_package_idname_dict(None)
+
+        logging.info("Scanning repository for garbage in packages")
+
+        lst = list(pkgs.keys())
+        lst.sort()
+        lst_l = len(lst)
+        lst_i = -1
+
+        for i in lst:
+
+            lst_i += 1
+            perc = 0
+
+            if lst_i == 0:
+                perc = 0.0
+            else:
+                perc = 100.0 / (float(lst_l) / lst_i)
+
+            org.wayround.utils.file.progress_write(
+                    "    {:6.2f}% (package {})".format(
+                        perc,
+                        pkgs[i]
+                        )
+                )
+
+            self.cleanup_repo_package(pkgs[i])
+            self.cleanup_repo_package_pack(pkgs[i])
+
+        g_files = os.listdir(garbage_dir)
+
+        for i in g_files:
+            p1 = garbage_dir + os.path.sep + i
+            if not os.path.islink(p1):
+                if os.path.isdir(p1):
+                    if org.wayround.utils.file.isdirempty(p1):
+                        try:
+                            os.rmdir(p1)
+                        except:
+                            logging.exception("Error")
+
+        return
+
+
+
+class SourceRepoCtl:
 
     def __init__(self, sources_dir, database_connection):
         self.sources_dir = sources_dir
@@ -1009,7 +1201,7 @@ class SrcIndexController:
         logging.info("Found {} indexable objects".format(found_count))
 
         try:
-            tags = org.wayround.aipsetup.dbconnections.src_db()
+            tags = self.database_connection
         except:
             logging.exception("Can't connect to source index DB")
             raise
@@ -1118,7 +1310,7 @@ class SrcIndexController:
 
                     i_i += 1
                     org.wayround.utils.file.progress_write(
-                        "    searching {}% "
+                        "    searching {:5.2f}% "
                         "(scanned {}, deleted {}, skipped {}): {}".format(
                             100.0 / (float(src_tag_objects_l) / i_i),
                             found_scanned_count,

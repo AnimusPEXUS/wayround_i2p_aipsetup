@@ -33,8 +33,12 @@ def commands():
         'install_package': system_install_package,
         },
 
-    'pkg_repo': {},
-    'src_repo': {},
+    'pkg_repo': {
+        'index': package_repository_index,
+        },
+    'src_repo': {
+        'index': source_repository_index,
+        },
     'info_repo': {},
     'build_repo': {},
 
@@ -633,7 +637,7 @@ def repoman_scan_creating_templates(opts, args):
 
     ret = 0
 
-    if repoman_scan_repo_for_pkg_and_cat(
+    if package_repository_index(
         opts={}, args=[]
         ) != 0:
 
@@ -658,20 +662,32 @@ def repoman_scan_creating_templates(opts, args):
     return ret
 
 
-def repoman_scan_repo_for_pkg_and_cat(opts, args):
+def package_repository_index(config, opts, args):
     """
     Scan repository and save it's categories and packages indexes
     to database
     """
 
+    import org.wayround.aipsetup.repository
+
     ret = 0
 
-    res = org.wayround.aipsetup.pkgindex.scan_repo_for_pkg_and_cat()
+    repository_dir = config['package_repo']['dir']
+    db_connection = org.wayround.aipsetup.repository.PackageRepo(
+        config['package_repo']['index_db_config']
+        )
+    garbage_dir = config['package_repo']['garbage_dir']
+
+    pkgindex = org.wayround.aipsetup.repository.PackageRepoCtl(
+        repository_dir, db_connection, garbage_dir
+        )
+
+    res = pkgindex.scan_repo_for_pkg_and_cat()
 
     if not isinstance(res, dict):
         ret = 1
     else:
-        res2 = org.wayround.aipsetup.clean.detect_package_collisions(
+        res2 = pkgindex.detect_package_collisions(
             res['cats'],
             res['packs']
             )
@@ -680,7 +696,7 @@ def repoman_scan_repo_for_pkg_and_cat(opts, args):
             ret = 2
         else:
 
-            res3 = org.wayround.aipsetup.pkgindex.save_cats_and_packs_to_db(
+            res3 = pkgindex.save_cats_and_packs_to_db(
                 res['cats'],
                 res['packs']
                 )
@@ -691,7 +707,7 @@ def repoman_scan_repo_for_pkg_and_cat(opts, args):
     return ret
 
 
-def repoman_index_sources(opts, args):
+def source_repository_index(config, opts, args):
     """
     Create sources and repositories indexes
 
@@ -702,10 +718,14 @@ def repoman_index_sources(opts, args):
 
     SUBDIR - index only one of subderictories
     """
+
+    import org.wayround.aipsetup.repository
+
     ret = 0
+
     subdir_name = org.wayround.utils.path.realpath(
         org.wayround.utils.path.abspath(
-                org.wayround.aipsetup.config.config['source']
+                config['sources_repo']['dir']
             )
         )
 
@@ -719,7 +739,9 @@ def repoman_index_sources(opts, args):
 
         if len(args) > 0:
             subdir_name = args[0]
-            subdir_name = org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(subdir_name))
+            subdir_name = org.wayround.utils.path.realpath(
+                org.wayround.utils.path.abspath(subdir_name)
+                )
 
         if (
             not (
@@ -729,23 +751,25 @@ def repoman_index_sources(opts, args):
                  ).startswith(
                     org.wayround.utils.path.realpath(
                         org.wayround.utils.path.abspath(
-                            org.wayround.aipsetup.config.config['source']
+                            config['sources_repo']['dir']
                             )
                         ) + '/'
                     )
             or not os.path.isdir(org.wayround.utils.path.abspath(subdir_name))
             ):
-            logging.error("Not a subdir of pkg_source")
+            logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
             logging.debug(
 """\
 passed: {}
 config: {}
 exists: {}
 """.format(
-                    org.wayround.utils.path.realpath(org.wayround.utils.path.abspath(subdir_name)),
+                    org.wayround.utils.path.realpath(
+                        org.wayround.utils.path.abspath(subdir_name)
+                        ),
                     org.wayround.utils.path.realpath(
                         org.wayround.utils.path.abspath(
-                            org.wayround.aipsetup.config.config['source']
+                            config['sources_repo']['dir']
                             )
                         ),
                     os.path.isdir(subdir_name)
@@ -754,10 +778,24 @@ exists: {}
             ret = 2
 
         else:
-            ret = org.wayround.aipsetup.pkgindex.index_sources(
+
+            sources_dir = config['sources_repo']['dir']
+
+            database_connection = org.wayround.aipsetup.repository.SourceRepo(
+                config['sources_repo']['index_db_config']
+                )
+
+            src_ctl = org.wayround.aipsetup.repository.SourceRepoCtl(
+                sources_dir,
+                database_connection
+                )
+
+            ret = src_ctl.index_sources(
                 org.wayround.utils.path.realpath(subdir_name),
                 force_reindex=force_reindex,
-                first_delete_found=first_delete_found
+                first_delete_found=first_delete_found,
+                acceptable_src_file_extensions=
+                    config['general']['acceptable_src_file_extensions'].split()
                 )
 
     return ret
@@ -1372,4 +1410,264 @@ def buildscript_edit_file(opts, args):
     FILENAME
     """
     return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
+
+
+def clean_packages_with_broken_files(opts, args):
+
+    """
+    Find packages with broken files
+    """
+
+    r = org.wayround.aipsetup.package.list_installed_asps_and_their_sums(mute=False)
+
+    logging.info("Checking Packages")
+
+    asps = list(r.keys())
+    asps_c = len(asps)
+
+    problems = {}
+
+    b = 0
+    m = 0
+
+    for i in range(asps_c):
+
+        asp_name = asps[i]
+
+        asp = r[asp_name]
+
+        if isinstance(asp, dict):
+
+            problems[asp_name] = {'missing':[], 'broken':[]}
+
+            files = list(asp.keys())
+            fc = len(files)
+            fi = 0
+
+            perc = 0
+            if i != 0:
+                perc = (100.0 / (asps_c / i))
+
+            for j in files:
+
+                if not os.path.exists(j):
+                    problems[asp_name]['missing'].append(j)
+                    m += 1
+
+                else:
+
+                    sum = org.wayround.utils.checksum.make_file_checksum(
+                        j, method='sha512'
+                        )
+
+                    if sum != asp[j]:
+                        problems[asp_name]['broken'].append(j)
+                        b += 1
+
+                fi += 1
+
+                org.wayround.utils.file.progress_write(
+                    "    ({perc:5.2f}%) {p} packages of {pc}, {f} files of {fc}. found {b} broken, {m} missing".format(
+                        perc=perc,
+                        p=i,
+                        pc=asps_c,
+                        f=fi,
+                        fc=fc,
+                        m=m,
+                        b=b
+                        )
+                    )
+
+    for i in list(problems.keys()):
+
+        if len(problems[i]['missing']) == 0 and len(problems[i]['broken']) == 0:
+            del problems[i]
+
+    print()
+
+    log = org.wayround.utils.log.Log(
+        os.getcwd(), 'problems'
+        )
+
+    log.info(pprint.pformat(problems))
+
+    log_name = log.log_filename
+
+    log.close()
+
+    logging.info("Log saved to {}".format(log_name))
+
+    return 0
+
+def clean_check_elfs_readiness(opts, args):
+
+    """
+    Performs system ELF files read checks
+
+    This is mainly needed to test aipsetup elf reader, but on the other hand it
+    can be used to detect broken elf files.
+    """
+
+    check_elfs_readiness()
+
+    return 0
+
+def clean_find_so_problems(opts, args):
+
+    """
+    Find so libraries missing in system and write package names requiring those
+    missing libraries.
+    """
+
+    ret = 0
+
+    basedir = '/'
+#    if '-b' in opts:
+#        basedir = opts['-b']
+
+    problems = org.wayround.utils.deps_c.find_so_problems_in_linux_system(
+        verbose=True
+        )
+
+    libs = list(problems.keys())
+    libs.sort()
+
+    log = org.wayround.utils.log.Log(
+        os.getcwd(), 'problems'
+        )
+
+    print("Writing log to {}".format(log.log_filename))
+
+    logging.info("Gathering asps file tree. Please wait...")
+    tree = org.wayround.aipsetup.package.list_installed_asps_and_their_files(basedir, mute=False)
+    logging.info("Now working")
+
+    total_problem_packages_list = set()
+
+    count_checked = 0
+    libs_c = len(libs)
+    for i in libs:
+        log.info("Library `{}' required by following files:".format(i))
+
+        files = problems[i]
+        files.sort()
+
+        for j in files:
+            log.info("    {}".format(j))
+
+
+        pkgs2 = org.wayround.aipsetup.package.find_file_in_files_installed_by_asps(
+            basedir, files, mode='end', mute=False, predefined_asp_tree=tree
+            )
+
+        pkgs2_l = list(pkgs2.keys())
+        pkgs2_l.sort()
+
+        count_checked += 1
+
+        log.info("  Contained in problem packages:")
+        for j in pkgs2_l:
+            log.info("    {}".format(j))
+
+        total_problem_packages_list |= set(pkgs2_l)
+
+        logging.info(
+            "Checked libraries: {} of {}".format(count_checked, libs_c)
+            )
+
+        log.info('---------------------------------')
+
+    pkgs = org.wayround.aipsetup.package.find_file_in_files_installed_by_asps(
+        basedir, libs, mode='end', mute=False, predefined_asp_tree=tree
+        )
+
+    pkgs_l = list(pkgs.keys())
+    pkgs_l.sort()
+
+    log.info('')
+    log.info("Libs found in packages:")
+    for i in pkgs_l:
+        log.info("    {}".format(i))
+
+    log.info('')
+
+    log.info("Total Problem Packages List:")
+    total_problem_packages_list = list(total_problem_packages_list)
+    total_problem_packages_list.sort()
+    for i in total_problem_packages_list:
+        log.info("    {}".format(i))
+
+    log.stop()
+    print("Log written to {}".format(log.log_filename))
+
+    return ret
+
+def clean_find_old_packages(opts, args):
+
+    """
+    Find packages older then month
+    """
+
+    # TODO: add arguments
+
+    ret = 0
+
+    res = find_old_packages()
+
+    res.sort()
+
+    for i in res:
+        parsed_name = org.wayround.aipsetup.name.package_name_parse(i)
+
+        if not parsed_name:
+            logging.warning("Can't parse package name `{}'".format(i))
+        else:
+
+            package_date = org.wayround.aipsetup.name.parse_timestamp(
+                parsed_name['groups']['timestamp']
+                )
+
+            if not package_date:
+                logging.error(
+                    "Can't parse timestamp {} in {}".format(
+                        parsed_name['groups']['timestamp'],
+                        i
+                        )
+                    )
+            else:
+
+                print(
+                    "    {:30}: {}: {}".format(
+                        datetime.datetime.now() - package_date,
+                        org.wayround.aipsetup.name.parse_timestamp(
+                            parsed_name['groups']['timestamp']
+                            ),
+                        i
+                        )
+                      )
+
+    return ret
+
+
+def clean_cleanup_repo(opts, args):
+
+    """
+    Removes old packages from package repository
+    """
+
+    # TODO: more descriptive help text required
+
+    cleanup_repo()
+
+    return 0
+
+def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
+
+    """
+    Searches for packages with more when one asp installed
+    """
+
+    logging.info("Working. Please wait, it will be not long...")
+
+    return check_list_of_installed_packages_and_asps_auto()
 

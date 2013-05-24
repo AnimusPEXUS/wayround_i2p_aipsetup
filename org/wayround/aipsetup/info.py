@@ -19,7 +19,6 @@ import org.wayround.utils.db
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 
-import org.wayround.aipsetup.config
 import org.wayround.aipsetup.info
 
 import org.wayround.aipsetup.pkglatest

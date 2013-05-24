@@ -1241,3 +1241,115 @@ class System:
 
 
         return ret
+
+    def find_old_packages(self, age=None, mute=True):
+
+        if age == None:
+            age = (60 * 60 * 24 * 30)  # 30 days
+
+        ret = []
+
+        asps = self.list_installed_asps(mute=mute)
+
+        for i in asps:
+
+            parsed_name = org.wayround.aipsetup.package_name_parser.package_name_parse(i, mute=mute)
+
+            if not parsed_name:
+                logging.warning("Can't parse package name `{}'".format(i))
+            else:
+
+                package_date = org.wayround.aipsetup.name.parse_timestamp(
+                    parsed_name['groups']['timestamp']
+                    )
+
+                if not package_date:
+                    logging.error(
+                        "Can't parse timestamp {} in {}".format(
+                            parsed_name['groups']['timestamp'],
+                            i
+                            )
+                        )
+                else:
+
+                    if datetime.datetime.now() - package_date > datetime.timedelta(seconds=age):
+                        ret.append(i)
+
+    #            if datetime
+    #            print(
+    #                "timestamp: {}: {}: {}".format(
+    #                    parsed_name['groups']['timestamp'],
+    #                    org.wayround.aipsetup.name.parse_timestamp(
+    #                        parsed_name['groups']['timestamp']
+    #                        ),
+    #                    i
+    #                    )
+    #                  )
+
+
+        return ret
+
+
+    def check_list_of_installed_packages_and_asps_auto(self):
+
+        content = org.wayround.aipsetup.package.list_installed_packages_and_asps()
+
+        ret = check_list_of_installed_packages_and_asps(content)
+
+        return ret
+
+
+    def check_list_of_installed_packages_and_asps(self, in_dict):
+
+        ret = 0
+
+        keys = list(in_dict.keys())
+
+        keys.sort()
+
+        errors = 0
+
+        for i in keys:
+
+            if len(in_dict[i]) > 1:
+
+                errors += 1
+                ret = 1
+
+                logging.warning("Package with too many ASPs found `{}'".format(i))
+
+                in_dict[i].sort()
+
+                for j in in_dict[i]:
+
+                    print("       {}".format(j))
+
+        if errors > 0:
+            logging.warning("Total erroneous packages: {}".format(errors))
+
+        return ret
+
+
+    def check_elfs_readiness(self, mute=False):
+
+        # TODO: complete
+
+        paths = org.wayround.utils.deps_c.elf_paths()
+        elfs = org.wayround.utils.deps_c.find_all_elf_files(paths, verbose=True)
+
+        elfs = org.wayround.utils.path.realpaths(elfs)
+
+        elfs.sort()
+
+        elfs_c = len(elfs)
+        elfs_i = 0
+
+        for i in elfs:
+            elfs_i += 1
+
+            if not mute:
+                logging.info("({} of {}) Trying to read file {}".format(elfs_i, elfs_c , i))
+
+            org.wayround.utils.format.elf.ELF(i)
+
+        return 0
