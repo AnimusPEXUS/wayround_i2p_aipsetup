@@ -1858,9 +1858,7 @@ def build(
 
         else:
 
-            info_db = org.wayround.aipsetup.info.PackageInfo(
-                config['info_repo']['index_db_config']
-                )
+            info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
             info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
                 info_dir=config['info_repo']['dir'],

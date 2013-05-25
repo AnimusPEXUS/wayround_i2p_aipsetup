@@ -1,6 +1,10 @@
 
 import os.path
 import logging
+import glob
+import copy
+
+import org.wayround.aipsetup.dbconnections
 
 import org.wayround.utils.path
 import org.wayround.utils.opts
@@ -36,7 +40,7 @@ def commands():
         },
 
     'pkg': {
-        'index': package_repository_index,
+        'index': package_repository_index_and_update,
         'put': package_put_to_repository
         },
 
@@ -106,9 +110,7 @@ def system_install_package(config, opts, args):
             fpi = []
 
             repository_dir = config['package_repo']['dir']
-            db_connection = org.wayround.aipsetup.repository.PackageRepo(
-                config['package_repo']['index_db_config']
-                )
+            db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
 
             garbage_dir = config['package_repo']['garbage_dir']
 
@@ -116,9 +118,7 @@ def system_install_package(config, opts, args):
                 repository_dir, db_connection, garbage_dir
                 )
 
-            info_db = org.wayround.aipsetup.info.PackageInfo(
-                config['info_repo']['index_db_config']
-                )
+            info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
             info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
                 info_dir=config['info_repo']['dir'],
@@ -661,7 +661,7 @@ def package_make_asp_deps(config, opts, args):
     return ret
 
 
-def repoman_scan_creating_templates(opts, args):
+def package_repository_index_and_update(config, opts, args):
     """
     Perform scan and templates creation
     """
@@ -669,15 +669,15 @@ def repoman_scan_creating_templates(opts, args):
     ret = 0
 
     if package_repository_index(
-        opts={}, args=[]
+        config, opts={}, args=[]
         ) != 0:
 
         ret = 1
 
     else:
 
-        if repoman_find_missing_pkg_info_records(
-            opts={'-t': None}, args=[]
+        if info_find_missing_pkg_info_records(
+            config, opts={'-t': None}, args=[]
             ) != 0:
 
             ret = 2
@@ -685,7 +685,7 @@ def repoman_scan_creating_templates(opts, args):
         else:
 
             if repoman_load_package_info_from_filesystem(
-                opts={}, args=[]
+                config, opts={}, args=[]
                 ) != 0:
 
                 ret = 3
@@ -704,9 +704,9 @@ def package_repository_index(config, opts, args):
     ret = 0
 
     repository_dir = config['package_repo']['dir']
-    db_connection = org.wayround.aipsetup.repository.PackageRepo(
-        config['package_repo']['index_db_config']
-        )
+
+    db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
+
     garbage_dir = config['package_repo']['garbage_dir']
 
     pkgindex = org.wayround.aipsetup.repository.PackageRepoCtl(
@@ -812,9 +812,7 @@ exists: {}
 
             sources_dir = config['sources_repo']['dir']
 
-            database_connection = org.wayround.aipsetup.repository.SourceRepo(
-                config['sources_repo']['index_db_config']
-                )
+            database_connection = org.wayround.aipsetup.dbconnections.src_repo_db(config)
 
             src_ctl = org.wayround.aipsetup.repository.SourceRepoCtl(
                 sources_dir,
@@ -831,25 +829,8 @@ exists: {}
 
     return ret
 
-def repoman_latest_editor(opts, args):
 
-    ret = 0
-
-    name = None
-    len_args = len(args)
-    if len_args == 0:
-        pass
-    elif len_args == 1:
-        name = args[0]
-    else:
-        ret = 1
-
-    if ret == 0:
-        org.wayround.aipsetup.pkglatest.latest_editor(name)
-
-    return ret
-
-def repoman_find_missing_pkg_info_records(opts, args):
+def info_find_missing_pkg_info_records(config, opts, args):
     """
     Search packages which have no corresponding info records
 
@@ -859,6 +840,8 @@ def repoman_find_missing_pkg_info_records(opts, args):
 
     -f forces rewrite existing .json files
     """
+    import org.wayround.aipsetup.info
+    import org.wayround.aipsetup.repository
 
     ret = 0
 
@@ -866,8 +849,21 @@ def repoman_find_missing_pkg_info_records(opts, args):
 
     f = '-f' in opts
 
+    info_db = org.wayround.aipsetup.dbconnections.info_db(config)
+    db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
+
+    info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
+        config['info_repo']['dir'], info_db
+        )
+
+    pkg_index_ctl = org.wayround.aipsetup.repository.PackageRepoCtl(
+        config['package_repo']['dir'],
+        db_connection,
+        config['package_repo']['garbage_dir']
+        )
+
     try:
-        org.wayround.aipsetup.pkginfo.get_missing_info_records_list(t, f)
+        info_ctl.get_missing_info_records_list(pkg_index_ctl, t, f)
     except:
         logging.exception("Error while searching for missing records")
         ret = 1
@@ -876,7 +872,7 @@ def repoman_find_missing_pkg_info_records(opts, args):
 
     return ret
 
-def repoman_find_outdated_pkg_info_records(opts, args):
+def info_find_outdated_pkg_info_records(config, opts, args):
     """
     Finds pkg info records which differs to FS .json files
     """
@@ -949,7 +945,7 @@ def repoman_backup_package_info_to_filesystem(opts, args):
 
     return ret
 
-def repoman_load_package_info_from_filesystem(opts, args):
+def repoman_load_package_info_from_filesystem(config, opts, args):
     """
     Load missing package information from named files
 
@@ -959,6 +955,7 @@ def repoman_load_package_info_from_filesystem(opts, args):
 
     -a force load all records, not only missing.
     """
+    import org.wayround.aipsetup.info
 
     ret = 0
 
@@ -966,9 +963,10 @@ def repoman_load_package_info_from_filesystem(opts, args):
     if len(args) == 0:
         filenames = (
             glob.glob(
-                org.wayround.aipsetup.config.config['info'] +
-                os.path.sep +
-                '*'
+                org.wayround.utils.path.join(
+                    config['info_repo']['dir'],
+                    '*'
+                    )
                 )
             )
     else:
@@ -976,8 +974,13 @@ def repoman_load_package_info_from_filesystem(opts, args):
 
     rewrite_all = '-a' in opts
 
+    info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
-    org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
+    info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
+        config['info_repo']['dir'], info_db
+        )
+
+    info_ctl.load_info_records_from_fs(
         filenames, rewrite_all
         )
 
@@ -1060,9 +1063,8 @@ def package_put_to_repository(config, opts, args):
     else:
 
         repository_dir = config['package_repo']['dir']
-        db_connection = org.wayround.aipsetup.repository.PackageRepo(
-            config['package_repo']['index_db_config']
-            )
+
+        db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
 
         garbage_dir = config['package_repo']['garbage_dir']
 
@@ -1155,9 +1157,7 @@ def info_editor(config, opts, args):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
 
-            info_db = org.wayround.aipsetup.info.PackageInfo(
-                config['info_repo']['index_db_config']
-                )
+            info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
             info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
                 info_dir=config['info_repo']['dir'],
@@ -1730,12 +1730,6 @@ def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
     return check_list_of_installed_packages_and_asps_auto()
 
 
-def latest_editor(name):
-    import org.wayround.aipsetup.latesteditor
-
-    ret = org.wayround.aipsetup.latesteditor.main(name)
-
-    return ret
 
 def pkgdeps_print_asps_asp_depends_on(opts, args):
 

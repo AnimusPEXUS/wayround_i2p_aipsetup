@@ -357,6 +357,11 @@ class PackageInfoCtl:
         self, pkg_index_ctl, create_templates=False, force_rewrite=False
         ):
 
+        if not isinstance(pkg_index_ctl, org.wayround.aipsetup.repository.PackageRepoCtl):
+            raise ValueError(
+                "pkg_index_ctl must be of type org.wayround.aipsetup.repository.PackageRepoCtl"
+                )
+
         info_db = self.info_db
         index_db = pkg_index_ctl.db_connection
 

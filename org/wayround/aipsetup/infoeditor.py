@@ -17,6 +17,7 @@ import org.wayround.utils.path
 
 import org.wayround.aipsetup.gtk
 import org.wayround.aipsetup.info
+import org.wayround.aipsetup.dbconnections
 
 
 
@@ -517,9 +518,7 @@ class MainWindow:
 
 def main(name_to_edit=None, config=None):
 
-    info_db = org.wayround.aipsetup.info.PackageInfo(
-        config['info_repo']['index_db_config']
-        )
+    info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
     info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
         info_dir=config['info_repo']['dir'],
@@ -527,9 +526,9 @@ def main(name_to_edit=None, config=None):
         )
 
     repository_dir = config['package_repo']['dir']
-    db_connection = org.wayround.aipsetup.repository.PackageRepo(
-        config['package_repo']['index_db_config']
-        )
+
+    db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
+
     garbage_dir = config['package_repo']['garbage_dir']
 
     pkg_repo_ctl = org.wayround.aipsetup.repository.PackageRepoCtl(
@@ -538,18 +537,14 @@ def main(name_to_edit=None, config=None):
 
     sources_dir = config['sources_repo']['dir']
 
-    database_connection = org.wayround.aipsetup.repository.SourceRepo(
-        config['sources_repo']['index_db_config']
-        )
+    database_connection = org.wayround.aipsetup.dbconnections.src_repo_db(config)
 
     src_repo_ctl = org.wayround.aipsetup.repository.SourceRepoCtl(
         sources_dir,
         database_connection
         )
 
-    tag_db = org.wayround.aipsetup.info.Tags(
-        config['info_repo']['tags_db_config']
-        )
+    tag_db = org.wayround.aipsetup.dbconnections.tag_db(config)
 
     tag_ctl = org.wayround.aipsetup.info.TagsControl(
         tag_db,
