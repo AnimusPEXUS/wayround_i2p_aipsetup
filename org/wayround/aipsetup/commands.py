@@ -3,6 +3,7 @@ import os.path
 import logging
 
 import org.wayround.utils.path
+import org.wayround.utils.opts
 
 def commands():
     return {
@@ -80,6 +81,9 @@ def system_install_package(config, opts, args):
     If -b is given - it is used as destination root
     """
 
+    import org.wayround.aipsetup.system
+    import org.wayround.aipsetup.sysupdates
+
     ret = org.wayround.utils.opts.is_wrong_opts(
         opts,
         ['-b', '--force']
@@ -101,9 +105,33 @@ def system_install_package(config, opts, args):
 
             fpi = []
 
+            repository_dir = config['package_repo']['dir']
+            db_connection = org.wayround.aipsetup.repository.PackageRepo(
+                config['package_repo']['index_db_config']
+                )
+
+            garbage_dir = config['package_repo']['garbage_dir']
+
+            pkg_repo_ctl = org.wayround.aipsetup.repository.PackageRepoCtl(
+                repository_dir, db_connection, garbage_dir
+                )
+
+            info_db = org.wayround.aipsetup.info.PackageInfo(
+                config['info_repo']['index_db_config']
+                )
+
+            info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
+                info_dir=config['info_repo']['dir'],
+                info_db=info_db
+                )
+
+            syst = org.wayround.aipsetup.system.System(
+                config, info_ctl, pkg_repo_ctl, basedir=basedir
+                )
+
             for name in names:
-                ret = install_package(
-                    name, force, basedir
+                ret = syst.install_package(
+                    name, force,
                     )
                 if ret != 0:
                     logging.error("Failed to install package: `{}'".format(name))

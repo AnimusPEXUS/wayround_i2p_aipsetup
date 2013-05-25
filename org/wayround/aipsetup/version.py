@@ -7,7 +7,7 @@ import logging
 
 import org.wayround.utils.version
 
-
+import org.wayround.aipsetup.package_name_parser
 
 def package_version_comparator(name1, name2):
     """
@@ -16,11 +16,11 @@ def package_version_comparator(name1, name2):
 
     ret = 0
 
-    d1 = org.wayround.aipsetup.name.package_name_parse(
+    d1 = org.wayround.aipsetup.package_name_parser.package_name_parse(
         name1, mute=True
         )
 
-    d2 = org.wayround.aipsetup.name.package_name_parse(
+    d2 = org.wayround.aipsetup.package_name_parser.package_name_parse(
         name2, mute=True
         )
 

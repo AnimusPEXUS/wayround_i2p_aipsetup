@@ -18,6 +18,7 @@ import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 
 import org.wayround.utils.path
+import org.wayround.utils.format.elf
 
 class System:
 
@@ -222,7 +223,7 @@ class System:
                 else:
 
                     latest_in_repo = (
-                        self.pkg_repo_ctl.get_latest_pkg_from_record(name)
+                        self.pkg_repo_ctl.get_latest_pkg_from_repo(name)
                         )
 
                     if latest_in_repo == None:
@@ -232,7 +233,7 @@ class System:
 
                         full_name = org.wayround.utils.path.abspath(
                             org.wayround.utils.path.join(
-                                self.pkg_repo_ctl.path,
+                                self.pkg_repo_ctl.repository_dir,
                                 latest_in_repo
                                 )
                             )
