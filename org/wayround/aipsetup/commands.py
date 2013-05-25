@@ -34,12 +34,12 @@ def commands():
         'editor':info_editor,
         },
 
-    'system': {
+    'sys': {
         '_help': 'System actions: install, uninstall, etc...',
         'install': system_install_package,
         },
 
-    'pkg': {
+    'repo': {
         'index': package_repository_index_and_update,
         'put': package_put_to_repository
         },
