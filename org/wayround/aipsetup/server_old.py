@@ -160,7 +160,7 @@ class Index:
             files.sort(
                 reverse = True,
                 key = functools.cmp_to_key(
-                    org.wayround.aipsetup.version.package_version_comparator
+                    org.wayround.utils.version.package_version_comparator
                     )
                 )
 

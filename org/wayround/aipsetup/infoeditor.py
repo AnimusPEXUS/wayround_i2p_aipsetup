@@ -7,27 +7,29 @@ import copy
 import glob
 import logging
 import os.path
+import functools
 
 from gi.repository import Gtk
 from gi.repository import Gdk
 
 import org.wayround.utils.gtk
+import org.wayround.utils.path
 
-import org.wayround.aipsetup.config
 import org.wayround.aipsetup.gtk
 import org.wayround.aipsetup.info
 
-import org.wayround.aipsetup.pkgindex
-import org.wayround.aipsetup.pkginfo
-import org.wayround.aipsetup.pkglatest
-import org.wayround.aipsetup.pkgtag
 
 
 class MainWindow:
 
-    def __init__(self):
+    def __init__(self, config, info_ctl, tag_ctl, pkg_repo_ctl, src_repo_ctl):
 
-        self.config = copy.copy(org.wayround.aipsetup.config.config)
+        self.config = config
+        self.info_ctl = info_ctl
+        self.pkg_repo_ctl = pkg_repo_ctl
+        self.src_repo_ctl = src_repo_ctl
+        self.tag_ctl = tag_ctl
+
         self.currently_opened = None
 
         ui_file = os.path.join(
@@ -50,11 +52,11 @@ class MainWindow:
 
         self.ui['button2'].connect('clicked', self.onSaveAndUpdateButtonActivated)
 
-        self.ui['button3'].connect('clicked', self.onEditLatestButtonActivated)
-
         self.ui['button4'].connect('clicked', self.onShowAllSourceFilesButtonActivated)
 
         self.ui['button5'].connect('clicked', self.onShowFilteredSourceFilesButtonActivated)
+
+        self.ui['button3'].connect('clicked', self.onQuitButtonClicked)
 
 
         c = Gtk.TreeViewColumn("File Names")
@@ -82,7 +84,7 @@ class MainWindow:
         ret = 0
 
         filename = os.path.join(
-            self.config['info'],
+            self.config['info_repo']['dir'],
             name
             )
 
@@ -98,7 +100,7 @@ class MainWindow:
             dia.destroy()
 
         else:
-            data = org.wayround.aipsetup.info.read_from_file(filename)
+            data = org.wayround.aipsetup.info.read_info_file(filename)
 
             if not isinstance(data, dict):
                 dia = Gtk.MessageDialog(
@@ -122,7 +124,7 @@ class MainWindow:
 
                 self.ui['entry7'].set_text(str(data['home_page']))
 
-                tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+                tag_db = self.tag_ctl.tag_db
 
                 b = Gtk.TextBuffer()
                 b.set_text('\n'.join(tag_db.get_tags(name[:-5])))
@@ -162,29 +164,6 @@ class MainWindow:
 
                 self.ui['checkbutton6'].set_active(bool(data['deprecated']))
 
-                self.ui['button3'].set_sensitive(
-                    (
-                        not self.ui['checkbutton3'].get_active()
-                        or
-                        not self.ui['checkbutton4'].get_active()
-                        )
-                    )
-
-                self.ui['entry4'].set_text(
-                    str(
-                        org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                            name[:-5]
-                            )
-                        )
-                    )
-
-                self.ui['entry6'].set_text(
-                    str(
-                        org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                            name[:-5]
-                            )
-                        )
-                    )
 
                 self.currently_opened = name
                 self.ui['window1'].set_title(name + " - aipsetup v3 .json info file editor")
@@ -203,7 +182,7 @@ class MainWindow:
             ret = 1
         else:
             filename = os.path.join(
-                self.config['info'],
+                self.config['info_repo']['dir'],
                 name
                 )
 
@@ -255,7 +234,7 @@ class MainWindow:
 
             data['deprecated'] = self.ui['checkbutton6'].get_active()
 
-            if org.wayround.aipsetup.info.write_to_file(filename, data) != 0:
+            if org.wayround.aipsetup.info.write_info_file(filename, data) != 0:
                 dia = Gtk.MessageDialog(
                     self.ui['window1'],
                     Gtk.DialogFlags.MODAL,
@@ -271,7 +250,7 @@ class MainWindow:
                 dbu = ''
                 if update_db:
                     try:
-                        org.wayround.aipsetup.pkginfo.load_info_records_from_fs(
+                        self.info_ctl.load_info_records_from_fs(
                             [filename], rewrite_existing=True
                             )
 
@@ -298,7 +277,7 @@ class MainWindow:
 
     def load_list(self):
 
-        mask = os.path.join(self.config['info'], '*.json')
+        mask = os.path.join(self.config['info_repo']['dir'], '*.json')
 
         files = glob.glob(mask)
 
@@ -318,7 +297,11 @@ class MainWindow:
 
     def load_buildscript_list(self):
 
-        files = glob.glob(self.config['buildscript'] + os.path.sep + '*.py')
+        files = glob.glob(
+            org.wayround.utils.path.join(
+                self.config['builder_repo']['building_scripts_dir'], '*.py'
+                )
+            )
 
         files.sort()
 
@@ -444,8 +427,9 @@ class MainWindow:
             dia.run()
             dia.destroy()
         else:
-            lst = org.wayround.aipsetup.pkgindex.get_package_source_files(
+            lst = self.src_repo_ctl.get_package_source_files(
                 self.ui['entry1'].get_text()[:-5],
+                info_ctl=self.info_ctl,
                 filtered=False
                 )
 
@@ -467,6 +451,9 @@ class MainWindow:
                     "{} - Non-filtered tarballs".format(self.ui['entry1'].get_text()[:-5])
                     )
 
+    def onQuitButtonClicked(self, button):
+        org.wayround.aipsetup.gtk.stop_session()
+
     def onShowFilteredSourceFilesButtonActivated(self, button):
 
         if self.ui['entry1'].get_text() == '':
@@ -480,9 +467,17 @@ class MainWindow:
             dia.run()
             dia.destroy()
         else:
-            lst = org.wayround.aipsetup.pkgindex.get_package_source_files(
+            lst = self.src_repo_ctl.get_package_source_files(
                 self.ui['entry1'].get_text()[:-5],
+                info_ctl=self.info_ctl,
                 filtered=True
+                )
+
+            lst.sort(
+                key=functools.cmp_to_key(
+                    org.wayround.utils.version.source_version_comparator
+                    ),
+                reverse=True
                 )
 
             logging.debug("get_package_source_files returned {}".format(lst))
@@ -519,27 +514,49 @@ class MainWindow:
 
         return
 
-    def onEditLatestButtonActivated(self, button):
 
-        import org.wayround.aipsetup.latesteditor
+def main(name_to_edit=None, config=None):
 
-        if self.ui['entry1'].get_text() == '':
-            dia = Gtk.MessageDialog(
-                self.ui['window1'],
-                Gtk.DialogFlags.MODAL,
-                Gtk.MessageType.ERROR,
-                Gtk.ButtonsType.OK,
-                "Record not selected\n\n(hint: double click on list item to select one)"
-                )
-            dia.run()
-            dia.destroy()
-        else:
-            org.wayround.aipsetup.latesteditor.main(self.ui['entry1'].get_text()[:-5])
+    info_db = org.wayround.aipsetup.info.PackageInfo(
+        config['info_repo']['index_db_config']
+        )
 
+    info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
+        info_dir=config['info_repo']['dir'],
+        info_db=info_db
+        )
 
-def main(name_to_edit=None):
+    repository_dir = config['package_repo']['dir']
+    db_connection = org.wayround.aipsetup.repository.PackageRepo(
+        config['package_repo']['index_db_config']
+        )
+    garbage_dir = config['package_repo']['garbage_dir']
 
-    mw = MainWindow()
+    pkg_repo_ctl = org.wayround.aipsetup.repository.PackageRepoCtl(
+        repository_dir, db_connection, garbage_dir
+        )
+
+    sources_dir = config['sources_repo']['dir']
+
+    database_connection = org.wayround.aipsetup.repository.SourceRepo(
+        config['sources_repo']['index_db_config']
+        )
+
+    src_repo_ctl = org.wayround.aipsetup.repository.SourceRepoCtl(
+        sources_dir,
+        database_connection
+        )
+
+    tag_db = org.wayround.aipsetup.info.Tags(
+        config['info_repo']['tags_db_config']
+        )
+
+    tag_ctl = org.wayround.aipsetup.info.TagsControl(
+        tag_db,
+        config['info_repo']['tags_json']
+        )
+
+    mw = MainWindow(config, info_ctl, tag_ctl, pkg_repo_ctl, src_repo_ctl)
 
     if isinstance(name_to_edit, str):
         if mw.load_data(os.path.basename(name_to_edit)) == 0:

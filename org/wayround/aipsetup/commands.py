@@ -25,7 +25,8 @@ def commands():
     'server': {},
     'client': {},
 
-    'pkg': {
+    'info': {
+        'editor':info_editor,
         },
 
     'system': {
@@ -33,13 +34,15 @@ def commands():
         'install_package': system_install_package,
         },
 
-    'pkg_repo': {
+    'pkg': {
         'index': package_repository_index,
+        'put': package_put_to_repository
         },
-    'src_repo': {
+
+    'src': {
         'index': source_repository_index,
         },
-    'info_repo': {},
+
     'build_repo': {},
 
     'test': {
@@ -194,7 +197,7 @@ def package_list_asps(config, opts, args):
             lst.sort(
                 reverse=True,
                 key=functools.cmp_to_key(
-                    org.wayround.aipsetup.version.package_version_comparator
+                    org.wayround.utils.version.package_version_comparator
                     )
                 )
 
@@ -1004,12 +1007,14 @@ def repoman_save_tags(opts, args):
     return 0
 
 
-def repoman_put_asps_to_index(opts, args):
+def package_put_to_repository(config, opts, args):
     """
     Copy package to index repository
 
     -m      move, not copy
     """
+
+    import org.wayround.aipsetup.repository
 
     ret = 0
 
@@ -1025,7 +1030,19 @@ def repoman_put_asps_to_index(opts, args):
         logging.error("Filenames required")
         ret = 2
     else:
-        ret = org.wayround.aipsetup.pkgindex.put_asps_to_index(files, move=move)
+
+        repository_dir = config['package_repo']['dir']
+        db_connection = org.wayround.aipsetup.repository.PackageRepo(
+            config['package_repo']['index_db_config']
+            )
+
+        garbage_dir = config['package_repo']['garbage_dir']
+
+        index = org.wayround.aipsetup.repository.PackageRepoCtl(
+            repository_dir, db_connection, garbage_dir
+            )
+
+        ret = index.put_asps_to_index(files, move=move)
 
     return ret
 
@@ -1089,7 +1106,7 @@ def info_edit_file(opts, args, typ='info'):
             )
     return ret
 
-def info_editor(opts, args):
+def info_editor(config, opts, args):
     """
     Start special info-file editor
     """
@@ -1110,9 +1127,21 @@ def info_editor(opts, args):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
 
-            pkg_name = (
-                org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(file_name)
+            info_db = org.wayround.aipsetup.info.PackageInfo(
+                config['info_repo']['index_db_config']
                 )
+
+            info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
+                info_dir=config['info_repo']['dir'],
+                info_db=info_db
+                )
+
+            pkg_name = (
+                info_ctl.get_package_name_by_tarball_filename(file_name)
+                )
+
+            del info_ctl
+            del info_db
 
             if not pkg_name:
                 logging.error(
@@ -1127,7 +1156,8 @@ def info_editor(opts, args):
         if isinstance(file_name, str):
             if not file_name.endswith('.json'):
                 file_name = file_name + '.json'
-        org.wayround.aipsetup.infoeditor.main(file_name)
+
+        org.wayround.aipsetup.infoeditor.main(file_name, config)
 
     return ret
 
@@ -1671,3 +1701,10 @@ def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
 
     return check_list_of_installed_packages_and_asps_auto()
 
+
+def latest_editor(name):
+    import org.wayround.aipsetup.latesteditor
+
+    ret = org.wayround.aipsetup.latesteditor.main(name)
+
+    return ret

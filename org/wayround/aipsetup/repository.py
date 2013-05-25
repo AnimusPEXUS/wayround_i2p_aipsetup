@@ -938,7 +938,7 @@ class PackageRepoCtl:
         files = os.listdir(path)
         files.sort(
             key=functools.cmp_to_key(
-                org.wayround.aipsetup.version.package_version_comparator
+                org.wayround.utils.version.package_version_comparator
                 ),
 
             reverse=True
@@ -1069,6 +1069,61 @@ class SourceRepoCtl:
             force_reindex=force_reindex,
             first_delete_found=first_delete_found
             )
+
+        return ret
+
+    def get_package_source_files(self, name, info_ctl, filtered=True):
+
+        """
+        Get tarball filenames from source index
+        """
+
+        ret = []
+
+        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+            raise ValueError(
+                "info_ctl must be of type "
+                "org.wayround.aipsetup.info.PackageInfoCtl"
+                )
+
+        pkg_info = info_ctl.get_package_info_record(
+            name=name
+            )
+
+        try:
+            tags_object = self.database_connection
+        except:
+            logging.exception("Can't connect to source file index")
+        else:
+
+            files = tags_object.objects_by_tags([pkg_info['basename']])
+
+            if filtered:
+                files2 = []
+                for i in files:
+                    if i.startswith(pkg_info['src_path_prefix']):
+                        files2.append(i)
+
+                files = files2
+
+                del files2
+
+            if filtered:
+                ftl_r = (
+                    info_ctl.filter_tarball_list(
+                        files,
+                        pkg_info['filters']
+                        )
+                    )
+                if isinstance(ftl_r, list):
+                    files = ftl_r
+                else:
+                    logging.error(
+                        "get_package_source_files: "
+                        "filter_tarball_list returned `{}'".format(files)
+                        )
+
+            ret = files
 
         return ret
 

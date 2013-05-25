@@ -8,7 +8,7 @@ import logging
 
 
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.version
+import org.wayround.utils.version
 import org.wayround.aipsetup.name
 import org.wayround.aipsetup.pkgindex
 

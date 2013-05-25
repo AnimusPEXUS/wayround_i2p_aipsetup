@@ -976,11 +976,11 @@ class BuildingSiteCtl:
 
         if not isinstance(
             info_ctl,
-            org.wayround.aipsetup.info.PackageInfoControl
+            org.wayround.aipsetup.info.PackageInfoCtl
             ):
             raise TypeError(
                 "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoControl"
+                "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
         ret = 0
@@ -1229,11 +1229,11 @@ class BuildingSiteCtl:
 
         if not isinstance(
             info_ctl,
-            org.wayround.aipsetup.info.PackageInfoControl
+            org.wayround.aipsetup.info.PackageInfoCtl
             ):
             raise TypeError(
                 "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoControl"
+                "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
         ret = 0
@@ -1293,11 +1293,11 @@ class BuildingSiteCtl:
 
         if not isinstance(
             info_ctl,
-            org.wayround.aipsetup.info.PackageInfoControl
+            org.wayround.aipsetup.info.PackageInfoCtl
             ):
             raise TypeError(
                 "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoControl"
+                "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
         path = org.wayround.utils.path.abspath(self.path)
@@ -1411,11 +1411,11 @@ class BuildingSiteCtl:
 
         if not isinstance(
             info_ctl,
-            org.wayround.aipsetup.info.PackageInfoControl
+            org.wayround.aipsetup.info.PackageInfoCtl
             ):
             raise TypeError(
                 "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoControl"
+                "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
         rp = org.wayround.utils.path.relpath(self.path, os.getcwd())
@@ -1862,7 +1862,7 @@ def build(
                 config['info_repo']['index_db_config']
                 )
 
-            info_ctl = org.wayround.aipsetup.info.PackageInfoControl(
+            info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
                 info_dir=config['info_repo']['dir'],
                 info_db=info_db
                 )

@@ -12,7 +12,7 @@ from gi.repository import Gtk
 
 import org.wayround.utils.gtk
 
-import org.wayround.aipsetup.version
+import org.wayround.utils.version
 
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
@@ -218,7 +218,7 @@ class MainWindow:
                     files.sort(
                         reverse=True,
                         key=functools.cmp_to_key(
-                            org.wayround.aipsetup.version.source_version_comparator
+                            org.wayround.utils.version.source_version_comparator
                             )
                         )
 
@@ -244,7 +244,7 @@ class MainWindow:
                     files.sort(
                         reverse=True,
                         key=functools.cmp_to_key(
-                            org.wayround.aipsetup.version.package_version_comparator
+                            org.wayround.utils.version.package_version_comparator
                             )
                         )
 

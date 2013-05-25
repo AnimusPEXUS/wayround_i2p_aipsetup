@@ -11,6 +11,7 @@ import os.path
 import re
 import sys
 import json
+import functools
 
 import sqlalchemy.ext.declarative
 
@@ -19,9 +20,9 @@ import org.wayround.utils.db
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 
-import org.wayround.aipsetup.info
 
-import org.wayround.aipsetup.pkglatest
+import org.wayround.aipsetup.repository
+import org.wayround.utils.version
 
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
@@ -210,7 +211,7 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
 
         return
 
-class PackageInfoControl:
+class PackageInfoCtl:
 
     def __init__(self, info_dir, info_db):
 
@@ -461,7 +462,7 @@ class PackageInfoControl:
                 ret.append(i.name)
                 continue
 
-            d1 = self.read_from_file(filename)
+            d1 = read_info_file(filename)
 
             if not isinstance(d1, dict):
                 if not mute:
@@ -662,7 +663,7 @@ class PackageInfoControl:
 
                     elif function in ['<', '<=', '==', '>=', '>']:
                         matched = (
-                            org.wayround.aipsetup.version.lb_comparator(
+                            org.wayround.utils.version.lb_comparator(
                                 working_item,
                                 function + ' ' + data
                                 )
@@ -834,40 +835,38 @@ class PackageInfoControl:
             else:
                 category = "< Package not indexed! >"
 
-            tag_db = tag_ctl.tag_db_connection
+            tag_db = tag_ctl.tag_db
 
             tags = tag_db.get_tags(name[:-4])
             tags.sort()
 
             print("""\
-    +---[{name}]----Overal Information-----------------+
++---[{name}]----Overal Information-----------------+
 
-                      basename: {basename}
-            source path prefix: {src_path_prefix}
-                   buildscript: {buildscript}
-                      homepage: {home_page}
-                      category: {category}
-                          tags: {tags}
-         installation priority: {installation_priority}
-                     removable: {removable}
-                     reducible: {reducible}
-               non-installable: {non_installable}
-                    deprecated: {deprecated}
-               auto newest src: {auto_newest_src}
-               auto newest pkg: {auto_newest_pkg}
-                    newest src: {newest_src}
-                    newest pkg: {newest_pkg}
+                  basename: {basename}
+        source path prefix: {src_path_prefix}
+               buildscript: {buildscript}
+                  homepage: {home_page}
+                  category: {category}
+                      tags: {tags}
+     installation priority: {installation_priority}
+                 removable: {removable}
+                 reducible: {reducible}
+           non-installable: {non_installable}
+                deprecated: {deprecated}
+           auto newest src: {auto_newest_src}
+           auto newest pkg: {auto_newest_pkg}
 
-    +---[{name}]----Tarball Filters--------------------+
++---[{name}]----Tarball Filters--------------------+
 
-    {filters}
+{filters}
 
-    +---[{name}]----Description------------------------+
++---[{name}]----Description------------------------+
 
-    {description}
+{description}
 
-    +---[{name}]----Info Block End---------------------+
-    """.format_map(
++---[{name}]----Info Block End---------------------+
+""".format_map(
                 {
                 'tags'                  : ', '.join(tags),
                 'category'              : category,
@@ -884,17 +883,7 @@ class PackageInfoControl:
                 'non_installable'       : r['non_installable'],
                 'deprecated'            : r['deprecated'],
                 'auto_newest_src'       : r['auto_newest_src'],
-                'auto_newest_pkg'       : r['auto_newest_pkg'],
-                'newest_src'            : (
-                    org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                        name,
-                        )
-                    ),
-                'newest_pkg'            : (
-                    org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                        name,
-                        )
-                    ),
+                'auto_newest_pkg'       : r['auto_newest_pkg']
                 }
                 )
             )
@@ -998,7 +987,7 @@ class PackageInfoControl:
         org.wayround.utils.file.progress_write("-i- Loading missing records")
 
         for i in missing:
-            struct = self.read_from_file(i)
+            struct = read_info_file(i)
             name = os.path.basename(i)[:-5]
             if isinstance(struct, dict):
                 org.wayround.utils.file.progress_write(
@@ -1018,86 +1007,19 @@ class PackageInfoControl:
         return
 
 
-class InfoFile:
 
-    def read_from_file(self, name):
-        """
-        Read package info structure from named file. Return dict. On error return
-        ``None``
-        """
-
-        ret = None
-
-        txt = ''
-        tree = None
-
-        try:
-            f = open(name, 'r')
-        except:
-            logging.error(
-                "Can't open file `{}'".format(name)
-                )
-            ret = 1
-        else:
-            try:
-                txt = f.read()
-
-                try:
-                    tree = json.loads(txt)
-                except:
-                    logging.exception("Can't parse file `{}'".format(name))
-                    ret = 2
-
-                else:
-                    ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
-
-                    ret.update(tree)
-
-                    ret['name'] = name
-                    del(tree)
-            finally:
-                f.close()
-
-        return ret
-
-    def write_to_file(self, name, struct):
-        """
-        Write package info structure into named file
-        """
-
-        ret = 0
-
-        struct = copy.copy(struct)
-
-        if 'name' in struct:
-            del struct['name']
-
-        txt = json.dumps(struct, indent=2, sort_keys=True)
-
-        try:
-            f = open(name, 'w')
-        except:
-            logging.exception("Can't rewrite file {}".format(name))
-            ret = 1
-        else:
-            try:
-                f.write(txt)
-            finally:
-                f.close()
-
-        return ret
-
+class Tags(org.wayround.utils.tag.TagEngine): pass
 
 class TagsControl:
 
-    def __init__(self, tag_db_connection, tags_json):
+    def __init__(self, tag_db, tags_json):
 
-        self.tag_db_connection = tag_db_connection,
+        self.tag_db = tag_db
         self.tags_json = tags_json
 
     def load_tags_from_fs(self):
 
-        tag_db = self.tag_db_connection
+        tag_db = self.tag_db
 
         file_name = self.tags_json
 
@@ -1137,7 +1059,7 @@ class TagsControl:
 
     def save_tags_to_fs(self):
 
-        tag_db = self.tag_db_connection
+        tag_db = self.tag_db
 
         file_name = self.tags_json
 
@@ -1167,6 +1089,343 @@ class TagsControl:
 
         return
 
+
+# I think "Latests" functionality not needed any longer, as it's will not be
+# used with coming of snapshots
+#
+#class PackageLatest(org.wayround.utils.db.BasicDB):
+#    """
+#    Main package index DB handling class
+#    """
+#
+#    Base = sqlalchemy.ext.declarative.declarative_base()
+#
+#    class Latest(Base):
+#        """
+#        Class for package's tags
+#        """
+#
+#        __tablename__ = 'newest'
+#
+#        id = sqlalchemy.Column(
+#            sqlalchemy.Integer,
+#            nullable=False,
+#            primary_key=True,
+#            autoincrement=True
+#            )
+#
+#        name = sqlalchemy.Column(
+#            sqlalchemy.UnicodeText,
+#            nullable=False
+#            )
+#
+#        typ = sqlalchemy.Column(
+#            'type',
+#            sqlalchemy.UnicodeText,
+#            nullable=False
+#            )
+#
+#        file = sqlalchemy.Column(
+#            sqlalchemy.UnicodeText,
+#            nullable=True,
+#            default=None,
+#            )
+#
+#
+#
+#    def __init__(self, config):
+#
+#        org.wayround.utils.db.BasicDB.__init__(
+#            self,
+#            config,
+#            echo=False
+#            )
+#
+#        return
+#
+#
+#class PackageLatestCtl:
+#
+#    def __init__(self, latest_db, info_ctl, index_ctl):
+#
+#        if not isinstance(info_ctl, PackageInfoCtl):
+#            raise ValueError(
+#                "info_ctl must be of type org.wayround.aipsetup.info.PackageInfoCtl"
+#                )
+#
+#        if not isinstance(index_ctl, org.wayround.aipsetup.repository.PackageRepoCtl):
+#            raise ValueError(
+#                "index_ctl must be of type org.wayround.aipsetup.repository.PackageRepoCtl"
+#                )
+#
+#        self.info_ctl = info_ctl
+#        self.latest_db = latest_db
+#        self.index_ctl = index_ctl
+#
+#    def set_found_latest_src_to_record(
+#        self, name, force=False, mute=True, info_ctl=None
+#        ):
+#
+#        ret = False
+#
+#        r = self.get_latest_src_from_src_db(name)
+#        if r != None:
+#            print(
+#                "Package's latest src is: `{}'".format(r),
+#                )
+#            if r != None:
+#
+#                ret = self.set_latest_src_to_record(
+#                    name, r, force
+#                    )
+#
+#            else:
+#                ret = False
+#
+#        if not ret:
+#            print("Can't set")
+#
+#
+#        return ret
+#
+#    def set_found_latest_src_to_records(
+#        self, names, force=False, mute=True
+#        ):
+#
+#        if len(names) == 0:
+#            names = self.info_ctl.get_info_records_list(
+#                mute=True
+#                )
+#
+#        for i in names:
+#            self.set_found_latest_src_to_record(
+#                i,
+#                force,
+#                mute
+#                )
+#
+#        return
+#
+#    def set_found_latest_pkg_to_record(
+#        self, name, force=False, mute=True
+#        ):
+#
+#        ret = False
+#
+#        r = self.get_latest_pkg_from_repo(name)
+#        if r != None:
+#            print(
+#                "Package's latest pkg is: `{}'".format(r)
+#                )
+#            if r != None:
+#
+#                ret = self.set_latest_pkg_to_record(
+#                    name, r, force
+#                    )
+#
+#            else:
+#                ret = False
+#
+#        if not ret:
+#            print("Can't set")
+#
+#
+#        return ret
+#
+#    def set_found_latest_pkg_to_records(
+#        self, names, force=False, mute=True
+#        ):
+#
+#        if len(names) == 0:
+#            names = self.info_ctl.get_info_records_list(
+#                mute=True
+#                )
+#
+#        for i in names:
+#            self.set_found_latest_pkg_to_record(
+#                i, force, mute
+#                )
+#
+#        return
+#
+#
+#    def set_latest_src_to_record(self, name, latest, force=False):
+#        return self._set_latest_to_record(name, latest, 'src', force)
+#
+#    def set_latest_pkg_to_record(
+#        self, name, latest, force=False
+#        ):
+#
+#        return self._set_latest_to_record(
+#            name, latest, 'pkg', force
+#            )
+#
+#    def _set_latest_to_record(
+#        self, name, latest, typ, force=False
+#        ):
+#
+#        latest_db = self.latest_db
+#
+#        logging.debug("setting latest `{}' to `{}'".format(typ, latest))
+#        ret = None
+#
+#        if not typ in ['src', 'pkg']:
+#            raise ValueError("`typ' can be only 'src' or 'pkg'")
+#
+#        typ2 = ''
+#        if typ == 'src':
+#            typ2 = 'source'
+#        elif typ == 'pkg':
+#            typ2 = 'package'
+#
+#        info = self.info_ctl.get_package_info_record(
+#            name
+#            )
+#
+#        if info == None:
+#            logging.error("Not found Info record for `{}'".format(name))
+#        else:
+#
+#            logging.debug("Searching for existing `Latest' record of `{}'".format(name))
+#            q = latest_db.sess.query(
+#                latest_db.Latest
+#                ).filter_by(
+#                    name=name, typ=typ2
+#                ).first()
+#
+#            if q == None:
+#                logging.debug("existing `Latest' record of `{}' not found".format(name))
+#                if info['auto_newest_' + typ] or force:
+#                    logging.debug("creating `Latest' record of `{}'".format(name))
+#                    q = latest_db.Latest()
+#                    q.name = name
+#                    q.file = latest
+#                    q.typ = typ2
+#                    latest_db.sess.add(q)
+#                    ret = True
+#                else:
+#                    ret = False
+#            else:
+#                logging.debug("existing `Latest' record of `{}' found".format(name))
+#                if info['auto_newest_' + typ] or force:
+#                    logging.debug("updating `Latest' record of `{}'".format(name))
+#                    q.file = latest
+#                    ret = True
+#                else:
+#                    ret = False
+#
+#            latest_db.sess.commit()
+#
+#        if ret == False:
+#            logging.error(
+#                "Not `auto_newest_{}' and not forced".format(typ)
+#                )
+#
+#        return ret
+#
+#    def get_latest_src_from_record(self, name):
+#        return self._get_latest_from_record(
+#            name, 'src'
+#            )
+#
+#    def get_latest_pkg_from_record(self, name):
+#        return self._get_latest_from_record(
+#            name, 'pkg'
+#            )
+#
+#    def _get_latest_from_record(self, name, typ):
+#
+#        latest_db = self.latest_db
+#
+#        ret = None
+#
+#        if not typ in ['src', 'pkg']:
+#            raise ValueError("`typ' can be only 'src' or 'pkg'")
+#
+#        info = self.info_ctl.get_package_info_record(
+#            name
+#            )
+#
+#        if info == None:
+#            logging.error("Not found Info record for `{}'".format(name))
+#        else:
+#            typ2 = ''
+#            if typ == 'src':
+#                typ2 = 'source'
+#            elif typ == 'pkg':
+#                typ2 = 'package'
+#
+#            if info['auto_newest_' + typ]:
+#                latest = ''
+#                if typ == 'src':
+#                    latest = self.get_latest_src_from_src_db(name)
+#                elif typ == 'pkg':
+#                    latest = self.get_latest_pkg_from_repo(name)
+#                ret = latest
+#            else:
+#
+#                latest_r = latest_db.sess.query(
+#                    latest_db.Latest
+#                    ).filter_by(
+#                        name=name, typ=typ2
+#                        ).first()
+#
+#                if latest_r == None:
+#                    ret = None
+#                else:
+#                    latest = latest_r.file
+#                    ret = latest
+#
+#        return ret
+#
+#
+#    def get_latest_src_from_src_db(self, name, files=None):
+#
+#        ret = None
+#
+#        if not files:
+#            files = self.index_ctl.get_package_source_files(
+#                name
+#                )
+#
+#        if not isinstance(files, list) or len(files) == 0:
+#            ret = None
+#        else:
+#            ret = max(
+#                files,
+#                key=functools.cmp_to_key(
+#                    org.wayround.utils.version.source_version_comparator
+#                    )
+#                )
+#
+#        return ret
+#
+#    def get_latest_pkg_from_repo(self, name, files=None):
+#
+#        ret = None
+#
+#        if not files:
+#            files = self.index_ctl.get_package_files(
+#                name
+#                )
+#
+#        if not isinstance(files, list):
+#            files = []
+#
+#        if len(files) == 0:
+#            ret = None
+#        else:
+#
+#            ret = max(
+#                files,
+#                key=functools.cmp_to_key(
+#                    org.wayround.utils.version.package_version_comparator
+#                    )
+#                )
+#
+#        return ret
+
+
 def is_info_dicts_equal(d1, d2):
 
     """
@@ -1195,5 +1454,74 @@ def is_info_dicts_equal(d1, d2):
         if d1[i] != d2[i]:
             ret = False
             break
+
+    return ret
+
+
+
+def read_info_file(name):
+    """
+    Read package info structure from named file. Return dict. On error return
+    ``None``
+    """
+
+    ret = None
+
+    txt = ''
+    tree = None
+
+    try:
+        f = open(name, 'r')
+    except:
+        logging.error(
+            "Can't open file `{}'".format(name)
+            )
+        ret = 1
+    else:
+        try:
+            txt = f.read()
+
+            try:
+                tree = json.loads(txt)
+            except:
+                logging.exception("Can't parse file `{}'".format(name))
+                ret = 2
+
+            else:
+                ret = copy.copy(SAMPLE_PACKAGE_INFO_STRUCTURE)
+
+                ret.update(tree)
+
+                ret['name'] = name
+                del(tree)
+        finally:
+            f.close()
+
+    return ret
+
+def write_info_file(name, struct):
+    """
+    Write package info structure into named file
+    """
+
+    ret = 0
+
+    struct = copy.copy(struct)
+
+    if 'name' in struct:
+        del struct['name']
+
+    txt = json.dumps(struct, indent=2, sort_keys=True)
+
+    try:
+        f = open(name, 'w')
+    except:
+        logging.exception("Can't rewrite file {}".format(name))
+        ret = 1
+    else:
+        try:
+            f.write(txt)
+        finally:
+            f.close()
 
     return ret

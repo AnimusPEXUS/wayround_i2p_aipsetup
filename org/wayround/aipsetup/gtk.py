@@ -49,7 +49,7 @@ def stop_session():
 
 class MainWindow:
     """
-    Overal aipsetup system window
+    Overall aipsetup system window
 
     Exists ensure everything is Ok
 

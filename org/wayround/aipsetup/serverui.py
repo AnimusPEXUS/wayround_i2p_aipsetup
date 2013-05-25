@@ -23,7 +23,7 @@ import org.wayround.utils.xml
 import org.wayround.aipsetup.pkgindex
 import org.wayround.aipsetup.pkginfo
 import org.wayround.aipsetup.pkglatest
-import org.wayround.aipsetup.version
+import org.wayround.utils.version
 
 
 class UI:
@@ -151,12 +151,12 @@ def page_index():
 #    files.sort(
 #        reverse=True,
 #        key=functools.cmp_to_key(
-#            org.wayround.aipsetup.version.package_version_comparator
+#            org.wayround.utils.version.package_version_comparator
 #            )
 #        )
 #
 ##    org.wayround.utils.list.list_sort(
-##        files, cmp=org.wayround.aipsetup.version.package_version_comparator
+##        files, cmp=org.wayround.utils.version.package_version_comparator
 ##        )
 ##
 ##    files.reverse()
@@ -302,13 +302,13 @@ def page_index():
 #    files.sort(
 #        reverse=True,
 #        key=functools.cmp_to_key(
-#            org.wayround.aipsetup.version.source_version_comparator
+#            org.wayround.utils.version.source_version_comparator
 #            )
 #        )
 #
 ##    org.wayround.utils.list.list_sort(
 ##        files,
-##        cmp=org.wayround.aipsetup.version.source_version_comparator
+##        cmp=org.wayround.utils.version.source_version_comparator
 ##        )
 ##
 ##    files.reverse()

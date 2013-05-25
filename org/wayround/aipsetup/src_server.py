@@ -15,7 +15,7 @@ from mako.template import Template
 
 import org.wayround.aipsetup.config
 import org.wayround.aipsetup.dbconnections
-import org.wayround.aipsetup.version
+import org.wayround.utils.version
 
 def cli_name():
     """
@@ -231,7 +231,7 @@ class SRCServer:
         results.sort(
             reverse=True,
             key=functools.cmp_to_key(
-                org.wayround.aipsetup.version.source_version_comparator
+                org.wayround.utils.version.source_version_comparator
                 )
             )
 

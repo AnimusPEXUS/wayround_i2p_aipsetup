@@ -61,7 +61,7 @@ class System:
                 lst.sort(
                     reverse=True,
                     key=functools.cmp_to_key(
-                        org.wayround.aipsetup.version.package_version_comparator
+                        org.wayround.utils.version.package_version_comparator
                         )
                     )
 
@@ -959,7 +959,7 @@ class System:
             latest = max(
                 lst,
                 key=functools.cmp_to_key(
-                    org.wayround.aipsetup.version.package_version_comparator
+                    org.wayround.utils.version.package_version_comparator
                     )
                 )
 
