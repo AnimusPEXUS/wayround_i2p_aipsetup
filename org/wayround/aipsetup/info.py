@@ -663,7 +663,7 @@ class PackageInfoCtl:
 
                     elif function in ['<', '<=', '==', '>=', '>']:
                         matched = (
-                            org.wayround.utils.version.lb_comparator(
+                            org.wayround.aipsetup.version.lb_comparator(
                                 working_item,
                                 function + ' ' + data
                                 )
