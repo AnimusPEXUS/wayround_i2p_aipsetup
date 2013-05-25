@@ -31,7 +31,7 @@ def commands():
 
     'system': {
         '_help': 'System actions: install, uninstall, etc...',
-        'install_package': system_install_package,
+        'install': system_install_package,
         },
 
     'pkg': {
@@ -1708,3 +1708,40 @@ def latest_editor(name):
     ret = org.wayround.aipsetup.latesteditor.main(name)
 
     return ret
+
+def pkgdeps_print_asps_asp_depends_on(opts, args):
+
+    r = get_asps_asp_depends_on('/', args[0], mute=False)
+
+    pprint.pprint(r)
+
+    return 0
+
+def pkgdeps_print_asp_depends(opts, args):
+
+    ret = 0
+
+    r = get_asp_dependencies('/', args[0], mute=False)
+
+    if not isinstance(r, dict):
+        logging.error(
+            "Couldn't get {} dependencies".format(
+                args[0]
+                )
+            )
+        ret = 1
+    else:
+
+        pprint.pprint(r)
+
+    return ret
+
+
+def pkgdeps_print_asps_depending_on_asp(opts, args):
+
+    r = get_asps_depending_on_asp('/', args[0], mute=False)
+
+    pprint.pprint(r)
+
+    return 0
+

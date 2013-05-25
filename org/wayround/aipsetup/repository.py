@@ -20,6 +20,7 @@ import org.wayround.utils.tarball_name_parser
 
 import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.package
+import org.wayround.aipsetup.version
 
 
 class PackageRepo(org.wayround.utils.db.BasicDB):
@@ -1043,6 +1044,30 @@ class PackageRepoCtl:
 
         return
 
+    def get_latest_pkg_from_repo(self, name, files=None):
+
+        ret = None
+
+        if not files:
+            files = self.get_package_files(
+                name
+                )
+
+        if not isinstance(files, list):
+            files = []
+
+        if len(files) == 0:
+            ret = None
+        else:
+
+            ret = max(
+                files,
+                key=functools.cmp_to_key(
+                    org.wayround.aipsetup.version.package_version_comparator
+                    )
+                )
+
+        return ret
 
 
 class SourceRepoCtl:
@@ -1127,6 +1152,26 @@ class SourceRepoCtl:
 
         return ret
 
+    def get_latest_src_from_src_db(self, name, files=None):
+
+        ret = None
+
+        if not files:
+            files = self.get_package_source_files(
+                name
+                )
+
+        if not isinstance(files, list) or len(files) == 0:
+            ret = None
+        else:
+            ret = max(
+                files,
+                key=functools.cmp_to_key(
+                    org.wayround.utils.version.source_version_comparator
+                    )
+                )
+
+        return ret
 
     def _index_progress(self, added_tags, sub_dir_name, root_dir_name_len):
         org.wayround.utils.file.progress_write(
