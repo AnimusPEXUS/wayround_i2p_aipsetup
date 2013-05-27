@@ -5,6 +5,8 @@ import glob
 import copy
 
 import org.wayround.aipsetup.dbconnections
+import org.wayround.aipsetup.classes
+import org.wayround.aipsetup.sysupdates
 
 import org.wayround.utils.path
 import org.wayround.utils.opts
@@ -35,7 +37,7 @@ def commands():
         },
 
     'sys': {
-        '_help': 'System actions: install, uninstall, etc...',
+        '_help': 'SystemCtl actions: install, uninstall, etc...',
         'install': system_install_package,
         },
 
@@ -85,9 +87,6 @@ def system_install_package(config, opts, args):
     If -b is given - it is used as destination root
     """
 
-    import org.wayround.aipsetup.system
-    import org.wayround.aipsetup.sysupdates
-
     ret = org.wayround.utils.opts.is_wrong_opts(
         opts,
         ['-b', '--force']
@@ -109,24 +108,15 @@ def system_install_package(config, opts, args):
 
             fpi = []
 
-            repository_dir = config['package_repo']['dir']
-            db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
+            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
 
-            garbage_dir = config['package_repo']['garbage_dir']
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
-            pkg_repo_ctl = org.wayround.aipsetup.repository.PackageRepoCtl(
-                repository_dir, db_connection, garbage_dir
-                )
-
-            info_db = org.wayround.aipsetup.dbconnections.info_db(config)
-
-            info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
-                info_dir=config['info_repo']['dir'],
-                info_db=info_db
-                )
-
-            syst = org.wayround.aipsetup.system.System(
-                config, info_ctl, pkg_repo_ctl, basedir=basedir
+            syst = org.wayround.aipsetup.classes.sys_ctl(
+                config,
+                info_ctl,
+                pkg_repo_ctl,
+                basedir
                 )
 
             for name in names:
@@ -134,7 +124,9 @@ def system_install_package(config, opts, args):
                     name, force,
                     )
                 if ret != 0:
-                    logging.error("Failed to install package: `{}'".format(name))
+                    logging.error(
+                        "Failed to install package: `{}'".format(name)
+                        )
                     fpi.append(name)
 
 
@@ -399,8 +391,6 @@ def build_full(config, opts, args):
     ================ ====================================
     """
 
-    import org.wayround.aipsetup.build
-
     r_bds = '-d' in opts
 
     sources = []
@@ -480,8 +470,6 @@ def build_pack(config, opts, args):
     DIRNAME - set building site. Default is current directory
     """
 
-    import org.wayround.aipsetup.build
-
     ret = 0
 
     dir_name = '.'
@@ -495,9 +483,9 @@ def build_pack(config, opts, args):
         if args_l == 1:
             dir_name = args[0]
 
-        bs = org.wayround.aipsetup.build.BuildingSiteCtl(dir_name)
+        bs = org.wayround.aipsetup.classes.bsite_ctl(dir_name)
 
-        packer = org.wayround.aipsetup.build.PackCtl(bs)
+        packer = org.wayround.aipsetup.classes.pack_ctl(bs)
 
         ret = packer.complete()
 
@@ -699,19 +687,9 @@ def package_repository_index(config, opts, args):
     to database
     """
 
-    import org.wayround.aipsetup.repository
-
     ret = 0
 
-    repository_dir = config['package_repo']['dir']
-
-    db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
-
-    garbage_dir = config['package_repo']['garbage_dir']
-
-    pkgindex = org.wayround.aipsetup.repository.PackageRepoCtl(
-        repository_dir, db_connection, garbage_dir
-        )
+    pkgindex = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
 
     res = pkgindex.scan_repo_for_pkg_and_cat()
 
@@ -749,8 +727,6 @@ def source_repository_index(config, opts, args):
 
     SUBDIR - index only one of subderictories
     """
-
-    import org.wayround.aipsetup.repository
 
     ret = 0
 
@@ -810,14 +786,7 @@ exists: {}
 
         else:
 
-            sources_dir = config['sources_repo']['dir']
-
-            database_connection = org.wayround.aipsetup.dbconnections.src_repo_db(config)
-
-            src_ctl = org.wayround.aipsetup.repository.SourceRepoCtl(
-                sources_dir,
-                database_connection
-                )
+            src_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
 
             ret = src_ctl.index_sources(
                 org.wayround.utils.path.realpath(subdir_name),
@@ -840,8 +809,6 @@ def info_find_missing_pkg_info_records(config, opts, args):
 
     -f forces rewrite existing .json files
     """
-    import org.wayround.aipsetup.info
-    import org.wayround.aipsetup.repository
 
     ret = 0
 
@@ -849,18 +816,9 @@ def info_find_missing_pkg_info_records(config, opts, args):
 
     f = '-f' in opts
 
-    info_db = org.wayround.aipsetup.dbconnections.info_db(config)
-    db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
-    info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
-        config['info_repo']['dir'], info_db
-        )
-
-    pkg_index_ctl = org.wayround.aipsetup.repository.PackageRepoCtl(
-        config['package_repo']['dir'],
-        db_connection,
-        config['package_repo']['garbage_dir']
-        )
+    pkg_index_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
 
     try:
         info_ctl.get_missing_info_records_list(pkg_index_ctl, t, f)
@@ -955,7 +913,6 @@ def repoman_load_package_info_from_filesystem(config, opts, args):
 
     -a force load all records, not only missing.
     """
-    import org.wayround.aipsetup.info
 
     ret = 0
 
@@ -974,11 +931,7 @@ def repoman_load_package_info_from_filesystem(config, opts, args):
 
     rewrite_all = '-a' in opts
 
-    info_db = org.wayround.aipsetup.dbconnections.info_db(config)
-
-    info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
-        config['info_repo']['dir'], info_db
-        )
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
     info_ctl.load_info_records_from_fs(
         filenames, rewrite_all
@@ -1045,8 +998,6 @@ def package_put_to_repository(config, opts, args):
     -m      move, not copy
     """
 
-    import org.wayround.aipsetup.repository
-
     ret = 0
 
     move = False
@@ -1062,15 +1013,7 @@ def package_put_to_repository(config, opts, args):
         ret = 2
     else:
 
-        repository_dir = config['package_repo']['dir']
-
-        db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
-
-        garbage_dir = config['package_repo']['garbage_dir']
-
-        index = org.wayround.aipsetup.repository.PackageRepoCtl(
-            repository_dir, db_connection, garbage_dir
-            )
+        index = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
 
         ret = index.put_asps_to_index(files, move=move)
 
@@ -1140,6 +1083,7 @@ def info_editor(config, opts, args):
     """
     Start special info-file editor
     """
+
     import org.wayround.aipsetup.infoeditor
 
     ret = 0
@@ -1157,19 +1101,14 @@ def info_editor(config, opts, args):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
 
-            info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
-            info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
-                info_dir=config['info_repo']['dir'],
-                info_db=info_db
-                )
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
             pkg_name = (
                 info_ctl.get_package_name_by_tarball_filename(file_name)
                 )
 
             del info_ctl
-            del info_db
 
             if not pkg_name:
                 logging.error(
@@ -1354,8 +1293,6 @@ def building_site_init(config, opts, args):
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
 
-    import org.wayround.aipsetup.buildingsite
-
     init_dir = '.'
 
     if len(args) > 0:
@@ -1366,7 +1303,7 @@ def building_site_init(config, opts, args):
         files = args[1:]
 
 
-    bs = org.wayround.aipsetup.buildingsite.BuildingSiteCtl(init_dir)
+    bs = org.wayround.aipsetup.classes.bsite_ctl(init_dir)
     ret = bs.init(files)
 
     return ret

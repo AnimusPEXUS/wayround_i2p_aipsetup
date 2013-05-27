@@ -1073,6 +1073,13 @@ class PackageRepoCtl:
 class SourceRepoCtl:
 
     def __init__(self, sources_dir, database_connection):
+
+        if not isinstance(database_connection, SourceRepo):
+            raise ValueError(
+                "database_connection must be of type "
+                "org.wayround.aipsetup.repository.SourceRepo"
+                )
+
         self.sources_dir = sources_dir
         self.database_connection = database_connection
 

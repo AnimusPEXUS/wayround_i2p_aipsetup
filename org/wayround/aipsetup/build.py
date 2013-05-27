@@ -19,6 +19,7 @@ import re
 
 
 import org.wayround.aipsetup.info
+import org.wayround.aipsetup.classes
 
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
@@ -1858,12 +1859,7 @@ def build(
 
         else:
 
-            info_db = org.wayround.aipsetup.dbconnections.info_db(config)
-
-            info_ctl = org.wayround.aipsetup.info.PackageInfoCtl(
-                info_dir=config['info_repo']['dir'],
-                info_db=info_db
-                )
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
             package_info = (
                 info_ctl.get_info_rec_by_tarball_filename(
@@ -1895,22 +1891,18 @@ def build(
                     dir=buildingsites_dir
                     )
 
+                bs = org.wayround.aipsetup.classes.bsite_ctl(build_site_dir)
 
-
-                bs = BuildingSiteCtl(build_site_dir)
-
-                buildscript_ctl = BuildScriptCtrl(
-                    config['builder_repo']['building_scripts_dir']
-                    )
-
-                build_ctl = BuildCtl(bs)
-                pack_ctl = PackCtl(bs)
 
                 if bs.init(info_ctl, source_files) != 0:
                     logging.error("Error initiating temporary dir")
                     ret = 3
                 else:
 
+                    build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
+                    pack_ctl = org.wayround.aipsetup.classes.pack_ctl(bs)
+
+                    buildscript_ctl = org.wayround.aipsetup.classes.bscript_ctl(config)
 
                     if bs.complete(
                         build_ctl,

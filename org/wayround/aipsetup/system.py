@@ -20,7 +20,7 @@ import org.wayround.aipsetup.info
 import org.wayround.utils.path
 import org.wayround.utils.format.elf
 
-class System:
+class SystemCtl:
 
     def __init__(self, config, info_ctl, pkg_repo_ctl, basedir='/'):
         """
