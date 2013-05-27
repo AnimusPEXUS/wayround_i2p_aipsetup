@@ -1,15 +1,20 @@
 
-import sys
-import os.path
-import logging
-import glob
 import copy
+import datetime
 import functools
+import glob
+import logging
+import os.path
+import pprint
+import sys
 
 import org.wayround.aipsetup.classes
+import org.wayround.aipsetup.info
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.version
 import org.wayround.aipsetup.package_name_parser
+import org.wayround.aipsetup.infoeditor
+
 
 import org.wayround.utils.path
 import org.wayround.utils.opts
@@ -1124,7 +1129,7 @@ def info_load_package_info_from_filesystem(config, opts, args):
 
     return ret
 
-def info_list_pkg_info_records(opts, args):
+def info_list_pkg_info_records(config, opts, args):
     """
     List records containing in index
 
@@ -1143,7 +1148,7 @@ def info_list_pkg_info_records(opts, args):
 
     return 0
 
-def repoman_print_pkg_info_record(opts, args):
+def repoman_print_pkg_info_record(config, opts, args):
     """
     Print package info record information
     """
@@ -1157,7 +1162,9 @@ def repoman_print_pkg_info_record(opts, args):
 
     if name != None:
 
-        ret = org.wayround.aipsetup.pkginfo.print_info_record(name)
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        info_ctl.print_info_record(name)
 
     else:
         logging.error("Name is not given")
@@ -1165,15 +1172,19 @@ def repoman_print_pkg_info_record(opts, args):
 
     return ret
 
-def repoman_load_tags(opts, args):
+def repoman_load_tags(config, opts, args):
 
-    org.wayround.aipsetup.pkgtag.load_tags_from_fs()
+    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+    tag_ctl.load_tags_from_fs()
 
     return 0
 
-def repoman_save_tags(opts, args):
+def repoman_save_tags(config, opts, args):
 
-    org.wayround.aipsetup.pkgtag.save_tags_to_fs()
+    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+    tag_ctl.save_tags_to_fs()
 
     return 0
 
@@ -1206,72 +1217,10 @@ def package_put_to_repository(config, opts, args):
 
     return ret
 
-def info_list_files(opts, args, typ='info', mask='*.json'):
-    """
-    List XML files in pkg_info dir of UNICORN dir
-
-    [FILEMASK]
-
-    One argument is allowed - FILEMASK, which defaults to '\*.json'
-
-    example:
-    aipsetup info list '\*doc\*.json'
-    """
-
-    args_l = len(args)
-
-    if args_l > 1:
-        logging.error("Too many arguments")
-    else:
-
-        if args_l == 1:
-            mask = args[0]
-
-        lst = glob.glob(
-            org.wayround.aipsetup.config.config[typ] + os.path.sep + mask
-            )
-
-        for i in range(len(lst)):
-            lst[i] = os.path.basename(lst[i])[:-5]
-
-        lst.sort()
-
-        print(
-            org.wayround.utils.text.return_columned_list(
-                lst
-                )
-            )
-
-    return 0
-
-def info_edit_file(opts, args, typ='info'):
-    """
-    Edit selected info-file in editor designated in aipsetup.conf
-
-    FILENAME
-
-    One argument required - FILENAME
-    """
-    ret = 0
-    if len(args) != 1:
-        logging.error("file to edit not specified")
-        ret = 1
-    else:
-        ret = org.wayround.utils.edit.edit_file(
-            os.path.join(
-                org.wayround.aipsetup.config.config[typ],
-                args[0]
-                ),
-            org.wayround.aipsetup.config.config['editor']
-            )
-    return ret
-
 def info_editor(config, opts, args):
     """
     Start special info-file editor
     """
-
-    import org.wayround.aipsetup.infoeditor
 
     ret = 0
 
@@ -1315,26 +1264,8 @@ def info_editor(config, opts, args):
 
     return ret
 
-def info_copy(opts, args):
-    """
-    Creates a copy of one info file into another
 
-    OLDNAME NEWNAME
-    """
-    if len(args) != 2:
-        logging.error("wrong argument count")
-    else:
-
-        org.wayround.utils.file.inderictory_copy_file(
-            org.wayround.aipsetup.config.config['info'],
-            args[0],
-            args[1]
-            )
-
-    return 0
-
-
-def info_mass_script(opts, args):
+def info_mass_script(config, opts, args):
     """
     Mass buildscript applience
 
@@ -1370,22 +1301,25 @@ def info_mass_script(opts, args):
     if ret == 0:
 
 
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
         for i in sources:
 
-            pkg_name = (
-                org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(i)
-                )
+            pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
 
             if not pkg_name:
                 logging.error("Could not find package name of `{}'".format(i))
                 ret = 4
             else:
 
-                info_dir = org.wayround.aipsetup.config.config['info']
+                info_dir = config['info_repo']['dir']
 
-                p1 = info_dir + os.path.sep + pkg_name + '.json'
+                p1 = org.wayround.utils.path.join(
+                    info_dir,
+                    pkg_name + '.json'
+                    )
 
-                info = read_from_file(p1)
+                info = org.wayround.aipsetup.info.read_info_file(p1)
 
                 if not isinstance(info, dict):
                     logging.error("Wrong info {}".format(p1))
@@ -1395,7 +1329,7 @@ def info_mass_script(opts, args):
                     if force or info['buildscript'] == '':
                         info['buildscript'] = script_name
 
-                        write_to_file(p1, info)
+                        org.wayround.aipsetup.info.write_info_file(p1, info)
 
                         logging.info("Applied to {}".format(pkg_name))
                     else:
@@ -1405,8 +1339,7 @@ def info_mass_script(opts, args):
                                 )
                             )
 
-
-        org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records()
+        info_ctl.update_outdated_pkg_info_records()
 
     return ret
 
@@ -1426,7 +1359,10 @@ def name_parse_package(opts, args):
 
         filename = args[0]
 
-        p_re = package_name_parse(filename, mute=False)
+        p_re = org.wayround.aipsetup.package_name_parser.package_name_parse(
+            filename,
+            mute=False
+            )
 
         if p_re == None:
             ret = 2
@@ -1435,7 +1371,7 @@ def name_parse_package(opts, args):
 
 
 
-def name_parse_name(opts, args):
+def name_parse_name(config, opts, args):
     """
     Parse name
 
@@ -1454,24 +1390,17 @@ def name_parse_name(opts, args):
 
         filename = args[0]
 
-        packagename = (
-            org.wayround.aipsetup.pkginfo.get_package_name_by_tarball_filename(
-                filename,
-                mute=False
-                )
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        packagename = info_ctl.get_package_name_by_tarball_filename(
+            filename,
+            mute=False
             )
 
         print("Package name is: {}".format(packagename))
 
     return ret
 
-
-def name_parse_test(args, opts):
-    """
-    Test Name Parsing Facilities
-    """
-    parse_test()
-    return 0
 
 def building_site_init(config, opts, args):
     """
@@ -1495,7 +1424,8 @@ def building_site_init(config, opts, args):
 
     return ret
 
-def buildingsite_apply_info(opts, args):
+
+def buildingsite_apply_info(config, opts, args):
     """
     Apply info to building dir
 
@@ -1511,11 +1441,13 @@ def buildingsite_apply_info(opts, args):
     if len(args) > 1:
         file = args[1]
 
-    ret = apply_info(dirname, file)
+    # TODO: add check for dirname correctness
+    bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
+    ret = bs.apply_info(file)
 
     return ret
 
-def build_script(opts, args):
+def build_script(config, opts, args):
     """
     Starts named action from script applied to current building site
 
@@ -1538,17 +1470,18 @@ def build_script(opts, args):
 
         action = args[0]
 
-        bs = '.'
+        dirname = '.'
         if '-b' in opts:
-            bs = opts['-b']
+            dirname = opts['-b']
 
-        ret = start_building_script(bs, action)
+        bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
+        ret = bs.start_building_script(action)
 
     return ret
 
 
 
-def build_complete(opts, args):
+def build_build(config, opts, args):
     """
     Configures, builds, distributes and prepares software accordingly to info
 
@@ -1570,37 +1503,61 @@ def build_complete(opts, args):
         if args_l == 1:
             dir_name = args[0]
 
-        ret = complete(dir_name)
+
+        bs = org.wayround.aipsetup.classes.bsite_ctl(dir_name)
+
+        build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
+
+        buildscript_ctl = org.wayround.aipsetup.classes.bscript_ctl(config)
+
+        ret = build_ctl.complete(buildscript_ctl)
 
     return ret
 
 
 
 
-def buildscript_list_files(opts, args):
-    """
-    List building scripts files
-    """
-    return org.wayround.aipsetup.info.info_list_files(
-        opts, args, 'buildscript', mask='*.py'
-        )
+#def buildscript_list_files(opts, args):
+#    """
+#    List building scripts files
+#    """
+#
+#    # TODO: redo
+#
+#    return org.wayround.aipsetup.info.info_list_files(
+#        opts, args, 'buildscript', mask='*.py'
+#        )
+#
+#def buildscript_edit_file(opts, args):
+#    """
+#    Edit building script
+#
+#    FILENAME
+#    """
+#
+#    # TODO: redo
+#
+#    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
 
-def buildscript_edit_file(opts, args):
-    """
-    Edit building script
 
-    FILENAME
-    """
-    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
-
-
-def clean_packages_with_broken_files(opts, args):
+def clean_packages_with_broken_files(config, opts, args):
 
     """
     Find packages with broken files
     """
 
-    r = org.wayround.aipsetup.package.list_installed_asps_and_their_sums(mute=False)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+    r = system.list_installed_asps_and_their_sums(mute=False)
 
     logging.info("Checking Packages")
 
@@ -1681,7 +1638,7 @@ def clean_packages_with_broken_files(opts, args):
 
     return 0
 
-def clean_check_elfs_readiness(opts, args):
+def clean_check_elfs_readiness(config, opts, args):
 
     """
     Performs system ELF files read checks
@@ -1690,11 +1647,22 @@ def clean_check_elfs_readiness(opts, args):
     can be used to detect broken elf files.
     """
 
-    check_elfs_readiness()
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
-    return 0
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
 
-def clean_find_so_problems(opts, args):
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+    ret = system.check_elfs_readiness()
+
+    return ret
+
+def clean_find_so_problems(config, opts, args):
 
     """
     Find so libraries missing in system and write package names requiring those
@@ -1720,8 +1688,19 @@ def clean_find_so_problems(opts, args):
 
     print("Writing log to {}".format(log.log_filename))
 
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
     logging.info("Gathering asps file tree. Please wait...")
-    tree = org.wayround.aipsetup.package.list_installed_asps_and_their_files(basedir, mute=False)
+    tree = system.list_installed_asps_and_their_files(mute=False)
     logging.info("Now working")
 
     total_problem_packages_list = set()
@@ -1738,8 +1717,8 @@ def clean_find_so_problems(opts, args):
             log.info("    {}".format(j))
 
 
-        pkgs2 = org.wayround.aipsetup.package.find_file_in_files_installed_by_asps(
-            basedir, files, mode='end', mute=False, predefined_asp_tree=tree
+        pkgs2 = system.find_file_in_files_installed_by_asps(
+            files, mode='end', mute=False, predefined_asp_tree=tree
             )
 
         pkgs2_l = list(pkgs2.keys())
@@ -1759,8 +1738,8 @@ def clean_find_so_problems(opts, args):
 
         log.info('---------------------------------')
 
-    pkgs = org.wayround.aipsetup.package.find_file_in_files_installed_by_asps(
-        basedir, libs, mode='end', mute=False, predefined_asp_tree=tree
+    pkgs = system.find_file_in_files_installed_by_asps(
+        libs, mode='end', mute=False, predefined_asp_tree=tree
         )
 
     pkgs_l = list(pkgs.keys())
@@ -1784,28 +1763,40 @@ def clean_find_so_problems(opts, args):
 
     return ret
 
-def clean_find_old_packages(opts, args):
+def clean_find_old_packages(config, opts, args):
 
     """
     Find packages older then month
     """
 
     # TODO: add arguments
+    # TODO: must work with basedir!
 
     ret = 0
 
-    res = find_old_packages()
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+    res = system.find_old_packages()
 
     res.sort()
 
     for i in res:
-        parsed_name = org.wayround.aipsetup.name.package_name_parse(i)
+        parsed_name = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
 
         if not parsed_name:
             logging.warning("Can't parse package name `{}'".format(i))
         else:
 
-            package_date = org.wayround.aipsetup.name.parse_timestamp(
+            package_date = org.wayround.aipsetup.package_name_parser.parse_timestamp(
                 parsed_name['groups']['timestamp']
                 )
 
@@ -1821,7 +1812,7 @@ def clean_find_old_packages(opts, args):
                 print(
                     "    {:30}: {}: {}".format(
                         datetime.datetime.now() - package_date,
-                        org.wayround.aipsetup.name.parse_timestamp(
+                        org.wayround.aipsetup.package_name_parser.parse_timestamp(
                             parsed_name['groups']['timestamp']
                             ),
                         i
@@ -1831,7 +1822,7 @@ def clean_find_old_packages(opts, args):
     return ret
 
 
-def clean_cleanup_repo(opts, args):
+def clean_cleanup_repo(config, opts, args):
 
     """
     Removes old packages from package repository
@@ -1839,11 +1830,13 @@ def clean_cleanup_repo(opts, args):
 
     # TODO: more descriptive help text required
 
-    cleanup_repo()
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    pkg_repo_ctl.cleanup_repo()
 
     return 0
 
-def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
+def clean_check_list_of_installed_packages_and_asps_auto(config, opts, args):
 
     """
     Searches for packages with more when one asp installed
@@ -1851,23 +1844,46 @@ def clean_check_list_of_installed_packages_and_asps_auto(opts, args):
 
     logging.info("Working. Please wait, it will be not long...")
 
-    return check_list_of_installed_packages_and_asps_auto()
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    return pkg_repo_ctl.check_list_of_installed_packages_and_asps_auto()
 
 
+def pkgdeps_print_asps_asp_depends_on(config, opts, args):
 
-def pkgdeps_print_asps_asp_depends_on(opts, args):
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
-    r = get_asps_asp_depends_on('/', args[0], mute=False)
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+    r = system.get_asps_asp_depends_on(args[0], mute=False)
 
     pprint.pprint(r)
 
     return 0
 
-def pkgdeps_print_asp_depends(opts, args):
+def pkgdeps_print_asp_depends(config, opts, args):
 
     ret = 0
 
-    r = get_asp_dependencies('/', args[0], mute=False)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+    r = system.get_asp_dependencies(args[0], mute=False)
 
     if not isinstance(r, dict):
         logging.error(
@@ -1883,9 +1899,20 @@ def pkgdeps_print_asp_depends(opts, args):
     return ret
 
 
-def pkgdeps_print_asps_depending_on_asp(opts, args):
+def pkgdeps_print_asps_depending_on_asp(config, opts, args):
 
-    r = get_asps_depending_on_asp('/', args[0], mute=False)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+    r = system.get_asps_depending_on_asp(args[0], mute=False)
 
     pprint.pprint(r)
 
