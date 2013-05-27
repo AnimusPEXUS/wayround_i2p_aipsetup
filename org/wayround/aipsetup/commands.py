@@ -1,12 +1,15 @@
 
+import sys
 import os.path
 import logging
 import glob
 import copy
+import functools
 
-import org.wayround.aipsetup.dbconnections
 import org.wayround.aipsetup.classes
 import org.wayround.aipsetup.sysupdates
+import org.wayround.aipsetup.version
+import org.wayround.aipsetup.package_name_parser
 
 import org.wayround.utils.path
 import org.wayround.utils.opts
@@ -22,7 +25,8 @@ def commands():
         'pack': build_pack
         },
 
-    'package': {
+    'pkg': {
+        'check':package_check,
         },
 
     'bsite': {
@@ -33,12 +37,25 @@ def commands():
     'client': {},
 
     'info': {
-        'editor':info_editor,
+        'editor': info_editor,
+        'delete': info_delete_pkg_info_records,
+        'save': info_backup_package_info_to_filesystem,
+        'load': info_load_package_info_from_filesystem,
+        'list': info_list_pkg_info_records
         },
 
     'sys': {
         '_help': 'SystemCtl actions: install, uninstall, etc...',
+        'list': system_package_list,
+        'lista': system_package_list_asps,
         'install': system_install_package,
+        'remove': system_remove_package,
+        'reduce': system_reduce_asp_to_latest,
+        'find': system_find_package_files,
+        },
+
+    'sysfix': {
+        'generate_deps': system_make_asp_deps,
         },
 
     'repo': {
@@ -147,7 +164,7 @@ def system_install_package(config, opts, args):
     return ret
 
 
-def package_list(config, opts, args):
+def system_package_list(config, opts, args):
     """
     List installed packages
 
@@ -171,17 +188,25 @@ def package_list(config, opts, args):
         ret = 2
 
     if ret == 0:
-        lst = list_installed_packages(mask, basedir)
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        system = org.wayround.aipsetup.classes.sys_ctl(
+            config, info_ctl, pkg_repo_ctl, basedir
+            )
+
+        lst = system.list_installed_packages(mask)
 
         lst.sort()
 
         org.wayround.utils.text.columned_list_print(
             lst, fd=sys.stdout.fileno()
-        )
+            )
 
     return ret
 
-def package_list_asps(config, opts, args):
+def system_package_list_asps(config, opts, args):
     """
     List installed package's ASPs
 
@@ -212,12 +237,19 @@ def package_list_asps(config, opts, args):
 
             logging.info("Searching ASPs for package `{}'".format(name))
 
-            lst = list_installed_package_s_asps(name, basedir)
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+            system = org.wayround.aipsetup.classes.sys_ctl(
+                config, info_ctl, pkg_repo_ctl, basedir
+                )
+
+            lst = system.list_installed_package_s_asps(name)
 
             lst.sort(
                 reverse=True,
                 key=functools.cmp_to_key(
-                    org.wayround.utils.version.package_version_comparator
+                    org.wayround.aipsetup.version.package_version_comparator
                     )
                 )
 
@@ -228,11 +260,13 @@ def package_list_asps(config, opts, args):
 
 def package_list_files(config, opts, args):
 
+    # TODO: complete this
+
     ret = 0
 
     return ret
 
-def package_remove(config, opts, args):
+def system_remove_package(config, opts, args):
     """
     Removes package matching NAME.
 
@@ -263,15 +297,70 @@ def package_remove(config, opts, args):
         ret = 3
 
     if ret == 0:
-        ret = remove_package(name, force, basedir)
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        system = org.wayround.aipsetup.classes.sys_ctl(
+            config,
+            info_ctl,
+            pkg_repo_ctl,
+            basedir
+            )
+
+        ret = system.remove_package(name, force, basedir)
 
         org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
 
-def package_complete(config, opts, args):
+def _build_complete_subroutine(
+    config,
+    host,
+    target,
+    build,
+    dirname,
+    file,
+    r_bds
+    ):
+
+    ret = 0
+
+    const = org.wayround.aipsetup.classes.constitution(
+        config,
+        host,
+        target,
+        build
+        )
+
+    if const == None:
+        ret = 1
+    else:
+
+        bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
+
+        build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
+        pack_ctl = org.wayround.aipsetup.classes.pack_ctl(bs)
+
+        build_script_ctl = org.wayround.aipsetup.classes.bscript_ctl(config)
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        ret = bs.complete(
+            build_ctl,
+            pack_ctl,
+            build_script_ctl,
+            info_ctl,
+            main_src_file=file,
+            remove_buildingsite_after_success=r_bds
+            )
+
+    return ret
+
+def build_complete(config, opts, args):
     """
-    Complete package building process: build complete; pack complete
+    Complete package building process in existing building site
 
     [DIRNAME] [TARBALL]
 
@@ -289,26 +378,52 @@ def package_complete(config, opts, args):
 
     options:
 
-    -d - remove buildingsite on success
+    ================ ====================================
+    options          meaning
+    ================ ====================================
+    -d               remove building site on success
+    --host=TRIPLET
+    --build=TRIPLET
+    --target=TRIPLET
+    ================ ====================================
     """
+
+    ret = 0
 
     dirname = '.'
     file = None
 
     r_bds = '-d' in opts
 
+    host = config['system_settings']['host']
+    build = config['system_settings']['build']
+    target = config['system_settings']['target']
 
-    ret = 0
+    if '--host' in opts:
+        host = opts['--host']
+
+    if '--build' in opts:
+        build = opts['--build']
+
+    if '--target' in opts:
+        target = opts['--target']
 
     args_l = len(args)
+
 
     if args_l == 0:
 
         dirname = '.'
         file = None
 
-        ret = complete(
-            dirname, file, remove_buildingsite_after_success=r_bds
+        ret = _build_complete_subroutine(
+            config,
+            host,
+            target,
+            build,
+            dirname,
+            file,
+            r_bds
             )
 
     elif args_l == 1:
@@ -330,8 +445,14 @@ def package_complete(config, opts, args):
 
         if ret == 0:
 
-            ret = complete(
-                dirname, file, remove_buildingsite_after_success=r_bds
+            ret = _build_complete_subroutine(
+                config,
+                host,
+                target,
+                build,
+                dirname,
+                file,
+                r_bds
                 )
 
     elif args_l == 2:
@@ -341,8 +462,14 @@ def package_complete(config, opts, args):
             dirname = args[0]
             file = args[1]
 
-            ret = complete(
-                dirname, file, remove_buildingsite_after_success=r_bds
+            ret = _build_complete_subroutine(
+                config,
+                host,
+                target,
+                build,
+                dirname,
+                file,
+                r_bds
                 )
 
         elif os.path.isdir(args[0]) and os.path.isdir(args[1]):
@@ -350,15 +477,19 @@ def package_complete(config, opts, args):
             file = None
             ret = 0
             for i in args[:2]:
-                if complete(
-                    i, file, remove_buildingsite_after_success=r_bds
-                    ) != 0:
 
-                    ret += 1
+                ret += _build_complete_subroutine(
+                    config,
+                    host,
+                    target,
+                    build,
+                    i,
+                    file,
+                    r_bds
+                    )
 
         else:
             logging.error("Wrong arguments")
-
 
     elif args_l > 2:
 
@@ -366,8 +497,15 @@ def package_complete(config, opts, args):
 
         ret = 0
         for i in args[2:]:
-            if complete(i, file, remove_buildingsite_after_success=r_bds) != 0:
-                ret += 1
+            ret += _build_complete_subroutine(
+                config,
+                host,
+                target,
+                build,
+                i,
+                file,
+                r_bds
+                )
 
     else:
         raise Exception("Programming error")
@@ -426,18 +564,16 @@ def build_full(config, opts, args):
 
     if ret == 0:
 
-        try:
-            const = org.wayround.aipsetup.build.Constitution(
-                host_str=host,
-                build_str=build,
-                target_str=target
-                )
-        except org.wayround.aipsetup.build.SystemTypeInvalidFullName:
-            logging.error("Wrong host: {}".format(host))
+        const = org.wayround.aipsetup.classes.constitution(
+            config,
+            host,
+            target,
+            build
+            )
+
+        if const == None:
             ret = 1
         else:
-
-            const.paths = dict(config['system_paths'])
 
             if multiple_packages:
                 sources.sort()
@@ -491,7 +627,7 @@ def build_pack(config, opts, args):
 
     return ret
 
-def package_find_files(config, opts, args):
+def system_find_package_files(config, opts, args):
     """
     Looks for LOOKFOR in all installed packages using one of methods:
 
@@ -519,8 +655,19 @@ def package_find_files(config, opts, args):
     if len(args) > 0:
         lookfor = args[0]
 
-    ret = find_file_in_files_installed_by_asps(
-        basedir, lookfor, mode=look_meth
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir
+        )
+
+    ret = system.find_file_in_files_installed_by_asps(
+        lookfor, mode=look_meth
         )
 
     if isinstance(ret, dict):
@@ -558,7 +705,7 @@ def package_find_files(config, opts, args):
 
     return ret
 
-def package_check_package(config, opts, args):
+def package_check(config, opts, args):
     """
     Check package for errors
     """
@@ -576,11 +723,13 @@ def package_check_package(config, opts, args):
 
     else:
 
-        ret = check_package(file)
+        asp_pkg = org.wayround.aipsetup.classes.asp_package(file)
+
+        ret = asp_pkg.check_package()
 
     return ret
 
-def package_asp_reduce_to_latest(config, opts, args):
+def system_reduce_asp_to_latest(config, opts, args):
     """
     Forcibly reduces named asp, excluding files installed by latest package's asp
 
@@ -601,7 +750,10 @@ def package_asp_reduce_to_latest(config, opts, args):
         asp_name = args
 
         for asp_name in args:
-            package_name_parsed = org.wayround.aipsetup.name.package_name_parse(asp_name)
+            package_name_parsed = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    asp_name
+                    )
             package_name = None
 
             if not isinstance(package_name_parsed, dict):
@@ -617,18 +769,29 @@ def package_asp_reduce_to_latest(config, opts, args):
                         )
                     )
 
-                asp_name_latest = (
-                    org.wayround.aipsetup.package.latest_installed_package_s_asp(
-                        package_name,
-                        destdir
-                        )
+                info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+                pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+                system = org.wayround.aipsetup.classes.sys_ctl(
+                    config,
+                    info_ctl,
+                    pkg_repo_ctl,
+                    destdir
                     )
 
-                reduce_asps(asp_name_latest, [asp_name], destdir)
+                asp_name_latest = system.latest_installed_package_s_asp(
+                    package_name
+                    )
+
+                system.reduce_asps(asp_name_latest, [asp_name])
 
     return ret
 
-def package_make_asp_deps(config, opts, args):
+def system_make_asp_deps(config, opts, args):
+    """
+    generates dependencies listing for named asp and places it under
+    /destdir/var/log/packages/deps
+    """
 
     ret = 0
 
@@ -644,7 +807,17 @@ def package_make_asp_deps(config, opts, args):
 
         asp_name = args[0]
 
-        ret = make_asp_deps(destdir, asp_name, mute=False)
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        system = org.wayround.aipsetup.classes.sys_ctl(
+            config,
+            info_ctl,
+            pkg_repo_ctl,
+            destdir
+            )
+
+        ret = system.make_asp_deps(asp_name, mute=False)
 
     return ret
 
@@ -672,7 +845,7 @@ def package_repository_index_and_update(config, opts, args):
 
         else:
 
-            if repoman_load_package_info_from_filesystem(
+            if info_load_package_info_from_filesystem(
                 config, opts={}, args=[]
                 ) != 0:
 
@@ -836,8 +1009,10 @@ def info_find_outdated_pkg_info_records(config, opts, args):
     """
     ret = 0
 
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
     try:
-        res = org.wayround.aipsetup.pkginfo.get_outdated_info_records_list(
+        res = info_ctl.get_outdated_info_records_list(
             mute=False
             )
 
@@ -854,37 +1029,45 @@ def info_find_outdated_pkg_info_records(config, opts, args):
 
     return ret
 
-def repoman_update_outdated_pkg_info_records(opts, args):
+def info_update_outdated_pkg_info_records(config, opts, args):
     """
     Loads pkg info records which differs to FS .json files
     """
 
-    org.wayround.aipsetup.pkginfo.update_outdated_pkg_info_records()
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    info_ctl.update_outdated_pkg_info_records()
+
+    # TODO: ret is need to be made
 
     return 0
 
-def repoman_delete_pkg_info_records(opts, args):
+def info_delete_pkg_info_records(config, opts, args):
     """
     mask must be given or operation will fail
 
     MASK
     """
-    mask = None
-
     ret = 0
+
+    mask = None
 
     if len(args) > 0:
         mask = args[0]
 
     if mask != None:
-        ret = org.wayround.aipsetup.pkginfo.delete_info_records(mask)
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        ret = info_ctl.delete_info_records(mask)
+
     else:
         logging.error("Mask is not given")
         ret = 1
 
     return ret
 
-def repoman_backup_package_info_to_filesystem(opts, args):
+def info_backup_package_info_to_filesystem(config, opts, args):
     """
     Save package information from database to info directory.
 
@@ -899,11 +1082,13 @@ def repoman_backup_package_info_to_filesystem(opts, args):
 
     force = '-f' in opts
 
-    ret = org.wayround.aipsetup.pkginfo.save_info_records_to_fs(mask, force)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    ret = info_ctl.save_info_records_to_fs(mask, force)
 
     return ret
 
-def repoman_load_package_info_from_filesystem(config, opts, args):
+def info_load_package_info_from_filesystem(config, opts, args):
     """
     Load missing package information from named files
 
@@ -939,7 +1124,7 @@ def repoman_load_package_info_from_filesystem(config, opts, args):
 
     return ret
 
-def repoman_list_pkg_info_records(opts, args):
+def info_list_pkg_info_records(opts, args):
     """
     List records containing in index
 
@@ -952,7 +1137,9 @@ def repoman_list_pkg_info_records(opts, args):
     if len(args) > 0:
         mask = args[0]
 
-    org.wayround.aipsetup.pkginfo.get_info_records_list(mask)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    info_ctl.get_info_records_list(mask)
 
     return 0
 

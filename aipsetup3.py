@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-import sys
 import logging
 
 import org.wayround.utils.program
+
+org.wayround.utils.program.logging_setup()
 
 import org.wayround.aipsetup.commands
 import org.wayround.aipsetup.config

@@ -1,8 +1,11 @@
 
+import logging
+
 import org.wayround.aipsetup.dbconnections
 import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package
+import org.wayround.aipsetup.system
 
 def pkg_repo_ctl(config):
 
@@ -84,3 +87,25 @@ def tag_ctl(config):
         )
 
     return ret
+
+def constitution(config, host, target, build):
+
+    ret = None
+
+    try:
+        ret = org.wayround.aipsetup.build.Constitution(
+            host_str=host,
+            build_str=build,
+            target_str=target
+            )
+    except org.wayround.aipsetup.build.SystemTypeInvalidFullName:
+        logging.error("Wrong host: {}".format(host))
+        ret = 1
+    else:
+
+        ret.paths = dict(config['system_paths'])
+
+    return ret
+
+def asp_package(asp_filename):
+    return org.wayround.aipsetup.package.ASPackage(asp_filename)

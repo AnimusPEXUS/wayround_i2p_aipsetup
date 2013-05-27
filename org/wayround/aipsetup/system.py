@@ -88,7 +88,7 @@ class SystemCtl:
                 lst.sort(
                     reverse=True,
                     key=functools.cmp_to_key(
-                        org.wayround.utils.version.package_version_comparator
+                        org.wayround.aipsetup.version.package_version_comparator
                         )
                     )
 
@@ -747,7 +747,7 @@ class SystemCtl:
 
         ret = None
 
-        asps = self.list_installed_asps(self.basedir, True)
+        asps = self.list_installed_asps(True)
 
         if not isinstance(asps, list):
             logging.error("Error getting list of installed ASPs")
@@ -756,7 +756,10 @@ class SystemCtl:
             lst = set()
 
             for i in asps:
-                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(i, mute=True)
+                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    i,
+                    mute=True
+                    )
 
                 if not isinstance(parsed, dict):
                     logging.error("Couldn't parse name `{}'".format(i))
