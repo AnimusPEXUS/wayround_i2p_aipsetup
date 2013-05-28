@@ -2,6 +2,7 @@
 import logging
 
 import org.wayround.aipsetup.dbconnections
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package
