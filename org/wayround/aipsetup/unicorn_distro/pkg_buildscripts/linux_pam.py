@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -31,9 +31,11 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
+
         separate_build_dir = False
 
-        source_configure_reldir = 'build_unix'
+        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -50,11 +52,9 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-sql',
-                    '--enable-compat185',
-                    '--enable-cxx',
-                    '--enable-tcl',
-                    '--with-tcl=/usr/lib',
+#                    '--disable-nis',
+                    '--enable-db=ndbm',
+                    '--enable-read-both-confs',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -69,10 +69,9 @@ def main(buildingsite, action=None):
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
-                script_name='../dist/configure',
+                script_name='configure',
                 run_script_not_bash=False,
-#                relative_call=False,
-                relative_call=True
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
@@ -87,34 +86,17 @@ def main(buildingsite, action=None):
                 )
 
         if 'distribute' in actions and ret == 0:
-            dis_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(
-                                buildingsite
-                                )
-
-            doc_dir = os.path.join(dis_dir, 'usr', 'share', 'doc', 'db')
-
-            try:
-                os.makedirs(
-                    doc_dir,
-                    mode=0o755
-                    )
-            except:
-                logging.exception("Error")
-                ret = 20
-            else:
-
-                ret = autotools.make_high(
-                    buildingsite,
-                    options=[],
-                    arguments=[
-                        'install',
-                        'DESTDIR=' + dis_dir,
-                        'docdir=/usr/share/doc/db'  # it's not a mistake docdir must be eq to /usr/share/doc/db
-                        ],
-                    environment={},
-                    environment_mode='copy',
-                    use_separate_buildding_dir=separate_build_dir,
-                    source_configure_reldir=source_configure_reldir
-                    )
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install',
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
 
     return ret

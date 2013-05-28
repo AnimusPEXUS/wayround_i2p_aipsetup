@@ -1574,7 +1574,6 @@ class SystemCtl:
                     files_list = list(set(files_list) - set(asp_name_latest_files))
 
                     i_deps = self.get_asp_dependencies(
-                        destdir,
                         i,
                         mute=True,
                         predefined_asp_name_files=files_list

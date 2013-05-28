@@ -26,7 +26,8 @@ def commands():
         'full': build_full,
         'build': build_build,
         'build+': build_script,
-        'pack': build_pack
+        'pack': build_pack,
+        'complete': build_complete
         },
 
     'pkg': {
@@ -34,7 +35,8 @@ def commands():
         },
 
     'bsite': {
-        'init': building_site_init
+        'init': building_site_init,
+        'apply': building_site_apply_info
         },
 
     'server': {},
@@ -405,7 +407,8 @@ def _build_complete_subroutine(
             build_script_ctl,
             info_ctl,
             main_src_file=file,
-            remove_buildingsite_after_success=r_bds
+            remove_buildingsite_after_success=r_bds,
+            const=const
             )
 
     return ret
@@ -1445,7 +1448,7 @@ def building_site_init(config, opts, args):
     return ret
 
 
-def buildingsite_apply_info(config, opts, args):
+def building_site_apply_info(config, opts, args):
     """
     Apply info to building dir
 
