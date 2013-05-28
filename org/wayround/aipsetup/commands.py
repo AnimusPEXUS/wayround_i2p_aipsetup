@@ -21,12 +21,11 @@ import org.wayround.utils.opts
 
 def commands():
     return {
-    '_order': [
-        ],
 
     'build': {
         'full': build_full,
-#        'build': build_build,
+        'build': build_build,
+        'build+': build_script,
         'pack': build_pack
         },
 
@@ -46,7 +45,15 @@ def commands():
         'delete': info_delete_pkg_info_records,
         'save': info_backup_package_info_to_filesystem,
         'load': info_load_package_info_from_filesystem,
-        'list': info_list_pkg_info_records
+        'list': info_list_pkg_info_records,
+        'missing': info_find_missing_pkg_info_records,
+        'outdated': info_find_outdated_pkg_info_records,
+        'update': info_update_outdated_pkg_info_records,
+        'print': info_print_pkg_record,
+        'save_tags': save_info_tags,
+        'load_tags': load_info_tags,
+        'script': info_mass_script_apply,
+        'parse': info_parse_pkg_name,
         },
 
     'sys': {
@@ -57,25 +64,32 @@ def commands():
         'remove': system_remove_package,
         'reduce': system_reduce_asp_to_latest,
         'find': system_find_package_files,
+        'generate_deps': system_make_asp_deps,
+        'files': system_list_package_files
         },
 
-    'sysfix': {
-        'generate_deps': system_make_asp_deps,
+    'sys_clean': {
+        'find_broken': clean_packages_with_broken_files,
+        'elf_readiness': clean_check_elfs_readiness,
+        'so_problems': clean_find_so_problems,
+        'find_old': clean_find_old_packages,
+        'explicit_asps': clean_check_list_of_installed_packages_and_asps_auto,
+        },
+
+    'sys_deps': {
+        'asps_asp_depends_on': pkgdeps_print_asps_asp_depends_on,
+        'asp_depends': pkgdeps_print_asp_depends,
+        'asps_depending_on_asp':pkgdeps_print_asps_depending_on_asp,
         },
 
     'repo': {
-        'index': package_repository_index_and_update,
-        'put': package_put_to_repository
+        'index': pkg_repo_index_and_update,
+        'put': pkg_repo_put_file,
+        'clean': pkg_repo_cleanup,
         },
 
     'src': {
-        'index': source_repository_index,
-        },
-
-    'build_repo': {},
-
-    'test': {
-        'test': test_test
+        'index': src_repo_index,
         }
 
     }
@@ -263,11 +277,44 @@ def system_package_list_asps(config, opts, args):
 
     return ret
 
-def package_list_files(config, opts, args):
-
-    # TODO: complete this
+def system_list_package_files(config, opts, args):
 
     ret = 0
+
+    basedir = '/'
+
+    if '-b' in opts:
+        basedir = opts['-b']
+
+    pkg_name = None
+
+    if len(args) != 1:
+        logging.error("One package name required")
+        ret = 1
+    else:
+
+        pkg_name = args[0]
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        system = org.wayround.aipsetup.classes.sys_ctl(
+            config, info_ctl, pkg_repo_ctl, basedir
+            )
+
+        latest = system.latest_installed_package_s_asp(pkg_name)
+
+        if latest == None:
+            logging.error(
+                "Error getting latest installed asp of package `{}'".format(pkg_name)
+                )
+            ret = 2
+        else:
+            files = system.list_files_installed_by_asp(latest, mute=True)
+
+            files.sort()
+            for i in files:
+                print(i)
 
     return ret
 
@@ -639,7 +686,7 @@ def system_find_package_files(config, opts, args):
     [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
 
     ================ ===================================
-    -m option values meanings
+    -m option value  meaning
     ================ ===================================
     sub              (default) filename contains LOOKFOR
     re               LOOKFOR is RegExp
@@ -827,7 +874,7 @@ def system_make_asp_deps(config, opts, args):
     return ret
 
 
-def package_repository_index_and_update(config, opts, args):
+def pkg_repo_index_and_update(config, opts, args):
     """
     Perform scan and templates creation
     """
@@ -894,7 +941,7 @@ def package_repository_index(config, opts, args):
     return ret
 
 
-def source_repository_index(config, opts, args):
+def src_repo_index(config, opts, args):
     """
     Create sources and repositories indexes
 
@@ -903,7 +950,7 @@ def source_repository_index(config, opts, args):
     -d - before saving delete all found files from index
     -f - force reindexation of already indexed files
 
-    SUBDIR - index only one of subderictories
+    SUBDIR - index only one of subdirectories
     """
 
     ret = 0
@@ -1148,7 +1195,7 @@ def info_list_pkg_info_records(config, opts, args):
 
     return 0
 
-def repoman_print_pkg_info_record(config, opts, args):
+def info_print_pkg_record(config, opts, args):
     """
     Print package info record information
     """
@@ -1164,7 +1211,13 @@ def repoman_print_pkg_info_record(config, opts, args):
 
         info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
-        info_ctl.print_info_record(name)
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+        info_ctl.print_info_record(
+            name, pkg_repo_ctl, tag_ctl
+            )
 
     else:
         logging.error("Name is not given")
@@ -1172,7 +1225,7 @@ def repoman_print_pkg_info_record(config, opts, args):
 
     return ret
 
-def repoman_load_tags(config, opts, args):
+def load_info_tags(config, opts, args):
 
     tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
 
@@ -1180,7 +1233,7 @@ def repoman_load_tags(config, opts, args):
 
     return 0
 
-def repoman_save_tags(config, opts, args):
+def save_info_tags(config, opts, args):
 
     tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
 
@@ -1189,7 +1242,7 @@ def repoman_save_tags(config, opts, args):
     return 0
 
 
-def package_put_to_repository(config, opts, args):
+def pkg_repo_put_file(config, opts, args):
     """
     Copy package to index repository
 
@@ -1265,7 +1318,7 @@ def info_editor(config, opts, args):
     return ret
 
 
-def info_mass_script(config, opts, args):
+def info_mass_script_apply(config, opts, args):
     """
     Mass buildscript applience
 
@@ -1343,7 +1396,7 @@ def info_mass_script(config, opts, args):
 
     return ret
 
-def name_parse_package(opts, args):
+def info_parse_pkg_name(opts, args):
     """
     Parse package name
 
@@ -1368,39 +1421,6 @@ def name_parse_package(opts, args):
             ret = 2
 
     return ret
-
-
-
-def name_parse_name(config, opts, args):
-    """
-    Parse name
-
-    [-w] NAME
-
-    if -w is set - change <name>.json info file nametype value to
-    result
-    """
-
-    ret = 0
-
-    if len(args) != 1:
-        logging.error("File name required")
-        ret = 1
-    else:
-
-        filename = args[0]
-
-        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-        packagename = info_ctl.get_package_name_by_tarball_filename(
-            filename,
-            mute=False
-            )
-
-        print("Package name is: {}".format(packagename))
-
-    return ret
-
 
 def building_site_init(config, opts, args):
     """
@@ -1822,7 +1842,7 @@ def clean_find_old_packages(config, opts, args):
     return ret
 
 
-def clean_cleanup_repo(config, opts, args):
+def pkg_repo_cleanup(config, opts, args):
 
     """
     Removes old packages from package repository

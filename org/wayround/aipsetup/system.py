@@ -13,7 +13,7 @@ import tarfile
 
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.package_name_parser
-
+import org.wayround.aipsetup.version
 import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 
@@ -1002,7 +1002,7 @@ class SystemCtl:
             latest = max(
                 lst,
                 key=functools.cmp_to_key(
-                    org.wayround.utils.version.package_version_comparator
+                    org.wayround.aipsetup.version.package_version_comparator
                     )
                 )
 
