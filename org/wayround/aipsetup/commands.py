@@ -22,6 +22,10 @@ import org.wayround.utils.opts
 def commands():
     return {
 
+    'config': {
+        'init': config_init
+        },
+
     'build': {
         'full': build_full,
         'build': build_build,
@@ -39,7 +43,9 @@ def commands():
         'apply': building_site_apply_info
         },
 
-    'server': {},
+    'server': {
+        'start': server_start_host,
+        },
     'client': {},
 
     'info': {
@@ -95,6 +101,16 @@ def commands():
         }
 
     }
+
+def config_init(config, opts, args):
+
+    import org.wayround.aipsetup.config
+
+    org.wayround.aipsetup.config.save_config(
+        org.wayround.aipsetup.config.DEFAULT_CONFIG
+        )
+
+    return 0
 
 
 def test_test(config, opts, args):
@@ -1941,3 +1957,26 @@ def pkgdeps_print_asps_depending_on_asp(config, opts, args):
 
     return 0
 
+
+
+def server_start_host(config, opts, args):
+    """
+    Start serving UNICORN Web Host
+    """
+
+    import org.wayround.aipsetup.server
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+    app = org.wayround.aipsetup.server.AipsetupASPServer(
+        config,
+        pkg_repo_ctl,
+        info_ctl,
+        tag_ctl
+        )
+
+    app.start()
+
+    return

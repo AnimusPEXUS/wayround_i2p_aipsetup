@@ -100,35 +100,6 @@ DEFAULT_CONFIG = {
     }
 
 
-def exported_commands():
-    """
-    Part of aipsetup CLI interface
-    """
-    return {
-        'init': config_init
-        }
-
-def commands_order():
-    """
-    Part of aipsetup CLI interface
-    """
-    return [
-        'init'
-        ]
-
-def cli_name():
-    """
-    Part of aipsetup CLI interface
-    """
-    return 'config'
-
-
-def config_init(opts, args):
-
-    save_config(DEFAULT_CONFIG)
-
-    return 0
-
 
 def load_config(filename):
 

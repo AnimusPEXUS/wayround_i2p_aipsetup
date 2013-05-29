@@ -4,69 +4,41 @@ import os.path
 
 import bottle
 
-import org.wayround.aipsetup.pkgindex
-import org.wayround.aipsetup.pkglatest
-import org.wayround.aipsetup.pkgtag
-import org.wayround.aipsetup.pkginfo
-import org.wayround.aipsetup.info
+import org.wayround.aipsetup.dbconnections
+import org.wayround.aipsetup.classes
 
+import org.wayround.aipsetup.serverui
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'
-
-
-def cli_name():
-    return 'server'
-
-def exported_commands():
-    return {
-        'start': server_start_host
-        }
-
-def commands_order():
-    return ['start']
-
-
-
-def server_start_host(opts, args):
-    """
-    Start serving UNICORN Web Host
-    """
-
-    import org.wayround.aipsetup.serverui
-
-    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    css_dir = os.path.join(os.path.dirname(__file__), 'css')
-    js_dir = os.path.join(os.path.dirname(__file__), 'js')
-
-    app = AipsetupASPServer(
-        templates_dir=templates_dir,
-        css_dir=css_dir,
-        js_dir=js_dir
-        )
-
-    app.start()
-
-    return
-
 
 class AipsetupASPServer:
 
     def __init__(
         self,
-        host='localhost',
-        port=8080,
-        templates_dir='.',
-        css_dir='./css',
-        js_dir='./js'
+        config,
+        pkg_repo_ctl,
+        info_ctl,
+        tag_ctl
         ):
 
-        self.host = host
-        self.port = port
+        web = os.path.join(os.path.dirname(__file__), 'web', 'pkg_server')
+
+        templates_dir = os.path.join(web, 'templates')
+        css_dir = os.path.join(web, 'css')
+        js_dir = os.path.join(web, 'js')
+
+        self.host = config['web_server_config']['ip']
+        self.port = config['web_server_config']['port']
 
         self.templates_dir = templates_dir
         self.css_dir = css_dir
         self.js_dir = js_dir
+
+        self.pkg_repo_ctl = pkg_repo_ctl
+        self.info_ctl = info_ctl
+        self.tag_ctl = tag_ctl
+
 
         self.ui = org.wayround.aipsetup.serverui.UI(templates_dir)
 
@@ -119,7 +91,7 @@ class AipsetupASPServer:
             if path in [None, '/']:
                 path = ''
 
-            cat_id = org.wayround.aipsetup.pkgindex.get_category_by_path(
+            cat_id = self.pkg_repo_ctl.get_category_by_path(
                 path
                 )
 
@@ -130,12 +102,12 @@ class AipsetupASPServer:
 
             if cat_id != 0:
 
-                parent_id = org.wayround.aipsetup.pkgindex.get_category_parent_by_id(
+                parent_id = self.pkg_repo_ctl.get_category_parent_by_id(
                     cat_id
                     )
 
 
-                parent_path = org.wayround.aipsetup.pkgindex.get_category_path_string(
+                parent_path = self.pkg_repo_ctl.get_category_path_string(
                     parent_id
                     )
 
@@ -144,11 +116,11 @@ class AipsetupASPServer:
             categories = []
             packages = []
 
-            cats_ids = org.wayround.aipsetup.pkgindex.get_category_id_list(
+            cats_ids = self.pkg_repo_ctl.get_category_id_list(
                 cat_id
                 )
 
-            pack_ids = org.wayround.aipsetup.pkgindex.get_package_id_list(
+            pack_ids = self.pkg_repo_ctl.get_package_id_list(
                 cat_id
                 )
 
@@ -156,10 +128,10 @@ class AipsetupASPServer:
             for i in cats_ids:
                 categories.append(
                     {'path':
-                        org.wayround.aipsetup.pkgindex.get_category_path_string(
+                        self.pkg_repo_ctl.get_category_path_string(
                             i
                             ),
-                     'name':org.wayround.aipsetup.pkgindex.get_category_by_id(
+                     'name':self.pkg_repo_ctl.get_category_by_id(
                             i
                             )
                     }
@@ -167,7 +139,7 @@ class AipsetupASPServer:
 
             for i in pack_ids:
                 packages.append(
-                    org.wayround.aipsetup.pkgindex.get_package_by_id(
+                    self.pkg_repo_ctl.get_package_by_id(
                         i
                         )
                     )
@@ -184,34 +156,34 @@ class AipsetupASPServer:
 
             if path == None:
 
-                pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
+                pkgs = self.pkg_repo_ctl.get_package_idname_dict(
                     None
                     )
 
-                cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
+                cats = self.pkg_repo_ctl.get_category_idname_dict(
                     None
                     )
 
             else:
-                cid = org.wayround.aipsetup.pkgindex.get_category_by_path(
+                cid = self.pkg_repo_ctl.get_category_by_path(
                     path
                     )
 
-                pkgs = org.wayround.aipsetup.pkgindex.get_package_idname_dict(
+                pkgs = self.pkg_repo_ctl.get_package_idname_dict(
                     cid
                     )
 
-                cats = org.wayround.aipsetup.pkgindex.get_category_idname_dict(
+                cats = self.pkg_repo_ctl.get_category_idname_dict(
                     cid
                     )
 
             for i in list(pkgs.keys()):
-                pkgs[i] = org.wayround.aipsetup.pkgindex.get_package_path_string(
+                pkgs[i] = self.pkg_repo_ctl.get_package_path_string(
                     i
                     )
 
             for i in list(cats.keys()):
-                cats[i] = org.wayround.aipsetup.pkgindex.get_category_path_string(
+                cats[i] = self.pkg_repo_ctl.get_category_path_string(
                     i
                     )
 
@@ -245,7 +217,7 @@ class AipsetupASPServer:
 
         if mode == 'normal':
 
-            pkg_info = org.wayround.aipsetup.pkginfo.get_package_info_record(name)
+            pkg_info = self.info_ctl.get_package_info_record(name)
 
             keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
 
@@ -267,31 +239,14 @@ class AipsetupASPServer:
                         )
                     )
 
-            cid = org.wayround.aipsetup.pkgindex.get_package_category_by_name(name)
+            cid = self.pkg_repo_ctl.get_package_category_by_name(name)
             if cid != None:
-                category = org.wayround.aipsetup.pkgindex.get_category_path_string(cid)
+                category = self.pkg_repo_ctl.get_category_path_string(cid)
             else:
                 category = "< Package not indexed! >"
 
 
-            latest_pkg = org.wayround.aipsetup.pkglatest.get_latest_pkg_from_record(
-                name
-                )
-
-            latest_src = org.wayround.aipsetup.pkglatest.get_latest_src_from_record(
-                name
-                )
-
-            latest_asp_basename = 'None'
-            if latest_pkg:
-                latest_asp_basename = os.path.basename(latest_pkg)
-
-            latest_src_basename = 'None'
-            if latest_src:
-                latest_src_basename = os.path.basename(latest_src)
-
-
-            tag_db = org.wayround.aipsetup.pkgtag.package_tags_connection()
+            tag_db = self.tag_ctl.package_tags_connection()
             tags = tag_db.get_tags(name)
 
             txt = self.ui.package(
@@ -301,8 +256,6 @@ class AipsetupASPServer:
                 homepage=pkg_info['home_page'],
                 description=pkg_info['description'],
                 tags=tags,
-                latest_asp_basename=latest_asp_basename,
-                latest_src_basename=latest_src_basename,
                 asp_list='',
                 tarball_list=''
                 )
