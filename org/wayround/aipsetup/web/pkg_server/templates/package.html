@@ -9,37 +9,29 @@
                             % for i in autorows:
                             <tr>
                                 <td>${ '{}:'.format(i[0]) | x }</td>
-                                <td>${ i[1] | x }</td>
+                                <td><pre>${ i[1] | x }</pre></td>
                             </tr>
                             % endfor
                             <tr>
                                 <td>Base Name:</td>
-                                <td>${ basename | x }</td>
+                                <td><pre>${ basename | x }</pre></td>
                             </tr>
                             <tr>
                                 <td>Category:</td>
-                                <td>${ category | x }</td>
+                                <td><pre>${ category | x }</pre></td>
                             </tr>
                             <tr>
                                 <td>Home Page:</td>
-                                <td>${ homepage | x }</td>
+                                <td><pre>${ homepage | x }</pre></td>
                             </tr>
                             <tr>
                                 <td>Tags:</td>
-                                <td>${ ','.join(tags) | x }</td>
-                            </tr>
-                            <tr>
-                                <td>Latest package (ASP):</td>
-                                <td><a href="${ latest_asp_basename | u,x }">${ latest_asp_basename | x }</a></td>
-                            </tr>
-                            <tr>
-                                <td>Newest src:</td>
-                                <td><a href="${ latest_src_basename | u,x }">${ latest_src_basename | x }</a></td>
+                                <td><pre>${ ','.join(tags) | x }</pre></td>
                             </tr>
                         </tbody>
                     </table>
                 </td>
-                <td>${ description | x }</td>
+                <td><pre>${ description | x }</pre></td>
             </tr>
         </tbody>
     </table>
@@ -49,12 +41,12 @@
     <table>
         <thead>
             <tr>
-                <th>Packages (ASPs):</th><th>Source Tarballs:</th>
+                <th>Packages:</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>${asp_list}</td><td>${tarball_list}</td>
+                <td>${asp_list}</td>
             </tr>
         </tbody>
     </table>

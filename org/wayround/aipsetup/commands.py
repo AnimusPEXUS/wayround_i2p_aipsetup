@@ -82,6 +82,7 @@ def commands():
         'so_problems': clean_find_so_problems,
         'find_old': clean_find_old_packages,
         'explicit_asps': clean_check_list_of_installed_packages_and_asps_auto,
+        'find_nonso_garbage': clean_find_nonso_garbage,
         },
 
     'sys_deps': {
@@ -1979,4 +1980,22 @@ def server_start_host(config, opts, args):
 
     app.start()
 
-    return
+    return 0
+
+def clean_find_nonso_garbage(config, opts, args):
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/'
+        )
+
+
+    system.find_system_nonso_garbage()
+
+    return 0

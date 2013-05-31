@@ -62,10 +62,11 @@ class UI:
             parent_path=parent_path
             )
 
-    def package_file_list(self, files):
+    def package_file_list(self, files, pkg_name):
 
         return self.templates['package_file_list'].render(
-            files=files
+            files=files,
+            pkg_name=pkg_name
             )
 
     def package(
@@ -76,10 +77,7 @@ class UI:
         homepage,
         description,
         tags,
-        latest_asp_basename,
-        latest_src_basename,
-        asp_list,
-        tarball_list
+        asp_list
         ):
 
         return self.templates['package'].render(
@@ -89,9 +87,6 @@ class UI:
             homepage=homepage,
             description=description,
             tags=tags,
-            latest_asp_basename=latest_asp_basename,
-            latest_src_basename=latest_src_basename,
             asp_list=asp_list,
-            tarball_list=tarball_list
             )
 

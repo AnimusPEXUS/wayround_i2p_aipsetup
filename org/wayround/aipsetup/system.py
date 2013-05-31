@@ -19,6 +19,21 @@ import org.wayround.aipsetup.info
 
 import org.wayround.utils.path
 import org.wayround.utils.format.elf
+import org.wayround.utils.file
+
+LOCAL_DIRS = [
+    'boot',
+    'dev',
+    'etc',
+    'home',
+    'lost+found',
+    'mnt',
+    'proc',
+    'root',
+    'run',
+    'sys',
+    'var',
+    ]
 
 class SystemCtl:
 
@@ -1812,3 +1827,32 @@ class SystemCtl:
 
         return ret
 
+    def find_system_nonso_garbage(self, prepared_all_files=None):
+
+        """
+        Searches files not installed by any of ASPs in system
+
+        If prepared_all_files == None, then
+        prepared_all_files = self.list_installed_asps_and_their_files()
+
+        Dirs excluded from search are:
+        /boot, /etc, /var, /run, /proc, /sys, /home, /root
+        """
+
+#        if prepared_all_files == None:
+#            prepared_all_files = self.list_installed_asps_and_their_files()
+
+        lst = org.wayround.utils.file.files_recurcive_list(
+            self.basedir,
+            exclude_paths=LOCAL_DIRS
+            )
+
+        lst.sort()
+
+        for i in lst:
+            try:
+                print("    {}".format(i))
+            except:
+                print("Error printing {}".format(repr(i)))
+
+        return 0

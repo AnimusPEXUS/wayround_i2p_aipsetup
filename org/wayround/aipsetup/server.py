@@ -1,11 +1,10 @@
 
 import json
 import os.path
+import functools
+import logging
 
 import bottle
-
-import org.wayround.aipsetup.dbconnections
-import org.wayround.aipsetup.classes
 
 import org.wayround.aipsetup.serverui
 
@@ -27,6 +26,8 @@ class AipsetupASPServer:
         templates_dir = os.path.join(web, 'templates')
         css_dir = os.path.join(web, 'css')
         js_dir = os.path.join(web, 'js')
+
+        self.config = config
 
         self.host = config['web_server_config']['ip']
         self.port = config['web_server_config']['port']
@@ -54,6 +55,8 @@ class AipsetupASPServer:
         self.app.route('/category/<path:path>', 'GET', self.category)
         self.app.route('/package/<name>', 'GET', self.package)
 
+        self.app.route('/package/<name>/asps/<name2>', 'GET', self.download_pkg)
+
         return
 
     def start(self):
@@ -67,6 +70,32 @@ class AipsetupASPServer:
 
     def js(self, filename):
         return bottle.static_file(filename, root=self.js_dir)
+
+    def download_pkg(self, name, name2):
+
+        base = os.path.basename(name2)
+
+        path = self.pkg_repo_ctl.get_package_path_string(name)
+
+        filename = org.wayround.utils.path.abspath(
+            org.wayround.utils.path.join(
+                self.config['package_repo']['dir'], path, 'pack', base
+                )
+            )
+
+        if not filename.startswith(self.config['package_repo']['dir'] + os.path.sep):
+            raise bottle.HTTPError(404, "Wrong package name `{}'".format(name))
+
+        if not os.path.isfile(filename):
+            raise bottle.HTTPError(404, "File `{}' not found".format(base))
+
+        logging.info("answering with file `{}'".format(filename))
+
+        return bottle.static_file(
+            filename=base,
+            root=os.path.dirname(filename),
+            mimetype='application/binary'
+            )
 
     def category_redirect(self):
         bottle.response.set_header('Location', '/category/')
@@ -246,8 +275,42 @@ class AipsetupASPServer:
                 category = "< Package not indexed! >"
 
 
-            tag_db = self.tag_ctl.package_tags_connection()
+            tag_db = self.tag_ctl.tag_db
             tags = tag_db.get_tags(name)
+
+            filesl = self.pkg_repo_ctl.get_package_files(name)
+            filesl.sort(
+                key=functools.cmp_to_key(
+                    org.wayround.aipsetup.version.package_version_comparator
+                    ),
+                reverse=True
+                )
+
+            files = []
+            for i in filesl:
+
+                base = os.path.basename(i)
+
+                stat = os.stat(
+                    org.wayround.utils.path.join(
+                        self.config['package_repo']['dir'],
+                        i
+                        )
+                    )
+
+                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    base
+                    )
+
+                files.append(
+                    {'basename': base,
+                     'size': stat.st_size,
+                     'version': parsed['groups']['version'],
+                     'timestamp': parsed['groups']['timestamp']
+                     }
+                    )
+
+            asp_files = self.ui.package_file_list(files, name)
 
             txt = self.ui.package(
                 autorows=rows,
@@ -256,8 +319,7 @@ class AipsetupASPServer:
                 homepage=pkg_info['home_page'],
                 description=pkg_info['description'],
                 tags=tags,
-                asp_list='',
-                tarball_list=''
+                asp_list=asp_files,
                 )
 
             ret = self.ui.html(
