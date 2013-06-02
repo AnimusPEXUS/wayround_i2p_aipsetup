@@ -18,6 +18,7 @@ import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 
 import org.wayround.utils.path
+import org.wayround.utils.list
 import org.wayround.utils.format.elf
 import org.wayround.utils.file
 
@@ -951,7 +952,7 @@ class SystemCtl:
         lst_i = 0
 
         if not mute:
-            logging.info("Getting file lists of all asps ")
+            logging.info("Loading file lists of all ASPs")
 
         for i in lst:
             ret[i] = self.list_files_installed_by_asp(i, mute)
@@ -1827,7 +1828,7 @@ class SystemCtl:
 
         return ret
 
-    def find_system_nonso_garbage(self, prepared_all_files=None):
+    def find_system_nonso_garbage(self, prepared_all_files=None, mute=True):
 
         """
         Searches files not installed by any of ASPs in system
@@ -1839,20 +1840,90 @@ class SystemCtl:
         /boot, /etc, /var, /run, /proc, /sys, /home, /root
         """
 
-#        if prepared_all_files == None:
-#            prepared_all_files = self.list_installed_asps_and_their_files()
+        ret = None
+
+        if not mute:
+            if self.basedir != '/':
+                logging.info("Working with base dir: {}".format(self.basedir))
+
+        if prepared_all_files == None:
+            prepared_all_files = self.list_installed_asps_and_their_files(
+                mute=mute
+                )
 
         lst = org.wayround.utils.file.files_recurcive_list(
             self.basedir,
-            exclude_paths=LOCAL_DIRS
+            exclude_paths=LOCAL_DIRS,
+            mute=mute,
+            sort=True
+            )
+
+        lst = org.wayround.utils.path.unprepend_path(
+            lst,
+            self.basedir
             )
 
         lst.sort()
 
-        for i in lst:
-            try:
-                print("    {}".format(i))
-            except:
-                print("Error printing {}".format(repr(i)))
+        result = []
 
-        return 0
+        if not mute:
+            logging.info("Generating list of not installed files")
+
+        ii = 0
+        len_list = len(lst)
+        lf = None
+        size = 0
+        s = 0
+#        for i in range(len_list - 1 , -1, -1):
+        for i in range(len_list):
+
+            lst_i = lst[i]
+
+            found = False
+
+            for j in list(prepared_all_files.keys()):
+
+                if lst_i in prepared_all_files[j]:
+                    found = True
+                    break
+
+
+            if not found:
+                result.append(lst_i)
+
+                fsn = org.wayround.utils.path.join(self.basedir, lst_i)
+
+                if os.path.isfile(fsn):
+                    fs = os.stat(fsn)
+
+                    size += fs.st_size
+
+                    if size != 0:
+                        s = '{:.3f}'.format(size / 1024 / 1024)
+
+                lf = lst_i
+
+                org.wayround.utils.file.progress_write(
+                    "    found: {}".format(lf),
+                    new_line=True
+                    )
+            ii += 1
+
+
+            org.wayround.utils.file.progress_write(
+                "    {} of {} ({:.2f}%) found: {} size: {} MiB position: {}".format(
+                    ii,
+                    len_list,
+                    100 / (float(len_list) / ii),
+                    len(result),
+                    s,
+                    lst_i
+                    )
+                )
+
+        org.wayround.utils.file.progress_write_finish()
+
+        ret = result
+
+        return ret

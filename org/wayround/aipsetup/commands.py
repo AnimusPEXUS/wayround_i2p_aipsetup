@@ -7,6 +7,7 @@ import logging
 import os.path
 import pprint
 import sys
+import shlex
 
 import org.wayround.aipsetup.classes
 import org.wayround.aipsetup.info
@@ -17,7 +18,7 @@ import org.wayround.aipsetup.infoeditor
 
 
 import org.wayround.utils.path
-import org.wayround.utils.opts
+import org.wayround.utils.getopt
 
 def commands():
     return {
@@ -1984,18 +1985,70 @@ def server_start_host(config, opts, args):
 
 def clean_find_nonso_garbage(config, opts, args):
 
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+    ret = 0
 
-    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-b=',
+                '-l=',
+                '--log-type='
+                ]
+            ) != 0:
+        ret = 1
 
-    system = org.wayround.aipsetup.classes.sys_ctl(
-        config,
-        info_ctl,
-        pkg_repo_ctl,
-        basedir='/'
-        )
+    if ret == 0:
+        basedir = '/'
+        log = None
+        log_type = 'bash'
+
+        if '-b' in opts:
+            basedir = opts['-b']
+
+        if '-l' in opts:
+            log = opts['-l']
+
+        if '--log-type' in opts:
+            log_type = opts['--log-type']
+
+        if not log_type in ['bash']:
+            logging.error("Invalid --log-type value")
+            ret = 1
+        else:
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+            system = org.wayround.aipsetup.classes.sys_ctl(
+                config,
+                info_ctl,
+                pkg_repo_ctl,
+                basedir=basedir
+                )
 
 
-    system.find_system_nonso_garbage()
+            res = system.find_system_nonso_garbage(mute=False)
 
-    return 0
+            l = None
+
+            if log:
+                l = open(log, 'w')
+
+            if isinstance(res, list):
+                for i in res:
+                    try:
+                        print("    {}".format(i))
+                    except:
+                        logging.error("Error printing {}".format(repr(i)))
+
+                    if log:
+                        try:
+                            l.write("rm {}\n".format(shlex.quote(i)))
+                        except:
+                            logging.error("Error writing {}".format(repr(i)))
+
+            if log:
+                l.close()
+
+    return ret
