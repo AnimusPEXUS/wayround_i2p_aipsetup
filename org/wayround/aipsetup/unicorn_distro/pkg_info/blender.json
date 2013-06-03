@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.blender.org/"
+  "src_path_prefix": "/blender.org/"
 }

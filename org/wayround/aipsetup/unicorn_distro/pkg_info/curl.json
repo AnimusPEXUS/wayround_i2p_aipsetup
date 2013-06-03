@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.haxx.se/curl.haxx.se/"
+  "src_path_prefix": "/haxx.se/curl.haxx.se/"
 }

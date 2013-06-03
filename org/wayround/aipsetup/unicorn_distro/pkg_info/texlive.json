@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.ctan.org/tex/systems/texlive/Source/"
+  "src_path_prefix": "/ctan.org/tex/systems/texlive/Source/"
 }

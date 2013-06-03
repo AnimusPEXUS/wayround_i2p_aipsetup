@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.citi.umich.edu/"
+  "src_path_prefix": "/citi.umich.edu/"
 }

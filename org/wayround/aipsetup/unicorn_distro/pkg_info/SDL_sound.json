@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.icculus.org/icculus.org/SDL_sound/"
+  "src_path_prefix": "/icculus.org/icculus.org/SDL_sound/"
 }

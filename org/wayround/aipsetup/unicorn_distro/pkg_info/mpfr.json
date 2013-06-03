@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": false, 
-  "src_path_prefix": "/www.mpfr.org/www.mpfr.org/"
+  "src_path_prefix": "/mpfr.org/www.mpfr.org/"
 }

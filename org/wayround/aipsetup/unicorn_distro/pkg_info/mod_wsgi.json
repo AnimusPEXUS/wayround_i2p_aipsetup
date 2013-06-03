@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.google.com/modwsgi/"
+  "src_path_prefix": "/google.com/modwsgi/"
 }

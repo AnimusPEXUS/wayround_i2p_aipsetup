@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.isc.org/isc/"
+  "src_path_prefix": "/isc.org/isc/"
 }

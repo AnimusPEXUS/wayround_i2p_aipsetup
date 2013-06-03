@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.gnu.org/ftp.gnu.org/gnu/gnugo/"
+  "src_path_prefix": "/gnu.org/ftp.gnu.org/gnu/gnugo/"
 }

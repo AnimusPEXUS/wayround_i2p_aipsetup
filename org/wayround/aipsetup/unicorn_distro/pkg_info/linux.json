@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": false, 
   "removable": false, 
-  "src_path_prefix": "/www.kernel.org/kernel.org/ftp.kernel.org/pub/linux/kernel/"
+  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/kernel/"
 }

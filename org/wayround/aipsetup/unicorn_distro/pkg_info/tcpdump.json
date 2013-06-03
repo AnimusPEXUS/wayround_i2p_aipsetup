@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.tcpdump.org/"
+  "src_path_prefix": "/tcpdump.org/"
 }

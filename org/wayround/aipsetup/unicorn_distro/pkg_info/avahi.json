@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.avahi.org/avahi.org/"
+  "src_path_prefix": "/avahi.org/avahi.org/"
 }

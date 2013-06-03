@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.gnome.org/gnome.org/sources/gtk+/"
+  "src_path_prefix": "/gnome.org/gnome.org/sources/gtk+/"
 }

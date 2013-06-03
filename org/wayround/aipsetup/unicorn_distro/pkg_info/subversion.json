@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/www.apache.org/mirror/subversion/"
+  "src_path_prefix": "/apache.org/mirror/subversion/"
 }
