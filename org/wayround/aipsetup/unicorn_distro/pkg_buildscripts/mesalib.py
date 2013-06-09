@@ -66,8 +66,7 @@ def main(buildingsite, action=None):
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
+                    '--host=i686-pc-linux-gnu',
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
