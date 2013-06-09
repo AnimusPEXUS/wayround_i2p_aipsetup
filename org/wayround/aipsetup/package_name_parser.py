@@ -69,7 +69,7 @@ def rm_ext_from_pkg_name(name):
 
     return ret
 
-def package_name_parse(filename, mute=True):
+def package_name_parse(filename):
     """
     Parse package name
     """

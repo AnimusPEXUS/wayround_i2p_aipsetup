@@ -409,7 +409,7 @@ class PackageInfoCtl:
                     if force_rewrite:
                         logging.info("Forced template rewriting: {}".format(filename))
 
-                    if self.write_to_file(
+                    if write_info_file(
                         filename,
                         SAMPLE_PACKAGE_INFO_STRUCTURE
                         ) != 0:

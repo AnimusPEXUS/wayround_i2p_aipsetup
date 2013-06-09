@@ -18,6 +18,7 @@ import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 
 import org.wayround.utils.path
+import org.wayround.utils.deps
 import org.wayround.utils.list
 import org.wayround.utils.format.elf
 import org.wayround.utils.file
@@ -34,6 +35,7 @@ LOCAL_DIRS = [
     'run',
     'sys',
     'var',
+    'tmp',
     ]
 
 class SystemCtl:
@@ -153,7 +155,7 @@ class SystemCtl:
 
         if os.path.isfile(name):
             name_parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                name, mute=True
+                name
                 )
 
             if not force and not isinstance(name_parsed, dict):
@@ -773,8 +775,7 @@ class SystemCtl:
 
             for i in asps:
                 parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                    i,
-                    mute=True
+                    i
                     )
 
                 if not isinstance(parsed, dict):
@@ -805,8 +806,7 @@ class SystemCtl:
 
         for i in asps_list:
             asps_list_parsed[i] = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                i,
-                mute=True
+                i
                 )
 
         for i in name_or_list:
@@ -1314,8 +1314,7 @@ class SystemCtl:
         for i in asps:
 
             parsed_name = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                i,
-                mute=mute
+                i
                 )
 
             if not parsed_name:
@@ -1388,8 +1387,8 @@ class SystemCtl:
 
         # TODO: complete
 
-        paths = org.wayround.utils.deps_c.elf_paths()
-        elfs = org.wayround.utils.deps_c.find_all_elf_files(paths, verbose=True)
+        paths = self.elf_paths()
+        elfs = find_all_elf_files(paths, verbose=True)
 
         elfs = org.wayround.utils.path.realpaths(elfs)
 
@@ -1837,10 +1836,8 @@ class SystemCtl:
         prepared_all_files = self.list_installed_asps_and_their_files()
 
         Dirs excluded from search are:
-        /boot, /etc, /var, /run, /proc, /sys, /home, /root
+        /boot, /etc, /var, /run, /proc, /sys, /home, /root, /tmp
         """
-
-        ret = None
 
         if not mute:
             if self.basedir != '/':
@@ -1927,3 +1924,374 @@ class SystemCtl:
         ret = result
 
         return ret
+
+
+
+    def find_so_problems_in_system(self, verbose=False):
+
+        """
+        Look for dependency problems in current system
+        """
+
+        so_files, elf_files = self.find_so_and_elf_files(verbose)
+
+        reqs = find_so_problems_by_given_so_and_elfs(
+            so_files, elf_files, verbose
+            )
+
+        return reqs
+
+
+    def build_dependency_tree(self, verbose=False):
+
+        """
+        Look for dependency problems in current system
+        """
+
+        elf_files = self.find_system_elf_files(verbose=verbose)
+
+        reqs = build_binary_dependency_tree_for_given_elf_files(
+            elf_files, verbose
+            )
+
+        return reqs
+
+
+    def library_paths(self):
+
+        ret = []
+        #        if 'LD_LIBRARY_PATH' in os.environ:
+        #            ret += os.environ['LD_LIBRARY_PATH'].split(':')
+
+        ret.append('/lib')
+        ret.append('/usr/lib')
+
+        ret = org.wayround.utils.path.prepend_path(ret, self.basedir)
+        ret = org.wayround.utils.path.realpaths(ret)
+
+        return ret
+
+    def elf_paths(self):
+
+        ret = []
+
+        #        ret = os.environ['PATH'].split(':') + self.library_paths()
+
+        ret += self.library_paths()
+
+        ret = org.wayround.utils.path.prepend_path(ret, self.basedir)
+        ret = org.wayround.utils.path.realpaths(ret)
+
+        return ret
+
+
+    def find_so_and_elf_files(self, verbose=False):
+
+        """
+        Find All system Shared Object Files and all ELF files real paths.
+        """
+
+        so_files = self.find_system_so_files(verbose=verbose)
+        elf_files = self.find_system_elf_files(verbose=verbose)
+        return (so_files, elf_files)
+
+
+    def find_system_so_files(self, verbose=False):
+        paths = self.library_paths()
+        if verbose:
+            logging.info("Searching so files in paths: {}".format(paths))
+        return find_all_so_files(paths, verbose=verbose)
+
+    def find_system_elf_files(self, verbose=False):
+        paths = self.elf_paths()
+        if verbose:
+            logging.info("Searching elf files in paths: {}".format(paths))
+        return find_all_elf_files(paths, verbose=verbose)
+
+
+def find_all_so_files(paths, verbose=False):
+
+    """
+    Get all shared object files in named dirs (real paths returned)
+    """
+
+    so_files = []
+
+    for i in paths:
+        so_files += find_so_files(i, verbose)
+
+    so_files = org.wayround.utils.path.realpaths(so_files)
+
+    return so_files
+
+def find_so_files(directory, verbose=False):
+
+    """
+    Get all shared object files in named dir (real paths returned)
+    """
+
+    ret = set()
+
+    if not os.path.isdir(directory):
+        logging.error(ValueError("Directory not exists `{}'".format(directory)))
+        ret = set()
+    else:
+
+        files = os.listdir(directory)
+
+        files = org.wayround.utils.path.prepend_path(files, directory)
+        files = org.wayround.utils.path.realpaths(files)
+        files = filter_so_files(files, verbose=verbose)
+        ret = files
+
+    if verbose:
+        org.wayround.utils.file.progress_write_finish()
+
+    ret = list(ret)
+
+    return ret
+
+
+def find_all_elf_files(paths, verbose=False):
+
+    """
+    Get all elf files in named dirs (real paths returned)
+    """
+
+    elf_files = []
+
+    for i in paths:
+        elf_files += find_elf_files(i, verbose)
+
+    elf_files = org.wayround.utils.path.realpaths(elf_files)
+
+    return elf_files
+
+def find_elf_files(directory, verbose=False):
+
+    """
+    Get all elf files in named dir (real paths returned)
+    """
+
+    ret = set()
+
+    if not os.path.isdir(directory):
+        logging.error(ValueError("Directory not exists `{}'".format(directory)))
+        ret = set()
+    else:
+
+        files = os.listdir(directory)
+
+        files = org.wayround.utils.path.prepend_path(files, directory)
+        files = org.wayround.utils.path.realpaths(files)
+        files = filter_elf_files(files, vebose=verbose)
+        ret = files
+
+    if verbose:
+        org.wayround.utils.file.progress_write_finish()
+
+    ret = list(ret)
+
+    return ret
+
+def filter_so_files(files, verbose=False):
+
+    """
+    Filter shared object (.so) files
+
+    Accepts list of file names. Retrns list of files, each of which has
+    basenames contains '.so', can be readen/parsed as ELF file and is of type
+    'ET_DYN'.
+
+    Resulted file list lines is returned in same order, in same formats, but
+    without filtered out incorrect lines.
+    """
+
+    ret = []
+
+    files_c = len(files)
+
+    count = 0
+    sos = 0
+
+    for i in files:
+
+        if os.path.isfile(i):
+            if os.path.basename(i).find('.so') != -1:
+                elf = org.wayround.utils.format.elf.ELF(i)
+                if (
+                    elf.is_elf
+                    and elf.elf_type_name == 'ET_DYN'
+                    ):
+                    ret.add(i)
+                    sos += 1
+
+        count += 1
+
+        if verbose:
+            org.wayround.utils.file.progress_write(
+                "Looking for .so files: {} of {} files (sos: {})".format(
+                    count,
+                    files_c,
+                    sos
+                    )
+                )
+
+    return ret
+
+def filter_elf_files(files, verbose=False):
+
+    """
+    Filter ELF files
+
+    Accepts list of file names. Retrns list of files, each of which can be
+    readen/parsed as ELF file and is of type.
+
+    Resulted file list lines is returned in same order, in same formats, but
+    without filtered out incorrect lines.
+    """
+
+    ret = []
+
+    files_c = len(files)
+
+    count = 0
+    elfs = 0
+
+    for i in files:
+
+        if os.path.isfile(i):
+            elf = org.wayround.utils.format.elf.ELF(i)
+
+            if elf.is_elf:
+                ret.add(i)
+                elfs += 1
+
+        count += 1
+
+        if verbose:
+            org.wayround.utils.file.progress_write(
+                "Looking for elf files: {} of {} files (elfs: {})".format(
+                    count,
+                    files_c,
+                    elfs
+                    )
+                )
+
+    return ret
+
+def build_binary_dependency_tree_for_given_elf_files(
+    elf_files, verbose=False
+    ):
+
+    """
+    Build dependency tree by given so and elf lists
+    """
+
+    # TODO: complete this function
+
+    if verbose:
+        elf_files.sort()
+
+    if verbose:
+        logging.info("Building dependency tree")
+
+    deps = {}
+
+
+    elf_files_c = len(elf_files)
+    elf_files_i = 0
+
+    for i in elf_files:
+
+        e = org.wayround.utils.format.elf.ELF(i)
+
+
+        libs_elf_linked_to = e.needed_libs_list
+
+        if not isinstance(libs_elf_linked_to, list):
+            logging.error(
+                "Can't get dependency list for file: `{}'".format(i)
+                )
+        else:
+            if not i in deps:
+                deps[i] = list()
+            deps[i] = libs_elf_linked_to
+
+        elf_files_i += 1
+
+        if verbose:
+            org.wayround.utils.file.progress_write(
+                "Progress: {} ELF files of {}".format(
+                    elf_files_i,
+                    elf_files_c
+                    )
+                )
+
+    if verbose:
+        org.wayround.utils.file.progress_write_finish()
+
+    return deps
+
+def find_so_problems_by_given_so_and_elfs(
+    self, so_files, elf_files, verbose=False
+    ):
+
+    """
+    Look for dependency problems in current system.
+
+    This function works with basenames of so_files and with elf_files lines,
+    which points on files which can be parsed as ELFs.
+
+    returns dict with keys pointing on the ELFs and lists of missing .so files
+    in them.
+    """
+
+    so_files = org.wayround.utils.path.bases(so_files)
+
+    if verbose:
+        so_files.sort()
+        elf_files.sort()
+
+    if verbose:
+        logging.info("Looking for problems")
+
+    reqs = {}
+
+
+    elf_files_c = len(elf_files)
+    elf_files_i = 0
+
+    for i in elf_files:
+
+        e = org.wayround.utils.format.elf.ELF(i)
+
+        libs_elf_linked_to = e.needed_libs_list
+
+        if not isinstance(libs_elf_linked_to, list):
+            logging.error(
+                "Can't get libs_elf_linked_to list for file: `{}'".format(i)
+                )
+        else:
+            for j in libs_elf_linked_to:
+                if not j in so_files:
+                    if not j in reqs:
+                        reqs[j] = list()
+                    reqs[j].append(i)
+
+        elf_files_i += 1
+
+        if verbose:
+            org.wayround.utils.file.progress_write(
+                "Checked dependencies: {} of {} ({} missing found)".format(
+                    elf_files_i,
+                    elf_files_c,
+                    len(reqs.keys())
+                    )
+                )
+
+    if verbose:
+        org.wayround.utils.file.progress_write_finish()
+        logging.info("Libraries missing: {}".format(len(reqs.keys())))
+
+    return reqs

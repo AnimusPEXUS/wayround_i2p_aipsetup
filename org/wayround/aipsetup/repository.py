@@ -1090,7 +1090,8 @@ class SourceRepoCtl:
         subdir_name,
         acceptable_src_file_extensions=None,
         force_reindex=False,
-        first_delete_found=False
+        first_delete_found=False,
+        clean_only=False
         ):
 
         ret = self._index_sources_directory(
@@ -1100,7 +1101,8 @@ class SourceRepoCtl:
                 ),
             acceptable_endings=acceptable_src_file_extensions,
             force_reindex=force_reindex,
-            first_delete_found=first_delete_found
+            first_delete_found=first_delete_found,
+            clean_only=clean_only
             )
 
         return ret
@@ -1181,83 +1183,6 @@ class SourceRepoCtl:
 
         return ret
 
-    def _index_progress(self, added_tags, sub_dir_name, root_dir_name_len):
-        org.wayround.utils.file.progress_write(
-            "    scanning (found {}): {}".format(
-                added_tags,
-                sub_dir_name[root_dir_name_len + 1:]
-                )
-            )
-
-        return
-
-    def _index_sources_directory_to_list(
-        self,
-        list_buffer,
-        root_dir_name,
-        sub_dir_name,
-        root_dir_name_len,
-        acceptable_endings=None,
-        added_tags=0
-        ):
-
-        sub_dir_name = org.wayround.utils.path.abspath(sub_dir_name)
-
-        added_tags = added_tags
-
-        self._index_progress(added_tags, sub_dir_name, root_dir_name_len)
-
-        files = os.listdir(sub_dir_name)
-        files.sort()
-
-        for each_file in files:
-
-            if each_file in ['.', '..']:
-                continue
-
-            full_path = os.path.join(sub_dir_name, each_file)
-
-            if os.path.islink(full_path):
-                continue
-
-            # not each_file[0] == '.' and
-            if os.path.isdir(full_path):
-
-                res = self._index_sources_directory_to_list(
-                    list_buffer,
-                    root_dir_name,
-                    full_path,
-                    root_dir_name_len,
-                    acceptable_endings,
-                    added_tags=added_tags
-                    )
-                added_tags = res['added_tags']
-
-            # not each_file[0] == '.' and
-            elif os.path.isfile(full_path):
-
-                if isinstance(acceptable_endings, list):
-
-                    match_found = False
-
-                    for i in acceptable_endings:
-                        if each_file.endswith(i):
-                            match_found = True
-                            break
-
-                    if not match_found:
-                        continue
-
-
-                p = full_path[root_dir_name_len:]
-                list_buffer.append(p)
-                added_tags += 1
-
-        self._index_progress(added_tags, sub_dir_name, root_dir_name_len)
-
-
-        return {'added_tags': added_tags}
-
 
     def _index_sources_directory(
         self,
@@ -1265,7 +1190,8 @@ class SourceRepoCtl:
         sub_dir_name,
         acceptable_endings=None,
         force_reindex=False,
-        first_delete_found=False
+        first_delete_found=False,
+        clean_only=False
         ):
 
         root_dir_name = org.wayround.utils.path.realpath(root_dir_name)
@@ -1283,163 +1209,164 @@ class SourceRepoCtl:
         if rel_path == '/./':
             rel_path = ''
 
-
         added_count = 0
         deleted_count = 0
 
-        logging.info("Indexing {}...".format(root_dir_name))
+        if not clean_only:
 
-        source_index = []
+            logging.info("Indexing {}...".format(root_dir_name))
 
-        self._index_sources_directory_to_list(
-            source_index,
-            root_dir_name,
-            sub_dir_name,
-            root_dir_name_len,
-            acceptable_endings
-            )
+            source_index = org.wayround.utils.file.files_recurcive_list(
+                dirname=sub_dir_name,
+                relative_to=root_dir_name,
+                mute=False,
+                acceptable_endings=acceptable_endings,
+                sort=True,
+                print_found=False,
+                list_symlincs=False
+                )
+
+            source_index = org.wayround.utils.path.prepend_path(source_index, '/')
+
+            source_index = list(set(source_index))
+            source_index.sort()
+
+            found_count = len(source_index)
+
+            logging.info("Found {} indexable objects".format(found_count))
+
+            if first_delete_found:
+                removed = 0
+                logging.info("Removing found files from index")
+                for i in source_index:
+                    org.wayround.utils.file.progress_write(
+                        "    removed {} of {}".format(removed, found_count)
+                        )
+                    self.database_connection.del_object_tags(i)
+                    removed += 1
+
+                self.database_connection.commit()
+
+                org.wayround.utils.file.progress_write_finish()
+
+            index = 0
+            failed_count = 0
+            skipped_count = 0
+            logging.info("Loading DB to save new data")
+            src_tag_objects = set(self.database_connection.get_objects())
+
+            for i in source_index:
+                index += 1
+
+                if not force_reindex and i in src_tag_objects:
+
+                    skipped_count += 1
+
+                else:
+
+                    parsed_src_filename = (
+                        org.wayround.utils.tarball_name_parser.parse_tarball_name(
+                            i,
+                            mute=True
+                            )
+                        )
+
+                    if parsed_src_filename:
+                        self.database_connection.set_tags(
+                            i,
+                            [parsed_src_filename['groups']['name']]
+                            )
+                        org.wayround.utils.file.progress_write(
+                            "    added: {}\n".format(
+                                os.path.basename(i)
+                                )
+                            )
+                        added_count += 1
+                    else:
+                        org.wayround.utils.file.progress_write(
+                            "    failed to parse: {}\n".format(
+                                os.path.basename(i)
+                                )
+                            )
+                        failed_count += 1
+
+                org.wayround.utils.file.progress_write(
+                    "    {} out of {} "
+                    "({:.2f}%, added {}, failed {}, skipped {})".format(
+                        index,
+                        found_count,
+                        (100.0 / (found_count / index)),
+                        added_count,
+                        failed_count,
+                        skipped_count
+                        )
+                    )
+
+            org.wayround.utils.file.progress_write_finish()
+
+            del source_index
+
+        self.database_connection.commit()
+        logging.info("Searching inexisting index items")
+        src_tag_objects = self.database_connection.get_objects(order='object')
+        deleted_count = 0
+        found_scanned_count = 0
+        skipped_count = 0
+        src_tag_objects_l = len(src_tag_objects)
+        i_i = 0
+        to_deletion = []
+        for i in src_tag_objects:
+
+            logging.debug(
+                "Checking possibility to skip {}".format(
+                    os.path.sep + rel_path + os.path.sep
+                    )
+                )
+
+            if i.startswith(rel_path):
+
+                rp = org.wayround.utils.path.join(
+                    root_dir_name, i
+                    )
+
+                if os.path.islink(rp) or not os.path.isfile(
+                    org.wayround.utils.path.realpath(
+                        rp
+                        )
+                    ):
+                    to_deletion.append(i)
+                    deleted_count += 1
+
+                found_scanned_count += 1
+
+            else:
+                skipped_count += 1
+
+            i_i += 1
+            org.wayround.utils.file.progress_write(
+                "    {:.2f}%, scanned {}, marked to deletion {}, skipped {}: {}".format(
+                    100.0 / (float(src_tag_objects_l) / i_i),
+                    found_scanned_count,
+                    deleted_count,
+                    skipped_count,
+                    i
+                    )
+                )
 
         org.wayround.utils.file.progress_write_finish()
 
-        source_index = list(set(source_index))
-        source_index.sort()
+        self.database_connection.commit()
 
-        found_count = len(source_index)
+        self.database_connection.del_object_tags(to_deletion)
 
-        logging.info("Found {} indexable objects".format(found_count))
+        self.database_connection.commit()
 
-        try:
-            tags = self.database_connection
-        except:
-            logging.exception("Can't connect to source index DB")
-            raise
-        else:
-
-            try:
-                if first_delete_found:
-                    removed = 0
-                    logging.info("Removing found files from index")
-                    for i in source_index:
-                        org.wayround.utils.file.progress_write(
-                            "    removed {} of {}".format(removed, found_count)
-                            )
-                        tags.del_object_tags(i)
-                        removed += 1
-
-                    tags.commit()
-
-                    org.wayround.utils.file.progress_write_finish()
-
-                index = 0
-                failed_count = 0
-                skipped_count = 0
-                logging.info("Loading DB to save new data")
-                src_tag_objects = set(tags.get_objects())
-
-                for i in source_index:
-                    index += 1
-
-                    if not force_reindex and i in src_tag_objects:
-
-                        skipped_count += 1
-
-                    else:
-
-                        parsed_src_filename = (
-                            org.wayround.utils.tarball_name_parser.parse_tarball_name(
-                                i,
-                                mute=True
-                                )
-                            )
-
-                        if parsed_src_filename:
-                            tags.set_tags(
-                                i,
-                                [parsed_src_filename['groups']['name']]
-                                )
-                            org.wayround.utils.file.progress_write(
-                                "    added: {}\n".format(
-                                    os.path.basename(i)
-                                    )
-                                )
-                            added_count += 1
-                        else:
-                            org.wayround.utils.file.progress_write(
-                                "    failed to parse: {}\n".format(
-                                    os.path.basename(i)
-                                    )
-                                )
-                            failed_count += 1
-
-                    org.wayround.utils.file.progress_write(
-                        "    processing ({:5.2f}%) {} out of {} "
-                        "(added {}, failed {}, skipped {})".format(
-                            (100.0 / (found_count / index)),
-                            index,
-                            found_count,
-                            added_count,
-                            failed_count,
-                            skipped_count
-                            )
-                        )
-
-                del source_index
-
-                tags.commit()
-                org.wayround.utils.file.progress_write_finish()
-                logging.info("Cleaning wrong DB entries")
-                src_tag_objects = tags.get_objects(order='object')
-                deleted_count = 0
-                found_scanned_count = 0
-                skipped_count = 0
-                src_tag_objects_l = len(src_tag_objects)
-                i_i = 0
-                for i in src_tag_objects:
-
-                    logging.debug(
-                        "Checking possibility to skip {}".format(
-                            os.path.sep + rel_path + os.path.sep
-                            )
-                        )
-
-                    if i.startswith(rel_path):
-                        if not os.path.exists(
-                            org.wayround.utils.path.realpath(
-                                root_dir_name + os.path.sep + i
-                                )
-                            ):
-                            tags.del_object_tags(i)
-                            deleted_count += 1
-
-                        found_scanned_count += 1
-
-                    else:
-                        skipped_count += 1
-
-                    i_i += 1
-                    org.wayround.utils.file.progress_write(
-                        "    searching {:5.2f}% "
-                        "(scanned {}, deleted {}, skipped {}): {}".format(
-                            100.0 / (float(src_tag_objects_l) / i_i),
-                            found_scanned_count,
-                            deleted_count,
-                            skipped_count,
-                            i
-                            )
-                        )
-
-                org.wayround.utils.file.progress_write_finish()
-
-                tags.commit()
-
-                logging.info(
-                    "Records: added {added}; deleted {deleted}".format(
-                        added=added_count,
-                        deleted=deleted_count
-                        )
-                    )
-                logging.info("DB Size: {} record(s)".format(tags.get_size()))
-            finally:
-                tags.close()
+        logging.info(
+            "Records: added {added}; deleted {deleted}".format(
+                added=added_count,
+                deleted=deleted_count
+                )
+            )
+        logging.info("DB Size: {} record(s)".format(self.database_connection.get_size()))
 
         return 0

@@ -17,11 +17,11 @@ def package_version_comparator(name1, name2):
     ret = 0
 
     d1 = org.wayround.aipsetup.package_name_parser.package_name_parse(
-        name1, mute=True
+        name1
         )
 
     d2 = org.wayround.aipsetup.package_name_parser.package_name_parse(
-        name2, mute=True
+        name2
         )
 
     if d1 == None:

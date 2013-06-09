@@ -102,7 +102,7 @@ PACK_FUNCTIONS_LIST = [
     'destdir_set_modes',
     'destdir_checksum',
     'destdir_filelist',
-    'destdir_deps_c',
+    'destdir_deps_bin',
 #    'remove_source_and_build_dirs',
     'compress_patches_destdir_and_logs',
     'compress_files_in_lists_dir',
@@ -438,7 +438,7 @@ class PackCtl:
         return ret
 
 
-    def destdir_deps_c(self):
+    def destdir_deps_bin(self):
 
         """
         Create dependency tree listing for ELFs in DESTDIR
@@ -481,12 +481,13 @@ class PackCtl:
                 file_list_i = 0
                 file_list_l = len(file_list)
                 for i in file_list:
-                    filename = destdir + os.path.sep + i
-                    filename.replace(os.path.sep * 2, os.path.sep)
-                    filename = org.wayround.utils.path.abspath(filename)
+                    filename = org.wayround.utils.path.abspath(
+                        org.wayround.utils.path.join(destdir, i)
+                        )
 
                     if os.path.isfile(filename) and os.path.exists(filename):
 
+                        # TODO: error check with 'try' required
                         elf = org.wayround.utils.format.elf.ELF(filename)
 
                         dep = elf.needed_libs_list
@@ -502,9 +503,9 @@ class PackCtl:
                     file_list_i += 1
 
                     org.wayround.utils.file.progress_write(
-                        "    ({perc:6.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".format_map(
+                        "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".format_map(
                             {
-                                'perc': 100.0 / (float(file_list_l) / float(file_list_i)),
+                                'perc': 100 / (float(file_list_l) / file_list_i),
                                 'elfs': elfs,
                                 'n_elfs': n_elfs
                                 }
@@ -521,7 +522,7 @@ class PackCtl:
                 try:
                     f2 = open(deps_file, 'w')
                 except:
-                    logging.exception("Can't create file for dependencies text")
+                    logging.exception("Can't create file of dependencies list")
                     raise
                 else:
                     try:
@@ -836,7 +837,7 @@ class PackCtl:
             'destdir_set_modes',
             'destdir_checksum',
             'destdir_filelist',
-            'destdir_deps_c',
+            'destdir_deps_bin',
     #        'remove_source_and_build_dirs',
             'compress_patches_destdir_and_logs',
             'compress_files_in_lists_dir',
@@ -2018,7 +2019,7 @@ def parse_triplet(string):
 #Create list of distribution files
 #"""
 #
-#    elif name == 'destdir_deps_c':
+#    elif name == 'destdir_deps_bin':
 #        ret = """\
 #Create list of ELF dependencies
 #"""

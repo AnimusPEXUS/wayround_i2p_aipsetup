@@ -63,6 +63,7 @@ def commands():
         'load_tags': load_info_tags,
         'script': info_mass_script_apply,
         'parse': info_parse_pkg_name,
+        'parse_tar': info_parse_tarball
         },
 
     'sys': {
@@ -143,7 +144,7 @@ def system_install_package(config, opts, args):
     If -b is given - it is used as destination root
     """
 
-    ret = org.wayround.utils.opts.is_wrong_opts(
+    ret = org.wayround.utils.getopt.check_options(
         opts,
         ['-b', '--force']
         )
@@ -968,13 +969,17 @@ def src_repo_index(config, opts, args):
 
     [-f] [SUBDIR]
 
-    -d - before saving delete all found files from index
-    -f - force reindexation of already indexed files
 
     SUBDIR - index only one of subdirectories
+
+    -f - force reindexing files already in index
+    -c - only index clean
     """
 
     ret = 0
+
+    forced_reindex = '-f' in opts
+    clean_only = '-c' in opts
 
     subdir_name = org.wayround.utils.path.realpath(
         org.wayround.utils.path.abspath(
@@ -982,8 +987,6 @@ def src_repo_index(config, opts, args):
             )
         )
 
-    first_delete_found = '-d' in opts
-    force_reindex = '-f' in opts
 
     if len(args) > 1:
         logging.error("Wrong argument count: can be only one")
@@ -1036,10 +1039,10 @@ exists: {}
 
             ret = src_ctl.index_sources(
                 org.wayround.utils.path.realpath(subdir_name),
-                force_reindex=force_reindex,
-                first_delete_found=first_delete_found,
                 acceptable_src_file_extensions=
-                    config['general']['acceptable_src_file_extensions'].split()
+                    config['general']['acceptable_src_file_extensions'].split(),
+                force_reindex=forced_reindex,
+                clean_only=clean_only
                 )
 
     return ret
@@ -1338,6 +1341,41 @@ def info_editor(config, opts, args):
 
     return ret
 
+def info_parse_tarball(config, opts, args):
+
+    tarball = None
+
+    ret = 0
+
+    if len(args) != 1:
+        logging.error("Tarball name must be supplied")
+        ret = 1
+    else:
+
+        tarball = args[0]
+
+        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+            tarball,
+            mute=False
+            )
+
+        if not parsed:
+            logging.error("Can't parse {}".format(tarball))
+            ret = 2
+        else:
+
+            pprint.pprint(parsed)
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+            pkg_name = (
+                info_ctl.get_package_name_by_tarball_filename(tarball)
+                )
+
+            print("Package name: {}".format(pkg_name))
+
+    return ret
+
 
 def info_mass_script_apply(config, opts, args):
     """
@@ -1417,7 +1455,7 @@ def info_mass_script_apply(config, opts, args):
 
     return ret
 
-def info_parse_pkg_name(opts, args):
+def info_parse_pkg_name(config, opts, args):
     """
     Parse package name
 
@@ -1434,12 +1472,13 @@ def info_parse_pkg_name(opts, args):
         filename = args[0]
 
         p_re = org.wayround.aipsetup.package_name_parser.package_name_parse(
-            filename,
-            mute=False
+            filename
             )
 
         if p_re == None:
             ret = 2
+        else:
+            pprint.pprint(p_re)
 
     return ret
 
@@ -1516,7 +1555,9 @@ def build_script(config, opts, args):
             dirname = opts['-b']
 
         bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
-        ret = bs.start_building_script(action)
+        build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
+        script = org.wayround.aipsetup.classes.bscript_ctl(config)
+        ret = build_ctl.start_building_script(script, action=action)
 
     return ret
 
@@ -1716,7 +1757,15 @@ def clean_find_so_problems(config, opts, args):
 #    if '-b' in opts:
 #        basedir = opts['-b']
 
-    problems = org.wayround.utils.deps_c.find_so_problems_in_linux_system(
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config, info_ctl, pkg_repo_ctl, basedir
+        )
+
+    problems = system.find_so_problems_in_system(
         verbose=True
         )
 
@@ -1729,16 +1778,6 @@ def clean_find_so_problems(config, opts, args):
 
     print("Writing log to {}".format(log.log_filename))
 
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-    system = org.wayround.aipsetup.classes.sys_ctl(
-        config,
-        info_ctl,
-        pkg_repo_ctl,
-        basedir='/'
-        )
 
     logging.info("Gathering asps file tree. Please wait...")
     tree = system.list_installed_asps_and_their_files(mute=False)
