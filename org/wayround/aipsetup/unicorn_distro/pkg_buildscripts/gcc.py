@@ -30,6 +30,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        cc_file = os.path.join(dst_dir, 'usr', 'bin', 'cc')
 
         separate_build_dir = False
 
@@ -111,6 +113,10 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+
+            if not os.path.exists(cc_file):
+                os.symlink('gcc', cc_file)
 
     return ret
 

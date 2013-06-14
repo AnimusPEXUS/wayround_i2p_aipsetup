@@ -18,7 +18,6 @@ import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.info
 
 import org.wayround.utils.path
-import org.wayround.utils.deps
 import org.wayround.utils.list
 import org.wayround.utils.format.elf
 import org.wayround.utils.file
@@ -1411,6 +1410,27 @@ class SystemCtl:
 
         return 0
 
+    def load_asp_deps_all(self, mute=True):
+
+        ret = {}
+
+        installed_asp_names = self.list_installed_asps(
+            mute=mute
+            )
+
+        for i in installed_asp_names:
+
+            asp_name = i
+            if asp_name.endswith('.asp'):
+                asp_name = asp_name[':-4']
+
+            res = self.load_asp_deps(asp_name=asp_name, mute=mute)
+
+            if isinstance(res, dict):
+                ret[asp_name] = res
+
+        return ret
+
 
     def get_asps_depending_on_asp(self, asp_name, mute=False):
 
@@ -1827,7 +1847,7 @@ class SystemCtl:
 
         return ret
 
-    def find_system_nonso_garbage(self, prepared_all_files=None, mute=True):
+    def find_system_garbage(self, prepared_all_files=None, mute=True, only_lib=False):
 
         """
         Searches files not installed by any of ASPs in system
@@ -1837,6 +1857,8 @@ class SystemCtl:
 
         Dirs excluded from search are:
         /boot, /etc, /var, /run, /proc, /sys, /home, /root, /tmp
+
+        only_lib - search only for library garbage (/usr/lib)
         """
 
         if not mute:
@@ -1848,12 +1870,29 @@ class SystemCtl:
                 mute=mute
                 )
 
-        lst = org.wayround.utils.file.files_recurcive_list(
-            self.basedir,
-            exclude_paths=LOCAL_DIRS,
-            mute=mute,
-            sort=True
-            )
+        lst = []
+
+        if not only_lib:
+
+            lst = org.wayround.utils.file.files_recurcive_list(
+                self.basedir,
+                exclude_paths=LOCAL_DIRS,
+                mute=mute,
+                sort=True
+                )
+
+        else:
+
+            # TODO: /usr/lib must be calculated, - not constant
+
+            lst = org.wayround.utils.file.files_recurcive_list(
+                org.wayround.utils.path.join(self.basedir, 'usr', 'lib'),
+                mute=mute,
+                sort=True,
+                maxdepth=1
+                )
+
+
 
         lst = org.wayround.utils.path.unprepend_path(
             lst,
@@ -1948,6 +1987,8 @@ class SystemCtl:
         Look for dependency problems in current system
         """
 
+        # TODO: rework to help text required
+
         elf_files = self.find_system_elf_files(verbose=verbose)
 
         reqs = build_binary_dependency_tree_for_given_elf_files(
@@ -1976,6 +2017,11 @@ class SystemCtl:
         ret = []
 
         #        ret = os.environ['PATH'].split(':') + self.library_paths()
+
+        ret.append('/bin')
+        ret.append('/sbin')
+        ret.append('/usr/bin')
+        ret.append('/usr/sbin')
 
         ret += self.library_paths()
 
@@ -2084,7 +2130,7 @@ def find_elf_files(directory, verbose=False):
 
         files = org.wayround.utils.path.prepend_path(files, directory)
         files = org.wayround.utils.path.realpaths(files)
-        files = filter_elf_files(files, vebose=verbose)
+        files = filter_elf_files(files, verbose=verbose)
         ret = files
 
     if verbose:
@@ -2107,7 +2153,7 @@ def filter_so_files(files, verbose=False):
     without filtered out incorrect lines.
     """
 
-    ret = []
+    ret = set()
 
     files_c = len(files)
 
@@ -2137,7 +2183,7 @@ def filter_so_files(files, verbose=False):
                     )
                 )
 
-    return ret
+    return list(ret)
 
 def filter_elf_files(files, verbose=False):
 
@@ -2151,7 +2197,7 @@ def filter_elf_files(files, verbose=False):
     without filtered out incorrect lines.
     """
 
-    ret = []
+    ret = set()
 
     files_c = len(files)
 
@@ -2178,7 +2224,7 @@ def filter_elf_files(files, verbose=False):
                     )
                 )
 
-    return ret
+    return list(ret)
 
 def build_binary_dependency_tree_for_given_elf_files(
     elf_files, verbose=False
@@ -2189,6 +2235,9 @@ def build_binary_dependency_tree_for_given_elf_files(
     """
 
     # TODO: complete this function
+
+    if not isinstance(elf_files, list):
+        raise TypeError("elf_files must be list")
 
     if verbose:
         elf_files.sort()
@@ -2234,7 +2283,7 @@ def build_binary_dependency_tree_for_given_elf_files(
     return deps
 
 def find_so_problems_by_given_so_and_elfs(
-    self, so_files, elf_files, verbose=False
+    so_files, elf_files, verbose=False
     ):
 
     """
@@ -2246,6 +2295,12 @@ def find_so_problems_by_given_so_and_elfs(
     returns dict with keys pointing on the ELFs and lists of missing .so files
     in them.
     """
+
+    if not isinstance(so_files, list):
+        raise TypeError("so_files must be list")
+
+    if not isinstance(elf_files, list):
+        raise TypeError("elf_files must be list")
 
     so_files = org.wayround.utils.path.bases(so_files)
 

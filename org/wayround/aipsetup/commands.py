@@ -6,8 +6,8 @@ import glob
 import logging
 import os.path
 import pprint
-import sys
 import shlex
+import sys
 
 import org.wayround.aipsetup.classes
 import org.wayround.aipsetup.info
@@ -19,6 +19,8 @@ import org.wayround.aipsetup.infoeditor
 
 import org.wayround.utils.path
 import org.wayround.utils.getopt
+import org.wayround.utils.log
+import org.wayround.utils.time
 
 def commands():
     return {
@@ -84,7 +86,8 @@ def commands():
         'so_problems': clean_find_so_problems,
         'find_old': clean_find_old_packages,
         'explicit_asps': clean_check_list_of_installed_packages_and_asps_auto,
-        'find_nonso_garbage': clean_find_nonso_garbage,
+        'find_garbage': clean_find_garbage,
+        'find_invalid_deps_lists':clean_find_invalid_deps_lists
         },
 
     'sys_deps': {
@@ -101,6 +104,8 @@ def commands():
 
     'src': {
         'index': src_repo_index,
+        'search': src_find_name,
+        'paths': src_get_paths
         }
 
     }
@@ -2022,7 +2027,66 @@ def server_start_host(config, opts, args):
 
     return 0
 
-def clean_find_nonso_garbage(config, opts, args):
+def clean_find_invalid_deps_lists(config, opts, args):
+
+    ret = 0
+
+    basedir = '/'
+
+    if '-b' in opts:
+        basedir = opts['-b']
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir=basedir
+        )
+
+    asps = system.list_installed_asps(mute=False)
+
+    # TODO: move it to System class
+
+    for i in asps:
+
+
+        asp_deps = system.load_asp_deps(i, mute=False)
+
+        if not isinstance(asp_deps, dict):
+            logging.error("{} has wrong dependencies dict".format(i))
+
+        else:
+
+            for j in asp_deps.keys():
+
+                if not isinstance(asp_deps[j], list):
+                    logging.error(
+                        "{} has wrong dependencies list for {}".format(i, j)
+                        )
+
+                else:
+
+                    for k in asp_deps[j]:
+                        if not isinstance(k, str):
+                            logging.error(
+                                "{} has wrong dependencies list items for {}".format(i, j)
+                                )
+
+    return ret
+
+def clean_find_garbage(config, opts, args):
+
+    """
+    Search system for garbage making log and cleaning script
+
+    -b=BASENAME        - system root path
+    --script-type=bash - system cleaning script language (only bash supported)
+    --so               - look only for .so files garbage in /usr/lib directory
+    """
 
     ret = 0
 
@@ -2030,28 +2094,33 @@ def clean_find_nonso_garbage(config, opts, args):
             opts,
             opts_list=[
                 '-b=',
-                '-l=',
-                '--log-type='
+                '--script-type=',
+                '--so'
                 ]
             ) != 0:
         ret = 1
 
     if ret == 0:
         basedir = '/'
-        log = None
-        log_type = 'bash'
+        script = 'system_garbage_{}.sh'.format(org.wayround.utils.time.currenttime_stamp())
+        script_type = 'bash'
+        only_lib = False
 
         if '-b' in opts:
             basedir = opts['-b']
 
-        if '-l' in opts:
-            log = opts['-l']
+        if '--script-type' in opts:
+            script_type = opts['--script-type']
 
-        if '--log-type' in opts:
-            log_type = opts['--log-type']
+        only_lib = '--so' in opts
 
-        if not log_type in ['bash']:
-            logging.error("Invalid --log-type value")
+        log = org.wayround.utils.log.Log(
+            os.getcwd(), 'system_garbage'
+            )
+
+
+        if not script_type in ['bash']:
+            logging.error("Invalid --script-type value")
             ret = 1
         else:
 
@@ -2067,27 +2136,169 @@ def clean_find_nonso_garbage(config, opts, args):
                 )
 
 
-            res = system.find_system_nonso_garbage(mute=False)
+            log.info("Searching for garbage")
+            res = system.find_system_garbage(mute=False, only_lib=only_lib)
 
-            l = None
+            if not isinstance(res, list):
+                log.error("Some error while searching for garbage")
+                ret = 1
+            else:
 
-            if log:
-                l = open(log, 'w')
+                log.info("Garbage search complete")
+                log.info("Separating garbage .so files to know which packages depending on them")
 
-            if isinstance(res, list):
+                libs = org.wayround.utils.path.exclude_files_not_in_dirs(
+                    res,
+                    system.library_paths()
+                    )
+
+                libs = org.wayround.aipsetup.system.filter_so_files(
+                    libs,
+                    verbose=True
+                    )
+
+                if only_lib:
+                    res = libs
+
+                libs = org.wayround.utils.path.bases(libs)
+
+                asp_deps = system.load_asp_deps_all(mute=False)
+
+                asps_lkd_to_garbage = {}
+
+                log.info("Calculating garbage dependencies")
+
+                for asp_name in list(asp_deps.keys()):
+
+
+                    if not asp_name in asps_lkd_to_garbage:
+                        asps_lkd_to_garbage[asp_name] = dict()
+
+                    for file_name in list(asp_deps[asp_name].keys()):
+
+                        file_name_with_dest_dir = org.wayround.utils.path.insert_base(
+                            file_name, basedir
+                            )
+
+                        if not file_name_with_dest_dir in asps_lkd_to_garbage[asp_name]:
+                            asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] = set()
+
+                        asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] |= (set(libs) & set(asp_deps[asp_name][file_name]))
+
+                        if len(asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]) == 0:
+                            del asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]
+
+                    if len(asps_lkd_to_garbage[asp_name]) == 0:
+                        del asps_lkd_to_garbage[asp_name]
+
+
+                if script:
+                    s = open(script, 'w')
+
+                log.info("Writing report and cleaning script")
+
+                res.sort()
+
                 for i in res:
                     try:
-                        print("    {}".format(i))
+                        log.info("    {}".format(i), echo=False)
                     except:
-                        logging.error("Error printing {}".format(repr(i)))
+                        log.error("Error logging {}".format(repr(i)))
 
-                    if log:
+                    if script:
                         try:
-                            l.write("rm {}\n".format(shlex.quote(i)))
+                            s.write("rm {}\n".format(shlex.quote(i)))
                         except:
-                            logging.error("Error writing {}".format(repr(i)))
+                            log.error("Error writing {}".format(repr(i)))
 
-            if log:
-                l.close()
+                log.info(
+                    "Packages linked to garbage libraries:\n{}".format(
+                        pprint.pformat(asps_lkd_to_garbage)
+                        ),
+                    echo=False
+                    )
+
+                if script:
+                    s.close()
+
+                logging.warning("""
+Do not run cleaning script at once!
+Check everything is correct!
+Wrong cleaning can ruin your system
+"""
+                    )
+
+            log.close()
+
+    return ret
+
+def src_find_name(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-r',
+                '-s'
+                ]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        mode = 'fm'
+        mask = '*'
+        case_sensetive = False
+
+        if '-r' in opts:
+            mode = 're'
+
+        if '-s' in opts:
+            case_sensetive = True
+
+        if len(args) > 0:
+            mask = args[0]
+
+        logging.info("Loading")
+
+        src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+        logging.info("Searching")
+
+        names = src_index.find_name(mode, mask, cs=case_sensetive)
+
+        names.sort()
+
+        for i in names:
+            print("    {}".format(i))
+
+    return ret
+
+
+def src_get_paths(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        name = None
+
+        if not len(args) == 1:
+            ret = 1
+            logging.error("One argument required")
+        else:
+            name = args[0]
+            src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+            objects = src_index.get_name_paths(name)
+            objects.sort()
+            for i in objects:
+                print('    {}'.format(i))
 
     return ret

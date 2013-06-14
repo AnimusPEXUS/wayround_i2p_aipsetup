@@ -4,11 +4,13 @@ Facility for indexing and analyzing sources and packages repository
 """
 
 import copy
+import fnmatch
+import functools
 import glob
 import logging
 import os.path
+import re
 import shutil
-import functools
 
 import sqlalchemy.ext
 
@@ -1370,3 +1372,38 @@ class SourceRepoCtl:
         logging.info("DB Size: {} record(s)".format(self.database_connection.get_size()))
 
         return 0
+
+    def find_name(self, mode, mask, cs=False):
+
+        tags = self.database_connection.get_all_tags()
+
+        ret = []
+
+        if not cs:
+            mask = mask.lower()
+
+        for i in tags:
+
+            i_i = i
+
+            if not cs:
+                i_i = i_i.lower()
+
+            if mode == 're':
+
+                if re.match(mask, i_i):
+                    ret.append(i)
+
+            if mode == 'fm':
+
+                if fnmatch.fnmatch(i_i, mask):
+                    ret.append(i)
+
+        return ret
+
+    def get_name_paths(self, name):
+
+        objs = self.database_connection.get_objects_by_tag(name)
+
+        return objs
+
