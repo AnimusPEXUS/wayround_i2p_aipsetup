@@ -5,11 +5,11 @@
   "buildscript": "std", 
   "deprecated": false, 
   "description": "", 
-  "filters": "", 
+  "filters": "- status fm *\n+ status re ^$", 
   "home_page": "", 
   "installation_priority": 5, 
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/google.com/"
+  "src_path_prefix": ""
 }

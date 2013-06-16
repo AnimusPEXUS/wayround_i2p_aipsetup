@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/google.com/git/git-core.googlecode.com/"
+  "src_path_prefix": ""
 }

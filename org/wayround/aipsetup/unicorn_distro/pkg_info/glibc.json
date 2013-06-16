@@ -9,7 +9,7 @@
   "home_page": "http://www.gnu.org", 
   "installation_priority": 0, 
   "non_installable": false, 
-  "reducible": false, 
+  "reducible": true, 
   "removable": false, 
   "src_path_prefix": ""
 }

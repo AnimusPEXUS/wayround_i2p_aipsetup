@@ -5,7 +5,7 @@
   "buildscript": "std", 
   "deprecated": false, 
   "description": "", 
-  "filters": "", 
+  "filters": "- version !re \\d*\\.\\d*[02468]\n", 
   "home_page": "", 
   "installation_priority": 5, 
   "non_installable": false, 

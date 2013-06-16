@@ -5,7 +5,7 @@
   "buildscript": "std", 
   "deprecated": false, 
   "description": "", 
-  "filters": "", 
+  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]", 
   "home_page": "http://gnome.org/", 
   "installation_priority": 5, 
   "non_installable": false, 

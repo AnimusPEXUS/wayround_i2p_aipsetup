@@ -1930,7 +1930,9 @@ class SystemCtl:
 
                 fsn = org.wayround.utils.path.join(self.basedir, lst_i)
 
-                if os.path.isfile(fsn):
+                if (os.path.isfile(fsn) and
+                    not os.path.islink(fsn) and
+                    fsn == org.wayround.utils.path.realpath(fsn)):
                     fs = os.stat(fsn)
 
                     size += fs.st_size

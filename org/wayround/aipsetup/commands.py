@@ -105,7 +105,9 @@ def commands():
     'src': {
         'index': src_repo_index,
         'search': src_find_name,
-        'paths': src_get_paths
+        'paths': src_get_paths,
+        'get': src_get_file,
+        'getl': src_get_latest_tarball
         }
 
     }
@@ -1140,7 +1142,7 @@ def info_delete_pkg_info_records(config, opts, args):
 
         info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
-        ret = info_ctl.delete_info_records(mask)
+        info_ctl.delete_info_records(mask)
 
     else:
         logging.error("Mask is not given")
@@ -2282,23 +2284,160 @@ def src_get_paths(config, opts, args):
 
     if org.wayround.utils.getopt.check_options(
             opts,
-            opts_list=[]
+            opts_list=[
+                '-b'
+                ]
             ) != 0:
         ret = 1
 
     if ret == 0:
 
+        namemode = 'packagename'
+
+        if '-b' in opts:
+            namemode = 'basename'
+
         name = None
+
 
         if not len(args) == 1:
             ret = 1
             logging.error("One argument required")
         else:
             name = args[0]
+
+            if namemode == 'packagename':
+                info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+                info_rec = info_ctl.get_package_info_record(name)
+
+            if namemode == 'packagename' and not info_rec:
+                logging.error("Can't determine package's tarball basename")
+                ret = 2
+            else:
+
+                if namemode == 'packagename':
+                    basename = info_rec['basename']
+                else:
+                    basename = name
+
+
+                src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+                objects = src_index.get_name_paths(basename)
+                objects.sort(key=functools.cmp_to_key(
+                        org.wayround.utils.version.source_version_comparator
+                        ))
+                for i in objects:
+                    print('    {}'.format(i))
+
+    return ret
+
+def src_get_file(config, opts, args):
+
+    ret = 0
+
+    dstdir = '.'
+    filename = None
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-o='
+                ]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        if '-o' in opts:
+            dstdir = opts['-o']
+
+        if len(args) != 0:
+            filename = args[0]
+
+        if not filename:
+            logging.error("File name required")
+            ret = 1
+        else:
+
             src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
-            objects = src_index.get_name_paths(name)
-            objects.sort()
-            for i in objects:
-                print('    {}'.format(i))
+            ret = src_index.get_file(filename, dstdir)
+
+    return 0
+
+def src_get_latest_tarball(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=['-o=']
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        name = None
+        dstdir = '.'
+
+        if '-o' in opts:
+            dstdir = opts['-o']
+
+        if len(args) != 0:
+            name = args[0]
+
+        if not len(args) == 1:
+            logging.error("tarball basename required")
+            ret = 1
+
+        if ret == 0:
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+            info_rec = info_ctl.get_package_info_record(name)
+
+            if not info_rec:
+                logging.error("Can't determine package's tarball basename")
+                ret = 4
+            else:
+
+                basename = info_rec['basename']
+
+                logging.info("Loading index")
+
+                src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+                logging.info("Getting list of tarballs")
+
+                objects = src_index.get_name_paths(basename)
+
+                if len(objects) == 0:
+                    logging.error("zero files found, nothing to get")
+                    ret = 2
+                else:
+
+                    logging.info("Selecting latest")
+
+                    latest = src_index.get_latest_src_from_src_db(
+                        name,
+                        info_ctl=info_ctl
+                        )
+
+                    if not isinstance(latest, str):
+
+                        logging.error("Error getting latest tarball")
+                        ret = 3
+
+                    else:
+
+                        dstfile = os.path.join(dstdir, os.path.basename(latest))
+
+                        logging.info("Aquiring {}".format(latest))
+
+                        if os.path.exists(dstfile):
+                            os.chmod(dstfile, 0o700)
+                            os.unlink(dstfile)
+
+                        ret = src_index.get_file(latest, dstdir)
+
+                        os.chmod(dstfile, 0o700)
 
     return ret

@@ -11,5 +11,5 @@
   "non_installable": false, 
   "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "src_path_prefix": "/ffmpeg.org/ffmpeg.org/releases/"
 }

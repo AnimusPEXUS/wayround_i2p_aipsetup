@@ -5,7 +5,7 @@
   "buildscript": "std", 
   "deprecated": false, 
   "description": "None", 
-  "filters": "", 
+  "filters": "- status fm *\n+ status re ^$\n- version re ^\\d+$\n", 
   "home_page": "http://www.sourceforge.net", 
   "installation_priority": 5, 
   "non_installable": false, 

@@ -1164,13 +1164,20 @@ class SourceRepoCtl:
 
         return ret
 
-    def get_latest_src_from_src_db(self, name, files=None):
+    def get_latest_src_from_src_db(self, name, files=None, info_ctl=None):
 
         ret = None
 
         if not files:
+
+            if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+                raise ValueError(
+                    "if files not given, info_ctl must be of type"
+                    " org.wayround.aipsetup.info.PackageInfoCtl"
+                    )
+
             files = self.get_package_source_files(
-                name
+                name, info_ctl
                 )
 
         if not isinstance(files, list) or len(files) == 0:
@@ -1212,7 +1219,6 @@ class SourceRepoCtl:
             rel_path = ''
 
         added_count = 0
-        deleted_count = 0
 
         if not clean_only:
 
@@ -1346,7 +1352,7 @@ class SourceRepoCtl:
 
             i_i += 1
             org.wayround.utils.file.progress_write(
-                "    {:.2f}%, scanned {}, marked to deletion {}, skipped {}: {}".format(
+                "    {:.2f}%, scanned {}, marked for deletion {}, skipped {}: {}".format(
                     100.0 / (float(src_tag_objects_l) / i_i),
                     found_scanned_count,
                     deleted_count,
@@ -1359,7 +1365,7 @@ class SourceRepoCtl:
 
         self.database_connection.commit()
 
-        self.database_connection.del_object_tags(to_deletion)
+        self.database_connection.del_object_tags(to_deletion, False)
 
         self.database_connection.commit()
 
@@ -1407,3 +1413,40 @@ class SourceRepoCtl:
 
         return objs
 
+    def get_file(self, path, out_dir='.'):
+
+        # TODO: maybe range of accessible files must be limited to index
+
+        ret = 0
+
+        out_dir = org.wayround.utils.path.abspath(out_dir)
+
+        if not os.path.isdir(out_dir):
+            logging.error("Not a directory {}".format(out_dir))
+            ret = 1
+        else:
+
+            src_file = org.wayround.utils.path.join(self.sources_dir, path)
+
+            if not os.path.isfile(src_file):
+                logging.error("Not a file {}".format(src_file))
+                ret = 2
+            else:
+
+                dst_file = org.wayround.utils.path.join(out_dir, os.path.basename(path))
+
+                try:
+                    shutil.copy(
+                        src_file,
+                        dst_file
+                        )
+                except:
+                    logging.exception(
+                        "Error copying file\n    {}\n    to\n    {}".format(
+                            src_file,
+                            dst_file
+                            )
+                        )
+                    ret = 3
+
+        return ret
