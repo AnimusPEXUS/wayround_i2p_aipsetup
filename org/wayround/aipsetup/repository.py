@@ -198,37 +198,34 @@ class PackageRepoCtl:
 
     def get_category_by_path(self, path):
 
+        """
+        In case of success, returns category id
+        """
+
         if not isinstance(path, str):
             raise ValueError("`path' must be string")
 
         ret = 0
         if len(path) > 0:
 
-            logging.debug("path: {}".format(repr(path)))
             path_parsed = path.split('/')
-
-            logging.debug("path_parsed: {}".format(repr(path_parsed)))
 
             level = 0
 
             for i in path_parsed:
 
-                logging.debug("Searching for: {}".format(i))
                 cat_dir = self.get_category_idname_dict(level)
-                logging.debug("cat_dir: {}".format(cat_dir))
 
                 found_cat = False
-                for j in cat_dir:
+                for j in list(cat_dir.keys()):
                     if cat_dir[j] == i:
                         level = j
                         ret = j
-                        logging.debug("found `{}' cid == {}".format(i, j))
                         found_cat = True
                         break
 
                 if not found_cat:
                     ret = None
-                    logging.debug("not found `{}' cid".format(i))
                     break
 
                 if ret == None:
@@ -299,8 +296,6 @@ class PackageRepoCtl:
         for i in lst:
             lst_names.append(i.name)
 
-        del(lst)
-
         lst_names.sort()
 
         return lst_names
@@ -319,8 +314,6 @@ class PackageRepoCtl:
         for i in lst:
             ids.append(i.pid)
 
-        del(lst)
-
         return ids
 
     def get_package_idname_dict(self, cid=None):
@@ -335,8 +328,6 @@ class PackageRepoCtl:
         dic = {}
         for i in lst:
             dic[int(i.pid)] = i.name
-
-        del(lst)
 
         return dic
 
@@ -355,8 +346,6 @@ class PackageRepoCtl:
         lst_names = []
         for i in lst:
             lst_names.append(i.name)
-
-        del(lst)
 
         lst_names.sort()
 
@@ -378,11 +367,13 @@ class PackageRepoCtl:
         for i in lst:
             ids.append(i.cid)
 
-        del(lst)
-
         return ids
 
     def get_category_idname_dict(self, parent_cid=0):
+
+        """
+        Return dict in which keys are ids and values are names
+        """
 
         index_db = self.db_connection
 
@@ -405,8 +396,6 @@ class PackageRepoCtl:
         dic = {}
         for i in lst:
             dic[int(i.cid)] = i.name
-
-        del(lst)
 
         return dic
 
@@ -1072,6 +1061,46 @@ class PackageRepoCtl:
 
         return ret
 
+    def build_category_tree(self, start_path=''):
+
+        """
+        Build category tree starting from ``start_path``
+
+        Returns dict with category tree. where keys are paths and values are
+        lists of packages
+        """
+
+        _id = self.get_category_by_path(start_path)
+
+        all_ids = [_id]
+
+        last_pos = 0
+        last_len = len(all_ids)
+
+        while True:
+
+            for i in range(last_pos, last_len):
+                all_ids += self.get_category_id_list(all_ids[i])
+
+            _l = len(all_ids)
+
+            if _l == last_len:
+                break
+
+            last_pos = last_len
+            last_len = _l
+
+        all_ids = set(all_ids)
+
+        dic = {}
+
+        for i in all_ids:
+            cat_path = self.get_category_path_string(int(i))
+
+            dic[cat_path] = self.get_package_name_list(int(i))
+
+        return dic
+
 
 class SourceRepoCtl:
 
@@ -1117,6 +1146,8 @@ class SourceRepoCtl:
 
         ret = []
 
+        tags_object = self.database_connection
+
         if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
             raise ValueError(
                 "info_ctl must be of type "
@@ -1127,10 +1158,10 @@ class SourceRepoCtl:
             name=name
             )
 
-        try:
-            tags_object = self.database_connection
-        except:
-            logging.exception("Can't connect to source file index")
+        if not isinstance(pkg_info, dict):
+            logging.error("Can't get info record for package `{}'".format(name))
+            ret = 1
+
         else:
 
             files = tags_object.objects_by_tags([pkg_info['basename']])
@@ -1191,7 +1222,6 @@ class SourceRepoCtl:
                 )
 
         return ret
-
 
     def _index_sources_directory(
         self,
@@ -1436,7 +1466,7 @@ class SourceRepoCtl:
                 dst_file = org.wayround.utils.path.join(out_dir, os.path.basename(path))
 
                 try:
-                    shutil.copy(
+                    shutil.copy2(
                         src_file,
                         dst_file
                         )
@@ -1450,3 +1480,167 @@ class SourceRepoCtl:
                     ret = 3
 
         return ret
+
+    def get_latest_file(self, package_name, out_dir='.', info_ctl=None, verbose=False, mute=False):
+
+        ret = 0
+
+        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+            raise ValueError(
+                "info_ctl must be of type "
+                "org.wayround.aipsetup.info.PackageInfoCtl"
+                )
+
+        info_rec = info_ctl.get_package_info_record(package_name)
+
+        if not info_rec:
+            if not mute:
+                logging.error(
+                    "Can't determine package's (`{}') tarball basename".format(
+                        package_name
+                        )
+                    )
+            ret = 4
+        else:
+
+            basename = info_rec['basename']
+
+            if verbose:
+                logging.info("Getting list of tarballs")
+
+
+            if verbose:
+                logging.info("Selecting latest")
+
+            latest = self.get_latest_src_from_src_db(
+                basename,
+                info_ctl=info_ctl
+                )
+
+            if not isinstance(latest, str):
+
+                if not mute:
+                    logging.error("Error getting latest tarball")
+                ret = 3
+
+            else:
+
+                dstfile = os.path.join(out_dir, os.path.basename(latest))
+
+                if verbose:
+                    logging.info("Acquiring {}".format(latest))
+
+                if os.path.exists(dstfile):
+                    os.chmod(dstfile, 0o700)
+                    os.unlink(dstfile)
+
+                ret = self.get_file(latest, out_dir)
+
+        return ret
+
+    def get_latest_files_by_category(
+        self,
+        category,
+        out_dir='.',
+        pkg_repo_ctl=None,
+        info_ctl=None,
+        verbose=False,
+        mute=False
+        ):
+
+        ret = 0
+
+        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+            raise ValueError(
+                "info_ctl must be of type "
+                "org.wayround.aipsetup.info.PackageInfoCtl"
+                )
+
+        if not isinstance(pkg_repo_ctl, PackageRepoCtl):
+            raise ValueError(
+                "pkg_repo_ctl must be of type "
+                "org.wayround.aipsetup.repository.PackageRepoCtl"
+                )
+
+        out_dir = org.wayround.utils.path.abspath(out_dir)
+
+        tree = pkg_repo_ctl.build_category_tree(category)
+
+        for i in list(tree.keys()):
+
+            real_cat_dir = org.wayround.utils.path.join(out_dir, i)
+
+            if not os.path.exists(real_cat_dir):
+                try:
+                    os.makedirs(real_cat_dir)
+                except:
+                    logging.exception("Can't create dir {}".format(real_cat_dir))
+                    ret += 1
+
+            if os.path.isdir(real_cat_dir):
+                for j in tree[i]:
+                    ret += self.get_latest_file(
+                        j,
+                        out_dir=real_cat_dir,
+                        info_ctl=info_ctl,
+                        verbose=verbose,
+                        mute=mute
+                        )
+
+        return ret
+
+
+    def check_tarball_basenames_registration(self, path, info_ctl=None):
+
+        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+            raise ValueError(
+                "info_ctl must be of type "
+                "org.wayround.aipsetup.info.PackageInfoCtl"
+                )
+
+        # TODO: this function requires optimisations
+
+        path = org.wayround.utils.path.realpath(path)
+
+        path = path[len(org.wayround.utils.path.realpath(self.sources_dir)):]
+
+        logging.info("Loading tarball names")
+        objs = self.database_connection.get_objects()
+
+        logging.info("Filtering")
+
+        objs2 = []
+        objs_l = len(objs)
+        i_i = 0
+        for i in objs:
+            if i.startswith(path + '/'):
+                objs2.append(i)
+
+            i_i += 1
+
+            org.wayround.utils.file.progress_write(
+                "    {:.2f}%".format(
+                    100.0 / (float(objs_l) / i_i)
+                    )
+                )
+
+        org.wayround.utils.file.progress_write_finish()
+        objs = objs2
+
+        logging.info("Setting report")
+
+        found = set()
+        res = {}
+        for i in objs:
+
+            info = info_ctl.get_info_rec_by_tarball_filename(i)
+            basename = os.path.basename(i)
+
+            if not info:
+                res[basename] = None
+            else:
+                if not info['name'] in found:
+                    res[basename] = info
+                    found.add(info['name'])
+
+        return res

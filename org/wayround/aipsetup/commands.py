@@ -14,7 +14,6 @@ import org.wayround.aipsetup.info
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.version
 import org.wayround.aipsetup.package_name_parser
-import org.wayround.aipsetup.infoeditor
 
 
 import org.wayround.utils.path
@@ -100,17 +99,20 @@ def commands():
         'index': pkg_repo_index_and_update,
         'put': pkg_repo_put_file,
         'clean': pkg_repo_cleanup,
+        'list': repo_list_categories
         },
 
     'src': {
         'index': src_repo_index,
-        'search': src_find_name,
-        'paths': src_get_paths,
+        'search': src_search_name,
+        'paths': src_print_paths,
         'get': src_get_file,
-        'getl': src_get_latest_tarball
+        'getl': src_get_latest_tarball,
+        'getc': src_get_latest_tarball_categorised,
+        'reg_check': src_check_registartions
         }
-
     }
+
 
 def config_init(config, opts, args):
 
@@ -1302,9 +1304,12 @@ def pkg_repo_put_file(config, opts, args):
     return ret
 
 def info_editor(config, opts, args):
+
     """
     Start special info-file editor
     """
+
+    import org.wayround.aipsetup.infoeditor
 
     ret = 0
 
@@ -2103,10 +2108,14 @@ def clean_find_garbage(config, opts, args):
         ret = 1
 
     if ret == 0:
+
+        timestamp = org.wayround.utils.time.currenttime_stamp()
+
         basedir = '/'
-        script = 'system_garbage_{}.sh'.format(org.wayround.utils.time.currenttime_stamp())
+        script = 'system_garbage_{}.sh'.format(timestamp)
         script_type = 'bash'
         only_lib = False
+        down_script = 'get_required_sources_{}.sh'.format(timestamp)
 
         if '-b' in opts:
             basedir = opts['-b']
@@ -2117,7 +2126,7 @@ def clean_find_garbage(config, opts, args):
         only_lib = '--so' in opts
 
         log = org.wayround.utils.log.Log(
-            os.getcwd(), 'system_garbage'
+            os.getcwd(), 'system_garbage', timestamp=timestamp
             )
 
 
@@ -2194,8 +2203,7 @@ def clean_find_garbage(config, opts, args):
                         del asps_lkd_to_garbage[asp_name]
 
 
-                if script:
-                    s = open(script, 'w')
+                s = open(script, 'w')
 
                 log.info("Writing report and cleaning script")
 
@@ -2207,11 +2215,10 @@ def clean_find_garbage(config, opts, args):
                     except:
                         log.error("Error logging {}".format(repr(i)))
 
-                    if script:
-                        try:
-                            s.write("rm {}\n".format(shlex.quote(i)))
-                        except:
-                            log.error("Error writing {}".format(repr(i)))
+                    try:
+                        s.write("rm {}\n".format(shlex.quote(i)))
+                    except:
+                        log.error("Error writing {}".format(repr(i)))
 
                 log.info(
                     "Packages linked to garbage libraries:\n{}".format(
@@ -2220,8 +2227,30 @@ def clean_find_garbage(config, opts, args):
                     echo=False
                     )
 
-                if script:
-                    s.close()
+                log.info("Generating download script")
+                required_packages = set()
+
+                for i in list(asps_lkd_to_garbage.keys()):
+                    p = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
+
+                    if not p:
+                        log.error("Can't parse ASP name `{}' to add it to download script".format(i))
+                    else:
+                        required_packages.add(p['groups']['name'])
+
+                log.info("Writing download script")
+                ds = open(down_script, 'w')
+                ds.write(
+                    """\
+#!/bin/bash
+
+aipsetup3 src getl {}
+""".format(' '.join(required_packages))
+                    )
+
+                ds.close()
+
+                s.close()
 
                 logging.warning("""
 Do not run cleaning script at once!
@@ -2234,7 +2263,7 @@ Wrong cleaning can ruin your system
 
     return ret
 
-def src_find_name(config, opts, args):
+def src_search_name(config, opts, args):
 
     ret = 0
 
@@ -2278,7 +2307,7 @@ def src_find_name(config, opts, args):
     return ret
 
 
-def src_get_paths(config, opts, args):
+def src_print_paths(config, opts, args):
 
     ret = 0
 
@@ -2366,6 +2395,12 @@ def src_get_file(config, opts, args):
 
 def src_get_latest_tarball(config, opts, args):
 
+    """
+    Download latest tarball by fiven package names
+
+    -o=OUTPUT_DIR - defaults to current
+    """
+
     ret = 0
 
     if org.wayround.utils.getopt.check_options(
@@ -2376,68 +2411,170 @@ def src_get_latest_tarball(config, opts, args):
 
     if ret == 0:
 
-        name = None
+        names = None
         dstdir = '.'
 
         if '-o' in opts:
             dstdir = opts['-o']
 
         if len(args) != 0:
-            name = args[0]
+            names = args
 
-        if not len(args) == 1:
-            logging.error("tarball basename required")
+        if len(names) == 0:
+            logging.error("package name required")
             ret = 1
 
         if ret == 0:
 
             info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-            info_rec = info_ctl.get_package_info_record(name)
 
-            if not info_rec:
-                logging.error("Can't determine package's tarball basename")
-                ret = 4
-            else:
+            logging.info("Loading index")
+            src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
 
-                basename = info_rec['basename']
+            for name in names:
 
-                logging.info("Loading index")
+                ret = src_index.get_latest_file(
+                    package_name=name,
+                    out_dir=dstdir,
+                    info_ctl=info_ctl,
+                    verbose=True,
+                    mute=False
+                    )
 
-                src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+    return ret
 
-                logging.info("Getting list of tarballs")
+def src_get_latest_tarball_categorised(config, opts, args):
 
-                objects = src_index.get_name_paths(basename)
+    ret = 0
 
-                if len(objects) == 0:
-                    logging.error("zero files found, nothing to get")
-                    ret = 2
-                else:
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=['-o=']
+            ) != 0:
+        ret = 1
 
-                    logging.info("Selecting latest")
+    if ret == 0:
 
-                    latest = src_index.get_latest_src_from_src_db(
-                        name,
-                        info_ctl=info_ctl
+        category = None
+        dstdir = '.'
+
+        if '-o' in opts:
+            dstdir = opts['-o']
+
+        if len(args) != 0:
+            category = args[0]
+
+        if category == None:
+            logging.error("category path required")
+            ret = 1
+
+        if ret == 0:
+
+            logging.info("Loading indexes")
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+            src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+            ret = src_repo_ctl.get_latest_files_by_category(
+                category,
+                out_dir=dstdir,
+                pkg_repo_ctl=pkg_repo_ctl,
+                info_ctl=info_ctl,
+                verbose=True,
+                mute=False
+                )
+
+    return ret
+
+def repo_list_categories(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        tree = pkg_repo_ctl.build_category_tree('')
+
+        keys = list(tree.keys())
+        keys.sort()
+
+        for i in keys:
+
+            print("{} ::".format(i))
+
+            tree[i].sort()
+
+            for j in tree[i]:
+                print("    {}".format(j))
+
+            print()
+
+    return 0
+
+def src_check_registartions(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        path = ''
+
+        if len(args) != 0:
+            path = args[0]
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+        src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
+        res = src_repo_ctl.check_tarball_basenames_registration(path, info_ctl)
+
+        keys = list(res.keys())
+        keys.sort()
+
+        longest_name = 0
+        for i in keys:
+
+            l = len(i)
+
+            if l > longest_name:
+                longest_name = l
+
+        longest_pkg_name = 0
+        for i in keys:
+
+            if res[i]:
+                l = len(res[i]['name'])
+
+                if l > longest_pkg_name:
+                    longest_pkg_name = l
+
+        for i in keys:
+            if res[i]:
+                print(
+                    "    {name}: {pkg_name}, {deprecated}, {non_installable},"
+                    " {removable}, {reducible}".format(
+                        name=i.ljust(longest_name),
+                        pkg_name=res[i]['name'].ljust(longest_pkg_name),
+                        deprecated=str(res[i]['deprecated']).ljust(5),
+                        non_installable=str(res[i]['non_installable']).ljust(5),
+                        removable=str(res[i]['removable']).ljust(5),
+                        reducible=str(res[i]['reducible']).ljust(5)
                         )
-
-                    if not isinstance(latest, str):
-
-                        logging.error("Error getting latest tarball")
-                        ret = 3
-
-                    else:
-
-                        dstfile = os.path.join(dstdir, os.path.basename(latest))
-
-                        logging.info("Aquiring {}".format(latest))
-
-                        if os.path.exists(dstfile):
-                            os.chmod(dstfile, 0o700)
-                            os.unlink(dstfile)
-
-                        ret = src_index.get_file(latest, dstdir)
-
-                        os.chmod(dstfile, 0o700)
+                    )
+            else:
+                print(
+                    "    {name}: NOT REGISTERED".format(name=i.ljust(longest_name))
+                    )
 
     return ret

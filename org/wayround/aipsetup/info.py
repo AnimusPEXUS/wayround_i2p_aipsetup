@@ -748,12 +748,14 @@ class PackageInfoCtl:
                     possible_names.append(i.name)
 
             if len(possible_names) < 1:
-                logging.error("Not found package name for tarball `{}'".format(tarball_filename))
+                if not mute:
+                    logging.error("Not found package name for tarball `{}'".format(tarball_filename))
 
                 ret = None
 
             elif len(possible_names) > 1:
-                logging.error("Too many possible package names for tarball `{}':".format(tarball_filename))
+                if not mute:
+                    logging.error("Too many possible package names for tarball `{}':".format(tarball_filename))
 
                 for i in q:
                     print("       {}".format(possible_names))

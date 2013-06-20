@@ -13,6 +13,7 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 
 import org.wayround.utils.gtk
+
 import org.wayround.utils.path
 
 import org.wayround.aipsetup.gtk
@@ -518,6 +519,7 @@ class MainWindow:
 
 
 def main(name_to_edit=None, config=None):
+
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 

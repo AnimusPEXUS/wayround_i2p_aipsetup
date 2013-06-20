@@ -54,6 +54,7 @@ def main(buildingsite, action=None):
                     '--disable-python-dbus',
                     '--disable-pygtk',
                     '--disable-qt3',
+                    '--disable-qt4',
                     '--with-distro=lfs',
 #                    '--with-distro=' +
 #                        pkg_info['constitution']['system_title'],

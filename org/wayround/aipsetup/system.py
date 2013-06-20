@@ -590,7 +590,7 @@ class SystemCtl:
                 shared_objects_tl.sort()
 
                 for i in shared_objects_tl:
-                    logging.info("    excluded {}".format(i))
+                    logging.info("   excluded: {}".format(i))
 
                 del(shared_objects_tl)
 
