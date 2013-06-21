@@ -887,21 +887,35 @@ class PackageRepoCtl:
 
         path = org.wayround.utils.path.abspath(path)
 
+        self.create_required_dirs_at_package(org.wayround.utils.path.join(
+            self.repository_dir,
+            self.get_package_path_string(name)
+            ))
+
         files = os.listdir(path)
         files.sort()
 
         for i in files:
             p1 = org.wayround.utils.path.join(path, i)
 
-            if os.path.exists(p1):
+            if not os.path.isfile(p1) or os.path.islink(p1):
+                logging.warning("Removing {}".format(p1))
+                org.wayround.utils.file.remove_if_exists(p1)
 
-                t = org.wayround.utils.path.join(path, i)
+        files = os.listdir(path)
+        files.sort()
 
-                if self.put_asp_to_index(t) != 0:
+        for i in files:
+
+            p1 = org.wayround.utils.path.join(path, i)
+
+            if os.path.isfile(p1) and not os.path.islink(p1):
+
+                if self.put_asp_to_index(p1) != 0:
 
                     logging.warning("Can't move file to index. moving to garbage")
 
-                    shutil.move(t, org.wayround.utils.path.join(g_path, i))
+                    shutil.move(p1, org.wayround.utils.path.join(g_path, i))
 
         files = os.listdir(path)
         files.sort()
@@ -931,7 +945,7 @@ class PackageRepoCtl:
         files = os.listdir(path)
         files.sort(
             key=functools.cmp_to_key(
-                org.wayround.utils.version.package_version_comparator
+                org.wayround.aipsetup.version.package_version_comparator
                 ),
 
             reverse=True
@@ -946,6 +960,8 @@ class PackageRepoCtl:
                     os.unlink(p1)
                 except:
                     logging.exception("Error")
+
+        return
 
 
     def cleanup_repo_package(self, name):
@@ -1481,7 +1497,14 @@ class SourceRepoCtl:
 
         return ret
 
-    def get_latest_file(self, package_name, out_dir='.', info_ctl=None, verbose=False, mute=False):
+    def get_latest_file(
+        self,
+        package_name,
+        out_dir='.',
+        info_ctl=None,
+        verbose=False,
+        mute=False
+        ):
 
         ret = 0
 
@@ -1491,52 +1514,39 @@ class SourceRepoCtl:
                 "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
-        info_rec = info_ctl.get_package_info_record(package_name)
-
-        if not info_rec:
-            if not mute:
-                logging.error(
-                    "Can't determine package's (`{}') tarball basename".format(
-                        package_name
-                        )
+        if verbose:
+            logging.info(
+                "Selecting latest tarball for package `{}'".format(
+                    package_name
                     )
-            ret = 4
-        else:
-
-            basename = info_rec['basename']
-
-            if verbose:
-                logging.info("Getting list of tarballs")
-
-
-            if verbose:
-                logging.info("Selecting latest")
-
-            latest = self.get_latest_src_from_src_db(
-                basename,
-                info_ctl=info_ctl
                 )
 
-            if not isinstance(latest, str):
+        latest = self.get_latest_src_from_src_db(
+            package_name,
+            info_ctl=info_ctl
+            )
 
-                if not mute:
-                    logging.error("Error getting latest tarball")
-                ret = 3
+        if not isinstance(latest, str):
 
-            else:
+            if not mute:
+                logging.error("Error getting latest tarball")
+            ret = 3
 
-                dstfile = os.path.join(out_dir, os.path.basename(latest))
+        else:
 
-                if verbose:
-                    logging.info("Acquiring {}".format(latest))
+            dstfile = os.path.join(out_dir, os.path.basename(latest))
 
-                if os.path.exists(dstfile):
-                    os.chmod(dstfile, 0o700)
-                    os.unlink(dstfile)
+            if verbose:
+                logging.info("Acquiring {}".format(latest))
 
-                ret = self.get_file(latest, out_dir)
+            if os.path.exists(dstfile):
+                os.chmod(dstfile, 0o700)
+                os.unlink(dstfile)
+
+            ret = self.get_file(latest, out_dir)
 
         return ret
+
 
     def get_latest_files_by_category(
         self,

@@ -52,6 +52,9 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+#                    '--disable-spamassassin',
+#                    '--disable-bogofilter',
+                    '--disable-text-highlight',
                     '--disable-pst-import',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],

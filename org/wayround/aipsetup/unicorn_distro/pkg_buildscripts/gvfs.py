@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'build2', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -30,6 +30,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -50,7 +52,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--without-v4l',
+                    '--disable-hal',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
@@ -58,8 +60,7 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--build=i486-pc-linux-gnu',
-#                    '--host=i686-pc-linux-gnu'
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -72,17 +73,6 @@ def main(buildingsite, action=None):
                 )
 
         if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=['depend'],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'build2' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -99,11 +89,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',

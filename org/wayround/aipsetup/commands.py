@@ -31,7 +31,7 @@ def commands():
     'build': {
         'full': build_full,
         'build': build_build,
-        'build+': build_script,
+        'build+': build_build_plus,
         'pack': build_pack,
         'complete': build_complete
         },
@@ -99,17 +99,17 @@ def commands():
         'index': pkg_repo_index_and_update,
         'put': pkg_repo_put_file,
         'clean': pkg_repo_cleanup,
-        'list': repo_list_categories
+        'list': pkg_repo_list_categories
         },
 
     'src': {
         'index': src_repo_index,
-        'search': src_search_name,
-        'paths': src_print_paths,
-        'get': src_get_file,
-        'getl': src_get_latest_tarball,
-        'getc': src_get_latest_tarball_categorised,
-        'reg_check': src_check_registartions
+        'search': src_repo_search_name,
+        'paths': src_repo_print_paths,
+        'get': src_repo_get_file,
+        'getl': src_repo_get_latest_tarball,
+        'getc': src_repo_get_latest_tarball_categorised,
+        'reg_check': src_repo_check_registartions
         }
     }
 
@@ -396,6 +396,1200 @@ def system_remove_package(config, opts, args):
         org.wayround.aipsetup.sysupdates.all_actions()
 
     return ret
+
+def system_find_package_files(config, opts, args):
+    """
+    Looks for LOOKFOR in all installed packages using one of methods:
+
+    [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
+
+    ================ ===================================
+    -m option value  meaning
+    ================ ===================================
+    sub              (default) filename contains LOOKFOR
+    re               LOOKFOR is RegExp
+    beg              file name starts with LOOKFOR
+    plain            Exact LOOKFOR match
+    fm               LOOKFOR is file mask
+    ================ ===================================
+    """
+    basedir = '/'
+    if '-b' in opts:
+        basedir = opts['-b']
+
+    look_meth = 'sub'
+    if '-m' in opts:
+        look_meth = opts['-m']
+
+    lookfor = ''
+    if len(args) > 0:
+        lookfor = args[0]
+
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir
+        )
+
+    ret = system.find_file_in_files_installed_by_asps(
+        lookfor, mode=look_meth
+        )
+
+    if isinstance(ret, dict):
+
+        rd_keys = list(ret.keys())
+        if len(rd_keys) == 0:
+            logging.info("Not found")
+        else:
+            logging.info(
+                "Found {num} packages with `{inc}'".format_map(
+                    {
+                        'num': len(rd_keys),
+                        'inc': lookfor
+                        }
+                    )
+                )
+
+            print("")
+            rd_keys.sort()
+
+            for i in rd_keys:
+                print("\t{}:".format(i))
+
+                pp_lst = ret[i]
+                pp_lst.sort()
+
+                for j in pp_lst:
+                    print("\t\t{}".format(j))
+
+                print("")
+        ret = 0
+
+    else:
+        ret = 1
+
+    return ret
+
+def system_reduce_asp_to_latest(config, opts, args):
+    """
+    Forcibly reduces named asp, excluding files installed by latest package's asp
+
+    [-b=DESTDIR] ASP_NAME
+    """
+
+    ret = 0
+
+    destdir = '/'
+    if '-b' in opts:
+        destdir = opts['-b']
+
+    if len(args) < 1:
+        logging.error("One or more argument required")
+        ret = 1
+    else:
+
+        asp_name = args
+
+        for asp_name in args:
+            package_name_parsed = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    asp_name
+                    )
+            package_name = None
+
+            if not isinstance(package_name_parsed, dict):
+                logging.error("Can't parse package name {}".fomat(asp_name))
+
+                ret = 2
+            else:
+                package_name = package_name_parsed['groups']['name']
+
+                logging.info(
+                    "Looking for latest installed asp of package {}".format(
+                        package_name
+                        )
+                    )
+
+                info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+                pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+                system = org.wayround.aipsetup.classes.sys_ctl(
+                    config,
+                    info_ctl,
+                    pkg_repo_ctl,
+                    destdir
+                    )
+
+                asp_name_latest = system.latest_installed_package_s_asp(
+                    package_name
+                    )
+
+                system.reduce_asps(asp_name_latest, [asp_name])
+
+    return ret
+
+def system_make_asp_deps(config, opts, args):
+    """
+    generates dependencies listing for named asp and places it under
+    /destdir/var/log/packages/deps
+    """
+
+    ret = 0
+
+    destdir = '/'
+
+    if '-b' in opts:
+        destdir = opts['-b']
+
+    if len(args) != 1:
+        logging.error("Must be exactly one argument")
+        ret = 1
+    else:
+
+        asp_name = args[0]
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        system = org.wayround.aipsetup.classes.sys_ctl(
+            config,
+            info_ctl,
+            pkg_repo_ctl,
+            destdir
+            )
+
+        ret = system.make_asp_deps(asp_name, mute=False)
+
+    return ret
+
+
+def pkg_repo_index(config, opts, args):
+    """
+    Scan repository and save it's categories and packages indexes
+    to database
+    """
+
+    ret = 0
+
+    pkgindex = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    res = pkgindex.scan_repo_for_pkg_and_cat()
+
+    if not isinstance(res, dict):
+        ret = 1
+    else:
+        res2 = pkgindex.detect_package_collisions(
+            res['cats'],
+            res['packs']
+            )
+
+        if res2 != 0:
+            ret = 2
+        else:
+
+            res3 = pkgindex.save_cats_and_packs_to_db(
+                res['cats'],
+                res['packs']
+                )
+
+            if res3 != 0:
+                ret = 2
+
+    return ret
+
+
+
+def pkg_repo_index_and_update(config, opts, args):
+    """
+    Perform scan and templates creation
+    """
+
+    ret = 0
+
+    if pkg_repo_index(
+        config, opts={}, args=[]
+        ) != 0:
+
+        ret = 1
+
+    else:
+
+        if info_find_missing_pkg_info_records(
+            config, opts={'-t': None}, args=[]
+            ) != 0:
+
+            ret = 2
+
+        else:
+
+            if info_load_package_info_from_filesystem(
+                config, opts={}, args=[]
+                ) != 0:
+
+                ret = 3
+
+    return ret
+
+
+def pkg_repo_put_file(config, opts, args):
+    """
+    Copy package to index repository
+
+    -m      move, not copy
+    """
+
+    ret = 0
+
+    move = False
+    if '-m' in opts:
+        move = True
+
+    files = []
+    if len(args) > 0:
+        files = args[:]
+
+    if len(files) == 0:
+        logging.error("Filenames required")
+        ret = 2
+    else:
+
+        index = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        ret = index.put_asps_to_index(files, move=move)
+
+    return ret
+
+
+def pkg_repo_list_categories(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        tree = pkg_repo_ctl.build_category_tree('')
+
+        keys = list(tree.keys())
+        keys.sort()
+
+        for i in keys:
+
+            print("{} ::".format(i))
+
+            tree[i].sort()
+
+            for j in tree[i]:
+                print("    {}".format(j))
+
+            print()
+
+    return 0
+
+
+def src_repo_index(config, opts, args):
+    """
+    Create sources and repositories indexes
+
+    [-f] [SUBDIR]
+
+
+    SUBDIR - index only one of subdirectories
+
+    -f - force reindexing files already in index
+    -c - only index clean
+    """
+
+    ret = 0
+
+    forced_reindex = '-f' in opts
+    clean_only = '-c' in opts
+
+    subdir_name = org.wayround.utils.path.realpath(
+        org.wayround.utils.path.abspath(
+                config['sources_repo']['dir']
+            )
+        )
+
+
+    if len(args) > 1:
+        logging.error("Wrong argument count: can be only one")
+        ret = 1
+    else:
+
+        if len(args) > 0:
+            subdir_name = args[0]
+            subdir_name = org.wayround.utils.path.realpath(
+                org.wayround.utils.path.abspath(subdir_name)
+                )
+
+        if (
+            not (
+                org.wayround.utils.path.realpath(
+                    org.wayround.utils.path.abspath(subdir_name)
+                    ) + '/'
+                 ).startswith(
+                    org.wayround.utils.path.realpath(
+                        org.wayround.utils.path.abspath(
+                            config['sources_repo']['dir']
+                            )
+                        ) + '/'
+                    )
+            or not os.path.isdir(org.wayround.utils.path.abspath(subdir_name))
+            ):
+            logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
+            logging.debug(
+"""\
+passed: {}
+config: {}
+exists: {}
+""".format(
+                    org.wayround.utils.path.realpath(
+                        org.wayround.utils.path.abspath(subdir_name)
+                        ),
+                    org.wayround.utils.path.realpath(
+                        org.wayround.utils.path.abspath(
+                            config['sources_repo']['dir']
+                            )
+                        ),
+                    os.path.isdir(subdir_name)
+                    )
+                )
+            ret = 2
+
+        else:
+
+            src_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+            ret = src_ctl.index_sources(
+                org.wayround.utils.path.realpath(subdir_name),
+                acceptable_src_file_extensions=
+                    config['general']['acceptable_src_file_extensions'].split(),
+                force_reindex=forced_reindex,
+                clean_only=clean_only
+                )
+
+    return ret
+
+
+
+def src_repo_search_name(config, opts, args):
+    """
+    Search for basenames in index using file name mask
+
+    -r - Use RegExp instead of file name mask
+    -c - be case sensitive
+    """
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-r',
+                '-s'
+                ]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        mode = 'fm'
+        mask = '*'
+        case_sensetive = False
+
+        if '-r' in opts:
+            mode = 're'
+
+        if '-s' in opts:
+            case_sensetive = True
+
+        if len(args) > 0:
+            mask = args[0]
+
+        logging.info("Loading")
+
+        src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+        logging.info("Searching")
+
+        names = src_index.find_name(mode, mask, cs=case_sensetive)
+
+        names.sort()
+
+        for i in names:
+            print("    {}".format(i))
+
+    return ret
+
+
+def src_repo_print_paths(config, opts, args):
+    """
+    Print paths of tarballs in source repository using package name
+
+    -b - use tarball base name, not package name
+    """
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-b'
+                ]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        namemode = 'packagename'
+
+        if '-b' in opts:
+            namemode = 'basename'
+
+        name = None
+
+
+        if not len(args) == 1:
+            ret = 1
+            logging.error("One argument required")
+        else:
+            name = args[0]
+
+            if namemode == 'packagename':
+                info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+                info_rec = info_ctl.get_package_info_record(name)
+
+            if namemode == 'packagename' and not info_rec:
+                logging.error("Can't determine package's tarball basename")
+                ret = 2
+            else:
+
+                if namemode == 'packagename':
+                    basename = info_rec['basename']
+                else:
+                    basename = name
+
+
+                src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+                objects = src_index.get_name_paths(basename)
+                objects.sort(key=functools.cmp_to_key(
+                        org.wayround.utils.version.source_version_comparator
+                        ))
+                for i in objects:
+                    print('    {}'.format(i))
+
+    return ret
+
+def src_repo_get_file(config, opts, args):
+
+    ret = 0
+
+    dstdir = '.'
+    filename = None
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-o='
+                ]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        if '-o' in opts:
+            dstdir = opts['-o']
+
+        if len(args) != 0:
+            filename = args[0]
+
+        if not filename:
+            logging.error("File name required")
+            ret = 1
+        else:
+
+            src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+            ret = src_index.get_file(filename, dstdir)
+
+    return 0
+
+def src_repo_get_latest_tarball(config, opts, args):
+
+    """
+    Download latest tarball by fiven package names
+
+    -o=OUTPUT_DIR - defaults to current
+    """
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=['-o=']
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        names = None
+        dstdir = '.'
+
+        if '-o' in opts:
+            dstdir = opts['-o']
+
+        if len(args) != 0:
+            names = args
+
+        if len(names) == 0:
+            logging.error("package name required")
+            ret = 1
+
+        if ret == 0:
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+            logging.info("Loading index")
+            src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+            for name in names:
+
+                ret = src_index.get_latest_file(
+                    package_name=name,
+                    out_dir=dstdir,
+                    info_ctl=info_ctl,
+                    verbose=True,
+                    mute=False
+                    )
+
+    return ret
+
+def src_repo_get_latest_tarball_categorised(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=['-o=']
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        category = None
+        dstdir = '.'
+
+        if '-o' in opts:
+            dstdir = opts['-o']
+
+        if len(args) != 0:
+            category = args[0]
+
+        if category == None:
+            logging.error("category path required")
+            ret = 1
+
+        if ret == 0:
+
+            logging.info("Loading indexes")
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+            src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
+
+            ret = src_repo_ctl.get_latest_files_by_category(
+                category,
+                out_dir=dstdir,
+                pkg_repo_ctl=pkg_repo_ctl,
+                info_ctl=info_ctl,
+                verbose=True,
+                mute=False
+                )
+
+    return ret
+
+def src_repo_check_registartions(config, opts, args):
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        path = ''
+
+        if len(args) != 0:
+            path = args[0]
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+        src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
+        res = src_repo_ctl.check_tarball_basenames_registration(path, info_ctl)
+
+        keys = list(res.keys())
+        keys.sort()
+
+        longest_name = 0
+        for i in keys:
+
+            l = len(i)
+
+            if l > longest_name:
+                longest_name = l
+
+        longest_pkg_name = 0
+        for i in keys:
+
+            if res[i]:
+                l = len(res[i]['name'])
+
+                if l > longest_pkg_name:
+                    longest_pkg_name = l
+
+        for i in keys:
+            if res[i]:
+                print(
+                    "    {name}: {pkg_name}, {deprecated}, {non_installable},"
+                    " {removable}, {reducible}".format(
+                        name=i.ljust(longest_name),
+                        pkg_name=res[i]['name'].ljust(longest_pkg_name),
+                        deprecated=str(res[i]['deprecated']).ljust(5),
+                        non_installable=str(res[i]['non_installable']).ljust(5),
+                        removable=str(res[i]['removable']).ljust(5),
+                        reducible=str(res[i]['reducible']).ljust(5)
+                        )
+                    )
+            else:
+                print(
+                    "    {name}: NOT REGISTERED".format(name=i.ljust(longest_name))
+                    )
+
+    return ret
+
+
+def info_find_missing_pkg_info_records(config, opts, args):
+    """
+    Search packages which have no corresponding info records
+
+    [-t] [-f]
+
+    -t creates non-existing .json file templates in info dir
+
+    -f forces rewrite existing .json files
+    """
+
+    ret = 0
+
+    t = '-t' in opts
+
+    f = '-f' in opts
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_index_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    try:
+        info_ctl.get_missing_info_records_list(pkg_index_ctl, t, f)
+    except:
+        logging.exception("Error while searching for missing records")
+        ret = 1
+    else:
+        ret = 0
+
+    return ret
+
+def info_find_outdated_pkg_info_records(config, opts, args):
+    """
+    Finds pkg info records which differs to FS .json files
+    """
+    ret = 0
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    try:
+        res = info_ctl.get_outdated_info_records_list(
+            mute=False
+            )
+
+    except:
+        logging.exception("Error getting outdated info records list")
+        ret = 2
+        raise
+
+    else:
+        if len(res) > 0:
+            logging.warning("Total {} warnings".format(len(res)))
+        else:
+            logging.info("No warnings")
+
+    return ret
+
+def info_update_outdated_pkg_info_records(config, opts, args):
+    """
+    Loads pkg info records which differs to FS .json files
+    """
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    info_ctl.update_outdated_pkg_info_records()
+
+    # TODO: ret is need to be made
+
+    return 0
+
+def info_delete_pkg_info_records(config, opts, args):
+    """
+    mask must be given or operation will fail
+
+    MASK
+    """
+    ret = 0
+
+    mask = None
+
+    if len(args) > 0:
+        mask = args[0]
+
+    if mask != None:
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        info_ctl.delete_info_records(mask)
+
+    else:
+        logging.error("Mask is not given")
+        ret = 1
+
+    return ret
+
+def info_backup_package_info_to_filesystem(config, opts, args):
+    """
+    Save package information from database to info directory.
+
+    [-f] [MASK]
+
+    Existing files are skipped, unless -f is set
+    """
+    mask = '*'
+
+    if len(args) > 0:
+        mask = args[0]
+
+    force = '-f' in opts
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    ret = info_ctl.save_info_records_to_fs(mask, force)
+
+    return ret
+
+def info_load_package_info_from_filesystem(config, opts, args):
+    """
+    Load missing package information from named files
+
+    [-a] [file names]
+
+    If no files listed - assume all files in info dir.
+
+    -a force load all records, not only missing.
+    """
+
+    ret = 0
+
+    filenames = []
+    if len(args) == 0:
+        filenames = (
+            glob.glob(
+                org.wayround.utils.path.join(
+                    config['info_repo']['dir'],
+                    '*'
+                    )
+                )
+            )
+    else:
+        filenames = copy.copy(args)
+
+    rewrite_all = '-a' in opts
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    info_ctl.load_info_records_from_fs(
+        filenames, rewrite_all
+        )
+
+    return ret
+
+def info_list_pkg_info_records(config, opts, args):
+    """
+    List records containing in index
+
+    [FILEMASK]
+
+    Default MASK is *
+    """
+    mask = '*'
+
+    if len(args) > 0:
+        mask = args[0]
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    info_ctl.get_info_records_list(mask)
+
+    return 0
+
+def info_print_pkg_record(config, opts, args):
+    """
+    Print package info record information
+    """
+
+    ret = 0
+
+    name = None
+
+    if len(args) > 0:
+        name = args[0]
+
+    if name != None:
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+        tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+        info_ctl.print_info_record(
+            name, pkg_repo_ctl, tag_ctl
+            )
+
+    else:
+        logging.error("Name is not given")
+        ret = 1
+
+    return ret
+
+
+def info_editor(config, opts, args):
+
+    """
+    Start special info-file editor
+    """
+
+    import org.wayround.aipsetup.infoeditor
+
+    ret = 0
+
+    file_name = None
+    len_args = len(args)
+    if len_args == 0:
+        pass
+    elif len_args == 1:
+        file_name = args[0]
+    else:
+        ret = 1
+
+    if ret == 0:
+
+        if isinstance(file_name, str) and os.path.isfile(file_name):
+
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+            pkg_name = (
+                info_ctl.get_package_name_by_tarball_filename(file_name)
+                )
+
+            del info_ctl
+
+            if not pkg_name:
+                logging.error(
+                    "Could not find package name of `{}'".format(
+                        file_name
+                        )
+                    )
+                ret = 4
+            else:
+                file_name = pkg_name
+
+        if isinstance(file_name, str):
+            if not file_name.endswith('.json'):
+                file_name = file_name + '.json'
+
+        org.wayround.aipsetup.infoeditor.main(file_name, config)
+
+    return ret
+
+def info_parse_tarball(config, opts, args):
+
+    tarball = None
+
+    ret = 0
+
+    if len(args) != 1:
+        logging.error("Tarball name must be supplied")
+        ret = 1
+    else:
+
+        tarball = args[0]
+
+        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+            tarball,
+            mute=False
+            )
+
+        if not parsed:
+            logging.error("Can't parse {}".format(tarball))
+            ret = 2
+        else:
+
+            pprint.pprint(parsed)
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+            pkg_name = (
+                info_ctl.get_package_name_by_tarball_filename(tarball)
+                )
+
+            print("Package name: {}".format(pkg_name))
+
+    return ret
+
+
+def info_mass_script_apply(config, opts, args):
+    """
+    Mass buildscript applience
+
+    scriptname [-f] [tarballs list]
+
+    -f    force (by default new script name will not be applied to
+          records with existing ones)
+    """
+
+    ret = 0
+
+    sources = []
+
+    force = '-f' in opts
+
+
+    script_name = None
+
+    if len(args) > 0:
+        script_name = args[0]
+
+    if len(args) > 1:
+        sources = args[1:]
+
+    if script_name == None:
+        logging.error("Script name required")
+        ret = 3
+
+    if len(sources) == 0:
+        logging.error("No source files named")
+        ret = 2
+
+    if ret == 0:
+
+
+        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+        for i in sources:
+
+            pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
+
+            if not pkg_name:
+                logging.error("Could not find package name of `{}'".format(i))
+                ret = 4
+            else:
+
+                info_dir = config['info_repo']['dir']
+
+                p1 = org.wayround.utils.path.join(
+                    info_dir,
+                    pkg_name + '.json'
+                    )
+
+                info = org.wayround.aipsetup.info.read_info_file(p1)
+
+                if not isinstance(info, dict):
+                    logging.error("Wrong info {}".format(p1))
+                    ret = 5
+                else:
+
+                    if force or info['buildscript'] == '':
+                        info['buildscript'] = script_name
+
+                        org.wayround.aipsetup.info.write_info_file(p1, info)
+
+                        logging.info("Applied to {}".format(pkg_name))
+                    else:
+                        logging.warning(
+                            "{} already have defined script".format(
+                                pkg_name
+                                )
+                            )
+
+        info_ctl.update_outdated_pkg_info_records()
+
+    return ret
+
+def info_parse_pkg_name(config, opts, args):
+    """
+    Parse package name
+
+    NAME
+    """
+
+    ret = 0
+
+    if len(args) != 1:
+        logging.error("File name required")
+        ret = 1
+    else:
+
+        filename = args[0]
+
+        p_re = org.wayround.aipsetup.package_name_parser.package_name_parse(
+            filename
+            )
+
+        if p_re == None:
+            ret = 2
+        else:
+            pprint.pprint(p_re)
+
+    return ret
+
+def load_info_tags(config, opts, args):
+
+    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+    tag_ctl.load_tags_from_fs()
+
+    return 0
+
+def save_info_tags(config, opts, args):
+
+    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+
+    tag_ctl.save_tags_to_fs()
+
+    return 0
+
+def building_site_init(config, opts, args):
+    """
+    Initiate new building site dir, copying spplyed tarballs to 00.TARBALLS
+
+    [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
+    """
+
+    init_dir = '.'
+
+    if len(args) > 0:
+        init_dir = args[0]
+
+    files = None
+    if len(args) > 1:
+        files = args[1:]
+
+
+    bs = org.wayround.aipsetup.classes.bsite_ctl(init_dir)
+    ret = bs.init(files)
+
+    return ret
+
+
+def building_site_apply_info(config, opts, args):
+    """
+    Apply info to building dir
+
+    [DIRNAME [FILENAME]]
+    """
+
+    dirname = '.'
+    file = None
+
+    if len(args) > 0:
+        dirname = args[0]
+
+    if len(args) > 1:
+        file = args[1]
+
+    # TODO: add check for dirname correctness
+
+    host = config['system_settings']['host']
+    build = config['system_settings']['build']
+    target = config['system_settings']['target']
+
+    if '--host' in opts:
+        host = opts['--host']
+
+    if '--build' in opts:
+        build = opts['--build']
+
+    if '--target' in opts:
+        target = opts['--target']
+
+    const = org.wayround.aipsetup.classes.constitution(
+        config,
+        host,
+        target,
+        build
+        )
+
+    bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+    ret = bs.apply_info(info_ctl, const, src_file_name=file)
+
+    return ret
+
+def build_build_plus(config, opts, args):
+    """
+    Starts named action from script applied to current building site
+
+    [-b=DIR] action_name
+
+    -b - set building site
+
+    if action name ends with + (plus) all remaining actions will be also started
+    (if not error will occur)
+    """
+
+    ret = 0
+
+    args_l = len(args)
+
+    if args_l != 1:
+        logging.error("one argument must be")
+        ret = 1
+    else:
+
+        action = args[0]
+
+        dirname = '.'
+        if '-b' in opts:
+            dirname = opts['-b']
+
+        bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
+        build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
+        script = org.wayround.aipsetup.classes.bscript_ctl(config)
+        ret = build_ctl.start_building_script(script, action=action)
+
+    return ret
+
 
 def _build_complete_subroutine(
     config,
@@ -709,870 +1903,6 @@ def build_pack(config, opts, args):
         ret = packer.complete()
 
     return ret
-
-def system_find_package_files(config, opts, args):
-    """
-    Looks for LOOKFOR in all installed packages using one of methods:
-
-    [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
-
-    ================ ===================================
-    -m option value  meaning
-    ================ ===================================
-    sub              (default) filename contains LOOKFOR
-    re               LOOKFOR is RegExp
-    beg              file name starts with LOOKFOR
-    plain            Exact LOOKFOR match
-    fm               LOOKFOR is file mask
-    ================ ===================================
-    """
-    basedir = '/'
-    if '-b' in opts:
-        basedir = opts['-b']
-
-    look_meth = 'sub'
-    if '-m' in opts:
-        look_meth = opts['-m']
-
-    lookfor = ''
-    if len(args) > 0:
-        lookfor = args[0]
-
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-    system = org.wayround.aipsetup.classes.sys_ctl(
-        config,
-        info_ctl,
-        pkg_repo_ctl,
-        basedir
-        )
-
-    ret = system.find_file_in_files_installed_by_asps(
-        lookfor, mode=look_meth
-        )
-
-    if isinstance(ret, dict):
-
-        rd_keys = list(ret.keys())
-        if len(rd_keys) == 0:
-            logging.info("Not found")
-        else:
-            logging.info(
-                "Found {num} packages with `{inc}'".format_map(
-                    {
-                        'num': len(rd_keys),
-                        'inc': lookfor
-                        }
-                    )
-                )
-
-            print("")
-            rd_keys.sort()
-
-            for i in rd_keys:
-                print("\t{}:".format(i))
-
-                pp_lst = ret[i]
-                pp_lst.sort()
-
-                for j in pp_lst:
-                    print("\t\t{}".format(j))
-
-                print("")
-        ret = 0
-
-    else:
-        ret = 1
-
-    return ret
-
-def package_check(config, opts, args):
-    """
-    Check package for errors
-    """
-
-    ret = 0
-
-    file = None
-
-    if len(args) == 1:
-        file = args[0]
-
-    if file == None:
-        logging.error("Filename required")
-        ret = 2
-
-    else:
-
-        asp_pkg = org.wayround.aipsetup.classes.asp_package(file)
-
-        ret = asp_pkg.check_package()
-
-    return ret
-
-def system_reduce_asp_to_latest(config, opts, args):
-    """
-    Forcibly reduces named asp, excluding files installed by latest package's asp
-
-    [-b=DESTDIR] ASP_NAME
-    """
-
-    ret = 0
-
-    destdir = '/'
-    if '-b' in opts:
-        destdir = opts['-b']
-
-    if len(args) < 1:
-        logging.error("One or more argument required")
-        ret = 1
-    else:
-
-        asp_name = args
-
-        for asp_name in args:
-            package_name_parsed = \
-                org.wayround.aipsetup.package_name_parser.package_name_parse(
-                    asp_name
-                    )
-            package_name = None
-
-            if not isinstance(package_name_parsed, dict):
-                logging.error("Can't parse package name {}".fomat(asp_name))
-
-                ret = 2
-            else:
-                package_name = package_name_parsed['groups']['name']
-
-                logging.info(
-                    "Looking for latest installed asp of package {}".format(
-                        package_name
-                        )
-                    )
-
-                info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-                pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-                system = org.wayround.aipsetup.classes.sys_ctl(
-                    config,
-                    info_ctl,
-                    pkg_repo_ctl,
-                    destdir
-                    )
-
-                asp_name_latest = system.latest_installed_package_s_asp(
-                    package_name
-                    )
-
-                system.reduce_asps(asp_name_latest, [asp_name])
-
-    return ret
-
-def system_make_asp_deps(config, opts, args):
-    """
-    generates dependencies listing for named asp and places it under
-    /destdir/var/log/packages/deps
-    """
-
-    ret = 0
-
-    destdir = '/'
-
-    if '-b' in opts:
-        destdir = opts['-b']
-
-    if len(args) != 1:
-        logging.error("Must be exactly one argument")
-        ret = 1
-    else:
-
-        asp_name = args[0]
-
-        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-        system = org.wayround.aipsetup.classes.sys_ctl(
-            config,
-            info_ctl,
-            pkg_repo_ctl,
-            destdir
-            )
-
-        ret = system.make_asp_deps(asp_name, mute=False)
-
-    return ret
-
-
-def pkg_repo_index_and_update(config, opts, args):
-    """
-    Perform scan and templates creation
-    """
-
-    ret = 0
-
-    if package_repository_index(
-        config, opts={}, args=[]
-        ) != 0:
-
-        ret = 1
-
-    else:
-
-        if info_find_missing_pkg_info_records(
-            config, opts={'-t': None}, args=[]
-            ) != 0:
-
-            ret = 2
-
-        else:
-
-            if info_load_package_info_from_filesystem(
-                config, opts={}, args=[]
-                ) != 0:
-
-                ret = 3
-
-    return ret
-
-
-def package_repository_index(config, opts, args):
-    """
-    Scan repository and save it's categories and packages indexes
-    to database
-    """
-
-    ret = 0
-
-    pkgindex = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-    res = pkgindex.scan_repo_for_pkg_and_cat()
-
-    if not isinstance(res, dict):
-        ret = 1
-    else:
-        res2 = pkgindex.detect_package_collisions(
-            res['cats'],
-            res['packs']
-            )
-
-        if res2 != 0:
-            ret = 2
-        else:
-
-            res3 = pkgindex.save_cats_and_packs_to_db(
-                res['cats'],
-                res['packs']
-                )
-
-            if res3 != 0:
-                ret = 2
-
-    return ret
-
-
-def src_repo_index(config, opts, args):
-    """
-    Create sources and repositories indexes
-
-    [-f] [SUBDIR]
-
-
-    SUBDIR - index only one of subdirectories
-
-    -f - force reindexing files already in index
-    -c - only index clean
-    """
-
-    ret = 0
-
-    forced_reindex = '-f' in opts
-    clean_only = '-c' in opts
-
-    subdir_name = org.wayround.utils.path.realpath(
-        org.wayround.utils.path.abspath(
-                config['sources_repo']['dir']
-            )
-        )
-
-
-    if len(args) > 1:
-        logging.error("Wrong argument count: can be only one")
-        ret = 1
-    else:
-
-        if len(args) > 0:
-            subdir_name = args[0]
-            subdir_name = org.wayround.utils.path.realpath(
-                org.wayround.utils.path.abspath(subdir_name)
-                )
-
-        if (
-            not (
-                org.wayround.utils.path.realpath(
-                    org.wayround.utils.path.abspath(subdir_name)
-                    ) + '/'
-                 ).startswith(
-                    org.wayround.utils.path.realpath(
-                        org.wayround.utils.path.abspath(
-                            config['sources_repo']['dir']
-                            )
-                        ) + '/'
-                    )
-            or not os.path.isdir(org.wayround.utils.path.abspath(subdir_name))
-            ):
-            logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
-            logging.debug(
-"""\
-passed: {}
-config: {}
-exists: {}
-""".format(
-                    org.wayround.utils.path.realpath(
-                        org.wayround.utils.path.abspath(subdir_name)
-                        ),
-                    org.wayround.utils.path.realpath(
-                        org.wayround.utils.path.abspath(
-                            config['sources_repo']['dir']
-                            )
-                        ),
-                    os.path.isdir(subdir_name)
-                    )
-                )
-            ret = 2
-
-        else:
-
-            src_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
-
-            ret = src_ctl.index_sources(
-                org.wayround.utils.path.realpath(subdir_name),
-                acceptable_src_file_extensions=
-                    config['general']['acceptable_src_file_extensions'].split(),
-                force_reindex=forced_reindex,
-                clean_only=clean_only
-                )
-
-    return ret
-
-
-def info_find_missing_pkg_info_records(config, opts, args):
-    """
-    Search packages which have no corresponding info records
-
-    [-t] [-f]
-
-    -t creates non-existing .json file templates in info dir
-
-    -f forces rewrite existing .json files
-    """
-
-    ret = 0
-
-    t = '-t' in opts
-
-    f = '-f' in opts
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    pkg_index_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-    try:
-        info_ctl.get_missing_info_records_list(pkg_index_ctl, t, f)
-    except:
-        logging.exception("Error while searching for missing records")
-        ret = 1
-    else:
-        ret = 0
-
-    return ret
-
-def info_find_outdated_pkg_info_records(config, opts, args):
-    """
-    Finds pkg info records which differs to FS .json files
-    """
-    ret = 0
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    try:
-        res = info_ctl.get_outdated_info_records_list(
-            mute=False
-            )
-
-    except:
-        logging.exception("Error getting outdated info records list")
-        ret = 2
-        raise
-
-    else:
-        if len(res) > 0:
-            logging.warning("Total {} warnings".format(len(res)))
-        else:
-            logging.info("No warnings")
-
-    return ret
-
-def info_update_outdated_pkg_info_records(config, opts, args):
-    """
-    Loads pkg info records which differs to FS .json files
-    """
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    info_ctl.update_outdated_pkg_info_records()
-
-    # TODO: ret is need to be made
-
-    return 0
-
-def info_delete_pkg_info_records(config, opts, args):
-    """
-    mask must be given or operation will fail
-
-    MASK
-    """
-    ret = 0
-
-    mask = None
-
-    if len(args) > 0:
-        mask = args[0]
-
-    if mask != None:
-
-        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-        info_ctl.delete_info_records(mask)
-
-    else:
-        logging.error("Mask is not given")
-        ret = 1
-
-    return ret
-
-def info_backup_package_info_to_filesystem(config, opts, args):
-    """
-    Save package information from database to info directory.
-
-    [-f] [MASK]
-
-    Existing files are skipped, unless -f is set
-    """
-    mask = '*'
-
-    if len(args) > 0:
-        mask = args[0]
-
-    force = '-f' in opts
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    ret = info_ctl.save_info_records_to_fs(mask, force)
-
-    return ret
-
-def info_load_package_info_from_filesystem(config, opts, args):
-    """
-    Load missing package information from named files
-
-    [-a] [file names]
-
-    If no files listed - assume all files in info dir.
-
-    -a force load all records, not only missing.
-    """
-
-    ret = 0
-
-    filenames = []
-    if len(args) == 0:
-        filenames = (
-            glob.glob(
-                org.wayround.utils.path.join(
-                    config['info_repo']['dir'],
-                    '*'
-                    )
-                )
-            )
-    else:
-        filenames = copy.copy(args)
-
-    rewrite_all = '-a' in opts
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    info_ctl.load_info_records_from_fs(
-        filenames, rewrite_all
-        )
-
-    return ret
-
-def info_list_pkg_info_records(config, opts, args):
-    """
-    List records containing in index
-
-    [FILEMASK]
-
-    Default MASK is *
-    """
-    mask = '*'
-
-    if len(args) > 0:
-        mask = args[0]
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    info_ctl.get_info_records_list(mask)
-
-    return 0
-
-def info_print_pkg_record(config, opts, args):
-    """
-    Print package info record information
-    """
-
-    ret = 0
-
-    name = None
-
-    if len(args) > 0:
-        name = args[0]
-
-    if name != None:
-
-        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-        tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
-
-        info_ctl.print_info_record(
-            name, pkg_repo_ctl, tag_ctl
-            )
-
-    else:
-        logging.error("Name is not given")
-        ret = 1
-
-    return ret
-
-def load_info_tags(config, opts, args):
-
-    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
-
-    tag_ctl.load_tags_from_fs()
-
-    return 0
-
-def save_info_tags(config, opts, args):
-
-    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
-
-    tag_ctl.save_tags_to_fs()
-
-    return 0
-
-
-def pkg_repo_put_file(config, opts, args):
-    """
-    Copy package to index repository
-
-    -m      move, not copy
-    """
-
-    ret = 0
-
-    move = False
-    if '-m' in opts:
-        move = True
-
-    files = []
-    if len(args) > 0:
-        files = args[:]
-
-    if len(files) == 0:
-        logging.error("Filenames required")
-        ret = 2
-    else:
-
-        index = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-        ret = index.put_asps_to_index(files, move=move)
-
-    return ret
-
-def info_editor(config, opts, args):
-
-    """
-    Start special info-file editor
-    """
-
-    import org.wayround.aipsetup.infoeditor
-
-    ret = 0
-
-    file_name = None
-    len_args = len(args)
-    if len_args == 0:
-        pass
-    elif len_args == 1:
-        file_name = args[0]
-    else:
-        ret = 1
-
-    if ret == 0:
-
-        if isinstance(file_name, str) and os.path.isfile(file_name):
-
-
-            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-            pkg_name = (
-                info_ctl.get_package_name_by_tarball_filename(file_name)
-                )
-
-            del info_ctl
-
-            if not pkg_name:
-                logging.error(
-                    "Could not find package name of `{}'".format(
-                        file_name
-                        )
-                    )
-                ret = 4
-            else:
-                file_name = pkg_name
-
-        if isinstance(file_name, str):
-            if not file_name.endswith('.json'):
-                file_name = file_name + '.json'
-
-        org.wayround.aipsetup.infoeditor.main(file_name, config)
-
-    return ret
-
-def info_parse_tarball(config, opts, args):
-
-    tarball = None
-
-    ret = 0
-
-    if len(args) != 1:
-        logging.error("Tarball name must be supplied")
-        ret = 1
-    else:
-
-        tarball = args[0]
-
-        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
-            tarball,
-            mute=False
-            )
-
-        if not parsed:
-            logging.error("Can't parse {}".format(tarball))
-            ret = 2
-        else:
-
-            pprint.pprint(parsed)
-
-            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-            pkg_name = (
-                info_ctl.get_package_name_by_tarball_filename(tarball)
-                )
-
-            print("Package name: {}".format(pkg_name))
-
-    return ret
-
-
-def info_mass_script_apply(config, opts, args):
-    """
-    Mass buildscript applience
-
-    scriptname [-f] [tarballs list]
-
-    -f    force (by default new script name will not be applied to
-          records with existing ones)
-    """
-
-    ret = 0
-
-    sources = []
-
-    force = '-f' in opts
-
-
-    script_name = None
-
-    if len(args) > 0:
-        script_name = args[0]
-
-    if len(args) > 1:
-        sources = args[1:]
-
-    if script_name == None:
-        logging.error("Script name required")
-        ret = 3
-
-    if len(sources) == 0:
-        logging.error("No source files named")
-        ret = 2
-
-    if ret == 0:
-
-
-        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-        for i in sources:
-
-            pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
-
-            if not pkg_name:
-                logging.error("Could not find package name of `{}'".format(i))
-                ret = 4
-            else:
-
-                info_dir = config['info_repo']['dir']
-
-                p1 = org.wayround.utils.path.join(
-                    info_dir,
-                    pkg_name + '.json'
-                    )
-
-                info = org.wayround.aipsetup.info.read_info_file(p1)
-
-                if not isinstance(info, dict):
-                    logging.error("Wrong info {}".format(p1))
-                    ret = 5
-                else:
-
-                    if force or info['buildscript'] == '':
-                        info['buildscript'] = script_name
-
-                        org.wayround.aipsetup.info.write_info_file(p1, info)
-
-                        logging.info("Applied to {}".format(pkg_name))
-                    else:
-                        logging.warning(
-                            "{} already have defined script".format(
-                                pkg_name
-                                )
-                            )
-
-        info_ctl.update_outdated_pkg_info_records()
-
-    return ret
-
-def info_parse_pkg_name(config, opts, args):
-    """
-    Parse package name
-
-    NAME
-    """
-
-    ret = 0
-
-    if len(args) != 1:
-        logging.error("File name required")
-        ret = 1
-    else:
-
-        filename = args[0]
-
-        p_re = org.wayround.aipsetup.package_name_parser.package_name_parse(
-            filename
-            )
-
-        if p_re == None:
-            ret = 2
-        else:
-            pprint.pprint(p_re)
-
-    return ret
-
-def building_site_init(config, opts, args):
-    """
-    Initiate new building site dir, copying spplyed tarballs to 00.TARBALLS
-
-    [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
-    """
-
-    init_dir = '.'
-
-    if len(args) > 0:
-        init_dir = args[0]
-
-    files = None
-    if len(args) > 1:
-        files = args[1:]
-
-
-    bs = org.wayround.aipsetup.classes.bsite_ctl(init_dir)
-    ret = bs.init(files)
-
-    return ret
-
-
-def building_site_apply_info(config, opts, args):
-    """
-    Apply info to building dir
-
-    [DIRNAME [FILENAME]]
-    """
-
-    dirname = '.'
-    file = None
-
-    if len(args) > 0:
-        dirname = args[0]
-
-    if len(args) > 1:
-        file = args[1]
-
-    # TODO: add check for dirname correctness
-    bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
-    ret = bs.apply_info(file)
-
-    return ret
-
-def build_script(config, opts, args):
-    """
-    Starts named action from script applied to current building site
-
-    [-b=DIR] action_name
-
-    -b - set building site
-
-    if action name ends with + (plus) all remaining actions will be also started
-    (if not error will occur)
-    """
-
-    ret = 0
-
-    args_l = len(args)
-
-    if args_l != 1:
-        logging.error("one argument must be")
-        ret = 1
-    else:
-
-        action = args[0]
-
-        dirname = '.'
-        if '-b' in opts:
-            dirname = opts['-b']
-
-        bs = org.wayround.aipsetup.classes.bsite_ctl(dirname)
-        build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
-        script = org.wayround.aipsetup.classes.bscript_ctl(config)
-        ret = build_ctl.start_building_script(script, action=action)
-
-    return ret
-
 
 
 def build_build(config, opts, args):
@@ -1928,6 +2258,245 @@ def pkg_repo_cleanup(config, opts, args):
 
     return 0
 
+def clean_find_invalid_deps_lists(config, opts, args):
+
+    ret = 0
+
+    basedir = '/'
+
+    if '-b' in opts:
+        basedir = opts['-b']
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    system = org.wayround.aipsetup.classes.sys_ctl(
+        config,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir=basedir
+        )
+
+    asps = system.list_installed_asps(mute=False)
+
+    # TODO: move it to System class
+
+    for i in asps:
+
+
+        asp_deps = system.load_asp_deps(i, mute=False)
+
+        if not isinstance(asp_deps, dict):
+            logging.error("{} has wrong dependencies dict".format(i))
+
+        else:
+
+            for j in asp_deps.keys():
+
+                if not isinstance(asp_deps[j], list):
+                    logging.error(
+                        "{} has wrong dependencies list for {}".format(i, j)
+                        )
+
+                else:
+
+                    for k in asp_deps[j]:
+                        if not isinstance(k, str):
+                            logging.error(
+                                "{} has wrong dependencies list items for {}".format(i, j)
+                                )
+
+    return ret
+
+def clean_find_garbage(config, opts, args):
+
+    """
+    Search system for garbage making log and cleaning script
+
+    -b=BASENAME        - system root path
+    --script-type=bash - system cleaning script language (only bash supported)
+    --so               - look only for .so files garbage in /usr/lib directory
+    """
+
+    ret = 0
+
+    if org.wayround.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-b=',
+                '--script-type=',
+                '--so'
+                ]
+            ) != 0:
+        ret = 1
+
+    if ret == 0:
+
+        timestamp = org.wayround.utils.time.currenttime_stamp()
+
+        basedir = '/'
+        script = 'system_garbage_remove_{}.sh'.format(timestamp)
+        script_type = 'bash'
+        only_lib = False
+        down_script = 'get_required_sources_{}.sh'.format(timestamp)
+
+        if '-b' in opts:
+            basedir = opts['-b']
+
+        if '--script-type' in opts:
+            script_type = opts['--script-type']
+
+        only_lib = '--so' in opts
+
+        log = org.wayround.utils.log.Log(
+            os.getcwd(), 'system_garbage', timestamp=timestamp
+            )
+
+
+        if not script_type in ['bash']:
+            logging.error("Invalid --script-type value")
+            ret = 1
+        else:
+
+            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+            system = org.wayround.aipsetup.classes.sys_ctl(
+                config,
+                info_ctl,
+                pkg_repo_ctl,
+                basedir=basedir
+                )
+
+
+            log.info("Searching for garbage")
+            res = system.find_system_garbage(mute=False, only_lib=only_lib)
+
+            if not isinstance(res, list):
+                log.error("Some error while searching for garbage")
+                ret = 1
+            else:
+
+                log.info("Garbage search complete")
+                log.info("Separating garbage .so files to know which packages depending on them")
+
+                libs = org.wayround.utils.path.exclude_files_not_in_dirs(
+                    res,
+                    system.library_paths()
+                    )
+
+                libs = org.wayround.aipsetup.system.filter_so_files(
+                    libs,
+                    verbose=True
+                    )
+
+                if only_lib:
+                    res = libs
+
+                libs = org.wayround.utils.path.bases(libs)
+
+                asp_deps = system.load_asp_deps_all(mute=False)
+
+                asps_lkd_to_garbage = {}
+
+                log.info("Calculating garbage dependencies")
+
+                for asp_name in list(asp_deps.keys()):
+
+
+                    if not asp_name in asps_lkd_to_garbage:
+                        asps_lkd_to_garbage[asp_name] = dict()
+
+                    for file_name in list(asp_deps[asp_name].keys()):
+
+                        file_name_with_dest_dir = org.wayround.utils.path.insert_base(
+                            file_name, basedir
+                            )
+
+                        if not file_name_with_dest_dir in asps_lkd_to_garbage[asp_name]:
+                            asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] = set()
+
+                        asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] |= (set(libs) & set(asp_deps[asp_name][file_name]))
+
+                        if len(asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]) == 0:
+                            del asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]
+
+                    if len(asps_lkd_to_garbage[asp_name]) == 0:
+                        del asps_lkd_to_garbage[asp_name]
+
+
+                s = open(script, 'w')
+
+                s.write("""\
+#!/bin/bash
+
+# This is fuse to ensure You are know what You are doing
+exit 1
+
+
+""")
+
+                log.info("Writing report and cleaning script")
+
+                res.sort()
+
+                for i in res:
+                    try:
+                        log.info("    {}".format(i), echo=False)
+                    except:
+                        log.error("Error logging {}".format(repr(i)))
+
+                    try:
+                        s.write("rm {}\n".format(shlex.quote(i)))
+                    except:
+                        log.error("Error writing {}".format(repr(i)))
+
+                log.info(
+                    "Packages linked to garbage libraries:\n{}".format(
+                        pprint.pformat(asps_lkd_to_garbage)
+                        ),
+                    echo=False
+                    )
+
+                log.info("Generating download script")
+                required_packages = set()
+
+                for i in list(asps_lkd_to_garbage.keys()):
+                    p = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
+
+                    if not p:
+                        log.error("Can't parse ASP name `{}' to add it to download script".format(i))
+                    else:
+                        required_packages.add(p['groups']['name'])
+
+                log.info("Writing download script")
+                ds = open(down_script, 'w')
+                ds.write(
+                    """\
+#!/bin/bash
+
+aipsetup3 src getl {}
+""".format(' '.join(required_packages))
+                    )
+
+                ds.close()
+
+                s.close()
+
+                logging.warning("""
+Do not run cleaning script at once!
+Check everything is correct!
+Wrong cleaning can ruin your system
+"""
+                    )
+
+            log.close()
+
+    return ret
+
+
 def clean_check_list_of_installed_packages_and_asps_auto(config, opts, args):
 
     """
@@ -2034,547 +2603,27 @@ def server_start_host(config, opts, args):
 
     return 0
 
-def clean_find_invalid_deps_lists(config, opts, args):
-
-    ret = 0
-
-    basedir = '/'
-
-    if '-b' in opts:
-        basedir = opts['-b']
-
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-    system = org.wayround.aipsetup.classes.sys_ctl(
-        config,
-        info_ctl,
-        pkg_repo_ctl,
-        basedir=basedir
-        )
-
-    asps = system.list_installed_asps(mute=False)
-
-    # TODO: move it to System class
-
-    for i in asps:
-
-
-        asp_deps = system.load_asp_deps(i, mute=False)
-
-        if not isinstance(asp_deps, dict):
-            logging.error("{} has wrong dependencies dict".format(i))
-
-        else:
-
-            for j in asp_deps.keys():
-
-                if not isinstance(asp_deps[j], list):
-                    logging.error(
-                        "{} has wrong dependencies list for {}".format(i, j)
-                        )
-
-                else:
-
-                    for k in asp_deps[j]:
-                        if not isinstance(k, str):
-                            logging.error(
-                                "{} has wrong dependencies list items for {}".format(i, j)
-                                )
-
-    return ret
-
-def clean_find_garbage(config, opts, args):
-
+def package_check(config, opts, args):
     """
-    Search system for garbage making log and cleaning script
-
-    -b=BASENAME        - system root path
-    --script-type=bash - system cleaning script language (only bash supported)
-    --so               - look only for .so files garbage in /usr/lib directory
+    Check package for errors
     """
 
     ret = 0
 
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[
-                '-b=',
-                '--script-type=',
-                '--so'
-                ]
-            ) != 0:
-        ret = 1
+    file = None
 
-    if ret == 0:
+    if len(args) == 1:
+        file = args[0]
 
-        timestamp = org.wayround.utils.time.currenttime_stamp()
+    if file == None:
+        logging.error("Filename required")
+        ret = 2
 
-        basedir = '/'
-        script = 'system_garbage_{}.sh'.format(timestamp)
-        script_type = 'bash'
-        only_lib = False
-        down_script = 'get_required_sources_{}.sh'.format(timestamp)
+    else:
 
-        if '-b' in opts:
-            basedir = opts['-b']
+        asp_pkg = org.wayround.aipsetup.classes.asp_package(file)
 
-        if '--script-type' in opts:
-            script_type = opts['--script-type']
-
-        only_lib = '--so' in opts
-
-        log = org.wayround.utils.log.Log(
-            os.getcwd(), 'system_garbage', timestamp=timestamp
-            )
-
-
-        if not script_type in ['bash']:
-            logging.error("Invalid --script-type value")
-            ret = 1
-        else:
-
-            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-            system = org.wayround.aipsetup.classes.sys_ctl(
-                config,
-                info_ctl,
-                pkg_repo_ctl,
-                basedir=basedir
-                )
-
-
-            log.info("Searching for garbage")
-            res = system.find_system_garbage(mute=False, only_lib=only_lib)
-
-            if not isinstance(res, list):
-                log.error("Some error while searching for garbage")
-                ret = 1
-            else:
-
-                log.info("Garbage search complete")
-                log.info("Separating garbage .so files to know which packages depending on them")
-
-                libs = org.wayround.utils.path.exclude_files_not_in_dirs(
-                    res,
-                    system.library_paths()
-                    )
-
-                libs = org.wayround.aipsetup.system.filter_so_files(
-                    libs,
-                    verbose=True
-                    )
-
-                if only_lib:
-                    res = libs
-
-                libs = org.wayround.utils.path.bases(libs)
-
-                asp_deps = system.load_asp_deps_all(mute=False)
-
-                asps_lkd_to_garbage = {}
-
-                log.info("Calculating garbage dependencies")
-
-                for asp_name in list(asp_deps.keys()):
-
-
-                    if not asp_name in asps_lkd_to_garbage:
-                        asps_lkd_to_garbage[asp_name] = dict()
-
-                    for file_name in list(asp_deps[asp_name].keys()):
-
-                        file_name_with_dest_dir = org.wayround.utils.path.insert_base(
-                            file_name, basedir
-                            )
-
-                        if not file_name_with_dest_dir in asps_lkd_to_garbage[asp_name]:
-                            asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] = set()
-
-                        asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] |= (set(libs) & set(asp_deps[asp_name][file_name]))
-
-                        if len(asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]) == 0:
-                            del asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]
-
-                    if len(asps_lkd_to_garbage[asp_name]) == 0:
-                        del asps_lkd_to_garbage[asp_name]
-
-
-                s = open(script, 'w')
-
-                log.info("Writing report and cleaning script")
-
-                res.sort()
-
-                for i in res:
-                    try:
-                        log.info("    {}".format(i), echo=False)
-                    except:
-                        log.error("Error logging {}".format(repr(i)))
-
-                    try:
-                        s.write("rm {}\n".format(shlex.quote(i)))
-                    except:
-                        log.error("Error writing {}".format(repr(i)))
-
-                log.info(
-                    "Packages linked to garbage libraries:\n{}".format(
-                        pprint.pformat(asps_lkd_to_garbage)
-                        ),
-                    echo=False
-                    )
-
-                log.info("Generating download script")
-                required_packages = set()
-
-                for i in list(asps_lkd_to_garbage.keys()):
-                    p = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
-
-                    if not p:
-                        log.error("Can't parse ASP name `{}' to add it to download script".format(i))
-                    else:
-                        required_packages.add(p['groups']['name'])
-
-                log.info("Writing download script")
-                ds = open(down_script, 'w')
-                ds.write(
-                    """\
-#!/bin/bash
-
-aipsetup3 src getl {}
-""".format(' '.join(required_packages))
-                    )
-
-                ds.close()
-
-                s.close()
-
-                logging.warning("""
-Do not run cleaning script at once!
-Check everything is correct!
-Wrong cleaning can ruin your system
-"""
-                    )
-
-            log.close()
+        ret = asp_pkg.check_package()
 
     return ret
 
-def src_search_name(config, opts, args):
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[
-                '-r',
-                '-s'
-                ]
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        mode = 'fm'
-        mask = '*'
-        case_sensetive = False
-
-        if '-r' in opts:
-            mode = 're'
-
-        if '-s' in opts:
-            case_sensetive = True
-
-        if len(args) > 0:
-            mask = args[0]
-
-        logging.info("Loading")
-
-        src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
-
-        logging.info("Searching")
-
-        names = src_index.find_name(mode, mask, cs=case_sensetive)
-
-        names.sort()
-
-        for i in names:
-            print("    {}".format(i))
-
-    return ret
-
-
-def src_print_paths(config, opts, args):
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[
-                '-b'
-                ]
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        namemode = 'packagename'
-
-        if '-b' in opts:
-            namemode = 'basename'
-
-        name = None
-
-
-        if not len(args) == 1:
-            ret = 1
-            logging.error("One argument required")
-        else:
-            name = args[0]
-
-            if namemode == 'packagename':
-                info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-                info_rec = info_ctl.get_package_info_record(name)
-
-            if namemode == 'packagename' and not info_rec:
-                logging.error("Can't determine package's tarball basename")
-                ret = 2
-            else:
-
-                if namemode == 'packagename':
-                    basename = info_rec['basename']
-                else:
-                    basename = name
-
-
-                src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
-                objects = src_index.get_name_paths(basename)
-                objects.sort(key=functools.cmp_to_key(
-                        org.wayround.utils.version.source_version_comparator
-                        ))
-                for i in objects:
-                    print('    {}'.format(i))
-
-    return ret
-
-def src_get_file(config, opts, args):
-
-    ret = 0
-
-    dstdir = '.'
-    filename = None
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[
-                '-o='
-                ]
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        if '-o' in opts:
-            dstdir = opts['-o']
-
-        if len(args) != 0:
-            filename = args[0]
-
-        if not filename:
-            logging.error("File name required")
-            ret = 1
-        else:
-
-            src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
-            ret = src_index.get_file(filename, dstdir)
-
-    return 0
-
-def src_get_latest_tarball(config, opts, args):
-
-    """
-    Download latest tarball by fiven package names
-
-    -o=OUTPUT_DIR - defaults to current
-    """
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=['-o=']
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        names = None
-        dstdir = '.'
-
-        if '-o' in opts:
-            dstdir = opts['-o']
-
-        if len(args) != 0:
-            names = args
-
-        if len(names) == 0:
-            logging.error("package name required")
-            ret = 1
-
-        if ret == 0:
-
-            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-
-            logging.info("Loading index")
-            src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
-
-            for name in names:
-
-                ret = src_index.get_latest_file(
-                    package_name=name,
-                    out_dir=dstdir,
-                    info_ctl=info_ctl,
-                    verbose=True,
-                    mute=False
-                    )
-
-    return ret
-
-def src_get_latest_tarball_categorised(config, opts, args):
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=['-o=']
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        category = None
-        dstdir = '.'
-
-        if '-o' in opts:
-            dstdir = opts['-o']
-
-        if len(args) != 0:
-            category = args[0]
-
-        if category == None:
-            logging.error("category path required")
-            ret = 1
-
-        if ret == 0:
-
-            logging.info("Loading indexes")
-            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-            pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-            src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
-
-            ret = src_repo_ctl.get_latest_files_by_category(
-                category,
-                out_dir=dstdir,
-                pkg_repo_ctl=pkg_repo_ctl,
-                info_ctl=info_ctl,
-                verbose=True,
-                mute=False
-                )
-
-    return ret
-
-def repo_list_categories(config, opts, args):
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[]
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-        tree = pkg_repo_ctl.build_category_tree('')
-
-        keys = list(tree.keys())
-        keys.sort()
-
-        for i in keys:
-
-            print("{} ::".format(i))
-
-            tree[i].sort()
-
-            for j in tree[i]:
-                print("    {}".format(j))
-
-            print()
-
-    return 0
-
-def src_check_registartions(config, opts, args):
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[]
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        path = ''
-
-        if len(args) != 0:
-            path = args[0]
-
-        info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-        src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
-        res = src_repo_ctl.check_tarball_basenames_registration(path, info_ctl)
-
-        keys = list(res.keys())
-        keys.sort()
-
-        longest_name = 0
-        for i in keys:
-
-            l = len(i)
-
-            if l > longest_name:
-                longest_name = l
-
-        longest_pkg_name = 0
-        for i in keys:
-
-            if res[i]:
-                l = len(res[i]['name'])
-
-                if l > longest_pkg_name:
-                    longest_pkg_name = l
-
-        for i in keys:
-            if res[i]:
-                print(
-                    "    {name}: {pkg_name}, {deprecated}, {non_installable},"
-                    " {removable}, {reducible}".format(
-                        name=i.ljust(longest_name),
-                        pkg_name=res[i]['name'].ljust(longest_pkg_name),
-                        deprecated=str(res[i]['deprecated']).ljust(5),
-                        non_installable=str(res[i]['non_installable']).ljust(5),
-                        removable=str(res[i]['removable']).ljust(5),
-                        reducible=str(res[i]['reducible']).ljust(5)
-                        )
-                    )
-            else:
-                print(
-                    "    {name}: NOT REGISTERED".format(name=i.ljust(longest_name))
-                    )
-
-    return ret

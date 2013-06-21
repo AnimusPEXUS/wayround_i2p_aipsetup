@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "gvfs", 
-  "buildscript": "std", 
+  "buildscript": "gvfs", 
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "- version !re \\d*\\.\\d*[02468]\n", 
