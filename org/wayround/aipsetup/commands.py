@@ -114,7 +114,7 @@ def commands():
     }
 
 
-def config_init(config, opts, args):
+def config_init(command_name, opts, args, adds):
 
     import org.wayround.aipsetup.config
 
@@ -125,7 +125,7 @@ def config_init(config, opts, args):
     return 0
 
 
-def test_test(config, opts, args):
+def test_test(command_name, opts, args, adds):
 
     """
     Test documentation
@@ -139,12 +139,12 @@ config: {}
 opts: {}
 
 args: {}
-""".format(config, opts, args))
+""".format(command_name, opts, args, adds))
 
     return 0
 
 
-def system_install_package(config, opts, args):
+def system_install_package(command_name, opts, args, adds):
     """
     Install package(s)
 
@@ -152,6 +152,8 @@ def system_install_package(config, opts, args):
 
     If -b is given - it is used as destination root
     """
+
+    config = adds['config']
 
     ret = org.wayround.utils.getopt.check_options(
         opts,
@@ -213,7 +215,8 @@ def system_install_package(config, opts, args):
     return ret
 
 
-def system_package_list(config, opts, args):
+def system_package_list(command_name, opts, args, adds):
+
     """
     List installed packages
 
@@ -221,6 +224,8 @@ def system_package_list(config, opts, args):
 
     -b is same as in install
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -255,7 +260,8 @@ def system_package_list(config, opts, args):
 
     return ret
 
-def system_package_list_asps(config, opts, args):
+def system_package_list_asps(command_name, opts, args, adds):
+
     """
     List installed package's ASPs
 
@@ -263,6 +269,8 @@ def system_package_list_asps(config, opts, args):
 
     -b is same as in install
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -307,7 +315,9 @@ def system_package_list_asps(config, opts, args):
 
     return ret
 
-def system_list_package_files(config, opts, args):
+def system_list_package_files(command_name, opts, args, adds):
+
+    config = adds['config']
 
     ret = 0
 
@@ -348,7 +358,8 @@ def system_list_package_files(config, opts, args):
 
     return ret
 
-def system_remove_package(config, opts, args):
+def system_remove_package(command_name, opts, args, adds):
+
     """
     Removes package matching NAME.
 
@@ -357,6 +368,8 @@ def system_remove_package(config, opts, args):
     --force    force removal of packages for which info is not
                available or which is not removable
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -397,7 +410,8 @@ def system_remove_package(config, opts, args):
 
     return ret
 
-def system_find_package_files(config, opts, args):
+def system_find_package_files(command_name, opts, args, adds):
+
     """
     Looks for LOOKFOR in all installed packages using one of methods:
 
@@ -413,7 +427,11 @@ def system_find_package_files(config, opts, args):
     fm               LOOKFOR is file mask
     ================ ===================================
     """
+
+    config = adds['config']
+
     basedir = '/'
+
     if '-b' in opts:
         basedir = opts['-b']
 
@@ -475,12 +493,15 @@ def system_find_package_files(config, opts, args):
 
     return ret
 
-def system_reduce_asp_to_latest(config, opts, args):
+def system_reduce_asp_to_latest(command_name, opts, args, adds):
+
     """
     Forcibly reduces named asp, excluding files installed by latest package's asp
 
     [-b=DESTDIR] ASP_NAME
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -533,11 +554,14 @@ def system_reduce_asp_to_latest(config, opts, args):
 
     return ret
 
-def system_make_asp_deps(config, opts, args):
+def system_make_asp_deps(command_name, opts, args, adds):
+
     """
     generates dependencies listing for named asp and places it under
     /destdir/var/log/packages/deps
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -568,11 +592,14 @@ def system_make_asp_deps(config, opts, args):
     return ret
 
 
-def pkg_repo_index(config, opts, args):
+def pkg_repo_index(command_name, opts, args, adds):
+
     """
     Scan repository and save it's categories and packages indexes
     to database
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -604,10 +631,13 @@ def pkg_repo_index(config, opts, args):
 
 
 
-def pkg_repo_index_and_update(config, opts, args):
+def pkg_repo_index_and_update(command_name, opts, args, adds):
+
     """
     Perform scan and templates creation
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -636,12 +666,15 @@ def pkg_repo_index_and_update(config, opts, args):
     return ret
 
 
-def pkg_repo_put_file(config, opts, args):
+def pkg_repo_put_file(command_name, opts, args, adds):
+
     """
     Copy package to index repository
 
     -m      move, not copy
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -665,7 +698,9 @@ def pkg_repo_put_file(config, opts, args):
     return ret
 
 
-def pkg_repo_list_categories(config, opts, args):
+def pkg_repo_list_categories(command_name, opts, args, adds):
+
+    config = adds['config']
 
     ret = 0
 
@@ -698,7 +733,8 @@ def pkg_repo_list_categories(config, opts, args):
     return 0
 
 
-def src_repo_index(config, opts, args):
+def src_repo_index(command_name, opts, args, adds):
+
     """
     Create sources and repositories indexes
 
@@ -710,6 +746,8 @@ def src_repo_index(config, opts, args):
     -f - force reindexing files already in index
     -c - only index clean
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -784,13 +822,16 @@ exists: {}
 
 
 
-def src_repo_search_name(config, opts, args):
+def src_repo_search_name(command_name, opts, args, adds):
+
     """
     Search for basenames in index using file name mask
 
     -r - Use RegExp instead of file name mask
-    -c - be case sensitive
+    -s - be case sensitive
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -834,12 +875,15 @@ def src_repo_search_name(config, opts, args):
     return ret
 
 
-def src_repo_print_paths(config, opts, args):
+def src_repo_print_paths(command_name, opts, args, adds):
+
     """
     Print paths of tarballs in source repository using package name
 
     -b - use tarball base name, not package name
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -888,11 +932,16 @@ def src_repo_print_paths(config, opts, args):
                         org.wayround.utils.version.source_version_comparator
                         ))
                 for i in objects:
-                    print('    {}'.format(i))
+                    st = os.stat(org.wayround.utils.path.join(src_index.sources_dir, i))
+                    mtime = st.st_mtime
+
+                    print('    {} ({})'.format(i, datetime.datetime.fromtimestamp(mtime)))
 
     return ret
 
-def src_repo_get_file(config, opts, args):
+def src_repo_get_file(command_name, opts, args, adds):
+
+    config = adds['config']
 
     ret = 0
 
@@ -925,13 +974,15 @@ def src_repo_get_file(config, opts, args):
 
     return 0
 
-def src_repo_get_latest_tarball(config, opts, args):
+def src_repo_get_latest_tarball(command_name, opts, args, adds):
 
     """
-    Download latest tarball by fiven package names
+    Download latest tarball by given package names
 
     -o=OUTPUT_DIR - defaults to current
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -975,7 +1026,9 @@ def src_repo_get_latest_tarball(config, opts, args):
 
     return ret
 
-def src_repo_get_latest_tarball_categorised(config, opts, args):
+def src_repo_get_latest_tarball_categorised(command_name, opts, args, adds):
+
+    config = adds['config']
 
     ret = 0
 
@@ -1018,7 +1071,9 @@ def src_repo_get_latest_tarball_categorised(config, opts, args):
 
     return ret
 
-def src_repo_check_registartions(config, opts, args):
+def src_repo_check_registartions(command_name, opts, args, adds):
+
+    config = adds['config']
 
     ret = 0
 
@@ -1080,7 +1135,25 @@ def src_repo_check_registartions(config, opts, args):
     return ret
 
 
-def info_find_missing_pkg_info_records(config, opts, args):
+def pkg_repo_cleanup(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    """
+    Removes old packages from package repository
+    """
+
+    # TODO: more descriptive help text required
+
+    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+
+    pkg_repo_ctl.cleanup_repo()
+
+    return 0
+
+
+def info_find_missing_pkg_info_records(command_name, opts, args, adds):
+
     """
     Search packages which have no corresponding info records
 
@@ -1090,6 +1163,8 @@ def info_find_missing_pkg_info_records(config, opts, args):
 
     -f forces rewrite existing .json files
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1111,10 +1186,14 @@ def info_find_missing_pkg_info_records(config, opts, args):
 
     return ret
 
-def info_find_outdated_pkg_info_records(config, opts, args):
+def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
+
     """
     Finds pkg info records which differs to FS .json files
     """
+
+    config = adds['config']
+
     ret = 0
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
@@ -1137,10 +1216,13 @@ def info_find_outdated_pkg_info_records(config, opts, args):
 
     return ret
 
-def info_update_outdated_pkg_info_records(config, opts, args):
+def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
+
     """
     Loads pkg info records which differs to FS .json files
     """
+
+    config = adds['config']
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -1150,12 +1232,16 @@ def info_update_outdated_pkg_info_records(config, opts, args):
 
     return 0
 
-def info_delete_pkg_info_records(config, opts, args):
+def info_delete_pkg_info_records(command_name, opts, args, adds):
+
     """
     mask must be given or operation will fail
 
     MASK
     """
+
+    config = adds['config']
+
     ret = 0
 
     mask = None
@@ -1175,7 +1261,8 @@ def info_delete_pkg_info_records(config, opts, args):
 
     return ret
 
-def info_backup_package_info_to_filesystem(config, opts, args):
+def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
+
     """
     Save package information from database to info directory.
 
@@ -1183,6 +1270,9 @@ def info_backup_package_info_to_filesystem(config, opts, args):
 
     Existing files are skipped, unless -f is set
     """
+
+    config = adds['config']
+
     mask = '*'
 
     if len(args) > 0:
@@ -1196,7 +1286,8 @@ def info_backup_package_info_to_filesystem(config, opts, args):
 
     return ret
 
-def info_load_package_info_from_filesystem(config, opts, args):
+def info_load_package_info_from_filesystem(command_name, opts, args, adds):
+
     """
     Load missing package information from named files
 
@@ -1206,6 +1297,8 @@ def info_load_package_info_from_filesystem(config, opts, args):
 
     -a force load all records, not only missing.
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1232,7 +1325,8 @@ def info_load_package_info_from_filesystem(config, opts, args):
 
     return ret
 
-def info_list_pkg_info_records(config, opts, args):
+def info_list_pkg_info_records(command_name, opts, args, adds):
+
     """
     List records containing in index
 
@@ -1240,6 +1334,9 @@ def info_list_pkg_info_records(config, opts, args):
 
     Default MASK is *
     """
+
+    config = adds['config']
+
     mask = '*'
 
     if len(args) > 0:
@@ -1251,10 +1348,13 @@ def info_list_pkg_info_records(config, opts, args):
 
     return 0
 
-def info_print_pkg_record(config, opts, args):
+def info_print_pkg_record(command_name, opts, args, adds):
+
     """
     Print package info record information
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1282,11 +1382,13 @@ def info_print_pkg_record(config, opts, args):
     return ret
 
 
-def info_editor(config, opts, args):
+def info_editor(command_name, opts, args, adds):
 
     """
     Start special info-file editor
     """
+
+    config = adds['config']
 
     import org.wayround.aipsetup.infoeditor
 
@@ -1332,7 +1434,9 @@ def info_editor(config, opts, args):
 
     return ret
 
-def info_parse_tarball(config, opts, args):
+def info_parse_tarball(command_name, opts, args, adds):
+
+    config = adds['config']
 
     tarball = None
 
@@ -1368,7 +1472,8 @@ def info_parse_tarball(config, opts, args):
     return ret
 
 
-def info_mass_script_apply(config, opts, args):
+def info_mass_script_apply(command_name, opts, args, adds):
+
     """
     Mass buildscript applience
 
@@ -1377,6 +1482,8 @@ def info_mass_script_apply(config, opts, args):
     -f    force (by default new script name will not be applied to
           records with existing ones)
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1446,12 +1553,15 @@ def info_mass_script_apply(config, opts, args):
 
     return ret
 
-def info_parse_pkg_name(config, opts, args):
+def info_parse_pkg_name(command_name, opts, args, adds):
+
     """
     Parse package name
 
     NAME
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1473,7 +1583,9 @@ def info_parse_pkg_name(config, opts, args):
 
     return ret
 
-def load_info_tags(config, opts, args):
+def load_info_tags(command_name, opts, args, adds):
+
+    config = adds['config']
 
     tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
 
@@ -1481,7 +1593,9 @@ def load_info_tags(config, opts, args):
 
     return 0
 
-def save_info_tags(config, opts, args):
+def save_info_tags(command_name, opts, args, adds):
+
+    config = adds['config']
 
     tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
 
@@ -1489,12 +1603,15 @@ def save_info_tags(config, opts, args):
 
     return 0
 
-def building_site_init(config, opts, args):
+def building_site_init(command_name, opts, args, adds):
+
     """
     Initiate new building site dir, copying spplyed tarballs to 00.TARBALLS
 
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
+
+    config = adds['config']
 
     init_dir = '.'
 
@@ -1512,12 +1629,15 @@ def building_site_init(config, opts, args):
     return ret
 
 
-def building_site_apply_info(config, opts, args):
+def building_site_apply_info(command_name, opts, args, adds):
+
     """
     Apply info to building dir
 
     [DIRNAME [FILENAME]]
     """
+
+    config = adds['config']
 
     dirname = '.'
     file = None
@@ -1556,7 +1676,8 @@ def building_site_apply_info(config, opts, args):
 
     return ret
 
-def build_build_plus(config, opts, args):
+def build_build_plus(command_name, opts, args, adds):
+
     """
     Starts named action from script applied to current building site
 
@@ -1567,6 +1688,8 @@ def build_build_plus(config, opts, args):
     if action name ends with + (plus) all remaining actions will be also started
     (if not error will occur)
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1635,7 +1758,8 @@ def _build_complete_subroutine(
 
     return ret
 
-def build_complete(config, opts, args):
+def build_complete(command_name, opts, args, adds):
+
     """
     Complete package building process in existing building site
 
@@ -1664,6 +1788,8 @@ def build_complete(config, opts, args):
     --target=TRIPLET
     ================ ====================================
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1789,7 +1915,8 @@ def build_complete(config, opts, args):
 
     return ret
 
-def build_full(config, opts, args):
+def build_full(command_name, opts, args, adds):
+
     """
     Place named source files in new building site and build new package from them
 
@@ -1805,6 +1932,8 @@ def build_full(config, opts, args):
     --target=TRIPLET
     ================ ====================================
     """
+
+    config = adds['config']
 
     r_bds = '-d' in opts
 
@@ -1874,7 +2003,8 @@ def build_full(config, opts, args):
 
     return ret
 
-def build_pack(config, opts, args):
+def build_pack(command_name, opts, args, adds):
+
     """
     Fullcircle action set for creating package
 
@@ -1882,6 +2012,8 @@ def build_pack(config, opts, args):
 
     DIRNAME - set building site. Default is current directory
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1905,7 +2037,8 @@ def build_pack(config, opts, args):
     return ret
 
 
-def build_build(config, opts, args):
+def build_build(command_name, opts, args, adds):
+
     """
     Configures, builds, distributes and prepares software accordingly to info
 
@@ -1913,6 +2046,8 @@ def build_build(config, opts, args):
 
     DIRNAME - set building site. Default is current directory
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -1964,11 +2099,13 @@ def build_build(config, opts, args):
 #    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
 
 
-def clean_packages_with_broken_files(config, opts, args):
+def clean_packages_with_broken_files(command_name, opts, args, adds):
 
     """
     Find packages with broken files
     """
+
+    config = adds['config']
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -2062,7 +2199,7 @@ def clean_packages_with_broken_files(config, opts, args):
 
     return 0
 
-def clean_check_elfs_readiness(config, opts, args):
+def clean_check_elfs_readiness(command_name, opts, args, adds):
 
     """
     Performs system ELF files read checks
@@ -2070,6 +2207,8 @@ def clean_check_elfs_readiness(config, opts, args):
     This is mainly needed to test aipsetup elf reader, but on the other hand it
     can be used to detect broken elf files.
     """
+
+    config = adds['config']
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -2086,12 +2225,14 @@ def clean_check_elfs_readiness(config, opts, args):
 
     return ret
 
-def clean_find_so_problems(config, opts, args):
+def clean_find_so_problems(command_name, opts, args, adds):
 
     """
     Find so libraries missing in system and write package names requiring those
     missing libraries.
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -2185,7 +2326,7 @@ def clean_find_so_problems(config, opts, args):
 
     return ret
 
-def clean_find_old_packages(config, opts, args):
+def clean_find_old_packages(command_name, opts, args, adds):
 
     """
     Find packages older then month
@@ -2193,6 +2334,8 @@ def clean_find_old_packages(config, opts, args):
 
     # TODO: add arguments
     # TODO: must work with basedir!
+
+    config = adds['config']
 
     ret = 0
 
@@ -2244,21 +2387,9 @@ def clean_find_old_packages(config, opts, args):
     return ret
 
 
-def pkg_repo_cleanup(config, opts, args):
+def clean_find_invalid_deps_lists(command_name, opts, args, adds):
 
-    """
-    Removes old packages from package repository
-    """
-
-    # TODO: more descriptive help text required
-
-    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
-
-    pkg_repo_ctl.cleanup_repo()
-
-    return 0
-
-def clean_find_invalid_deps_lists(config, opts, args):
+    config = adds['config']
 
     ret = 0
 
@@ -2309,7 +2440,7 @@ def clean_find_invalid_deps_lists(config, opts, args):
 
     return ret
 
-def clean_find_garbage(config, opts, args):
+def clean_find_garbage(command_name, opts, args, adds):
 
     """
     Search system for garbage making log and cleaning script
@@ -2318,6 +2449,8 @@ def clean_find_garbage(config, opts, args):
     --script-type=bash - system cleaning script language (only bash supported)
     --so               - look only for .so files garbage in /usr/lib directory
     """
+
+    config = adds['config']
 
     ret = 0
 
@@ -2497,11 +2630,13 @@ Wrong cleaning can ruin your system
     return ret
 
 
-def clean_check_list_of_installed_packages_and_asps_auto(config, opts, args):
+def clean_check_list_of_installed_packages_and_asps_auto(command_name, opts, args, adds):
 
     """
     Searches for packages with more when one asp installed
     """
+
+    config = adds['config']
 
     logging.info("Working. Please wait, it will be not long...")
 
@@ -2510,7 +2645,9 @@ def clean_check_list_of_installed_packages_and_asps_auto(config, opts, args):
     return pkg_repo_ctl.check_list_of_installed_packages_and_asps_auto()
 
 
-def pkgdeps_print_asps_asp_depends_on(config, opts, args):
+def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
+
+    config = adds['config']
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -2529,9 +2666,11 @@ def pkgdeps_print_asps_asp_depends_on(config, opts, args):
 
     return 0
 
-def pkgdeps_print_asp_depends(config, opts, args):
+def pkgdeps_print_asp_depends(command_name, opts, args, adds):
 
     ret = 0
+
+    config = adds['config']
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -2560,7 +2699,9 @@ def pkgdeps_print_asp_depends(config, opts, args):
     return ret
 
 
-def pkgdeps_print_asps_depending_on_asp(config, opts, args):
+def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
+
+    config = adds['config']
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -2581,10 +2722,13 @@ def pkgdeps_print_asps_depending_on_asp(config, opts, args):
 
 
 
-def server_start_host(config, opts, args):
+def server_start_host(command_name, opts, args, adds):
+
     """
     Start serving UNICORN Web Host
     """
+
+    config = adds['config']
 
     import org.wayround.aipsetup.server
 
@@ -2603,10 +2747,13 @@ def server_start_host(config, opts, args):
 
     return 0
 
-def package_check(config, opts, args):
+def package_check(command_name, opts, args, adds):
+
     """
     Check package for errors
     """
+
+    config = adds['config']
 
     ret = 0
 

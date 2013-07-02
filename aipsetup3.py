@@ -16,7 +16,7 @@ config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.ini')
 commands = org.wayround.aipsetup.commands.commands()
 
 ret = org.wayround.utils.program.program(
-    'aipsetup3', config, commands
+    'aipsetup3', commands, additional_data={'config': config}
     )
 
 try:

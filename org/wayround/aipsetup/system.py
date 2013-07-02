@@ -153,6 +153,13 @@ class SystemCtl:
         ret = 0
 
         if os.path.isfile(name):
+
+            logging.info(
+                "Trying to install file (package) `{}'".format(
+                    org.wayround.utils.path.abspath(name)
+                    )
+                )
+
             name_parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
                 name
                 )

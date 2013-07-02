@@ -11,6 +11,7 @@ import logging
 import os.path
 import re
 import shutil
+import datetime
 
 import sqlalchemy.ext
 
@@ -1537,7 +1538,10 @@ class SourceRepoCtl:
             dstfile = os.path.join(out_dir, os.path.basename(latest))
 
             if verbose:
-                logging.info("Acquiring {}".format(latest))
+                st = os.stat(org.wayround.utils.path.join(self.sources_dir, latest))
+                mtime = st.st_mtime
+
+                logging.info("Acquiring {} ({})".format(latest, datetime.datetime.fromtimestamp(mtime)))
 
             if os.path.exists(dstfile):
                 os.chmod(dstfile, 0o700)
@@ -1608,7 +1612,7 @@ class SourceRepoCtl:
                 "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
-        # TODO: this function requires optimisations
+        # TODO: this function requires optimizations
 
         path = org.wayround.utils.path.realpath(path)
 

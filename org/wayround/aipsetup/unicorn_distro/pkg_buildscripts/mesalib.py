@@ -55,7 +55,7 @@ def main(buildingsite, action=None):
                     '--enable-gles2',
                     '--enable-openvg',
                     '--enable-osmesa',
-                    '--with-osmesa-bits=8,16,32',
+                    '--with-osmesa-bits=32',
                     '--enable-xorg',
                     '--enable-xa',
 #                    '--enable-d3d1x',

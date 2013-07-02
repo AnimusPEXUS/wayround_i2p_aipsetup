@@ -645,10 +645,14 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkImage" id="image6">
+                                  <object class="GtkExpander" id="expander1">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">[+-] [(filename)|(version)|(status)] COMPARATOR value
+                                    <property name="can_focus">True</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label4">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">[+-] [(filename)|(version)|(status)] [!]COMPARATOR value
 
 comparators:
 
@@ -656,8 +660,38 @@ for status and filename:
 begins, contains, ends, fm, re
 
 for version:
-&lt;, &lt;=, ==, &gt;=, &gt;, re, fm, begins, contains, ends</property>
-                                    <property name="stock">gtk-help</property>
+&lt;, &lt;=, ==, &gt;=, &gt;, re, fm, begins, contains, ends
+
+'!' before comparator means NOT
+
+warning: 
+when using status or version comparison, 
+algorithm uses not text in file name, but parsing result
+so for name 'cgkit-2.0.0-py3k.tar.gz' parsing reult is:
+&gt;aipsetup3 info parse_tar cgkit-2.0.0-py3k.tar.gz 
+-i- AIP Setup version 3.1
+{'groups': {'extension': '.tar.gz',
+            'name': 'cgkit',
+            'status': 'py.3.k',
+            'status_dirty': 'py3k',
+            'status_list': ['py', '3', 'k'],
+            'status_list_dirty': ['py', '3', 'k'],
+            'version': '2.0.0',
+            'version_dirty': '2.0.0',
+            'version_list': ['2', '0', '0'],
+            'version_list_dirty': ['2', '.', '0', '.', '0']},
+ 'name': 'cgkit-2.0.0-py3k.tar.gz'}
+
+</property>
+                                      </object>
+                                    </child>
+                                    <child type="label">
+                                      <object class="GtkLabel" id="label1">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Help</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>

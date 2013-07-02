@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "emacs", 
-  "buildscript": "std", 
+  "buildscript": "emacs", 
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "", 
