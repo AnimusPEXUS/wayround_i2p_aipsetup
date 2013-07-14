@@ -1,8 +1,8 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "", 
-  "buildscript": "", 
+  "basename": "lightspark", 
+  "buildscript": "std_cmake", 
   "deprecated": false, 
   "description": "", 
   "filters": "", 

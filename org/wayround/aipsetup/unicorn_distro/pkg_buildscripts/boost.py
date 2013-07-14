@@ -45,12 +45,24 @@ def main(buildingsite, action=None):
 
         if 'bootstrap' in actions and ret == 0:
             ret = subprocess.Popen(
-                ['bash', './bootstrap.sh', '--prefix=/usr'],
+                [
+                 'bash',
+                 './bootstrap.sh',
+                 '--prefix=/usr',
+#                 '--with-python-version=3.3'
+                 ],
                 cwd=src_dir
                 ).wait()
 
         if 'build' in actions and ret == 0:
-            ret = subprocess.Popen(
+
+            log = org.wayround.utils.log.Log(
+                org.wayround.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
+                'build'
+                )
+
+
+            p = subprocess.Popen(
                 [
                     os.path.join(src_dir, 'bjam'),
                     '--prefix=' + os.path.join(
@@ -65,8 +77,16 @@ def main(buildingsite, action=None):
                     'link=shared',
                     'stage',
                     ],
-                    cwd=src_dir
-                    ).wait()
+                    cwd=src_dir,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    )
+
+            org.wayround.utils.log.process_output_logger(p, log)
+
+            p.wait()
+
+            log.stop()
 
         if 'distribute' in actions and ret == 0:
             ret = subprocess.Popen(

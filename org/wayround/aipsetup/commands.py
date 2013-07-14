@@ -642,7 +642,7 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
     ret = 0
 
     if pkg_repo_index(
-        config, opts={}, args=[]
+        config, opts={}, args=[], adds=adds
         ) != 0:
 
         ret = 1
@@ -650,7 +650,7 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
     else:
 
         if info_find_missing_pkg_info_records(
-            config, opts={'-t': None}, args=[]
+            config, opts={'-t': None}, args=[], adds=adds
             ) != 0:
 
             ret = 2
@@ -658,7 +658,7 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
         else:
 
             if info_load_package_info_from_filesystem(
-                config, opts={}, args=[]
+                config, opts={}, args=[], adds=adds
                 ) != 0:
 
                 ret = 3
@@ -1983,15 +1983,20 @@ def build_full(command_name, opts, args, adds):
 
             if multiple_packages:
                 sources.sort()
+                rets = 0
                 for i in sources:
-                    org.wayround.aipsetup.build.build(
+                    if org.wayround.aipsetup.build.build(
                         config,
                         [i],
                         remove_buildingsite_after_success=r_bds,
                         buildingsites_dir=building_site_dir,
                         const=const
-                        )
-                ret = 0
+                        ) != 0:
+                        rets += 1
+                if rets == 0:
+                    ret = 0
+                else:
+                    ret = 1
             else:
                 ret = org.wayround.aipsetup.build.build(
                     config,

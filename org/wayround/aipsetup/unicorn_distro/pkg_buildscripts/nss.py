@@ -38,7 +38,7 @@ def main(buildingsite, action=None):
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         separate_build_dir = False
-        source_configure_reldir = 'mozilla/security/nss'
+        source_configure_reldir = 'nss'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -55,7 +55,7 @@ def main(buildingsite, action=None):
 #            nss_build_all: build_coreconf build_nspr build_dbm all
 
             makefile = os.path.join(
-                src_dir, 'mozilla', 'security', 'nss', 'Makefile'
+                src_dir, source_configure_reldir, 'Makefile'
                 )
 
             f = open(makefile, 'r')
@@ -111,7 +111,7 @@ def main(buildingsite, action=None):
                             )
 
             dist_dir = os.path.join(
-                src_dir, 'mozilla', 'dist'
+                src_dir, 'dist'
                 )
 
             OBJ_dir = glob.glob(dist_dir + os.path.sep + '*.OBJ')

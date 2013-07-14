@@ -16,7 +16,10 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['extract', 
+#             'configure', 'build', 'distribute',
+             'configure_xul', 'build_xul', 'distribute_xul'
+             ],
             action,
             "help"
             )
@@ -52,7 +55,7 @@ def main(buildingsite, action=None):
                     )
 
 
-        if 'configure' in actions and ret == 0:
+        if 'configure_xul' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
@@ -75,14 +78,14 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
+                source_configure_reldir='./mozilla',
                 use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
                 )
 
-        if 'build' in actions and ret == 0:
+        if 'build_xul' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -90,10 +93,10 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir='./mozilla'
                 )
 
-        if 'distribute' in actions and ret == 0:
+        if 'distribute_xul' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -104,7 +107,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='.'
+                source_configure_reldir='./mozilla'
                 )
 
     return ret

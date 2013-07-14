@@ -1920,6 +1920,7 @@ def build(
 
                     else:
                         logging.info("Complete package building ended with no error")
+                        ret = 0
 
     return ret
 

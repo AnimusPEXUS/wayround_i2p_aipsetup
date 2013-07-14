@@ -32,7 +32,7 @@ def main(buildingsite, action=None):
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         separate_build_dir = False
-        source_configure_reldir = 'mozilla/nsprpub'
+        source_configure_reldir = 'nspr'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
