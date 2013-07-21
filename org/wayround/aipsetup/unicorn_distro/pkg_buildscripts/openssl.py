@@ -10,13 +10,13 @@ import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 
-def main(buildingsite, action = None):
+def main(buildingsite, action=None):
 
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'configure', 'distribute'],
         action,
         "help"
         )
@@ -42,55 +42,58 @@ def main(buildingsite, action = None):
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
-                unwrap_dir = True,
-                rename_dir = False
+                unwrap_dir=True,
+                rename_dir=False
                 )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
-                options = [
-                    '-shared',
+                options=[
                     '--prefix=/usr',
-                    '386'
+                    '--openssldir=/etc/ssl',
+                    'shared',
+                    'zlib-dynamic'
                     ],
-                arguments = [],
-                environment = {},
-                environment_mode = 'copy',
-                source_configure_reldir = source_configure_reldir,
-                use_separate_buildding_dir = separate_build_dir,
-                script_name = 'config',
-                run_script_not_bash = False,
-                relative_call = False
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='config',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options = [],
-                arguments = [],
-                environment = {},
-                environment_mode = 'copy',
-                use_separate_buildding_dir = separate_build_dir,
-                source_configure_reldir = source_configure_reldir
-                )
+#        if 'build' in actions and ret == 0:
+#            ret = autotools.make_high(
+#                buildingsite,
+#                options = [],
+#                arguments = [],
+#                environment = {},
+#                environment_mode = 'copy',
+#                use_separate_buildding_dir = separate_build_dir,
+#                source_configure_reldir = source_configure_reldir
+#                )
 
         if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options = [],
-                arguments = [
+                options=[],
+                arguments=[
                     'install',
+                    'MANDIR=/usr/share/man',
+#                    'MANSUFFIX=ssl',
                     'INSTALL_PREFIX=' + (
                         org.wayround.aipsetup.build.getDIR_DESTDIR(
                             buildingsite
                             )
                         )
                     ],
-                environment = {},
-                environment_mode = 'copy',
-                use_separate_buildding_dir = separate_build_dir,
-                source_configure_reldir = source_configure_reldir
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

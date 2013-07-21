@@ -927,7 +927,16 @@ def src_repo_print_paths(command_name, opts, args, adds):
 
 
                 src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
-                objects = src_index.get_name_paths(basename)
+
+                if namemode == 'basename':
+                    objects = src_index.get_name_paths(basename)
+                elif namemode == 'packagename':
+                    objects = src_index.get_package_source_files(
+                        basename,
+                        info_ctl,
+                        filtered=True
+                        )
+
                 objects.sort(key=functools.cmp_to_key(
                         org.wayround.utils.version.source_version_comparator
                         ))
@@ -1137,11 +1146,11 @@ def src_repo_check_registartions(command_name, opts, args, adds):
 
 def pkg_repo_cleanup(command_name, opts, args, adds):
 
-    config = adds['config']
-
     """
     Removes old packages from package repository
     """
+
+    config = adds['config']
 
     # TODO: more descriptive help text required
 
@@ -1561,8 +1570,6 @@ def info_parse_pkg_name(command_name, opts, args, adds):
     NAME
     """
 
-    config = adds['config']
-
     ret = 0
 
     if len(args) != 1:
@@ -1610,8 +1617,6 @@ def building_site_init(command_name, opts, args, adds):
 
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
-
-    config = adds['config']
 
     init_dir = '.'
 
@@ -2018,8 +2023,6 @@ def build_pack(command_name, opts, args, adds):
     DIRNAME - set building site. Default is current directory
     """
 
-    config = adds['config']
-
     ret = 0
 
     dir_name = '.'
@@ -2080,30 +2083,6 @@ def build_build(command_name, opts, args, adds):
 
 
 
-
-#def buildscript_list_files(opts, args):
-#    """
-#    List building scripts files
-#    """
-#
-#    # TODO: redo
-#
-#    return org.wayround.aipsetup.info.info_list_files(
-#        opts, args, 'buildscript', mask='*.py'
-#        )
-#
-#def buildscript_edit_file(opts, args):
-#    """
-#    Edit building script
-#
-#    FILENAME
-#    """
-#
-#    # TODO: redo
-#
-#    return org.wayround.aipsetup.info.info_edit_file(opts, args, 'buildscript')
-
-
 def clean_packages_with_broken_files(command_name, opts, args, adds):
 
     """
@@ -2161,11 +2140,11 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
                 else:
 
-                    sum = org.wayround.utils.checksum.make_file_checksum(
+                    _sum = org.wayround.utils.checksum.make_file_checksum(
                         j, method='sha512'
                         )
 
-                    if sum != asp[j]:
+                    if _sum != asp[j]:
                         problems[asp_name]['broken'].append(j)
                         b += 1
 
@@ -2757,8 +2736,6 @@ def package_check(command_name, opts, args, adds):
     """
     Check package for errors
     """
-
-    config = adds['config']
 
     ret = 0
 
