@@ -1618,6 +1618,8 @@ def building_site_init(command_name, opts, args, adds):
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
 
+    config = adds['config']
+
     init_dir = '.'
 
     if len(args) > 0:
@@ -1629,7 +1631,10 @@ def building_site_init(command_name, opts, args, adds):
 
 
     bs = org.wayround.aipsetup.classes.bsite_ctl(init_dir)
-    ret = bs.init(files)
+
+    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+
+    ret = bs.init(info_ctl, files=files)
 
     return ret
 
