@@ -143,7 +143,7 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = './mozilla'
 
-        if 'extract_xul' in actions:
+        if 'extract_xul' in actions and ret == 0:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 if org.wayround.utils.file.cleanup_dir(src_dir) != 0:

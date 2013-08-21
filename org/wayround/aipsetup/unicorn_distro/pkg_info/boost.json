@@ -5,7 +5,7 @@
   "buildscript": "boost", 
   "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
+  "filters": "- status !re ^$\n", 
   "home_page": "http://www.sourceforge.net", 
   "installation_priority": 5, 
   "non_installable": false, 

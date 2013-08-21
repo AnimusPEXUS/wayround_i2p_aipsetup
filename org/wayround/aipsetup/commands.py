@@ -31,7 +31,7 @@ def commands():
     'build': {
         'full': build_full,
         'build': build_build,
-        'build+': build_build_plus,
+        'continue': build_build_plus,
         'pack': build_pack,
         'complete': build_complete
         },

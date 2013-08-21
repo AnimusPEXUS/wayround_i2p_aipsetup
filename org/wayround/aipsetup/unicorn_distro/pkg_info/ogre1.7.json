@@ -5,7 +5,7 @@
   "buildscript": "std_cmake", 
   "deprecated": false, 
   "description": "", 
-  "filters": "", 
+  "filters": "- version < 1.7\n- version >= 1.8\n- status !re ^$", 
   "home_page": "http://ogre3d.org/", 
   "installation_priority": 5, 
   "non_installable": false, 

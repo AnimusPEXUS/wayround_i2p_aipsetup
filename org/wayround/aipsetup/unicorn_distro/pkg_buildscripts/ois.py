@@ -2,6 +2,7 @@
 
 import os.path
 import logging
+import subprocess
 
 import org.wayround.utils.file
 
@@ -16,7 +17,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'bootstrap', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -48,19 +49,31 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+        if 'bootstrap' in actions and ret == 0:
+            p = subprocess.Popen(
+                ['bash', './bootstrap'],
+                cwd=org.wayround.utils.path.join(
+                    src_dir,
+                    source_configure_reldir
+                    )
+                )
+            ret = p.wait()
+
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--no-system-libs',
-                    '--no-qt-gui'
-#                    "LDFLAGS+=-ltinfow"
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={
-#                    'LDFLAGS':'-ltinfow'
-                    },
+                environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,

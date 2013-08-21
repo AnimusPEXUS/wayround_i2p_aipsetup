@@ -7,7 +7,9 @@ import org.wayround.utils.file
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
-import org.wayround.aipsetup.buildtools.autotools as autotools
+
+from org.wayround.aipsetup.buildtools import autotools
+from org.wayround.aipsetup.buildtools import cmake
 
 
 def main(buildingsite, action=None):
@@ -15,11 +17,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'cmake', 'build', 'distribute'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -35,7 +37,7 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
-        source_configure_reldir = '.'
+        source_configure_reldir = 'FreeOrion'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -48,25 +50,25 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
+        if 'cmake' in actions and ret == 0:
+            ret = cmake.cmake_high(
                 buildingsite,
                 options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--no-system-libs',
-                    '--no-qt-gui'
-#                    "LDFLAGS+=-ltinfow"
+                    '-DCMAKE_INSTALL_PREFIX=' +
+                        pkg_info['constitution']['paths']['usr'],
+#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+#                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+#                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+#                    '--enable-shared',
+#                    '--host=' + pkg_info['constitution']['host'],
+#                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={
-#                    'LDFLAGS':'-ltinfow'
-                    },
+                environment={},
                 environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                source_subdir=source_configure_reldir,
+                build_in_separate_dir=separate_build_dir
                 )
 
         if 'build' in actions and ret == 0:
