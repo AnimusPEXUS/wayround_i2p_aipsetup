@@ -2,7 +2,7 @@
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
   "basename": "perl", 
-  "buildscript": "std_perl", 
+  "buildscript": "perl", 
   "deprecated": false, 
   "description": "write something here, please", 
   "filters": "- status !re ^$\n- version re \\d{4}\n- version !re ^\\d*\\.\\d*[02468][\\.&]", 
