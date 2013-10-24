@@ -2,7 +2,6 @@
 
 import os.path
 import logging
-import subprocess
 
 import org.wayround.utils.file
 
@@ -17,7 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'build', 'distribute', 'pc'],
+        ['extract', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -49,11 +48,34 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+        if 'configure' in actions and ret == 0:
+            ret = autotools.configure_high(
+                buildingsite,
+                options=[
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
+                    ],
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
+                )
+
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
-                arguments=['linux', 'INSTALL_TOP=/usr'],
+                arguments=[],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
@@ -66,80 +88,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'INSTALL_TOP=' + os.path.join(dst_dir, 'usr')
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
-
-        if 'pc' in actions and ret == 0:
-
-            pc_file_name_dir = org.wayround.utils.path.join(
-                dst_dir, 'usr', 'lib', 'pkgconfig'
-                )
-
-            try:
-                os.makedirs(pc_file_name_dir)
-            except FileExistsError:
-                pass
-
-            pc_file_name = org.wayround.utils.path.join(
-                pc_file_name_dir, 'lua.pc'
-                )
-
-            pc_file = open(pc_file_name, 'w')
-
-            pc_text = ''
-
-            p = subprocess.Popen(
-                ['make',
-                 'pc',
-                 'INSTALL_TOP=' + org.wayround.utils.path.join('/', 'usr')
-                 ],
-                stdout=subprocess.PIPE,
-                cwd=src_dir
-                )
-            p.wait()
-            pc_text = p.communicate()[0]
-            pc_text = str(pc_text, 'utf-8')
-            pc_lines = pc_text.splitlines()
-
-            version = []
-#            print("Out: {}".format(pc_text))
-
-            for i in pc_lines:
-                if i.startswith('version='):
-                    version = i.split('=')[1].split('.')
-
-            tpl = """\
-V={V}
-R={R}
-
-prefix=/usr
-INSTALL_BIN=${{prefix}}/bin
-INSTALL_INC=${{prefix}}/include
-INSTALL_LIB=${{prefix}}/lib
-INSTALL_MAN=${{prefix}}/man/man1
-INSTALL_LMOD=${{prefix}}/share/lua/${{V}}
-INSTALL_CMOD=${{prefix}}/lib/lua/${{V}}
-exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/lib
-includedir=${{prefix}}/include
-
-Name: Lua
-Description: An Extensible Extension Language
-Version: ${{R}}
-Requires:
-Libs: -L${{libdir}} -llua -lm
-Cflags: -I${{includedir}}
-""".format(
-                V='.'.join(version[:2]),
-                R='.'.join(version)
-                )
-
-            pc_file.write(tpl)
-            pc_file.close()
 
     return ret

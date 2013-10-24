@@ -937,14 +937,17 @@ def src_repo_print_paths(command_name, opts, args, adds):
                         filtered=True
                         )
 
-                objects.sort(key=functools.cmp_to_key(
-                        org.wayround.utils.version.source_version_comparator
-                        ))
-                for i in objects:
-                    st = os.stat(org.wayround.utils.path.join(src_index.sources_dir, i))
-                    mtime = st.st_mtime
+                if not isinstance(objects, list):
+                    ret = 10
+                else:
+                    objects.sort(key=functools.cmp_to_key(
+                            org.wayround.utils.version.source_version_comparator
+                            ))
+                    for i in objects:
+                        st = os.stat(org.wayround.utils.path.join(src_index.sources_dir, i))
+                        mtime = st.st_mtime
 
-                    print('    {} ({})'.format(i, datetime.datetime.fromtimestamp(mtime)))
+                        print('    {} ({})'.format(i, datetime.datetime.fromtimestamp(mtime)))
 
     return ret
 

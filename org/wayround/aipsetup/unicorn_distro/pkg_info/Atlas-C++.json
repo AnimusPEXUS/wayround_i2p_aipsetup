@@ -1,7 +1,7 @@
 {
   "auto_newest_pkg": true, 
   "auto_newest_src": true, 
-  "basename": "Atlas-C++", 
+  "basename": "Atlas-C", 
   "buildscript": "std", 
   "deprecated": false, 
   "description": "write something here, please", 
