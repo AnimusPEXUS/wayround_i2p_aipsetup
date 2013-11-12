@@ -61,25 +61,25 @@ def main(buildingsite, action=None):
                 time.sleep(10)
                 ret = 0
 
-
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
                     '--enable-obsolete-rpc',
+                    '--enable-kernel=3.11.6',
+                    '--enable-tls',
+                    '--with-elf',
+                    '--enable-multi-arch',
+#                    '--with-headers=/usr/src/linux',
+#                    '--with-headers=/usr/src/linux/include',
+                    '--enable-shared',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target'],
-                    '--enable-kernel=3.8',
-                    '--enable-tls',
-                    '--with-elf',
-                    '--enable-multi-arch',
-#                    '--with-headers=/usr/src/linux/usr/include'
+                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

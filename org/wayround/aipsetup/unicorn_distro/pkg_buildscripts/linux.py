@@ -9,7 +9,6 @@ import subprocess
 import org.wayround.utils.file
 
 import org.wayround.aipsetup.build
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 
@@ -21,9 +20,12 @@ def main(buildingsite, action=None):
         buildingsite,
         [
          'extract', 'configure', 'build',
-         'distr_kernel', 'distr_modules', 'distr_firmware', 'distr_headers_internal',
-         'distr_headers', 'remove_install_files_from_includes',
-         #'distr_man',
+
+         'distr_kernel', 'distr_modules', 'distr_firmware',
+         'distr_headers_internal',
+         'distr_headers',
+         'remove_install_files_from_includes',
+#         'distr_man',
          'copy_source'
          ],
         action,
@@ -64,7 +66,7 @@ def main(buildingsite, action=None):
         if 'configure' in actions and ret == 0:
             logging.info("You now need to configure kernel by your needs and")
             logging.info("continue building procedure with command")
-            logging.info("'aipsetup3 build s build+'")
+            logging.info("'aipsetup3 build continue build+'")
             ret = 1
 
         if 'build' in actions and ret == 0:
@@ -107,8 +109,6 @@ def main(buildingsite, action=None):
                         )
                     )
 
-
-
         if 'distr_modules' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
@@ -130,7 +130,9 @@ def main(buildingsite, action=None):
                 files = os.listdir(modules_dir)
 
                 if len(files) != 1:
-                    logging.error("Can't find directory in {}".format(modules_dir))
+                    logging.error(
+                        "Can't find directory in {}".format(modules_dir)
+                        )
                     ret = 1
                 else:
                     modules_dir = os.path.join(modules_dir, files[0])
@@ -178,7 +180,6 @@ def main(buildingsite, action=None):
                 dst_must_be_empty=False
                 )
 
-
         if 'distr_headers' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
@@ -194,9 +195,10 @@ def main(buildingsite, action=None):
                 )
 
             print("""
-Please make correct usr/include/asm by 'ln -s' manually.
+Please make correct 04.DESTDIR/usr/include/asm by 'ln -s' manually.
 
-Continue with command 'aipsetup3 build s remove_install_files_from_includes+'
+Continue with command
+'aipsetup3 build continue remove_install_files_from_includes+'
 """)
 
             ret = 1
