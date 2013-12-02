@@ -63,7 +63,6 @@ def main(buildingsite, action=None):
                     rename_dir=False
                     )
 
-
         if 'configure_sm' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
@@ -122,7 +121,6 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-
             inc_dir = os.path.join(dst_dir, 'usr', 'include')
 
             lst = os.listdir(inc_dir)
@@ -130,16 +128,16 @@ def main(buildingsite, action=None):
             sea_inc_dir = None
 
             if not len(lst) == 1:
-                logging.error("Can't find seamonkey includes dir in {}".format(inc_dir))
+                logging.error(
+                    "Can't find seamonkey includes dir in {}".format(inc_dir)
+                    )
                 ret = 30
             else:
                 sea_inc_dir = lst[0]
 
                 os.symlink(sea_inc_dir, os.path.join(inc_dir, 'npapi'))
 
-
         ###### XULRUNNER PART ######
-
 
         source_configure_reldir = './mozilla'
 
@@ -158,7 +156,6 @@ def main(buildingsite, action=None):
                     unwrap_dir=True,
                     rename_dir=False
                     )
-
 
         if 'configure_xul' in actions and ret == 0:
             ret = autotools.configure_high(
@@ -270,8 +267,14 @@ def main(buildingsite, action=None):
                 ret = 3
             else:
 
-                include_sm_path = org.wayround.utils.path.join(include_path, sm_dir)
-                include_xul_path = org.wayround.utils.path.join(include_path, xul_dir)
+                include_sm_path = org.wayround.utils.path.join(
+                    include_path,
+                    sm_dir
+                    )
+                include_xul_path = org.wayround.utils.path.join(
+                    include_path,
+                    xul_dir
+                    )
 
                 org.wayround.utils.file.checksumed_dir_redue(
                     include_sm_path, include_xul_path
@@ -301,8 +304,14 @@ def main(buildingsite, action=None):
                 ret = 3
             else:
 
-                include_sm_path = org.wayround.utils.path.join(include_path, sm_dir)
-                include_xul_path = org.wayround.utils.path.join(include_path, xul_dir)
+                include_sm_path = org.wayround.utils.path.join(
+                    include_path,
+                    sm_dir
+                    )
+                include_xul_path = org.wayround.utils.path.join(
+                    include_path,
+                    xul_dir
+                    )
 
                 org.wayround.utils.file.checksumed_dir_redue(
                     include_sm_path, include_xul_path
@@ -332,8 +341,14 @@ def main(buildingsite, action=None):
                 ret = 3
             else:
 
-                include_sm_path = org.wayround.utils.path.join(include_path, sm_dir)
-                include_xul_path = org.wayround.utils.path.join(include_path, xul_dir)
+                include_sm_path = org.wayround.utils.path.join(
+                    include_path,
+                    sm_dir
+                    )
+                include_xul_path = org.wayround.utils.path.join(
+                    include_path,
+                    xul_dir
+                    )
 
                 org.wayround.utils.file.checksumed_dir_redue(
                     include_sm_path, include_xul_path

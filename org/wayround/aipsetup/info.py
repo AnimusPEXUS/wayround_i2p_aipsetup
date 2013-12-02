@@ -11,7 +11,6 @@ import os.path
 import re
 import sys
 import json
-import functools
 
 import sqlalchemy.ext.declarative
 
@@ -19,10 +18,10 @@ import org.wayround.utils.file
 import org.wayround.utils.db
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.version
 
 
 import org.wayround.aipsetup.repository
-import org.wayround.utils.version
 
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
@@ -41,19 +40,19 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
     # prefix for filtering source files
     src_path_prefix='',
 
-    # filters. various filters to provide correct list of acceptable tarballs by
-    # they filenames
+    # filters. various filters to provide correct list of acceptable tarballs
+    # by they filenames
     filters='',
 
     # from 0 to 9. default 5. lower number - higher priority
     installation_priority=5,
 
-    # can package be deleted without hazard to aipsetup functionality (including
-    # system stability)?
+    # can package be deleted without hazard to aipsetup functionality
+    # (including system stability)?
     removable=True,
 
-    # can package be updated without hazard to aipsetup functionality (including
-    # system stability)?
+    # can package be updated without hazard to aipsetup functionality
+    # (including system stability)?
     reducible=True,
 
     # package can not be installed
@@ -211,6 +210,7 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
 
         return
 
+
 class PackageInfoCtl:
 
     def __init__(self, info_dir, info_db):
@@ -218,11 +218,14 @@ class PackageInfoCtl:
         self.info_dir = org.wayround.utils.path.abspath(info_dir)
         self.info_db = info_db
 
+    def get_lists_of_packages_missing_and_present_info_records(
+        self,
+        names, pkg_index_ctl
+        ):
 
-    def get_lists_of_packages_missing_and_present_info_records(self, names, pkg_index_ctl):
         """
-        :param names: can be a string or a ``list`` of names to check. if names is
-        ``None`` - check all.
+        :param names: can be a string or a ``list`` of names to check. if names
+        is ``None`` - check all.
         """
 
         index_db = pkg_index_ctl.db_connection
@@ -235,14 +238,14 @@ class PackageInfoCtl:
         names_found = []
 
         if names == None:
-            q = index_db.sess.query(index_db.Package).all()
+            q = index_db.session.query(index_db.Package).all()
             for i in q:
                 names_found.append(i.name)
         else:
             names_found = names
 
         for i in names_found:
-            q = info_db.sess.query(info_db.Info).filter_by(name=i).first()
+            q = info_db.session.query(info_db.Info).filter_by(name=i).first()
 
             if q == None:
                 not_found.append(q)
@@ -250,7 +253,6 @@ class PackageInfoCtl:
                 found.append(q)
 
         return (found, not_found)
-
 
     def get_package_info_record(self, name=None, record=None):
         """
@@ -267,7 +269,7 @@ class PackageInfoCtl:
         ret = None
 
         if name != None:
-            q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
+            q = info_db.session.query(info_db.Info).filter_by(name=name).first()
         else:
             q = record
 
@@ -288,15 +290,13 @@ class PackageInfoCtl:
 
             ret['name'] = q.name
 
-
         return ret
-
 
     def set_package_info_record(self, name, struct):
 
         info_db = self.info_db
 
-        q = info_db.sess.query(info_db.Info).filter_by(name=name).first()
+        q = info_db.session.query(info_db.Info).filter_by(name=name).first()
 
         creating_new = False
         if q == None:
@@ -321,15 +321,16 @@ class PackageInfoCtl:
             else:
                 raise Exception("Programming Error")
 
-            exec("q.{name} = {type}(struct['{name}'])".format(type=ktt, name=i))
+            exec(
+                "q.{name} = {type}(struct['{name}'])".format(type=ktt, name=i)
+                )
 
         q.name = name
 
         if creating_new:
-            info_db.sess.add(q)
+            info_db.session.add(q)
 
         return
-
 
     def get_info_records_list(self, mask='*', mute=False):
 
@@ -337,7 +338,7 @@ class PackageInfoCtl:
 
         ret = []
 
-        q = info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
+        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).all()
 
         found = 0
 
@@ -357,15 +358,21 @@ class PackageInfoCtl:
         self, pkg_index_ctl, create_templates=False, force_rewrite=False
         ):
 
-        if not isinstance(pkg_index_ctl, org.wayround.aipsetup.repository.PackageRepoCtl):
+        if not isinstance(
+            pkg_index_ctl,
+            org.wayround.aipsetup.repository.PackageRepoCtl
+            ):
             raise ValueError(
-                "pkg_index_ctl must be of type org.wayround.aipsetup.repository.PackageRepoCtl"
+                "pkg_index_ctl must be of type "
+                "org.wayround.aipsetup.repository.PackageRepoCtl"
                 )
 
         info_db = self.info_db
         index_db = pkg_index_ctl.db_connection
 
-        q = index_db.sess.query(index_db.Package).order_by(index_db.Package.name).all()
+        q = index_db.session.query(
+            index_db.Package
+            ).order_by(index_db.Package.name).all()
 
         pkgs_checked = 0
         pkgs_missing = 0
@@ -380,7 +387,9 @@ class PackageInfoCtl:
 
             pkgs_checked += 1
 
-            q2 = info_db.sess.query(info_db.Info).filter_by(name=each.name).first()
+            q2 = info_db.session.query(
+                info_db.Info
+                ).filter_by(name=each.name).first()
 
             if q2 == None:
 
@@ -407,7 +416,9 @@ class PackageInfoCtl:
                             pkgs_forced += 1
 
                     if force_rewrite:
-                        logging.info("Forced template rewriting: {}".format(filename))
+                        logging.info(
+                            "Forced template rewriting: {}".format(filename)
+                            )
 
                     if write_info_file(
                         filename,
@@ -451,7 +462,7 @@ class PackageInfoCtl:
         ret = []
 
         query_result = (
-            info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
+            info_db.session.query(info_db.Info).order_by(info_db.Info.name).all()
             )
 
         for i in query_result:
@@ -575,7 +586,9 @@ class PackageInfoCtl:
             if subject == 'filename' or subject == 'status':
 
                 if not function in ['begins', 'contains', 'ends', 'fm', 're']:
-                    logging.error("Wrong `{}' function : `{}'".format(subject, function))
+                    logging.error(
+                        "Wrong `{}' function : `{}'".format(subject, function)
+                        )
                     ret = 3
                     break
 
@@ -585,20 +598,14 @@ class PackageInfoCtl:
                         '<', '<=', '==', '>=', '>', 're', 'fm',
                         'begins', 'contains', 'ends'
                         ]:
-                    logging.error("Wrong `version' function : `{}'".format(function))
+                    logging.error(
+                        "Wrong `version' function : `{}'".format(function)
+                        )
                     ret = 4
                     break
 
-    #        elif subject == 'status':
-    #
-    #            if not function in ['begins', 'contains', 'ends', 'fm', 're']:
-    #                logging.error("Wrong `status' function : `{}'".format(function))
-    #                ret = 5
-    #                break
-
             else:
                 raise Exception("Programming error")
-
 
             if not isinstance(ret, int):
 
@@ -612,7 +619,6 @@ class PackageInfoCtl:
                 else:
                     raise Exception("Programming Error")
 
-
                 for item in working_list:
 
                     working_item = item
@@ -624,10 +630,11 @@ class PackageInfoCtl:
 
                         working_item = None
 
-                        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
-                            os.path.basename(item),
-                            mute=True
-                            )
+                        parsed = org.wayround.utils.tarball_name_parser.\
+                            parse_tarball_name(
+                                os.path.basename(item),
+                                mute=True
+                                )
 
                         if not isinstance(parsed, dict):
                             # TODO: it's not error, but may be it's need to do
@@ -662,7 +669,11 @@ class PackageInfoCtl:
 
                     elif function == 'fm':
                         logging.debug(
-                            "filter_tarball_list: fm-matching `{}' and `{}'".format(working_item, data)
+                            "filter_tarball_list: "
+                            "fm-matching `{}' and `{}'".format(
+                                working_item,
+                                data
+                                )
                             )
                         matched = fnmatch.fnmatch(working_item, data)
 
@@ -682,15 +693,22 @@ class PackageInfoCtl:
                     if matched:
 
                         logging.debug(
-                            "filter_tarball_list: match: `{}'\n       `{}'".format(item, f)
+                            "filter_tarball_list: "
+                            "match: `{}'\n       `{}'".format(item, f)
                             )
 
                         if action == '+':
-                            logging.debug("filter_tarball_list: adding: {}".format(item))
+                            logging.debug(
+                                "filter_tarball_list: adding: {}".format(item)
+                                )
                             out_list.add(item)
 
                         elif action == '-':
-                            logging.debug("filter_tarball_list: removing: {}".format(item))
+                            logging.debug(
+                                "filter_tarball_list: removing: {}".format(
+                                    item
+                                    )
+                                )
                             if item in out_list:
                                 out_list.remove(item)
 
@@ -699,9 +717,9 @@ class PackageInfoCtl:
 
                     else:
                         logging.debug(
-                            "filter_tarball_list: NOT match: `{}'\n       `{}'".format(item, f)
+                            "filter_tarball_list: NOT "
+                            "match: `{}'\n       `{}'".format(item, f)
                             )
-
 
         if not isinstance(ret, int):
             ret = out_list
@@ -711,8 +729,10 @@ class PackageInfoCtl:
 
         return ret
 
-
-    def get_package_name_by_tarball_filename(self, tarball_filename, mute=True):
+    def get_package_name_by_tarball_filename(
+        self,
+        tarball_filename, mute=True
+        ):
 
         ret = None
 
@@ -729,7 +749,7 @@ class PackageInfoCtl:
 
             info_db = self.info_db
 
-            q = info_db.sess.query(
+            q = info_db.session.query(
                 info_db.Info
                 ).filter_by(
                     basename=parsed['groups']['name']
@@ -749,13 +769,19 @@ class PackageInfoCtl:
 
             if len(possible_names) < 1:
                 if not mute:
-                    logging.error("Not found package name for tarball `{}'".format(tarball_filename))
+                    logging.error(
+                        "Not found package name "
+                        "for tarball `{}'".format(tarball_filename)
+                        )
 
                 ret = None
 
             elif len(possible_names) > 1:
                 if not mute:
-                    logging.error("Too many possible package names for tarball `{}':".format(tarball_filename))
+                    logging.error(
+                        "Too many possible package names "
+                        "for tarball `{}':".format(tarball_filename)
+                        )
 
                 for i in q:
                     print("       {}".format(possible_names))
@@ -771,7 +797,7 @@ class PackageInfoCtl:
 
         info_db = self.info_db
 
-        q = info_db.sess.query(
+        q = info_db.session.query(
             info_db.Info
             ).filter(
                 info_db.Info.auto_newest_pkg == False
@@ -783,7 +809,6 @@ class PackageInfoCtl:
             lst.append(self.get_package_info_record(i.name, i))
 
         return lst
-
 
     def guess_package_homepage(self, pkg_name):
 
@@ -799,7 +824,9 @@ class PackageInfoCtl:
                 ret[domain] = 0
 
             ret[domain] += 1
-        logging.debug('Possibilities for {} are: {}'.format(pkg_name, repr(ret)))
+        logging.debug(
+            'Possibilities for {} are: {}'.format(pkg_name, repr(ret))
+            )
 
         return ret
 
@@ -822,7 +849,6 @@ class PackageInfoCtl:
             )
 
         return
-
 
     def print_info_record(self, name, pkg_index_ctl, tag_ctl):
 
@@ -899,14 +925,14 @@ class PackageInfoCtl:
 
         info_db = self.info_db
 
-        q = info_db.sess.query(info_db.Info).all()
+        q = info_db.session.query(info_db.Info).all()
 
         deleted = 0
 
         for i in q:
 
             if fnmatch.fnmatch(i.name, mask):
-                info_db.sess.delete(i)
+                info_db.session.delete(i)
                 deleted += 1
                 logging.info(
                     "deleted pkg info: {}".format(i.name)
@@ -923,7 +949,7 @@ class PackageInfoCtl:
 
         info_db = self.info_db
 
-        q = info_db.sess.query(info_db.Info).order_by(info_db.Info.name).all()
+        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).all()
 
         for i in q:
             if fnmatch.fnmatch(i.name, mask):
@@ -931,10 +957,14 @@ class PackageInfoCtl:
                     self.info_dir,
                     '{}.json'.format(i.name))
                 if not force_rewrite and os.path.exists(filename):
-                    logging.warning("File exists - skipping: {}".format(filename))
+                    logging.warning(
+                        "File exists - skipping: {}".format(filename)
+                        )
                     continue
                 if force_rewrite and os.path.exists(filename):
-                    logging.info("File exists - rewriting: {}".format(filename))
+                    logging.info(
+                        "File exists - rewriting: {}".format(filename)
+                        )
                 if not os.path.exists(filename):
                     logging.info("Writing: {}".format(filename))
 
@@ -981,7 +1011,7 @@ class PackageInfoCtl:
             name = os.path.basename(i)[:-5]
 
             if not rewrite_existing:
-                q = info_db.sess.query(info_db.Info).filter_by(
+                q = info_db.session.query(info_db.Info).filter_by(
                     name=name
                     ).first()
                 if q == None:
@@ -1014,8 +1044,9 @@ class PackageInfoCtl:
         return
 
 
+class Tags(org.wayround.utils.tag.TagEngine):
+    pass
 
-class Tags(org.wayround.utils.tag.TagEngine): pass
 
 class TagsControl:
 
@@ -1054,7 +1085,9 @@ class TagsControl:
                         perc = 0
                     else:
                         perc = float(100) / (float(count) / float(num))
-                    org.wayround.utils.file.progress_write('    {:6.2f}%'.format(perc))
+                    org.wayround.utils.file.progress_write(
+                        '    {:6.2f}%'.format(perc)
+                        )
                     tag_db.set_tags(i, d[i])
 
                 org.wayround.utils.file.progress_write_finish()
@@ -1097,342 +1130,6 @@ class TagsControl:
         return
 
 
-# I think "Latests" functionality not needed any longer, as it's will not be
-# used with coming of snapshots
-#
-#class PackageLatest(org.wayround.utils.db.BasicDB):
-#    """
-#    Main package index DB handling class
-#    """
-#
-#    Base = sqlalchemy.ext.declarative.declarative_base()
-#
-#    class Latest(Base):
-#        """
-#        Class for package's tags
-#        """
-#
-#        __tablename__ = 'newest'
-#
-#        id = sqlalchemy.Column(
-#            sqlalchemy.Integer,
-#            nullable=False,
-#            primary_key=True,
-#            autoincrement=True
-#            )
-#
-#        name = sqlalchemy.Column(
-#            sqlalchemy.UnicodeText,
-#            nullable=False
-#            )
-#
-#        typ = sqlalchemy.Column(
-#            'type',
-#            sqlalchemy.UnicodeText,
-#            nullable=False
-#            )
-#
-#        file = sqlalchemy.Column(
-#            sqlalchemy.UnicodeText,
-#            nullable=True,
-#            default=None,
-#            )
-#
-#
-#
-#    def __init__(self, config):
-#
-#        org.wayround.utils.db.BasicDB.__init__(
-#            self,
-#            config,
-#            echo=False
-#            )
-#
-#        return
-#
-#
-#class PackageLatestCtl:
-#
-#    def __init__(self, latest_db, info_ctl, index_ctl):
-#
-#        if not isinstance(info_ctl, PackageInfoCtl):
-#            raise ValueError(
-#                "info_ctl must be of type org.wayround.aipsetup.info.PackageInfoCtl"
-#                )
-#
-#        if not isinstance(index_ctl, org.wayround.aipsetup.repository.PackageRepoCtl):
-#            raise ValueError(
-#                "index_ctl must be of type org.wayround.aipsetup.repository.PackageRepoCtl"
-#                )
-#
-#        self.info_ctl = info_ctl
-#        self.latest_db = latest_db
-#        self.index_ctl = index_ctl
-#
-#    def set_found_latest_src_to_record(
-#        self, name, force=False, mute=True, info_ctl=None
-#        ):
-#
-#        ret = False
-#
-#        r = self.get_latest_src_from_src_db(name)
-#        if r != None:
-#            print(
-#                "Package's latest src is: `{}'".format(r),
-#                )
-#            if r != None:
-#
-#                ret = self.set_latest_src_to_record(
-#                    name, r, force
-#                    )
-#
-#            else:
-#                ret = False
-#
-#        if not ret:
-#            print("Can't set")
-#
-#
-#        return ret
-#
-#    def set_found_latest_src_to_records(
-#        self, names, force=False, mute=True
-#        ):
-#
-#        if len(names) == 0:
-#            names = self.info_ctl.get_info_records_list(
-#                mute=True
-#                )
-#
-#        for i in names:
-#            self.set_found_latest_src_to_record(
-#                i,
-#                force,
-#                mute
-#                )
-#
-#        return
-#
-#    def set_found_latest_pkg_to_record(
-#        self, name, force=False, mute=True
-#        ):
-#
-#        ret = False
-#
-#        r = self.get_latest_pkg_from_repo(name)
-#        if r != None:
-#            print(
-#                "Package's latest pkg is: `{}'".format(r)
-#                )
-#            if r != None:
-#
-#                ret = self.set_latest_pkg_to_record(
-#                    name, r, force
-#                    )
-#
-#            else:
-#                ret = False
-#
-#        if not ret:
-#            print("Can't set")
-#
-#
-#        return ret
-#
-#    def set_found_latest_pkg_to_records(
-#        self, names, force=False, mute=True
-#        ):
-#
-#        if len(names) == 0:
-#            names = self.info_ctl.get_info_records_list(
-#                mute=True
-#                )
-#
-#        for i in names:
-#            self.set_found_latest_pkg_to_record(
-#                i, force, mute
-#                )
-#
-#        return
-#
-#
-#    def set_latest_src_to_record(self, name, latest, force=False):
-#        return self._set_latest_to_record(name, latest, 'src', force)
-#
-#    def set_latest_pkg_to_record(
-#        self, name, latest, force=False
-#        ):
-#
-#        return self._set_latest_to_record(
-#            name, latest, 'pkg', force
-#            )
-#
-#    def _set_latest_to_record(
-#        self, name, latest, typ, force=False
-#        ):
-#
-#        latest_db = self.latest_db
-#
-#        logging.debug("setting latest `{}' to `{}'".format(typ, latest))
-#        ret = None
-#
-#        if not typ in ['src', 'pkg']:
-#            raise ValueError("`typ' can be only 'src' or 'pkg'")
-#
-#        typ2 = ''
-#        if typ == 'src':
-#            typ2 = 'source'
-#        elif typ == 'pkg':
-#            typ2 = 'package'
-#
-#        info = self.info_ctl.get_package_info_record(
-#            name
-#            )
-#
-#        if info == None:
-#            logging.error("Not found Info record for `{}'".format(name))
-#        else:
-#
-#            logging.debug("Searching for existing `Latest' record of `{}'".format(name))
-#            q = latest_db.sess.query(
-#                latest_db.Latest
-#                ).filter_by(
-#                    name=name, typ=typ2
-#                ).first()
-#
-#            if q == None:
-#                logging.debug("existing `Latest' record of `{}' not found".format(name))
-#                if info['auto_newest_' + typ] or force:
-#                    logging.debug("creating `Latest' record of `{}'".format(name))
-#                    q = latest_db.Latest()
-#                    q.name = name
-#                    q.file = latest
-#                    q.typ = typ2
-#                    latest_db.sess.add(q)
-#                    ret = True
-#                else:
-#                    ret = False
-#            else:
-#                logging.debug("existing `Latest' record of `{}' found".format(name))
-#                if info['auto_newest_' + typ] or force:
-#                    logging.debug("updating `Latest' record of `{}'".format(name))
-#                    q.file = latest
-#                    ret = True
-#                else:
-#                    ret = False
-#
-#            latest_db.sess.commit()
-#
-#        if ret == False:
-#            logging.error(
-#                "Not `auto_newest_{}' and not forced".format(typ)
-#                )
-#
-#        return ret
-#
-#    def get_latest_src_from_record(self, name):
-#        return self._get_latest_from_record(
-#            name, 'src'
-#            )
-#
-#    def get_latest_pkg_from_record(self, name):
-#        return self._get_latest_from_record(
-#            name, 'pkg'
-#            )
-#
-#    def _get_latest_from_record(self, name, typ):
-#
-#        latest_db = self.latest_db
-#
-#        ret = None
-#
-#        if not typ in ['src', 'pkg']:
-#            raise ValueError("`typ' can be only 'src' or 'pkg'")
-#
-#        info = self.info_ctl.get_package_info_record(
-#            name
-#            )
-#
-#        if info == None:
-#            logging.error("Not found Info record for `{}'".format(name))
-#        else:
-#            typ2 = ''
-#            if typ == 'src':
-#                typ2 = 'source'
-#            elif typ == 'pkg':
-#                typ2 = 'package'
-#
-#            if info['auto_newest_' + typ]:
-#                latest = ''
-#                if typ == 'src':
-#                    latest = self.get_latest_src_from_src_db(name)
-#                elif typ == 'pkg':
-#                    latest = self.get_latest_pkg_from_repo(name)
-#                ret = latest
-#            else:
-#
-#                latest_r = latest_db.sess.query(
-#                    latest_db.Latest
-#                    ).filter_by(
-#                        name=name, typ=typ2
-#                        ).first()
-#
-#                if latest_r == None:
-#                    ret = None
-#                else:
-#                    latest = latest_r.file
-#                    ret = latest
-#
-#        return ret
-#
-#
-#    def get_latest_src_from_src_db(self, name, files=None):
-#
-#        ret = None
-#
-#        if not files:
-#            files = self.index_ctl.get_package_source_files(
-#                name
-#                )
-#
-#        if not isinstance(files, list) or len(files) == 0:
-#            ret = None
-#        else:
-#            ret = max(
-#                files,
-#                key=functools.cmp_to_key(
-#                    org.wayround.utils.version.source_version_comparator
-#                    )
-#                )
-#
-#        return ret
-#
-#    def get_latest_pkg_from_repo(self, name, files=None):
-#
-#        ret = None
-#
-#        if not files:
-#            files = self.index_ctl.get_package_files(
-#                name
-#                )
-#
-#        if not isinstance(files, list):
-#            files = []
-#
-#        if len(files) == 0:
-#            ret = None
-#        else:
-#
-#            ret = max(
-#                files,
-#                key=functools.cmp_to_key(
-#                    org.wayround.utils.version.package_version_comparator
-#                    )
-#                )
-#
-#        return ret
-
-
 def is_info_dicts_equal(d1, d2):
 
     """
@@ -1463,7 +1160,6 @@ def is_info_dicts_equal(d1, d2):
             break
 
     return ret
-
 
 
 def read_info_file(name):
@@ -1505,6 +1201,7 @@ def read_info_file(name):
             f.close()
 
     return ret
+
 
 def write_info_file(name, struct):
     """

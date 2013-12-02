@@ -14,6 +14,7 @@ import shutil
 import datetime
 
 import sqlalchemy.ext
+import sqlalchemy.ext.declarative
 
 import org.wayround.utils.db
 import org.wayround.utils.file
@@ -61,7 +62,6 @@ class PackageRepo(org.wayround.utils.db.BasicDB):
             default=0
             )
 
-
     class Category(Base):
         """
         Class for package categories
@@ -98,7 +98,10 @@ class PackageRepo(org.wayround.utils.db.BasicDB):
 
         return
 
-class SourceRepo(org.wayround.utils.tag.TagEngine): pass
+
+class SourceRepo(org.wayround.utils.tag.TagEngine):
+    pass
+
 
 class PackageRepoCtl:
 
@@ -156,7 +159,8 @@ class PackageRepoCtl:
 
                 for i in files:
 
-                    parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
+                    parsed = org.wayround.aipsetup.package_name_parser.\
+                        package_name_parse(i)
 
                     if parsed and parsed['groups']['name'] == name:
                         needed_files.append(
@@ -177,7 +181,7 @@ class PackageRepoCtl:
 
         index_db = self.db_connection
 
-        q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+        q = index_db.session.query(index_db.Category).filter_by(cid=cid).first()
 
         if q:
             ret = q.name
@@ -190,7 +194,7 @@ class PackageRepoCtl:
 
         index_db = self.db_connection
 
-        q = index_db.sess.query(index_db.Category).filter_by(cid=cid).first()
+        q = index_db.session.query(index_db.Category).filter_by(cid=cid).first()
 
         if q:
             ret = q.parent_cid
@@ -240,7 +244,7 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
+        q = index_db.session.query(index_db.Package).filter_by(name=name).first()
         if q != None:
             ret = q.pid
 
@@ -252,7 +256,7 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+        q = index_db.session.query(index_db.Package).filter_by(pid=pid).first()
         if q != None:
             ret = q.cid
 
@@ -264,12 +268,11 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = index_db.sess.query(index_db.Package).filter_by(name=name).first()
+        q = index_db.session.query(index_db.Package).filter_by(name=name).first()
         if q != None:
             ret = q.cid
 
         return ret
-
 
     def get_package_by_id(self, pid):
 
@@ -277,21 +280,22 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+        q = index_db.session.query(index_db.Package).filter_by(pid=pid).first()
         if q != None:
             ret = q.name
 
         return ret
-
 
     def get_package_name_list(self, cid=None):
 
         index_db = self.db_connection
 
         if cid == None:
-            lst = index_db.sess.query(index_db.Package).all()
+            lst = index_db.session.query(index_db.Package).all()
         else:
-            lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+            lst = index_db.session.query(
+                index_db.Package
+                ).filter_by(cid=cid).all()
 
         lst_names = []
         for i in lst:
@@ -307,9 +311,11 @@ class PackageRepoCtl:
 
         lst = None
         if cid == None:
-            lst = index_db.sess.query(index_db.Package).all()
+            lst = index_db.session.query(index_db.Package).all()
         else:
-            lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+            lst = index_db.session.query(
+                index_db.Package
+                ).filter_by(cid=cid).all()
 
         ids = []
         for i in lst:
@@ -322,9 +328,11 @@ class PackageRepoCtl:
         index_db = self.db_connection
 
         if cid == None:
-            lst = index_db.sess.query(index_db.Package).all()
+            lst = index_db.session.query(index_db.Package).all()
         else:
-            lst = index_db.sess.query(index_db.Package).filter_by(cid=cid).all()
+            lst = index_db.session.query(
+                index_db.Package
+                ).filter_by(cid=cid).all()
 
         dic = {}
         for i in lst:
@@ -336,7 +344,7 @@ class PackageRepoCtl:
 
         index_db = self.db_connection
 
-        lst = index_db.sess.query(
+        lst = index_db.session.query(
             index_db.Category
             ).filter_by(
                 parent_cid=parent_cid
@@ -356,7 +364,7 @@ class PackageRepoCtl:
 
         index_db = self.db_connection
 
-        lst = index_db.sess.query(
+        lst = index_db.session.query(
             index_db.Category
             ).filter_by(
                 parent_cid=parent_cid
@@ -380,13 +388,13 @@ class PackageRepoCtl:
 
         lst = None
         if parent_cid == None:
-            lst = index_db.sess.query(
+            lst = index_db.session.query(
                 index_db.Category
                 ).order_by(
                     index_db.Category.name
                     ).all()
         else:
-            lst = index_db.sess.query(
+            lst = index_db.session.query(
                 index_db.Category
                 ).filter_by(
                     parent_cid=parent_cid
@@ -399,7 +407,6 @@ class PackageRepoCtl:
             dic[int(i.cid)] = i.name
 
         return dic
-
 
     def get_package_path(self, pid_or_name):
 
@@ -425,16 +432,18 @@ class PackageRepoCtl:
 
         else:
             index_db = self.db_connection
-            pkg = index_db.sess.query(index_db.Package).filter_by(pid=pid).first()
+            pkg = index_db.session.query(
+                index_db.Package
+                ).filter_by(pid=pid).first()
 
-            if pkg != None :
+            if pkg != None:
 
                 r = pkg.cid
 
                 ret.insert(0, (pkg.pid, pkg.name))
 
                 while r != 0:
-                    cat = index_db.sess.query(
+                    cat = index_db.session.query(
                         index_db.Category
                         ).filter_by(cid=r).first()
 
@@ -442,7 +451,6 @@ class PackageRepoCtl:
                     r = cat.parent_cid
 
         return ret
-
 
     def get_category_path(self, cid):
 
@@ -459,18 +467,18 @@ class PackageRepoCtl:
                 )
             ret = None
         else:
-            categ = index_db.sess.query(
+            categ = index_db.session.query(
                 index_db.Category
                 ).filter_by(cid=cid).first()
 
-            if categ != None :
+            if categ != None:
 
                 r = categ.parent_cid
 
                 ret.insert(0, (categ.cid, categ.name))
 
                 while r != 0:
-                    cat = index_db.sess.query(
+                    cat = index_db.session.query(
                         index_db.Category
                         ).filter_by(cid=r).first()
 
@@ -478,7 +486,6 @@ class PackageRepoCtl:
                     r = cat.parent_cid
 
         return ret
-
 
     def get_package_path_string(self, pid_or_name):
 
@@ -516,7 +523,6 @@ class PackageRepoCtl:
 
         return ret
 
-
     def _srfpac_pkg_struct(self, pid, name, cid):
         return dict(pid=pid, name=name, cid=cid)
 
@@ -549,7 +555,6 @@ class PackageRepoCtl:
             repo_dir
             ):
 
-
             if os_walk_iter[0] == repo_dir:
                 category_locations[''] = self._srfpac_cat_struct(
                     cid=0,
@@ -558,7 +563,10 @@ class PackageRepoCtl:
                     )
 
             else:
-                relpath = org.wayround.utils.path.relpath(os_walk_iter[0], repo_dir)
+                relpath = org.wayround.utils.path.relpath(
+                    os_walk_iter[0],
+                    repo_dir
+                    )
 
                 if self.is_repo_package(os_walk_iter[0]):
 
@@ -604,7 +612,8 @@ class PackageRepoCtl:
                         )
 
                 org.wayround.utils.file.progress_write(
-                    "    scanning (found: {} categories, {} packages): {}".format(
+                    "    scanning "
+                    "(found: {} categories, {} packages): {}".format(
                         len(category_locations.keys()),
                         len(package_locations.keys()),
                         relpath
@@ -614,11 +623,9 @@ class PackageRepoCtl:
         org.wayround.utils.file.progress_write_finish()
 
         if ret == 0:
-            ret = {'cats': category_locations, 'packs':package_locations}
+            ret = {'cats': category_locations, 'packs': package_locations}
 
         return ret
-
-
 
     def save_cats_and_packs_to_db(self, category_locations, package_locations):
 
@@ -631,10 +638,10 @@ class PackageRepoCtl:
         index_db = self.db_connection
 
         logging.info("Deleting old data from DB")
-        index_db.sess.query(index_db.Category).delete()
-        index_db.sess.query(index_db.Package).delete()
+        index_db.session.query(index_db.Category).delete()
+        index_db.session.query(index_db.Package).delete()
 
-        index_db.sess.commit()
+        index_db.session.commit()
 
         logging.info("Adding new data to DB")
         for i in category_locations_internal.keys():
@@ -645,7 +652,7 @@ class PackageRepoCtl:
             new_obj.name = category_locations_internal[i]['name']
             new_obj.parent_cid = category_locations_internal[i]['parent_cid']
 
-            index_db.sess.add(new_obj)
+            index_db.session.add(new_obj)
 
         for i in package_locations.keys():
 
@@ -655,9 +662,9 @@ class PackageRepoCtl:
             new_obj.name = package_locations[i]['name']
             new_obj.cid = package_locations[i]['cid']
 
-            index_db.sess.add(new_obj)
+            index_db.session.add(new_obj)
 
-        index_db.sess.commit()
+        index_db.session.commit()
         logging.info("DB saved")
 
         return ret
@@ -691,7 +698,6 @@ class PackageRepoCtl:
                 break
 
         return ret
-
 
     def put_asps_to_index(self, files, move=False):
 
@@ -765,9 +771,10 @@ class PackageRepoCtl:
             asp = org.wayround.aipsetup.package.ASPackage(filename)
 
             if asp.check_package(mute=True) == 0:
-                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                    filename
-                    )
+                parsed = org.wayround.aipsetup.package_name_parser.\
+                    package_name_parse(
+                        filename
+                        )
 
                 if not isinstance(parsed, dict):
                     logging.error(
@@ -782,7 +789,6 @@ class PackageRepoCtl:
                     files = [
                         file
                         ]
-
 
                     package_path = self.get_package_path_string(
                         parsed['groups']['name']
@@ -819,8 +825,10 @@ class PackageRepoCtl:
 
         return ret
 
-
-    def detect_package_collisions(self, category_locations, package_locations):
+    def detect_package_collisions(
+        self,
+        category_locations, package_locations
+        ):
 
         ret = 0
 
@@ -843,10 +851,10 @@ class PackageRepoCtl:
             if len(pkg_paths[l]) > 1:
                 lst_dup[l] = pkg_paths[l]
 
-
         if len(lst_dup) == 0:
             logging.info(
-                "Found {} duplicated package names. Package locations looks good!".format(
+                "Found {} duplicated package names. "
+                "Package locations looks good!".format(
                     len(lst_dup)
                     )
                 )
@@ -872,7 +880,6 @@ class PackageRepoCtl:
 
         return ret
 
-
     def cleanup_repo_package_pack(self, name):
 
         g_path = org.wayround.utils.path.join(self.garbage_dir, name)
@@ -884,7 +891,6 @@ class PackageRepoCtl:
             self.repository_dir,
             self.get_package_path_string(name), 'pack'
             )
-
 
         path = org.wayround.utils.path.abspath(path)
 
@@ -914,7 +920,9 @@ class PackageRepoCtl:
 
                 if self.put_asp_to_index(p1) != 0:
 
-                    logging.warning("Can't move file to index. moving to garbage")
+                    logging.warning(
+                        "Can't move file to index. moving to garbage"
+                        )
 
                     shutil.move(p1, org.wayround.utils.path.join(g_path, i))
 
@@ -956,14 +964,17 @@ class PackageRepoCtl:
             for i in files[5:]:
                 p1 = path + os.path.sep + i
 
-                logging.warning("Removing outdated package: {}".format(os.path.basename(p1)))
+                logging.warning(
+                    "Removing outdated package: {}".format(
+                        os.path.basename(p1)
+                        )
+                    )
                 try:
                     os.unlink(p1)
                 except:
                     logging.exception("Error")
 
         return
-
 
     def cleanup_repo_package(self, name):
 
@@ -999,7 +1010,6 @@ class PackageRepoCtl:
                     shutil.move(p1, p2)
                 except:
                     logging.exception("Can't move file or dir")
-
 
     def cleanup_repo(self):
 
@@ -1132,7 +1142,6 @@ class SourceRepoCtl:
         self.sources_dir = sources_dir
         self.database_connection = database_connection
 
-
     def index_sources(
         self,
         subdir_name,
@@ -1176,7 +1185,9 @@ class SourceRepoCtl:
             )
 
         if not isinstance(pkg_info, dict):
-            logging.error("Can't get info record for package `{}'".format(name))
+            logging.error(
+                "Can't get info record for package `{}'".format(name)
+                )
             ret = 1
 
         else:
@@ -1218,7 +1229,10 @@ class SourceRepoCtl:
 
         if not files:
 
-            if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+            if not isinstance(
+                info_ctl,
+                org.wayround.aipsetup.info.PackageInfoCtl
+                ):
                 raise ValueError(
                     "if files not given, info_ctl must be of type"
                     " org.wayround.aipsetup.info.PackageInfoCtl"
@@ -1251,7 +1265,7 @@ class SourceRepoCtl:
         ):
 
         root_dir_name = org.wayround.utils.path.realpath(root_dir_name)
-        root_dir_name_len = len(root_dir_name)
+        #        root_dir_name_len = len(root_dir_name)
 
         sub_dir_name = org.wayround.utils.path.realpath(sub_dir_name)
 
@@ -1281,7 +1295,10 @@ class SourceRepoCtl:
                 list_symlincs=False
                 )
 
-            source_index = org.wayround.utils.path.prepend_path(source_index, '/')
+            source_index = org.wayround.utils.path.prepend_path(
+                source_index,
+                '/'
+                )
 
             source_index = list(set(source_index))
             source_index.sort()
@@ -1320,10 +1337,11 @@ class SourceRepoCtl:
                 else:
 
                     parsed_src_filename = (
-                        org.wayround.utils.tarball_name_parser.parse_tarball_name(
-                            i,
-                            mute=True
-                            )
+                        org.wayround.utils.tarball_name_parser.\
+                            parse_tarball_name(
+                                i,
+                                mute=True
+                                )
                         )
 
                     if parsed_src_filename:
@@ -1399,7 +1417,8 @@ class SourceRepoCtl:
 
             i_i += 1
             org.wayround.utils.file.progress_write(
-                "    {:.2f}%, scanned {}, marked for deletion {}, skipped {}: {}".format(
+                "    {:.2f}%, scanned {}, marked for "
+                "deletion {}, skipped {}: {}".format(
                     100.0 / (float(src_tag_objects_l) / i_i),
                     found_scanned_count,
                     deleted_count,
@@ -1422,7 +1441,9 @@ class SourceRepoCtl:
                 deleted=deleted_count
                 )
             )
-        logging.info("DB Size: {} record(s)".format(self.database_connection.get_size()))
+        logging.info(
+            "DB Size: {} record(s)".format(self.database_connection.get_size())
+            )
 
         return 0
 
@@ -1480,7 +1501,10 @@ class SourceRepoCtl:
                 ret = 2
             else:
 
-                dst_file = org.wayround.utils.path.join(out_dir, os.path.basename(path))
+                dst_file = org.wayround.utils.path.join(
+                    out_dir,
+                    os.path.basename(path)
+                    )
 
                 try:
                     shutil.copy2(
@@ -1538,10 +1562,17 @@ class SourceRepoCtl:
             dstfile = os.path.join(out_dir, os.path.basename(latest))
 
             if verbose:
-                st = os.stat(org.wayround.utils.path.join(self.sources_dir, latest))
+                st = os.stat(
+                    org.wayround.utils.path.join(self.sources_dir, latest)
+                    )
                 mtime = st.st_mtime
 
-                logging.info("Acquiring {} ({})".format(latest, datetime.datetime.fromtimestamp(mtime)))
+                logging.info(
+                    "Acquiring {} ({})".format(
+                        latest,
+                        datetime.datetime.fromtimestamp(mtime)
+                        )
+                    )
 
             if os.path.exists(dstfile):
                 os.chmod(dstfile, 0o700)
@@ -1550,7 +1581,6 @@ class SourceRepoCtl:
             ret = self.get_file(latest, out_dir)
 
         return ret
-
 
     def get_latest_files_by_category(
         self,
@@ -1588,7 +1618,9 @@ class SourceRepoCtl:
                 try:
                     os.makedirs(real_cat_dir)
                 except:
-                    logging.exception("Can't create dir {}".format(real_cat_dir))
+                    logging.exception(
+                        "Can't create dir {}".format(real_cat_dir)
+                        )
                     ret += 1
 
             if os.path.isdir(real_cat_dir):
@@ -1602,7 +1634,6 @@ class SourceRepoCtl:
                         )
 
         return ret
-
 
     def check_tarball_basenames_registration(self, path, info_ctl=None):
 
