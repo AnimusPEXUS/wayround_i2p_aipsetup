@@ -11,6 +11,7 @@ _latest_db_connection = None
 _tag_db_connection = None
 _src_repo_db_connection = None
 
+
 def info_db(config):
     """
     Returns info database connection creating it if needed
