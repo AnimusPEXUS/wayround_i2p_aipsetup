@@ -3,13 +3,8 @@
 aipsetup configuration manipulations
 """
 
-import os.path
-import copy
-import logging
-import pprint
 import configparser
 
-import org.wayround.utils.path
 
 DEFAULT_CONFIG = {
     'general': {
@@ -72,7 +67,8 @@ DEFAULT_CONFIG = {
         },
 
     'info_repo': {
-        'index_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkginfo.sqlite',
+        'index_db_config': 'sqlite:////usr/lib/python3.3/site-packages/org/wayround/aipsetup/unicorn_distro/pkginfo.sqlite',
+#        'index_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkginfo.sqlite',
         'dir':'/mnt/sda3/home/agu/_UNICORN/pkg_info',
         'tags_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgtags.sqlite',
         'tags_json': '/mnt/sda3/home/agu/_UNICORN/tags.json',
@@ -98,7 +94,6 @@ DEFAULT_CONFIG = {
         },
 
     }
-
 
 
 def load_config(filename):

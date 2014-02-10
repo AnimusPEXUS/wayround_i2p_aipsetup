@@ -21,6 +21,7 @@ import org.wayround.utils.getopt
 import org.wayround.utils.log
 import org.wayround.utils.time
 
+
 def commands():
     return {
 
@@ -37,7 +38,7 @@ def commands():
         },
 
     'pkg': {
-        'check':package_check,
+        'check': package_check,
         },
 
     'bsite': {
@@ -86,13 +87,13 @@ def commands():
         'find_old': clean_find_old_packages,
         'explicit_asps': clean_check_list_of_installed_packages_and_asps_auto,
         'find_garbage': clean_find_garbage,
-        'find_invalid_deps_lists':clean_find_invalid_deps_lists
+        'find_invalid_deps_lists': clean_find_invalid_deps_lists
         },
 
     'sys_deps': {
         'asps_asp_depends_on': pkgdeps_print_asps_asp_depends_on,
         'asp_depends': pkgdeps_print_asp_depends,
-        'asps_depending_on_asp':pkgdeps_print_asps_depending_on_asp,
+        'asps_depending_on_asp': pkgdeps_print_asps_depending_on_asp,
         },
 
     'repo': {
@@ -118,7 +119,10 @@ def config_init(command_name, opts, args, adds):
 
     import org.wayround.aipsetup.config
 
+    config = adds['config']
+
     org.wayround.aipsetup.config.save_config(
+        '/etc/aipsetup.conf',
         org.wayround.aipsetup.config.DEFAULT_CONFIG
         )
 
@@ -197,7 +201,6 @@ def system_install_package(command_name, opts, args, adds):
                         )
                     fpi.append(name)
 
-
             if len(fpi) != 0:
                 logging.error(
                     "Failed installing packages:"
@@ -260,6 +263,7 @@ def system_package_list(command_name, opts, args, adds):
 
     return ret
 
+
 def system_package_list_asps(command_name, opts, args, adds):
 
     """
@@ -315,6 +319,7 @@ def system_package_list_asps(command_name, opts, args, adds):
 
     return ret
 
+
 def system_list_package_files(command_name, opts, args, adds):
 
     config = adds['config']
@@ -346,7 +351,9 @@ def system_list_package_files(command_name, opts, args, adds):
 
         if latest == None:
             logging.error(
-                "Error getting latest installed asp of package `{}'".format(pkg_name)
+                "Error getting latest installed asp of package `{}'".format(
+                    pkg_name
+                    )
                 )
             ret = 2
         else:
@@ -357,6 +364,7 @@ def system_list_package_files(command_name, opts, args, adds):
                 print(i)
 
     return ret
+
 
 def system_remove_package(command_name, opts, args, adds):
 
@@ -410,6 +418,7 @@ def system_remove_package(command_name, opts, args, adds):
 
     return ret
 
+
 def system_find_package_files(command_name, opts, args, adds):
 
     """
@@ -442,7 +451,6 @@ def system_find_package_files(command_name, opts, args, adds):
     lookfor = ''
     if len(args) > 0:
         lookfor = args[0]
-
 
     info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
     pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
@@ -493,10 +501,12 @@ def system_find_package_files(command_name, opts, args, adds):
 
     return ret
 
+
 def system_reduce_asp_to_latest(command_name, opts, args, adds):
 
     """
-    Forcibly reduces named asp, excluding files installed by latest package's asp
+    Forcibly reduces named asp, excluding files installed by latest package's
+    asp
 
     [-b=DESTDIR] ASP_NAME
     """
@@ -537,7 +547,8 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
                     )
 
                 info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
-                pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+                pkg_repo_ctl = \
+                    org.wayround.aipsetup.classes.pkg_repo_ctl(config)
 
                 system = org.wayround.aipsetup.classes.sys_ctl(
                     config,
@@ -553,6 +564,7 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
                 system.reduce_asps(asp_name_latest, [asp_name])
 
     return ret
+
 
 def system_make_asp_deps(command_name, opts, args, adds):
 
@@ -628,7 +640,6 @@ def pkg_repo_index(command_name, opts, args, adds):
                 ret = 2
 
     return ret
-
 
 
 def pkg_repo_index_and_update(command_name, opts, args, adds):
@@ -760,7 +771,6 @@ def src_repo_index(command_name, opts, args, adds):
             )
         )
 
-
     if len(args) > 1:
         logging.error("Wrong argument count: can be only one")
         ret = 1
@@ -812,14 +822,14 @@ exists: {}
 
             ret = src_ctl.index_sources(
                 org.wayround.utils.path.realpath(subdir_name),
-                acceptable_src_file_extensions=
-                    config['general']['acceptable_src_file_extensions'].split(),
+                acceptable_src_file_extensions=\
+                    config['general'][
+                        'acceptable_src_file_extensions'].split(),
                 force_reindex=forced_reindex,
                 clean_only=clean_only
                 )
 
     return ret
-
 
 
 def src_repo_search_name(command_name, opts, args, adds):
@@ -904,7 +914,6 @@ def src_repo_print_paths(command_name, opts, args, adds):
 
         name = None
 
-
         if not len(args) == 1:
             ret = 1
             logging.error("One argument required")
@@ -925,7 +934,6 @@ def src_repo_print_paths(command_name, opts, args, adds):
                 else:
                     basename = name
 
-
                 src_index = org.wayround.aipsetup.classes.src_repo_ctl(config)
 
                 if namemode == 'basename':
@@ -940,16 +948,29 @@ def src_repo_print_paths(command_name, opts, args, adds):
                 if not isinstance(objects, list):
                     ret = 10
                 else:
-                    objects.sort(key=functools.cmp_to_key(
-                            org.wayround.utils.version.source_version_comparator
-                            ))
+                    objects.sort(
+                        key=functools.cmp_to_key(
+                        org.wayround.utils.version.source_version_comparator
+                            )
+                        )
                     for i in objects:
-                        st = os.stat(org.wayround.utils.path.join(src_index.sources_dir, i))
+                        st = os.stat(
+                            org.wayround.utils.path.join(
+                                src_index.sources_dir,
+                                i
+                                )
+                            )
                         mtime = st.st_mtime
 
-                        print('    {} ({})'.format(i, datetime.datetime.fromtimestamp(mtime)))
+                        print(
+                            '    {} ({})'.format(
+                                i,
+                                datetime.datetime.fromtimestamp(mtime)
+                                )
+                            )
 
     return ret
+
 
 def src_repo_get_file(command_name, opts, args, adds):
 
@@ -985,6 +1006,7 @@ def src_repo_get_file(command_name, opts, args, adds):
             ret = src_index.get_file(filename, dstdir)
 
     return 0
+
 
 def src_repo_get_latest_tarball(command_name, opts, args, adds):
 
@@ -1038,6 +1060,7 @@ def src_repo_get_latest_tarball(command_name, opts, args, adds):
 
     return ret
 
+
 def src_repo_get_latest_tarball_categorised(command_name, opts, args, adds):
 
     config = adds['config']
@@ -1082,6 +1105,7 @@ def src_repo_get_latest_tarball_categorised(command_name, opts, args, adds):
                 )
 
     return ret
+
 
 def src_repo_check_registartions(command_name, opts, args, adds):
 
@@ -1134,14 +1158,17 @@ def src_repo_check_registartions(command_name, opts, args, adds):
                         name=i.ljust(longest_name),
                         pkg_name=res[i]['name'].ljust(longest_pkg_name),
                         deprecated=str(res[i]['deprecated']).ljust(5),
-                        non_installable=str(res[i]['non_installable']).ljust(5),
+                        non_installable=\
+                            str(res[i]['non_installable']).ljust(5),
                         removable=str(res[i]['removable']).ljust(5),
                         reducible=str(res[i]['reducible']).ljust(5)
                         )
                     )
             else:
                 print(
-                    "    {name}: NOT REGISTERED".format(name=i.ljust(longest_name))
+                    "    {name}: NOT REGISTERED".format(
+                        name=i.ljust(longest_name)
+                        )
                     )
 
     return ret
@@ -1198,6 +1225,7 @@ def info_find_missing_pkg_info_records(command_name, opts, args, adds):
 
     return ret
 
+
 def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
 
     """
@@ -1228,6 +1256,7 @@ def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
 
     return ret
 
+
 def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
 
     """
@@ -1243,6 +1272,7 @@ def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
     # TODO: ret is need to be made
 
     return 0
+
 
 def info_delete_pkg_info_records(command_name, opts, args, adds):
 
@@ -1273,6 +1303,7 @@ def info_delete_pkg_info_records(command_name, opts, args, adds):
 
     return ret
 
+
 def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
 
     """
@@ -1297,6 +1328,7 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
     ret = info_ctl.save_info_records_to_fs(mask, force)
 
     return ret
+
 
 def info_load_package_info_from_filesystem(command_name, opts, args, adds):
 
@@ -1337,6 +1369,7 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
 
     return ret
 
+
 def info_list_pkg_info_records(command_name, opts, args, adds):
 
     """
@@ -1359,6 +1392,7 @@ def info_list_pkg_info_records(command_name, opts, args, adds):
     info_ctl.get_info_records_list(mask)
 
     return 0
+
 
 def info_print_pkg_record(command_name, opts, args, adds):
 
@@ -1419,7 +1453,6 @@ def info_editor(command_name, opts, args, adds):
 
         if isinstance(file_name, str) and os.path.isfile(file_name):
 
-
             info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
             pkg_name = (
@@ -1445,6 +1478,7 @@ def info_editor(command_name, opts, args, adds):
         org.wayround.aipsetup.infoeditor.main(file_name, config)
 
     return ret
+
 
 def info_parse_tarball(command_name, opts, args, adds):
 
@@ -1503,7 +1537,6 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
     force = '-f' in opts
 
-
     script_name = None
 
     if len(args) > 0:
@@ -1521,7 +1554,6 @@ def info_mass_script_apply(command_name, opts, args, adds):
         ret = 2
 
     if ret == 0:
-
 
         info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
 
@@ -1565,6 +1597,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
     return ret
 
+
 def info_parse_pkg_name(command_name, opts, args, adds):
 
     """
@@ -1593,6 +1626,7 @@ def info_parse_pkg_name(command_name, opts, args, adds):
 
     return ret
 
+
 def load_info_tags(command_name, opts, args, adds):
 
     config = adds['config']
@@ -1603,6 +1637,7 @@ def load_info_tags(command_name, opts, args, adds):
 
     return 0
 
+
 def save_info_tags(command_name, opts, args, adds):
 
     config = adds['config']
@@ -1612,6 +1647,7 @@ def save_info_tags(command_name, opts, args, adds):
     tag_ctl.save_tags_to_fs()
 
     return 0
+
 
 def building_site_init(command_name, opts, args, adds):
 
@@ -1631,7 +1667,6 @@ def building_site_init(command_name, opts, args, adds):
     files = None
     if len(args) > 1:
         files = args[1:]
-
 
     bs = org.wayround.aipsetup.classes.bsite_ctl(init_dir)
 
@@ -1689,6 +1724,7 @@ def building_site_apply_info(command_name, opts, args, adds):
 
     return ret
 
+
 def build_build_plus(command_name, opts, args, adds):
 
     """
@@ -1698,8 +1734,8 @@ def build_build_plus(command_name, opts, args, adds):
 
     -b - set building site
 
-    if action name ends with + (plus) all remaining actions will be also started
-    (if not error will occur)
+    if action name ends with + (plus) all remaining actions will be also
+    started (if not error will occur)
     """
 
     config = adds['config']
@@ -1771,6 +1807,7 @@ def _build_complete_subroutine(
 
     return ret
 
+
 def build_complete(command_name, opts, args, adds):
 
     """
@@ -1825,7 +1862,6 @@ def build_complete(command_name, opts, args, adds):
         target = opts['--target']
 
     args_l = len(args)
-
 
     if args_l == 0:
 
@@ -1928,6 +1964,7 @@ def build_complete(command_name, opts, args, adds):
 
     return ret
 
+
 def build_full(command_name, opts, args, adds):
 
     """
@@ -2021,6 +2058,7 @@ def build_full(command_name, opts, args, adds):
 
     return ret
 
+
 def build_pack(command_name, opts, args, adds):
 
     """
@@ -2035,7 +2073,6 @@ def build_pack(command_name, opts, args, adds):
 
     dir_name = '.'
     args_l = len(args)
-
 
     if args_l > 1:
         logging.error("Too many parameters")
@@ -2070,14 +2107,12 @@ def build_build(command_name, opts, args, adds):
     dir_name = '.'
     args_l = len(args)
 
-
     if args_l > 1:
         logging.error("Too many parameters")
 
     else:
         if args_l == 1:
             dir_name = args[0]
-
 
         bs = org.wayround.aipsetup.classes.bsite_ctl(dir_name)
 
@@ -2088,7 +2123,6 @@ def build_build(command_name, opts, args, adds):
         ret = build_ctl.complete(buildscript_ctl)
 
     return ret
-
 
 
 def clean_packages_with_broken_files(command_name, opts, args, adds):
@@ -2130,7 +2164,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
         if isinstance(asp, dict):
 
-            problems[asp_name] = {'missing':[], 'broken':[]}
+            problems[asp_name] = {'missing': [], 'broken': []}
 
             files = list(asp.keys())
             fc = len(files)
@@ -2159,7 +2193,8 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
                 fi += 1
 
                 org.wayround.utils.file.progress_write(
-                    "    ({perc:5.2f}%) {p} packages of {pc}, {f} files of {fc}. found {b} broken, {m} missing".format(
+                    "    ({perc:5.2f}%) {p} packages of {pc}, {f} files of "
+                    "{fc}. found {b} broken, {m} missing".format(
                         perc=perc,
                         p=i,
                         pc=asps_c,
@@ -2172,7 +2207,10 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
     for i in list(problems.keys()):
 
-        if len(problems[i]['missing']) == 0 and len(problems[i]['broken']) == 0:
+        if (len(
+            problems[i]['missing']
+            ) == 0
+            and len(problems[i]['broken']) == 0):
             del problems[i]
 
     print()
@@ -2190,6 +2228,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
     logging.info("Log saved to {}".format(log_name))
 
     return 0
+
 
 def clean_check_elfs_readiness(command_name, opts, args, adds):
 
@@ -2216,6 +2255,7 @@ def clean_check_elfs_readiness(command_name, opts, args, adds):
     ret = system.check_elfs_readiness()
 
     return ret
+
 
 def clean_find_so_problems(command_name, opts, args, adds):
 
@@ -2253,7 +2293,6 @@ def clean_find_so_problems(command_name, opts, args, adds):
 
     print("Writing log to {}".format(log.log_filename))
 
-
     logging.info("Gathering asps file tree. Please wait...")
     tree = system.list_installed_asps_and_their_files(mute=False)
     logging.info("Now working")
@@ -2270,7 +2309,6 @@ def clean_find_so_problems(command_name, opts, args, adds):
 
         for j in files:
             log.info("    {}".format(j))
-
 
         pkgs2 = system.find_file_in_files_installed_by_asps(
             files, mode='end', mute=False, predefined_asp_tree=tree
@@ -2318,6 +2356,7 @@ def clean_find_so_problems(command_name, opts, args, adds):
 
     return ret
 
+
 def clean_find_old_packages(command_name, opts, args, adds):
 
     """
@@ -2347,15 +2386,17 @@ def clean_find_old_packages(command_name, opts, args, adds):
     res.sort()
 
     for i in res:
-        parsed_name = org.wayround.aipsetup.package_name_parser.package_name_parse(i)
+        parsed_name = \
+            org.wayround.aipsetup.package_name_parser.package_name_parse(i)
 
         if not parsed_name:
             logging.warning("Can't parse package name `{}'".format(i))
         else:
 
-            package_date = org.wayround.aipsetup.package_name_parser.parse_timestamp(
-                parsed_name['groups']['timestamp']
-                )
+            package_date = \
+                org.wayround.aipsetup.package_name_parser.parse_timestamp(
+                    parsed_name['groups']['timestamp']
+                    )
 
             if not package_date:
                 logging.error(
@@ -2367,13 +2408,13 @@ def clean_find_old_packages(command_name, opts, args, adds):
             else:
 
                 print(
-                    "    {:30}: {}: {}".format(
-                        datetime.datetime.now() - package_date,
-                        org.wayround.aipsetup.package_name_parser.parse_timestamp(
-                            parsed_name['groups']['timestamp']
-                            ),
-                        i
-                        )
+            "    {:30}: {}: {}".format(
+                datetime.datetime.now() - package_date,
+                org.wayround.aipsetup.package_name_parser.parse_timestamp(
+                    parsed_name['groups']['timestamp']
+                    ),
+                i
+                )
                       )
 
     return ret
@@ -2407,7 +2448,6 @@ def clean_find_invalid_deps_lists(command_name, opts, args, adds):
 
     for i in asps:
 
-
         asp_deps = system.load_asp_deps(i, mute=False)
 
         if not isinstance(asp_deps, dict):
@@ -2427,10 +2467,11 @@ def clean_find_invalid_deps_lists(command_name, opts, args, adds):
                     for k in asp_deps[j]:
                         if not isinstance(k, str):
                             logging.error(
-                                "{} has wrong dependencies list items for {}".format(i, j)
+                    "{} has wrong dependencies list items for {}".format(i, j)
                                 )
 
     return ret
+
 
 def clean_find_garbage(command_name, opts, args, adds):
 
@@ -2478,7 +2519,6 @@ def clean_find_garbage(command_name, opts, args, adds):
             os.getcwd(), 'system_garbage', timestamp=timestamp
             )
 
-
         if not script_type in ['bash']:
             logging.error("Invalid --script-type value")
             ret = 1
@@ -2495,7 +2535,6 @@ def clean_find_garbage(command_name, opts, args, adds):
                 basedir=basedir
                 )
 
-
             log.info("Searching for garbage")
             res = system.find_system_garbage(mute=False, only_lib=only_lib)
 
@@ -2505,7 +2544,10 @@ def clean_find_garbage(command_name, opts, args, adds):
             else:
 
                 log.info("Garbage search complete")
-                log.info("Separating garbage .so files to know which packages depending on them")
+                log.info(
+                    "Separating garbage .so files to know "
+                    "which packages depending on them"
+                    )
 
                 libs = org.wayround.utils.path.exclude_files_not_in_dirs(
                     res,
@@ -2530,27 +2572,36 @@ def clean_find_garbage(command_name, opts, args, adds):
 
                 for asp_name in list(asp_deps.keys()):
 
-
                     if not asp_name in asps_lkd_to_garbage:
                         asps_lkd_to_garbage[asp_name] = dict()
 
                     for file_name in list(asp_deps[asp_name].keys()):
 
-                        file_name_with_dest_dir = org.wayround.utils.path.insert_base(
-                            file_name, basedir
-                            )
+                        file_name_with_dest_dir = \
+                            org.wayround.utils.path.insert_base(
+                                file_name, basedir
+                                )
 
-                        if not file_name_with_dest_dir in asps_lkd_to_garbage[asp_name]:
-                            asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] = set()
+                        if (not file_name_with_dest_dir
+                            in asps_lkd_to_garbage[asp_name]):
+                            asps_lkd_to_garbage[
+                                asp_name
+                                ][file_name_with_dest_dir] = set()
 
-                        asps_lkd_to_garbage[asp_name][file_name_with_dest_dir] |= (set(libs) & set(asp_deps[asp_name][file_name]))
+                        asps_lkd_to_garbage[
+                            asp_name
+                            ][file_name_with_dest_dir] |= \
+                            (set(libs) & set(asp_deps[asp_name][file_name]))
 
-                        if len(asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]) == 0:
-                            del asps_lkd_to_garbage[asp_name][file_name_with_dest_dir]
+                        if len(
+                            asps_lkd_to_garbage[
+                                asp_name][file_name_with_dest_dir]
+                               ) == 0:
+                            del asps_lkd_to_garbage[
+                                    asp_name][file_name_with_dest_dir]
 
                     if len(asps_lkd_to_garbage[asp_name]) == 0:
                         del asps_lkd_to_garbage[asp_name]
-
 
                 s = open(script, 'w')
 
@@ -2622,7 +2673,9 @@ Wrong cleaning can ruin your system
     return ret
 
 
-def clean_check_list_of_installed_packages_and_asps_auto(command_name, opts, args, adds):
+def clean_check_list_of_installed_packages_and_asps_auto(
+    command_name, opts, args, adds
+    ):
 
     """
     Searches for packages with more when one asp installed
@@ -2657,6 +2710,7 @@ def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
     pprint.pprint(r)
 
     return 0
+
 
 def pkgdeps_print_asp_depends(command_name, opts, args, adds):
 
@@ -2713,7 +2767,6 @@ def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
     return 0
 
 
-
 def server_start_host(command_name, opts, args, adds):
 
     """
@@ -2739,6 +2792,7 @@ def server_start_host(command_name, opts, args, adds):
 
     return 0
 
+
 def package_check(command_name, opts, args, adds):
 
     """
@@ -2763,4 +2817,3 @@ def package_check(command_name, opts, args, adds):
         ret = asp_pkg.check_package()
 
     return ret
-

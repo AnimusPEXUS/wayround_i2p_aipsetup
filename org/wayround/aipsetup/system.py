@@ -134,18 +134,18 @@ class SystemCtl:
 
         This function works in two modes:
 
-            One mode, is when name is package name registered with package database
-            records. In this case, aipsetup finds latest asp package located in
-            package index directory and calls this(install_package) function with
-            ``name == 'full path to asp'``
+            One mode, is when name is package name registered with package
+            database records. In this case, aipsetup finds latest asp package
+            located in package index directory and calls this(install_package)
+            function with ``name == 'full path to asp'``
 
             Second mode, is when name is pointing on existing file. In this case
             next sequence is done:
 
                 #. install package using :func:`install_asp`
 
-                #. check whatever package is reducible, and if it is — reduce older
-                   asps from system using :func:`reduce_asps`
+                #. check whatever package is reducible, and if it is — reduce 
+                   older asps from system using :func:`reduce_asps`
 
         """
 
