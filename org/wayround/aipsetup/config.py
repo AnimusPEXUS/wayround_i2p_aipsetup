@@ -4,7 +4,12 @@ aipsetup configuration manipulations
 """
 
 import configparser
+import os.path
 
+import org.wayround.utils.path
+
+
+CUR_DIR = org.wayround.utils.path.abspath(os.path.dirname(__file__))
 
 DEFAULT_CONFIG = {
     'general': {
@@ -67,8 +72,11 @@ DEFAULT_CONFIG = {
         },
 
     'info_repo': {
-        'index_db_config': 'sqlite:////usr/lib/python3.3/site-packages/org/wayround/aipsetup/unicorn_distro/pkginfo.sqlite',
-#        'index_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkginfo.sqlite',
+        'index_db_config': 'sqlite:///{}'.format(
+            org.wayround.utils.path.join(
+                CUR_DIR, 'unicorn_distro', 'pkginfo.sqlite'
+                )
+            ),
         'dir':'/mnt/sda3/home/agu/_UNICORN/pkg_info',
         'tags_db_config': 'sqlite:////mnt/sda3/home/agu/_UNICORN/pkgtags.sqlite',
         'tags_json': '/mnt/sda3/home/agu/_UNICORN/tags.json',
