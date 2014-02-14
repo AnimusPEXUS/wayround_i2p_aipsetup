@@ -14,4 +14,4 @@
 /.settings
 /org/wayround/utils
 /aipsetup3.profile
-/org/wayround/aipsetup/unicorn_distro/pkginfo.sqlite
+/org/wayround/aipsetup/unicorn_distro/*.sqlite

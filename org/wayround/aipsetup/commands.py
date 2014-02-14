@@ -26,7 +26,8 @@ def commands():
     return {
 
     'config': {
-        'init': config_init
+        'init': config_init,
+        'print': config_print
         },
 
     'build': {
@@ -127,6 +128,28 @@ def config_init(command_name, opts, args, adds):
         )
 
     return 0
+
+
+def config_print(command_name, opts, args, adds):
+
+    import org.wayround.aipsetup.config
+    import io
+
+    config = adds['config']
+
+    b = io.StringIO()
+
+    config.write(b)
+
+    b.seek(0)
+
+    s = b.read()
+#    s = str(b.read(), 'utf-8')
+    b.close()
+
+    print(s)
+
+    return
 
 
 def test_test(command_name, opts, args, adds):
@@ -648,12 +671,10 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
     Perform scan and templates creation
     """
 
-    config = adds['config']
-
     ret = 0
 
     if pkg_repo_index(
-        config, opts={}, args=[], adds=adds
+        command_name, opts={}, args=[], adds=adds
         ) != 0:
 
         ret = 1
@@ -661,7 +682,7 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
     else:
 
         if info_find_missing_pkg_info_records(
-            config, opts={'-t': None}, args=[], adds=adds
+            command_name, opts={'-t': None}, args=[], adds=adds
             ) != 0:
 
             ret = 2
@@ -669,7 +690,7 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
         else:
 
             if info_load_package_info_from_filesystem(
-                config, opts={}, args=[], adds=adds
+                command_name, opts={}, args=[], adds=adds
                 ) != 0:
 
                 ret = 3

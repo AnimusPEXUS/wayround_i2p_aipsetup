@@ -11,7 +11,7 @@ import org.wayround.aipsetup.config
 import org.wayround.aipsetup.gtk
 import org.wayround.aipsetup.dbconnections
 
-config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.ini')
+config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
 
 commands = org.wayround.aipsetup.commands.commands()
 

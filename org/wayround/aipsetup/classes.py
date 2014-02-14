@@ -8,11 +8,12 @@ import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.system
 
+
 def pkg_repo_ctl(config):
 
-    repository_dir = config['package_repo']['dir']
     db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
 
+    repository_dir = config['package_repo']['dir']
     garbage_dir = config['package_repo']['garbage_dir']
 
     ret = org.wayround.aipsetup.repository.PackageRepoCtl(
@@ -21,17 +22,19 @@ def pkg_repo_ctl(config):
 
     return ret
 
+
 def src_repo_ctl(config):
 
+    database_connection = \
+        org.wayround.aipsetup.dbconnections.src_repo_db(config)
+
     sources_dir = config['sources_repo']['dir']
-    database_connection = org.wayround.aipsetup.dbconnections.src_repo_db(config)
-
-
     ret = org.wayround.aipsetup.repository.SourceRepoCtl(
         sources_dir, database_connection
         )
 
     return ret
+
 
 def info_ctl(config):
 
@@ -44,6 +47,7 @@ def info_ctl(config):
 
     return ret
 
+
 def sys_ctl(config, info_ctl, pkg_repo_ctl, basedir='/'):
 
     ret = org.wayround.aipsetup.system.SystemCtl(
@@ -52,11 +56,13 @@ def sys_ctl(config, info_ctl, pkg_repo_ctl, basedir='/'):
 
     return ret
 
+
 def bsite_ctl(path):
 
     ret = org.wayround.aipsetup.build.BuildingSiteCtl(path)
 
     return ret
+
 
 def build_ctl(bs):
 
@@ -64,11 +70,13 @@ def build_ctl(bs):
 
     return ret
 
+
 def pack_ctl(bs):
 
     ret = org.wayround.aipsetup.build.PackCtl(bs)
 
     return ret
+
 
 def bscript_ctl(config):
 
@@ -77,6 +85,7 @@ def bscript_ctl(config):
         )
 
     return ret
+
 
 def tag_ctl(config):
 
@@ -88,6 +97,7 @@ def tag_ctl(config):
         )
 
     return ret
+
 
 def constitution(config, host, target, build):
 
@@ -107,6 +117,7 @@ def constitution(config, host, target, build):
         ret.paths = dict(config['system_paths'])
 
     return ret
+
 
 def asp_package(asp_filename):
     return org.wayround.aipsetup.package.ASPackage(asp_filename)

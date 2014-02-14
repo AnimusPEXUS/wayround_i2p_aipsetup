@@ -205,7 +205,8 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
         org.wayround.utils.db.BasicDB.__init__(
             self,
             config,
-            echo=False
+            echo=False,
+            create_all=True
             )
 
         return

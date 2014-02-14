@@ -93,7 +93,8 @@ class PackageRepo(org.wayround.utils.db.BasicDB):
         org.wayround.utils.db.BasicDB.__init__(
             self,
             config,
-            echo=False
+            echo=False,
+            create_all=True
             )
 
         return
@@ -633,7 +634,8 @@ class PackageRepoCtl:
 
         category_locations_internal = copy.copy(category_locations)
 
-        del category_locations_internal['']
+        if '' in category_locations_internal:
+            del category_locations_internal['']
 
         index_db = self.db_connection
 

@@ -5,6 +5,8 @@ Global aipsetup database connection facility
 Allows minimize DB access requests
 """
 
+import logging
+
 _info_db_connection = None
 _pkg_repo_db_connection = None
 _latest_db_connection = None
@@ -21,11 +23,17 @@ def info_db(config):
     global _info_db_connection
 
     if not _info_db_connection:
+        logging.info(
+            "Getting info DB connection: {}".format(
+                config['info_repo']['index_db_config']
+                )
+            )
         _info_db_connection = org.wayround.aipsetup.info.PackageInfo(
             config['info_repo']['index_db_config']
             )
 
     return _info_db_connection
+
 
 def tag_db(config):
     """
@@ -36,11 +44,17 @@ def tag_db(config):
     global _tag_db_connection
 
     if not _tag_db_connection:
+        logging.info(
+            "Getting tag DB connection: {}".format(
+                config['info_repo']['tags_db_config']
+                )
+            )
         _tag_db_connection = org.wayround.aipsetup.info.Tags(
             config['info_repo']['tags_db_config']
             )
 
     return _tag_db_connection
+
 
 def pkg_repo_db(config):
     """
@@ -51,11 +65,17 @@ def pkg_repo_db(config):
     global _pkg_repo_db_connection
 
     if not _pkg_repo_db_connection:
+        logging.info(
+            "Getting repo DB connection: {}".format(
+                config['package_repo']['index_db_config']
+                )
+            )
         _pkg_repo_db_connection = org.wayround.aipsetup.repository.PackageRepo(
             config['package_repo']['index_db_config']
             )
 
     return _pkg_repo_db_connection
+
 
 def src_repo_db(config):
     """
@@ -66,12 +86,16 @@ def src_repo_db(config):
     global _src_repo_db_connection
 
     if not _src_repo_db_connection:
+        logging.info(
+            "Getting repo DB connection: {}".format(
+                config['sources_repo']['index_db_config']
+                )
+            )
         _src_repo_db_connection = org.wayround.aipsetup.repository.SourceRepo(
             config['sources_repo']['index_db_config']
             )
 
     return _src_repo_db_connection
-
 
 
 def close_all():
