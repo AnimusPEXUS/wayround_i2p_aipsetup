@@ -35,7 +35,8 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
-        source_configure_reldir = 'src'
+        source_configure_reldir = '.'
+#        source_configure_reldir = 'src'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):

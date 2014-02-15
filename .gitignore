@@ -12,6 +12,7 @@
 /.pydevproject
 /.project
 /.settings
+/dist
 /org/wayround/utils
 /aipsetup3.profile
 /org/wayround/aipsetup/unicorn_distro/*.sqlite

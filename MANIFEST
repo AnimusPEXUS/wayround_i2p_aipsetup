@@ -34,7 +34,10 @@ org/wayround/aipsetup/ui/info_edit.glade
 org/wayround/aipsetup/ui/latest_edit.glade
 org/wayround/aipsetup/ui/main_loop.glade
 org/wayround/aipsetup/ui/tag_edit.glade
+org/wayround/aipsetup/unicorn_distro/pkgindex.sqlite
 org/wayround/aipsetup/unicorn_distro/pkginfo.sqlite
+org/wayround/aipsetup/unicorn_distro/pkgtags.sqlite
+org/wayround/aipsetup/unicorn_distro/sources.sqlite
 org/wayround/aipsetup/unicorn_distro/tags.json
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/Cg.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/ConsoleKit.py
@@ -120,6 +123,7 @@ org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/icedtea.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/icedtea_web.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/icu4c.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/inetutils.py
+org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/inn.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/ipsec_tools.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/jabberd2.py
 org/wayround/aipsetup/unicorn_distro/pkg_buildscripts/jack.py
@@ -849,6 +853,7 @@ org/wayround/aipsetup/unicorn_distro/pkg_info/indent.json
 org/wayround/aipsetup/unicorn_distro/pkg_info/indri.json
 org/wayround/aipsetup/unicorn_distro/pkg_info/inetutils.json
 org/wayround/aipsetup/unicorn_distro/pkg_info/inkscape.json
+org/wayround/aipsetup/unicorn_distro/pkg_info/inn.json
 org/wayround/aipsetup/unicorn_distro/pkg_info/inputproto.json
 org/wayround/aipsetup/unicorn_distro/pkg_info/intel-gpu-tools.json
 org/wayround/aipsetup/unicorn_distro/pkg_info/intltool.json
