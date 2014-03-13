@@ -6,7 +6,7 @@ from distutils.core import setup
 
 setup(
     name='aipsetup',
-    version='3.0.108',
+    version='3.0.109',
     description='aipsetup software packaging system',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',

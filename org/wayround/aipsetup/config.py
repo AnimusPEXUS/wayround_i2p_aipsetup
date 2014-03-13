@@ -29,7 +29,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
 
     ('system_settings', collections.OrderedDict([
         ('system_title', 'UNICORN'),
-        ('system_version', '2.0'),
+        ('system_version', '3.0'),
 
         ('installed_pkg_dir', '/var/log/packages'),
 
@@ -66,7 +66,20 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ])
      ),
 
-    ('package_repo', collections.OrderedDict([
+    ('src_tarball_server', collections.OrderedDict([
+        ('host', 'localhost'),
+        ('port', '8080'),
+        ('working_dir', '/mnt/sda3/home/agu/_UNICORN_SOURCES'),
+        ('tarball_repository_root', '${working_dir}/pkg_source'),
+        ('src_index_db_config', 'sqlite:///${working_dir}/src_index.sqlite'),
+        ('xmpp_account', ''),
+        ('xmpp_password', ''),
+        ('acceptable_src_file_extensions',
+            '${general:acceptable_src_file_extensions}')
+        ])
+     ),
+
+    ('server_package_repo', collections.OrderedDict([
         ('base_dir', '${general:distro_buildout_dir}'),
         ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
         ('dir', '${base_dir}/pkg_repository'),
@@ -75,7 +88,16 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ])
      ),
 
-    ('sources_repo', collections.OrderedDict([
+    ('designer_settings', collections.OrderedDict([
+        ('base_dir', '${general:distro_buildout_dir}'),
+        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
+        ('dir', '${base_dir}/pkg_repository'),
+        ('snapshots_dir', '${base_dir}/snapshots'),
+        ('garbage_dir', '${base_dir}/garbage')
+        ])
+     ),
+
+    ('server_sources_repo', collections.OrderedDict([
         ('base_dir', '${general:distro_buildout_dir}'),
         ('index_db_config', 'sqlite:///${base_dir}/sources.sqlite'),
         ('dir', '${base_dir}/pkg_source')

@@ -14,6 +14,7 @@ import org.wayround.aipsetup.info
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.version
 import org.wayround.aipsetup.package_name_parser
+import org.wayround.aipsetup.server_src
 
 
 import org.wayround.utils.path
@@ -112,6 +113,11 @@ def commands():
         'getl': src_repo_get_latest_tarball,
         'getc': src_repo_get_latest_tarball_categorised,
         'reg_check': src_repo_check_registartions
+        },
+
+    'src_server': {
+        'start': org.wayround.aipsetup.server_src.src_server_start,
+        'reindex': org.wayround.aipsetup.server_src.src_server_reindex,
         }
     }
 

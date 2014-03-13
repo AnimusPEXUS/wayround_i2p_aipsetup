@@ -1,16 +1,11 @@
 
 import os.path
-import logging
-import time
-import functools
-import urllib.parse
 
 import mako.template
 
 
 import org.wayround.utils.path
 import org.wayround.utils.mako_filters
-
 
 
 class UI:
@@ -89,4 +84,3 @@ class UI:
             tags=tags,
             asp_list=asp_list,
             )
-

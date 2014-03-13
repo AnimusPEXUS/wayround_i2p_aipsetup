@@ -11,6 +11,7 @@ import org.wayround.aipsetup.serverui
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'
 
+
 class AipsetupASPServer:
 
     def __init__(
@@ -40,7 +41,6 @@ class AipsetupASPServer:
         self.info_ctl = info_ctl
         self.tag_ctl = tag_ctl
 
-
         self.ui = org.wayround.aipsetup.serverui.UI(templates_dir)
 
         self.app = bottle.Bottle()
@@ -55,7 +55,9 @@ class AipsetupASPServer:
         self.app.route('/category/<path:path>', 'GET', self.category)
         self.app.route('/package/<name>', 'GET', self.package)
 
-        self.app.route('/package/<name>/asps/<name2>', 'GET', self.download_pkg)
+        self.app.route(
+            '/package/<name>/asps/<name2>', 'GET', self.download_pkg
+            )
 
         return
 
@@ -83,7 +85,9 @@ class AipsetupASPServer:
                 )
             )
 
-        if not filename.startswith(self.config['package_repo']['dir'] + os.path.sep):
+        if not filename.startswith(
+            self.config['package_repo']['dir'] + os.path.sep
+            ):
             raise bottle.HTTPError(404, "Wrong package name `{}'".format(name))
 
         if not os.path.isfile(filename):
@@ -135,7 +139,6 @@ class AipsetupASPServer:
                     cat_id
                     )
 
-
                 parent_path = self.pkg_repo_ctl.get_category_path_string(
                     parent_id
                     )
@@ -153,14 +156,13 @@ class AipsetupASPServer:
                 cat_id
                 )
 
-
             for i in cats_ids:
                 categories.append(
                     {'path':
                         self.pkg_repo_ctl.get_category_path_string(
                             i
                             ),
-                     'name':self.pkg_repo_ctl.get_category_by_id(
+                     'name': self.pkg_repo_ctl.get_category_by_id(
                             i
                             )
                     }
@@ -179,7 +181,6 @@ class AipsetupASPServer:
                 title="Category: '{}'".format(path),
                 body=txt
                 )
-
 
         elif mode == 'json':
 
@@ -248,7 +249,9 @@ class AipsetupASPServer:
 
             pkg_info = self.info_ctl.get_package_info_record(name)
 
-            keys = set(org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
+            keys = set(
+                org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
+                )
 
             rows = []
 
@@ -258,7 +261,6 @@ class AipsetupASPServer:
                 ]:
                 if i in keys:
                     keys.remove(i)
-
 
             for i in keys:
                 rows.append(
@@ -273,7 +275,6 @@ class AipsetupASPServer:
                 category = self.pkg_repo_ctl.get_category_path_string(cid)
             else:
                 category = "< Package not indexed! >"
-
 
             tag_db = self.tag_ctl.tag_db
             tags = tag_db.get_tags(name)
@@ -298,9 +299,10 @@ class AipsetupASPServer:
                         )
                     )
 
-                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                    base
-                    )
+                parsed = org.wayround.aipsetup.package_name_parser.\
+                    package_name_parse(
+                        base
+                        )
 
                 files.append(
                     {'basename': base,

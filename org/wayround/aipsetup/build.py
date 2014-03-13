@@ -7,24 +7,22 @@ This module provides functions for building package using building script (see
 building scripts)
 """
 
+import copy
+import json
 import logging
 import os
-import tempfile
 import pprint
-import subprocess
 import shutil
-import json
-import copy
-import re
+import subprocess
+import tempfile
 
-
-import org.wayround.aipsetup.info
 import org.wayround.aipsetup.classes
-
+import org.wayround.aipsetup.info
+import org.wayround.utils.format.elf
 import org.wayround.utils.path
+import org.wayround.utils.system_type
 import org.wayround.utils.tarball_name_parser
 import org.wayround.utils.time
-import org.wayround.utils.format.elf
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -129,6 +127,7 @@ APPLY_DESCR = """\
     in  this order by function :func:`apply_info`
 """
 
+
 class Constitution:
 
     def __init__(
@@ -138,9 +137,9 @@ class Constitution:
         target_str='i486-pc-linux-gnu'
         ):
 
-        self.host = SystemType(host_str)
-        self.build = SystemType(build_str)
-        self.target = SystemType(target_str)
+        self.host = org.wayround.utils.system_type.SystemType(host_str)
+        self.build = org.wayround.utils.system_type.SystemType(build_str)
+        self.target = org.wayround.utils.system_type.SystemType(target_str)
 
         self.paths = {}
 
@@ -151,8 +150,9 @@ class Constitution:
             'target': str(self.target),
             'paths': copy.copy(self.paths),
             'system_title': 'UNICORN',
-            'system_version': '2.0'
+            'system_version': '3.0'
             }
+
 
 class BuildCtl:
 
@@ -173,7 +173,6 @@ class BuildCtl:
         self.buildingsite_ctl = buildingsite_ctl
         self.path = org.wayround.utils.path.abspath(buildingsite_ctl.path)
 
-
     def complete(self, buildscript_ctl):
         """
         Run all building script commands on selected building site
@@ -182,16 +181,15 @@ class BuildCtl:
         """
         return self.start_building_script(buildscript_ctl, action=None)
 
-
     def start_building_script(self, buildscript_ctl, action=None):
         """
         Run selected action on building site using particular building script.
 
         :param building_site: path to building site directory
 
-        :param action: can be None or concrete name of action in building script.
-            if action name ends with + (plus) all remaining actions will be also
-            started (if not error will occur)
+        :param action: can be None or concrete name of action in building
+            script. if action name ends with + (plus) all remaining actions
+            will be also started (if not error will occur)
 
         :rtype: 0 - if no error occurred
         """
@@ -243,10 +241,11 @@ class BuildCtl:
                         )
                     ret = 3
 
-                logging.info("action `{}' ended with code {}".format(action, ret));
+                logging.info(
+                    "action `{}' ended with code {}".format(action, ret)
+                    )
 
         return ret
-
 
 
 class PackCtl:
@@ -274,8 +273,8 @@ class PackCtl:
         Check for forbidden files in destdir
 
         Files ``['bin', 'sbin', 'lib', 'lib64', 'mnt']`` are forbidden to be in
-        DESTDIR root. This is a rule for aipsetup based distributions. Except is
-        special cases, when this function is avoided.
+        DESTDIR root. This is a rule for aipsetup based distributions. Except
+        is special cases, when this function is avoided.
         """
 
         # TODO: Maybe this function need to be rewritten to be more
@@ -304,9 +303,9 @@ class PackCtl:
         """
         Ensure all files (and dirs) in DESTDIR have ``0o755`` mode.
 
-        If You interested in defferent modes for files after package installation,
-        read about post_install.py (script, which need to be placed in package and
-        will be executed after package installation)
+        If You interested in defferent modes for files after package
+        installation, read about post_install.py (script, which need to be
+        placed in package and will be executed after package installation)
 
         .. TODO: link to info about post_install.py
         """
@@ -336,7 +335,6 @@ class PackCtl:
             ret = 1
 
         return ret
-
 
     def destdir_checksum(self):
         """
@@ -376,7 +374,6 @@ class PackCtl:
                 )
 
         return ret
-
 
     def destdir_filelist(self):
         """
@@ -436,7 +433,6 @@ class PackCtl:
                 f.close()
 
         return ret
-
 
     def destdir_deps_bin(self):
 
@@ -503,13 +499,16 @@ class PackCtl:
                     file_list_i += 1
 
                     org.wayround.utils.file.progress_write(
-                        "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".format_map(
-                            {
-                                'perc': 100 / (float(file_list_l) / file_list_i),
-                                'elfs': elfs,
-                                'n_elfs': n_elfs
-                                }
-                            )
+                        "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".\
+                            format_map(
+                                {
+                                    'perc':
+                                        (100 /
+                                         (float(file_list_l) / file_list_i)),
+                                    'elfs': elfs,
+                                    'n_elfs': n_elfs
+                                    }
+                                )
                         )
 
                 org.wayround.utils.file.progress_write_finish()
@@ -686,7 +685,9 @@ class PackCtl:
                 try:
                     os.unlink(filename)
                 except:
-                    logging.exception("Can't remove file `{}'".format(filename))
+                    logging.exception(
+                        "Can't remove file `{}'".format(filename)
+                        )
                     ret = 1
 
         return ret
@@ -747,11 +748,11 @@ class PackCtl:
 
         return ret
 
-
     def pack_buildingsite(self):
 
         """
-        Create new package from building site and place it under ../pack deirectory
+        Create new package from building site and place it under ../pack
+        deirectory
         """
 
         ret = 0
@@ -779,12 +780,16 @@ class PackCtl:
 
             pack_file_name = os.path.join(
                 pack_dir,
-                "({pkgname})-({version})-({status})-({timestamp})-({hostinfo}).asp".format_map(
+                "({pkgname})-({version})-({status})-"
+                "({timestamp})-({hostinfo}).asp".format_map(
                     {
                         'pkgname': package_info['pkg_info']['name'],
-                        'version': package_info['pkg_nameinfo']['groups']['version'],
-                        'status': package_info['pkg_nameinfo']['groups']['status'],
-                        'timestamp': org.wayround.utils.time.currenttime_stamp(),
+                        'version':
+                            package_info['pkg_nameinfo']['groups']['version'],
+                        'status':
+                            package_info['pkg_nameinfo']['groups']['status'],
+                        'timestamp':
+                            org.wayround.utils.time.currenttime_stamp(),
                         'hostinfo': package_info['constitution']['host'],
                         }
                     )
@@ -895,7 +900,6 @@ class PackCtl:
                 )
             )
 
-
         post_install_script = org.wayround.utils.path.join(
             building_site, 'post_install.py'
             )
@@ -914,7 +918,6 @@ class PackCtl:
                     DIR_TARBALL, i
                     )
                 )
-
 
         lists = os.listdir(
             self.buildingsite_ctl.getDIR_LISTS()
@@ -937,28 +940,32 @@ class BuildingSiteCtl:
     def __init__(self, path):
         self.path = org.wayround.utils.path.abspath(path)
 
-    def _getDIR_x(self, _x='TARBALL'):
-        '''
-        Returns absolute path to DIR_{_x}
+    def getDIR_TARBALL(self):
+        return getDIR_TARBALL(self.path)
 
-        note: this method is generated dinamicly
-        '''
+    def getDIR_SOURCE(self):
+        return getDIR_SOURCE(self.path)
 
-        return _getDIR_x(self.path, _x)
+    def getDIR_PATCHES(self):
+        return getDIR_PATCHES(self.path)
 
+    def getDIR_BUILDING(self):
+        return getDIR_BUILDING(self.path)
 
-    def getDIR_TARBALL   (self): return self._getDIR_x('TARBALL')
-    def getDIR_SOURCE    (self): return self._getDIR_x('SOURCE')
-    def getDIR_PATCHES   (self): return self._getDIR_x('PATCHES')
-    def getDIR_BUILDING  (self): return self._getDIR_x('BUILDING')
-    def getDIR_DESTDIR   (self): return self._getDIR_x('DESTDIR')
-    def getDIR_BUILD_LOGS(self): return self._getDIR_x('BUILD_LOGS')
-    def getDIR_LISTS     (self): return self._getDIR_x('LISTS')
-    def getDIR_TEMP      (self): return self._getDIR_x('TEMP')
+    def getDIR_DESTDIR(self):
+        return getDIR_DESTDIR(self.path)
+
+    def getDIR_BUILD_LOGS(self):
+        return getDIR_BUILD_LOGS(self.path)
+
+    def getDIR_LISTS(self):
+        return getDIR_LISTS(self.path)
+
+    def getDIR_TEMP(self):
+        return getDIR_TEMP(self.path)
 
     def isWdDirRestricted(self):
         return isWdDirRestricted(self.path)
-
 
     def init(self, info_ctl, files=None):
 #, system_type=None
@@ -999,13 +1006,14 @@ class BuildingSiteCtl:
                 )
             ret = -1
 
-
         # if exists and not derictory - not continue
         if ret == 0:
 
             if ((os.path.exists(path))
                 and not os.path.isdir(path)):
-                logging.error("File already exists and it is not a building site")
+                logging.error(
+                    "File already exists and it is not a building site"
+                    )
                 ret = -2
 
         if ret == 0:
@@ -1057,13 +1065,13 @@ class BuildingSiteCtl:
 
         return ret
 
-
     def read_package_info(self, ret_on_error=None):
 
         """
         Reads package info applied to building site
 
-        :rtype: ``ret_on_error`` parameter contents on error (``None`` by default)
+        :rtype: ``ret_on_error`` parameter contents on error (``None`` by
+            default)
         """
 
         path = org.wayround.utils.path.abspath(self.path)
@@ -1117,13 +1125,20 @@ class BuildingSiteCtl:
             f = open(package_information_filename, 'w')
         except:
             raise Exception(
-                "Can't open `{}' for writing".format(package_information_filename)
+                "Can't open `{}' for writing".format(
+                    package_information_filename
+                    )
                 )
         else:
             try:
                 txt = ''
                 try:
-                    txt = json.dumps(info, allow_nan=True, indent=2, sort_keys=True)
+                    txt = json.dumps(
+                        info,
+                        allow_nan=False,
+                        indent=2,
+                        sort_keys=True
+                        )
                 except:
                     raise ValueError("Can't represent data for package info")
                 else:
@@ -1161,7 +1176,6 @@ class BuildingSiteCtl:
 
         return ret
 
-
     def apply_pkg_nameinfo_on_buildingsite(self, filename):
 
         """
@@ -1176,9 +1190,8 @@ class BuildingSiteCtl:
 
         base = os.path.basename(filename)
 
-        parse_result = org.wayround.utils.tarball_name_parser.parse_tarball_name(
-            base
-            )
+        parse_result = \
+            org.wayround.utils.tarball_name_parser.parse_tarball_name(base)
 
         if not isinstance(parse_result, dict):
             logging.error("Can't correctly parse file name")
@@ -1222,7 +1235,6 @@ class BuildingSiteCtl:
 
     apply_constitution_on_buildingsite.__doc__ += APPLY_DESCR
 
-
     def apply_pkg_info_on_buildingsite(self, info_ctl):
 
         """
@@ -1249,10 +1261,14 @@ class BuildingSiteCtl:
             or not 'groups' in package_info['pkg_nameinfo']
             or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
             or not 'name' in package_info['pkg_nameinfo']['groups']
-            or not isinstance(package_info['pkg_nameinfo']['groups']['name'], str)
+            or not isinstance(
+                package_info['pkg_nameinfo']['groups']['name'], str
+                )
             ):
 
-            logging.error("package_info['pkg_nameinfo']['groups'] undetermined")
+            logging.error(
+                "package_info['pkg_nameinfo']['groups'] undetermined"
+                )
             package_info['pkg_info'] = {}
             ret = 1
 
@@ -1280,7 +1296,6 @@ class BuildingSiteCtl:
         return ret
 
     apply_pkg_info_on_buildingsite.__doc__ += APPLY_DESCR
-
 
     def apply_info(self, info_ctl, const, src_file_name=None):
         """
@@ -1382,11 +1397,13 @@ class BuildingSiteCtl:
         ):
 
         """
-        Applies package information on building site, does building and packaging
-        and optionally deletes building site after everything is done.
+        Applies package information on building site, does building and
+        packaging and optionally deletes building site after everything is
+        done.
 
         :param main_src_file: used with function
-            :func:`buildingsite.apply_info <org.wayround.aipsetup.buildingsite.apply_info>`
+            :func:`buildingsite.apply_info
+            <org.wayround.aipsetup.buildingsite.apply_info>`
         """
 
         if not isinstance(const, Constitution):
@@ -1397,7 +1414,8 @@ class BuildingSiteCtl:
 
         if not isinstance(build_ctl, BuildCtl):
             raise ValueError(
-                "build_ctl must be of type org.wayround.aipsetup.build.BuildCtl"
+                "build_ctl must be of type "
+                "org.wayround.aipsetup.build.BuildCtl"
                 )
 
         if not isinstance(pack_ctl, PackCtl):
@@ -1423,7 +1441,8 @@ class BuildingSiteCtl:
         rp = org.wayround.utils.path.relpath(self.path, os.getcwd())
 
         logging.info(
-            "+++++++++++ Starting Complete build in `{}' +++++++++++".format(rp)
+            "+++++++++++ Starting Complete build under `{}' +++++++++++".\
+                format(rp)
             )
 
         building_site = org.wayround.utils.path.abspath(self.path)
@@ -1445,7 +1464,7 @@ class BuildingSiteCtl:
                 info_ctl,
                 const,
                 main_src_file
-                ) != 0 :
+                ) != 0:
                 logging.error("Can't apply build information to site")
                 ret = 15
 
@@ -1480,13 +1499,17 @@ class BuildingSiteCtl:
                 try:
                     shutil.rmtree(building_site)
                 except:
-                    logging.exception("Could not remove `{}'".format(building_site))
+                    logging.exception(
+                        "Could not remove `{}'".format(building_site)
+                        )
 
         logging.info(
-            "+++++++++++ Finished Complete build in `{}' +++++++++++".format(rp)
+            "+++++++++++ Finished Complete build under `{}' +++++++++++".\
+                format(rp)
             )
 
         return ret
+
 
 class BuildScriptCtrl:
 
@@ -1494,11 +1517,10 @@ class BuildScriptCtrl:
 
         self.dirname = dirname
 
-
     def load_buildscript(self, name):
         """
-        Loads building script with exec function and returns it's global dictionary.
-        ``None`` is returned in case of error.
+        Loads building script with exec function and returns it's global
+        dictionary. ``None`` is returned in case of error.
         """
 
         ret = None
@@ -1558,7 +1580,8 @@ class BuildScriptCtrl:
                         ret = globals_dict
                     except:
                         logging.exception(
-                            "Error while calling for build_script() from `{}'".format(
+                            "Error while calling "
+                            "for build_script() from `{}'".format(
                                 buildscript_filename
                                 )
                             )
@@ -1574,67 +1597,13 @@ class BuildScriptCtrl:
         return ret
 
 
-class SystemTypeInvalidFullName(Exception): pass
-class SystemType:
-
-    def __init__(self, fullname=None, cpu='i486', company='pc', kernel='linux', os='gnu'):
-
-
-        self.fullname = fullname
-
-        if isinstance(self.fullname, str):
-
-            self._sane(self.fullname)
-
-        else:
-            self.cpu = cpu
-            self.company = company
-            self.os = os
-            self.kernel = kernel
-
-            self._sane(
-                format_triplet(
-                    cpu=cpu, company=company, kernel=kernel, os=os
-                    )
-                )
-
-        return
-
-    def _sane(self, string):
-
-        if not isinstance(string, str):
-            raise SystemTypeInvalidFullName(
-                "Not valid fullname type: {}".format(type(string))
-                )
-
-        res = parse_triplet(string)
-
-        if not res:
-            raise SystemTypeInvalidFullName(
-                "Not valid fullname: {}".format(string)
-                )
-        else:
-            self.cpu = res[0]
-            self.company = res[1]
-            self.kernel = res[2]
-            self.os = res[3]
-            self.fullname = res[4]
-
-        return
-
-    def __str__(self):
-        return self.fullname
-
-
-def _getDIR_x(path, _x='TARBALL'):
+def getDIR_x(path, _x='TARBALL'):
     '''
     Returns absolute path to DIR_{_x}
-
-    note: this method is generated dinamicly
     '''
 
     ret = org.wayround.utils.path.abspath(
-        os.path.join(
+        org.wayround.utils.path.join(
             path,
             eval('DIR_{}'.format(_x)))
         )
@@ -1642,14 +1611,36 @@ def _getDIR_x(path, _x='TARBALL'):
     return ret
 
 
-def getDIR_TARBALL   (path): return _getDIR_x(path, 'TARBALL')
-def getDIR_SOURCE    (path): return _getDIR_x(path, 'SOURCE')
-def getDIR_PATCHES   (path): return _getDIR_x(path, 'PATCHES')
-def getDIR_BUILDING  (path): return _getDIR_x(path, 'BUILDING')
-def getDIR_DESTDIR   (path): return _getDIR_x(path, 'DESTDIR')
-def getDIR_BUILD_LOGS(path): return _getDIR_x(path, 'BUILD_LOGS')
-def getDIR_LISTS     (path): return _getDIR_x(path, 'LISTS')
-def getDIR_TEMP      (path): return _getDIR_x(path, 'TEMP')
+def getDIR_TARBALL(path):
+    return getDIR_x(path, 'TARBALL')
+
+
+def getDIR_SOURCE(path):
+    return getDIR_x(path, 'SOURCE')
+
+
+def getDIR_PATCHES(path):
+    return getDIR_x(path, 'PATCHES')
+
+
+def getDIR_BUILDING(path):
+    return getDIR_x(path, 'BUILDING')
+
+
+def getDIR_DESTDIR(path):
+    return getDIR_x(path, 'DESTDIR')
+
+
+def getDIR_BUILD_LOGS(path):
+    return getDIR_x(path, 'BUILD_LOGS')
+
+
+def getDIR_LISTS(path):
+    return getDIR_x(path, 'LISTS')
+
+
+def getDIR_TEMP(path):
+    return getDIR_x(path, 'TEMP')
 
 
 def build_script_wrap(buildingsite, desired_actions, action, help_text):
@@ -1659,11 +1650,12 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
     :param buildingsite: path to building site
     :param desired_actions: list of possible actions
     :param action: action selected by building script user
-    :param help_text: if action == 'help', help_text is text to show before list
-        of available actions
+    :param help_text: if action == 'help', help_text is text to show before
+        list of available actions
     :rtype: ``int`` if error. ``tuple`` (package_info, actions), where
         ``package_info`` is package info readen from building site package info
-        file, ``actions`` - list of actions, needed to be run by building script
+        file, ``actions`` - list of actions, needed to be run by building
+        script
     """
 
     bs = BuildingSiteCtl(buildingsite)
@@ -1713,15 +1705,17 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
 
     return ret
 
+
 def build_actions_selector(actions, action):
+
     """
     Used by :func:`build_script_wrap` to build it's valid return action list
 
-    :rtype: ``None`` if error. tuple (actions, action), where ``action = None`` if
-        ``action == 'complete'``. If ``action == 'help'``, both values returned
-        without changes. If action is one of actions, ``actions = [action]``. If
-        action is one of actions and action ends with + sign, ``actions =
-        actions[(action position):]``
+    :rtype: ``None`` if error. tuple (actions, action), where ``action = None``
+        if ``action == 'complete'``. If ``action == 'help'``, both values
+        returned without changes. If action is one of actions, ``actions =
+        [action]``. If action is one of actions and action ends with + sign,
+        ``actions = actions[(action position):]``
     """
 
     ret = None
@@ -1765,6 +1759,7 @@ def build_actions_selector(actions, action):
 
     return ret
 
+
 def isWdDirRestricted(path):
     """
     This function is a routine to check supplied path is it suitable to be a
@@ -1790,7 +1785,7 @@ def isWdDirRestricted(path):
     ret = False
 
     dirs_begining_with = [
-        '/bin', '/boot' , '/daemons',
+        '/bin', '/boot', '/daemons',
         '/dev', '/etc', '/lib', '/proc',
         '/sbin', '/sys',
         '/usr'
@@ -1824,8 +1819,8 @@ def build(
     """
     Gathering function for all package building process
 
-    Uses :func:`org.wayround.aipsetup.buildingsite.init` to create building site.
-    Farther process controlled by :func:`complete`.
+    Uses :func:`org.wayround.aipsetup.buildingsite.init` to create building
+    site. Farther process controlled by :func:`complete`.
 
     :param source_files: tarball name or list of them.
     """
@@ -1852,7 +1847,9 @@ def build(
             try:
                 os.makedirs(buildingsites_dir)
             except:
-                logging.error("Can't create directory: {}".format(buildingsites_dir))
+                logging.error(
+                    "Can't create directory: {}".format(buildingsites_dir)
+                    )
 
         if not os.path.isdir(buildingsites_dir):
             logging.error("Directory not exists: {}".format(buildingsites_dir))
@@ -1877,15 +1874,16 @@ def build(
                 ret = 2
             else:
 
-
-                tmp_dir_prefix = "{name}-{version}-{status}-{timestamp}-".format_map(
-                    {
-                        'name': package_info['name'],
-                        'version': par_res['groups']['version'],
-                        'status': par_res['groups']['status'],
-                        'timestamp': org.wayround.utils.time.currenttime_stamp()
-                        }
-                    )
+                tmp_dir_prefix = \
+                    "{name}-{version}-{status}-{timestamp}-".format_map(
+                        {
+                            'name': package_info['name'],
+                            'version': par_res['groups']['version'],
+                            'status': par_res['groups']['status'],
+                            'timestamp':
+                                org.wayround.utils.time.currenttime_stamp()
+                            }
+                        )
 
                 build_site_dir = tempfile.mkdtemp(
                     prefix=tmp_dir_prefix,
@@ -1893,7 +1891,6 @@ def build(
                     )
 
                 bs = org.wayround.aipsetup.classes.bsite_ctl(build_site_dir)
-
 
                 if bs.init(info_ctl, source_files) != 0:
                     logging.error("Error initiating temporary dir")
@@ -1903,7 +1900,8 @@ def build(
                     build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
                     pack_ctl = org.wayround.aipsetup.classes.pack_ctl(bs)
 
-                    buildscript_ctl = org.wayround.aipsetup.classes.bscript_ctl(config)
+                    buildscript_ctl = \
+                        org.wayround.aipsetup.classes.bscript_ctl(config)
 
                     if bs.complete(
                         build_ctl,
@@ -1912,87 +1910,21 @@ def build(
                         info_ctl,
                         source_files[0],
                         const=const,
-                        remove_buildingsite_after_success=remove_buildingsite_after_success
+                        remove_buildingsite_after_success=
+                            remove_buildingsite_after_success
                         ) != 0:
 
                         logging.error("Package building failed")
                         ret = 5
 
                     else:
-                        logging.info("Complete package building ended with no error")
+                        logging.info(
+                            "Complete package building ended with no error"
+                            )
                         ret = 0
 
     return ret
 
-
-def format_triplet(cpu='i486', company='pc', kernel='linux', os='gnu'):
-
-    system = os
-
-    if kernel:
-        system = kernel + '-' + system
-
-    return '{cpu}-{company}-{system}'.format(
-        cpu=cpu,
-        company=company,
-        system=system
-        )
-
-
-def parse_triplet(string):
-    """
-    Parse constitution triplet (``(.*?)-(.*?)-(.*)``), and return 3-tuple
-
-    cpu-company-system
-
-    where system can have one of these forms:
-
-     os
-     kernel-os
-
-    """
-
-    ret = None
-
-    wd = os.path.dirname(org.wayround.utils.path.abspath(__file__))
-
-    p = subprocess.Popen(
-        ['bash',
-         os.path.join(wd, 'config.sub'),
-         string
-         ],
-        cwd=wd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL
-        )
-
-    res = p.wait()
-
-    if res != 0:
-        ret = None
-    else:
-        com_res = p.communicate()
-
-        out = str(com_res[0].splitlines()[0].strip(), 'utf-8')
-
-        a = re.match(r'(?P<cpu>.*?)-(?P<company>.*?)-(?P<system>.*)', out)
-        if a:
-
-            system = a.group('system')
-
-            b = re.match(r'((?P<kernel>.*?)-)?(?P<os>.*)', system)
-
-            if b:
-
-                ret = (
-                    a.group('cpu'),
-                    a.group('company'),
-                    b.group('kernel'),
-                    b.group('os'),
-                    out
-                    )
-
-    return ret
 
 
 # TODO: clean up this garbage

@@ -4,6 +4,7 @@ Facility for indexing and analyzing sources and packages repository
 """
 
 import copy
+import datetime
 import fnmatch
 import functools
 import glob
@@ -11,20 +12,18 @@ import logging
 import os.path
 import re
 import shutil
-import datetime
 
 import sqlalchemy.ext
 import sqlalchemy.ext.declarative
 
+import org.wayround.aipsetup.package
+import org.wayround.aipsetup.package_name_parser
+import org.wayround.aipsetup.version
 import org.wayround.utils.db
 import org.wayround.utils.file
 import org.wayround.utils.path
 import org.wayround.utils.tag
 import org.wayround.utils.tarball_name_parser
-
-import org.wayround.aipsetup.package_name_parser
-import org.wayround.aipsetup.package
-import org.wayround.aipsetup.version
 
 
 class PackageRepo(org.wayround.utils.db.BasicDB):
@@ -182,7 +181,8 @@ class PackageRepoCtl:
 
         index_db = self.db_connection
 
-        q = index_db.session.query(index_db.Category).filter_by(cid=cid).first()
+        q = index_db.session.query(index_db.Category).filter_by(cid=cid).\
+            first()
 
         if q:
             ret = q.name
@@ -195,7 +195,8 @@ class PackageRepoCtl:
 
         index_db = self.db_connection
 
-        q = index_db.session.query(index_db.Category).filter_by(cid=cid).first()
+        q = index_db.session.query(index_db.Category).filter_by(cid=cid).\
+            first()
 
         if q:
             ret = q.parent_cid
@@ -245,7 +246,8 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = index_db.session.query(index_db.Package).filter_by(name=name).first()
+        q = index_db.session.query(index_db.Package).filter_by(name=name).\
+            first()
         if q != None:
             ret = q.pid
 
@@ -269,7 +271,9 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = index_db.session.query(index_db.Package).filter_by(name=name).first()
+        q = index_db.session.query(index_db.Package).filter_by(name=name).\
+            first()
+
         if q != None:
             ret = q.cid
 
@@ -1267,7 +1271,6 @@ class SourceRepoCtl:
         ):
 
         root_dir_name = org.wayround.utils.path.realpath(root_dir_name)
-        #        root_dir_name_len = len(root_dir_name)
 
         sub_dir_name = org.wayround.utils.path.realpath(sub_dir_name)
 
@@ -1382,7 +1385,7 @@ class SourceRepoCtl:
             del source_index
 
         self.database_connection.commit()
-        logging.info("Searching inexisting index items")
+        logging.info("Searching non existing index items")
         src_tag_objects = self.database_connection.get_objects(order='object')
         deleted_count = 0
         found_scanned_count = 0

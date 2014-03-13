@@ -7,6 +7,10 @@ Allows minimize DB access requests
 
 import logging
 
+import org.wayround.aipsetup.info
+import org.wayround.aipsetup.repository
+
+
 _info_db_connection = None
 _pkg_repo_db_connection = None
 _latest_db_connection = None
@@ -18,70 +22,97 @@ def info_db(config):
     """
     Returns info database connection creating it if needed
     """
-    import org.wayround.aipsetup.info
-
     global _info_db_connection
 
     if not _info_db_connection:
-        logging.info(
-            "Getting info DB connection: {}".format(
-                config['info_repo']['index_db_config']
-                )
-            )
-        _info_db_connection = org.wayround.aipsetup.info.PackageInfo(
-            config['info_repo']['index_db_config']
-            )
+        _info_db_connection = \
+            info_db_new_connection(config['info_repo']['index_db_config'])
 
     return _info_db_connection
+
+
+def info_db_new_connection(config_string):
+    """
+    Returns info database connection creating it if needed
+    """
+
+    logging.info(
+        "Getting info DB connection: {}".format(config_string)
+        )
+    ret = org.wayround.aipsetup.info.PackageInfo(
+        config_string
+        )
+
+    return ret
 
 
 def tag_db(config):
     """
     Returns tag database connection creating it if needed
     """
-    import org.wayround.aipsetup.info
 
     global _tag_db_connection
 
     if not _tag_db_connection:
-        logging.info(
-            "Getting tag DB connection: {}".format(
-                config['info_repo']['tags_db_config']
-                )
-            )
-        _tag_db_connection = org.wayround.aipsetup.info.Tags(
-            config['info_repo']['tags_db_config']
-            )
+        _tag_db_connection = \
+            tag_db_new_connection(config['info_repo']['tags_db_config'])
 
     return _tag_db_connection
+
+
+def tag_db_new_connection(config_string):
+    """
+    Returns tag database connection creating it if needed
+    """
+
+    logging.info(
+        "Getting tag DB connection: {}".format(
+            config_string
+            )
+        )
+    ret = org.wayround.aipsetup.info.Tags(
+        config_string
+        )
+
+    return ret
 
 
 def pkg_repo_db(config):
     """
     Returns package index database connection creating it if needed
     """
-    import org.wayround.aipsetup.repository
 
     global _pkg_repo_db_connection
 
     if not _pkg_repo_db_connection:
-        logging.info(
-            "Getting repo DB connection: {}".format(
-                config['package_repo']['index_db_config']
-                )
-            )
-        _pkg_repo_db_connection = org.wayround.aipsetup.repository.PackageRepo(
+        _pkg_repo_db_connection = pkg_repo_db_new_connection(
             config['package_repo']['index_db_config']
             )
 
     return _pkg_repo_db_connection
 
 
+def pkg_repo_db_new_connection(config_string):
+    """
+    Returns package index database connection creating it if needed
+    """
+
+    logging.info(
+        "Getting repo DB connection: {}".format(
+            config_string
+            )
+        )
+    ret = org.wayround.aipsetup.repository.PackageRepo(
+        config_string
+        )
+
+    return ret
+
+
 def src_repo_db(config):
     """
     Returns sources database connection creating it if needed
     """
-    import org.wayround.aipsetup.repository
 
     global _src_repo_db_connection
 
@@ -91,11 +122,27 @@ def src_repo_db(config):
                 config['sources_repo']['index_db_config']
                 )
             )
-        _src_repo_db_connection = org.wayround.aipsetup.repository.SourceRepo(
+        _src_repo_db_connection = src_repo_db_new_connection(
             config['sources_repo']['index_db_config']
             )
 
     return _src_repo_db_connection
+
+
+def src_repo_db_new_connection(config_string):
+    """
+    Returns sources database connection creating it if needed
+    """
+    logging.info(
+        "Getting repo DB connection: {}".format(
+            config_string
+            )
+        )
+    ret = org.wayround.aipsetup.repository.SourceRepo(
+        config_string
+        )
+
+    return ret
 
 
 def close_all():
@@ -104,7 +151,6 @@ def close_all():
     """
     global _info_db_connection
     global _pkg_repo_db_connection
-    global _latest_db_connection
     global _tag_db_connection
     global _src_repo_db_connection
 
@@ -113,9 +159,6 @@ def close_all():
 
     if _pkg_repo_db_connection:
         _pkg_repo_db_connection.close()
-
-    if _latest_db_connection:
-        _latest_db_connection.close()
 
     if _tag_db_connection:
         _tag_db_connection.close()

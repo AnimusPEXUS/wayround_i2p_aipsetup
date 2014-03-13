@@ -1,9 +1,21 @@
 <div>
     <form method="GET" action="list">
         <label>
-            Mode:
-            <select name="mode">
+            Search Mode:
+            <select name="searchmode">
                 % for i in [('filemask', 'FileName Mask'), ('regexp', 'Regular Expression')]:
+                <%
+                selected = '' 
+                if mode == i[0]:
+                    selected = 'selected="selected"' 
+                %><option value="${ i[0] | x }" ${selected}>${ i[1] | x }</option>
+                % endfor
+            </select>
+        </label>
+        <label>
+            Result Mode:
+            <select name="resultmode">
+                % for i in [('html', 'HTML'), ('json', 'JSON')]:
                 <%
                 selected = '' 
                 if mode == i[0]:
@@ -28,4 +40,5 @@
         <button type="submit" name="action" value="search">Search</button>
         <button type="submit" name="action" value="go">Go Directly To Exact Name</button>
     </form>
+    <a href="/list">List All</a>
 </div>
