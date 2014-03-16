@@ -216,8 +216,14 @@ class PackageInfoCtl:
 
     def __init__(self, info_dir, info_db):
 
-        self.info_dir = org.wayround.utils.path.abspath(info_dir)
-        self.info_db = info_db
+        if not isinstance(info_dir, str):
+            raise TypeError("`info_dir' must be str")
+
+        if not isinstance(info_db, PackageInfo):
+            raise TypeError("`info_db' must be PackageInfo")
+
+        self._info_dir = org.wayround.utils.path.abspath(info_dir)
+        self._info_db = info_db
 
     def get_lists_of_packages_missing_and_present_info_records(
         self,
@@ -229,8 +235,8 @@ class PackageInfoCtl:
         is ``None`` - check all.
         """
 
-        index_db = pkg_index_ctl.db_connection
-        info_db = self.info_db
+        index_db = pkg_index_ctl.get_db_connection()
+        info_db = self._info_db
 
         found = []
 
@@ -265,12 +271,13 @@ class PackageInfoCtl:
         result.
         """
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         ret = None
 
         if name != None:
-            q = info_db.session.query(info_db.Info).filter_by(name=name).first()
+            q = info_db.session.query(info_db.Info).filter_by(name=name).\
+                first()
         else:
             q = record
 
@@ -295,7 +302,7 @@ class PackageInfoCtl:
 
     def set_package_info_record(self, name, struct):
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         q = info_db.session.query(info_db.Info).filter_by(name=name).first()
 
@@ -335,11 +342,12 @@ class PackageInfoCtl:
 
     def get_info_records_list(self, mask='*', mute=False):
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         ret = []
 
-        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).all()
+        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
+            all()
 
         found = 0
 
@@ -368,8 +376,8 @@ class PackageInfoCtl:
                 "org.wayround.aipsetup.repository.PackageRepoCtl"
                 )
 
-        info_db = self.info_db
-        index_db = pkg_index_ctl.db_connection
+        info_db = self._info_db
+        index_db = pkg_index_ctl.get_db_connection()
 
         q = index_db.session.query(
             index_db.Package
@@ -404,7 +412,7 @@ class PackageInfoCtl:
                 if create_templates:
 
                     filename = os.path.join(
-                        self.info_dir,
+                        self._info_dir,
                         '{}.json'.format(each.name)
                         )
 
@@ -458,18 +466,19 @@ class PackageInfoCtl:
 
     def get_outdated_info_records_list(self, mute=True):
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         ret = []
 
         query_result = (
-            info_db.session.query(info_db.Info).order_by(info_db.Info.name).all()
+            info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
+                all()
             )
 
         for i in query_result:
 
             filename = os.path.join(
-                self.info_dir,
+                self._info_dir,
                 '{}.json'.format(i.name)
                 )
 
@@ -748,7 +757,7 @@ class PackageInfoCtl:
 
             lst = [tarball_filename]
 
-            info_db = self.info_db
+            info_db = self._info_db
 
             q = info_db.session.query(
                 info_db.Info
@@ -796,7 +805,7 @@ class PackageInfoCtl:
 
     def get_non_automatic_packages_info_list(self):
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         q = info_db.session.query(
             info_db.Info
@@ -813,7 +822,7 @@ class PackageInfoCtl:
 
     def guess_package_homepage(self, pkg_name):
 
-        src_db = self.info_db
+        src_db = self._info_db
 
         files = src_db.objects_by_tags([pkg_name])
 
@@ -841,7 +850,7 @@ class PackageInfoCtl:
 
         for i in range(len(oir)):
             oir[i] = os.path.join(
-                self.info_dir,
+                self._info_dir,
                 oir[i] + '.json'
                 )
         self.load_info_records_from_fs(
@@ -924,7 +933,7 @@ class PackageInfoCtl:
 
     def delete_info_records(self, mask='*'):
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         q = info_db.session.query(info_db.Info).all()
 
@@ -948,14 +957,15 @@ class PackageInfoCtl:
         self, mask='*', force_rewrite=False
         ):
 
-        info_db = self.info_db
+        info_db = self._info_db
 
-        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).all()
+        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
+            all()
 
         for i in q:
             if fnmatch.fnmatch(i.name, mask):
                 filename = os.path.join(
-                    self.info_dir,
+                    self._info_dir,
                     '{}.json'.format(i.name))
                 if not force_rewrite and os.path.exists(filename):
                     logging.warning(
@@ -984,7 +994,7 @@ class PackageInfoCtl:
         existing
         """
 
-        info_db = self.info_db
+        info_db = self._info_db
 
         files = []
         loaded = 0

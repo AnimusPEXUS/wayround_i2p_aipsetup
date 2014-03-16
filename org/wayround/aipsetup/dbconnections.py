@@ -26,7 +26,7 @@ def info_db(config):
 
     if not _info_db_connection:
         _info_db_connection = \
-            info_db_new_connection(config['info_repo']['index_db_config'])
+            info_db_new_connection(config['pkg_server']['info_db_config'])
 
     return _info_db_connection
 
@@ -55,7 +55,7 @@ def tag_db(config):
 
     if not _tag_db_connection:
         _tag_db_connection = \
-            tag_db_new_connection(config['info_repo']['tags_db_config'])
+            tag_db_new_connection(config['pkg_server']['tags_db_config'])
 
     return _tag_db_connection
 
@@ -86,7 +86,7 @@ def pkg_repo_db(config):
 
     if not _pkg_repo_db_connection:
         _pkg_repo_db_connection = pkg_repo_db_new_connection(
-            config['package_repo']['index_db_config']
+            config['pkg_server']['repository_dir_index_db_config']
             )
 
     return _pkg_repo_db_connection
@@ -119,11 +119,11 @@ def src_repo_db(config):
     if not _src_repo_db_connection:
         logging.info(
             "Getting repo DB connection: {}".format(
-                config['sources_repo']['index_db_config']
+                config['src_server']['src_index_db_config']
                 )
             )
         _src_repo_db_connection = src_repo_db_new_connection(
-            config['sources_repo']['index_db_config']
+            config['src_server']['src_index_db_config']
             )
 
     return _src_repo_db_connection

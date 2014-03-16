@@ -72,6 +72,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
         ('tarball_repository_root', '${working_dir}/pkg_source'),
         ('src_index_db_config', 'sqlite:///${working_dir}/src_index.sqlite'),
+        ('xmpp_admins', 'animus@wayround.org animus@wayround.org'),
         ('xmpp_account', ''),
         ('xmpp_password', ''),
         ('acceptable_src_file_extensions',
@@ -84,18 +85,24 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ])
      ),
 
-    ('asp_repo_server', collections.OrderedDict([
+    ('pkg_server', collections.OrderedDict([
         ('host', 'localhost'),
         ('port', '8081'),
         ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
-        ('asp_repository_root', '${working_dir}/pkg_repository'),
-        ('asp_repository_index_db_config',
+        ('repository_dir', '${working_dir}/pkg_repository'),
+        ('repository_dir_index_db_config',
             'sqlite:///${working_dir}/pkg_index.sqlite'),
+        ('garbage_dir', '${working_dir}/pkg_garbage'),
+        ('info_json_dir', '${working_dir}/pkg_info'),
+        ('info_db_config', 'sqlite:///${working_dir}/pkg_info.sqlite'),
+        ('tags_db_config', 'sqlite:///${working_dir}/pkg_tags.sqlite'),
+        ('tags_json', '${working_dir}/tags.json'),
+        ('xmpp_admins', 'animus@wayround.org animus@wayround.org'),
         ('xmpp_account', ''),
         ('xmpp_password', '')
         ])
      ),
-     
+
 
 #    ('server_package_repo', collections.OrderedDict([
 #        ('base_dir', '${general:distro_buildout_dir}'),
@@ -124,10 +131,6 @@ DEFAULT_CONFIG = collections.OrderedDict(
 #
 #    ('info_repo', collections.OrderedDict([
 #        ('base_dir', '${general:distro_buildout_dir}'),
-#        ('index_db_config', 'sqlite:///${base_dir}/pkginfo.sqlite'),
-#        ('dir', '${base_dir}/pkg_info'),
-#        ('tags_db_config', 'sqlite:///${base_dir}/pkgtags.sqlite'),
-#        ('tags_json', '${base_dir}/tags.json')
 #        ])
 #     ),
 #

@@ -17,31 +17,21 @@ def commands():
         ('pkg_server', {
             'start': pkg_server_start,
             }),
-
-        ('info', {
-            'editor': info_editor,
-            'delete': info_delete_pkg_info_records,
+        ('pkg_server_info', {
             'save': info_backup_package_info_to_filesystem,
             'load': info_load_package_info_from_filesystem,
-            'list': info_list_pkg_info_records,
+            'save_tags': save_info_tags,
+            'load_tags': load_info_tags,
             'missing': info_find_missing_pkg_info_records,
             'outdated': info_find_outdated_pkg_info_records,
             'update': info_update_outdated_pkg_info_records,
-            'print': info_print_pkg_record,
-            'save_tags': save_info_tags,
-            'load_tags': load_info_tags,
-            'script': info_mass_script_apply,
-            'parse': info_parse_pkg_name,
-            'parse_tar': info_parse_tarball
+            'delete': info_delete_pkg_info_records
             }),
-
-        ('repo', {
-            'index': pkg_repo_index_and_update,
+        ('pkg_server_packages', {
+            'reindex': pkg_repo_index_and_update,
             'put': pkg_repo_put_file,
-            'clean': pkg_repo_cleanup,
-            'list': pkg_repo_list_categories
-            }),
-
+            'clean': pkg_repo_cleanup
+            })
         ])
 
 
@@ -233,7 +223,7 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
         filenames = (
             glob.glob(
                 org.wayround.utils.path.join(
-                    config['info_repo']['dir'],
+                    config['pkg_server']['info_json_dir'],
                     '*'
                     )
                 )
@@ -451,7 +441,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
                 ret = 4
             else:
 
-                info_dir = config['info_repo']['dir']
+                info_dir = config['pkg_server']['info_json_dir']
 
                 p1 = org.wayround.utils.path.join(
                     info_dir,

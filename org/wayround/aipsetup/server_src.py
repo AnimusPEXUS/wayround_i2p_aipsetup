@@ -47,7 +47,7 @@ def src_server_start(command_name, opts, args, adds):
             config['src_server']['src_index_db_config']
             ),
         host=host,
-        port=port
+        port=int(port)
         )
 
     serv.start()
@@ -69,14 +69,7 @@ def src_server_reindex(command_name, opts, args, adds):
 
     config = adds['config']
 
-    con = org.wayround.aipsetup.dbconnections.src_repo_db_new_connection(
-        config['src_server']['src_index_db_config']
-        )
-
-    ctl = org.wayround.aipsetup.controllers.src_repo_ctl_new(
-        config['src_server']['tarball_repository_root'],
-        con
-        )
+    ctl = org.wayround.aipsetup.controllers.src_repo_ctl_by_config(config)
 
     ctl.index_sources(
         config['src_server']['tarball_repository_root'],

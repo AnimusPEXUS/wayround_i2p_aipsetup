@@ -105,11 +105,22 @@ class SourceRepo(org.wayround.utils.tag.TagEngine):
 
 class PackageRepoCtl:
 
-    def __init__(self, repository_dir, db_connection, garbage_dir):
+    def __init__(self, repository_dir, garbage_dir, db_connection):
 
-        self.repository_dir = org.wayround.utils.path.abspath(repository_dir)
-        self.db_connection = db_connection
-        self.garbage_dir = org.wayround.utils.path.abspath(garbage_dir)
+        self._repository_dir = org.wayround.utils.path.abspath(repository_dir)
+        self._garbage_dir = org.wayround.utils.path.abspath(garbage_dir)
+        self._db_connection = db_connection
+
+        return
+
+    def get_repository_dir(self):
+        return self._repository_dir
+
+    def get_garbage_dir(self):
+        return self._garbage_dir
+
+    def get_db_connection(self):
+        return self._db_connection
 
     def is_repo_package(self, path):
 
@@ -145,7 +156,7 @@ class PackageRepoCtl:
             else:
 
                 package_dir = org.wayround.utils.path.abspath(
-                    self.repository_dir
+                    self._repository_dir
                     + os.path.sep + package_path + os.path.sep + 'pack'
                     )
 
@@ -167,7 +178,7 @@ class PackageRepoCtl:
                             os.path.sep +
                             org.wayround.utils.path.relpath(
                                 i,
-                                self.repository_dir
+                                self._repository_dir
                                 )
                             )
 
@@ -179,7 +190,7 @@ class PackageRepoCtl:
 
         ret = None
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         q = index_db.session.query(index_db.Category).filter_by(cid=cid).\
             first()
@@ -193,7 +204,7 @@ class PackageRepoCtl:
 
         ret = None
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         q = index_db.session.query(index_db.Category).filter_by(cid=cid).\
             first()
@@ -242,7 +253,7 @@ class PackageRepoCtl:
 
     def get_package_id(self, name):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         ret = None
 
@@ -255,7 +266,7 @@ class PackageRepoCtl:
 
     def get_package_category(self, pid):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         ret = None
 
@@ -267,7 +278,7 @@ class PackageRepoCtl:
 
     def get_package_category_by_name(self, name):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         ret = None
 
@@ -281,7 +292,7 @@ class PackageRepoCtl:
 
     def get_package_by_id(self, pid):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         ret = None
 
@@ -293,7 +304,7 @@ class PackageRepoCtl:
 
     def get_package_name_list(self, cid=None):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         if cid == None:
             lst = index_db.session.query(index_db.Package).all()
@@ -312,7 +323,7 @@ class PackageRepoCtl:
 
     def get_package_id_list(self, cid=None):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         lst = None
         if cid == None:
@@ -330,7 +341,7 @@ class PackageRepoCtl:
 
     def get_package_idname_dict(self, cid=None):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         if cid == None:
             lst = index_db.session.query(index_db.Package).all()
@@ -347,7 +358,7 @@ class PackageRepoCtl:
 
     def get_category_name_list(self, parent_cid=0):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         lst = index_db.session.query(
             index_db.Category
@@ -367,7 +378,7 @@ class PackageRepoCtl:
 
     def get_category_id_list(self, parent_cid=0):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         lst = index_db.session.query(
             index_db.Category
@@ -389,7 +400,7 @@ class PackageRepoCtl:
         Return dict in which keys are ids and values are names
         """
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         lst = None
         if parent_cid == None:
@@ -436,7 +447,7 @@ class PackageRepoCtl:
             ret = None
 
         else:
-            index_db = self.db_connection
+            index_db = self._db_connection
             pkg = index_db.session.query(
                 index_db.Package
                 ).filter_by(pid=pid).first()
@@ -459,7 +470,7 @@ class PackageRepoCtl:
 
     def get_category_path(self, cid):
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         ret = []
         categ = None
@@ -547,7 +558,7 @@ class PackageRepoCtl:
         ret = 0
 
         repo_dir = org.wayround.utils.path.abspath(
-            self.repository_dir
+            self._repository_dir
             )
 
         category_locations = dict()
@@ -641,7 +652,7 @@ class PackageRepoCtl:
         if '' in category_locations_internal:
             del category_locations_internal['']
 
-        index_db = self.db_connection
+        index_db = self._db_connection
 
         logging.info("Deleting old data from DB")
         index_db.session.query(index_db.Category).delete()
@@ -723,7 +734,7 @@ class PackageRepoCtl:
 
         ret = 0
 
-        repository_path = self.repository_dir
+        repository_path = self._repository_dir
 
         for file in files:
 
@@ -888,20 +899,20 @@ class PackageRepoCtl:
 
     def cleanup_repo_package_pack(self, name):
 
-        g_path = org.wayround.utils.path.join(self.garbage_dir, name)
+        g_path = org.wayround.utils.path.join(self._garbage_dir, name)
 
         if not os.path.exists(g_path):
             os.makedirs(g_path, exist_ok=True)
 
         path = org.wayround.utils.path.join(
-            self.repository_dir,
+            self._repository_dir,
             self.get_package_path_string(name), 'pack'
             )
 
         path = org.wayround.utils.path.abspath(path)
 
         self.create_required_dirs_at_package(org.wayround.utils.path.join(
-            self.repository_dir,
+            self._repository_dir,
             self.get_package_path_string(name)
             ))
 
@@ -984,13 +995,13 @@ class PackageRepoCtl:
 
     def cleanup_repo_package(self, name):
 
-        g_path = org.wayround.utils.path.join(self.garbage_dir, name)
+        g_path = org.wayround.utils.path.join(self._garbage_dir, name)
 
         if not os.path.exists(g_path):
             os.makedirs(g_path)
 
         path = org.wayround.utils.path.join(
-            self.garbage_dir,
+            self._garbage_dir,
             self.get_package_path_string(name)
             )
 
@@ -1019,7 +1030,7 @@ class PackageRepoCtl:
 
     def cleanup_repo(self):
 
-        garbage_dir = self.garbage_dir
+        garbage_dir = self._garbage_dir
 
         if not os.path.exists(garbage_dir):
             os.makedirs(garbage_dir)

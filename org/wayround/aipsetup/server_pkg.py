@@ -6,6 +6,7 @@ import logging
 
 import bottle
 
+import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.server_pkg_ui
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
@@ -20,19 +21,21 @@ def server_start_host(command_name, opts, args, adds):
 
     config = adds['config']
 
-    # FIXME: redo this to *_new
     pkg_repo_ctl = \
         org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+
     info_ctl = \
         org.wayround.aipsetup.controllers.info_ctl_by_config(config)
+
     tag_ctl = \
         org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
 
-    app = AipsetupASPServer(
-        config,
+    app = ASPServer(
         pkg_repo_ctl,
         info_ctl,
-        tag_ctl
+        tag_ctl,
+        config['pkg_server']['host'],
+        int(config['pkg_server']['port'])
         )
 
     app.start()
@@ -40,14 +43,15 @@ def server_start_host(command_name, opts, args, adds):
     return 0
 
 
-class AipsetupASPServer:
+class ASPServer:
 
     def __init__(
         self,
-        config,
         pkg_repo_ctl,
         info_ctl,
-        tag_ctl
+        tag_ctl,
+        host='localhost',
+        port=8081
         ):
 
         web = os.path.join(os.path.dirname(__file__), 'web', 'pkg_server')
@@ -56,10 +60,11 @@ class AipsetupASPServer:
         css_dir = os.path.join(web, 'css')
         js_dir = os.path.join(web, 'js')
 
-        self.config = config
+        # TODO: extinct self.config
+        #        self.config = config
 
-        self.host = config['web_server_config']['ip']
-        self.port = config['web_server_config']['port']
+        self.host = host
+        self.port = port
 
         self.templates_dir = templates_dir
         self.css_dir = css_dir
@@ -109,12 +114,12 @@ class AipsetupASPServer:
 
         filename = org.wayround.utils.path.abspath(
             org.wayround.utils.path.join(
-                self.config['package_repo']['dir'], path, 'pack', base
+                self.pkg_repo_ctl.get_repository_dir(), path, 'pack', base
                 )
             )
 
         if not filename.startswith(
-            self.config['package_repo']['dir'] + os.path.sep
+            self.pkg_repo_ctl.get_repository_dir() + os.path.sep
             ):
             raise bottle.HTTPError(404, "Wrong package name `{}'".format(name))
 
@@ -322,7 +327,7 @@ class AipsetupASPServer:
 
                 stat = os.stat(
                     org.wayround.utils.path.join(
-                        self.config['package_repo']['dir'],
+                        self.pkg_repo_ctl.get_repository_dir(),
                         i
                         )
                     )

@@ -12,12 +12,15 @@ import org.wayround.utils.system_type
 
 def pkg_repo_ctl_by_config(config):
 
+    # TODO: rename form 'pkg_repo_ctl_by_config'
+    #       to 'pkg_repo_ctl_for_pkg_server'
+
     db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
 
-    repository_dir = config['package_repo']['dir']
-    garbage_dir = config['package_repo']['garbage_dir']
+    repository_dir = config['pkg_server']['repository_dir']
+    garbage_dir = config['pkg_server']['garbage_dir']
 
-    ret = pkg_repo_ctl_new(repository_dir, db_connection, garbage_dir)
+    ret = pkg_repo_ctl_new(repository_dir, garbage_dir, db_connection)
 
     return ret
 
@@ -25,7 +28,7 @@ def pkg_repo_ctl_by_config(config):
 def pkg_repo_ctl_new(repository_dir, garbage_dir, pkg_repo_db):
 
     ret = org.wayround.aipsetup.repository.PackageRepoCtl(
-        repository_dir, pkg_repo_db, garbage_dir
+        repository_dir, garbage_dir, pkg_repo_db
         )
 
     return ret
@@ -36,7 +39,8 @@ def src_repo_ctl_by_config(config):
     database_connection = \
         org.wayround.aipsetup.dbconnections.src_repo_db(config)
 
-    sources_dir = config['sources_repo']['dir']
+    sources_dir = config['src_server']['tarball_repository_root']
+
     ret = src_repo_ctl_new(sources_dir, database_connection)
 
     return ret
@@ -55,7 +59,7 @@ def info_ctl_by_config(config):
 
     info_db = org.wayround.aipsetup.dbconnections.info_db(config)
 
-    ret = info_ctl_new(config['info_repo']['dir'], info_db)
+    ret = info_ctl_new(config['pkg_server']['info_json_dir'], info_db)
 
     return ret
 
@@ -149,7 +153,7 @@ def tag_ctl_by_config(config):
     tag_db = org.wayround.aipsetup.dbconnections.tag_db(config)
 
     ret = tag_ctl_new(
-        config['info_repo']['tags_json'],
+        config['pkg_server']['tags_json'],
         tag_db
         )
 

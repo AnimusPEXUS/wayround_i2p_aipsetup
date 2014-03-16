@@ -108,9 +108,10 @@ def files(command_name, opts, args, adds):
 def get(command_name, opts, args, adds):
 
     """
-    List tarballs of pointed names
+    Get tarball
 
-    [options] name
+    This command internally uses wget to download named file to current
+    directory
     """
 
     config = adds['config']
