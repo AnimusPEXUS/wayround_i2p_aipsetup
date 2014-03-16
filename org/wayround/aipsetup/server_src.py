@@ -13,9 +13,8 @@ import urllib.request
 import bottle
 from mako.template import Template
 
-import org.wayround.aipsetup.config
+import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.dbconnections
-import org.wayround.aipsetup.repository
 import org.wayround.utils.version
 
 
@@ -27,7 +26,7 @@ def src_server_start(command_name, opts, args, adds):
     """
     Starts serving specified host and port
 
-    aipsetup3 src_server start [--host=localhost] [--port=8080]
+    aipsetup3 src_server start
 
     Requires aipsetup configuration file to be correctly configured with
     'source' and 'source_index' parameters
@@ -37,15 +36,15 @@ def src_server_start(command_name, opts, args, adds):
 
     ret = 0
 
-    host = config['src_tarball_server']['host']
-    port = config['src_tarball_server']['port']
+    host = config['src_server']['host']
+    port = config['src_server']['port']
 
-    os.chdir(config['src_tarball_server']['working_dir'])
+    os.chdir(config['src_server']['working_dir'])
 
     serv = SRCServer(
-        config['src_tarball_server']['tarball_repository_root'],
+        config['src_server']['tarball_repository_root'],
         org.wayround.aipsetup.dbconnections.src_repo_db_new_connection(
-            config['src_tarball_server']['src_index_db_config']
+            config['src_server']['src_index_db_config']
             ),
         host=host,
         port=port
@@ -64,24 +63,24 @@ def src_server_reindex(command_name, opts, args, adds):
     options:
         --force                 force total reindex
         --first-delete-found    delete found tarballs from index before doing
-                                anything else
+                                anything else to force they'r reparsing
         --clean-only            only remove non existing tarballs from index
     """
 
     config = adds['config']
 
     con = org.wayround.aipsetup.dbconnections.src_repo_db_new_connection(
-        config['src_tarball_server']['src_index_db_config']
+        config['src_server']['src_index_db_config']
         )
 
-    ctl = org.wayround.aipsetup.repository.SourceRepoCtl(
-        config['src_tarball_server']['tarball_repository_root'],
+    ctl = org.wayround.aipsetup.controllers.src_repo_ctl_new(
+        config['src_server']['tarball_repository_root'],
         con
         )
 
     ctl.index_sources(
-        config['src_tarball_server']['tarball_repository_root'],
-        config['src_tarball_server']['acceptable_src_file_extensions'],
+        config['src_server']['tarball_repository_root'],
+        config['src_server']['acceptable_src_file_extensions'],
         '--force' in opts,
         '--first-delete-found' in opts,
         '--clean-only'  in opts
@@ -133,7 +132,9 @@ class SRCServer:
         bottle.run(self.app, host=self.host, port=self.port)
 
     def search(self, searchmode='filemask', mask='*', cs=True):
-        return self.templates['search'].render(searchmode=searchmode, mask=mask, cs=cs)
+        return self.templates['search'].render(
+            searchmode=searchmode, mask=mask, cs=cs
+            )
 
     def none(self):
         bottle.response.set_header('Location', '/')

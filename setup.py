@@ -6,7 +6,7 @@ from distutils.core import setup
 
 setup(
     name='aipsetup',
-    version='3.0.109',
+    version='3.0.110',
     description='aipsetup software packaging system',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -24,6 +24,7 @@ setup(
             os.path.join('unicorn_distro', '*.sqlite'),
             os.path.join('unicorn_distro', 'pkg_buildscripts', '*.py'),
             os.path.join('unicorn_distro', 'pkg_info', '*.json'),
+            os.path.join('web', 'src_server', 'templates', '*.html')
             ],
         }
     )

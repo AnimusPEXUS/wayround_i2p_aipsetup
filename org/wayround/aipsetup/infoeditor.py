@@ -19,7 +19,7 @@ import org.wayround.utils.path
 import org.wayround.aipsetup.gtk
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.dbconnections
-import org.wayround.aipsetup.classes
+import org.wayround.aipsetup.controllers
 
 
 
@@ -520,14 +520,15 @@ class MainWindow:
 
 def main(name_to_edit=None, config=None):
 
+    # TODO: re do to *_new
 
-    info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+    info_ctl = org.wayround.aipsetup.controllers.info_ctl(config)
 
-    pkg_repo_ctl = org.wayround.aipsetup.classes.pkg_repo_ctl(config)
+    pkg_repo_ctl = org.wayround.aipsetup.controllers.pkg_repo_ctl(config)
 
-    src_repo_ctl = org.wayround.aipsetup.classes.src_repo_ctl(config)
+    src_repo_ctl = org.wayround.aipsetup.controllers.src_repo_ctl(config)
 
-    tag_ctl = org.wayround.aipsetup.classes.tag_ctl(config)
+    tag_ctl = org.wayround.aipsetup.controllers.tag_ctl(config)
 
     mw = MainWindow(config, info_ctl, tag_ctl, pkg_repo_ctl, src_repo_ctl)
 

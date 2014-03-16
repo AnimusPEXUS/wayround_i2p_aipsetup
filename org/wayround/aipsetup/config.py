@@ -66,10 +66,10 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ])
      ),
 
-    ('src_tarball_server', collections.OrderedDict([
+    ('src_server', collections.OrderedDict([
         ('host', 'localhost'),
         ('port', '8080'),
-        ('working_dir', '/mnt/sda3/home/agu/_UNICORN_SOURCES'),
+        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
         ('tarball_repository_root', '${working_dir}/pkg_source'),
         ('src_index_db_config', 'sqlite:///${working_dir}/src_index.sqlite'),
         ('xmpp_account', ''),
@@ -79,64 +79,82 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ])
      ),
 
-    ('server_package_repo', collections.OrderedDict([
-        ('base_dir', '${general:distro_buildout_dir}'),
-        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
-        ('dir', '${base_dir}/pkg_repository'),
-        ('snapshots_dir', '${base_dir}/snapshots'),
-        ('garbage_dir', '${base_dir}/garbage')
+    ('src_client', collections.OrderedDict([
+        ('server_url', 'http://localhost:8080/')
         ])
      ),
 
-    ('designer_settings', collections.OrderedDict([
-        ('base_dir', '${general:distro_buildout_dir}'),
-        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
-        ('dir', '${base_dir}/pkg_repository'),
-        ('snapshots_dir', '${base_dir}/snapshots'),
-        ('garbage_dir', '${base_dir}/garbage')
+    ('asp_repo_server', collections.OrderedDict([
+        ('host', 'localhost'),
+        ('port', '8081'),
+        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('asp_repository_root', '${working_dir}/pkg_repository'),
+        ('asp_repository_index_db_config',
+            'sqlite:///${working_dir}/pkg_index.sqlite'),
+        ('xmpp_account', ''),
+        ('xmpp_password', '')
         ])
      ),
+     
 
-    ('server_sources_repo', collections.OrderedDict([
-        ('base_dir', '${general:distro_buildout_dir}'),
-        ('index_db_config', 'sqlite:///${base_dir}/sources.sqlite'),
-        ('dir', '${base_dir}/pkg_source')
-        ])
-     ),
-
-    ('info_repo', collections.OrderedDict([
-        ('base_dir', '${general:distro_buildout_dir}'),
-        ('index_db_config', 'sqlite:///${base_dir}/pkginfo.sqlite'),
-        ('dir', '${base_dir}/pkg_info'),
-        ('tags_db_config', 'sqlite:///${base_dir}/pkgtags.sqlite'),
-        ('tags_json', '${base_dir}/tags.json')
-        ])
-     ),
-
-    ('latest_repo', collections.OrderedDict([
-        ('base_dir', '${general:distro_buildout_dir}'),
-        ('index_db_config', 'sqlite:///${base_dir}/pkglatest.sqlite')
-        ])
-     ),
-
-    ('builder_repo', collections.OrderedDict([
-        ('base_dir', '${general:distro_buildout_dir}'),
-        ('building_scripts_dir', '${base_dir}/pkg_buildscripts'),
-        ('building_sites_dir', '${base_dir}/b')
-        ])
-     ),
-
-    ('web_server_config', collections.OrderedDict([
-        ('ip'          , '127.0.0.1'),
-        ('port'        , '8005'),
-        ('path_prefix' , '/')
-        ])
-     ),
-
-    ('web_client_config', collections.OrderedDict([
-        ('server_url'  , 'http://127.0.0.1:8005/')
-        ])
-     )
+#    ('server_package_repo', collections.OrderedDict([
+#        ('base_dir', '${general:distro_buildout_dir}'),
+#        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
+#        ('dir', '${base_dir}/pkg_repository'),
+#        ('snapshots_dir', '${base_dir}/snapshots'),
+#        ('garbage_dir', '${base_dir}/garbage')
+#        ])
+#     ),
+#
+#    ('designer_settings', collections.OrderedDict([
+#        ('base_dir', '${general:distro_buildout_dir}'),
+#        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
+#        ('dir', '${base_dir}/pkg_repository'),
+#        ('snapshots_dir', '${base_dir}/snapshots'),
+#        ('garbage_dir', '${base_dir}/garbage')
+#        ])
+#     ),
+#
+#    ('server_sources_repo', collections.OrderedDict([
+#        ('base_dir', '${general:distro_buildout_dir}'),
+#        ('index_db_config', 'sqlite:///${base_dir}/sources.sqlite'),
+#        ('dir', '${base_dir}/pkg_source')
+#        ])
+#     ),
+#
+#    ('info_repo', collections.OrderedDict([
+#        ('base_dir', '${general:distro_buildout_dir}'),
+#        ('index_db_config', 'sqlite:///${base_dir}/pkginfo.sqlite'),
+#        ('dir', '${base_dir}/pkg_info'),
+#        ('tags_db_config', 'sqlite:///${base_dir}/pkgtags.sqlite'),
+#        ('tags_json', '${base_dir}/tags.json')
+#        ])
+#     ),
+#
+#    ('latest_repo', collections.OrderedDict([
+#        ('base_dir', '${general:distro_buildout_dir}'),
+#        ('index_db_config', 'sqlite:///${base_dir}/pkglatest.sqlite')
+#        ])
+#     ),
+#
+#    ('builder_repo', collections.OrderedDict([
+#        ('base_dir', '${general:distro_buildout_dir}'),
+#        ('building_scripts_dir', '${base_dir}/pkg_buildscripts'),
+#        ('building_sites_dir', '${base_dir}/b')
+#        ])
+#     ),
+#
+#    ('web_server_config', collections.OrderedDict([
+#        ('ip'          , '127.0.0.1'),
+#        ('port'        , '8005'),
+#        ('path_prefix' , '/')
+#        ])
+#     ),
+#
+#    ('web_client_config', collections.OrderedDict([
+#        ('server_url'  , 'http://127.0.0.1:8005/')
+#        ])
+#     )
 
     ]
     )

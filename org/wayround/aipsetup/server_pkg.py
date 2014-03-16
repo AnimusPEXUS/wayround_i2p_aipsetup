@@ -6,10 +6,38 @@ import logging
 
 import bottle
 
-import org.wayround.aipsetup.serverui
+import org.wayround.aipsetup.server_pkg_ui
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
 APPLICATION_JSON = 'application/json; codepage=utf-8'
+
+
+def server_start_host(command_name, opts, args, adds):
+
+    """
+    Start serving UNICORN ASP package Web Server
+    """
+
+    config = adds['config']
+
+    # FIXME: redo this to *_new
+    pkg_repo_ctl = \
+        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    info_ctl = \
+        org.wayround.aipsetup.controllers.info_ctl_by_config(config)
+    tag_ctl = \
+        org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
+
+    app = AipsetupASPServer(
+        config,
+        pkg_repo_ctl,
+        info_ctl,
+        tag_ctl
+        )
+
+    app.start()
+
+    return 0
 
 
 class AipsetupASPServer:
@@ -41,7 +69,7 @@ class AipsetupASPServer:
         self.info_ctl = info_ctl
         self.tag_ctl = tag_ctl
 
-        self.ui = org.wayround.aipsetup.serverui.UI(templates_dir)
+        self.ui = org.wayround.aipsetup.server_pkg_ui.UI(templates_dir)
 
         self.app = bottle.Bottle()
 

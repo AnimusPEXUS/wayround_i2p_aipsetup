@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import tempfile
 
-import org.wayround.aipsetup.classes
+import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.info
 import org.wayround.utils.format.elf
 import org.wayround.utils.path
@@ -1857,7 +1857,8 @@ def build(
 
         else:
 
-            info_ctl = org.wayround.aipsetup.classes.info_ctl(config)
+            info_ctl = \
+                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
 
             package_info = (
                 info_ctl.get_info_rec_by_tarball_filename(
@@ -1890,18 +1891,24 @@ def build(
                     dir=buildingsites_dir
                     )
 
-                bs = org.wayround.aipsetup.classes.bsite_ctl(build_site_dir)
+                bs = org.wayround.aipsetup.controllers.bsite_ctl_new(
+                    build_site_dir
+                    )
 
                 if bs.init(info_ctl, source_files) != 0:
                     logging.error("Error initiating temporary dir")
                     ret = 3
                 else:
 
-                    build_ctl = org.wayround.aipsetup.classes.build_ctl(bs)
-                    pack_ctl = org.wayround.aipsetup.classes.pack_ctl(bs)
+                    build_ctl = \
+                        org.wayround.aipsetup.controllers.build_ctl_new(bs)
+
+                    pack_ctl = \
+                        org.wayround.aipsetup.controllers.pack_ctl_new(bs)
 
                     buildscript_ctl = \
-                        org.wayround.aipsetup.classes.bscript_ctl(config)
+                        org.wayround.aipsetup.controllers.\
+                            bscript_ctl_by_config(config)
 
                     if bs.complete(
                         build_ctl,

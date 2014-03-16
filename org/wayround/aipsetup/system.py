@@ -11,16 +11,16 @@ import pprint
 import re
 import tarfile
 
+import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.package_name_parser
-import org.wayround.aipsetup.version
 import org.wayround.aipsetup.repository
-import org.wayround.aipsetup.info
-
-import org.wayround.utils.path
-import org.wayround.utils.list
-import org.wayround.utils.format.elf
+import org.wayround.aipsetup.version
 import org.wayround.utils.file
+import org.wayround.utils.format.elf
+import org.wayround.utils.list
+import org.wayround.utils.path
+
 
 LOCAL_DIRS = [
     'boot',
@@ -34,12 +34,22 @@ LOCAL_DIRS = [
     'run',
     'sys',
     'var',
-    'tmp',
+    'tmp'
     ]
+
 
 class SystemCtl:
 
-    def __init__(self, config, info_ctl, pkg_repo_ctl, basedir='/'):
+    def __init__(
+        self,
+        info_ctl,
+        pkg_repo_ctl,
+        basedir='/',
+        installed_pkg_dir='/var/log/packages',
+        installed_pkg_dir_buildlogs='/var/log/packages/buildlogs',
+        installed_pkg_dir_sums='/var/log/packages/sums',
+        installed_pkg_dir_deps='/var/log/packages/deps'
+        ):
         """
         :param basedir: path to root directory of target system
             (absoluted internally)
@@ -51,7 +61,11 @@ class SystemCtl:
                 "org.wayround.aipsetup.info.PackageInfoCtl"
                 )
 
-        if not isinstance(pkg_repo_ctl, org.wayround.aipsetup.repository.PackageRepoCtl):
+        if not isinstance(
+            pkg_repo_ctl,
+            org.wayround.aipsetup.repository.PackageRepoCtl
+            ):
+
             raise ValueError(
                 "pkg_repo_ctl must be of type "
                 "org.wayround.aipsetup.repository.PackageRepoCtl"
@@ -60,7 +74,14 @@ class SystemCtl:
         self.basedir = org.wayround.utils.path.abspath(basedir)
         self.info_ctl = info_ctl
         self.pkg_repo_ctl = pkg_repo_ctl
-        self.config = config
+        #        self.config = config
+
+        self._installed_pkg_dir = installed_pkg_dir
+        self._installed_pkg_dir_buildlogs = installed_pkg_dir_buildlogs
+        self._installed_pkg_dir_sums = installed_pkg_dir_sums
+        self._installed_pkg_dir_deps = installed_pkg_dir_deps
+
+        return
 
     def remove_package(self, name, force=False, mute=False):
         """
@@ -69,12 +90,12 @@ class SystemCtl:
         Before package removal, aipsetup checks whatever package removal is
         restricted. This can be overridden with ``force=True`` option.
 
-        :param name: package name. e.g. ``gajim``, ``php`` or ``ruby``. List of
-            installed package names can be retrieved with command ``aipsetup pkg
-            list``
+        :param name: package name. e.g. ``gajim``, ``php`` or ``ruby``. List
+            of installed package names can be retrieved with command
+            ``aipsetup pkg list``
 
-        :param force: force package removal even if it is not registered in info
-            record system
+        :param force: force package removal even if it is not registered in
+            info record system
 
         :param mute: suppress status output
         """
@@ -86,12 +107,15 @@ class SystemCtl:
             )
 
         if not isinstance(info, dict) and not force:
-            logging.error("Can't find information about package `{}'".format(name))
+            logging.error(
+                "Can't find information about package `{}'".format(name)
+                )
 
             ret = 1
 
         else:
-            if not force and (isinstance(info, dict) and not info['removable']):
+            if (not force
+                and (isinstance(info, dict) and not info['removable'])):
                 logging.error("Package `{}' is not removable".format(name))
 
                 ret = 2
@@ -105,7 +129,8 @@ class SystemCtl:
                 lst.sort(
                     reverse=True,
                     key=functools.cmp_to_key(
-                        org.wayround.aipsetup.version.package_version_comparator
+                        org.wayround.aipsetup.version.\
+                            package_version_comparator
                         )
                     )
 
@@ -116,14 +141,14 @@ class SystemCtl:
 
                 for i in lst:
 
-                    name = org.wayround.aipsetup.package_name_parser.rm_ext_from_pkg_name(i)
+                    name = org.wayround.aipsetup.package_name_parser.\
+                        rm_ext_from_pkg_name(i)
 
                     if not mute:
                         logging.info("Removing package `{}'".format(name))
                     self.remove_asp(name)
 
         return ret
-
 
     def install_package(
         self, name, force=False
@@ -139,16 +164,15 @@ class SystemCtl:
             located in package index directory and calls this(install_package)
             function with ``name == 'full path to asp'``
 
-            Second mode, is when name is pointing on existing file. In this case
-            next sequence is done:
+            Second mode, is when name is pointing on existing file. In this
+            case next sequence is done:
 
                 #. install package using :func:`install_asp`
 
-                #. check whatever package is reducible, and if it is — reduce 
+                #. check whatever package is reducible, and if it is — reduce
                    older asps from system using :func:`reduce_asps`
 
         """
-
 
         ret = 0
 
@@ -160,9 +184,10 @@ class SystemCtl:
                     )
                 )
 
-            name_parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                name
-                )
+            name_parsed = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    name
+                    )
 
             if not force and not isinstance(name_parsed, dict):
                 logging.error("Can't parse `{}' as package name".format(name))
@@ -183,9 +208,11 @@ class SystemCtl:
                     ret = 2
                 else:
 
-                    if not force and (info['deprecated'] or info['non_installable']):
+                    if (not force
+                        and (info['deprecated'] or info['non_installable'])):
                         logging.error(
-                            "Package is deprecated({}) or non-installable({})".format(
+                            "Package is deprecated({}) or"
+                            " non-installable({})".format(
                             info['deprecated'],
                             info['non_installable']
                             )
@@ -196,7 +223,6 @@ class SystemCtl:
                         asps = self.list_installed_package_s_asps(
                             name_parsed['groups']['name']
                             )
-
 
                         ret = self.install_asp(name)
 
@@ -238,10 +264,11 @@ class SystemCtl:
 
                 if info['deprecated'] or info['non_installable']:
                     logging.error(
-                        "Package is deprecated({}) or non-installable({})".format(
-                        info['deprecated'],
-                        info['non_installable']
-                        )
+                        "Package is deprecated({}) "
+                        "or non-installable({})".format(
+                            info['deprecated'],
+                            info['non_installable']
+                            )
                     )
                     ret = 3
                 else:
@@ -265,7 +292,6 @@ class SystemCtl:
                         ret = self.install_package(full_name, False)
 
         return ret
-
 
     def install_asp(self, asp_package):
 
@@ -292,9 +318,10 @@ class SystemCtl:
             else:
 
                 package_name = os.path.basename(asp.filename)
-                if org.wayround.aipsetup.package_name_parser.package_name_parse(
-                    package_name
-                    ) == None:
+                if org.wayround.aipsetup.\
+                    package_name_parser.package_name_parse(
+                        package_name
+                        ) == None:
 
                     logging.error(
                         "Can't parse package name `{}'".format(package_name)
@@ -306,22 +333,22 @@ class SystemCtl:
                     for i in [
                         (
                              './06.LISTS/DESTDIR.lst.xz',
-                             self.config['system_settings']['installed_pkg_dir'],
+                             self._installed_pkg_dir,
                              "package's file list"
                              ),
                         (
                              './06.LISTS/DESTDIR.sha512.xz',
-                             self.config['system_settings']['installed_pkg_dir_sums'],
+                             self._installed_pkg_dir_sums,
                              "package's check sums"
                              ),
                         (
                              './05.BUILD_LOGS.tar.xz',
-                             self.config['system_settings']['installed_pkg_dir_buildlogs'],
+                             self._installed_pkg_dir_buildlogs,
                              "package's buildlogs"
                              ),
                         (
                              './06.LISTS/DESTDIR.dep_c.xz',
-                             self.config['system_settings']['installed_pkg_dir_deps'],
+                             self._installed_pkg_dir_deps,
                              "package's dependencies listing"
                              )
                         ]:
@@ -353,11 +380,12 @@ class SystemCtl:
                                 )
                             )
 
-                        if org.wayround.utils.archive.tar_member_get_extract_file_to(
-                                tarf,
-                                i[0],
-                                out_filename
-                                ) != 0 :
+                        if org.wayround.utils.archive.\
+                            tar_member_get_extract_file_to(
+                                    tarf,
+                                    i[0],
+                                    out_filename
+                                    ) != 0:
                             logging.error(
                                 "Can't install asp {} as {}".format(
                                     i[2], out_filename
@@ -369,25 +397,30 @@ class SystemCtl:
                     if ret == 0:
                         logging.info("Installing package's destdir")
 
-                        dd_fobj = org.wayround.utils.archive.tar_member_get_extract_file(
-                                tarf, './04.DESTDIR.tar.xz'
-                                )
+                        dd_fobj = org.wayround.utils.archive.\
+                            tar_member_get_extract_file(
+                                    tarf,
+                                    './{}.tar.xz'.format(
+                                        org.wayround.aipsetup.build.DIR_DESTDIR
+                                        )
+                                    )
                         if not isinstance(dd_fobj, tarfile.ExFileObject):
                             logging.error("Can't get package's destdir")
                             ret = 4
                         else:
                             try:
-                                tec = org.wayround.utils.archive.extract_tar_canonical_fobj(
-                                        dd_fobj,
-                                        self.basedir,
-                                        'xz',
-                                        verbose_tar=True,
-                                        verbose_compressor=True,
-                                        add_tar_options=[
-                                            '--no-same-owner',
-                                            '--no-same-permissions'
-                                            ]
-                                        )
+                                tec = org.wayround.utils.archive.\
+                                    extract_tar_canonical_fobj(
+                                            dd_fobj,
+                                            self.basedir,
+                                            'xz',
+                                            verbose_tar=True,
+                                            verbose_compressor=True,
+                                            add_tar_options=[
+                                                '--no-same-owner',
+                                                '--no-same-permissions'
+                                                ]
+                                            )
                                 if tec != 0:
                                     logging.error(
                                         "Package destdir decompression error:"
@@ -412,13 +445,18 @@ class SystemCtl:
                         files = []
                         dirs = []
 
-                        installed_file_list = (
-                            org.wayround.utils.archive.tar_member_get_extract_file(
-                                tarf, './06.LISTS/DESTDIR.lst.xz'
-                                )
-                            )
+                        installed_file_list = \
+                            org.wayround.utils.archive.\
+                                tar_member_get_extract_file(
+                                    tarf,
+                                    './06.LISTS/DESTDIR.lst.xz'
+                                    )
 
-                        if not isinstance(installed_file_list, tarfile.ExFileObject):
+                        if not isinstance(
+                            installed_file_list,
+                            tarfile.ExFileObject
+                            ):
+
                             logging.error("Can't get package's file list")
                             ret = 10
                         else:
@@ -429,9 +467,9 @@ class SystemCtl:
 
                                 files = text_lst.split('\n')
 
-                                files = (
-                                    org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(files)
-                                    )
+                                files = \
+                                    org.wayround.utils.list.\
+                    filelist_strip_remove_empty_remove_duplicated_lines(files)
 
                                 files.sort()
 
@@ -449,7 +487,6 @@ class SystemCtl:
                                             )
                                         )
 
-
                                     if not os.path.islink(f_d_p):
                                         os.chown(f_d_p, 0, 0)
                                         os.chmod(f_d_p, 0o755)
@@ -462,7 +499,6 @@ class SystemCtl:
                                             )
                                         )
 
-
                                     if not os.path.islink(f_f_p):
                                         os.chown(f_f_p, 0, 0)
                                         os.chmod(f_f_p, 0o755)
@@ -472,11 +508,12 @@ class SystemCtl:
                     if ret == 0:
                         logging.info("Searching post installation script")
 
-                        script_obj = (
-                            org.wayround.utils.archive.tar_member_get_extract_file(
-                                tarf, './post_install.py'
-                                )
-                            )
+                        script_obj = \
+                            org.wayround.utils.archive.\
+                                tar_member_get_extract_file(
+                                    tarf,
+                                    './post_install.py'
+                                    )
 
                         if not isinstance(script_obj, tarfile.ExFileObject):
                             logging.info(
@@ -497,19 +534,18 @@ class SystemCtl:
                                         )
                                 except:
                                     logging.exception(
-                                        "Can't load package's post installation script"
+                    "Can't load package's post installation script"
                                         )
                                     ret = 7
 
                                 else:
                                     if l['main'](self.basedir) != 0:
                                         logging.error(
-                                            "Post installation script main function returned error"
+                    "Post installation script main function returned error"
                                             )
                                         ret = 8
                             finally:
                                 script_obj.close()
-
 
                 tarf.close()
 
@@ -529,8 +565,8 @@ class SystemCtl:
         :param exclude: can be ``None`` or ``list`` of files which is NOT
             PREPENDED WITH DESTDIR
 
-        :param only_remove_package_registration: do not actually remove files from
-            system, only remove it's registration
+        :param only_remove_package_registration: do not actually remove files
+            from system, only remove it's registration
         """
 
         exclude = copy.copy(exclude)
@@ -566,7 +602,10 @@ class SystemCtl:
 
                     lines_before_ex = len(lines)
 
-                    exclude = org.wayround.utils.path.prepend_path(exclude, destdir)
+                    exclude = org.wayround.utils.path.prepend_path(
+                        exclude,
+                        destdir
+                        )
 
                     exclude = org.wayround.utils.path.realpaths(exclude)
 
@@ -601,7 +640,6 @@ class SystemCtl:
 
                 del(shared_objects_tl)
 
-
                 lines = list(set(lines) - set(shared_objects))
 
                 logging.info(
@@ -610,7 +648,6 @@ class SystemCtl:
                         )
                     )
 
-
                 lines.sort(reverse=True)
 
                 for line in lines:
@@ -618,7 +655,6 @@ class SystemCtl:
                     rm_file_name = org.wayround.utils.path.abspath(
                         line
                         )
-
 
                     if (
                         (os.path.islink(rm_file_name)
@@ -632,7 +668,9 @@ class SystemCtl:
                          )
                         ):
                         if not mute:
-                            logging.info("   removing: {}".format(rm_file_name))
+                            logging.info(
+                                "   removing: {}".format(rm_file_name)
+                                )
 
                         if (
                             os.path.isfile(rm_file_name)
@@ -643,29 +681,35 @@ class SystemCtl:
                                 os.unlink(rm_file_name)
                             except:
                                 logging.exception(
-                                    "Couldn't remove file: {}".format(rm_file_name)
+                                    "Couldn't remove file: {}".format(
+                                        rm_file_name
+                                        )
                                     )
                         else:
                             try:
                                 os.rmdir(rm_file_name)
                             except:
                                 logging.exception(
-                                    "Couldn't remove dir: {}".format(rm_file_name)
+                                    "Couldn't remove dir: {}".format(
+                                        rm_file_name
+                                        )
                                     )
 
             if len(shared_objects) != 0:
 
                 logging.warning(
-                    "{} shared objects of asp `{}' was remained in system".format(
-                        len(shared_objects), asp_name
+                    "{} shared objects of asp `{}' "
+                    "was remained in system".format(
+                        len(shared_objects),
+                        asp_name
                         )
                     )
 
             for i in [
-                self.config['system_settings']['installed_pkg_dir_buildlogs'],
-                self.config['system_settings']['installed_pkg_dir_sums'],
-                self.config['system_settings']['installed_pkg_dir_deps'],
-                self.config['system_settings']['installed_pkg_dir']
+                self._installed_pkg_dir_buildlogs,
+                self._installed_pkg_dir_sums,
+                self._installed_pkg_dir_deps,
+                self._installed_pkg_dir
                 ]:
 
                 rm_file_name = org.wayround.utils.path.abspath(
@@ -697,7 +741,9 @@ class SystemCtl:
         reduce_to = os.path.basename(reduce_to)
 
         reduce_to = (
-            org.wayround.aipsetup.package_name_parser.rm_ext_from_pkg_name(reduce_to)
+            org.wayround.aipsetup.package_name_parser.rm_ext_from_pkg_name(
+                reduce_to
+                )
             )
 
         for i in range(len(reduce_what)):
@@ -719,7 +765,9 @@ class SystemCtl:
 
         if not isinstance(fiba, list):
             logging.error(
-                "Some error getting list of files installed by {}".format(reduce_to)
+                "Some error getting list of files installed by {}".format(
+                    reduce_to
+                    )
                 )
             ret = 1
         else:
@@ -732,7 +780,6 @@ class SystemCtl:
 
         return ret
 
-
     def list_installed_asps(self, mute=False):
 
         destdir = org.wayround.utils.path.abspath(self.basedir)
@@ -740,7 +787,7 @@ class SystemCtl:
         listdir = org.wayround.utils.path.abspath(
             org.wayround.utils.path.join(
                 destdir,
-                self.config['system_settings']['installed_pkg_dir']
+                self._installed_pkg_dir
                 )
             )
 
@@ -766,7 +813,6 @@ class SystemCtl:
 
         return ret
 
-
     def list_installed_packages(self, mask='*', mute=False):
 
         ret = None
@@ -780,9 +826,9 @@ class SystemCtl:
             lst = set()
 
             for i in asps:
-                parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                    i
-                    )
+                parsed = \
+                    org.wayround.aipsetup.package_name_parser.\
+                        package_name_parse(i)
 
                 if not isinstance(parsed, dict):
                     logging.error("Couldn't parse name `{}'".format(i))
@@ -811,9 +857,8 @@ class SystemCtl:
         asps_list_parsed = {}
 
         for i in asps_list:
-            asps_list_parsed[i] = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                i
-                )
+            asps_list_parsed[i] = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(i)
 
         for i in name_or_list:
 
@@ -847,7 +892,7 @@ class SystemCtl:
         list_dir = org.wayround.utils.path.abspath(
             org.wayround.utils.path.join(
                 destdir,
-                self.config['system_settings']['installed_pkg_dir']
+                self._installed_pkg_dir
                 )
             )
 
@@ -859,7 +904,9 @@ class SystemCtl:
         try:
             f = open(pkg_list_file, 'rb')
         except:
-            logging.exception("Can't open list file `{}'".format(pkg_list_file))
+            logging.exception(
+                "Can't open list file `{}'".format(pkg_list_file)
+                )
             ret = 2
         else:
 
@@ -871,11 +918,11 @@ class SystemCtl:
 
             pkg_file_list = pkg_file_list.splitlines()
             pkg_file_list = (
-                org.wayround.utils.list.filelist_strip_remove_empty_remove_duplicated_lines(
-                    pkg_file_list
-                    )
+                org.wayround.utils.list.\
+                    filelist_strip_remove_empty_remove_duplicated_lines(
+                        pkg_file_list
+                        )
                 )
-
 
             pkg_file_list.sort()
 
@@ -900,7 +947,7 @@ class SystemCtl:
         list_dir = org.wayround.utils.path.abspath(
             org.wayround.utils.path.join(
                 destdir,
-                self.config['system_settings']['installed_pkg_dir_sums']
+                self._installed_pkg_dir_sums
                 )
             )
 
@@ -933,8 +980,6 @@ class SystemCtl:
 
         return ret
 
-
-
     def list_installed_packages_and_asps(self):
 
         packages = self.list_installed_packages(mute=True)
@@ -962,7 +1007,6 @@ class SystemCtl:
 
         for i in lst:
             ret[i] = self.list_files_installed_by_asp(i, mute)
-
 
             lst_i += 1
 
@@ -1031,7 +1075,6 @@ class SystemCtl:
             ret = latest
 
         return ret
-
 
     def find_file_in_files_installed_by_asps(
         self,
@@ -1135,7 +1178,8 @@ class SystemCtl:
 
         :param instr: data which function must look for
         :param mode: mode inf which function must operate:
-        :param predefined_file_list: use existing file list instead of creating own
+        :param predefined_file_list: use existing file list instead of
+            creating own
         :param pkgname: take file list from this asp package
         """
 
@@ -1209,8 +1253,6 @@ class SystemCtl:
 
         return ret
 
-
-
     def make_asp_deps(self, asp_name, mute=True):
 
         """
@@ -1228,7 +1270,7 @@ class SystemCtl:
 
         deps_dir = org.wayround.utils.path.join(
             destdir,
-            self.config['system_settings']['installed_pkg_dir_deps']
+            self._installed_pkg_dir_deps
             )
 
         file_name = org.wayround.utils.path.join(
@@ -1268,7 +1310,6 @@ class SystemCtl:
 
         return ret
 
-
     def load_asp_deps(self, asp_name, mute=True):
 
         ret = None
@@ -1277,7 +1318,7 @@ class SystemCtl:
 
         dire = org.wayround.utils.path.join(
             destdir,
-            self.config['system_settings']['installed_pkg_dir_deps']
+            self._installed_pkg_dir_deps
             )
 
         file_name = org.wayround.utils.path.join(
@@ -1311,7 +1352,7 @@ class SystemCtl:
     def find_old_packages(self, age=None, mute=True):
 
         if age == None:
-            age = (60 * 60 * 24 * 30)  # 30 days
+            age = 2592000  # (60 * 60 * 24 * 30)  # 30 days
 
         ret = []
 
@@ -1319,17 +1360,19 @@ class SystemCtl:
 
         for i in asps:
 
-            parsed_name = org.wayround.aipsetup.package_name_parser.package_name_parse(
-                i
-                )
+            parsed_name = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    i
+                    )
 
             if not parsed_name:
                 logging.warning("Can't parse package name `{}'".format(i))
             else:
 
-                package_date = org.wayround.aipsetup.package_name_parser.parse_timestamp(
-                    parsed_name['groups']['timestamp']
-                    )
+                package_date = \
+                    org.wayround.aipsetup.package_name_parser.parse_timestamp(
+                        parsed_name['groups']['timestamp']
+                        )
 
                 if not package_date:
                     logging.error(
@@ -1340,14 +1383,12 @@ class SystemCtl:
                         )
                 else:
 
-                    if datetime.datetime.now() - package_date > datetime.timedelta(
-                        seconds=age
-                        ):
+                    if (datetime.datetime.now() - package_date
+                        > datetime.timedelta(seconds=age)):
 
                         ret.append(i)
 
         return ret
-
 
     def check_list_of_installed_packages_and_asps_auto(self):
 
@@ -1356,7 +1397,6 @@ class SystemCtl:
         ret = self.check_list_of_installed_packages_and_asps(content)
 
         return ret
-
 
     def check_list_of_installed_packages_and_asps(self, in_dict):
 
@@ -1375,7 +1415,9 @@ class SystemCtl:
                 errors += 1
                 ret = 1
 
-                logging.warning("Package with too many ASPs found `{}'".format(i))
+                logging.warning(
+                    "Package with too many ASPs found `{}'".format(i)
+                    )
 
                 in_dict[i].sort()
 
@@ -1387,7 +1429,6 @@ class SystemCtl:
             logging.warning("Total erroneous packages: {}".format(errors))
 
         return ret
-
 
     def check_elfs_readiness(self, mute=False):
 
@@ -1409,7 +1450,7 @@ class SystemCtl:
             if not mute:
                 logging.info(
                     "({} of {}) Trying to read file {}".format(
-                        elfs_i, elfs_c , i
+                        elfs_i, elfs_c, i
                         )
                     )
 
@@ -1438,7 +1479,6 @@ class SystemCtl:
 
         return ret
 
-
     def get_asps_depending_on_asp(self, asp_name, mute=False):
 
         ret = 0
@@ -1447,9 +1487,10 @@ class SystemCtl:
 
         asp_name_latest = None
 
-        package_name_parsed = org.wayround.aipsetup.package_name_parser.package_name_parse(
-            asp_name
-            )
+        package_name_parsed = \
+            org.wayround.aipsetup.package_name_parser.package_name_parse(
+                asp_name
+                )
         package_name = None
 
         if not isinstance(package_name_parsed, dict):
@@ -1494,9 +1535,10 @@ class SystemCtl:
                             )
                         )
 
-                    asp_name_latest_files = org.wayround.utils.path.prepend_path(
-                        asp_name_latest_files, destdir
-                        )
+                    asp_name_latest_files = \
+                        org.wayround.utils.path.prepend_path(
+                            asp_name_latest_files, destdir
+                            )
 
                     asp_name_latest_files = org.wayround.utils.path.realpaths(
                         asp_name_latest_files
@@ -1515,9 +1557,13 @@ class SystemCtl:
 
                     for i in range(len(asp_name_latest_files)):
 
-                        e = org.wayround.utils.format.elf.ELF(asp_name_latest_files[i])
+                        e = org.wayround.utils.format.elf.ELF(
+                            asp_name_latest_files[i]
+                            )
                         if e.is_elf:
-                            asp_name_latest_files2.append(asp_name_latest_files[i])
+                            asp_name_latest_files2.append(
+                                asp_name_latest_files[i]
+                                )
 
                     asp_name_latest_files = asp_name_latest_files2
 
@@ -1563,7 +1609,9 @@ class SystemCtl:
 
             if len(asp_name_latest_files) != 0:
                 if not mute:
-                    logging.info("Excluding latest asp files from selected asp files")
+                    logging.info(
+                        "Excluding latest asp files from selected asp files"
+                        )
 
                 asp_name_files = list(
                     set(asp_name_files) - set(asp_name_latest_files)
@@ -1613,7 +1661,8 @@ class SystemCtl:
 
                     del(files_list2)
 
-                    files_list = list(set(files_list) - set(asp_name_latest_files))
+                    files_list = \
+                        list(set(files_list) - set(asp_name_latest_files))
 
                     i_deps = self.get_asp_dependencies(
                         i,
@@ -1638,10 +1687,11 @@ class SystemCtl:
                                         deps_list[i] = set()
 
                                     deps_list[i].add(k)
-                                    last_found = "{} (depends on file {})".format(
-                                        i,
-                                        os.path.basename(k)
-                                        )
+                                    last_found = \
+                                        "{} (depends on file {})".format(
+                                            i,
+                                            os.path.basename(k)
+                                            )
 
                 if ret != 0:
                     break
@@ -1650,10 +1700,13 @@ class SystemCtl:
 
                 if not mute:
                     org.wayround.utils.file.progress_write(
-                        "    {} of {} ({:.2f}%) found: {}; last found: {}".format(
+                        "    {} of {} ({:.2f}%) "
+                        "found: {}; last found: {}".format(
                             installed_asp_names_i,
                             installed_asp_names_c,
-                            100.0 / (installed_asp_names_c / installed_asp_names_i),
+                            100.0 / (
+                                installed_asp_names_c / installed_asp_names_i
+                                ),
                             len(deps_list),
                             last_found
                             )
@@ -1738,9 +1791,8 @@ class SystemCtl:
         """
         Build dependency list for each elf in asp
 
-        On success returns ``dict``, in which each key is file name not prepended
-        with destdir
-
+        On success returns ``dict``, in which each key is file name not
+        prepended with destdir
         """
 
         ret = 0
@@ -1753,12 +1805,16 @@ class SystemCtl:
         if not isinstance(ret, dict):
 
             if not mute:
-                logging.warning("asp requiring deps list regeneration: {}".format(asp_name))
+                logging.warning(
+                    "asp requiring deps list regeneration: {}".format(asp_name)
+                    )
 
             ret = 0
 
             if not mute:
-                logging.info("Getting list of files installed by {}".format(asp_name))
+                logging.info(
+                    "Getting list of files installed by {}".format(asp_name)
+                    )
 
             asp_name_files = list()
             if predefined_asp_name_files:
@@ -1810,9 +1866,10 @@ class SystemCtl:
                 if not mute:
                     logging.info("{} files".format(len(asp_name_files)))
 
-
                 if not mute:
-                    logging.info("getting list of elf files from files installed by asp")
+                    logging.info(
+                        "getting list of elf files from files installed by asp"
+                        )
 
                 asp_name_elfs = set()
                 for i in asp_name_files:
@@ -1854,7 +1911,9 @@ class SystemCtl:
 
         return ret
 
-    def find_system_garbage(self, prepared_all_files=None, mute=True, only_lib=False):
+    def find_system_garbage(
+        self, prepared_all_files=None, mute=True, only_lib=False
+        ):
 
         """
         Searches files not installed by any of ASPs in system
@@ -1899,8 +1958,6 @@ class SystemCtl:
                 maxdepth=1
                 )
 
-
-
         lst = org.wayround.utils.path.unprepend_path(
             lst,
             self.basedir
@@ -1918,7 +1975,6 @@ class SystemCtl:
         lf = None
         size = 0
         s = 0
-#        for i in range(len_list - 1 , -1, -1):
         for i in range(len_list):
 
             lst_i = lst[i]
@@ -1930,7 +1986,6 @@ class SystemCtl:
                 if lst_i in prepared_all_files[j]:
                     found = True
                     break
-
 
             if not found:
                 result.append(lst_i)
@@ -1955,9 +2010,9 @@ class SystemCtl:
                     )
             ii += 1
 
-
             org.wayround.utils.file.progress_write(
-                "    {} of {} ({:.2f}%) found: {} size: {} MiB position: {}".format(
+                "    {} of {} ({:.2f}%) found:"
+                " {} size: {} MiB position: {}".format(
                     ii,
                     len_list,
                     100 / (float(len_list) / ii),
@@ -1973,8 +2028,6 @@ class SystemCtl:
 
         return ret
 
-
-
     def find_so_problems_in_system(self, verbose=False):
 
         """
@@ -1988,7 +2041,6 @@ class SystemCtl:
             )
 
         return reqs
-
 
     def build_dependency_tree(self, verbose=False):
 
@@ -2006,12 +2058,9 @@ class SystemCtl:
 
         return reqs
 
-
     def library_paths(self):
 
         ret = []
-        #        if 'LD_LIBRARY_PATH' in os.environ:
-        #            ret += os.environ['LD_LIBRARY_PATH'].split(':')
 
         ret.append('/lib')
         ret.append('/usr/lib')
@@ -2025,8 +2074,6 @@ class SystemCtl:
 
         ret = []
 
-        #        ret = os.environ['PATH'].split(':') + self.library_paths()
-
         ret.append('/bin')
         ret.append('/sbin')
         ret.append('/usr/bin')
@@ -2039,7 +2086,6 @@ class SystemCtl:
 
         return ret
 
-
     def find_so_and_elf_files(self, verbose=False):
 
         """
@@ -2049,7 +2095,6 @@ class SystemCtl:
         so_files = self.find_system_so_files(verbose=verbose)
         elf_files = self.find_system_elf_files(verbose=verbose)
         return (so_files, elf_files)
-
 
     def find_system_so_files(self, verbose=False):
         paths = self.library_paths()
@@ -2079,6 +2124,7 @@ def find_all_so_files(paths, verbose=False):
 
     return so_files
 
+
 def find_so_files(directory, verbose=False):
 
     """
@@ -2088,7 +2134,7 @@ def find_so_files(directory, verbose=False):
     ret = set()
 
     if not os.path.isdir(directory):
-        logging.error(ValueError("Directory not exists `{}'".format(directory)))
+        logging.error("Directory not exists `{}'".format(directory))
         ret = set()
     else:
 
@@ -2122,6 +2168,7 @@ def find_all_elf_files(paths, verbose=False):
 
     return elf_files
 
+
 def find_elf_files(directory, verbose=False):
 
     """
@@ -2131,7 +2178,7 @@ def find_elf_files(directory, verbose=False):
     ret = set()
 
     if not os.path.isdir(directory):
-        logging.error(ValueError("Directory not exists `{}'".format(directory)))
+        logging.error("Directory not exists `{}'".format(directory))
         ret = set()
     else:
 
@@ -2148,6 +2195,7 @@ def find_elf_files(directory, verbose=False):
     ret = list(ret)
 
     return ret
+
 
 def filter_so_files(files, verbose=False):
 
@@ -2194,6 +2242,7 @@ def filter_so_files(files, verbose=False):
 
     return list(ret)
 
+
 def filter_elf_files(files, verbose=False):
 
     """
@@ -2235,6 +2284,7 @@ def filter_elf_files(files, verbose=False):
 
     return list(ret)
 
+
 def build_binary_dependency_tree_for_given_elf_files(
     elf_files, verbose=False
     ):
@@ -2256,14 +2306,12 @@ def build_binary_dependency_tree_for_given_elf_files(
 
     deps = {}
 
-
     elf_files_c = len(elf_files)
     elf_files_i = 0
 
     for i in elf_files:
 
         e = org.wayround.utils.format.elf.ELF(i)
-
 
         libs_elf_linked_to = e.needed_libs_list
 
@@ -2290,6 +2338,7 @@ def build_binary_dependency_tree_for_given_elf_files(
         org.wayround.utils.file.progress_write_finish()
 
     return deps
+
 
 def find_so_problems_by_given_so_and_elfs(
     so_files, elf_files, verbose=False
@@ -2321,7 +2370,6 @@ def find_so_problems_by_given_so_and_elfs(
         logging.info("Looking for problems")
 
     reqs = {}
-
 
     elf_files_c = len(elf_files)
     elf_files_i = 0
