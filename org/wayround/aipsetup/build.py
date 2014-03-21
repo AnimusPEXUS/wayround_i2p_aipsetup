@@ -27,8 +27,8 @@ import org.wayround.utils.time
 
 DIR_TARBALL = '00.TARBALL'
 """
-Directory for storing tarballs used in package building. contents is packed into
-resulting package as it is requirements of most good licenses
+Directory for storing tarballs used in package building. contents is packed
+into resulting package as it is requirements of most good licenses
 """
 
 DIR_SOURCE = '01.SOURCE'

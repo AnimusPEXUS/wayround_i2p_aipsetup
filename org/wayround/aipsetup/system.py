@@ -11,10 +11,9 @@ import pprint
 import re
 import tarfile
 
-import org.wayround.aipsetup.info
+import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.package
 import org.wayround.aipsetup.package_name_parser
-import org.wayround.aipsetup.repository
 import org.wayround.aipsetup.version
 import org.wayround.utils.file
 import org.wayround.utils.format.elf
@@ -42,8 +41,7 @@ class SystemCtl:
 
     def __init__(
         self,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/',
         installed_pkg_dir='/var/log/packages',
         installed_pkg_dir_buildlogs='/var/log/packages/buildlogs',
@@ -55,26 +53,19 @@ class SystemCtl:
             (absoluted internally)
         """
 
-        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
-            raise ValueError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
-                )
-
         if not isinstance(
-            pkg_repo_ctl,
-            org.wayround.aipsetup.repository.PackageRepoCtl
+            pkg_client,
+            org.wayround.aipsetup.client_pkg.PackageServerClient
             ):
 
             raise ValueError(
-                "pkg_repo_ctl must be of type "
-                "org.wayround.aipsetup.repository.PackageRepoCtl"
+                "pkg_client must be of type "
+                "org.wayround.aipsetup.client_pkg.PackageServerClient"
                 )
 
         self.basedir = org.wayround.utils.path.abspath(basedir)
-        self.info_ctl = info_ctl
-        self.pkg_repo_ctl = pkg_repo_ctl
-        #        self.config = config
+
+        self._pkg_client = pkg_client
 
         self._installed_pkg_dir = installed_pkg_dir
         self._installed_pkg_dir_buildlogs = installed_pkg_dir_buildlogs
@@ -102,9 +93,7 @@ class SystemCtl:
 
         ret = 0
 
-        info = self.info_ctl.get_package_info_record(
-            name
-            )
+        info = self._pkg_client.info(name)
 
         if not isinstance(info, dict) and not force:
             logging.error(
@@ -196,7 +185,7 @@ class SystemCtl:
 
                 info = None
                 if isinstance(name_parsed, dict):
-                    info = self.info_ctl.get_package_info_record(
+                    info = self._pkg_client.info(
                         name_parsed['groups']['name']
                         )
 
@@ -253,9 +242,7 @@ class SystemCtl:
                                             )
 
         else:
-            info = self.info_ctl.get_package_info_record(
-                name
-                )
+            info = self._pkg_client.info(name)
 
             if not isinstance(info, dict):
                 logging.error("Don't know about package")
@@ -273,23 +260,22 @@ class SystemCtl:
                     ret = 3
                 else:
 
-                    latest_in_repo = (
-                        self.pkg_repo_ctl.get_latest_pkg_from_repo(name)
+                    latest_full_path = self._pkg_client.get_latest_asp(
+                        name,
+                        out_dir=self._pkg_client.downloads_dir,
+                        out_to_temp=True
                         )
 
-                    if latest_in_repo == None:
-                        logging.error("Repo has no latest package")
+                    if not isinstance(latest_full_path, str):
+                        logging.error("Can't get latest asp from pkg_server")
                         ret = 3
                     else:
 
-                        full_name = org.wayround.utils.path.abspath(
-                            org.wayround.utils.path.join(
-                                self.pkg_repo_ctl.repository_dir,
-                                latest_in_repo
-                                )
+                        latest_full_path = org.wayround.utils.path.abspath(
+                            latest_full_path
                             )
 
-                        ret = self.install_package(full_name, False)
+                        ret = self.install_package(latest_full_path, False)
 
         return ret
 

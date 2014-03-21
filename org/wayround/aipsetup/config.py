@@ -22,7 +22,8 @@ DEFAULT_CONFIG = collections.OrderedDict(
      ('general', collections.OrderedDict([
         ('editor', 'emacs'),
         ('acceptable_src_file_extensions',
-            '.tar.gz .tar.bz2 .zip .7z .tgz .tar.xz .tar.lzma .tbz2'),
+            '.tar.xz .tar.lzma .tar.bz2 .tar.gz '
+            '.txz .tlzma .tbz2 .tgz .7z .zip'),
         ('distro_buildout_dir', EMBEDDED_DISTRO_DIR)
         ])
       ),
@@ -103,6 +104,21 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ])
      ),
 
+    ('pkg_client', collections.OrderedDict([
+        ('server_url', 'http://localhost:8081/'),
+        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('downloads_dir', '${working_dir}/downloads'),
+        ('acceptable_src_file_extensions',
+            '${general:acceptable_src_file_extensions}')
+        ])
+     ),
+
+    ('local_build', collections.OrderedDict([
+        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('building_scripts_dir', '${working_dir}/pkg_buildscripts'),
+        ('building_sites_dir', '${working_dir}/b')
+        ])
+     ),
 
 #    ('server_package_repo', collections.OrderedDict([
 #        ('base_dir', '${general:distro_buildout_dir}'),

@@ -4,76 +4,80 @@ Package info related functions
 """
 
 import builtins
+import collections
 import copy
 import fnmatch
+import json
 import logging
 import os.path
 import re
 import sys
-import json
 
 import sqlalchemy.ext.declarative
 
-import org.wayround.utils.file
+import org.wayround.aipsetup.repository
 import org.wayround.utils.db
+import org.wayround.utils.file
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 import org.wayround.utils.version
 
 
-import org.wayround.aipsetup.repository
-
-
-SAMPLE_PACKAGE_INFO_STRUCTURE = dict(
+SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # description
-    description="",
+    ('description', ""),
 
     # not required, but can be useful
-    home_page="",
+    ('home_page', ""),
 
     # string
-    buildscript='',
+    ('buildscript', ''),
 
     # file name base
-    basename='',
+    ('basename', ''),
 
     # prefix for filtering source files
-    src_path_prefix='',
+    ('src_path_prefix', ''),
 
     # filters. various filters to provide correct list of acceptable tarballs
     # by they filenames
-    filters='',
+    ('filters', ''),
 
     # from 0 to 9. default 5. lower number - higher priority
-    installation_priority=5,
+    ('installation_priority', 5),
 
     # can package be deleted without hazard to aipsetup functionality
     # (including system stability)?
-    removable=True,
+    ('removable', True),
 
     # can package be updated without hazard to aipsetup functionality
     # (including system stability)?
-    reducible=True,
+    ('reducible', True),
 
     # package can not be installed
-    non_installable=False,
+    ('non_installable', False),
 
     # package outdated and need to be removed
-    deprecated=False,
+    ('deprecated', False)
 
-    # can aipsetup automatically find and update latest version? (can't not for
-    # files containing statuses, e.g. openssl-1.0.1a.tar.gz, where 'a' is
-    # status)
-    auto_newest_src=True,
-
-    # can aipsetup automatically find and update latest version? (can't not for
-    # files containing statuses, e.g. openssl-1.0.1a.tar.gz, where 'a' is
-    # status)
-    auto_newest_pkg=True,
-    )
+    ])
 """
 Package info skeleton.
 """
+
+SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
+    ('description', 'Description'),
+    ('home_page', "Homepage"),
+    ('buildscript', "Building Script"),
+    ('basename', 'Tarball basename'),
+    ('src_path_prefix', "Sources Path Prefix"),
+    ('filters', "Filters"),
+    ('installation_priority', "Installation Priority"),
+    ('removable', "Is Removable?"),
+    ('reducible', "Is Reducible?"),
+    ('non_installable', "Is Non Installable?"),
+    ('deprecated', "Is Deprecated?")
+    ])
 
 #pkg_info_file_template = Template(text="""\
 #<package>
@@ -225,6 +229,8 @@ class PackageInfoCtl:
         self._info_dir = org.wayround.utils.path.abspath(info_dir)
         self._info_db = info_db
 
+        return
+
     def get_lists_of_packages_missing_and_present_info_records(
         self,
         names, pkg_index_ctl
@@ -287,11 +293,9 @@ class PackageInfoCtl:
 
         else:
 
-            ret = dict()
+            ret = collections.OrderedDict()
 
-            keys = set(
-                SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
-                )
+            keys = SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
 
             for i in keys:
                 ret[i] = eval('q.{}'.format(i))
@@ -518,227 +522,6 @@ class PackageInfoCtl:
 
         return ret
 
-    def filter_text_parse(self, filter_text):
-        """
-        Returns list of command structures
-
-        ret = [
-            dict(
-                action   = '-' or '+',
-                subject  = in ['path', 'filename', 'version', 'status'],
-                function = <depends on subject> (no spaces allowed),
-                data     = <depends on subject> (can contain spaces)
-                )
-            ]
-
-        """
-        ret = []
-
-        lines = filter_text.splitlines()
-
-        for i in lines:
-            if not i.isspace():
-                struct = i.split(' ', maxsplit=3)
-                if not len(struct) == 4:
-                    logging.error("Wrong filter line: `{}'".format(i))
-                else:
-                    struct = dict(
-                        action=struct[0],
-                        subject=struct[1],
-                        function=struct[2],
-                        data=struct[3],
-                        )
-                    ret.append(struct)
-
-        return ret
-
-    def filter_tarball_list(
-        self,
-        input_list,
-        filter_text
-        ):
-        """
-        Filters supplied list with supplied filter
-
-        subjects not in check_for_subjects will always be positive (but can be
-        filtered out by proper leading rules)
-        """
-
-        ret = []
-
-        inp_list = set(copy.copy(input_list))
-        out_list = copy.copy(inp_list)
-
-        filters = self.filter_text_parse(filter_text)
-
-        for f in filters:
-
-            action = f['action']
-            subject = f['subject']
-            function = f['function']
-            no = False
-            data = f['data']
-
-            if not action in ['+', '-']:
-                logging.error("Wrong action: `{}'".format(action))
-                ret = 10
-                break
-
-            if function.startswith('!'):
-                no = True
-                function = function[1:]
-
-            if not subject in ['filename', 'version', 'status']:
-                logging.error("Wrong subject : `{}'".format(subject))
-                ret = 1
-                break
-
-            if subject == 'filename' or subject == 'status':
-
-                if not function in ['begins', 'contains', 'ends', 'fm', 're']:
-                    logging.error(
-                        "Wrong `{}' function : `{}'".format(subject, function)
-                        )
-                    ret = 3
-                    break
-
-            elif subject == 'version':
-
-                if not function in [
-                        '<', '<=', '==', '>=', '>', 're', 'fm',
-                        'begins', 'contains', 'ends'
-                        ]:
-                    logging.error(
-                        "Wrong `version' function : `{}'".format(function)
-                        )
-                    ret = 4
-                    break
-
-            else:
-                raise Exception("Programming error")
-
-            if not isinstance(ret, int):
-
-                working_list = None
-
-                if action == '+':
-                    working_list = copy.copy(inp_list)
-
-                elif action == '-':
-                    working_list = copy.copy(out_list)
-                else:
-                    raise Exception("Programming Error")
-
-                for item in working_list:
-
-                    working_item = item
-
-                    if subject == 'filename':
-                        working_item = os.path.basename(item)
-
-                    elif subject in ['version', 'status']:
-
-                        working_item = None
-
-                        parsed = org.wayround.utils.tarball_name_parser.\
-                            parse_tarball_name(
-                                os.path.basename(item),
-                                mute=True
-                                )
-
-                        if not isinstance(parsed, dict):
-                            # TODO: it's not error, but may be it's need to do
-                            # something when just a `pass'
-                            pass
-                        else:
-                            if subject == 'version':
-                                working_item = parsed['groups']['version']
-
-                            elif subject == 'status':
-                                working_item = parsed['groups']['status']
-
-                            else:
-                                raise Exception("Programming error")
-
-                    else:
-                        raise Exception("Programming error")
-
-                    matched = False
-
-                    if function == 'begins':
-                        matched = working_item.startswith(data)
-
-                    elif function == 'contains':
-                        matched = working_item.find(data) != -1
-
-                    elif function == 'end':
-                        matched = working_item.endswith(data)
-
-                    elif function == 're':
-                        matched = re.match(data, working_item) != None
-
-                    elif function == 'fm':
-                        logging.debug(
-                            "filter_tarball_list: "
-                            "fm-matching `{}' and `{}'".format(
-                                working_item,
-                                data
-                                )
-                            )
-                        matched = fnmatch.fnmatch(working_item, data)
-
-                    elif function in ['<', '<=', '==', '>=', '>']:
-                        matched = (
-                            org.wayround.aipsetup.version.lb_comparator(
-                                working_item,
-                                function + ' ' + data
-                                )
-                            )
-                    else:
-                        raise Exception("Programming error")
-
-                    if no:
-                        matched = not matched
-
-                    if matched:
-
-                        logging.debug(
-                            "filter_tarball_list: "
-                            "match: `{}'\n       `{}'".format(item, f)
-                            )
-
-                        if action == '+':
-                            logging.debug(
-                                "filter_tarball_list: adding: {}".format(item)
-                                )
-                            out_list.add(item)
-
-                        elif action == '-':
-                            logging.debug(
-                                "filter_tarball_list: removing: {}".format(
-                                    item
-                                    )
-                                )
-                            if item in out_list:
-                                out_list.remove(item)
-
-                        else:
-                            raise Exception("Programming error")
-
-                    else:
-                        logging.debug(
-                            "filter_tarball_list: NOT "
-                            "match: `{}'\n       `{}'".format(item, f)
-                            )
-
-        if not isinstance(ret, int):
-            ret = out_list
-
-        if isinstance(ret, set):
-            ret = list(ret)
-
-        return ret
-
     def get_package_name_by_tarball_filename(
         self,
         tarball_filename, mute=True
@@ -769,7 +552,7 @@ class PackageInfoCtl:
 
             for i in q:
 
-                res = self.filter_tarball_list(
+                res = filter_tarball_list(
                     lst,
                     i.filters
                     )
@@ -861,6 +644,8 @@ class PackageInfoCtl:
         return
 
     def print_info_record(self, name, pkg_index_ctl, tag_ctl):
+
+        # TODO: move this method to package_client
 
         r = self.get_package_info_record(name=name)
 
@@ -981,10 +766,10 @@ class PackageInfoCtl:
 
                 r = self.get_package_info_record(record=i)
                 if isinstance(r, dict):
-                    if self.write_to_file(filename, r) != 0:
+                    if write_info_file(filename, r) != 0:
                         logging.error("can't write file {}".format(filename))
 
-        return
+        return 0
 
     def load_info_records_from_fs(
         self, filenames=[], rewrite_existing=False
@@ -1221,12 +1006,10 @@ def write_info_file(name, struct):
 
     ret = 0
 
-    struct = copy.copy(struct)
-
     if 'name' in struct:
         del struct['name']
 
-    txt = json.dumps(struct, indent=2, sort_keys=True)
+    txt = json.dumps(struct, indent=2)
 
     try:
         f = open(name, 'w')
@@ -1238,5 +1021,225 @@ def write_info_file(name, struct):
             f.write(txt)
         finally:
             f.close()
+
+    return ret
+
+
+def filter_text_parse(filter_text):
+    """
+    Returns list of command structures
+
+    ret = [
+        dict(
+            action   = '-' or '+',
+            subject  = in ['path', 'filename', 'version', 'status'],
+            function = <depends on subject> (no spaces allowed),
+            data     = <depends on subject> (can contain spaces)
+            )
+        ]
+
+    """
+    ret = []
+
+    lines = filter_text.splitlines()
+
+    for i in lines:
+        if not i.isspace():
+            struct = i.split(' ', maxsplit=3)
+            if not len(struct) == 4:
+                logging.error("Wrong filter line: `{}'".format(i))
+            else:
+                struct = dict(
+                    action=struct[0],
+                    subject=struct[1],
+                    function=struct[2],
+                    data=struct[3],
+                    )
+                ret.append(struct)
+
+    return ret
+
+
+def filter_tarball_list(input_list, filter_text):
+
+    """
+    Filters supplied list with supplied filter
+
+    subjects not in check_for_subjects will always be positive (but can be
+    filtered out by proper leading rules)
+    """
+
+    ret = []
+
+    inp_list = set(copy.copy(input_list))
+    out_list = copy.copy(inp_list)
+
+    filters = filter_text_parse(filter_text)
+
+    for f in filters:
+
+        action = f['action']
+        subject = f['subject']
+        function = f['function']
+        no = False
+        data = f['data']
+
+        if not action in ['+', '-']:
+            logging.error("Wrong action: `{}'".format(action))
+            ret = 10
+            break
+
+        if function.startswith('!'):
+            no = True
+            function = function[1:]
+
+        if not subject in ['filename', 'version', 'status']:
+            logging.error("Wrong subject : `{}'".format(subject))
+            ret = 1
+            break
+
+        if subject == 'filename' or subject == 'status':
+
+            if not function in ['begins', 'contains', 'ends', 'fm', 're']:
+                logging.error(
+                    "Wrong `{}' function : `{}'".format(subject, function)
+                    )
+                ret = 3
+                break
+
+        elif subject == 'version':
+
+            if not function in [
+                    '<', '<=', '==', '>=', '>', 're', 'fm',
+                    'begins', 'contains', 'ends'
+                    ]:
+                logging.error(
+                    "Wrong `version' function : `{}'".format(function)
+                    )
+                ret = 4
+                break
+
+        else:
+            raise Exception("Programming error")
+
+        if not isinstance(ret, int):
+
+            working_list = None
+
+            if action == '+':
+                working_list = copy.copy(inp_list)
+
+            elif action == '-':
+                working_list = copy.copy(out_list)
+            else:
+                raise Exception("Programming Error")
+
+            for item in working_list:
+
+                working_item = item
+
+                if subject == 'filename':
+                    working_item = os.path.basename(item)
+
+                elif subject in ['version', 'status']:
+
+                    working_item = None
+
+                    parsed = org.wayround.utils.tarball_name_parser.\
+                        parse_tarball_name(
+                            os.path.basename(item),
+                            mute=True
+                            )
+
+                    if not isinstance(parsed, dict):
+                        # TODO: it's not error, but may be it's need to do
+                        # something than just a `pass'
+                        pass
+                    else:
+                        if subject == 'version':
+                            working_item = parsed['groups']['version']
+
+                        elif subject == 'status':
+                            working_item = parsed['groups']['status']
+
+                        else:
+                            raise Exception("Programming error")
+
+                else:
+                    raise Exception("Programming error")
+
+                matched = False
+
+                if function == 'begins':
+                    matched = working_item.startswith(data)
+
+                elif function == 'contains':
+                    matched = working_item.find(data) != -1
+
+                elif function == 'end':
+                    matched = working_item.endswith(data)
+
+                elif function == 're':
+                    matched = re.match(data, working_item) != None
+
+                elif function == 'fm':
+                    logging.debug(
+                        "filter_tarball_list: "
+                        "fm-matching `{}' and `{}'".format(
+                            working_item,
+                            data
+                            )
+                        )
+                    matched = fnmatch.fnmatch(working_item, data)
+
+                elif function in ['<', '<=', '==', '>=', '>']:
+                    matched = (
+                        org.wayround.aipsetup.version.lb_comparator(
+                            working_item,
+                            function + ' ' + data
+                            )
+                        )
+                else:
+                    raise Exception("Programming error")
+
+                if no:
+                    matched = not matched
+
+                if matched:
+
+                    logging.debug(
+                        "filter_tarball_list: "
+                        "match: `{}'\n       `{}'".format(item, f)
+                        )
+
+                    if action == '+':
+                        logging.debug(
+                            "filter_tarball_list: adding: {}".format(item)
+                            )
+                        out_list.add(item)
+
+                    elif action == '-':
+                        logging.debug(
+                            "filter_tarball_list: removing: {}".format(
+                                item
+                                )
+                            )
+                        if item in out_list:
+                            out_list.remove(item)
+
+                    else:
+                        raise Exception("Programming error")
+
+                else:
+                    logging.debug(
+                        "filter_tarball_list: NOT "
+                        "match: `{}'\n       `{}'".format(item, f)
+                        )
+
+    if not isinstance(ret, int):
+        ret = out_list
+
+    if isinstance(ret, set):
+        ret = list(ret)
 
     return ret

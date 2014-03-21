@@ -3,8 +3,8 @@
 Module for GNU/Linux system related package actions
 """
 
-import os.path
 import logging
+import os.path
 import tarfile
 
 import org.wayround.utils.archive

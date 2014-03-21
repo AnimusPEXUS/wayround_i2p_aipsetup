@@ -226,7 +226,7 @@ class SRCServer:
 
             if resultmode == 'html':
                 ret = self.templates['html'].render(
-                    title="List of package names found by request mode "
+                    title="List of tarball names found by request mode "
                         "`{}', using mask `{}' in `{}' mode".format(
                         searchmode_name,
                         mask,
@@ -257,6 +257,8 @@ class SRCServer:
 
         decoded_params = bottle.request.params.decode('utf-8')
 
+        name = decoded_params['name']
+
         if not 'resultmode' in decoded_params:
             decoded_params['resultmode'] = 'html'
 
@@ -265,7 +267,7 @@ class SRCServer:
 
         resultmode = decoded_params['resultmode']
 
-        results = self.src_db.get_objects_by_tag(decoded_params['name'])
+        results = self.src_db.get_objects_by_tag(name)
 
         results.sort(
             reverse=True,
@@ -279,15 +281,16 @@ class SRCServer:
         if resultmode == 'html':
 
             ret = self.templates['html'].render(
-                title="List of tarballs with basename `{}'".format(
-                    decoded_params['name']
-                    ),
+                title="List of tarballs with basename `{}'".format(name),
                 body=self.search(
                     searchmode='filemask',
-                    mask=decoded_params['name'],
+                    mask=name,
                     cs=True
                     )
-                    + self.templates['file_list'].render(files=results),
+                    + self.templates['file_list'].render(
+                        files=results,
+                        name=name
+                        ),
                 css=[]
                 )
 

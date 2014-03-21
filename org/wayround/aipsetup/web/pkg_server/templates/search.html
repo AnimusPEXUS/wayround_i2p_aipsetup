@@ -1,0 +1,42 @@
+<div>
+    <form method="GET" action="search">
+        <label>
+            Search Mode:
+            <select name="searchmode">
+                % for i in [('filemask', 'FileName Mask'), ('regexp', 'Regular Expression')]:
+                <%
+                selected = '' 
+                if mode == i[0]:
+                    selected = 'selected="selected"' 
+                %><option value="${ i[0] | x }" ${selected}>${ i[1] | x }</option>
+                % endfor
+            </select>
+        </label>
+        <label>
+            Result Mode:
+            <select name="resultmode">
+                % for i in [('html', 'HTML'), ('json', 'JSON')]:
+                <%
+                selected = '' 
+                if mode == i[0]:
+                    selected = 'selected="selected"' 
+                %><option value="${ i[0] | x }" ${selected}>${ i[1] | x }</option>
+                % endfor
+            </select>
+        </label>
+        <label>
+            Mask:
+            <input type="text" name="mask" value="${mask|x}" />
+        </label>
+        <label>
+            Case Sensitive:
+            <%
+            checked=''
+            if cs:
+                checked='checked="checked"'
+            %>
+            <input type="checkbox" name="cs" ${checked} />
+        </label>
+        <button type="submit" name="action" value="search">Search</button>
+    </form>
+</div>

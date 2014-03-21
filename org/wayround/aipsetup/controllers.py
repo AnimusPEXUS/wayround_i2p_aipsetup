@@ -2,6 +2,7 @@
 import logging
 
 import org.wayround.aipsetup.build
+import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.dbconnections
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package
@@ -71,11 +72,10 @@ def info_ctl_new(info_dir, info_db):
     return ret
 
 
-def sys_ctl_by_config(config, info_ctl, pkg_repo_ctl, basedir='/'):
+def sys_ctl_by_config(config, pkg_client, basedir='/'):
 
     ret = sys_ctl_new(
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir,
         config['system_settings']['installed_pkg_dir'],
         config['system_settings']['installed_pkg_dir_buildlogs'],
@@ -87,8 +87,7 @@ def sys_ctl_by_config(config, info_ctl, pkg_repo_ctl, basedir='/'):
 
 
 def sys_ctl_new(
-    info_ctl,
-    pkg_repo_ctl,
+    pkg_client,
     basedir='/',
     installed_pkg_dir='/var/log/packages',
     installed_pkg_dir_buildlogs='/var/log/packages/buildlogs',
@@ -97,8 +96,7 @@ def sys_ctl_new(
     ):
 
     ret = org.wayround.aipsetup.system.SystemCtl(
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir,
         installed_pkg_dir,
         installed_pkg_dir_buildlogs,
@@ -133,7 +131,7 @@ def pack_ctl_new(bs):
 def bscript_ctl_by_config(config):
 
     ret = bscript_ctl_new(
-        config['builder_repo']['building_scripts_dir']
+        config['local_build']['building_scripts_dir']
         )
 
     return ret
@@ -192,3 +190,17 @@ def constitution_by_config(config, host, target, build):
 
 def asp_package(asp_filename):
     return org.wayround.aipsetup.package.ASPackage(asp_filename)
+
+
+def pkg_client_by_config(config):
+    return pkg_client_new(
+        config['pkg_client']['server_url'],
+        config['pkg_client']['downloads_dir']
+        )
+
+
+def pkg_client_new(url, downloads_dir='/tmp/aipsetup_downloads'):
+    return org.wayround.aipsetup.client_pkg.PackageServerClient(
+        url,
+        downloads_dir
+        )

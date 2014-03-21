@@ -1,0 +1,16 @@
+<%
+import os.path
+%><table>
+    <thead>
+        <tr>
+            <th>File</th>
+        </tr>
+    </thead>
+    <tbody>
+        % for i in files:
+        <tr>
+            <td><a href="${ src_page_url | x }download${i}">${ os.path.basename(i) | x }</a></td>
+        </tr>
+        % endfor
+    </tbody>
+</table>

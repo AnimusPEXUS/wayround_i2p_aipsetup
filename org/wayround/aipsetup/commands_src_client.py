@@ -11,8 +11,7 @@ def commands():
             ('list', list_),
             ('files', files),
             ('get', get)
-            ])
-            )
+            ]))
         ])
 
 
@@ -26,7 +25,6 @@ def list_(command_name, opts, args, adds):
     options:
         --searchmode=NAME    must be 'filemask' or 'regexp'
         -n                   non case sensitive
-        -d
     """
 
     config = adds['config']

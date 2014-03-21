@@ -1,28 +1,24 @@
+
+<div>
+    <a href="/">Index Page</a> 
+    <a href="/category/${category | x}">Go to category</a>
+</div>
 <div>
     <table>
         <tbody>
-
             <tr>
                 <td>
                     <table>
                         <tbody>
-                            % for i in autorows:
+                            % for i in autorows.keys():
                             <tr>
-                                <td>${ '{}:'.format(i[0]) | x }</td>
-                                <td><pre>${ i[1] | x }</pre></td>
+                                <td>${ '{}:'.format(autorows[i][0]) | x }</td>
+                                <td><pre>${ autorows[i][1] | x }</pre></td>
                             </tr>
                             % endfor
                             <tr>
-                                <td>Base Name:</td>
-                                <td><pre>${ basename | x }</pre></td>
-                            </tr>
-                            <tr>
                                 <td>Category:</td>
                                 <td><pre>${ category | x }</pre></td>
-                            </tr>
-                            <tr>
-                                <td>Home Page:</td>
-                                <td><pre>${ homepage | x }</pre></td>
                             </tr>
                             <tr>
                                 <td>Tags:</td>
@@ -36,18 +32,13 @@
         </tbody>
     </table>
 </div>
-
 <div>
-    <table>
-        <thead>
-            <tr>
-                <th>Packages:</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>${asp_list}</td>
-            </tr>
-        </tbody>
-    </table>
+    <a href="?resultmode=json">json</a>
+    <a href="${ src_page_url | x }files?name=${ autorows['basename'][1] | u,x}">
+        all sources on tarball server
+    </a>
+    <a href="/package/${name | u,x}/asps">asps</a>
+    <a href="/package/${name | u,x}/asps_latest">latest asp</a>
+    <a href="/package/${name | u,x}/tarballs">tarballs</a>
+    <a href="/package/${name | u,x}/tarballs_latest">latest tarball</a>
 </div>

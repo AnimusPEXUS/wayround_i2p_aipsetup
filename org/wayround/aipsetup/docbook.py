@@ -20,31 +20,21 @@ import org.wayround.utils.file
 import org.wayround.utils.archive
 import org.wayround.utils.path
 
-def cli_name():
-    """
-    Internally used by aipsetup
-    """
-    return 'docbook'
 
-
-def exported_commands():
+def commands():
     """
     Internally used by aipsetup
     """
     return {
-        'install': docbook_install
+        'docbook': {
+            'install': docbook_install
+            }
         }
 
-def commands_order():
-    """
-    Internally used by aipsetup
-    """
-    return [
-        'install'
-        ]
 
 def docbook_install(opts, args):
     install()
+
 
 def set_correct_modes(directory):
 
@@ -85,7 +75,6 @@ def set_correct_owners(directory):
     return 0
 
 
-
 def make_directories(base_dir, lst):
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
@@ -108,7 +97,6 @@ def make_directories(base_dir, lst):
             return 1
 
     return 0
-
 
 
 def prepare_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
@@ -162,11 +150,11 @@ def import_docbook_to_catalog(base_dir_etc_xml_catalog):
     return 0
 
 
-
-
 def import_docbook_xsl_to_catalog(
-    target_xsl_dir, base_dir='/', current=False, super_xml_catalog='/etc/xml/catalog'
+    target_xsl_dir, base_dir='/', current=False,
+    super_xml_catalog='/etc/xml/catalog'
     ):
+
     """
     target_xsl_dir: [/base_dir]/usr/share/xml/docbook/docbook-xsl-1.78.1
     super_xml_catalog: [/base_dir]/etc/xml/catalog
@@ -177,9 +165,11 @@ def import_docbook_xsl_to_catalog(
     super_xml_catalog = org.wayround.utils.path.abspath(super_xml_catalog)
 
     target_xsl_dir_fn = org.wayround.utils.path.join(base_dir, target_xsl_dir)
-    target_xsl_dir_fn_no_base = org.wayround.utils.path.remove_base(target_xsl_dir_fn, base_dir)
+    target_xsl_dir_fn_no_base = \
+        org.wayround.utils.path.remove_base(target_xsl_dir_fn, base_dir)
 
-    super_xml_catalog_fn = org.wayround.utils.path.join(base_dir, super_xml_catalog)
+    super_xml_catalog_fn = \
+        org.wayround.utils.path.join(base_dir, super_xml_catalog)
 
     bn = os.path.basename(target_xsl_dir)
 
@@ -197,7 +187,7 @@ def import_docbook_xsl_to_catalog(
 
     subprocess.Popen(
         [
-            'xmlcatalog' , '--noout', '--add', 'rewriteURI',
+            'xmlcatalog', '--noout', '--add', 'rewriteURI',
             'http://docbook.sourceforge.net/release/xsl/' + version,
             target_xsl_dir_fn_no_base,
             super_xml_catalog_fn
@@ -207,7 +197,7 @@ def import_docbook_xsl_to_catalog(
     if current:
         subprocess.Popen(
             [
-                'xmlcatalog', '--noout' , '--add', 'rewriteSystem',
+                'xmlcatalog', '--noout', '--add', 'rewriteSystem',
                 'http://docbook.sourceforge.net/release/xsl/current',
                 target_xsl_dir_fn_no_base,
                 super_xml_catalog_fn
@@ -231,15 +221,18 @@ def import_catalog_xml_to_super_docbook_catalog(
     base_dir='/',
     super_docbook_catalog_xml='/etc/xml/docbook'
     ):
+
     """
-    target_catalog_xml: [/base_dir]/usr/share/xml/docbook/docbook-xml-4.5/catalog.xml
+    target_catalog_xml:
+    [/base_dir]/usr/share/xml/docbook/docbook-xml-4.5/catalog.xml
 
     super_docbook_catalog_xml: [/base_dir]/etc/xml/docbook
     """
 
     target_catalog_xml = org.wayround.utils.path.abspath(target_catalog_xml)
     base_dir = org.wayround.utils.path.abspath(base_dir)
-    super_docbook_catalog_xml = org.wayround.utils.path.abspath(super_docbook_catalog_xml)
+    super_docbook_catalog_xml = \
+        org.wayround.utils.path.abspath(super_docbook_catalog_xml)
 
     target_catalog_xml_fn = org.wayround.utils.path.abspath(
         org.wayround.utils.path.join(base_dir, target_catalog_xml)
@@ -251,8 +244,10 @@ def import_catalog_xml_to_super_docbook_catalog(
         target_catalog_xml_fn_dir_virtual, base_dir
         )
 
-    super_docbook_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_docbook_catalog_xml)
-    super_docbook_catalog_xml_fn_dir = os.path.dirname(super_docbook_catalog_xml_fn)
+    super_docbook_catalog_xml_fn = \
+        org.wayround.utils.path.join(base_dir, super_docbook_catalog_xml)
+    super_docbook_catalog_xml_fn_dir = \
+        os.path.dirname(super_docbook_catalog_xml_fn)
 
     if not os.path.exists(super_docbook_catalog_xml_fn_dir):
         os.makedirs(super_docbook_catalog_xml_fn_dir)
@@ -262,8 +257,9 @@ def import_catalog_xml_to_super_docbook_catalog(
     try:
         tmp_cat_lxml = lxml.etree.parse(target_catalog_xml_fn)
     except:
-        logging.exception("Can't parse catalog file {}".format(target_catalog_xml_fn))
-
+        logging.exception(
+            "Can't parse catalog file {}".format(target_catalog_xml_fn)
+            )
 
     for i in tmp_cat_lxml.getroot():
 
@@ -272,7 +268,6 @@ def import_catalog_xml_to_super_docbook_catalog(
             qname = lxml.etree.QName(i.tag)
 
             tag = qname.localname
-
 
             src_uri = i.get('uri')
 
@@ -312,6 +307,7 @@ def import_catalog_xml_to_super_docbook_catalog(
 
     return
 
+
 def import_to_super_docbook_catalog(
     target_dir,
     base_dir='/',
@@ -350,11 +346,15 @@ def import_to_super_docbook_catalog(
 
     if 'catalog.xml' in files:
 
-        target_catalog_xml = org.wayround.utils.path.join(target_dir, 'catalog.xml')
+        target_catalog_xml = org.wayround.utils.path.join(
+            target_dir,
+            'catalog.xml'
+            )
 
         import_catalog_xml_to_super_docbook_catalog(
             target_catalog_xml, base_dir, super_catalog_xml
             )
+
 
 def make_new_docbook_xml_look_like_old(
     base_dir='/',
@@ -364,11 +364,15 @@ def make_new_docbook_xml_look_like_old(
     ):
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
-    installed_docbook_xml_dir = org.wayround.utils.path.abspath(installed_docbook_xml_dir)
+    installed_docbook_xml_dir = \
+        org.wayround.utils.path.abspath(installed_docbook_xml_dir)
     super_catalog_xml = org.wayround.utils.path.abspath(super_catalog_xml)
     xml_catalog = org.wayround.utils.path.abspath(xml_catalog)
 
-    super_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_catalog_xml)
+    super_catalog_xml_fn = org.wayround.utils.path.join(
+        base_dir,
+        super_catalog_xml
+        )
 
     logging.info("Adding support for older docbook-xml versions")
 
@@ -429,17 +433,29 @@ def make_new_docbook_xml_look_like_old(
 
     return
 
+
 def make_new_docbook_4_5_look_like_old(
     base_dir='/',
     installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-4.5',
     ):
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
-    installed_docbook_xml_dir = org.wayround.utils.path.abspath(installed_docbook_sgml_dir)
 
-    installed_docbook_xml_dir_fn = org.wayround.utils.path.join(base_dir, installed_docbook_xml_dir)
+    installed_docbook_xml_dir = \
+        org.wayround.utils.path.abspath(
+            installed_docbook_sgml_dir
+            )
 
-    catalog_fn = org.wayround.utils.path.join(installed_docbook_xml_dir_fn, 'docbook.cat')
+    installed_docbook_xml_dir_fn = \
+        org.wayround.utils.path.join(
+            base_dir,
+            installed_docbook_xml_dir
+            )
+
+    catalog_fn = org.wayround.utils.path.join(
+        installed_docbook_xml_dir_fn,
+        'docbook.cat'
+        )
 
     f = open(catalog_fn)
 
@@ -453,7 +469,8 @@ def make_new_docbook_4_5_look_like_old(
 
         logging.info("    {}".format(i))
 
-        new_line = 'PUBLIC "-//OASIS//DTD DocBook V{}//EN" "docbook.dtd"'.format(i)
+        new_line = \
+            'PUBLIC "-//OASIS//DTD DocBook V{}//EN" "docbook.dtd"'.format(i)
 
         if not new_line in lines:
             lines.append(new_line)
@@ -466,17 +483,29 @@ def make_new_docbook_4_5_look_like_old(
 
     return
 
+
 def make_new_docbook_3_1_look_like_old(
     base_dir='/',
     installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-3.1',
     ):
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
-    installed_docbook_xml_dir = org.wayround.utils.path.abspath(installed_docbook_sgml_dir)
 
-    installed_docbook_xml_dir_fn = org.wayround.utils.path.join(base_dir, installed_docbook_xml_dir)
+    installed_docbook_xml_dir = \
+        org.wayround.utils.path.abspath(
+            installed_docbook_sgml_dir
+            )
 
-    catalog_fn = org.wayround.utils.path.join(installed_docbook_xml_dir_fn, 'docbook.cat')
+    installed_docbook_xml_dir_fn = \
+        org.wayround.utils.path.join(
+            base_dir,
+            installed_docbook_xml_dir
+            )
+
+    catalog_fn = org.wayround.utils.path.join(
+        installed_docbook_xml_dir_fn,
+        'docbook.cat'
+        )
 
     f = open(catalog_fn)
 
@@ -490,7 +519,10 @@ def make_new_docbook_3_1_look_like_old(
 
         logging.info("    {}".format(i))
 
-        new_line = 'PUBLIC "-//Davenport//DTD DocBook V{}//EN" "docbook.dtd"'.format(i)
+        new_line = \
+            'PUBLIC "-//Davenport//DTD DocBook V{}//EN" "docbook.dtd"'.format(
+                i
+                )
 
         if not new_line in lines:
             lines.append(new_line)
@@ -502,7 +534,7 @@ def make_new_docbook_3_1_look_like_old(
     f.close()
 
     return
-
+\
 def install(
     base_dir='/',
     super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
@@ -512,7 +544,6 @@ def install(
     xml_catalog='/etc/xml/catalog'
     ):
 
-
     ret = 0
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
@@ -521,8 +552,8 @@ def install(
     sys_xml_dir = org.wayround.utils.path.abspath(sys_xml_dir)
     xml_catalog = org.wayround.utils.path.abspath(xml_catalog)
 
-#    super_catalog_sgml_fn = org.wayround.utils.path.join(base_dir, super_catalog_sgml)
-    super_catalog_xml_fn = org.wayround.utils.path.join(base_dir, super_catalog_xml)
+    super_catalog_xml_fn = \
+        org.wayround.utils.path.join(base_dir, super_catalog_xml)
     sys_sgml_dir_fn = org.wayround.utils.path.join(base_dir, sys_sgml_dir)
     sys_xml_dir_fn = org.wayround.utils.path.join(base_dir, sys_xml_dir)
     xml_catalog_fn = org.wayround.utils.path.join(base_dir, xml_catalog)
@@ -553,11 +584,14 @@ def install(
         if not re.match(r'docbook-xsl-(\d+\.?)+', i):
             xsl_dirs.remove(i)
 
-
-    if len(dirs) != 2 or not 'docbook-3.1' in dirs or not 'docbook-4.5' in dirs:
-        logging.error("docbook-[version] dirs must be exacly: docbook-3.1 and docbook-4.5")
+    if (len(dirs) != 2
+        or not 'docbook-3.1' in dirs
+        or not 'docbook-4.5' in dirs):
+        logging.error(
+            "docbook-[version] dirs must be exacly:"
+            " docbook-3.1 and docbook-4.5"
+            )
         ret = 1
-
 
     if len(xml_dirs) != 1:
         logging.error("Exacly one docbook-xml-[version] dir required")
@@ -566,7 +600,6 @@ def install(
     if len(xsl_dirs) != 1:
         logging.error("Exacly one docbook-xsl-[version] dir required")
         ret = 1
-
 
     if ret != 0:
         pass
@@ -578,7 +611,10 @@ def install(
             logging.info("Installing {}".format(i))
 
             target_dir = org.wayround.utils.path.join(sys_sgml_dir_fn, i)
-            target_dir = org.wayround.utils.path.remove_base(target_dir, base_dir)
+            target_dir = org.wayround.utils.path.remove_base(
+                target_dir,
+                base_dir
+                )
 
             import_to_super_docbook_catalog(
                 target_dir, base_dir, super_catalog_sgml, super_catalog_xml
@@ -596,7 +632,10 @@ def install(
             logging.info("Installing {}".format(i))
 
             target_dir = org.wayround.utils.path.join(sys_xml_dir_fn, i)
-            target_dir = org.wayround.utils.path.remove_base(target_dir, base_dir)
+            target_dir = org.wayround.utils.path.remove_base(
+                target_dir,
+                base_dir
+                )
 
             import_to_super_docbook_catalog(
                 target_dir, base_dir, super_catalog_sgml, super_catalog_xml
@@ -612,7 +651,10 @@ def install(
             logging.info("Installing {}".format(i))
 
             target_dir = org.wayround.utils.path.join(sys_xml_dir_fn, i)
-            target_dir = org.wayround.utils.path.remove_base(target_dir, base_dir)
+            target_dir = org.wayround.utils.path.remove_base(
+                target_dir,
+                base_dir
+                )
 
     #        import_to_super_docbook_catalog(
     #            target_dir, base_dir, super_catalog_sgml, super_catalog_xml
@@ -624,6 +666,4 @@ def install(
 
         import_docbook_to_catalog(xml_catalog_fn)
 
-
     return
-

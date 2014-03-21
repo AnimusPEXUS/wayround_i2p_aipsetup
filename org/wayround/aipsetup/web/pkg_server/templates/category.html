@@ -1,23 +1,24 @@
 <h1>${category_path|x}</h1>
+<div>
+    [<a href="?resultmode=json">json</a>]
+</div>
+ 
+<div>
+<a href="/">Index Page</a>
 
 ${double_dot} 
 
 % for i in categories:
-
 <div class="dir_entry">
-    <a href="/category/${ i['path'] | u_path,x }"><img
-        src="/css/folder.png"/> ${ i['name'] | x }</a>
+    <a href="/category/${ i['path'] | u_path,x }"><img src="/css/folder.png"/> ${ i['name'] | x }</a>
 </div>
-
 % endfor
 
 % for i in packages:
-
 <div class="dir_entry">
-    <a href="/package/${ i | u,x }"><img
-        src="/css/package.png"/> ${ i | x }</a>
+    <a href="/info/${ i | u,x }"><img src="/css/package.png"/> ${ i | x }</a>
 </div>
-
 % endfor 
 
 ${double_dot}
+</div>

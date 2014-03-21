@@ -16,8 +16,6 @@ def list_(
 
     ret = None
 
-    action = 'search'
-
     cst = 'off'
     if cs:
         cst = 'on'
@@ -27,7 +25,7 @@ def list_(
          'mask': mask,
          'searchmode': searchmode,
          'cs': cst,
-         'action': action,
+         'action': 'search',
          'resultmode': 'json'
          },
         encoding='utf-8'

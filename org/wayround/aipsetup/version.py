@@ -9,6 +9,7 @@ import org.wayround.utils.version
 
 import org.wayround.aipsetup.package_name_parser
 
+
 def package_version_comparator(name1, name2):
     """
     Compares package names by timestamps
@@ -55,6 +56,7 @@ def package_version_comparator(name1, name2):
 
     return ret
 
+
 def lb_comparator(version_str, pattern_str='== 0.0.0'):
 
     logging.debug("lb_comparator: `{}', `{}'".format(version_str, pattern_str))
@@ -77,7 +79,11 @@ def lb_comparator(version_str, pattern_str='== 0.0.0'):
     pattern_str = pattern_str.split('.')
     version_str = version_str.split('.')
 
-    cmp_res = org.wayround.utils.version.standard_comparator(version_str, pattern_str)
+    cmp_res = \
+        org.wayround.utils.version.standard_comparator(
+            version_str,
+            pattern_str
+            )
 
     ret = eval("cmp_res {} 0".format(comparator))
     logging.debug("evaluating: {} {} 0 => {}".format(cmp_res, comparator, ret))

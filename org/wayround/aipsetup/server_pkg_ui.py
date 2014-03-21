@@ -3,8 +3,6 @@ import os.path
 
 import mako.template
 
-
-import org.wayround.utils.path
 import org.wayround.utils.mako_filters
 
 
@@ -15,23 +13,21 @@ class UI:
         self.templates = {}
 
         for i in [
+            'html',
+            'index',
             'category',
-
-#            'page_index',
-#            'page_package',
-#
-            'package_file_list',
-#            'package_sources_file_list',
-#            'package_info',
-
+            'asps',
+            'asps_file_list',
+            'tarballs',
+            'tarballs_file_list',
             'category_double_dot',
-
             'package',
-
-            'html'
+            'search',
+            'search_result'
             ]:
             self.templates[i] = mako.template.Template(
-                filename=os.path.join(templates_dir, i + '.html')
+                filename=os.path.join(templates_dir, i + '.html'),
+                format_exceptions=False
                 )
 
     def html(self, title, body):
@@ -40,6 +36,11 @@ class UI:
             body=body,
             js=[],
             css=['default.css']
+            )
+
+    def index(self, search_form):
+        return self.templates['index'].render(
+            search_form=search_form
             )
 
     def category(self, category_path, double_dot, categories, packages):
@@ -57,30 +58,58 @@ class UI:
             parent_path=parent_path
             )
 
-    def package_file_list(self, files, pkg_name):
+    def package(
+        self,
+        name,
+        autorows,
+        category,
+        description,
+        tags,
+        src_page_url
+        ):
 
-        return self.templates['package_file_list'].render(
+        return self.templates['package'].render(
+            name=name,
+            autorows=autorows,
+            category=category,
+            description=description,
+            tags=tags,
+            src_page_url=src_page_url
+            )
+
+    def asps_file_list(self, files, pkg_name):
+        return self.templates['asps_file_list'].render(
             files=files,
             pkg_name=pkg_name
             )
 
-    def package(
-        self,
-        autorows,
-        basename,
-        category,
-        homepage,
-        description,
-        tags,
-        asp_list
-        ):
+    def asps(self, name, asp_list):
 
-        return self.templates['package'].render(
-            autorows=autorows,
-            basename=basename,
-            category=category,
-            homepage=homepage,
-            description=description,
-            tags=tags,
-            asp_list=asp_list,
+        return self.templates['asps'].render(
+            name=name,
+            asp_list=asp_list
+            )
+
+    def tarballs_file_list(self, files, pkg_name, src_page_url):
+        return self.templates['tarballs_file_list'].render(
+            files=files,
+            pkg_name=pkg_name,
+            src_page_url=src_page_url
+            )
+
+    def tarballs(self, name, files_list):
+
+        return self.templates['tarballs'].render(
+            name=name,
+            files_list=files_list
+            )
+
+    def search(self, searchmode='filemask', mask='*', cs=True):
+        return self.templates['search'].render(
+            searchmode=searchmode, mask=mask, cs=cs
+            )
+
+    def search_result(self, lines):
+        return self.templates['search_result'].render(
+            lines=lines
             )

@@ -1,0 +1,8 @@
+<div>
+    <div>${"{} Item(s) Found".format(len(lines))|x}</div>
+    % for i in lines:
+    <div>
+        <a href="/package/${ i | x }">${ i | x }</a>
+    </div>
+    % endfor
+</div>

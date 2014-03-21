@@ -14,24 +14,25 @@ import org.wayround.utils.path
 
 def commands():
     return collections.OrderedDict([
-        ('pkg_server', {
-            'start': pkg_server_start,
-            }),
-        ('pkg_server_info', {
-            'save': info_backup_package_info_to_filesystem,
-            'load': info_load_package_info_from_filesystem,
-            'save_tags': save_info_tags,
-            'load_tags': load_info_tags,
-            'missing': info_find_missing_pkg_info_records,
-            'outdated': info_find_outdated_pkg_info_records,
-            'update': info_update_outdated_pkg_info_records,
-            'delete': info_delete_pkg_info_records
-            }),
-        ('pkg_server_packages', {
-            'reindex': pkg_repo_index_and_update,
-            'put': pkg_repo_put_file,
-            'clean': pkg_repo_cleanup
-            })
+        ('pkg_server', collections.OrderedDict([
+            ('start', pkg_server_start),
+            ])),
+        ('pkg_server_info', collections.OrderedDict([
+            ('save', info_backup_package_info_to_filesystem),
+            ('load', info_load_package_info_from_filesystem),
+            ('save_tags', save_info_tags),
+            ('load_tags', load_info_tags),
+            ('missing', info_find_missing_pkg_info_records),
+            ('outdated', info_find_outdated_pkg_info_records),
+            ('update', info_update_outdated_pkg_info_records),
+            ('delete', info_delete_pkg_info_records),
+            ('editor', None),
+            ])),
+        ('pkg_server_asps', collections.OrderedDict([
+            ('reindex', pkg_repo_index_and_update),
+            ('put', pkg_repo_put_file),
+            ('clean', pkg_repo_cleanup)
+            ]))
         ])
 
 

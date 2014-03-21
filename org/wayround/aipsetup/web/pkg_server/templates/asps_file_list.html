@@ -9,7 +9,7 @@
     <tbody>
         % for i in files:
         <tr>
-            <td><a href="/package/${ pkg_name | u,x }/asps/${ i['basename'] | u,x }">${ i['version'] | x }</a></td>
+            <td><a href="/packages/${ pkg_name | u,x }/asps/${ i['basename'] | u,x }">${ i['version'] | x }</a></td>
             <td>${ i['timestamp'] | x }</td>
             <td>${ i['size'] | x }</td>
         </tr>

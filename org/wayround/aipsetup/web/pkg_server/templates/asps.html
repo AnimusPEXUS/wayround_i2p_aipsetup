@@ -1,0 +1,18 @@
+<div>
+    <a href="/info/${name | u,x}">info</a>
+    <a href="?resultmode=json">json</a>
+</div>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>${ name | x } Packages:</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>${asp_list}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

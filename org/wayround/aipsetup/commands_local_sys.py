@@ -9,43 +9,40 @@ import shlex
 import sys
 
 import org.wayround.utils.getopt
+import org.wayround.aipsetup.controllers
 
 
 def commands():
     return collections.OrderedDict([
-        ('local_sys', {
-            'check': package_check,
-            }),
-
-        ('sys', {
-            '_help': 'SystemCtl actions: install, uninstall, etc...',
-            'list': system_package_list,
-            'lista': system_package_list_asps,
-            'install': system_install_package,
-            'remove': system_remove_package,
-            'reduce': system_reduce_asp_to_latest,
-            'find': system_find_package_files,
-            'generate_deps': system_make_asp_deps,
-            'files': system_list_package_files
-            }),
-
-        ('sys_clean', {
-            'find_broken': clean_packages_with_broken_files,
-            'elf_readiness': clean_check_elfs_readiness,
-            'so_problems': clean_find_so_problems,
-            'find_old': clean_find_old_packages,
-            'explicit_asps':
-                clean_check_list_of_installed_packages_and_asps_auto,
-            'find_garbage': clean_find_garbage,
-            'find_invalid_deps_lists': clean_find_invalid_deps_lists
-            }),
-
-        ('sys_deps', {
-            'asps_asp_depends_on': pkgdeps_print_asps_asp_depends_on,
-            'asp_depends': pkgdeps_print_asp_depends,
-            'asps_depending_on_asp': pkgdeps_print_asps_depending_on_asp,
-            }),
-
+        ('local_sys', collections.OrderedDict([
+            ('check', package_check),
+            ])),
+        ('sys', collections.OrderedDict([
+            ('_help', 'SystemCtl actions: install, uninstall, etc...'),
+            ('list', system_package_list),
+            ('lista', system_package_list_asps),
+            ('install', system_install_package),
+            ('remove', system_remove_package),
+            ('reduce', system_reduce_asp_to_latest),
+            ('find', system_find_package_files),
+            ('generate_deps', system_make_asp_deps),
+            ('files', system_list_package_files)
+            ])),
+        ('sys_clean', collections.OrderedDict([
+            ('find_broken', clean_packages_with_broken_files),
+            ('elf_readiness', clean_check_elfs_readiness),
+            ('so_problems', clean_find_so_problems),
+            ('find_old', clean_find_old_packages),
+            ('explicit_asps',
+                clean_check_list_of_installed_packages_and_asps_auto),
+            ('find_garbage', clean_find_garbage),
+            ('find_invalid_deps_lists', clean_find_invalid_deps_lists)
+            ])),
+        ('sys_deps', collections.OrderedDict([
+            ('asps_asp_depends_on', pkgdeps_print_asps_asp_depends_on),
+            ('asp_depends', pkgdeps_print_asp_depends),
+            ('asps_depending_on_asp', pkgdeps_print_asps_depending_on_asp)
+            ]))
         ])
 
 
@@ -81,17 +78,14 @@ def system_install_package(command_name, opts, args, adds):
 
             fpi = []
 
-            pkg_repo_ctl = \
-                org.wayround.aipsetup.controllers.\
-                    pkg_repo_ctl_by_config(config)
-
-            info_ctl = \
-                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
+            pkg_client = \
+                org.wayround.aipsetup.controllers.pkg_client_by_config(
+                    config
+                    )
 
             syst = org.wayround.aipsetup.controllers.sys_ctl_by_config(
                 config,
-                info_ctl,
-                pkg_repo_ctl,
+                pkg_client,
                 basedir
                 )
 
@@ -150,14 +144,13 @@ def system_package_list(command_name, opts, args, adds):
 
     if ret == 0:
 
-        info_ctl = \
-            org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-        pkg_repo_ctl = \
-            org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(
+                config
+                )
 
         system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
-            config, info_ctl, pkg_repo_ctl, basedir
+            config, pkg_client, basedir
             )
 
         lst = system.list_installed_packages(mask)
@@ -205,15 +198,13 @@ def system_package_list_asps(command_name, opts, args, adds):
 
             logging.info("Searching ASPs for package `{}'".format(name))
 
-            info_ctl = \
-                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-            pkg_repo_ctl = \
-                org.wayround.aipsetup.controllers.\
-                    pkg_repo_ctl_by_config(config)
+            pkg_client = \
+                org.wayround.aipsetup.controllers.pkg_client_by_config(
+                    config
+                    )
 
             system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
-                config, info_ctl, pkg_repo_ctl, basedir
+                config, pkg_client, basedir
                 )
 
             lst = system.list_installed_package_s_asps(name)
@@ -251,12 +242,13 @@ def system_list_package_files(command_name, opts, args, adds):
 
         pkg_name = args[0]
 
-        info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-        pkg_repo_ctl = \
-            org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(
+                config
+                )
 
         system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
-            config, info_ctl, pkg_repo_ctl, basedir
+            config, pkg_client, basedir
             )
 
         latest = system.latest_installed_package_s_asp(pkg_name)
@@ -313,15 +305,14 @@ def system_remove_package(command_name, opts, args, adds):
 
     if ret == 0:
 
-        info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-        pkg_repo_ctl = \
-            org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(
+                config
+                )
 
         system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
             config,
-            info_ctl,
-            pkg_repo_ctl,
+            pkg_client,
             basedir
             )
 
@@ -365,15 +356,14 @@ def system_find_package_files(command_name, opts, args, adds):
     if len(args) > 0:
         lookfor = args[0]
 
-    info_ctl = \
-        org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir
         )
 
@@ -461,17 +451,14 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
                         )
                     )
 
-                info_ctl = \
-                    org.wayround.aipsetup.controllers.\
-                        info_ctl_by_config(config)
-                pkg_repo_ctl = \
-                    org.wayround.aipsetup.controllers.\
-                        pkg_repo_ctl_by_config(config)
+                pkg_client = \
+                    org.wayround.aipsetup.controllers.pkg_client_by_config(
+                        config
+                        )
 
                 system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
                     config,
-                    info_ctl,
-                    pkg_repo_ctl,
+                    pkg_client,
                     destdir
                     )
 
@@ -507,15 +494,14 @@ def system_make_asp_deps(command_name, opts, args, adds):
 
         asp_name = args[0]
 
-        info_ctl = \
-            org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-        pkg_repo_ctl = \
-            org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(
+                config
+                )
 
         system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
             config,
-            info_ctl,
-            pkg_repo_ctl,
+            pkg_client,
             destdir
             )
 
@@ -532,15 +518,14 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
     config = adds['config']
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/'
         )
 
@@ -641,15 +626,14 @@ def clean_check_elfs_readiness(command_name, opts, args, adds):
 
     config = adds['config']
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/'
         )
 
@@ -670,16 +654,14 @@ def clean_find_so_problems(command_name, opts, args, adds):
     ret = 0
 
     basedir = '/'
-#    if '-b' in opts:
-#        basedir = opts['-b']
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
-        config, info_ctl, pkg_repo_ctl, basedir
+        config, pkg_client, basedir
         )
 
     problems = system.find_so_problems_in_system(
@@ -772,15 +754,14 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
     ret = 0
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/'
         )
 
@@ -834,15 +815,14 @@ def clean_find_invalid_deps_lists(command_name, opts, args, adds):
     if '-b' in opts:
         basedir = opts['-b']
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir=basedir
         )
 
@@ -928,17 +908,14 @@ def clean_find_garbage(command_name, opts, args, adds):
             ret = 1
         else:
 
-            info_ctl = \
-                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-            pkg_repo_ctl = \
-                org.wayround.aipsetup.controllers.\
-                    pkg_repo_ctl_by_config(config)
+            pkg_client = \
+                org.wayround.aipsetup.controllers.pkg_client_by_config(
+                    config
+                    )
 
             system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
                 config,
-                info_ctl,
-                pkg_repo_ctl,
+                pkg_client,
                 basedir=basedir
                 )
 
@@ -1105,15 +1082,14 @@ def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
 
     config = adds['config']
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/'
         )
 
@@ -1130,16 +1106,14 @@ def pkgdeps_print_asp_depends(command_name, opts, args, adds):
 
     config = adds['config']
 
-    info_ctl = \
-        org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/'
         )
 
@@ -1163,15 +1137,14 @@ def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
 
     config = adds['config']
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    pkg_repo_ctl = \
-        org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
 
     system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
         config,
-        info_ctl,
-        pkg_repo_ctl,
+        pkg_client,
         basedir='/'
         )
 

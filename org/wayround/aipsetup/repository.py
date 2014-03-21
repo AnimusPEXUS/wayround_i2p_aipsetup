@@ -1223,7 +1223,7 @@ class SourceRepoCtl:
 
             if filtered:
                 ftl_r = (
-                    info_ctl.filter_tarball_list(
+                    org.wayround.aipsetup.info.filter_tarball_list(
                         files,
                         pkg_info['filters']
                         )

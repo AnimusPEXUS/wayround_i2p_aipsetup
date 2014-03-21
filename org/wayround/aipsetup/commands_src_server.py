@@ -4,11 +4,11 @@ import collections
 
 def commands():
     return collections.OrderedDict([
-        ('src_server', {
-            'start': src_server_start,
-            'reindex': src_server_reindex
-            })
-
+        ('src_server',
+            collections.OrderedDict([
+                ('start', src_server_start),
+                ('reindex', src_server_reindex)
+            ]))
         ])
 
 

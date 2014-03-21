@@ -2,26 +2,24 @@
 import collections
 import logging
 import os.path
-import sys
 
+import org.wayround.aipsetup.build
 import org.wayround.aipsetup.controllers
-import org.wayround.utils.time
 
 
 def commands():
     return collections.OrderedDict([
-        ('bsite', {
-            'init': building_site_init,
-            'apply': building_site_apply_info
-            }),
-
-        ('build', {
-            'full': build_full,
-            'build': build_build,
-            'continue': build_build_plus,
-            'pack': build_pack,
-            'complete': build_complete
-            })
+        ('bsite', collections.OrderedDict([
+            ('init', building_site_init),
+            ('apply', building_site_apply_info)
+            ])),
+        ('build', collections.OrderedDict([
+            ('full', build_full),
+            ('build', build_build),
+            ('continue', build_build_plus),
+            ('pack', build_pack),
+            ('complete', build_complete)
+            ])),
         ])
 
 
@@ -373,7 +371,7 @@ def build_full(command_name, opts, args, adds):
 
     ret = 0
 
-    building_site_dir = config['builder_repo']['building_scripts_dir']
+    building_site_dir = config['local_build']['building_scripts_dir']
 
     host = config['system_settings']['host']
     build = config['system_settings']['build']

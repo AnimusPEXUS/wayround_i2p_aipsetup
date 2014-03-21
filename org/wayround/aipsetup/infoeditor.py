@@ -4,23 +4,20 @@ Edit package info on disk and update pkginfo database
 """
 
 import copy
+import functools
 import glob
 import logging
 import os.path
-import functools
 
-from gi.repository import Gtk
 from gi.repository import Gdk
+from gi.repository import Gtk
 
-import org.wayround.utils.gtk
-
-import org.wayround.utils.path
-
+import org.wayround.aipsetup.controllers
+import org.wayround.aipsetup.dbconnections
 import org.wayround.aipsetup.gtk
 import org.wayround.aipsetup.info
-import org.wayround.aipsetup.dbconnections
-import org.wayround.aipsetup.controllers
-
+import org.wayround.utils.gtk
+import org.wayround.utils.path
 
 
 class MainWindow:
@@ -44,23 +41,34 @@ class MainWindow:
 
         self.ui = org.wayround.utils.gtk.widget_dict(ui)
 
-
-#        self.ui['window1'].connect("delete-event", gtk_widget_hide_on_delete)
         self.ui['window1'].show_all()
 
+        self.ui['window1'].connect(
+            'key-press-event',
+            self.onWindow1KeyPressed
+            )
 
-        self.ui['window1'].connect('key-press-event', self.onWindow1KeyPressed)
+        self.ui['button1'].connect(
+            'clicked',
+            self.onListRealoadButtonActivated
+            )
 
-        self.ui['button1'].connect('clicked', self.onListRealoadButtonActivated)
+        self.ui['button2'].connect(
+            'clicked',
+            self.onSaveAndUpdateButtonActivated
+            )
 
-        self.ui['button2'].connect('clicked', self.onSaveAndUpdateButtonActivated)
+        self.ui['button4'].connect(
+            'clicked',
+            self.onShowAllSourceFilesButtonActivated
+            )
 
-        self.ui['button4'].connect('clicked', self.onShowAllSourceFilesButtonActivated)
-
-        self.ui['button5'].connect('clicked', self.onShowFilteredSourceFilesButtonActivated)
+        self.ui['button5'].connect(
+            'clicked',
+            self.onShowFilteredSourceFilesButtonActivated
+            )
 
         self.ui['button3'].connect('clicked', self.onQuitButtonClicked)
-
 
         c = Gtk.TreeViewColumn("File Names")
         r = Gtk.CellRendererText()
@@ -69,18 +77,19 @@ class MainWindow:
 
         self.ui['treeview1'].append_column(c)
         self.ui['treeview1'].show_all()
-        self.ui['treeview1'].connect('row-activated', self.onPackageListItemActivated)
+        self.ui['treeview1'].connect(
+            'row-activated',
+            self.onPackageListItemActivated
+            )
 
         r = Gtk.CellRendererText()
         self.ui['combobox1'].pack_start(r, True)
         self.ui['combobox1'].add_attribute(r, 'text', 0)
 
-
         self.load_list()
         self.load_buildscript_list()
 
         return
-
 
     def load_data(self, name):
 
@@ -148,28 +157,36 @@ class MainWindow:
 
                 self.ui['combobox1'].set_active(name_i)
 
-
                 self.ui['entry2'].set_text(str(data['basename']))
 
                 self.ui['entry3'].set_text(str(data['src_path_prefix']))
 
-                self.ui['spinbutton1'].set_value(float(data['installation_priority']))
+                self.ui['spinbutton1'].set_value(
+                    float(data['installation_priority'])
+                    )
 
                 self.ui['checkbutton2'].set_active(bool(data['removable']))
 
                 self.ui['checkbutton1'].set_active(bool(data['reducible']))
 
-                self.ui['checkbutton3'].set_active(bool(data['auto_newest_src']))
+                self.ui['checkbutton3'].set_active(
+                    bool(data['auto_newest_src'])
+                    )
 
-                self.ui['checkbutton4'].set_active(bool(data['auto_newest_pkg']))
+                self.ui['checkbutton4'].set_active(
+                    bool(data['auto_newest_pkg'])
+                    )
 
-                self.ui['checkbutton5'].set_active(bool(data['non_installable']))
+                self.ui['checkbutton5'].set_active(
+                    bool(data['non_installable'])
+                    )
 
                 self.ui['checkbutton6'].set_active(bool(data['deprecated']))
 
-
                 self.currently_opened = name
-                self.ui['window1'].set_title(name + " - aipsetup v3 .json info file editor")
+                self.ui['window1'].set_title(
+                    name + " - aipsetup v3 .json info file editor"
+                    )
 
                 self.scroll_package_list_to_name(name)
 
@@ -193,21 +210,15 @@ class MainWindow:
 
             b = self.ui['textview1'].get_buffer()
 
-            data['description'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
+            data['description'] = \
+                b.get_text(b.get_start_iter(), b.get_end_iter(), False)
 
             b = self.ui['textview4'].get_buffer()
 
-            data['filters'] = b.get_text(b.get_start_iter(), b.get_end_iter(), False)
+            data['filters'] = \
+                b.get_text(b.get_start_iter(), b.get_end_iter(), False)
 
             data['home_page'] = self.ui['entry7'].get_text()
-
-    #        b = self.ui['textview2'].get_buffer()
-    #
-    #        data['tags'] = org.wayround.utils.list.list_strip_remove_empty_remove_duplicated_lines(
-    #            b.get_text(b.get_start_iter(), b.get_end_iter(), False).splitlines()
-    #            )
-
-    #        data['buildscript'] = self.ui['combobox-entry'].get_text()
 
             model = self.ui['combobox1'].get_model()
             active = self.ui['combobox1'].get_active()
@@ -223,7 +234,8 @@ class MainWindow:
 
             data['src_path_prefix'] = self.ui['entry3'].get_text()
 
-            data['installation_priority'] = int(self.ui['spinbutton1'].get_value())
+            data['installation_priority'] = \
+                int(self.ui['spinbutton1'].get_value())
 
             data['removable'] = self.ui['checkbutton2'].get_active()
 
@@ -277,7 +289,6 @@ class MainWindow:
 
         return ret
 
-
     def load_list(self):
 
         mask = os.path.join(self.config['info_repo']['dir'], '*.json')
@@ -302,7 +313,7 @@ class MainWindow:
 
         files = glob.glob(
             org.wayround.utils.path.join(
-                self.config['builder_repo']['building_scripts_dir'], '*.py'
+                self.config['local_build']['building_scripts_dir'], '*.py'
                 )
             )
 
@@ -315,7 +326,6 @@ class MainWindow:
         if model:
             if active != -1:
                 name = model[active][0]
-
 
         self.ui['combobox1'].set_model(None)
 
@@ -370,13 +380,6 @@ class MainWindow:
         return
 
     def onWindow1KeyPressed(self, widget, event):
-#        print("keyval ==     {}".format(repr(hex(event.keyval))))
-#        print("state  ==     {}".format(repr(bin(event.state))))
-#
-#        print("CONTROL_MASK: {}".format(repr(bin(event.state & Gdk.ModifierType.CONTROL_MASK))))
-#        print("SHIFT_MASK:   {}".format(repr(bin(event.state & Gdk.ModifierType.SHIFT_MASK))))
-#        print("MOD1_MASK:    {}".format(repr(bin(event.state & Gdk.ModifierType.MOD1_MASK))))
-#        print("")
 
         if (
             (event.keyval == Gdk.KEY_q)
@@ -410,7 +413,8 @@ class MainWindow:
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
-                "Record not selected\n\n(hint: double click on list item to select one)"
+                "Record not selected\n\n"
+                "(hint: double click on list item to select one)"
                 )
             dia.run()
             dia.destroy()
@@ -425,7 +429,8 @@ class MainWindow:
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
-                "Record not selected\n\n(hint: double click on list item to select one)"
+                "Record not selected\n\n"
+                "(hint: double click on list item to select one)"
                 )
             dia.run()
             dia.destroy()
@@ -451,7 +456,9 @@ class MainWindow:
             else:
                 org.wayround.utils.gtk.text_view(
                     '\n'.join(lst),
-                    "{} - Non-filtered tarballs".format(self.ui['entry1'].get_text()[:-5])
+                    "{} - Non-filtered tarballs".format(
+                        self.ui['entry1'].get_text()[:-5]
+                        )
                     )
 
     def onQuitButtonClicked(self, button):
@@ -465,7 +472,8 @@ class MainWindow:
                 Gtk.DialogFlags.MODAL,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
-                "Record not selected\n\n(hint: double click on list item to select one)"
+                "Record not selected\n\n"
+                "(hint: double click on list item to select one)"
                 )
             dia.run()
             dia.destroy()
@@ -498,10 +506,12 @@ class MainWindow:
             else:
                 org.wayround.utils.gtk.text_view(
                     '\n'.join(lst),
-                    "{} - Filtered tarballs".format(self.ui['entry1'].get_text()[:-5])
+                    "{} - Filtered tarballs".format(
+                        self.ui['entry1'].get_text()[:-5]
+                        )
                     )
 
-
+        return
 
     def onListRealoadButtonActivated(self, button):
         self.load_buildscript_list()
@@ -511,9 +521,9 @@ class MainWindow:
 
         sel = view.get_selection()
 
-        model, iter = sel.get_selected()
-        if not model == None and not iter == None:
-            self.load_data(model[iter][0])
+        model, itera = sel.get_selected()
+        if not model == None and not itera == None:
+            self.load_data(model[itera][0])
 
         return
 
@@ -522,13 +532,17 @@ def main(name_to_edit=None, config=None):
 
     # TODO: re do to *_new
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl(config)
+    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
 
-    pkg_repo_ctl = org.wayround.aipsetup.controllers.pkg_repo_ctl(config)
+    pkg_repo_ctl = org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(
+        config
+        )
 
-    src_repo_ctl = org.wayround.aipsetup.controllers.src_repo_ctl(config)
+    src_repo_ctl = org.wayround.aipsetup.controllers.src_repo_ctl_by_config(
+        config
+        )
 
-    tag_ctl = org.wayround.aipsetup.controllers.tag_ctl(config)
+    tag_ctl = org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
 
     mw = MainWindow(config, info_ctl, tag_ctl, pkg_repo_ctl, src_repo_ctl)
 

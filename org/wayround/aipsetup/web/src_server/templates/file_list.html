@@ -1,5 +1,8 @@
 <div>
-    <div>${"{} File(s) Found".format(len(files))|x}</div>
+    <div>
+        ${"{} File(s) Found".format(len(files))|x}
+        <a href="?name=${name|x}&resultmode=json">json</a>
+    </div>
     <table>
         <tbody>
             % for i in files:
