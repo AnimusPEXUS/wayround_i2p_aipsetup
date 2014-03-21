@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "commoncpp2", 
-  "buildscript": "std", 
-  "deprecated": true, 
   "description": "use 'ucommon'", 
-  "filters": "", 
   "home_page": "http://www.gnu.org", 
+  "buildscript": "std", 
+  "basename": "commoncpp2", 
+  "src_path_prefix": "", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": true, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": true, 
+  "deprecated": true
 }

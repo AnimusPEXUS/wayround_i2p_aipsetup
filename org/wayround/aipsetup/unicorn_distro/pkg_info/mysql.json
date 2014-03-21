@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "mysql", 
-  "buildscript": "mysql", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.mysql.com", 
+  "buildscript": "mysql", 
+  "basename": "mysql", 
+  "src_path_prefix": "/mysql.com/rsync/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/mysql.com/rsync/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "libsndfile", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.mega-nerd.com", 
+  "buildscript": "std", 
+  "basename": "libsndfile", 
+  "src_path_prefix": "/mega-nerd.com/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/mega-nerd.com/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

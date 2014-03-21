@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "liboil", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.freedesktop.org", 
+  "buildscript": "std", 
+  "basename": "liboil", 
+  "src_path_prefix": "/freedesktop.org/liboil/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/freedesktop.org/liboil/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

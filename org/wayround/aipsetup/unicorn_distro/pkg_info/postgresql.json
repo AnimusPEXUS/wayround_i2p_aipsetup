@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "postgresql", 
-  "buildscript": "postgreSQL", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.postgresql.org", 
+  "buildscript": "postgreSQL", 
+  "basename": "postgresql", 
+  "src_path_prefix": "/postgresql.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/postgresql.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

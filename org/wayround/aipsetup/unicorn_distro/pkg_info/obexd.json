@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "obexd", 
-  "buildscript": "std", 
-  "deprecated": true, 
   "description": "write something here, please", 
-  "filters": "integrated into bluez", 
   "home_page": "http://www.kernel.org", 
+  "buildscript": "std", 
+  "basename": "obexd", 
+  "src_path_prefix": "", 
+  "filters": "integrated into bluez", 
   "installation_priority": 5, 
-  "non_installable": true, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": true, 
+  "deprecated": true
 }

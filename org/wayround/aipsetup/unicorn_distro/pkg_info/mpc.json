@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "mpc", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.multiprecision.org", 
+  "buildscript": "std", 
+  "basename": "mpc", 
+  "src_path_prefix": "/multiprecision.org/www.multiprecision.org/mpc/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": false, 
-  "src_path_prefix": "/multiprecision.org/www.multiprecision.org/mpc/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

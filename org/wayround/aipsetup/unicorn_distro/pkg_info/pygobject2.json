@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "pygobject", 
-  "buildscript": "pygobject2", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- version < 2\n- version >= 3\n- version re ^(\\d*?)\\.(\\d*[13579])\n", 
   "home_page": "http://www.gnome.org", 
+  "buildscript": "pygobject2", 
+  "basename": "pygobject", 
+  "src_path_prefix": "", 
+  "filters": "- version < 2\n- version >= 3\n- version re ^(\\d*?)\\.(\\d*[13579])\n", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

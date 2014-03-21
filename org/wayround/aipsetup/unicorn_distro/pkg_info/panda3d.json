@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "panda3d", 
-  "buildscript": "panda3d", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://None", 
+  "buildscript": "panda3d", 
+  "basename": "panda3d", 
+  "src_path_prefix": "/panda3d.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/panda3d.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "jpeg", 
-  "buildscript": null, 
-  "deprecated": true, 
   "description": "use openjpeg1 openjpeg2 and libjpeg-turbo", 
-  "filters": "- version fm *", 
   "home_page": "http://www.ijg.org", 
+  "buildscript": "None", 
+  "basename": "jpeg", 
+  "src_path_prefix": "", 
+  "filters": "- version fm *", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": true
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "gimp-gap", 
-  "buildscript": "", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.gimp.org", 
+  "buildscript": "", 
+  "basename": "gimp-gap", 
+  "src_path_prefix": "/gtk.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gtk.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

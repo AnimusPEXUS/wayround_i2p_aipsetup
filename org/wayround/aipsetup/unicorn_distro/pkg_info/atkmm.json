@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "atkmm", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]", 
   "home_page": "http://www.gnome.org", 
+  "buildscript": "std", 
+  "basename": "atkmm", 
+  "src_path_prefix": "/gnome.org/gnome.org/sources/", 
+  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gnome.org/gnome.org/sources/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "gedit", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- version !re \\d*\\.\\d*[02468]", 
   "home_page": "", 
+  "buildscript": "std", 
+  "basename": "gedit", 
+  "src_path_prefix": "/gnome.org/", 
+  "filters": "- version !re \\d*\\.\\d*[02468]", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gnome.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "linux", 
-  "buildscript": "linux", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "", 
   "home_page": "http://www.kernel.org/", 
+  "buildscript": "linux", 
+  "basename": "linux", 
+  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/kernel/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": false, 
   "removable": false, 
-  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/kernel/"
+  "reducible": false, 
+  "non_installable": false, 
+  "deprecated": false
 }

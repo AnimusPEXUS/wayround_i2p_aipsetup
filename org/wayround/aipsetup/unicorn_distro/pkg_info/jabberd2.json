@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "jabberd", 
-  "buildscript": "jabberd2", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- version fm *\n+ version fm 2.*", 
   "home_page": "", 
+  "buildscript": "jabberd2", 
+  "basename": "jabberd", 
+  "src_path_prefix": "/jabberd2.org/", 
+  "filters": "- version fm *\n+ version fm 2.*", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/jabberd2.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "openjpeg", 
-  "buildscript": "std_cmake", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- version fm *\n+ version fm 1.*\n", 
   "home_page": "", 
+  "buildscript": "std_cmake", 
+  "basename": "openjpeg", 
+  "src_path_prefix": "", 
+  "filters": "- version fm *\n+ version fm 1.*\n", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

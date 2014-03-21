@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "gtk", 
-  "buildscript": "gtk_with_docs", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- version fm *\n+ version fm 2.*\n- version !re 2\\.\\d*[02468]\n- version >= 2.90\n", 
   "home_page": "http://www.gnome.org", 
+  "buildscript": "gtk_with_docs", 
+  "basename": "gtk", 
+  "src_path_prefix": "/gnome.org/gnome.org/sources/gtk+/", 
+  "filters": "- version fm *\n+ version fm 2.*\n- version !re 2\\.\\d*[02468]\n- version >= 2.90\n", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gnome.org/gnome.org/sources/gtk+/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

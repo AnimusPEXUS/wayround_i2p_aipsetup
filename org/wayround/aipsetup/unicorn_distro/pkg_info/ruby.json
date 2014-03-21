@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "ruby", 
-  "buildscript": "ruby", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- status fm rc*\n- status fm preview*", 
   "home_page": "http://www.ruby-lang.org", 
+  "buildscript": "ruby", 
+  "basename": "ruby", 
+  "src_path_prefix": "/ruby-lang.org/", 
+  "filters": "- status fm rc*\n- status fm preview*", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/ruby-lang.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

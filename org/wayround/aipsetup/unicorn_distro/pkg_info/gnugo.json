@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "gnugo", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "", 
   "home_page": "http://gnu.org/", 
+  "buildscript": "std", 
+  "basename": "gnugo", 
+  "src_path_prefix": "/gnu.org/ftp.gnu.org/gnu/gnugo/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gnu.org/ftp.gnu.org/gnu/gnugo/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "gnome-tweak-tool", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- version !re \\d*\\.\\d*[02468]", 
   "home_page": "http://gnome.org/", 
+  "buildscript": "std", 
+  "basename": "gnome-tweak-tool", 
+  "src_path_prefix": "", 
+  "filters": "- version !re \\d*\\.\\d*[02468]", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

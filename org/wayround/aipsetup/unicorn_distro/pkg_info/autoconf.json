@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "autoconf", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "+ version fm *\n- version re 2\\.13\\.?", 
   "home_page": "http://www.gnu.org", 
+  "buildscript": "std", 
+  "basename": "autoconf", 
+  "src_path_prefix": "/gnu.org/ftp.gnu.org/", 
+  "filters": "+ version fm *\n- version re 2\\.13\\.?", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gnu.org/ftp.gnu.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

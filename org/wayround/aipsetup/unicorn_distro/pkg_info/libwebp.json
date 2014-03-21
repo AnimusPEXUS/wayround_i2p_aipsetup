@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "libwebp", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- status fm *\n+ status re ^$", 
   "home_page": "", 
+  "buildscript": "std", 
+  "basename": "libwebp", 
+  "src_path_prefix": "", 
+  "filters": "- status fm *\n+ status re ^$", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

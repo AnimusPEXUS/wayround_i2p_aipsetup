@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "net-snmp", 
-  "buildscript": "net_snmp", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- status fm *rc*\n- status fm *pre*\n", 
   "home_page": "http://www.sourceforge.net", 
+  "buildscript": "net_snmp", 
+  "basename": "net-snmp", 
+  "src_path_prefix": "/sourceforge.net/else/rsync/n/project/ne/net-snmp/", 
+  "filters": "- status fm *rc*\n- status fm *pre*\n", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/sourceforge.net/else/rsync/n/project/ne/net-snmp/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

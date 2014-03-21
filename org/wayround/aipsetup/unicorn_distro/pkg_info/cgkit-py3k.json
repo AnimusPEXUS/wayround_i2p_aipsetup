@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "cgkit", 
-  "buildscript": "cgkit_py3k", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- status !re py\\.3\\.k", 
   "home_page": "", 
+  "buildscript": "cgkit_py3k", 
+  "basename": "cgkit", 
+  "src_path_prefix": "", 
+  "filters": "- status !re py\\.3\\.k", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "rpcnis-headers", 
-  "buildscript": "rpcnis_headers", 
-  "deprecated": true, 
   "description": "", 
-  "filters": "can be installed with glibc", 
   "home_page": "", 
+  "buildscript": "rpcnis_headers", 
+  "basename": "rpcnis-headers", 
+  "src_path_prefix": "", 
+  "filters": "can be installed with glibc", 
   "installation_priority": 5, 
-  "non_installable": true, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": true, 
+  "deprecated": true
 }

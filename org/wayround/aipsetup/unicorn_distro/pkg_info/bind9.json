@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "bind", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.isc.org", 
+  "buildscript": "std", 
+  "basename": "bind", 
+  "src_path_prefix": "/isc.org/isc/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/isc.org/isc/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

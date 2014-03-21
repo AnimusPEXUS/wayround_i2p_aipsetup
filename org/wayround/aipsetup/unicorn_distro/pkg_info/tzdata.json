@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "tzdata", 
-  "buildscript": "tzdata", 
-  "deprecated": false, 
   "description": "required by glibc", 
-  "filters": "", 
   "home_page": "", 
+  "buildscript": "tzdata", 
+  "basename": "tzdata", 
+  "src_path_prefix": "", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

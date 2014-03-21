@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "pidgin", 
-  "buildscript": "pidgin", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- version < 2.5\n- version >= 2.6", 
   "home_page": "http://www.sourceforge.net/", 
+  "buildscript": "pidgin", 
+  "basename": "pidgin", 
+  "src_path_prefix": "/sourceforge.net/else/rsync/p/project/pi/pidgin/", 
+  "filters": "- version < 2.5\n- version >= 2.6", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/sourceforge.net/else/rsync/p/project/pi/pidgin/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

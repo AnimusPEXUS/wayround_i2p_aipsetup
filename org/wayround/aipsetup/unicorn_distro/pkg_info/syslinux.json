@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "syslinux", 
-  "buildscript": "syslinux", 
-  "deprecated": false, 
   "description": "linux kernel boot loader used in this distribution", 
-  "filters": "", 
   "home_page": "http://www.kernel.org", 
+  "buildscript": "syslinux", 
+  "basename": "syslinux", 
+  "src_path_prefix": "", 
+  "filters": "", 
   "installation_priority": 0, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": false, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

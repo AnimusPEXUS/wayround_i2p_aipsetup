@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "sip", 
-  "buildscript": "std_configure_py2", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.riverbankcomputing.co.uk", 
+  "buildscript": "std_configure_py2", 
+  "basename": "sip", 
+  "src_path_prefix": "/riverbankcomputing.co.uk/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/riverbankcomputing.co.uk/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

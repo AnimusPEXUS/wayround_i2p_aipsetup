@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "pycairo", 
-  "buildscript": "pycairo", 
-  "deprecated": false, 
   "description": "required by pygobject", 
-  "filters": "", 
   "home_page": "http://www.freedesktop.org", 
+  "buildscript": "pycairo", 
+  "basename": "pycairo", 
+  "src_path_prefix": "/freedesktop.org/cairo/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/freedesktop.org/cairo/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

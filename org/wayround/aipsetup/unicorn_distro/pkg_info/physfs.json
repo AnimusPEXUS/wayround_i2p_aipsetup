@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "physfs", 
-  "buildscript": "std_cmake", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.icculus.org", 
+  "buildscript": "std_cmake", 
+  "basename": "physfs", 
+  "src_path_prefix": "/icculus.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/icculus.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

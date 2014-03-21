@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "rrdtool", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.oetiker.ch", 
+  "buildscript": "std", 
+  "basename": "rrdtool", 
+  "src_path_prefix": "/oetiker.ch/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/oetiker.ch/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

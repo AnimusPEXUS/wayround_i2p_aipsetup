@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "libpng", 
-  "buildscript": "std", 
-  "deprecated": true, 
   "description": "write something here, please", 
-  "filters": "- version fm *\n+ version fm 1.2.*\n- filename contains config", 
   "home_page": "http://www.sourceforge.net", 
+  "buildscript": "std", 
+  "basename": "libpng", 
+  "src_path_prefix": "/sourceforge.net/else/rsync/l/project/li/libpng/", 
+  "filters": "- version fm *\n+ version fm 1.2.*\n- filename contains config", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/sourceforge.net/else/rsync/l/project/li/libpng/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": true
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "autoconf", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "- version fm *\n+ version re 2\\.13\\.?", 
   "home_page": "", 
+  "buildscript": "std", 
+  "basename": "autoconf", 
+  "src_path_prefix": "", 
+  "filters": "- version fm *\n+ version re 2\\.13\\.?", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

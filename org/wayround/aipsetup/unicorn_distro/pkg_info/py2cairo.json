@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "py2cairo", 
-  "buildscript": "py2cairo", 
-  "deprecated": false, 
   "description": "", 
-  "filters": "", 
   "home_page": "", 
+  "buildscript": "py2cairo", 
+  "basename": "py2cairo", 
+  "src_path_prefix": "/freedesktop.org/cairo/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/freedesktop.org/cairo/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "glibc-ports", 
-  "buildscript": "glibc", 
-  "deprecated": false, 
   "description": "This is glibc plugin. optional in glibc build time.", 
-  "filters": "", 
   "home_page": "http://www.gnu.org", 
+  "buildscript": "glibc", 
+  "basename": "glibc-ports", 
+  "src_path_prefix": "", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": false, 
   "removable": false, 
-  "src_path_prefix": ""
+  "reducible": false, 
+  "non_installable": false, 
+  "deprecated": false
 }

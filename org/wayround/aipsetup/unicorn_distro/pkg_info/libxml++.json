@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "libxmlplusplus", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "WARNING\n\nas libxml++-2.36.0.tar.xz is too complicated for parsing, it need to be renamed to libxmlplusplus-2.36.0.tar.xz in order to properly work with aipsetup", 
-  "filters": "", 
   "home_page": "http://www.gnome.org", 
+  "buildscript": "std", 
+  "basename": "libxmlplusplus", 
+  "src_path_prefix": "/gnome.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/gnome.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

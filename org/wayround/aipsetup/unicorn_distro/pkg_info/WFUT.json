@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "WFUT", 
-  "buildscript": "std", 
-  "deprecated": true, 
   "description": "", 
-  "filters": "see libwfut", 
   "home_page": "", 
+  "buildscript": "std", 
+  "basename": "WFUT", 
+  "src_path_prefix": "", 
+  "filters": "see libwfut", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": true
 }

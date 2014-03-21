@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "e2fsprogs", 
-  "buildscript": "e2fsprogs", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- status fm *WIP*\n- status fm *rc*\n- status fm *beta*\n- status fm *alpha*\n- status re \\w\n", 
   "home_page": "http://sf.net", 
+  "buildscript": "e2fsprogs", 
+  "basename": "e2fsprogs", 
+  "src_path_prefix": "", 
+  "filters": "- status fm *WIP*\n- status fm *rc*\n- status fm *beta*\n- status fm *alpha*\n- status re \\w\n", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "fcron", 
-  "buildscript": "fcron", 
-  "deprecated": true, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.free.fr", 
+  "buildscript": "fcron", 
+  "basename": "fcron", 
+  "src_path_prefix": "", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": true, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": true, 
+  "deprecated": true
 }

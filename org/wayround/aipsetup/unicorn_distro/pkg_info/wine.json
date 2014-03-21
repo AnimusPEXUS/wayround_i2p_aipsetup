@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "wine", 
-  "buildscript": "wine", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- status !re ^$", 
   "home_page": "http://www.sourceforge.net", 
+  "buildscript": "wine", 
+  "basename": "wine", 
+  "src_path_prefix": "", 
+  "filters": "- status !re ^$", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": ""
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "ejabberd", 
-  "buildscript": "ejabberd", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.ejabberd.im", 
+  "buildscript": "ejabberd", 
+  "basename": "ejabberd", 
+  "src_path_prefix": "/ejabberd.im/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/ejabberd.im/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

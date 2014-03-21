@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": false, 
-  "basename": "lynx", 
-  "buildscript": "lynx", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "- status fm *rel*\n- version fm *rel*\n- status fm *pre*\n- status fm *dev*", 
   "home_page": "http://www.isc.org", 
+  "buildscript": "lynx", 
+  "basename": "lynx", 
+  "src_path_prefix": "/isc.org/lynx/", 
+  "filters": "- status fm *rel*\n- version fm *rel*\n- status fm *pre*\n- status fm *dev*", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/isc.org/lynx/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

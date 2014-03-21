@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "tar", 
-  "buildscript": "std", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.gnu.org", 
+  "buildscript": "std", 
+  "basename": "tar", 
+  "src_path_prefix": "/gnu.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": false, 
-  "src_path_prefix": "/gnu.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

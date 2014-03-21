@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "expect", 
-  "buildscript": "expect", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.sf.net/projects/expect", 
+  "buildscript": "expect", 
+  "basename": "expect", 
+  "src_path_prefix": "/sourceforge.net/else/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/sourceforge.net/else/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }

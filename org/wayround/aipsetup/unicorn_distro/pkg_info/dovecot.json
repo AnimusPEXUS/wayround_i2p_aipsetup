@@ -1,15 +1,13 @@
 {
-  "auto_newest_pkg": true, 
-  "auto_newest_src": true, 
-  "basename": "dovecot", 
-  "buildscript": "dovecot", 
-  "deprecated": false, 
   "description": "write something here, please", 
-  "filters": "", 
   "home_page": "http://www.dovecot.org", 
+  "buildscript": "dovecot", 
+  "basename": "dovecot", 
+  "src_path_prefix": "/dovecot.org/www.dovecot.org/", 
+  "filters": "", 
   "installation_priority": 5, 
-  "non_installable": false, 
-  "reducible": true, 
   "removable": true, 
-  "src_path_prefix": "/dovecot.org/www.dovecot.org/"
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
 }
