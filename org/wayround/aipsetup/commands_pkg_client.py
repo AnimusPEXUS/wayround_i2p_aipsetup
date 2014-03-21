@@ -471,7 +471,7 @@ def get_tar_latest(command_name, opts, args, adds):
     return ret
 
 
-def _get_tarballs_latest(url, name, config):
+def _get_tarballs_latest(url, name, config, out_dir=None):
 
     ret = 1
 
@@ -495,7 +495,10 @@ def _get_tarballs_latest(url, name, config):
         if found:
             res = found
 
-        res = org.wayround.aipsetup.client_pkg.get_tarball(res)
+        res = org.wayround.aipsetup.client_pkg.get_tarball(
+            res,
+            out_dir=out_dir
+            )
 
         if isinstance(res, str):
             ret = 0
@@ -571,7 +574,7 @@ def get_tar_lat_cat(command_name, opts, args, adds):
 
                 if can_continue:
 
-                    res = _get_tarballs_latest(url, i, config)
+                    res = _get_tarballs_latest(url, i, config, out_dir=out_dir)
 
                     if res != 0:
                         errors = True
