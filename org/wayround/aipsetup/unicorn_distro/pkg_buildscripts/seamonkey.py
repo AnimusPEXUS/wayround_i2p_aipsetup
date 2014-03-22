@@ -1,14 +1,13 @@
 #!/usr/bin/python
 
-import os.path
 import logging
-
-import org.wayround.utils.file
-import org.wayround.utils.path
-import org.wayround.utils.checksum
+import os.path
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.checksum
+import org.wayround.utils.file
+import org.wayround.utils.path
 
 
 def main(buildingsite, action=None):
@@ -41,7 +40,8 @@ def main(buildingsite, action=None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir = False
+        separate_build_dir_sm = True
+        separate_build_dir_xul = True
 
         ###### SEAMONKEY PART ###### (XULRUNNER LOWER)
 
@@ -90,7 +90,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
+                use_separate_buildding_dir=separate_build_dir_sm,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
@@ -103,7 +103,7 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
+                use_separate_buildding_dir=separate_build_dir_sm,
                 source_configure_reldir=source_configure_reldir
                 )
 
@@ -117,7 +117,7 @@ def main(buildingsite, action=None):
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
+                use_separate_buildding_dir=separate_build_dir_sm,
                 source_configure_reldir=source_configure_reldir
                 )
 
@@ -181,7 +181,7 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
@@ -194,7 +194,7 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 source_configure_reldir=source_configure_reldir
                 )
 
@@ -208,7 +208,7 @@ def main(buildingsite, action=None):
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 source_configure_reldir=source_configure_reldir
                 )
 

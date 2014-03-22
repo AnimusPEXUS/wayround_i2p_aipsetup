@@ -76,7 +76,7 @@ def src_server_reindex(command_name, opts, args, adds):
         config['src_server']['acceptable_src_file_extensions'],
         '--force' in opts,
         '--first-delete-found' in opts,
-        '--clean-only'  in opts
+        '--clean-only' in opts
         )
 
     return 0

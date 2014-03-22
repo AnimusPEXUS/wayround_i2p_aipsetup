@@ -1173,7 +1173,7 @@ class SourceRepoCtl:
             org.wayround.utils.path.realpath(
                 subdir_name
                 ),
-            acceptable_endings=acceptable_src_file_extensions,
+            acceptable_endings=acceptable_src_file_extensions.split(' '),
             force_reindex=force_reindex,
             first_delete_found=first_delete_found,
             clean_only=clean_only

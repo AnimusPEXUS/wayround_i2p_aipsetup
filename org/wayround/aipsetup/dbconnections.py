@@ -117,11 +117,6 @@ def src_repo_db(config):
     global _src_repo_db_connection
 
     if not _src_repo_db_connection:
-        logging.info(
-            "Getting repo DB connection: {}".format(
-                config['src_server']['src_index_db_config']
-                )
-            )
         _src_repo_db_connection = src_repo_db_new_connection(
             config['src_server']['src_index_db_config']
             )
