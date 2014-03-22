@@ -8,8 +8,9 @@ import pprint
 import shlex
 import sys
 
-import org.wayround.utils.getopt
 import org.wayround.aipsetup.controllers
+import org.wayround.utils.getopt
+import org.wayround.utils.terminal
 
 
 def commands():
@@ -577,7 +578,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
                 fi += 1
 
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    ({perc:5.2f}%) {p} packages of {pc}, {f} files of "
                     "{fc}. found {b} broken, {m} missing".format(
                         perc=perc,

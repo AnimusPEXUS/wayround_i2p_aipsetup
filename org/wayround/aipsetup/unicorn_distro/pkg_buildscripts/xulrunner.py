@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.checksum
+import org.wayround.utils.file
+import org.wayround.utils.path
 
 
 def main(buildingsite, action=None):
@@ -16,8 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 
-#             'configure', 'build', 'distribute',
+            ['extract_xul',
              'configure_xul', 'build_xul', 'distribute_xul'
              ],
             action,
@@ -36,9 +35,11 @@ def main(buildingsite, action=None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir = False
+        separate_build_dir_xul = True
 
-        if 'extract' in actions:
+        source_configure_reldir = '.'
+
+        if 'extract_xul' in actions and ret == 0:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 if org.wayround.utils.file.cleanup_dir(src_dir) != 0:
@@ -53,7 +54,6 @@ def main(buildingsite, action=None):
                     unwrap_dir=True,
                     rename_dir=False
                     )
-
 
         if 'configure_xul' in actions and ret == 0:
             ret = autotools.configure_high(
@@ -78,8 +78,8 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='./mozilla',
-                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
@@ -92,8 +92,8 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='./mozilla'
+                use_separate_buildding_dir=separate_build_dir_xul,
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute_xul' in actions and ret == 0:
@@ -106,8 +106,8 @@ def main(buildingsite, action=None):
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir='./mozilla'
+                use_separate_buildding_dir=separate_build_dir_xul,
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret

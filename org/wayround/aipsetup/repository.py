@@ -13,7 +13,6 @@ import os.path
 import re
 import shutil
 
-import sqlalchemy.ext
 import sqlalchemy.ext.declarative
 
 import org.wayround.aipsetup.package
@@ -24,6 +23,7 @@ import org.wayround.utils.file
 import org.wayround.utils.path
 import org.wayround.utils.tag
 import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.terminal
 
 
 class PackageRepo(org.wayround.utils.db.BasicDB):
@@ -627,7 +627,7 @@ class PackageRepoCtl:
                         parent_cid=parent_cat_id
                         )
 
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    scanning "
                     "(found: {} categories, {} packages): {}".format(
                         len(category_locations.keys()),
@@ -636,7 +636,7 @@ class PackageRepoCtl:
                         )
                     )
 
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
         if ret == 0:
             ret = {'cats': category_locations, 'packs': package_locations}
@@ -1056,7 +1056,7 @@ class PackageRepoCtl:
             else:
                 perc = 100.0 / (float(lst_l) / lst_i)
 
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                     "    {:6.2f}% (package {})".format(
                         perc,
                         pkgs[i]
@@ -1327,7 +1327,7 @@ class SourceRepoCtl:
                 removed = 0
                 logging.info("Removing found files from index")
                 for i in source_index:
-                    org.wayround.utils.file.progress_write(
+                    org.wayround.utils.terminal.progress_write(
                         "    removed {} of {}".format(removed, found_count)
                         )
                     self.database_connection.del_object_tags(i)
@@ -1335,7 +1335,7 @@ class SourceRepoCtl:
 
                 self.database_connection.commit()
 
-                org.wayround.utils.file.progress_write_finish()
+                org.wayround.utils.terminal.progress_write_finish()
 
             index = 0
             failed_count = 0
@@ -1365,21 +1365,21 @@ class SourceRepoCtl:
                             i,
                             [parsed_src_filename['groups']['name']]
                             )
-                        org.wayround.utils.file.progress_write(
+                        org.wayround.utils.terminal.progress_write(
                             "    added: {}\n".format(
                                 os.path.basename(i)
                                 )
                             )
                         added_count += 1
                     else:
-                        org.wayround.utils.file.progress_write(
+                        org.wayround.utils.terminal.progress_write(
                             "    failed to parse: {}\n".format(
                                 os.path.basename(i)
                                 )
                             )
                         failed_count += 1
 
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    {} out of {} "
                     "({:.2f}%, added {}, failed {}, skipped {})".format(
                         index,
@@ -1391,7 +1391,7 @@ class SourceRepoCtl:
                         )
                     )
 
-            org.wayround.utils.file.progress_write_finish()
+            org.wayround.utils.terminal.progress_write_finish()
 
             del source_index
 
@@ -1432,7 +1432,7 @@ class SourceRepoCtl:
                 skipped_count += 1
 
             i_i += 1
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "    {:.2f}%, scanned {}, marked for "
                 "deletion {}, skipped {}: {}".format(
                     100.0 / (float(src_tag_objects_l) / i_i),
@@ -1443,7 +1443,7 @@ class SourceRepoCtl:
                     )
                 )
 
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
         self.database_connection.commit()
 
@@ -1679,13 +1679,13 @@ class SourceRepoCtl:
 
             i_i += 1
 
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "    {:.2f}%".format(
                     100.0 / (float(objs_l) / i_i)
                     )
                 )
 
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
         objs = objs2
 
         logging.info("Setting report")

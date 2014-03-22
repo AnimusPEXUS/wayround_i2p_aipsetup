@@ -19,6 +19,7 @@ import org.wayround.utils.file
 import org.wayround.utils.format.elf
 import org.wayround.utils.list
 import org.wayround.utils.path
+import org.wayround.utils.terminal
 
 
 LOCAL_DIRS = [
@@ -997,7 +998,7 @@ class SystemCtl:
             lst_i += 1
 
             if not mute:
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    {} of {} ({:.2f}%)".format(
                         lst_i,
                         lst_c,
@@ -1032,7 +1033,7 @@ class SystemCtl:
             lst_i += 1
 
             if not mute:
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    {} of {} ({:.2f}%)".format(
                         lst_i,
                         lst_c,
@@ -1130,7 +1131,7 @@ class SystemCtl:
                     else:
                         perc = 100.0 / (float(lst_l) / float(lst_i))
 
-                    org.wayround.utils.file.progress_write(
+                    org.wayround.utils.terminal.progress_write(
                         "    {:6.2f}% (found {} packages) ({})".format(
                             perc,
                             len(ret_dict.keys()),
@@ -1139,7 +1140,7 @@ class SystemCtl:
                         )
 
             if not mute:
-                org.wayround.utils.file.progress_write_finish()
+                org.wayround.utils.terminal.progress_write_finish()
 
             ret = ret_dict
 
@@ -1685,7 +1686,7 @@ class SystemCtl:
                 installed_asp_names_i += 1
 
                 if not mute:
-                    org.wayround.utils.file.progress_write(
+                    org.wayround.utils.terminal.progress_write(
                         "    {} of {} ({:.2f}%) "
                         "found: {}; last found: {}".format(
                             installed_asp_names_i,
@@ -1990,13 +1991,13 @@ class SystemCtl:
 
                 lf = lst_i
 
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    found: {}".format(lf),
                     new_line=True
                     )
             ii += 1
 
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "    {} of {} ({:.2f}%) found:"
                 " {} size: {} MiB position: {}".format(
                     ii,
@@ -2008,7 +2009,7 @@ class SystemCtl:
                     )
                 )
 
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
         ret = result
 
@@ -2132,7 +2133,7 @@ def find_so_files(directory, verbose=False):
         ret = files
 
     if verbose:
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
     ret = list(ret)
 
@@ -2176,7 +2177,7 @@ def find_elf_files(directory, verbose=False):
         ret = files
 
     if verbose:
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
     ret = list(ret)
 
@@ -2218,7 +2219,7 @@ def filter_so_files(files, verbose=False):
         count += 1
 
         if verbose:
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "Looking for .so files: {} of {} files (sos: {})".format(
                     count,
                     files_c,
@@ -2260,7 +2261,7 @@ def filter_elf_files(files, verbose=False):
         count += 1
 
         if verbose:
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "Looking for elf files: {} of {} files (elfs: {})".format(
                     count,
                     files_c,
@@ -2313,7 +2314,7 @@ def build_binary_dependency_tree_for_given_elf_files(
         elf_files_i += 1
 
         if verbose:
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "Progress: {} ELF files of {}".format(
                     elf_files_i,
                     elf_files_c
@@ -2321,7 +2322,7 @@ def build_binary_dependency_tree_for_given_elf_files(
                 )
 
     if verbose:
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
     return deps
 
@@ -2380,7 +2381,7 @@ def find_so_problems_by_given_so_and_elfs(
         elf_files_i += 1
 
         if verbose:
-            org.wayround.utils.file.progress_write(
+            org.wayround.utils.terminal.progress_write(
                 "Checked dependencies: {} of {} ({} missing found)".format(
                     elf_files_i,
                     elf_files_c,
@@ -2389,7 +2390,7 @@ def find_so_problems_by_given_so_and_elfs(
                 )
 
     if verbose:
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
         logging.info("Libraries missing: {}".format(len(reqs.keys())))
 
     return reqs

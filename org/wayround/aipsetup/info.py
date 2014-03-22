@@ -20,6 +20,7 @@ import org.wayround.utils.db
 import org.wayround.utils.file
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.terminal
 import org.wayround.utils.version
 
 
@@ -802,7 +803,9 @@ class PackageInfoCtl:
                 perc = 0
             else:
                 perc = float(100) / (float(files_l) / float(num))
-            org.wayround.utils.file.progress_write('    {:6.2f}%'.format(perc))
+            org.wayround.utils.terminal.progress_write(
+                '    {:6.2f}%'.format(perc)
+                )
 
             name = os.path.basename(i)[:-5]
 
@@ -815,15 +818,17 @@ class PackageInfoCtl:
             else:
                 missing.append(i)
 
-        org.wayround.utils.file.progress_write_finish()
+        org.wayround.utils.terminal.progress_write_finish()
 
-        org.wayround.utils.file.progress_write("-i- Loading missing records")
+        org.wayround.utils.terminal.progress_write(
+            "-i- Loading missing records"
+            )
 
         for i in missing:
             struct = read_info_file(i)
             name = os.path.basename(i)[:-5]
             if isinstance(struct, dict):
-                org.wayround.utils.file.progress_write(
+                org.wayround.utils.terminal.progress_write(
                     "    loading record: {}\n".format(name)
                     )
 
@@ -881,12 +886,12 @@ class TagsControl:
                         perc = 0
                     else:
                         perc = float(100) / (float(count) / float(num))
-                    org.wayround.utils.file.progress_write(
+                    org.wayround.utils.terminal.progress_write(
                         '    {:6.2f}%'.format(perc)
                         )
                     tag_db.set_tags(i, d[i])
 
-                org.wayround.utils.file.progress_write_finish()
+                org.wayround.utils.terminal.progress_write_finish()
             finally:
 
                 f.close()

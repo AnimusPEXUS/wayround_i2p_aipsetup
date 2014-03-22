@@ -5,23 +5,11 @@ Update system bindings and such
 
 import subprocess
 
-def exported_commands():
-    return {
-        'all': all_actions,
-        }
-
-def commands_order():
-    return [
-        'all'
-        ]
-
-def cli_name():
-    return 'sys_updates'
-
 
 def sysupdates_all_actions(opts, args):
     all_actions()
     return 0
+
 
 def all_actions():
     ret = 0
@@ -44,15 +32,18 @@ def all_actions():
 def ldconfig():
     return subprocess.Popen(['ldconfig']).wait()
 
+
 def update_mime_database():
     return subprocess.Popen(
         ['update-mime-database', '/usr/share/mime']
         ).wait()
 
+
 def gdk_pixbuf_query_loaders():
     return subprocess.Popen(
         ['gdk-pixbuf-query-loaders', '--update-cache']
         ).wait()
+
 
 def pango_querymodules():
     f = open('/etc/pango/pango.modules', 'wb')
@@ -62,11 +53,13 @@ def pango_querymodules():
     f.close()
     return r
 
+
 def glib_compile_schemas():
     r = subprocess.Popen(
         ['glib-compile-schemas', '/usr/share/glib-2.0/schemas'],
         ).wait()
     return r
+
 
 def gtk_query_immodules_2_0():
     f = open('/etc/gtk-2.0/gtk.immodules', 'wb')
@@ -76,6 +69,7 @@ def gtk_query_immodules_2_0():
         ).wait()
     f.close()
     return r
+
 
 def gtk_query_immodules_3_0():
     r = subprocess.Popen(

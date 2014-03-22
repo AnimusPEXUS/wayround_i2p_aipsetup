@@ -22,6 +22,7 @@ import org.wayround.utils.format.elf
 import org.wayround.utils.path
 import org.wayround.utils.system_type
 import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.terminal
 import org.wayround.utils.time
 
 
@@ -498,7 +499,7 @@ class PackCtl:
 
                     file_list_i += 1
 
-                    org.wayround.utils.file.progress_write(
+                    org.wayround.utils.terminal.progress_write(
                         "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".\
                             format_map(
                                 {
@@ -511,7 +512,7 @@ class PackCtl:
                                 )
                         )
 
-                org.wayround.utils.file.progress_write_finish()
+                org.wayround.utils.terminal.progress_write_finish()
 
                 logging.info("ELFs: {elfs}; non-ELFs: {n_elfs}".format_map({
                     'elfs': elfs,
