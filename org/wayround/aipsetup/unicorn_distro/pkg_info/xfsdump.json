@@ -1,9 +1,9 @@
 {
   "description": "write something here, please", 
-  "home_page": "http://www.sgi.com", 
-  "buildscript": "std", 
+  "home_page": "http://oss.sgi.com/projects/xfs/", 
+  "buildscript": "xfs", 
   "basename": "xfsdump", 
-  "src_path_prefix": "", 
+  "src_path_prefix": "/sgi.com/", 
   "filters": "", 
   "installation_priority": 5, 
   "removable": true, 

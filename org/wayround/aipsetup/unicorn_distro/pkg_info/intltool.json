@@ -3,7 +3,7 @@
   "home_page": "http://www.gnome.org", 
   "buildscript": "std", 
   "basename": "intltool", 
-  "src_path_prefix": "", 
+  "src_path_prefix": "/launchpad.net/intltool/", 
   "filters": "", 
   "installation_priority": 5, 
   "removable": true, 

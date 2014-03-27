@@ -15,11 +15,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute', 'distribute2'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute', 'links'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -30,6 +30,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -50,15 +52,10 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--disable-libuuid',
-                    '--disable-uuidd',
-                    '--disable-libblkid',
-                    '--enable-elf-shlibs',
-                    '--disable-fsck',
-                    '--prefix=' +
-                        pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' +
-                        pkg_info['constitution']['paths']['man'],
+                    '--with-xz',
+                    '--with-zlib',
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
                         pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
@@ -66,7 +63,7 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -95,11 +92,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
@@ -107,22 +100,29 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'distribute2' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install-libs',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        if 'links' in actions and ret == 0:
+
+            try:
+                os.makedirs(os.path.join(dst_dir, 'usr', 'sbin'))
+            except:
+                pass
+
+            for i in ['depmod', 'insmod', 'modinfo', 'modprobe', 'rmmod']:
+
+                ffn = os.path.join(dst_dir, 'usr', 'sbin', i)
+
+                if os.path.exists(ffn):
+                    os.unlink(ffn)
+
+                os.symlink(os.path.join('..', 'bin', 'kmod'), ffn)
+
+            for i in ['lsmod']:
+
+                ffn = os.path.join(dst_dir, 'usr', 'bin', i)
+
+                if os.path.exists(ffn):
+                    os.unlink(ffn)
+
+                os.symlink(os.path.join('.', 'kmod'), ffn)
 
     return ret

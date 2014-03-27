@@ -1,18 +1,11 @@
 #!/usr/bin/python3
 
-"""
-This script is for XFS tools, which can be downloaded from
-"""
-
-import os
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -21,8 +14,12 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute',
-         'fix_symlinks', 'fix_la_file'],
+        ['extract', 'configure', 'build',
+         'distribute1',
+         'distribute2',
+         'distribute3'
+         # 'fix_symlinks', 'fix_la_file'
+         ],
         action,
         "help"
         )
@@ -37,7 +34,9 @@ def main(buildingsite, action=None):
 
         basename = pkg_info['pkg_info']['basename']
 
-        logging.info("Detected (and accepted) basename is: [{}]".format(basename))
+        logging.info(
+                "Detected (and accepted) basename is: [{}]".format(basename)
+                )
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
@@ -62,10 +61,19 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--prefix=' + os.path.join(dst_dir, 'usr'),
-                    '--mandir=' + os.path.join(dst_dir, 'usr', 'share', 'man'),
-                    '--sysconfdir=' + os.path.join(dst_dir, 'etc'),
-                    '--localstatedir=' + os.path.join(dst_dir, 'var'),
+                    '--prefix=' +
+                        pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' +
+                        pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
+#                    '--prefix=' + os.path.join(dst_dir, 'usr'),
+#                    '--mandir=' +
+#                        os.path.join(dst_dir, 'usr', 'share', 'man'),
+#                    '--sysconfdir=' + os.path.join(dst_dir, 'etc'),
+#                    '--localstatedir=' + os.path.join(dst_dir, 'var'),
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -92,9 +100,41 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'distribute' in actions and ret == 0:
+        if 'distribute1' in actions and ret == 0:
 
-            commands = ['install', 'install-dev']
+            commands = ['install']
+
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=commands + [
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'distribute2' in actions and ret == 0:
+
+            commands = ['install-dev']
+
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=commands + [
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'distribute3' in actions and ret == 0:
+
+            commands = []
 
             if not basename in ['xfsprogs', 'xfsdump', 'dmapi']:
                 commands.append('install-lib')
@@ -111,44 +151,53 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'fix_symlinks' in actions and ret == 0 and not basename in ['xfsprogs', 'xfsdump', 'dmapi']:
-
-            try:
-                for i in ['lib{}.a'.format(basename), 'lib{}.la'.format(basename)]:
-                    ffn = os.path.join(dst_dir, 'usr', 'lib', i)
-
-                    if os.path.exists(ffn):
-                        os.unlink(ffn)
-
-                    os.symlink(os.path.join('..', 'libexec', i), ffn)
-
-                for i in ['lib{}.so'.format(basename)]:
-                    ffn = os.path.join(dst_dir, 'usr', 'libexec', i)
-
-                    if os.path.exists(ffn):
-                        os.unlink(ffn)
-
-                    os.symlink(os.path.join('..', 'lib', i), ffn)
-            except:
-                logging.exception('error')
-                ret = 1
-
-        if 'fix_la_file' in actions and ret == 0 and not basename in ['xfsprogs', 'xfsdump', 'dmapi']:
-
-            la_file_name = os.path.join(dst_dir, 'usr', 'lib', 'lib{}.la'.format(basename))
-
-            print("la_file_name == {}".format(la_file_name))
-
-            la_file = open(la_file_name)
-            lines = la_file.read().splitlines()
-            la_file.close()
-
-            for i in range(len(lines)):
-                while dst_dir in lines[i]:
-                    lines[i] = lines[i].replace(dst_dir, '')
-
-            la_file = open(la_file_name, 'w')
-            la_file.write('\n'.join(lines))
-            la_file.close()
+#        if ('fix_symlinks' in actions
+#            and ret == 0
+#            and not basename in ['xfsprogs', 'xfsdump', 'dmapi']):
+#
+#            try:
+#                for i in [
+#                    'lib{}.a'.format(basename),
+#                    'lib{}.la'.format(basename)
+#                    ]:
+#                    ffn = os.path.join(dst_dir, 'usr', 'lib', i)
+#
+#                    if os.path.exists(ffn):
+#                        os.unlink(ffn)
+#
+#                    os.symlink(os.path.join('..', 'libexec', i), ffn)
+#
+#                for i in ['lib{}.so'.format(basename)]:
+#                    ffn = os.path.join(dst_dir, 'usr', 'libexec', i)
+#
+#                    if os.path.exists(ffn):
+#                        os.unlink(ffn)
+#
+#                    os.symlink(os.path.join('..', 'lib', i), ffn)
+#            except:
+#                logging.exception('error')
+#                ret = 1
+#
+#        if ('fix_la_file' in actions
+#            and ret == 0
+#            and not basename in ['xfsprogs', 'xfsdump', 'dmapi']):
+#
+#            la_file_name = os.path.join(
+#                dst_dir, 'usr', 'lib', 'lib{}.la'.format(basename)
+#                )
+#
+#            print("la_file_name == {}".format(la_file_name))
+#
+#            la_file = open(la_file_name)
+#            lines = la_file.read().splitlines()
+#            la_file.close()
+#
+#            for i in range(len(lines)):
+#                while dst_dir in lines[i]:
+#                    lines[i] = lines[i].replace(dst_dir, '')
+#
+#            la_file = open(la_file_name, 'w')
+#            la_file.write('\n'.join(lines))
+#            la_file.close()
 
     return ret

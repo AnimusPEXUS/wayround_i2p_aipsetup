@@ -1,0 +1,13 @@
+{
+  "description": "utility used to conveniently setup disk encryption based on dm-crypt kernel module\n", 
+  "home_page": "https://code.google.com/p/cryptsetup/", 
+  "buildscript": "std", 
+  "basename": "cryptsetup", 
+  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/utils/cryptsetup/", 
+  "filters": "", 
+  "installation_priority": 5, 
+  "removable": true, 
+  "reducible": true, 
+  "non_installable": false, 
+  "deprecated": false
+}

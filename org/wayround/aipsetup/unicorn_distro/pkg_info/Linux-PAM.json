@@ -4,7 +4,7 @@
   "buildscript": "linux_pam", 
   "basename": "Linux-PAM", 
   "src_path_prefix": "", 
-  "filters": "", 
+  "filters": "- status re docs", 
   "installation_priority": 5, 
   "removable": true, 
   "reducible": true, 

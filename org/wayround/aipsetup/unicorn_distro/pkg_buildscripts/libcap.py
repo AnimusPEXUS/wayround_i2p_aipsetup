@@ -16,7 +16,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'build', 'distribute'],
         action,
         "help"
         )
@@ -48,37 +48,6 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--enable-targets=all',
-                    '--enable-64-bit-bfd',
-                    '--disable-werror',
-                    '--enable-libada',
-                    '--enable-libssp',
-                    '--enable-objc-gc',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
@@ -96,7 +65,8 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + dst_dir
+                    'DESTDIR=' + dst_dir,
+                    'RAISE_SETFCAP=no'
                     ],
                 environment={},
                 environment_mode='copy',

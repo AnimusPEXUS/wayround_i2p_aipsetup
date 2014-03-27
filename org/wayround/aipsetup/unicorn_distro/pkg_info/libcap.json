@@ -1,13 +1,13 @@
 {
-  "description": "write something here, please", 
+  "description": "deprecated. use libcap2", 
   "home_page": "http://www.kernel.org", 
-  "buildscript": "", 
+  "buildscript": "libcap", 
   "basename": "libcap", 
-  "src_path_prefix": "", 
-  "filters": "", 
+  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/libs/security/linux-privs/libcap1/", 
+  "filters": "- version >= 2", 
   "installation_priority": 5, 
   "removable": true, 
   "reducible": true, 
   "non_installable": false, 
-  "deprecated": false
+  "deprecated": true
 }

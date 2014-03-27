@@ -18,7 +18,7 @@ def main(buildingsite, action=None):
         buildingsite,
         [
         'extract', 'configure', 'build', 'distribute',
-        'clean_src', 'configure2', 'build2', 'distribute2'
+        'clean_src', 'configure3', 'build3', 'distribute3'
         ],
         action,
         "help"
@@ -47,7 +47,6 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -60,13 +59,15 @@ def main(buildingsite, action=None):
                 )
 
         if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
+            autotools.configure_high(
                 buildingsite,
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir='
+                        + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir='
+                        + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -83,7 +84,7 @@ def main(buildingsite, action=None):
                 )
 
         if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
+            autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[],
@@ -94,7 +95,7 @@ def main(buildingsite, action=None):
                 )
 
         if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
+            autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[
@@ -122,14 +123,16 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure2' in actions and ret == 0:
-            ret = autotools.configure_high(
+        if 'configure3' in actions and ret == 0:
+            autotools.configure_high(
                 buildingsite,
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir='
+                        + pkg_info['constitution']['paths']['config'],
+                    '--localstatedir='
+                        + pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -145,7 +148,7 @@ def main(buildingsite, action=None):
                 relative_call=False
                 )
 
-        if 'build2' in actions and ret == 0:
+        if 'build3' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -156,7 +159,7 @@ def main(buildingsite, action=None):
                 source_configure_reldir='.'
                 )
 
-        if 'distribute2' in actions and ret == 0:
+        if 'distribute3' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
