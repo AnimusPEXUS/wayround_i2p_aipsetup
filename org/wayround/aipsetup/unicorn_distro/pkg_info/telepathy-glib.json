@@ -1,7 +1,7 @@
 {
   "description": "", 
   "home_page": "http://www.freedesktop.org/", 
-  "buildscript": "std", 
+  "buildscript": "telepathy_glib", 
   "basename": "telepathy-glib", 
   "src_path_prefix": "", 
   "filters": "", 

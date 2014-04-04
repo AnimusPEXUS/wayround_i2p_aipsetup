@@ -1,13 +1,13 @@
 {
-  "description": "Simple Window Manager\n", 
-  "home_page": "http://www.afterstep.org", 
-  "buildscript": "None", 
-  "basename": "AfterStep", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
-  "deprecated": false
+  "basename": "AfterStep",
+  "removable": true,
+  "buildscript": "None",
+  "description": "Simple Window Manager\n",
+  "filters": "",
+  "reducible": true,
+  "installation_priority": 5,
+  "src_path_prefix": "/afterstep.org/",
+  "non_installable": false,
+  "deprecated": false,
+  "home_page": "http://www.afterstep.org"
 }

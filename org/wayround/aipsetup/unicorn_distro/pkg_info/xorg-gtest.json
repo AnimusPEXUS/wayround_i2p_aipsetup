@@ -2,7 +2,7 @@
   "description": "",
   "home_page": "",
   "buildscript": "",
-  "basename": "",
+  "basename": "xorg-gtest",
   "src_path_prefix": "",
   "filters": "",
   "installation_priority": 5,

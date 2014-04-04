@@ -1,7 +1,7 @@
 {
   "description": "write something here, please", 
   "home_page": "http://mozilla.org", 
-  "buildscript": "js", 
+  "buildscript": "js185", 
   "basename": "js185", 
   "src_path_prefix": "", 
   "filters": "", 

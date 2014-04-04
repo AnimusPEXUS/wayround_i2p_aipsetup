@@ -2,7 +2,7 @@
   "description": "",
   "home_page": "",
   "buildscript": "",
-  "basename": "",
+  "basename": "xf86-video-freedreno",
   "src_path_prefix": "",
   "filters": "",
   "installation_priority": 5,

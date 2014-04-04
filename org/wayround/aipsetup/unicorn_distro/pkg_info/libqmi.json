@@ -1,8 +1,8 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "",
-  "basename": "xf86-video-modesetting",
+  "buildscript": "std",
+  "basename": "libqmi",
   "src_path_prefix": "",
   "filters": "",
   "installation_priority": 5,

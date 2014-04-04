@@ -1,8 +1,8 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "",
-  "basename": "",
+  "buildscript": "std",
+  "basename": "presentproto",
   "src_path_prefix": "",
   "filters": "",
   "installation_priority": 5,

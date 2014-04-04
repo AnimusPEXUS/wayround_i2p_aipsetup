@@ -1,7 +1,7 @@
 {
   "description": "", 
   "home_page": "", 
-  "buildscript": "std", 
+  "buildscript": "weston", 
   "basename": "weston", 
   "src_path_prefix": "", 
   "filters": "", 
