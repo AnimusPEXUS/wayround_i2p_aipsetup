@@ -1,13 +1,12 @@
 {
-  "description": "None", 
-  "home_page": "http://www.sourceforge.net", 
-  "buildscript": "std", 
-  "basename": "gutenprint", 
-  "src_path_prefix": "", 
-  "filters": "- status fm *\n+ status re ^$\n- version re ^\\d+$\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "None",
+  "home_page": "http://www.sourceforge.net",
+  "buildscript": "std",
+  "basename": "gutenprint",
+  "filters": "- status fm *\n+ status re ^$\n- version re ^\\d+$\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

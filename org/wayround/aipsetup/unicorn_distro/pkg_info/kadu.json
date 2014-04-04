@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "std_cmake", 
-  "basename": "kadu", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "std_cmake",
+  "basename": "kadu",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://gnome.org/", 
-  "buildscript": "std", 
-  "basename": "gdl", 
-  "src_path_prefix": "/gnome.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://gnome.org/",
+  "buildscript": "std",
+  "basename": "gdl",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

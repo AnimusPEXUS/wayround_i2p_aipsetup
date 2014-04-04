@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "https://sites.google.com/site/fullycapable/", 
-  "buildscript": "libcap2", 
-  "basename": "libcap", 
-  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/libs/security/linux-privs/libcap2/", 
-  "filters": "- version < 2", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "https://sites.google.com/site/fullycapable/",
+  "buildscript": "libcap2",
+  "basename": "libcap",
+  "filters": "- version < 2",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

@@ -1,13 +1,12 @@
 {
-  "description": "required by glibc", 
-  "home_page": "", 
-  "buildscript": "tzdata", 
-  "basename": "tzdata", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "required by glibc",
+  "home_page": "",
+  "buildscript": "tzdata",
+  "basename": "tzdata",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

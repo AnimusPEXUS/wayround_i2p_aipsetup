@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "docbook_xml4", 
-  "basename": "docbook-xml", 
-  "src_path_prefix": "", 
-  "filters": "- version fm *\n+ version fm 4.*\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "docbook_xml4",
+  "basename": "docbook-xml",
+  "filters": "- version fm *\n+ version fm 4.*\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

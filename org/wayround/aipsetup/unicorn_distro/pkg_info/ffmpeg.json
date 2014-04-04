@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.gnu.org", 
-  "buildscript": "ffmpeg", 
-  "basename": "ffmpeg", 
-  "src_path_prefix": "/ffmpeg.org/ffmpeg.org/releases/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.gnu.org",
+  "buildscript": "ffmpeg",
+  "basename": "ffmpeg",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

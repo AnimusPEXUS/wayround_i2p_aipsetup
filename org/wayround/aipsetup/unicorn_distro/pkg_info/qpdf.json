@@ -1,13 +1,12 @@
 {
-  "description": "None", 
-  "home_page": "http://sf.net", 
-  "buildscript": "std", 
-  "basename": "qpdf", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "None",
+  "home_page": "http://sf.net",
+  "buildscript": "std",
+  "basename": "qpdf",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

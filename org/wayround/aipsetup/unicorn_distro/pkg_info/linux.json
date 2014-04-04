@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://www.kernel.org/", 
-  "buildscript": "linux", 
-  "basename": "linux", 
-  "src_path_prefix": "/kernel.org/kernel.org/ftp.kernel.org/pub/linux/kernel/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": false, 
-  "reducible": false, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://www.kernel.org/",
+  "buildscript": "linux",
+  "basename": "linux",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": false,
+  "reducible": false,
+  "non_installable": false,
   "deprecated": false
 }

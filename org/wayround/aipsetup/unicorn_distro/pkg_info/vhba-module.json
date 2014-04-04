@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "vhba-module", 
-  "basename": "vhba-module", 
-  "src_path_prefix": "/sourceforge.net/else/rsync/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "vhba-module",
+  "basename": "vhba-module",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

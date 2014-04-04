@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.openssl.org", 
-  "buildscript": "openssl", 
-  "basename": "openssl", 
-  "src_path_prefix": "/openssl.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.openssl.org",
+  "buildscript": "openssl",
+  "basename": "openssl",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

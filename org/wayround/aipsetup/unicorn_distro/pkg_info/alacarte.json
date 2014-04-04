@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "std", 
-  "basename": "alacarte", 
-  "src_path_prefix": "/gnome.org/gnome.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "alacarte",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

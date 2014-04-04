@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.tcpdump.org", 
-  "buildscript": "std", 
-  "basename": "libpcap", 
-  "src_path_prefix": "/tcpdump.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.tcpdump.org",
+  "buildscript": "std",
+  "basename": "libpcap",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

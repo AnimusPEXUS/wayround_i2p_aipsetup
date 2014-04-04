@@ -1,14 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.gnome.org", 
-  "buildscript": "pygobject", 
-  "basename": "pygobject", 
-  "src_path_prefix": "/gnome.org/gnome.org/sources/", 
-  "filters": "- version < 3.10\n- version re ^(\\d+)\\.(\\d*[13579])(\\.\\d+)*$\n",
-  "filters": "- version < 3.10\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.gnome.org",
+  "buildscript": "pygobject",
+  "basename": "pygobject",
+  "filters": "- version < 3.10\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.kde.org", 
-  "buildscript": "", 
-  "basename": "kactivities", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.kde.org",
+  "buildscript": "",
+  "basename": "kactivities",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

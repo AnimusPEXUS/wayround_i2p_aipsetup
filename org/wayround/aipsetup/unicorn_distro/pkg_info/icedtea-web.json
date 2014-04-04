@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://None", 
-  "buildscript": "icedtea_web", 
-  "basename": "icedtea-web", 
-  "src_path_prefix": "", 
-  "filters": "- status !re ^$\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://None",
+  "buildscript": "icedtea_web",
+  "basename": "icedtea-web",
+  "filters": "- status !re ^$\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

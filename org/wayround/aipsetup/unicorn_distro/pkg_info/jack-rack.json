@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.sourceforge.net", 
-  "buildscript": "std", 
-  "basename": "jack-rack", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.sourceforge.net",
+  "buildscript": "std",
+  "basename": "jack-rack",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

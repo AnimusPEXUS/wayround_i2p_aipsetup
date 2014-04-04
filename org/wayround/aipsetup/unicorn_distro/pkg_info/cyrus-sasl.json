@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.cmu.edu", 
-  "buildscript": "std", 
-  "basename": "cyrus-sasl", 
-  "src_path_prefix": "/cyrusimap.org/ftp.cyrusimap.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.cmu.edu",
+  "buildscript": "std",
+  "basename": "cyrus-sasl",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

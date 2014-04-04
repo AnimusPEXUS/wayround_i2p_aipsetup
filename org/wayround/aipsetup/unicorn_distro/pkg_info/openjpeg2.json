@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "std_cmake", 
-  "basename": "openjpeg", 
-  "src_path_prefix": "", 
-  "filters": "- version fm *\n+ version fm 2.*\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "std_cmake",
+  "basename": "openjpeg",
+  "filters": "- version fm *\n+ version fm 2.*\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

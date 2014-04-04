@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://gnome.org/", 
-  "buildscript": "std", 
-  "basename": "gnome-color-manager", 
-  "src_path_prefix": "", 
-  "filters": "- version !re \\d*\\.\\d*[02468]", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://gnome.org/",
+  "buildscript": "std",
+  "basename": "gnome-color-manager",
+  "filters": "- version !re \\d*\\.\\d*[02468]",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

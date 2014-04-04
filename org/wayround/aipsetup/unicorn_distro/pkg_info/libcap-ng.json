@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://people.redhat.com/sgrubb/libcap-ng/", 
-  "buildscript": "std", 
-  "basename": "libcap-ng", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://people.redhat.com/sgrubb/libcap-ng/",
+  "buildscript": "std",
+  "basename": "libcap-ng",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

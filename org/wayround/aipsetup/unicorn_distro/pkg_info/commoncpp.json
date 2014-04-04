@@ -1,13 +1,12 @@
 {
-  "description": "see commoncpp2", 
-  "home_page": "http://www.gnu.org", 
-  "buildscript": "", 
-  "basename": "commoncpp", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": true, 
+  "description": "see commoncpp2",
+  "home_page": "http://www.gnu.org",
+  "buildscript": "",
+  "basename": "commoncpp",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": true,
   "deprecated": true
 }

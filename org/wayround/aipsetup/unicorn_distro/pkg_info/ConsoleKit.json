@@ -1,13 +1,12 @@
 {
-  "description": "use systemd", 
-  "home_page": "", 
-  "buildscript": "ConsoleKit", 
-  "basename": "ConsoleKit", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "use systemd",
+  "home_page": "",
+  "buildscript": "ConsoleKit",
+  "basename": "ConsoleKit",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": true
 }

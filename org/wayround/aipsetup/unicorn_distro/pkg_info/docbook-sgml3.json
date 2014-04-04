@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "docbook_sgml3", 
-  "basename": "docbk", 
-  "src_path_prefix": "", 
-  "filters": "- version fm *\n+ version fm 3*\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "docbook_sgml3",
+  "basename": "docbk",
+  "filters": "- version fm *\n+ version fm 3*\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

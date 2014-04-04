@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "https://developer.nvidia.com/cg-toolkit-download", 
-  "buildscript": "Cg", 
-  "basename": "Cg", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "https://developer.nvidia.com/cg-toolkit-download",
+  "buildscript": "Cg",
+  "basename": "Cg",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

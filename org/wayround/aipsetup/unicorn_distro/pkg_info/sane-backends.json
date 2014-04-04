@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.sane-project.org", 
-  "buildscript": "sane_backends", 
-  "basename": "sane-backends", 
-  "src_path_prefix": "/sane-project.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.sane-project.org",
+  "buildscript": "sane_backends",
+  "basename": "sane-backends",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

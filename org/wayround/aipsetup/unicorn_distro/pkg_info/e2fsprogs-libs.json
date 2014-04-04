@@ -1,13 +1,12 @@
 {
-  "description": "subset of e2fsprogs package", 
-  "home_page": "http://sf.net", 
-  "buildscript": "e2fsprogs", 
-  "basename": "e2fsprogs-libs", 
-  "src_path_prefix": "", 
-  "filters": "- status !re ^$", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": true, 
+  "description": "subset of e2fsprogs package",
+  "home_page": "http://sf.net",
+  "buildscript": "e2fsprogs",
+  "basename": "e2fsprogs-libs",
+  "filters": "- status !re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": true,
   "deprecated": false
 }

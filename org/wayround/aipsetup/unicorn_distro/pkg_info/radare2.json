@@ -1,13 +1,12 @@
 {
-  "description": "disassembler", 
-  "home_page": "http://radare.org/", 
-  "buildscript": "std", 
-  "basename": "radare2", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "disassembler",
+  "home_page": "http://radare.org/",
+  "buildscript": "std",
+  "basename": "radare2",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

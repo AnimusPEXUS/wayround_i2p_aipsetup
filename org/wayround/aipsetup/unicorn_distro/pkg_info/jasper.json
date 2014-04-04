@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://www.ece.uvic.ca", 
-  "buildscript": "std", 
-  "basename": "jasper", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://www.ece.uvic.ca",
+  "buildscript": "std",
+  "basename": "jasper",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": true
 }

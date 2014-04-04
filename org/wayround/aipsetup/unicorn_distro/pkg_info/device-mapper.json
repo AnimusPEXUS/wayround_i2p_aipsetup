@@ -1,13 +1,12 @@
 {
-  "description": "integrated with lvm2", 
-  "home_page": "http://www.redhat.com", 
-  "buildscript": "std", 
-  "basename": "device-mapper", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": true, 
+  "description": "integrated with lvm2",
+  "home_page": "http://www.redhat.com",
+  "buildscript": "std",
+  "basename": "device-mapper",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": true,
   "deprecated": true
 }

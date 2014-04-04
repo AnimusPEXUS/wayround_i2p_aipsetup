@@ -3,7 +3,6 @@
   "home_page": "",
   "buildscript": "",
   "basename": "xf86-video-omap",
-  "src_path_prefix": "",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://www.gnunet.org", 
-  "buildscript": "std", 
-  "basename": "", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": true, 
+  "description": "",
+  "home_page": "http://www.gnunet.org",
+  "buildscript": "std",
+  "basename": "",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": true,
   "deprecated": false
 }

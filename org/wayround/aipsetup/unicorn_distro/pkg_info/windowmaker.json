@@ -1,13 +1,12 @@
 {
-  "deprecated": false,
   "description": "",
-  "filters": "",
-  "non_installable": false,
   "home_page": "",
-  "installation_priority": 5,
   "buildscript": "windowmaker",
-  "reducible": true,
-  "src_path_prefix": "",
   "basename": "WindowMaker",
-  "removable": true
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

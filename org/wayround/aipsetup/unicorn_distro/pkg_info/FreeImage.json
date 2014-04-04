@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://sf.net/projects/freeimage", 
-  "buildscript": "FreeImage", 
-  "basename": "FreeImage", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://sf.net/projects/freeimage",
+  "buildscript": "FreeImage",
+  "basename": "FreeImage",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

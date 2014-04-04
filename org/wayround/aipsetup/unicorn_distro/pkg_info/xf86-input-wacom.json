@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://sourceforge.net", 
-  "buildscript": "std", 
-  "basename": "xf86-input-wacom", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://sourceforge.net",
+  "buildscript": "std",
+  "basename": "xf86-input-wacom",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

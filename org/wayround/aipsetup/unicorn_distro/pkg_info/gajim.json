@@ -1,13 +1,12 @@
 {
-  "description": "good pythonic xmpp client\n\nsupports voip, plugins and many other things\n\npython2.7 is required\n", 
-  "home_page": "http://gajim.org/", 
-  "buildscript": "gajim", 
-  "basename": "gajim", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "good pythonic xmpp client\n\nsupports voip, plugins and many other things\n\npython2.7 is required\n",
+  "home_page": "http://gajim.org/",
+  "buildscript": "gajim",
+  "basename": "gajim",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

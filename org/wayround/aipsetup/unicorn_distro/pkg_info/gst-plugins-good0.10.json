@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://www.freedesktop.org", 
-  "buildscript": "gst_plugins_good.0.10", 
-  "basename": "gst-plugins-good", 
-  "src_path_prefix": "", 
-  "filters": "- version fm *\n+ version fm 0.10.*\n", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://www.freedesktop.org",
+  "buildscript": "gst_plugins_good.0.10",
+  "basename": "gst-plugins-good",
+  "filters": "- version fm *\n+ version fm 0.10.*\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

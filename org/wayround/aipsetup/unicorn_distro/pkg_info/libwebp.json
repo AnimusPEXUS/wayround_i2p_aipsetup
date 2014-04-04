@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "std", 
-  "basename": "libwebp", 
-  "src_path_prefix": "", 
-  "filters": "- status fm *\n+ status re ^$", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "libwebp",
+  "filters": "- status fm *\n+ status re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

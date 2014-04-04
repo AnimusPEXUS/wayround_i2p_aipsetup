@@ -1,13 +1,12 @@
 {
-  "description": "write something here, please", 
-  "home_page": "http://oss.sgi.com/projects/xfs/", 
-  "buildscript": "xfs", 
-  "basename": "xfsprogs", 
-  "src_path_prefix": "/sgi.com/", 
-  "filters": "- status !re ^$", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "write something here, please",
+  "home_page": "http://oss.sgi.com/projects/xfs/",
+  "buildscript": "xfs",
+  "basename": "xfsprogs",
+  "filters": "- status !re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

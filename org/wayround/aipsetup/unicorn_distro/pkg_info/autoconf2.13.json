@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "std", 
-  "basename": "autoconf", 
-  "src_path_prefix": "", 
-  "filters": "- version fm *\n+ version re 2\\.13\\.?", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "autoconf",
+  "filters": "- version fm *\n+ version re 2\\.13\\.?",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

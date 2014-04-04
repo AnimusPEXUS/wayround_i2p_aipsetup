@@ -1,13 +1,12 @@
 {
-  "description": "None", 
-  "home_page": "http://www.openprinting.org/download/cups-filters/", 
-  "buildscript": "std", 
-  "basename": "cups-filters", 
-  "src_path_prefix": "", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "None",
+  "home_page": "http://www.openprinting.org/download/cups-filters/",
+  "buildscript": "std",
+  "basename": "cups-filters",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

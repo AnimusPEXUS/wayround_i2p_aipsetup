@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "http://www.gnu.org", 
-  "buildscript": "std", 
-  "basename": "libosip2", 
-  "src_path_prefix": "/gnu.org/", 
-  "filters": "", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "http://www.gnu.org",
+  "buildscript": "std",
+  "basename": "libosip2",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }

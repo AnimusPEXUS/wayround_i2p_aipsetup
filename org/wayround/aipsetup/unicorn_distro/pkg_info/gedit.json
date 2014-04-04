@@ -1,13 +1,12 @@
 {
-  "description": "", 
-  "home_page": "", 
-  "buildscript": "std", 
-  "basename": "gedit", 
-  "src_path_prefix": "/gnome.org/", 
-  "filters": "- version !re \\d*\\.\\d*[02468]", 
-  "installation_priority": 5, 
-  "removable": true, 
-  "reducible": true, 
-  "non_installable": false, 
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "gedit",
+  "filters": "- version !re \\d*\\.\\d*[02468]",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
   "deprecated": false
 }
