@@ -219,9 +219,6 @@ def build_complete(command_name, opts, args, adds):
 
     ret = 0
 
-    dirname = '.'
-    file = None
-
     r_bds = '-d' in opts
 
     host = config['system_settings']['host']
@@ -241,102 +238,58 @@ def build_complete(command_name, opts, args, adds):
 
     if args_l == 0:
 
-        dirname = '.'
-        file = None
+        ret = _build_complete_subroutine(
+            config,
+            host,
+            target,
+            build,
+            '.',
+            None,
+            r_bds
+            )
+
+    elif args_l == 1 and os.path.isfile(args[0]):
 
         ret = _build_complete_subroutine(
             config,
             host,
             target,
             build,
-            dirname,
-            file,
+            '.',
+            args[0],
             r_bds
             )
 
-    elif args_l == 1:
+    elif args_l == 2 and os.path.isdir(args[0]) and os.path.isfile(args[1]):
 
-        if os.path.isdir(args[0]):
+        ret = _build_complete_subroutine(
+            config,
+            host,
+            target,
+            build,
+            args[0],
+            args[1],
+            r_bds
+            )
 
-            dirname = args[0]
-            file = None
+    else:
 
-        elif os.path.isfile(args[0]):
+        error = False
 
-            dirname = '.'
-            file = args[0]
+        for i in args:
 
-        else:
-
-            logging.error("{} not a dir and not a file".format())
-            ret = 2
-
-        if ret == 0:
-
-            ret = _build_complete_subroutine(
-                config,
-                host,
-                target,
-                build,
-                dirname,
-                file,
-                r_bds
-                )
-
-    elif args_l == 2:
-
-        if os.path.isdir(args[0]) and os.path.isfile(args[1]):
-
-            dirname = args[0]
-            file = args[1]
-
-            ret = _build_complete_subroutine(
-                config,
-                host,
-                target,
-                build,
-                dirname,
-                file,
-                r_bds
-                )
-
-        elif os.path.isdir(args[0]) and os.path.isdir(args[1]):
-
-            file = None
-            ret = 0
-            for i in args[:2]:
-
-                ret += _build_complete_subroutine(
-                    config,
-                    host,
-                    target,
-                    build,
-                    i,
-                    file,
-                    r_bds
-                    )
-
-        else:
-            logging.error("Wrong arguments")
-
-    elif args_l > 2:
-
-        file = None
-
-        ret = 0
-        for i in args[2:]:
-            ret += _build_complete_subroutine(
+            if _build_complete_subroutine(
                 config,
                 host,
                 target,
                 build,
                 i,
-                file,
+                None,
                 r_bds
-                )
+                ) != 0:
+                error = True
 
-    else:
-        raise Exception("Programming error")
+        ret = int(error)
 
     return ret
 

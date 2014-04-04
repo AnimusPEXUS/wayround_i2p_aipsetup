@@ -73,6 +73,9 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
         ('tarball_repository_root', '${working_dir}/pkg_source'),
         ('src_index_db_config', 'sqlite:///${working_dir}/src_index.sqlite'),
+        ('src_paths_index_db_config',
+            'sqlite:///${working_dir}/src_paths_index.sqlite'),
+        ('src_paths_json', '${working_dir}/src_paths.json'),
         ('xmpp_admins', 'animus@wayround.org animus@wayround.org'),
         ('xmpp_account', ''),
         ('xmpp_password', ''),
@@ -100,7 +103,9 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('tags_json', '${working_dir}/tags.json'),
         ('xmpp_admins', 'animus@wayround.org animus@wayround.org'),
         ('xmpp_account', ''),
-        ('xmpp_password', '')
+        ('xmpp_password', ''),
+        ('acceptable_src_file_extensions',
+            '${general:acceptable_src_file_extensions}')
         ])
      ),
 

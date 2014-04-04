@@ -111,9 +111,13 @@ def list_(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen('{}search?{}'.format(url, data))
+    res = None
+    try:
+        res = urllib.request.urlopen('{}search?{}'.format(url, data))
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
     return ret
@@ -137,9 +141,15 @@ def ls(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen('{}category/{}?{}'.format(url, path, data))
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}category/{}?{}'.format(url, path, data)
+            )
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
     return ret
@@ -163,9 +173,15 @@ def info(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen('{}package/{}?{}'.format(url, pkg_name, data))
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}?{}'.format(url, pkg_name, data)
+            )
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
     return ret
@@ -185,11 +201,15 @@ def asps(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen(
-        '{}package/{}/asps?{}'.format(url, pkg_name, data)
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}/asps?{}'.format(url, pkg_name, data)
         )
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
     return ret
@@ -209,14 +229,18 @@ def asps_latest(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen(
-        '{}package/{}/asps_latest?{}'.format(url, pkg_name, data)
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}/asps_latest?{}'.format(url, pkg_name, data)
         )
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
-    if len(ret) != 0:
+    if ret and len(ret) != 0:
         ret = ret[0]
     else:
         ret = None
@@ -317,11 +341,15 @@ def tarballs(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen(
-        '{}package/{}/tarballs?{}'.format(url, pkg_name, data)
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}/tarballs?{}'.format(url, pkg_name, data)
         )
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
     return ret
@@ -341,14 +369,18 @@ def tarballs_latest(
         encoding='utf-8'
         )
 
-    res = urllib.request.urlopen(
-        '{}package/{}/tarballs_latest?{}'.format(url, pkg_name, data)
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}/tarballs_latest?{}'.format(url, pkg_name, data)
         )
+    except:
+        pass
 
-    if isinstance(res, http.client.HTTPResponse):
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
 
-    if len(ret) == 0:
+    if ret and len(ret) == 0:
         ret = None
 
     return ret

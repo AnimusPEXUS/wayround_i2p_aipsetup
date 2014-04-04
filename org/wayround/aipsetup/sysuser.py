@@ -8,8 +8,6 @@ import subprocess
 import org.wayround.utils.path
 import org.wayround.utils.terminal
 
-import org.wayround.aipsetup.sysuser_sys
-
 SYS_UID_MAX = 999
 SYS_GID_MAX = 999
 
@@ -24,6 +22,7 @@ USERS = {
     4: 'ftp',
     5: 'mail',
     6: 'adm',
+    7: 'systemd-journal',
 
     # terminals 10-19
     10: 'pts',
@@ -108,12 +107,14 @@ USERS = {
 GROUPS = copy.copy(USERS)
 
 
-def update(base_dir='/', daemons_dir='/daemons'):
+def sysusers(base_dir='/', daemons_dir='/daemons'):
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
-    daemons_dir = org.wayround.utils.path.abspath(
+    base_dir_daemons_dir = org.wayround.utils.path.abspath(
         org.wayround.utils.path.join(base_dir, daemons_dir)
         )
+
+    chroot = ['chroot', base_dir]
 
     errors = 0
 
@@ -121,13 +122,13 @@ def update(base_dir='/', daemons_dir='/daemons'):
     for i in pwd.getpwall():
         if 0 < i.pw_uid <= SYS_UID_MAX:
             org.wayround.utils.terminal.progress_write(
-                "  ({:3d}) {}".format(
+                "  ({:3d}%) {}".format(
                     i.pw_uid,
                     i.pw_name
                     )
                 )
             p = subprocess.Popen(
-                ['userdel', i.pw_name]
+                chroot + ['userdel', i.pw_name]
                 )
             p.wait()
     org.wayround.utils.terminal.progress_write_finish()
@@ -136,13 +137,13 @@ def update(base_dir='/', daemons_dir='/daemons'):
     for i in grp.getgrall():
         if 0 < i.gr_gid <= SYS_GID_MAX:
             org.wayround.utils.terminal.progress_write(
-                "  ({:3d}) {}".format(
+                "  ({:3d}%) {}".format(
                     i.gr_gid,
                     i.gr_name
                     )
                 )
             p = subprocess.Popen(
-                ['groupdel', i.gr_name]
+                chroot + ['groupdel', i.gr_name]
                 )
             p.wait()
     org.wayround.utils.terminal.progress_write_finish()
@@ -151,40 +152,40 @@ def update(base_dir='/', daemons_dir='/daemons'):
     for i in sorted(list(GROUPS.keys())):
         name = GROUPS[i]
         org.wayround.utils.terminal.progress_write(
-            "  ({:3d}) {}".format(
+            "  ({:3d}%) {}".format(
                 i,
                 name
                 )
             )
         p = subprocess.Popen(
-            ['groupadd', '-r', '-o', '-g', str(i), name]
+            chroot + ['groupadd', '-r', '-o', '-g', str(i), name]
             )
         res = p.wait()
         if res != 0:
             errors += 1
     org.wayround.utils.terminal.progress_write_finish()
 
-    print("Checking `{}' dir".format(daemons_dir))
-    if not os.path.exists(daemons_dir):
+    print("Checking `{}' dir".format(base_dir_daemons_dir))
+    if not os.path.exists(base_dir_daemons_dir):
         print("   ..creating")
         try:
-            os.makedirs(daemons_dir)
+            os.makedirs(base_dir_daemons_dir)
         except:
-            print("Error creating dir: {}".format(daemons_dir))
+            print("Error creating dir: {}".format(base_dir_daemons_dir))
 
     print("Creating special user accounts")
     for i in sorted(list(USERS.keys())):
         name = USERS[i]
-        home_path = org.wayround.utils.path.join(daemons_dir, name)
+        home_path = org.wayround.utils.path.join(base_dir_daemons_dir, name)
 
         org.wayround.utils.terminal.progress_write(
-            "  ({:3d}) {}".format(
+            "  ({:3d}%) {}".format(
                 i,
                 name
                 )
             )
         p = subprocess.Popen(
-            ['useradd', '-r', '-g', str(i), '-G', name, '-u', str(i),
+            chroot + ['useradd', '-r', '-g', str(i), '-G', name, '-u', str(i),
              '-d', home_path,
              '-s', '/bin/false',
              name]
@@ -194,7 +195,7 @@ def update(base_dir='/', daemons_dir='/daemons'):
             errors += 1
 
         p = subprocess.Popen(
-            ['usermod', '-L', name]
+            chroot + ['usermod', '-L', name]
             )
         res = p.wait()
         if res != 0:
@@ -203,17 +204,18 @@ def update(base_dir='/', daemons_dir='/daemons'):
         try:
             os.makedirs(home_path)
         except:
-            print("Error creating dir: {}".format(home_path))
+            pass
+            # print("Error creating dir: {}".format(home_path))
 
         p = subprocess.Popen(
-            ['chown', '-R', '{}:'.format(name), home_path]
+            chroot + ['chown', '-R', '{}:'.format(name), home_path]
             )
         res = p.wait()
         if res != 0:
             errors += 1
 
         p = subprocess.Popen(
-            ['chmod', '-R', '700', home_path]
+            chroot + ['chmod', '-R', '700', home_path]
             )
         res = p.wait()
         if res != 0:
@@ -221,28 +223,16 @@ def update(base_dir='/', daemons_dir='/daemons'):
 
     org.wayround.utils.terminal.progress_write_finish()
 
-    print("Ensuring `{}' permissions".format(daemons_dir))
+    print("Ensuring `{}' permissions".format(base_dir_daemons_dir))
     p = subprocess.Popen(
-        ['chown', 'root:root', daemons_dir]
+        chroot + ['chown', 'root:root', base_dir_daemons_dir]
         )
     res = p.wait()
     if res != 0:
         errors += 1
 
     p = subprocess.Popen(
-        ['chmode', '755', daemons_dir]
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
-
-    sysuser_sys = org.wayround.utils.path.join(
-        org.wayround.utils.path.abspath(os.path.dirname(__file__)), 
-        'sysuser_sys.sh'
-        )
-    print("Starting {}".format(sysuser_sys))
-    p = subprocess.Popen(
-        ['bash', 'sysuser_sys'], env={'BASE_DIR':}
+        chroot + ['chmode', '755', base_dir_daemons_dir]
         )
     res = p.wait()
     if res != 0:
@@ -250,7 +240,7 @@ def update(base_dir='/', daemons_dir='/daemons'):
 
     print("Starting /etc/aipsetup.d/sysuser_local.sh")
     p = subprocess.Popen(
-        ['bash', '/etc/aipsetup.d/sysuser_local.sh']
+        chroot + ['bash', '/etc/aipsetup.d/sysuser_local.sh']
         )
     res = p.wait()
     if res != 0:
@@ -258,7 +248,7 @@ def update(base_dir='/', daemons_dir='/daemons'):
 
     print("Ensuring `root' user existance")
     p = subprocess.Popen(
-        ['useradd',
+        chroot + ['useradd',
          '-r',
          '-g', '0',
          '-G', 'root',
@@ -270,7 +260,7 @@ def update(base_dir='/', daemons_dir='/daemons'):
     p.wait()
 
     p = subprocess.Popen(
-        ['usermod',
+        chroot + ['usermod',
          '-U',
          'root']
         )
@@ -285,9 +275,9 @@ def update(base_dir='/', daemons_dir='/daemons'):
             print("Error creating dir: {}".format('/root'))
 
     p = subprocess.Popen(
-        ['chown',
+        chroot + ['chown',
          '-R',
-         'root:root'
+         'root:root',
          '/root']
         )
     res = p.wait()
@@ -295,9 +285,9 @@ def update(base_dir='/', daemons_dir='/daemons'):
         errors += 1
 
     p = subprocess.Popen(
-        ['chmod',
+        chroot + ['chmod',
          '-R',
-         '700'
+         '700',
          '/root']
         )
     res = p.wait()
@@ -306,14 +296,14 @@ def update(base_dir='/', daemons_dir='/daemons'):
 
     print("Sorting passwd and group files")
     p = subprocess.Popen(
-        ['pwck', '-s']
+        chroot + ['pwck', '-s']
         )
     res = p.wait()
     if res != 0:
         errors += 1
 
     p = subprocess.Popen(
-        ['grpck', '-s']
+        chroot + ['grpck', '-s']
         )
     res = p.wait()
     if res != 0:
@@ -324,3 +314,22 @@ def update(base_dir='/', daemons_dir='/daemons'):
         ret = 1
 
     return ret
+
+
+def sysusers_sys(chroot):
+
+    errors = 0
+
+    sysuser_sys = org.wayround.utils.path.join(
+        org.wayround.utils.path.abspath(os.path.dirname(__file__)),
+        'sysuser_sys.sh'
+        )
+    print("Starting {}".format(sysuser_sys))
+    p = subprocess.Popen(
+        chroot + ['bash', sysuser_sys]
+        )
+    res = p.wait()
+    if res != 0:
+        errors += 1
+
+    return errors

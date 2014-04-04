@@ -9,15 +9,18 @@ import shlex
 import sys
 
 import org.wayround.aipsetup.controllers
+import org.wayround.aipsetup.sysupdates
+import org.wayround.aipsetup.sysuser
+import org.wayround.utils.checksum
 import org.wayround.utils.getopt
+import org.wayround.utils.log
 import org.wayround.utils.terminal
+import org.wayround.utils.text
+import org.wayround.utils.time
 
 
 def commands():
     return collections.OrderedDict([
-        ('local_sys', collections.OrderedDict([
-            ('check', package_check),
-            ])),
         ('sys', collections.OrderedDict([
             ('_help', 'SystemCtl actions: install, uninstall, etc...'),
             ('list', system_package_list),
@@ -27,7 +30,8 @@ def commands():
             ('reduce', system_reduce_asp_to_latest),
             ('find', system_find_package_files),
             ('generate_deps', system_make_asp_deps),
-            ('files', system_list_package_files)
+            ('files', system_list_package_files),
+            ('check', package_check),
             ])),
         ('sys_clean', collections.OrderedDict([
             ('find_broken', clean_packages_with_broken_files),
@@ -37,7 +41,9 @@ def commands():
             ('explicit_asps',
                 clean_check_list_of_installed_packages_and_asps_auto),
             ('find_garbage', clean_find_garbage),
-            ('find_invalid_deps_lists', clean_find_invalid_deps_lists)
+            ('find_invalid_deps_lists', clean_find_invalid_deps_lists),
+            ('sysusers', clean_sysusers),
+            ('sysusers_sys', clean_sysusers_sys)
             ])),
         ('sys_deps', collections.OrderedDict([
             ('asps_asp_depends_on', pkgdeps_print_asps_asp_depends_on),
@@ -1178,5 +1184,51 @@ def package_check(command_name, opts, args, adds):
         asp_pkg = org.wayround.aipsetup.controllers.asp_package(file)
 
         ret = asp_pkg.check_package()
+
+    return ret
+
+
+def clean_sysusers(command_name, opts, args, adds):
+
+    """
+    (only root) Creates system users and their directories under /daemons
+    """
+
+    if os.getuid() != 0:
+        logging.error("Only root allowed to use this command")
+        ret = 1
+    else:
+
+        config = adds['config']
+
+        base_dir = '/'
+        if '-b' in opts:
+            base_dir = opts['-b']
+
+        daemons_dir = config['system_paths']['daemons']
+
+        ret = org.wayround.aipsetup.sysuser.sysusers(base_dir, daemons_dir)
+
+    return ret
+
+
+def clean_sysusers_sys(command_name, opts, args, adds):
+
+    """
+    (only root) Ensures system files and dirs permissions
+    """
+
+    if os.getuid() != 0:
+        logging.error("Only root allowed to use this command")
+        ret = 1
+    else:
+
+        base_dir = '/'
+        if '-b' in opts:
+            base_dir = opts['-b']
+
+        chroot = ['chroot', base_dir]
+
+        ret = org.wayround.aipsetup.sysuser.sysusers_sys(chroot)
 
     return ret

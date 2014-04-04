@@ -1,13 +1,11 @@
 #!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -35,11 +33,11 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
-        source_configure_reldir = '.'
+        source_configure_reldir = 'js/src'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
+                logging.info("cleaning up source dir")
                 org.wayround.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
@@ -52,14 +50,6 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-targets=all',
-#                    '--disable-libada',
-#                    '--enable-bootstrap',
-                    '--enable-64-bit-bfd',
-#                    '--disable-werror',
-                    '--enable-libada',
-                    '--enable-libssp',
-                    '--enable-objc-gc',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -69,7 +59,7 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

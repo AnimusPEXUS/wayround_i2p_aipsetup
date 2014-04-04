@@ -1,9 +1,12 @@
 
 import collections
+import logging
 import os.path
 
 import org.wayround.aipsetup.client_pkg
+import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.info
+import org.wayround.aipsetup.source_groups.gnome
 import org.wayround.utils.text
 
 
@@ -19,10 +22,11 @@ def commands():
             ('get_lat', get_asp_latest),
             ('get_lat_cat', get_asp_lat_cat)
             ])),
-        ('pkg_client_tar', collections.OrderedDict([
+        ('pkg_client_src', collections.OrderedDict([
             ('list', tar_list),
             ('get_lat', get_tar_latest),
-            ('get_lat_cat', get_tar_lat_cat)
+            ('get_lat_cat', get_tar_lat_cat),
+            ('get_gnome_core', get_gnome_core)
             ]))
         ])
 
@@ -552,20 +556,22 @@ def get_tar_lat_cat(command_name, opts, args, adds):
 
             for i in res:
 
+                logging.info("Getting tarball for `{}'".format(i))
+
                 info = org.wayround.aipsetup.client_pkg.info(url, i)
 
                 can_continue = False
                 if info['deprecated'] and not deprecated:
                     f = open('!deprecated.txt', 'a')
                     f.write(
-                        "Package `{}' is deprecated\n".format(i)
+                        "{}\n".format(i)
                         )
                     f.close()
                     errors = True
                 elif info['non_installable'] and not non_installable:
                     f = open('!non_installable.txt', 'a')
                     f.write(
-                        "Package `{}' is non-installable\n".format(i)
+                        "{}\n".format(i)
                         )
                     f.close()
                     errors = True
@@ -577,8 +583,49 @@ def get_tar_lat_cat(command_name, opts, args, adds):
                     res = _get_tarballs_latest(url, i, config, out_dir=out_dir)
 
                     if res != 0:
+                        f = open('!can not get.txt', 'a')
+                        f.write(
+                            "{}\n".format(i)
+                            )
+                        f.close()
                         errors = True
 
-            ret = int(not errors)
+            ret = int(errors)
+
+    return ret
+
+
+def get_gnome_core(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    ret = 1
+
+    if not len(args) == 1:
+        print("Must be one argument")
+    else:
+
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(config)
+        src_client = \
+            org.wayround.aipsetup.controllers.src_client_by_config(config)
+
+        required_v1, required_v2 = args[0].split('.')
+
+        required_v1 = int(required_v1)
+        required_v2 = int(required_v2)
+
+        if org.wayround.aipsetup.source_groups.gnome.get_gnome(
+            pkg_client,
+            src_client,
+            required_v1,
+            required_v2,
+            acceptable_extensions_order_list=
+                config['pkg_client']['acceptable_src_file_extensions'].\
+                    split(' '),
+            verbose=True
+            ) == 0:
+
+            ret = 0
 
     return ret

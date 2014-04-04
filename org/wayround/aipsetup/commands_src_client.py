@@ -8,23 +8,24 @@ import org.wayround.utils.text
 def commands():
     return collections.OrderedDict([
         ('src_client', collections.OrderedDict([
-            ('list', list_),
+            ('search', search),
             ('files', files),
             ('get', get)
             ]))
         ])
 
 
-def list_(command_name, opts, args, adds):
+def search(command_name, opts, args, adds):
 
     """
-    List tarball names known to server
+    Search tarball names known to server
 
     [options] name
 
     options:
         --searchmode=NAME    must be 'filemask' or 'regexp'
         -n                   non case sensitive
+        -p=NAME              reduce search to package name paths
     """
 
     config = adds['config']
@@ -46,7 +47,7 @@ def list_(command_name, opts, args, adds):
         if '-n' in opts:
             cs = False
 
-        res = org.wayround.aipsetup.client_src.list_(
+        res = org.wayround.aipsetup.client_src.search(
             url,
             args[0],
             searchmode,
@@ -71,34 +72,44 @@ def files(command_name, opts, args, adds):
     """
     List tarballs of pointed names
 
-    [options] name
+    [options] name [pkgname]
     """
 
     config = adds['config']
 
     ret = 1
 
-    if not len(args) == 1:
-        print("Must be one argument")
+    if len(args) not in range(1, 3):
+        print("Must be one argument one or two")
 
     else:
 
         url = config['src_client']['server_url']
 
+        name = args[0]
+        pkgname = ''
+        if len(args) > 1:
+            pkgname = args[1]
+
         res = org.wayround.aipsetup.client_src.files(
             url,
-            args[0]
+            name,
+            pkgname
             )
 
-        columned_list = org.wayround.utils.text.return_columned_list(res)
-        c = len(res)
-        print(
-            "Result ({} items):\n{}Result ({} items)".format(
-                c, columned_list, c
+        if res == None:
+            ret = 1
+            print("No result")
+        else:
+            columned_list = org.wayround.utils.text.return_columned_list(res)
+            c = len(res)
+            print(
+                "Result ({} items):\n{}Result ({} items)".format(
+                    c, columned_list, c
+                    )
                 )
-            )
 
-        ret = 0
+            ret = 0
 
     return ret
 

@@ -25,21 +25,20 @@ chmod g+r /etc/shadow
 chown root:root /etc/polkit-1/localauthority
 chmod 0700 /etc/polkit-1/localauthority
 
-chown polkitd:polkitd /etc/polkit-1/rules.d
-chmod 0700 /etc/polkit-1/rules.d
-
-chown polkitd:polkitd /usr/share/polkit-1/rules.d
-chmod 0700 /usr/share/polkit-1/rules.d
-
 chown root:root /var/lib/polkit-1
 chmod 0700 /var/lib/polkit-1
 
+# systemd services
+chmod 0644 /usr/lib/systemd/system
+find /usr/lib/systemd/system/ -type d -exec chmod 744 '{}' ';'
+
 
 chmod 4755 /usr/libexec/dbus-daemon-launch-helper
-chmod 4755 /usr/lib/polkit-1/polkit-agent-helper-1
+chmod 4755 /usr/libexec/polkit-agent-helper-1
 chmod 4755 /usr/bin/pkexec
 chmod 4755 "`which xinit`"
 chmod 4755 "`which su`"
 chmod 4755 "`which sudo`"
 chmod 4755 "`which mount`"
 chmod 4755 "`which exim`"
+chmod 4755 "`which weston-launch`"

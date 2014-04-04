@@ -16,6 +16,7 @@ _pkg_repo_db_connection = None
 _latest_db_connection = None
 _tag_db_connection = None
 _src_repo_db_connection = None
+_src_paths_repo_db_connection = None
 
 
 def info_db(config):
@@ -98,7 +99,7 @@ def pkg_repo_db_new_connection(config_string):
     """
 
     logging.info(
-        "Getting repo DB connection: {}".format(
+        "Getting pkg repo DB connection: {}".format(
             config_string
             )
         )
@@ -129,11 +130,42 @@ def src_repo_db_new_connection(config_string):
     Returns sources database connection creating it if needed
     """
     logging.info(
-        "Getting repo DB connection: {}".format(
+        "Getting src repo DB connection: {}".format(
             config_string
             )
         )
     ret = org.wayround.aipsetup.repository.SourceRepo(
+        config_string
+        )
+
+    return ret
+
+
+def src_paths_repo_db(config):
+    """
+    Returns sources database connection creating it if needed
+    """
+
+    global _src_paths_repo_db_connection
+
+    if not _src_paths_repo_db_connection:
+        _src_paths_repo_db_connection = src_paths_repo_db_new_connection(
+            config['src_server']['src_paths_index_db_config']
+            )
+
+    return _src_paths_repo_db_connection
+
+
+def src_paths_repo_db_new_connection(config_string):
+    """
+    Returns sources database connection creating it if needed
+    """
+    logging.info(
+        "Getting src paths repo DB connection: {}".format(
+            config_string
+            )
+        )
+    ret = org.wayround.aipsetup.repository.SourcePathsRepo(
         config_string
         )
 
@@ -148,6 +180,7 @@ def close_all():
     global _pkg_repo_db_connection
     global _tag_db_connection
     global _src_repo_db_connection
+    global _src_paths_repo_db_connection
 
     if _info_db_connection:
         _info_db_connection.close()
@@ -160,5 +193,8 @@ def close_all():
 
     if _src_repo_db_connection:
         _src_repo_db_connection.close()
+
+    if _src_paths_repo_db_connection:
+        _src_paths_repo_db_connection.close()
 
     return

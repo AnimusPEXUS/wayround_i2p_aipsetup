@@ -51,16 +51,17 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '--disable-silent-rules',
-#                    '--enable-split-usr',
                     '--enable-gtk-doc',
-#                    '--disable-kmod',
+                    '--enable-logind',
+                    '--enable-shared',
+#                    '--enable-static',
+                    '--enable-compat-libs',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
                         pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build']
                     #'--target=' + pkg_info['constitution']['target']

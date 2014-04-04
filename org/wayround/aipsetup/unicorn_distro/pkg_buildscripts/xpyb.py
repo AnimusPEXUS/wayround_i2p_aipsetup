@@ -16,7 +16,10 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        [
+         'extract2', 'configure2', 'build2', 'distribute2',
+         'extract3', 'configure3', 'build3', 'distribute3'
+         ],
         action,
         "help"
         )
@@ -37,7 +40,7 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = '.'
 
-        if 'extract' in actions:
+        if 'extract2' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 org.wayround.utils.file.cleanup_dir(src_dir)
@@ -48,18 +51,10 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure' in actions and ret == 0:
+        if 'configure2' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-targets=all',
-#                    '--disable-libada',
-#                    '--enable-bootstrap',
-                    '--enable-64-bit-bfd',
-#                    '--disable-werror',
-                    '--enable-libada',
-                    '--enable-libssp',
-                    '--enable-objc-gc',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -69,10 +64,10 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={},
+                environment={'PYTHON': '/usr/bin/python2'},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
@@ -81,7 +76,7 @@ def main(buildingsite, action=None):
                 relative_call=False
                 )
 
-        if 'build' in actions and ret == 0:
+        if 'build2' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -92,7 +87,68 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'distribute' in actions and ret == 0:
+        if 'distribute2' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[
+                    'install',
+                    'DESTDIR=' + dst_dir
+                    ],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'extract3' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
+            ret = autotools.extract_high(
+                buildingsite,
+                pkg_info['pkg_info']['basename'],
+                unwrap_dir=True,
+                rename_dir=False
+                )
+
+        if 'configure3' in actions and ret == 0:
+            ret = autotools.configure_high(
+                buildingsite,
+                options=[
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
+                    ],
+                arguments=[],
+                environment={'PYTHON': '/usr/bin/python3'},
+                environment_mode='copy',
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
+                )
+
+        if 'build3' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=[],
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'distribute3' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],

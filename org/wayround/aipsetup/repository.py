@@ -8,6 +8,7 @@ import datetime
 import fnmatch
 import functools
 import glob
+import json
 import logging
 import os.path
 import re
@@ -100,6 +101,10 @@ class PackageRepo(org.wayround.utils.db.BasicDB):
 
 
 class SourceRepo(org.wayround.utils.tag.TagEngine):
+    pass
+
+
+class SourcePathsRepo(org.wayround.utils.tag.TagEngine):
     pass
 
 
@@ -1162,11 +1167,14 @@ class SourceRepoCtl:
     def index_sources(
         self,
         subdir_name,
-        acceptable_src_file_extensions=None,
+        acceptable_src_file_extensions,
         force_reindex=False,
         first_delete_found=False,
         clean_only=False
         ):
+
+        if not isinstance(acceptable_src_file_extensions, str):
+            raise TypeError("`acceptable_src_file_extensions' must be str")
 
         ret = self._index_sources_directory(
             org.wayround.utils.path.realpath(self.sources_dir),
@@ -1181,95 +1189,95 @@ class SourceRepoCtl:
 
         return ret
 
-    def get_package_source_files(self, name, info_ctl, filtered=True):
+#    def get_package_source_files(self, name, info_ctl, filtered=True):
+#
+#        """
+#        Get tarball filenames from source index
+#        """
+#
+#        ret = []
+#
+#        tags_object = self.database_connection
+#
+#        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+#            raise ValueError(
+#                "info_ctl must be of type "
+#                "org.wayround.aipsetup.info.PackageInfoCtl"
+#                )
+#
+#        pkg_info = info_ctl.get_package_info_record(
+#            name=name
+#            )
+#
+#        if not isinstance(pkg_info, dict):
+#            logging.error(
+#                "Can't get info record for package `{}'".format(name)
+#                )
+#            ret = 1
+#
+#        else:
+#
+#            files = tags_object.objects_by_tags([pkg_info['basename']])
+#
+#            if filtered:
+#                files2 = []
+#                for i in files:
+#                    if i.startswith(pkg_info['src_path_prefix']):
+#                        files2.append(i)
+#
+#                files = files2
+#
+#                del files2
+#
+#            if filtered:
+#                ftl_r = (
+#                    org.wayround.aipsetup.info.filter_tarball_list(
+#                        files,
+#                        pkg_info['filters']
+#                        )
+#                    )
+#                if isinstance(ftl_r, list):
+#                    files = ftl_r
+#                else:
+#                    logging.error(
+#                        "get_package_source_files: "
+#                        "filter_tarball_list returned `{}'".format(files)
+#                        )
+#
+#            ret = files
+#
+#        return ret
 
-        """
-        Get tarball filenames from source index
-        """
-
-        ret = []
-
-        tags_object = self.database_connection
-
-        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
-            raise ValueError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
-                )
-
-        pkg_info = info_ctl.get_package_info_record(
-            name=name
-            )
-
-        if not isinstance(pkg_info, dict):
-            logging.error(
-                "Can't get info record for package `{}'".format(name)
-                )
-            ret = 1
-
-        else:
-
-            files = tags_object.objects_by_tags([pkg_info['basename']])
-
-            if filtered:
-                files2 = []
-                for i in files:
-                    if i.startswith(pkg_info['src_path_prefix']):
-                        files2.append(i)
-
-                files = files2
-
-                del files2
-
-            if filtered:
-                ftl_r = (
-                    org.wayround.aipsetup.info.filter_tarball_list(
-                        files,
-                        pkg_info['filters']
-                        )
-                    )
-                if isinstance(ftl_r, list):
-                    files = ftl_r
-                else:
-                    logging.error(
-                        "get_package_source_files: "
-                        "filter_tarball_list returned `{}'".format(files)
-                        )
-
-            ret = files
-
-        return ret
-
-    def get_latest_src_from_src_db(self, name, files=None, info_ctl=None):
-
-        ret = None
-
-        if not files:
-
-            if not isinstance(
-                info_ctl,
-                org.wayround.aipsetup.info.PackageInfoCtl
-                ):
-                raise ValueError(
-                    "if files not given, info_ctl must be of type"
-                    " org.wayround.aipsetup.info.PackageInfoCtl"
-                    )
-
-            files = self.get_package_source_files(
-                name, info_ctl
-                )
-
-        if not isinstance(files, list) or len(files) == 0:
-            ret = None
-        else:
-            ret = max(
-                files,
-                key=functools.cmp_to_key(
-                    org.wayround.utils.version.source_version_comparator
-                    )
-                )
-
-        return ret
+#    def get_latest_src_from_src_db(self, name, files=None, info_ctl=None):
+#
+#        ret = None
+#
+#        if not files:
+#
+#            if not isinstance(
+#                info_ctl,
+#                org.wayround.aipsetup.info.PackageInfoCtl
+#                ):
+#                raise ValueError(
+#                    "if files not given, info_ctl must be of type"
+#                    " org.wayround.aipsetup.info.PackageInfoCtl"
+#                    )
+#
+#            files = self.get_package_source_files(
+#                name, info_ctl
+#                )
+#
+#        if not isinstance(files, list) or len(files) == 0:
+#            ret = None
+#        else:
+#            ret = max(
+#                files,
+#                key=functools.cmp_to_key(
+#                    org.wayround.utils.version.source_version_comparator
+#                    )
+#                )
+#
+#        return ret
 
     def _index_sources_directory(
         self,
@@ -1463,245 +1471,295 @@ class SourceRepoCtl:
 
         return 0
 
-    def find_name(self, mode, mask, cs=False):
+#    def find_name(self, mode, mask, cs=False):
+#
+#        tags = self.database_connection.get_all_tags()
+#
+#        ret = []
+#
+#        if not cs:
+#            mask = mask.lower()
+#
+#        for i in tags:
+#
+#            i_i = i
+#
+#            if not cs:
+#                i_i = i_i.lower()
+#
+#            if mode == 're':
+#
+#                if re.match(mask, i_i):
+#                    ret.append(i)
+#
+#            if mode == 'fm':
+#
+#                if fnmatch.fnmatch(i_i, mask):
+#                    ret.append(i)
+#
+#        return ret
 
-        tags = self.database_connection.get_all_tags()
+#    def get_name_paths(self, name):
+#
+#        objs = self.database_connection.get_objects_by_tag(name)
+#
+#        return objs
 
-        ret = []
+#    def get_file(self, path, out_dir='.'):
+#
+#        # TODO: maybe range of accessible files must be limited to index
+#
+#        ret = 0
+#
+#        out_dir = org.wayround.utils.path.abspath(out_dir)
+#
+#        if not os.path.isdir(out_dir):
+#            logging.error("Not a directory {}".format(out_dir))
+#            ret = 1
+#        else:
+#
+#            src_file = org.wayround.utils.path.join(self.sources_dir, path)
+#
+#            if not os.path.isfile(src_file):
+#                logging.error("Not a file {}".format(src_file))
+#                ret = 2
+#            else:
+#
+#                dst_file = org.wayround.utils.path.join(
+#                    out_dir,
+#                    os.path.basename(path)
+#                    )
+#
+#                try:
+#                    shutil.copy2(
+#                        src_file,
+#                        dst_file
+#                        )
+#                except:
+#                    logging.exception(
+#                        "Error copying file\n    {}\n    to\n    {}".format(
+#                            src_file,
+#                            dst_file
+#                            )
+#                        )
+#                    ret = 3
+#
+#        return ret
 
-        if not cs:
-            mask = mask.lower()
+#    def get_latest_file(
+#        self,
+#        package_name,
+#        out_dir='.',
+#        info_ctl=None,
+#        verbose=False,
+#        mute=False
+#        ):
+#
+#        ret = 0
+#
+#        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+#            raise ValueError(
+#                "info_ctl must be of type "
+#                "org.wayround.aipsetup.info.PackageInfoCtl"
+#                )
+#
+#        if verbose:
+#            logging.info(
+#                "Selecting latest tarball for package `{}'".format(
+#                    package_name
+#                    )
+#                )
+#
+#        latest = self.get_latest_src_from_src_db(
+#            package_name,
+#            info_ctl=info_ctl
+#            )
+#
+#        if not isinstance(latest, str):
+#
+#            if not mute:
+#                logging.error("Error getting latest tarball")
+#            ret = 3
+#
+#        else:
+#
+#            dstfile = os.path.join(out_dir, os.path.basename(latest))
+#
+#            if verbose:
+#                st = os.stat(
+#                    org.wayround.utils.path.join(self.sources_dir, latest)
+#                    )
+#                mtime = st.st_mtime
+#
+#                logging.info(
+#                    "Acquiring {} ({})".format(
+#                        latest,
+#                        datetime.datetime.fromtimestamp(mtime)
+#                        )
+#                    )
+#
+#            if os.path.exists(dstfile):
+#                os.chmod(dstfile, 0o700)
+#                os.unlink(dstfile)
+#
+#            ret = self.get_file(latest, out_dir)
+#
+#        return ret
 
-        for i in tags:
+#    def get_latest_files_by_category(
+#        self,
+#        category,
+#        out_dir='.',
+#        pkg_repo_ctl=None,
+#        info_ctl=None,
+#        verbose=False,
+#        mute=False
+#        ):
+#
+#        ret = 0
+#
+#        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+#            raise ValueError(
+#                "info_ctl must be of type "
+#                "org.wayround.aipsetup.info.PackageInfoCtl"
+#                )
+#
+#        if not isinstance(pkg_repo_ctl, PackageRepoCtl):
+#            raise ValueError(
+#                "pkg_repo_ctl must be of type "
+#                "org.wayround.aipsetup.repository.PackageRepoCtl"
+#                )
+#
+#        out_dir = org.wayround.utils.path.abspath(out_dir)
+#
+#        tree = pkg_repo_ctl.build_category_tree(category)
+#
+#        for i in list(tree.keys()):
+#
+#            real_cat_dir = org.wayround.utils.path.join(out_dir, i)
+#
+#            if not os.path.exists(real_cat_dir):
+#                try:
+#                    os.makedirs(real_cat_dir)
+#                except:
+#                    logging.exception(
+#                        "Can't create dir {}".format(real_cat_dir)
+#                        )
+#                    ret += 1
+#
+#            if os.path.isdir(real_cat_dir):
+#                for j in tree[i]:
+#                    ret += self.get_latest_file(
+#                        j,
+#                        out_dir=real_cat_dir,
+#                        info_ctl=info_ctl,
+#                        verbose=verbose,
+#                        mute=mute
+#                        )
+#
+#        return ret
 
-            i_i = i
+#    def check_tarball_basenames_registration(self, path, info_ctl=None):
+#
+#        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+#            raise ValueError(
+#                "info_ctl must be of type "
+#                "org.wayround.aipsetup.info.PackageInfoCtl"
+#                )
+#
+#        # TODO: this function requires optimizations
+#
+#        path = org.wayround.utils.path.realpath(path)
+#
+#        path = path[len(org.wayround.utils.path.realpath(self.sources_dir)):]
+#
+#        logging.info("Loading tarball names")
+#        objs = self.database_connection.get_objects()
+#
+#        logging.info("Filtering")
+#
+#        objs2 = []
+#        objs_l = len(objs)
+#        i_i = 0
+#        for i in objs:
+#            if i.startswith(path + '/'):
+#                objs2.append(i)
+#
+#            i_i += 1
+#
+#            org.wayround.utils.terminal.progress_write(
+#                "    {:.2f}%".format(
+#                    100.0 / (float(objs_l) / i_i)
+#                    )
+#                )
+#
+#        org.wayround.utils.terminal.progress_write_finish()
+#        objs = objs2
+#
+#        logging.info("Setting report")
+#
+#        found = set()
+#        res = {}
+#        for i in objs:
+#
+#            info = info_ctl.get_info_rec_by_tarball_filename(i)
+#            basename = os.path.basename(i)
+#
+#            if not info:
+#                res[basename] = None
+#            else:
+#                if not info['name'] in found:
+#                    res[basename] = info
+#                    found.add(info['name'])
+#
+#        return res
 
-            if not cs:
-                i_i = i_i.lower()
 
-            if mode == 're':
+class SourcePathsRepoCtl:
 
-                if re.match(mask, i_i):
-                    ret.append(i)
+    def __init__(self, sources_paths_json_filename, database_connection):
 
-            if mode == 'fm':
-
-                if fnmatch.fnmatch(i_i, mask):
-                    ret.append(i)
-
-        return ret
-
-    def get_name_paths(self, name):
-
-        objs = self.database_connection.get_objects_by_tag(name)
-
-        return objs
-
-    def get_file(self, path, out_dir='.'):
-
-        # TODO: maybe range of accessible files must be limited to index
-
-        ret = 0
-
-        out_dir = org.wayround.utils.path.abspath(out_dir)
-
-        if not os.path.isdir(out_dir):
-            logging.error("Not a directory {}".format(out_dir))
-            ret = 1
-        else:
-
-            src_file = org.wayround.utils.path.join(self.sources_dir, path)
-
-            if not os.path.isfile(src_file):
-                logging.error("Not a file {}".format(src_file))
-                ret = 2
-            else:
-
-                dst_file = org.wayround.utils.path.join(
-                    out_dir,
-                    os.path.basename(path)
-                    )
-
-                try:
-                    shutil.copy2(
-                        src_file,
-                        dst_file
-                        )
-                except:
-                    logging.exception(
-                        "Error copying file\n    {}\n    to\n    {}".format(
-                            src_file,
-                            dst_file
-                            )
-                        )
-                    ret = 3
-
-        return ret
-
-    def get_latest_file(
-        self,
-        package_name,
-        out_dir='.',
-        info_ctl=None,
-        verbose=False,
-        mute=False
-        ):
-
-        ret = 0
-
-        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
+        if not isinstance(database_connection, SourcePathsRepo):
             raise ValueError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
+                "database_connection must be of type "
+                "org.wayround.aipsetup.repository.SourcePathsRepo"
                 )
 
-        if verbose:
-            logging.info(
-                "Selecting latest tarball for package `{}'".format(
-                    package_name
-                    )
-                )
+        self.sources_paths_json_filename = sources_paths_json_filename
+        self.database_connection = database_connection
 
-        latest = self.get_latest_src_from_src_db(
-            package_name,
-            info_ctl=info_ctl
+    def load(self):
+
+        f = open(self.sources_paths_json_filename)
+        txt = f.read()
+        f.close()
+
+        data = json.loads(txt)
+
+        self.database_connection.clear()
+
+        for name in data.keys():
+
+            for i in range(len(data[name]) - 1, -1, -1):
+                if data[name][i] == '' or data[name][i].isspace():
+                    del data[name][i]
+
+            self.database_connection.set_tags(name, data[name])
+
+        self.database_connection.commit()
+
+        return
+
+    def save(self):
+
+        data = self.database_connection.get_objects_and_tags_dict()
+
+        txt = json.dumps(
+            data, sort_keys=True, indent=2
             )
 
-        if not isinstance(latest, str):
+        f = open(self.sources_paths_json_filename, 'w')
+        f.write(txt)
+        f.close()
 
-            if not mute:
-                logging.error("Error getting latest tarball")
-            ret = 3
-
-        else:
-
-            dstfile = os.path.join(out_dir, os.path.basename(latest))
-
-            if verbose:
-                st = os.stat(
-                    org.wayround.utils.path.join(self.sources_dir, latest)
-                    )
-                mtime = st.st_mtime
-
-                logging.info(
-                    "Acquiring {} ({})".format(
-                        latest,
-                        datetime.datetime.fromtimestamp(mtime)
-                        )
-                    )
-
-            if os.path.exists(dstfile):
-                os.chmod(dstfile, 0o700)
-                os.unlink(dstfile)
-
-            ret = self.get_file(latest, out_dir)
-
-        return ret
-
-    def get_latest_files_by_category(
-        self,
-        category,
-        out_dir='.',
-        pkg_repo_ctl=None,
-        info_ctl=None,
-        verbose=False,
-        mute=False
-        ):
-
-        ret = 0
-
-        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
-            raise ValueError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
-                )
-
-        if not isinstance(pkg_repo_ctl, PackageRepoCtl):
-            raise ValueError(
-                "pkg_repo_ctl must be of type "
-                "org.wayround.aipsetup.repository.PackageRepoCtl"
-                )
-
-        out_dir = org.wayround.utils.path.abspath(out_dir)
-
-        tree = pkg_repo_ctl.build_category_tree(category)
-
-        for i in list(tree.keys()):
-
-            real_cat_dir = org.wayround.utils.path.join(out_dir, i)
-
-            if not os.path.exists(real_cat_dir):
-                try:
-                    os.makedirs(real_cat_dir)
-                except:
-                    logging.exception(
-                        "Can't create dir {}".format(real_cat_dir)
-                        )
-                    ret += 1
-
-            if os.path.isdir(real_cat_dir):
-                for j in tree[i]:
-                    ret += self.get_latest_file(
-                        j,
-                        out_dir=real_cat_dir,
-                        info_ctl=info_ctl,
-                        verbose=verbose,
-                        mute=mute
-                        )
-
-        return ret
-
-    def check_tarball_basenames_registration(self, path, info_ctl=None):
-
-        if not isinstance(info_ctl, org.wayround.aipsetup.info.PackageInfoCtl):
-            raise ValueError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
-                )
-
-        # TODO: this function requires optimizations
-
-        path = org.wayround.utils.path.realpath(path)
-
-        path = path[len(org.wayround.utils.path.realpath(self.sources_dir)):]
-
-        logging.info("Loading tarball names")
-        objs = self.database_connection.get_objects()
-
-        logging.info("Filtering")
-
-        objs2 = []
-        objs_l = len(objs)
-        i_i = 0
-        for i in objs:
-            if i.startswith(path + '/'):
-                objs2.append(i)
-
-            i_i += 1
-
-            org.wayround.utils.terminal.progress_write(
-                "    {:.2f}%".format(
-                    100.0 / (float(objs_l) / i_i)
-                    )
-                )
-
-        org.wayround.utils.terminal.progress_write_finish()
-        objs = objs2
-
-        logging.info("Setting report")
-
-        found = set()
-        res = {}
-        for i in objs:
-
-            info = info_ctl.get_info_rec_by_tarball_filename(i)
-            basename = os.path.basename(i)
-
-            if not info:
-                res[basename] = None
-            else:
-                if not info['name'] in found:
-                    res[basename] = info
-                    found.add(info['name'])
-
-        return res
+        return

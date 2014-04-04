@@ -37,9 +37,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # file name base
     ('basename', ''),
 
-    # prefix for filtering source files
-    ('src_path_prefix', ''),
-
     # filters. various filters to provide correct list of acceptable tarballs
     # by they filenames
     ('filters', ''),
@@ -71,7 +68,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
     ('home_page', "Homepage"),
     ('buildscript', "Building Script"),
     ('basename', 'Tarball basename'),
-    ('src_path_prefix', "Sources Path Prefix"),
     ('filters', "Filters"),
     ('installation_priority', "Installation Priority"),
     ('removable', "Is Removable?"),
@@ -100,9 +96,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
 #    <removable value="${ removable | x }"/>
 #    <reducible value="${ reducible | x }"/>
 #
-#    <auto_newest_src value="${ auto_newest_src | x }"/>
-#    <auto_newest_pkg value="${ auto_newest_pkg | x }"/>
-#
 #</package>
 #""")
 
@@ -128,12 +121,6 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             )
 
         basename = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
-
-        src_path_prefix = sqlalchemy.Column(
             sqlalchemy.UnicodeText,
             nullable=False,
             default=''
@@ -193,18 +180,6 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
             default=False
             )
 
-        auto_newest_src = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
-
-        auto_newest_pkg = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
-
     def __init__(self, config):
 
         org.wayround.utils.db.BasicDB.__init__(
@@ -231,6 +206,9 @@ class PackageInfoCtl:
         self._info_db = info_db
 
         return
+
+    def get_info_dir(self):
+        return self._info_dir
 
     def get_lists_of_packages_missing_and_present_info_records(
         self,
@@ -591,13 +569,7 @@ class PackageInfoCtl:
 
         info_db = self._info_db
 
-        q = info_db.session.query(
-            info_db.Info
-            ).filter(
-                info_db.Info.auto_newest_pkg == False
-                or info_db.Info.auto_newest_src == False
-            ).all()
-
+        # FIXME: error
         lst = []
         for i in q:
             lst.append(self.get_package_info_record(i.name, i))
@@ -673,7 +645,6 @@ class PackageInfoCtl:
 +---[{name}]----Overal Information-----------------+
 
                   basename: {basename}
-        source path prefix: {src_path_prefix}
                buildscript: {buildscript}
                   homepage: {home_page}
                   category: {category}
@@ -683,8 +654,6 @@ class PackageInfoCtl:
                  reducible: {reducible}
            non-installable: {non_installable}
                 deprecated: {deprecated}
-           auto newest src: {auto_newest_src}
-           auto newest pkg: {auto_newest_pkg}
 
 +---[{name}]----Tarball Filters--------------------+
 
@@ -705,14 +674,11 @@ class PackageInfoCtl:
                 'buildscript'           : r['buildscript'],
                 'basename'              : r['basename'],
                 'filters'               : r['filters'],
-                'src_path_prefix'       : r['src_path_prefix'],
                 'installation_priority' : r['installation_priority'],
                 'removable'             : r['removable'],
                 'reducible'             : r['reducible'],
                 'non_installable'       : r['non_installable'],
-                'deprecated'            : r['deprecated'],
-                'auto_newest_src'       : r['auto_newest_src'],
-                'auto_newest_pkg'       : r['auto_newest_pkg']
+                'deprecated'            : r['deprecated']
                 }
                 )
             )
@@ -952,9 +918,6 @@ def is_info_dicts_equal(d1, d2):
         'reducible',
         'non_installable',
         'deprecated',
-        'auto_newest_src',
-        'auto_newest_pkg',
-        'src_path_prefix'
         ]:
         if d1[i] != d2[i]:
             ret = False

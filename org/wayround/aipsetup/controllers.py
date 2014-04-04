@@ -3,6 +3,7 @@ import logging
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.client_pkg
+import org.wayround.aipsetup.client_src
 import org.wayround.aipsetup.dbconnections
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package
@@ -51,6 +52,30 @@ def src_repo_ctl_new(sources_dir, src_repo_db):
 
     ret = org.wayround.aipsetup.repository.SourceRepoCtl(
         sources_dir, src_repo_db
+        )
+
+    return ret
+
+
+def src_paths_repo_ctl_by_config(config):
+
+    database_connection = \
+        org.wayround.aipsetup.dbconnections.src_paths_repo_db(config)
+
+    sources_paths_json_filename = config['src_server']['src_paths_json']
+
+    ret = src_paths_repo_ctl_new(
+        sources_paths_json_filename,
+        database_connection
+        )
+
+    return ret
+
+
+def src_paths_repo_ctl_new(sources_paths_json_filename, src_paths_repo_db):
+
+    ret = org.wayround.aipsetup.repository.SourcePathsRepoCtl(
+        sources_paths_json_filename, src_paths_repo_db
         )
 
     return ret
@@ -204,3 +229,11 @@ def pkg_client_new(url, downloads_dir='/tmp/aipsetup_downloads'):
         url,
         downloads_dir
         )
+
+
+def src_client_by_config(config):
+    return src_client_new(config['src_client']['server_url'])
+
+
+def src_client_new(url):
+    return org.wayround.aipsetup.client_src.SourceServerClient(url)

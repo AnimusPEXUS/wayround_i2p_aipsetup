@@ -10,6 +10,7 @@ import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.info
 import org.wayround.aipsetup.package_name_parser
 import org.wayround.utils.path
+import org.wayround.utils.tarball_name_parser
 
 
 def commands():
@@ -20,15 +21,14 @@ def commands():
         ('pkg_server_info', collections.OrderedDict([
             ('save', info_backup_package_info_to_filesystem),
             ('load', info_load_package_info_from_filesystem),
-            ('save_tags', save_info_tags),
-            ('load_tags', load_info_tags),
             ('missing', info_find_missing_pkg_info_records),
             ('outdated', info_find_outdated_pkg_info_records),
             ('update', info_update_outdated_pkg_info_records),
             ('delete', info_delete_pkg_info_records),
-            ('editor', None),
+            ('editor', info_editor),
+            ('mass_apply', info_mass_script_apply)
             ])),
-        ('pkg_server_asps', collections.OrderedDict([
+        ('pkg_server_repo', collections.OrderedDict([
             ('reindex', pkg_repo_index_and_update),
             ('put', pkg_repo_put_file),
             ('clean', pkg_repo_cleanup)
@@ -142,6 +142,8 @@ def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
 
     info_ctl.update_outdated_pkg_info_records()
 
+    load_info_tags(command_name, {}, [], adds)
+
     # TODO: ret is need to be made
 
     return 0
@@ -200,6 +202,8 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
 
     ret = info_ctl.save_info_records_to_fs(mask, force)
 
+    save_info_tags(command_name, {}, [], adds)
+
     return ret
 
 
@@ -239,6 +243,8 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
     info_ctl.load_info_records_from_fs(
         filenames, rewrite_all
         )
+
+    load_info_tags(command_name, {}, [], adds)
 
     return ret
 
@@ -399,10 +405,13 @@ def info_mass_script_apply(command_name, opts, args, adds):
     """
     Mass buildscript applience
 
-    scriptname [-f] [tarballs list]
+    scriptname [-i=subpath] [-f] [tarballs list]
 
     -f    force (by default new script name will not be applied to
           records with existing ones)
+
+    -i=subpath
+          create package section in repository under pointed subpath
     """
 
     config = adds['config']
@@ -412,6 +421,10 @@ def info_mass_script_apply(command_name, opts, args, adds):
     sources = []
 
     force = '-f' in opts
+
+    subpath = None
+    if '-i' in opts:
+        subpath = opts['-i']
 
     script_name = None
 
@@ -433,13 +446,74 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
         info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
 
+        known_names = set()
+        exts = config['pkg_server']['acceptable_src_file_extensions'].split(' ')
+
+        sources.sort()
+
+        # TODO: rework next
         for i in sources:
 
+            cont = True
+            for j in exts:
+                if i.endswith(j):
+                    cont = False
+                    break
+
+            if cont:
+                continue
+
             pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
+            parsed_name = org.wayround.utils.tarball_name_parser.\
+                parse_tarball_name(i, mute=True)
+
+            if not parsed_name:
+                logging.error("Error parsing tarball name `{}'".format(i))
+
+            parsed_name = parsed_name['groups']['name']
+            if parsed_name.isspace() or len(parsed_name) == 0:
+                logging.error("Empty package names are not allowed")
+                continue
+
+            if parsed_name in known_names:
+                continue
+
+            known_names.add(parsed_name)
 
             if not pkg_name:
-                logging.error("Could not find package name of `{}'".format(i))
-                ret = 4
+                logging.error("Could not find package name for base `{}'".format(i))
+                if not subpath:
+                    ret = 4
+                else:
+                    logging.info("Adding `{}' to repository".format(parsed_name))
+                    total_pkg_path = org.wayround.utils.path.join(
+                        config['pkg_server']['repository_dir'],
+                        subpath,
+                        parsed_name
+                        )
+                    try:
+                        os.makedirs(total_pkg_path)
+                    except:
+                        pass
+
+                    f = open(
+                        org.wayround.utils.path.join(
+                            total_pkg_path, '.package'
+                            ),
+                        'w'
+                        )
+                    f.write('')
+                    f.close()
+
+                    try:
+                        os.makedirs(
+                            org.wayround.utils.path.join(
+                                total_pkg_path, 'pack'
+                                )
+                            )
+                    except:
+                        pass
+
             else:
 
                 info_dir = config['pkg_server']['info_json_dir']
@@ -469,7 +543,20 @@ def info_mass_script_apply(command_name, opts, args, adds):
                                 )
                             )
 
-        info_ctl.update_outdated_pkg_info_records()
+        filenames = (
+            glob.glob(
+                org.wayround.utils.path.join(
+                    config['pkg_server']['info_json_dir'],
+                    '*'
+                    )
+                )
+            )
+
+        # info_ctl.load_info_records_from_fs(
+        #     filenames, False
+        #     )
+        # info_ctl.update_outdated_pkg_info_records()
+        pkg_repo_index_and_update(command_name, opts, args, adds)
 
     return ret
 

@@ -186,9 +186,13 @@ class SystemCtl:
 
                 info = None
                 if isinstance(name_parsed, dict):
-                    info = self._pkg_client.info(
-                        name_parsed['groups']['name']
-                        )
+                    # FIXME get package info from package it self
+                    try:
+                        info = self._pkg_client.info(
+                            name_parsed['groups']['name']
+                            )
+                    except:
+                        logging.exception("Can't get package info")
 
                 if not isinstance(info, dict) and not force:
                     logging.error(

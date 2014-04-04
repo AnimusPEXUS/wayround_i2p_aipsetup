@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
+import org.wayround.utils.path
 
 
 def main(buildingsite, action=None):
@@ -15,11 +14,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+            buildingsite,
+            ['extract', 'configure', 'build', 'distribute', 'fixlinks'],
+            action,
+            "help"
+            )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -35,7 +34,7 @@ def main(buildingsite, action=None):
 
         separate_build_dir = False
 
-        source_configure_reldir = '.'
+        source_configure_reldir = 'js/src'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -52,14 +51,11 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-targets=all',
-#                    '--disable-libada',
-#                    '--enable-bootstrap',
-                    '--enable-64-bit-bfd',
-#                    '--disable-werror',
-                    '--enable-libada',
-                    '--enable-libssp',
-                    '--enable-objc-gc',
+                    '--with-x',
+                    '--with-pthreads',
+                    '--with-system-nspr',
+#                    '--enable-readline',
+                    '--enable-threadsafe',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -69,7 +65,7 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -98,12 +94,28 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + dst_dir
+                    'DESTDIR=' + (
+                        org.wayround.aipsetup.build.getDIR_DESTDIR(
+                            buildingsite
+                            )
+                        )
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+        if 'fixlinks' in actions and ret == 0:
+            for i in ['libmozjs185.so', 'libmozjs185.so.1.0']:
+
+                iff = org.wayround.utils.path.join(dst_dir, 'usr', 'lib', i)
+
+                try:
+                    os.unlink(iff)
+                except:
+                    pass
+
+                os.symlink('./libmozjs185.so.1.0.0', iff)
 
     return ret

@@ -479,19 +479,17 @@ class ASPServer:
             raise bottle.HTTPError(404, "Can't get package information")
 
         basename = rec['basename']
-        src_path_prefix = rec['src_path_prefix']
         filters = rec['filters']
 
         filesl = org.wayround.aipsetup.client_src.files(
-            self._src_page_url, basename
+            self._src_page_url, basename, name
             )
+
+        if not filesl:
+            raise bottle.HTTPError(404, "Error getting tarball list")
 
         if filesl == None:
             filesl = []
-
-        for i in filesl[:]:
-            if not i.startswith(src_path_prefix):
-                filesl.remove(i)
 
         filesl = (
             org.wayround.aipsetup.info.filter_tarball_list(

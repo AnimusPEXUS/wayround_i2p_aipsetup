@@ -43,8 +43,11 @@ def src_server_start(command_name, opts, args, adds):
 
     serv = SRCServer(
         config['src_server']['tarball_repository_root'],
-        org.wayround.aipsetup.dbconnections.src_repo_db_new_connection(
-            config['src_server']['src_index_db_config']
+        org.wayround.aipsetup.dbconnections.src_repo_db(
+            config
+            ),
+        org.wayround.aipsetup.dbconnections.src_paths_repo_db(
+            config
             ),
         host=host,
         port=int(port)
@@ -84,11 +87,17 @@ def src_server_reindex(command_name, opts, args, adds):
 
 class SRCServer:
 
-    def __init__(self, server_dir, src_db, host='localhost', port=8080):
+    def __init__(
+        self,
+        repository_dir,
+        src_db, src_paths_db,
+        host='localhost', port=8080
+        ):
 
-        self.server_dir = os.path.abspath(server_dir)
+        self.repository_dir = os.path.abspath(repository_dir)
 
         self.src_db = src_db
+        self.src_paths_db = src_paths_db
 
         self.host = host
         self.port = port
@@ -105,7 +114,7 @@ class SRCServer:
         self.app.route('', method='GET', callback=self.none)
 
         self.app.route('/', method='GET', callback=self.index)
-        self.app.route('/list', method='GET', callback=self.get_tag_list)
+        self.app.route('/search', method='GET', callback=self.search)
         self.app.route('/files', method='GET', callback=self.get_file_list)
         self.app.route(
             '/download/<path:path>', method='GET', callback=self.download
@@ -124,9 +133,14 @@ class SRCServer:
     def start(self):
         bottle.run(self.app, host=self.host, port=self.port)
 
-    def search(self, searchmode='filemask', mask='*', cs=True):
+    def search_tpl(
+        self,
+        searchmode='filemask', mask='*', cs=True
+        ):
         return self.templates['search'].render(
-            searchmode=searchmode, mask=mask, cs=cs
+            searchmode=searchmode,
+            mask=mask,
+            cs=cs
             )
 
     def none(self):
@@ -137,12 +151,12 @@ class SRCServer:
     def index(self):
         ret = self.templates['html'].render(
             title="Index",
-            body=self.search(),
+            body=self.search_tpl(),
             css=[]
             )
         return ret
 
-    def get_tag_list(self):
+    def search(self):
 
         decoded_params = bottle.request.params.decode('utf-8')
 
@@ -207,6 +221,7 @@ class SRCServer:
                 cs_name = 'None Case Sensitive'
 
             all_tags = self.src_db.get_all_tags()
+
             filtered_tags = []
 
             for i in all_tags:
@@ -232,7 +247,11 @@ class SRCServer:
                         mask,
                         cs_name
                         ),
-                    body=self.search(searchmode=searchmode, mask=mask, cs=cs)
+                    body=self.search_tpl(
+                        searchmode=searchmode,
+                        mask=mask,
+                        cs=cs
+                        )
                         +
                         self.templates['tag_list'].render(tags=filtered_tags),
                     css=[]
@@ -259,6 +278,24 @@ class SRCServer:
 
         name = decoded_params['name']
 
+        pkgname = ''
+        if 'pkgname' in decoded_params:
+            pkgname = decoded_params['pkgname']
+
+        pkgname_paths = []
+
+        if pkgname == None:
+            pkgname = ''
+
+        if pkgname != '':
+            pkgname_paths = self.src_paths_db.get_tags(pkgname)
+
+            if len(pkgname_paths) == 0:
+                pkgname_paths.append('')
+
+        if name == '' or name.isspace():
+            raise bottle.HTTPError(400, "`name' must be non empty")
+
         if not 'resultmode' in decoded_params:
             decoded_params['resultmode'] = 'html'
 
@@ -268,6 +305,18 @@ class SRCServer:
         resultmode = decoded_params['resultmode']
 
         results = self.src_db.get_objects_by_tag(name)
+
+        if pkgname != '':
+            for i in range(len(results) - 1, -1, -1):
+
+                found = False
+                for j in pkgname_paths:
+                    if results[i].startswith(j):
+                        found = True
+                        break
+
+                if not found:
+                    del results[i]
 
         results.sort(
             reverse=True,
@@ -282,7 +331,7 @@ class SRCServer:
 
             ret = self.templates['html'].render(
                 title="List of tarballs with basename `{}'".format(name),
-                body=self.search(
+                body=self.search_tpl(
                     searchmode='filemask',
                     mask=name,
                     cs=True
@@ -303,5 +352,5 @@ class SRCServer:
     def download(self, path):
 
         return bottle.static_file(
-            path, root=self.server_dir, mimetype='binary'
+            path, root=self.repository_dir, mimetype='binary'
             )
