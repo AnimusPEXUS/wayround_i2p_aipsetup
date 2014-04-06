@@ -1,16 +1,12 @@
-#!/usr/bin/python
 
-import os.path
 import logging
-import subprocess
+import os.path
 import shutil
-import glob
+import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -31,17 +27,13 @@ def main(buildingsite, action=None):
 
     else:
 
-        pkg_info, actions = r
+        actions = r[1]
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         tar_dir = org.wayround.aipsetup.build.getDIR_TARBALL(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
 
         makefile = os.path.join(src_dir, 'Makefile')
 
@@ -51,18 +43,12 @@ def main(buildingsite, action=None):
 
         files = os.listdir(tar_dir)
 
-        # tzcode=None
         tzdata = None
 
         for i in files:
             if i.startswith('tzdata'):
                 tzdata = i
                 break
-
-        # for i in files:
-        #     if i.startswith('tzcode'):
-        #         tzcode=i
-        #         break
 
         if tzdata == None:
             logging.error("tzdata missing in tarball dir")
@@ -74,7 +60,6 @@ def main(buildingsite, action=None):
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 org.wayround.utils.file.cleanup_dir(src_dir)
-
 
         if 'extract' in actions and ret == 0:
 
@@ -88,43 +73,6 @@ def main(buildingsite, action=None):
 
             logging.info("Extracted with code {}".format(ret))
 
-        # if 'extract2' in actions and ret ==0:
-
-        #     ret = autotools.extract_high(
-        #         buildingsite,
-        #         'tzcode',
-        #         unwrap_dir=False,
-        #         rename_dir=False,
-        #         more_when_one_extracted_ok=True
-        #         )
-
-        #     logging.info("Extracted with code {}".format(ret))
-
-
-        # if 'configure' in actions and ret == 0:
-
-        #     try:
-        #         f=open(makefile, 'r')
-        #         txt = f.read()
-        #         f.close()
-
-
-        #         txtl = txt.splitlines()
-
-        #         for i in range(len(txtl)):
-
-        #             if txtl[i].startswith('TOPDIR='):
-        #                 txtl[i] = 'TOPDIR={}\n'.format(os.path.join(dst_dir, 'usr'))
-
-        #         f=open(makefile, 'w')
-        #         f.write('\n'.join(txtl))
-        #         f.close()
-        #     except:
-        #         logging.exception("Can't do some actions on Makefile")
-        #         ret = 1
-        #     else:
-        #         ret = 0
-
         if 'configure' in actions and ret == 0:
 
             try:
@@ -132,11 +80,9 @@ def main(buildingsite, action=None):
                 txt = f.read()
                 f.close()
 
-
-
                 txt += """
 printtdata:
-		@echo "$(TDATA)"
+\t\t@echo "$(TDATA)"
 """
 
                 f = open(makefile, 'w')
@@ -148,7 +94,6 @@ printtdata:
             else:
                 ret = 0
 
-
         if 'distribute' in actions and ret == 0:
 
             os.makedirs(zoneinfo)
@@ -157,7 +102,11 @@ printtdata:
 
             zonefiles = []
 
-            p = subprocess.Popen(['make', 'printtdata'], cwd=src_dir, stdout=subprocess.PIPE)
+            p = subprocess.Popen(
+                ['make', 'printtdata'],
+                cwd=src_dir,
+                stdout=subprocess.PIPE
+                )
             r = p.wait()
             if r != 0:
                 ret = r
@@ -173,26 +122,34 @@ printtdata:
                     logging.info("Working with {} zone info".format(tz))
 
                     p = subprocess.Popen(
-                        ['zic', '-L', '/dev/null', '-d', zoneinfo, '-y', 'sh yearistype.sh', tz ],
+                        ['zic',
+                         '-L', '/dev/null',
+                         '-d', zoneinfo, '-y', 'sh yearistype.sh', tz],
                         cwd=src_dir
                         )
                     p.wait()
 
                     p = subprocess.Popen(
-                        ['zic', '-L', '/dev/null', '-d', zoneinfop, '-y', 'sh yearistype.sh', tz ],
+                        ['zic',
+                         '-L', '/dev/null',
+                         '-d', zoneinfop, '-y', 'sh yearistype.sh', tz],
                         cwd=src_dir
                         )
                     p.wait()
 
                     p = subprocess.Popen(
-                        ['zic', '-L', 'leapseconds', '-d', zoneinfor, '-y', 'sh yearistype.sh', tz ],
+                        ['zic',
+                         '-L', 'leapseconds',
+                         '-d', zoneinfor, '-y', 'sh yearistype.sh', tz],
                         cwd=src_dir
                         )
                     p.wait()
 
                 for i in os.listdir(src_dir):
                     if i.endswith('.tab'):
-                        shutil.copy(os.path.join(src_dir, i), os.path.join(zoneinfo, i))
-
+                        shutil.copy(
+                            os.path.join(src_dir, i),
+                            os.path.join(zoneinfo, i)
+                            )
 
     return ret

@@ -1,27 +1,23 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 
-import os.path
 import logging
+import os.path
 import time
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
+
 
 # For history
 # RUN[$j]='echo "CFLAGS += -march=i486 -mtune=native" > configparms
-
-
 def main(buildingsite, action=None):
 
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'extract_glibc-ports', 'configure', 'build', 'distribute'],
+            ['extract', 'extract_glibc-ports',
+             'configure', 'build', 'distribute'],
             action,
             "help"
             )
@@ -35,7 +31,6 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
-
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -56,7 +51,10 @@ def main(buildingsite, action=None):
                 rename_dir='ports'
                 )
             if ret != 0:
-                logging.warning("glibc-ports are not found. this is Ok starting from glibc-2.17")
+                logging.warning(
+                    "glibc-ports are not found. "
+                    "this is Ok starting from glibc-2.17"
+                    )
                 logging.info("sleeping for 10 seconds and continuing")
                 time.sleep(10)
                 ret = 0
@@ -75,8 +73,10 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']

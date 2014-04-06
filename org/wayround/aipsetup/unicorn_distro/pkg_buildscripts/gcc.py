@@ -1,4 +1,3 @@
-#!/usr/bin/python
 
 import logging
 import os.path
@@ -114,9 +113,7 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-
             if not os.path.exists(cc_file):
                 os.symlink('gcc', cc_file)
 
     return ret
-

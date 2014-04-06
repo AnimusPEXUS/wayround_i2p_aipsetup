@@ -15,10 +15,10 @@ import org.wayround.utils.tarball_name_parser
 
 def commands():
     return collections.OrderedDict([
-        ('pkg_server', collections.OrderedDict([
+        ('pkg-server', collections.OrderedDict([
             ('start', pkg_server_start),
             ])),
-        ('pkg_server_info', collections.OrderedDict([
+        ('pkg-server-info', collections.OrderedDict([
             ('save', info_backup_package_info_to_filesystem),
             ('load', info_load_package_info_from_filesystem),
             ('missing', info_find_missing_pkg_info_records),
@@ -26,9 +26,9 @@ def commands():
             ('update', info_update_outdated_pkg_info_records),
             ('delete', info_delete_pkg_info_records),
             ('editor', info_editor),
-            ('mass_apply', info_mass_script_apply)
+            ('mass-apply', info_mass_script_apply)
             ])),
-        ('pkg_server_repo', collections.OrderedDict([
+        ('pkg-server-repo', collections.OrderedDict([
             ('reindex', pkg_repo_index_and_update),
             ('put', pkg_repo_put_file),
             ('clean', pkg_repo_cleanup)

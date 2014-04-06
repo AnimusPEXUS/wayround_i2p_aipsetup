@@ -232,7 +232,7 @@ def asps_latest(url, pkg_name):
             key=functools.cmp_to_key(
                 org.wayround.aipsetup.version.package_version_comparator
                 ),
-                reversed=True
+            reverse=True
             )
         ret = ret[0]
     else:

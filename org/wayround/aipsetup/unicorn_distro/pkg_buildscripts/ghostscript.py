@@ -1,13 +1,10 @@
-#!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -38,7 +35,6 @@ def main(buildingsite, action=None):
             logging.info("cleaningup source dir")
             org.wayround.utils.file.cleanup_dir(src_dir)
 
-
         separate_build_dir = False
 
         if 'extract' in actions:
@@ -49,7 +45,6 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
@@ -58,8 +53,10 @@ def main(buildingsite, action=None):
                     '--with-install-cups',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -134,4 +131,3 @@ def main(buildingsite, action=None):
                 )
 
     return ret
-

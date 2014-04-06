@@ -1,16 +1,11 @@
-#!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 import subprocess
 
-import org.wayround.utils.file
-
 import org.wayround.aipsetup.build
-import org.wayround.aipsetup.build
-
 from org.wayround.aipsetup.buildtools import autotools
-from org.wayround.aipsetup.buildtools import cmake
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -36,10 +31,6 @@ def main(buildingsite, action=None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -54,7 +45,6 @@ def main(buildingsite, action=None):
         if 'scons' in actions and ret == 0:
             p = subprocess.Popen(['scons', 'all'], cwd=src_dir)
             ret = p.wait()
-
 
         if 'distribute' in actions and ret == 0:
             p = subprocess.Popen(

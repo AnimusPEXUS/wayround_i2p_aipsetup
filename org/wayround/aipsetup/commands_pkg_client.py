@@ -1,7 +1,6 @@
 
 import collections
 import logging
-import os.path
 
 import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.controllers
@@ -12,21 +11,21 @@ import org.wayround.utils.text
 
 def commands():
     return collections.OrderedDict([
-        ('pkg_client', collections.OrderedDict([
+        ('pkg-client', collections.OrderedDict([
             ('list', list_),
-            ('list_cat', list_cat),
+            ('list-cat', list_cat),
             ('ls', ls),
             ('print', print_info),
-            ('asp_list', asp_list),
+            ('asp-list', asp_list),
             ('get', get_asp),
-            ('get_lat', get_asp_latest),
-            ('get_lat_cat', get_asp_lat_cat)
+            ('get-lat', get_asp_latest),
+            ('get-lat-cat', get_asp_lat_cat)
             ])),
-        ('pkg_client_src', collections.OrderedDict([
+        ('pkg-client-src', collections.OrderedDict([
             ('list', tar_list),
-            ('get_lat', get_tar_latest),
-            ('get_lat_cat', get_tar_lat_cat),
-            ('get_gnome_core', get_gnome_core)
+            ('get-lat', get_tar_latest),
+            ('get-lat-cat', get_tar_lat_cat),
+            ('get-gnome-core', get_gnome_core)
             ]))
         ])
 

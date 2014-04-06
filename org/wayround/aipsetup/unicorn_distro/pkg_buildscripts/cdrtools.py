@@ -1,13 +1,10 @@
-#!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -47,7 +44,6 @@ def main(buildingsite, action=None):
                 unwrap_dir=True,
                 rename_dir=False
                 )
-
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(

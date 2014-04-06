@@ -1,23 +1,20 @@
 
 import collections
-import functools
 import logging
 import os.path
 
 import org.wayround.aipsetup.controllers
-import org.wayround.utils.getopt
 import org.wayround.utils.path
-import org.wayround.utils.version
 
 
 def commands():
     return collections.OrderedDict([
-        ('src_server',
+        ('src-server',
             collections.OrderedDict([
                 ('start', src_server_start),
                 ('index', src_repo_index),
-                ('load_paths', load_paths),
-                ('save_paths', save_paths)
+                ('load-paths', load_paths),
+                ('save-paths', save_paths)
             ]))
         ])
 

@@ -1,16 +1,13 @@
-#!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
-def main(buildingsite, action = None):
+def main(buildingsite, action=None):
 
     ret = 0
 
@@ -42,11 +39,10 @@ def main(buildingsite, action = None):
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
-                unwrap_dir = False,
-                rename_dir = False,
-                more_when_one_extracted_ok = True
+                unwrap_dir=False,
+                rename_dir=False,
+                more_when_one_extracted_ok=True
                 )
-
 
         if 'distribute' in actions and ret == 0:
 
@@ -60,11 +56,11 @@ def main(buildingsite, action = None):
                 os.makedirs(m)
 
                 org.wayround.utils.file.copytree(
-                    src_dir = sm,
-                    dst_dir = m,
-                    overwrite_files = True,
-                    clear_before_copy = False,
-                    dst_must_be_empty = False
+                    src_dir=sm,
+                    dst_dir=m,
+                    overwrite_files=True,
+                    clear_before_copy=False,
+                    dst_must_be_empty=False
                     )
 
     return ret

@@ -93,8 +93,8 @@ INVALID_DESTDIR_ROOT_LINKS = [
     ]
 
 
-# NOTE: this list is suspiciously similar to what in complete
-# function, but actually they must be separate
+# WARNING: this list is suspiciously similar to what in complete
+#          function, but actually they must be separate
 
 PACK_FUNCTIONS_LIST = [
     'destdir_verify_paths_correctness',
@@ -102,11 +102,8 @@ PACK_FUNCTIONS_LIST = [
     'destdir_checksum',
     'destdir_filelist',
     'destdir_deps_bin',
-#    'remove_source_and_build_dirs',
     'compress_patches_destdir_and_logs',
     'compress_files_in_lists_dir',
-#    'remove_patches_destdir_buildlogs_and_temp_dirs',
-#    'remove_decompressed_files_from_lists_dir',
     'make_checksums_for_building_site',
     'pack_buildingsite'
     ]
@@ -278,9 +275,6 @@ class PackCtl:
         is special cases, when this function is avoided.
         """
 
-        # TODO: Maybe this function need to be rewritten to be more
-        #       flexible
-
         ret = 0
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
@@ -369,9 +363,10 @@ class PackCtl:
             logging.error("LIST dir can't be used")
             ret = 2
         else:
-            org.wayround.utils.checksum.make_dir_checksums(
+            ret = org.wayround.utils.checksum.make_dir_checksums(
                 destdir,
-                output_file
+                output_file,
+                destdir
                 )
 
         return ret
@@ -484,16 +479,22 @@ class PackCtl:
 
                     if os.path.isfile(filename) and os.path.exists(filename):
 
-                        # TODO: error check with 'try' required
-                        elf = org.wayround.utils.format.elf.ELF(filename)
-
-                        dep = elf.needed_libs_list
-
-                        if isinstance(dep, list):
-                            elfs += 1
-                            deps[i] = dep
-                        else:
+                        try:
+                            elf = org.wayround.utils.format.elf.ELF(filename)
+                        except:
+                            logging.exception(
+                                "Error parsing file: `{}'".format(filename)
+                                )
                             n_elfs += 1
+                        else:
+
+                            dep = elf.needed_libs_list
+
+                            if isinstance(dep, list):
+                                elfs += 1
+                                deps[i] = dep
+                            else:
+                                n_elfs += 1
                     else:
                         n_elfs += 1
 
@@ -1450,7 +1451,6 @@ class BuildingSiteCtl:
 
         ret = 0
 
-        # TODO: reduce self._complete_info_correctness_check() usage
         if (self._complete_info_correctness_check(buildscript_ctl) != 0
             or
             isinstance(main_src_file, str)
@@ -1932,136 +1932,3 @@ def build(
                         ret = 0
 
     return ret
-
-
-
-# TODO: clean up this garbage
-#def help_texts(name):
-#
-#    ret = None
-#
-#    if name == 'destdir_verify_paths_correctness':
-#        ret = """
-#Ensure new package creates with bin, sbin, lib and lib64 symlinked into
-#usr
-#"""
-#    elif name == 'destdir_set_modes':
-#        ret = """
-#Ensure files and dirs have correct modes
-#"""
-#
-#    elif name == 'destdir_checksum':
-#        ret = """
-#Create checksums of distribution files
-#"""
-#
-#    elif name == 'destdir_filelist':
-#        ret = """\
-#Create list of distribution files
-#"""
-#
-#    elif name == 'destdir_deps_bin':
-#        ret = """\
-#Create list of ELF dependencies
-#"""
-#
-#    elif name == 'remove_source_and_build_dirs':
-#        ret = """\
-#Removes source dir and build dir (one of cleanups
-#stages)
-#"""
-#
-#    elif name == 'compress_patches_destdir_and_logs':
-#        ret = """\
-#Compress patches, distribution and logs.
-#"""
-#
-#    elif name == 'compress_files_in_lists_dir':
-#        ret = """\
-#Compress files found in lists dir
-#"""
-#
-#    elif name == 'remove_patches_destdir_buildlogs_and_temp_dirs':
-#        ret = """\
-#Removes patches, destdir and logs (one of cleanups stages)
-#"""
-#
-#    elif name == 'remove_decompressed_files_from_lists_dir':
-#        ret = """\
-#Remove decompressed files from lists dir (one of cleanups stages)
-#"""
-#
-#    elif name == 'make_checksums_for_building_site':
-#        ret = """\
-#Make checksums for installers to check package integrity.
-#"""
-#
-#    elif name == 'pack_buildingsite':
-#        ret = """\
-#Makes final packaging and creates UNICORN software package
-#"""
-#
-#    if isinstance(ret, str):
-#        ret = """\
-#{text}
-#    [DIRNAME]
-#
-#    DIRNAME - set building site. Default is current directory
-#""".format(text=ret)
-#
-#    return ret
-#
-#def cli_name():
-#    """
-#    aipsetup CLI related functionality
-#    """
-#    return 'pack'
-#
-#def exported_commands():
-#    """
-#    aipsetup CLI related functionality
-#    """
-#
-#    commands = {}
-#
-#    for i in FUNCTIONS_SET:
-#        commands[i] = eval("pack_{}".format(i))
-#
-#    commands['complete'] = pack_complete
-#
-#    return commands
-#
-#def commands_order():
-#    """
-#    aipsetup CLI related functionality
-#    """
-#    return ['complete'] + PACK_FUNCTIONS_LIST
-#
-#def _pack_x(opts, args, action):
-#
-#    if not action in FUNCTIONS_SET:
-#        raise ValueError("Wrong action parameter")
-#
-#    ret = 0
-#
-#    dir_name = '.'
-#    args_l = len(args)
-#
-#    if args_l > 1:
-#        logging.error("Too many parameters")
-#
-#    else:
-#        if args_l == 1:
-#            dir_name = args[0]
-#
-#        ret = eval("{}(dir_name)".format(action))
-#
-#    return ret
-#
-#for i in FUNCTIONS_SET:
-#    exec("""\
-#def pack_{name}(opts, args):
-#    return _pack_x(opts, args, '{name}')
-#
-#pack_{name}.__doc__ = help_texts('{name}')
-#""".format(name=i))

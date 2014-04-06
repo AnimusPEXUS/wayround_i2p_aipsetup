@@ -1,17 +1,13 @@
-#!/usr/bin/python
 
-import os.path
 import logging
-import os
+import os.path
 import re
-import subprocess
 import shutil
+import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -36,10 +32,6 @@ def main(buildingsite, action=None):
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -106,7 +98,8 @@ export RM= rm
 export ARFLAGS= rs
 export RMFLAGS= -vf
 
-export CPPFLAGS= -DPATH_DELIM=0x2f -DASK_ABOUT_WARNINGS=false -DUNBLOCK_SIGNALS -fdollars-in-identifiers
+export CPPFLAGS= -DPATH_DELIM=0x2f -DASK_ABOUT_WARNINGS=false \
+-DUNBLOCK_SIGNALS -fdollars-in-identifiers
 export CXXFLAGS= -Wall -Wextra -Weffc++ -O2
 export GCJFLAGS= -Wall -fsource=1.3 -O2
 export GCJHFLAGS= -force
@@ -126,22 +119,23 @@ include Makefile.Base
 
         if 'distribute' in actions and ret == 0:
             sbin = org.wayround.utils.path.join(src_dir, 'pdftk', 'pdftk')
-            bin = org.wayround.utils.path.join(dst_dir, 'usr', 'bin')
+            bin_dir = org.wayround.utils.path.join(dst_dir, 'usr', 'bin')
 
             try:
-                os.makedirs(bin)
+                os.makedirs(bin_dir)
             except:
                 pass
 
-            if not os.path.isdir(bin):
-                logging.error("Can't create dir: `{}'".format(bin))
+            if not os.path.isdir(bin_dir):
+                logging.error("Can't create dir: `{}'".format(bin_dir))
                 ret = 22
             else:
-                shutil.copy(sbin, org.wayround.utils.path.join(bin, 'pdftk'))
-
+                shutil.copy(sbin, org.wayround.utils.path.join(bin_dir, 'pdftk'))
 
             sman = org.wayround.utils.path.join(src_dir, 'pdftk.1')
-            man = org.wayround.utils.path.join(dst_dir, 'usr', 'share', 'man', 'man1')
+            man = org.wayround.utils.path.join(
+                dst_dir, 'usr', 'share', 'man', 'man1'
+                )
 
             try:
                 os.makedirs(man)
@@ -153,6 +147,5 @@ include Makefile.Base
                 ret = 23
             else:
                 shutil.copy(sman, org.wayround.utils.path.join(man, 'pdftk.1'))
-            
 
     return ret

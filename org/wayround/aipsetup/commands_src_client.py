@@ -7,7 +7,7 @@ import org.wayround.utils.text
 
 def commands():
     return collections.OrderedDict([
-        ('src_client', collections.OrderedDict([
+        ('src-client', collections.OrderedDict([
             ('search', search),
             ('files', files),
             ('get', get)

@@ -1,19 +1,14 @@
-#!/usr/bin/python
 
-import os
-import os.path
-import shutil
-import logging
 import glob
+import logging
+import os.path
 import re
+import shutil
 
-import org.wayround.utils.file
-import org.wayround.utils.path
-
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
+import org.wayround.utils.path
 
 
 def main(buildingsite, action=None):
@@ -62,7 +57,6 @@ def main(buildingsite, action=None):
             lines = f.read().splitlines()
             f.close()
 
-
             for i in range(len(lines)):
 
                 if lines[i].startswith('nss_build_all:'):
@@ -80,7 +74,6 @@ def main(buildingsite, action=None):
                         line.remove('clobber_nspr')
 
                     lines[i] = ' '.join(line)
-
 
             f = open(makefile, 'w')
             f.write('\n'.join(lines))
@@ -140,11 +133,12 @@ def main(buildingsite, action=None):
                             os.path.join(OBJ_dir, 'bin', i)
                             )
 
-
                 if org.wayround.utils.file.dereference_files_in_dir(
                     OBJ_dir
                     ) != 0:
-                    logging.error("Some errors while dereferencing symlinks. see above.")
+                    logging.error(
+                        "Some errors while dereferencing symlinks. see above."
+                        )
                     ret = 11
                 else:
 
@@ -227,15 +221,20 @@ def main(buildingsite, action=None):
                     nss_minor_version = 0
                     nss_patch_version = 0
 
-                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 0:
-                        nss_major_version = pkg_info['pkg_nameinfo']['groups']['version_list'][0]
+                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                        > 0):
+                        nss_major_version = \
+                        pkg_info['pkg_nameinfo']['groups']['version_list'][0]
 
-                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 1:
-                        nss_minor_version = pkg_info['pkg_nameinfo']['groups']['version_list'][1]
+                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                        > 1):
+                        nss_minor_version = \
+                        pkg_info['pkg_nameinfo']['groups']['version_list'][1]
 
-                    if len(pkg_info['pkg_nameinfo']['groups']['version_list']) > 2:
-                        nss_patch_version = pkg_info['pkg_nameinfo']['groups']['version_list'][2]
-
+                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                        > 2):
+                        nss_patch_version = \
+                        pkg_info['pkg_nameinfo']['groups']['version_list'][2]
 
                     logging.info(
                         "Applying version {}.{}.{}".format(
@@ -263,7 +262,11 @@ Cflags: -I${{includedir}}
                         nss_patch_version=nss_patch_version,
                         libs=libs
                         )
-# -lnss{nss_major_version} -lnssutil{nss_major_version} -lsmime{nss_major_version} -lssl{nss_major_version} -lsoftokn{nss_major_version}
+# -lnss{nss_major_version} -lnssutil{nss_major_version}
+# -lsmime{nss_major_version} -lssl{nss_major_version}
+# -lsoftokn{nss_major_version}
+
+                    # TODO: use os.path.join
 
                     try:
                         os.mkdir(
@@ -276,7 +279,8 @@ Cflags: -I${{includedir}}
 
                     f = open(
                         OBJ_dir + os.path.sep + 'usr' + os.path.sep +
-                        'lib' + os.path.sep + 'pkgconfig' + os.path.sep + 'nss.pc',
+                        'lib' + os.path.sep + 'pkgconfig' + os.path.sep +
+                        'nss.pc',
                         'w'
                         )
 

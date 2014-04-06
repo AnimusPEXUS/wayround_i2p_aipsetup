@@ -1,4 +1,3 @@
-#!/usr/bin/python
 
 import logging
 import os.path
@@ -73,8 +72,10 @@ def main(buildingsite, action=None):
                     '--enable-storage',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' + \
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' + \
+                        pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build']
                     ],

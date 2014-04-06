@@ -1,4 +1,3 @@
-#!/usr/bin/python
 
 import glob
 import logging
@@ -7,15 +6,12 @@ import re
 import shutil
 import subprocess
 
-import org.wayround.utils.file
-import org.wayround.utils.path
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
-def main(buildingsite, action = None):
+def main(buildingsite, action=None):
 
     ret = 0
 
@@ -52,7 +48,6 @@ def main(buildingsite, action = None):
 
         classpath000 = os.path.join(etc_dir, '000.classpath')
 
-
         separate_build_dir = False
 
         source_configure_reldir = '.'
@@ -64,43 +59,45 @@ def main(buildingsite, action = None):
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
-                unwrap_dir = True,
-                rename_dir = False
+                unwrap_dir=True,
+                rename_dir=False
                 )
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
-                options = [
+                options=[
                     '--with-jdk-home=/usr/lib/java/jdk',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
-                arguments = [],
-                environment = {},
-                environment_mode = 'copy',
-                source_configure_reldir = source_configure_reldir,
-                use_separate_buildding_dir = separate_build_dir,
-                script_name = 'configure',
-                run_script_not_bash = False,
-                relative_call = False
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options = [],
-                arguments = [],
-                environment = {},
-                environment_mode = 'copy',
-                use_separate_buildding_dir = separate_build_dir,
-                source_configure_reldir = source_configure_reldir
+                options=[],
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -109,15 +106,15 @@ def main(buildingsite, action = None):
 
             p = subprocess.Popen(
                 [java_exec, '-version'],
-                stdout = subprocess.PIPE,
-                stderr = subprocess.STDOUT
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
                 )
 
             comm = p.communicate()
 
             stdou = comm[0]
 
-            ver_str = str(stdou.splitlines()[0], encoding = 'utf-8')
+            ver_str = str(stdou.splitlines()[0], encoding='utf-8')
 
             m = re.match('java version "(.*)"', ver_str)
             if not m:
@@ -131,15 +128,14 @@ def main(buildingsite, action = None):
 
             jdk_dir = os.path.join(java_dir, teaname)
 
-
-            os.makedirs(java_dir, exist_ok = True)
+            os.makedirs(java_dir, exist_ok=True)
 
             org.wayround.utils.file.copytree(
                 src_jdk_dir,
                 jdk_dir,
-                clear_before_copy = True,
-                overwrite_files = True,
-                dst_must_be_empty = False
+                clear_before_copy=True,
+                overwrite_files=True,
+                dst_must_be_empty=False
                 )
 
             for i in [
@@ -153,20 +149,21 @@ def main(buildingsite, action = None):
 
                 os.symlink(teaname, i)
 
-            os.makedirs(etc_dir, exist_ok = True)
+            os.makedirs(etc_dir, exist_ok=True)
 
             fi = open(java009, 'w')
 
             fi.write(
                 """\
-#!/bin/bash                                                                                                                                                             
+#!/bin/bash
 export PATH=$PATH:/usr/lib/java/jdk/bin:/usr/lib/java/jdk/jre/bin
 export JAVA_HOME=/usr/lib/java/jdk
 export MANPATH=$MANPATH:$JAVA_HOME/man
 if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"
 fi
-export LD_LIBRARY_PATH+="$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
+export LD_LIBRARY_PATH+=\
+"$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
 
 """
 )

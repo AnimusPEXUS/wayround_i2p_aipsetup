@@ -33,22 +33,22 @@ def commands():
             ('files', system_list_package_files),
             ('check', package_check),
             ])),
-        ('sys_clean', collections.OrderedDict([
+        ('sys-clean', collections.OrderedDict([
             ('find_broken', clean_packages_with_broken_files),
-            ('elf_readiness', clean_check_elfs_readiness),
-            ('so_problems', clean_find_so_problems),
-            ('find_old', clean_find_old_packages),
-            ('explicit_asps',
+            ('elf-readiness', clean_check_elfs_readiness),
+            ('so-problems', clean_find_so_problems),
+            ('find-old', clean_find_old_packages),
+            ('explicit-asps',
                 clean_check_list_of_installed_packages_and_asps_auto),
-            ('find_garbage', clean_find_garbage),
-            ('find_invalid_deps_lists', clean_find_invalid_deps_lists),
+            ('find-garbage', clean_find_garbage),
+            ('find-invalid-deps-lists', clean_find_invalid_deps_lists),
             ('sysusers', clean_sysusers),
-            ('sysusers_sys', clean_sysusers_sys)
+            ('sysusers-sys', clean_sysusers_sys)
             ])),
-        ('sys_deps', collections.OrderedDict([
-            ('asps_asp_depends_on', pkgdeps_print_asps_asp_depends_on),
-            ('asp_depends', pkgdeps_print_asp_depends),
-            ('asps_depending_on_asp', pkgdeps_print_asps_depending_on_asp)
+        ('sys-deps', collections.OrderedDict([
+            ('asps-asp-depends_on', pkgdeps_print_asps_asp_depends_on),
+            ('asp-depends', pkgdeps_print_asp_depends),
+            ('asps-depending-on-asp', pkgdeps_print_asps_depending_on_asp)
             ]))
         ])
 

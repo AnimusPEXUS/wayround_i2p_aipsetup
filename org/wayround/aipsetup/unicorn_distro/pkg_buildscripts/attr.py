@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 
 import logging
 import os.path
@@ -131,10 +130,8 @@ def main(buildingsite, action=None):
                 while dst_dir in lines[i]:
                     lines[i] = lines[i].replace(dst_dir, '')
 
-
             la_file = open(la_file_name, 'w')
             la_file.write('\n'.join(lines))
             la_file.close()
 
     return ret
-

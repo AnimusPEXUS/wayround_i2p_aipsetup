@@ -1,16 +1,11 @@
-#!/usr/bin/python
 
 import logging
-import os
 import os.path
 import shutil
-import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -78,7 +73,6 @@ def main(buildingsite, action=None):
             ft = f.write(ft)
             f.close()
 
-
         if 'config_exim' in actions and ret == 0:
 
             try:
@@ -139,7 +133,7 @@ def main(buildingsite, action=None):
 #                        '# AUTH_LIBS=-lsasl2',
 #                        '# AUTH_LIBS=-lgsasl',
 #                        '# AUTH_LIBS=-lgssapi -lheimntlm -lkrb5 -lhx509 '
-#                            '-lcom_err -lhcrypto -lasn1 -lwind -lroken -lcrypt',
+#                          '-lcom_err -lhcrypto -lasn1 -lwind -lroken -lcrypt',
 
                         '# HAVE_ICONV=yes',
                         '# SUPPORT_TLS=yes',
@@ -167,7 +161,6 @@ def main(buildingsite, action=None):
 
                         ftl.insert(i + 1, 'AUTH_LIBS=-lsasl2 -lgsasl')
 
-
                 ftl.append('EXTRALIBS+=-lpam')
 
                 if ret == 0:
@@ -187,7 +180,6 @@ def main(buildingsite, action=None):
                 ret = 1
             else:
                 ret = 0
-
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(

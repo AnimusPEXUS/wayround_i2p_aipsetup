@@ -1,14 +1,11 @@
-#!/usr/bin/python
 
-import os.path
-import logging
 import glob
+import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -55,8 +52,10 @@ def main(buildingsite, action=None):
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--disable-gtk',
                     '--without-junit',
@@ -103,9 +102,13 @@ def main(buildingsite, action=None):
 
             gid = glob.glob(org.wayround.utils.path.join(dst_dir, 'gid*'))
 
-            lbo_dir = org.wayround.utils.path.join(dst_dir, 'usr', 'lib', 'libreoffice')
+            lbo_dir = org.wayround.utils.path.join(
+                dst_dir, 'usr', 'lib', 'libreoffice'
+                )
             gid_dir = org.wayround.utils.path.join(lbo_dir, 'gid')
-            lbo_lnk = org.wayround.utils.path.join(dst_dir, 'usr', 'bin', 'soffice')
+            lbo_lnk = org.wayround.utils.path.join(
+                dst_dir, 'usr', 'bin', 'soffice'
+                )
 
             try:
                 os.makedirs(gid_dir)
@@ -114,22 +117,32 @@ def main(buildingsite, action=None):
 
             if not os.path.isdir(gid_dir):
                 ret = 3
-                logging.error("Can't create required dir: `{}'".format(gid_dir))
+                logging.error(
+                    "Can't create required dir: `{}'".format(gid_dir)
+                    )
 
             else:
                 logging.info("Moving gid* files")
                 for i in gid:
-                    os.rename(i, org.wayround.utils.path.join(gid_dir, os.path.basename(i)))
+                    os.rename(
+                        i,
+                        org.wayround.utils.path.join(
+                            gid_dir, os.path.basename(i)
+                            )
+                        )
 
                 logging.info("Creating link")
-                os.makedirs(org.wayround.utils.path.join(dst_dir, 'usr', 'bin'))
+                os.makedirs(
+                    org.wayround.utils.path.join(dst_dir, 'usr', 'bin')
+                    )
                 os.symlink(
                     org.wayround.utils.path.relpath(
-                        org.wayround.utils.path.join(lbo_dir, 'program', 'soffice'),
+                        org.wayround.utils.path.join(
+                            lbo_dir, 'program', 'soffice'
+                            ),
                         os.path.dirname(lbo_lnk)
                         ),
                     lbo_lnk
                     )
-
 
     return ret

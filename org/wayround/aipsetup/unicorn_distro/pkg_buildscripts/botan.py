@@ -1,14 +1,11 @@
-#!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -51,7 +48,10 @@ def main(buildingsite, action=None):
 
         if 'fix' in actions and ret == 0:
 
-            f = open(os.path.join(src_dir, 'src', 'build-data', 'botan-config.in'))
+            src_build_data_botan_config_in = \
+                os.path.join(src_dir, 'src', 'build-data', 'botan-config.in')
+
+            f = open(src_build_data_botan_config_in)
             lines = f.read().splitlines()
             f.close()
 
@@ -59,13 +59,15 @@ def main(buildingsite, action=None):
                 if lines[i] == 'prefix=':
                     lines[i] = 'prefix=/usr'
 
-            f = open(os.path.join(src_dir, 'src', 'build-data', 'botan-config.in'), 'w')
+            f = open(src_build_data_botan_config_in, 'w')
             f.write('\n'.join(lines))
             f.close()
 
-
         if 'configure' in actions and ret == 0:
-            p = subprocess.Popen(['./configure.py', '--prefix=/usr'], cwd=src_dir)
+            p = subprocess.Popen(
+                ['./configure.py', '--prefix=/usr'],
+                cwd=src_dir
+                )
 
             ret = p.wait()
 

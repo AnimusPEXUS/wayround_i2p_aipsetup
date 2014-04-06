@@ -1,13 +1,10 @@
-#!/usr/bin/python
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -54,7 +51,7 @@ def main(buildingsite, action=None):
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=/daemons/couchdb/etc' ,
+                    '--sysconfdir=/daemons/couchdb/etc',
                     '--localstatedir=/daemons/couchdb/var',
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],

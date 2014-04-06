@@ -1,17 +1,14 @@
-#!/usr/bin/python
 
 import logging
 import os.path
 import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
-def main(buildingsite, action = None):
+def main(buildingsite, action=None):
 
     ret = 0
 
@@ -34,7 +31,6 @@ def main(buildingsite, action = None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -42,8 +38,8 @@ def main(buildingsite, action = None):
             ret = autotools.extract_high(
                 buildingsite,
                 pkg_info['pkg_info']['basename'],
-                unwrap_dir = True,
-                rename_dir = False
+                unwrap_dir=True,
+                rename_dir=False
                 )
 
         if 'build' in actions and ret == 0:
@@ -57,11 +53,10 @@ def main(buildingsite, action = None):
                     '--everything',
                     '--override=HAVE_VIDEO4LINUX=UNDEF'
                     ],
-                cwd = src_dir
+                cwd=src_dir
                 )
 
             ret = p.wait()
-
 
         if 'distribute' in actions and ret == 0:
 
@@ -72,7 +67,7 @@ def main(buildingsite, action = None):
                     '--prefix=/usr',
                     '--destdir=' + dst_dir
                     ],
-                cwd = src_dir
+                cwd=src_dir
                 )
 
             ret = p.wait()
