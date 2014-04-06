@@ -1,12 +1,12 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.gnome.org",
-  "buildscript": "std",
-  "basename": "gnome-js-common",
-  "filters": "- version !re \\d*\\.\\d*[02468]",
   "installation_priority": 5,
-  "removable": true,
+  "buildscript": "std",
+  "home_page": "http://www.gnome.org",
+  "basename": "gnome-js-common",
   "reducible": true,
-  "non_installable": false,
-  "deprecated": false
+  "removable": true,
+  "description": "write something here, please",
+  "deprecated": false,
+  "filters": "",
+  "non_installable": false
 }

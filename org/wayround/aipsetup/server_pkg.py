@@ -99,11 +99,11 @@ class ASPServer:
         self.app.route('/package', 'GET', self.package_redir)
         self.app.route('/package/<name>', 'GET', self.package)
         self.app.route('/package/<name>/asps', 'GET', self.asps)
-        self.app.route('/package/<name>/asps_latest', 'GET', self.asps_latest)
+#        self.app.route('/package/<name>/asps_latest', 'GET', self.asps_latest)
         self.app.route('/package/<name>/tarballs', 'GET', self.tarballs)
-        self.app.route(
-            '/package/<name>/tarballs_latest', 'GET', self.tarballs_latest
-            )
+#        self.app.route(
+#            '/package/<name>/tarballs_latest', 'GET', self.tarballs_latest
+#            )
 
         self.app.route('/search', 'GET', self.search)
 
@@ -367,7 +367,7 @@ class ASPServer:
 
         return ret
 
-    def asps(self, name, latest=False):
+    def asps(self, name):
 
         decoded_params = bottle.request.params.decode('utf-8')
 
@@ -387,23 +387,12 @@ class ASPServer:
                 "Error getting file list. Is package name correct?"
                 )
 
-        if latest:
-            if len(filesl) != 0:
-                filesl = [
-                    max(filesl,
-                        key=functools.cmp_to_key(
-                            org.wayround.aipsetup.version.\
-                                package_version_comparator
-                            )
-                        )
-                    ]
-        else:
-            filesl.sort(
-                key=functools.cmp_to_key(
-                    org.wayround.aipsetup.version.package_version_comparator
-                    ),
-                reverse=True
-                )
+        filesl.sort(
+            key=functools.cmp_to_key(
+                org.wayround.aipsetup.version.package_version_comparator
+                ),
+            reverse=True
+            )
 
         if resultmode == 'html':
 
@@ -457,10 +446,7 @@ class ASPServer:
 
         return ret
 
-    def asps_latest(self, name):
-        return self.asps(name, latest=True)
-
-    def tarballs(self, name, latest=False):
+    def tarballs(self, name):
 
         decoded_params = bottle.request.params.decode('utf-8')
 
@@ -508,20 +494,6 @@ class ASPServer:
             reverse=True
             )
 
-        if latest:
-
-            m = None
-            if len(filesl) != 0:
-                m = filesl[0]
-
-            for i in filesl[:]:
-                if (org.wayround.utils.version.source_version_comparator(
-                        i, m
-                        )
-                    != 0):
-
-                    filesl.remove(i)
-
         if resultmode == 'html':
 
             tarball_files = self.ui.tarballs_file_list(
@@ -549,9 +521,6 @@ class ASPServer:
             bottle.response.set_header('Content-Type', APPLICATION_JSON)
 
         return ret
-
-    def tarballs_latest(self, name):
-        return self.tarballs(name, latest=True)
 
     def search(self):
 

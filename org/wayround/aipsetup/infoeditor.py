@@ -12,11 +12,11 @@ from gi.repository import Gdk, Gtk
 
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.gtk
+import org.wayround.aipsetup.gui.infoeditor
 import org.wayround.aipsetup.info
 import org.wayround.utils.gtk
 import org.wayround.utils.list
 import org.wayround.utils.text
-import org.wayround.aipsetup.gui.infoeditor
 
 
 class MainWindow:
@@ -150,7 +150,7 @@ class MainWindow:
                     filename + " - aipsetup v3 .json info file editor"
                     )
 
-                self.scroll_package_list_to_name(filename)
+                self.scroll_package_list_to_name(os.path.basename(filename))
 
 #        self.window.set_sensitive(True)
 
@@ -271,7 +271,9 @@ class MainWindow:
 
         self.ui.tree_view1.set_model(lst)
         if self.currently_opened:
-            self.scroll_package_list_to_name(self.currently_opened)
+            self.scroll_package_list_to_name(
+                os.path.basename(self.currently_opened)
+                )
         return
 
     def scroll_package_list_to_name(self, name):

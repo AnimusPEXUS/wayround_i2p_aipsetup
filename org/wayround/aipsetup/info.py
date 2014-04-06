@@ -1012,7 +1012,7 @@ def filter_text_parse(filter_text):
     lines = filter_text.splitlines()
 
     for i in lines:
-        if not i.isspace():
+        if i != '' and not i.isspace():
             struct = i.split(' ', maxsplit=3)
             if not len(struct) == 4:
                 logging.error("Wrong filter line: `{}'".format(i))

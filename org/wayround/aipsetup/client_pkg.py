@@ -1,4 +1,5 @@
 
+import functools
 import http.client
 import json
 import os.path
@@ -21,8 +22,8 @@ class PackageServerClient:
     def walk(self, path):
         return walk(self._url, path)
 
-    def get_rec_package_list(self, path):
-        return get_rec_package_list(self._url, path)
+    def get_recurcive_package_list(self, path):
+        return get_recurcive_package_list(self._url, path)
 
     def list_(self, mask, searchmode='filemask', cs=True):
         return list_(self._url, mask, searchmode, cs)
@@ -88,12 +89,7 @@ def get_recurcive_package_list(url, path):
     return list(set(pkgs))
 
 
-def list_(
-    url,
-    mask,
-    searchmode='filemask',
-    cs=True
-    ):
+def list_(url, mask, searchmode='filemask', cs=True):
 
     ret = None
 
@@ -123,10 +119,7 @@ def list_(
     return ret
 
 
-def ls(
-    url,
-    path
-    ):
+def ls(url, path):
 
     """
     path must be string not starting and not ending with slash
@@ -187,10 +180,7 @@ def info(
     return ret
 
 
-def asps(
-    url,
-    pkg_name
-    ):
+def asps(url, pkg_name):
 
     ret = None
 
@@ -215,10 +205,7 @@ def asps(
     return ret
 
 
-def asps_latest(
-    url,
-    pkg_name
-    ):
+def asps_latest(url, pkg_name):
 
     ret = None
 
@@ -232,7 +219,7 @@ def asps_latest(
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/asps_latest?{}'.format(url, pkg_name, data)
+            '{}package/{}/asps?{}'.format(url, pkg_name, data)
         )
     except:
         pass
@@ -241,6 +228,12 @@ def asps_latest(
         ret = json.loads(str(res.read(), 'utf-8'))
 
     if ret and len(ret) != 0:
+        ret.sort(
+            key=functools.cmp_to_key(
+                org.wayround.aipsetup.version.package_version_comparator
+                ),
+                reversed=True
+            )
         ret = ret[0]
     else:
         ret = None
@@ -327,10 +320,7 @@ def get_latest_asp(url, pkg_name, out_dir=None, out_to_temp=False):
     return ret
 
 
-def tarballs(
-    url,
-    pkg_name
-    ):
+def tarballs(url, pkg_name):
 
     ret = None
 
@@ -355,10 +345,7 @@ def tarballs(
     return ret
 
 
-def tarballs_latest(
-    url,
-    pkg_name
-    ):
+def tarballs_latest(url, pkg_name):
 
     ret = None
 
@@ -372,7 +359,7 @@ def tarballs_latest(
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/tarballs_latest?{}'.format(url, pkg_name, data)
+            '{}package/{}/tarballs?{}'.format(url, pkg_name, data)
         )
     except:
         pass
@@ -382,6 +369,24 @@ def tarballs_latest(
 
     if ret and len(ret) == 0:
         ret = None
+
+    if isinstance(ret, list):
+        m = None
+        if len(ret) != 0:
+            m = max(
+                ret,
+                key=functools.cmp_to_key(
+                    org.wayround.utils.version.source_version_comparator
+                    )
+                )
+
+        for i in ret[:]:
+            if (org.wayround.utils.version.source_version_comparator(
+                    i, m
+                    )
+                != 0):
+
+                ret.remove(i)
 
     return ret
 

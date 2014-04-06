@@ -138,20 +138,18 @@ class InfoEditorUi:
 
 comparators:
 
-for status and filename:
-begins, contains, ends, fm, re
+  for status and filename:
+    begins, contains, ends, fm, re
 
-for version:
-&lt;, &lt;=, ==, &gt;=, &gt;, re, fm, begins, contains, ends
+  for version:
+    <, <=, ==, >=, >, re, fm, begins, contains, ends
 
-'!' before comparator means NOT
+'!' before comparator - means 'NOT'
 
 warning:
 when using status or version comparison,
 algorithm uses not text in file name, but parsing result
 so for name 'cgkit-2.0.0-py3k.tar.gz' parsing reult is:
-&gt;aipsetup3 info parse_tar cgkit-2.0.0-py3k.tar.gz
--i- AIP Setup version 3.1
 {'groups': {'extension': '.tar.gz',
             'name': 'cgkit',
             'status': 'py.3.k',

@@ -1,5 +1,6 @@
 
 import functools
+import os.path
 import re
 
 import org.wayround.aipsetup.client_pkg
@@ -42,13 +43,15 @@ VERSION_TARGETED_NAMES = {
     'gnome-settings-daemon': {},
     'gnome-shell': {},
     'gnome-shell-extensions': {},
-    'gnome-system-log': {},
+    'gnome-system-log': {'daa': True, 'nmaa': True},
     'gnome-system-monitor': {},
+    'gnome-terminal': {},
+    'gnome-themes-standard': {},
     'gnome-user-docs': {},
     'gnome-user-share': {},
     'gsettings-desktop-schemas': {},
     'gtk+': {},
-    'gtkmm': {},
+    'gtkmm': {'daa': True, 'nmaa': False},
     'gtksourceview': {},
     'gucharmap': {},
     'libgweather': {},
@@ -56,100 +59,126 @@ VERSION_TARGETED_NAMES = {
     'mutter': {},
     'nautilus': {},
     'pygobject': {},
-    'seed': {'daa': True},
-    'sushi': {},
+    'seed': {},
+    'sushi': {'daa': True, 'nmaa': True},
     'totem': {},
     'totem-pl-parser': {},
     'vino': {},
     'yelp': {},
     'yelp-tools': {},
     'yelp-xsl': {},
-    'zenity': {},
+    'zenity': {}
+    }
+
+GNOMMY_NAMES = {
+    'gtk-engines': {'nmaa': False, 'daa': False}
+    }
+
+ADDITIONAL_NAMES = {
+    'NetworkManager': {},
+    'at-spi2-atk': {},
+    'at-spi2-core': {},
+    'atk': {},
+    'atkmm': {},
+    'cantarell-fonts': {},
+    'caribou': {},
+    'clutter': {},
+    'clutter-gst': {},
+    'clutter-gtk': {},
+    'cogl': {},
+    'dconf': {},
+    'folks': {},
+    'gdk-pixbuf': {},
+    'gjs': {},
+    'glib': {},
+    'glib-networking': {},
+    'glibmm': {},
+    'gmime': {},
+    'gnome-js-common': {},
+    'gnome-video-effects': {},
+    'gobject-introspection': {},
+    'grilo': {},
+    'grilo-plugins': {},
+    'gssdp': {},
+    'gst-plugins-base': {},
+    'gst-plugins-good': {},
+    'gstreamer': {},
+    'gtk+2': {},
+    'gtk-doc': {},
+    'gupnp': {},
+    'gupnp-igd': {},
+    'gvfs': {},
+    'json-glib': {},
+    'libchamplain': {},
+    'libcroco': {},
+    'libgdata': {},
+    'libgee': {},
+    'libgnomekbd': {},
+    'libgsf': {},
+    'libgtop': {},
+    'libgxps': {},
+    'libmediaart': {},
+    'libnotify': {},
+    'libpeas': {},
+    'librsvg': {},
+    'libsecret': {},
+    'libsigc++': {},
+    'libsoup': {},
+    'libwnck': {},
+    'libzapojit': {},
+    'mm-common': {},
+    'network-manager-applet': {},
+    'pango': {},
+    'pangomm': {},
+    'rest': {},
+    'tracker': {},
+    'vala': {},
+    'vte': {}
     }
 
 
-ADDITIONAL_NAMES = [
-    'NetworkManager',
-    'at-spi2-atk',
-    'at-spi2-core',
-    'atk',
-    'atkmm',
-    'cantarell-fonts',
-    'caribou',
-    'clutter',
-    'clutter-gst',
-    'clutter-gtk',
-    'cogl',
-    'dconf',
-    'folks',
-    'gdk-pixbuf',
-    'gjs',
-    'glib',
-    'glib-networking',
-    'glibmm',
-    'gmime',
-    'gnome-js-common',
-    'gnome-js-common',
-    'gnome-video-effects',
-    'gobject-introspection',
-    'grilo',
-    'grilo-plugins',
-    'gssdp',
-    'gst-plugins-base',
-    'gst-plugins-good',
-    'gstreamer',
-    'gtk+3',
-    'gtk-doc',
-    'gtk-engines',
-    'gtk-engines',
-    'gupnp',
-    'gupnp-igd',
-    'gvfs',
-    'json-glib',
-    'libchamplain',
-    'libcroco',
-    'libgdata',
-    'libgee',
-    'libgnomekbd',
-    'libgsf',
-    'libgtop',
-    'libgxps',
-    'libmediaart',
-    'libnotify',
-    'libpeas',
-    'librsvg',
-    'libsecret',
-    'libsigc++',
-    'libsoup',
-    'libwnck',
-    'libzapojit',
-    'mm-common',
-    'network-manager-applet',
-    'pango',
-    'pangomm',
-    'rest',
-    'tracker',
-    'vala',
-    'vte'
-    ]
+def check_nineties(parsed):
+
+    parsed_groups_version_list = parsed['groups']['version_list']
+
+    ret = False
+
+    if len(parsed_groups_version_list) > 2:
+        ret = re.match(
+            r'^9\d+$',
+            parsed_groups_version_list[1]
+            ) != None
+
+    return ret
+
+
+def check_development(parsed):
+
+    parsed_groups_version_list = parsed['groups']['version_list']
+
+    ret = re.match(
+        r'^\d*[13579]$',
+        parsed_groups_version_list[1]
+        ) != None
+
+    return ret
 
 
 def find_gnome_tarball_name(
     pkg_client,
     pkgname,
-    required_v1,
-    required_v2,
+    required_v1=None,
+    required_v2=None,
     find_lower_version_if_required_missing=True,
-    development_are_acceptable=False,
-    nineties_minors_are_acceptable=False,
-    acceptable_extensions_order_list=['.tar.xz', '.tar.bz2', '.tar.gz']
+    development_are_acceptable=True,
+    nineties_minors_are_acceptable=True,
+    acceptable_extensions_order_list=None
     ):
 
-#    print()
+    if acceptable_extensions_order_list == None:
+        acceptable_extensions_order_list = ['.tar.xz', '.tar.bz2', '.tar.gz']
 
     tarballs = pkg_client.tarballs(pkgname)
-
-#    print("tarballs:\n{}".format(tarballs))
 
     if tarballs == None:
         tarballs = []
@@ -163,7 +192,41 @@ def find_gnome_tarball_name(
 
     found_required_targeted_tarballs = []
 
-#    print("sorted tarballs:\n{}".format(tarballs))
+    if (required_v1 == None or required_v2 == None) and len(tarballs) != 0:
+
+        for i in tarballs:
+
+            parsed = org.wayround.utils.tarball_name_parser.\
+                parse_tarball_name(i, mute=True)
+
+            parsed_groups_version_list = parsed['groups']['version_list']
+
+            is_nineties = check_nineties(parsed)
+
+            is_development = check_development(parsed)
+
+            int_parsed_groups_version_list_1 = \
+                int(parsed_groups_version_list[1])
+
+            if (
+                (is_nineties
+                 and nineties_minors_are_acceptable == True
+                 )
+                or (is_development
+                    and development_are_acceptable == True
+                    )
+                or (not is_nineties
+                    and not is_development
+                    )
+                ):
+
+                if required_v1 == None:
+                    required_v1 = int(parsed['groups']['version_list'][0])
+
+                if required_v2 == None:
+                    required_v2 = int_parsed_groups_version_list_1
+
+                break
 
     for i in tarballs:
 
@@ -177,12 +240,19 @@ def find_gnome_tarball_name(
                 and
                 int(parsed_groups_version_list[1]) == required_v2
                 ):
-                found_required_targeted_tarballs.append(i)
+
+                is_nineties = check_nineties(parsed)
+
+                if ((is_nineties and nineties_minors_are_acceptable)
+                    or
+                    (not is_nineties)):
+
+                    found_required_targeted_tarballs.append(i)
 
     if (len(found_required_targeted_tarballs) == 0
         and find_lower_version_if_required_missing == True):
 
-        next_found_middle_version = None
+        next_found_acceptable_tarball = None
 
         for i in tarballs:
 
@@ -194,61 +264,50 @@ def find_gnome_tarball_name(
                 parsed_groups_version_list = \
                     parsed['groups']['version_list']
 
-                is_nineties = \
-                    re.match(
-                        r'9\d+',
-                        parsed_groups_version_list[2]
-                        ) != None
+                int_parsed_groups_version_list_1 = \
+                    int(parsed_groups_version_list[1])
 
-                is_development = \
-                    re.match(
-                        r'\d+[13579]',
-                        parsed_groups_version_list[1]
-                        ) != None
+                if int_parsed_groups_version_list_1 >= required_v2:
+                    continue
 
-                if next_found_middle_version == None:
+                is_nineties = check_nineties(parsed)
 
-                    if (len(parsed_groups_version_list) > 2
-                        and is_nineties
+                is_development = check_development(parsed)
+
+                if next_found_acceptable_tarball == None:
+
+                    if (is_nineties
                         and nineties_minors_are_acceptable == True
-                        and int(parsed_groups_version_list[0]) == required_v1
+                        and int_parsed_groups_version_list_1 < required_v2
                         ):
+                        next_found_acceptable_tarball = i
 
-                        next_found_middle_version = \
-                            int(parsed_groups_version_list[1])
-
-                    if (next_found_middle_version == None
+                    if (next_found_acceptable_tarball == None
                         and is_development
                         and development_are_acceptable == True
-                        and int(parsed_groups_version_list[0]) == required_v1
+                        and int_parsed_groups_version_list_1 < required_v2
                         ):
+                        next_found_acceptable_tarball = i
 
-                        next_found_middle_version = \
-                            int(parsed_groups_version_list[1])
-
-                    if (next_found_middle_version == None
+                    if (next_found_acceptable_tarball == None
                         and not is_nineties
                         and not is_development
-                        and int(parsed_groups_version_list[0]) == required_v1
+                        and int_parsed_groups_version_list_1 < required_v2
                         ):
+                        next_found_acceptable_tarball = i
 
-                        next_found_middle_version = \
-                            int(parsed_groups_version_list[1])
+                if next_found_acceptable_tarball != None:
+                    break
 
-                if next_found_middle_version != None:
-                    if (int(parsed_groups_version_list[0]) == required_v1
-                        and int(parsed_groups_version_list[1]) == \
-                            next_found_middle_version
-                        and ((not is_nineties and not is_development)
-                             or (is_nineties
-                                 and nineties_minors_are_acceptable == True)
-                             or (is_development
-                                 and development_are_acceptable == True)
-                             )
-                        ):
-                        found_required_targeted_tarballs.append(i)
+        if next_found_acceptable_tarball != None:
 
-#    print("req tarballs:\n{}".format(found_required_targeted_tarballs))
+            for i in tarballs:
+                if org.wayround.utils.version.\
+                    source_version_comparator(
+                        i,
+                        next_found_acceptable_tarball
+                        ) == 0:
+                    found_required_targeted_tarballs.append(i)
 
     ret = None
     for i in found_required_targeted_tarballs:
@@ -263,6 +322,83 @@ def find_gnome_tarball_name(
     return ret
 
 
+def process_gnommy_names_dict(
+    inp_dict,
+    pkg_client,
+    required_v1=None,
+    required_v2=None,
+    verbose=False,
+    find_lower_version_if_required_missing=True,
+    development_are_acceptable=False,
+    nineties_minors_are_acceptable=False,
+    acceptable_extensions_order_list=None
+    ):
+
+    if acceptable_extensions_order_list == None:
+        acceptable_extensions_order_list = ['.tar.xz', '.tar.bz2', '.tar.gz']
+
+    found = []
+    for i in sorted(list(inp_dict.keys())):
+        if verbose:
+            org.wayround.utils.terminal.progress_write(
+                "Looking for `{}' `{}.{}'".format(i, required_v1, required_v2)
+                )
+
+        kwargs = {}
+
+        if 'flvirm' in inp_dict[i]:
+            kwargs['find_lower_version_if_required_missing'] = \
+                inp_dict[i]['flvirm']
+        else:
+            if find_lower_version_if_required_missing != None:
+                kwargs['find_lower_version_if_required_missing'] = \
+                    find_lower_version_if_required_missing
+
+        if 'daa' in inp_dict[i]:
+            kwargs['development_are_acceptable'] = \
+                inp_dict[i]['daa']
+        else:
+            if development_are_acceptable != None:
+                kwargs['development_are_acceptable'] = \
+                    development_are_acceptable
+
+        if 'nmaa' in inp_dict[i]:
+            kwargs['nineties_minors_are_acceptable'] = \
+                inp_dict[i]['nmaa']
+        else:
+            if nineties_minors_are_acceptable != None:
+                kwargs['nineties_minors_are_acceptable'] = \
+                    nineties_minors_are_acceptable
+
+        res = find_gnome_tarball_name(
+            pkg_client,
+            i,
+            required_v1,
+            required_v2,
+            acceptable_extensions_order_list=acceptable_extensions_order_list,
+            **kwargs
+            )
+
+        if res != None:
+            found.append(res)
+            if verbose:
+                org.wayround.utils.terminal.progress_write(
+                    "   found `{}'".format(os.path.basename(res)), True
+                    )
+        else:
+            if verbose:
+                org.wayround.utils.terminal.progress_write(
+                    "   not found `{}' `{}.{}'".format(
+                        i,
+                        required_v1,
+                        required_v2
+                        ),
+                    True
+                    )
+
+    return found
+
+
 def get_gnome(
     pkg_client,
     src_client,
@@ -271,6 +407,15 @@ def get_gnome(
     acceptable_extensions_order_list,
     verbose=False
     ):
+
+    if acceptable_extensions_order_list == None:
+        acceptable_extensions_order_list = ['.tar.xz', '.tar.bz2', '.tar.gz']
+
+    if not isinstance(required_v1, int):
+        raise TypeError("`required_v1' must be int")
+
+    if not isinstance(required_v2, int):
+        raise TypeError("`required_v2' must be int")
 
     if not isinstance(
         pkg_client,
@@ -298,46 +443,46 @@ def get_gnome(
             "`acceptable_extensions_order_list' must be list of str"
             )
 
-    found = []
-    for i in sorted(list(VERSION_TARGETED_NAMES.keys())):
-        if verbose:
-            org.wayround.utils.terminal.progress_write(
-                "Looking for `{}' `{}.{}'".format(i, required_v1, required_v2)
-                )
-        res = find_gnome_tarball_name(
-            pkg_client,
-            i,
-            required_v1,
-            required_v2,
-            find_lower_version_if_required_missing=True,
-            development_are_acceptable=(
-                'daa' in VERSION_TARGETED_NAMES[i]
-                and VERSION_TARGETED_NAMES[i]['daa'] == True
-                ),
-            nineties_minors_are_acceptable=(
-                'nmaa' in VERSION_TARGETED_NAMES[i]
-                and VERSION_TARGETED_NAMES[i]['nmaa'] == True
-                ),
-            acceptable_extensions_order_list=acceptable_extensions_order_list
-            )
-        if res != None:
-            found.append(res)
-            if verbose:
-                org.wayround.utils.terminal.progress_write(
-                    "   found `{}'".format(res), True
-                    )
-        else:
-            if verbose:
-                org.wayround.utils.terminal.progress_write(
-                    "   not found `{}' `{}.{}'".format(
-                        i,
-                        required_v1,
-                        required_v2
-                        ),
-                    True
-                    )
+    found = process_gnommy_names_dict(
+        VERSION_TARGETED_NAMES,
+        pkg_client,
+        required_v1,
+        required_v2,
+        verbose,
+        True,
+        acceptable_extensions_order_list
+        )
 
     for i in found:
         org.wayround.aipsetup.client_pkg.get_tarball(i)
+
+    found = process_gnommy_names_dict(
+        GNOMMY_NAMES,
+        pkg_client,
+        None,
+        None,
+        verbose,
+        True,
+        acceptable_extensions_order_list
+        )
+
+    for i in found:
+        org.wayround.aipsetup.client_pkg.get_tarball(i)
+
+    for i in sorted(list(ADDITIONAL_NAMES.keys())):
+        res = pkg_client.tarballs_latest(i)
+        if isinstance(res, list) and len(res) != 0:
+            found = None
+            for j in acceptable_extensions_order_list:
+                for k in res:
+                    if k.endswith(j):
+                        found = k
+                        break
+                if found != None:
+                    break
+            if found == None:
+                found = res[0]
+
+            org.wayround.aipsetup.client_pkg.get_tarball(found)
 
     return 0

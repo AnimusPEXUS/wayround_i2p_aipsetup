@@ -1,0 +1,12 @@
+{
+  "installation_priority": 5,
+  "basename": "gnome-calculator",
+  "reducible": true,
+  "description": "",
+  "filters": "",
+  "deprecated": false,
+  "buildscript": "std",
+  "home_page": "",
+  "removable": true,
+  "non_installable": false
+}

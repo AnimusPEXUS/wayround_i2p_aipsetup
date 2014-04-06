@@ -1,0 +1,12 @@
+{
+  "deprecated": false,
+  "buildscript": "std",
+  "installation_priority": 5,
+  "reducible": true,
+  "removable": true,
+  "home_page": "",
+  "description": "",
+  "basename": "libmediaart",
+  "filters": "",
+  "non_installable": false
+}
