@@ -1,14 +1,12 @@
 
-import os.path
 import logging
-import subprocess
+import os.path
 import shutil
+import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -33,10 +31,6 @@ def main(buildingsite, action=None):
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
 
         tar_dir = None
         lsof_file = None
@@ -84,8 +78,6 @@ def main(buildingsite, action=None):
                         lsof_file = os.path.join(tar_dir, 'lsof')
                         lsof_man_file = os.path.join(tar_dir, 'lsof.8')
 
-
-
         if 'configure' in actions and ret == 0:
             p = subprocess.Popen(['./Configure', '-n', 'linux'], cwd=tar_dir)
             ret = p.wait()
@@ -112,11 +104,15 @@ def main(buildingsite, action=None):
 
                     shutil.copy(lsof_file, os.path.join(dst_bin_dir, 'lsof'))
 
-                    dst_man_dir = os.path.join(dst_dir, 'usr', 'share', 'man', 'man8')
+                    dst_man_dir = os.path.join(
+                        dst_dir, 'usr', 'share', 'man', 'man8'
+                        )
 
                     if not os.path.isdir(dst_man_dir):
                         os.makedirs(dst_man_dir)
 
-                    shutil.copy(lsof_man_file, os.path.join(dst_man_dir, 'lsof.8'))
+                    shutil.copy(
+                        lsof_man_file, os.path.join(dst_man_dir, 'lsof.8')
+                        )
 
     return ret

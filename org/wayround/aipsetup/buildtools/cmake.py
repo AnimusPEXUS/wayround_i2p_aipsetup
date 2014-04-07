@@ -8,7 +8,6 @@ import subprocess
 import sys
 
 import org.wayround.aipsetup.build
-
 import org.wayround.utils.error
 import org.wayround.utils.log
 import org.wayround.utils.osutils
@@ -26,8 +25,8 @@ def determine_abs_configure_dir(buildingsite, config_dir):
             ) + os.path.sep + config_dir
         )
 
-
     return config_dir
+
 
 def determine_building_dir(
     buildingsite, config_dir, separate_build_dir
@@ -65,8 +64,6 @@ def cmake_high(
     build_in_separate_dir
     ):
 
-    ret = 0
-
     building_site = org.wayround.utils.path.abspath(building_site)
 
     log = org.wayround.utils.log.Log(
@@ -75,7 +72,6 @@ def cmake_high(
             ),
         'cmake'
         )
-
 
     env = org.wayround.utils.osutils.env_vars_edit(
         environment,
@@ -113,6 +109,7 @@ def cmake_high(
     log.close()
 
     return ret
+
 
 def cmake_low(
     log,

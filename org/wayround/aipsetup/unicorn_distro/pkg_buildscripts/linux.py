@@ -144,10 +144,10 @@ def main(buildingsite, action=None):
                         os.symlink(
                             os.path.join(
                                 os.path.sep + 'usr',
-                                'src',
-                                'linux-{}'.format(
-                                    pkg_info['pkg_nameinfo']['groups']['version']
-                                    )
+                            'src',
+                            'linux-{}'.format(
+                                pkg_info['pkg_nameinfo']['groups']['version']
+                                )
                                 ),
                             new_link
                             )

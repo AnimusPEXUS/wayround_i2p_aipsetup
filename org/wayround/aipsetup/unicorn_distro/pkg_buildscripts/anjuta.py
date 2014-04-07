@@ -61,7 +61,7 @@ def main(buildingsite, action=None):
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={'CC': 'cc', 'CXX':'g++'},
+                environment={'CC': 'cc', 'CXX': 'g++'},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,

@@ -16,7 +16,6 @@ import org.wayround.aipsetup.gui.infoeditor
 import org.wayround.aipsetup.info
 import org.wayround.utils.gtk
 import org.wayround.utils.list
-import org.wayround.utils.text
 
 
 class MainWindow:

@@ -619,9 +619,10 @@ def get_gnome_core(command_name, opts, args, adds):
             src_client,
             required_v1,
             required_v2,
-            acceptable_extensions_order_list=
+            acceptable_extensions_order_list=(
                 config['pkg_client']['acceptable_src_file_extensions'].\
-                    split(' '),
+                    split(' ')
+                ),
             verbose=True
             ) == 0:
 

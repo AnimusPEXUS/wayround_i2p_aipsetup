@@ -1,15 +1,13 @@
 
-import os.path
-import logging
 import glob
+import logging
+import os.path
 import shutil
 
-import org.wayround.utils.file
-
 import org.wayround.aipsetup.build
-
 from org.wayround.aipsetup.buildtools import autotools
 from org.wayround.aipsetup.buildtools import cmake
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -57,8 +55,10 @@ def main(buildingsite, action=None):
                     '-DCMAKE_INSTALL_PREFIX=' +
                         pkg_info['constitution']['paths']['usr'],
 #                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+#                    '--sysconfdir=' +
+#                        pkg_info['constitution']['paths']['config'],
+#                    '--localstatedir=' +
+#                        pkg_info['constitution']['paths']['var'],
 #                    '--enable-shared',
 #                    '--host=' + pkg_info['constitution']['host'],
 #                    '--build=' + pkg_info['constitution']['build'],

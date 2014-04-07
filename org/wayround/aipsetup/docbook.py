@@ -534,7 +534,8 @@ def make_new_docbook_3_1_look_like_old(
     f.close()
 
     return
-\
+
+
 def install(
     base_dir='/',
     super_catalog_sgml='/etc/sgml/sgml-docbook.cat',

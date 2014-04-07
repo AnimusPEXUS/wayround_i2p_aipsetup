@@ -4,11 +4,9 @@ import logging
 import os.path
 import shutil
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -94,17 +92,27 @@ def main(buildingsite, action=None):
             os.makedirs(os.path.join(dst_dir, 'usr', 'man', 'man8'))
             os.makedirs(os.path.join(dst_dir, 'usr', 'man', 'man5'))
 
-            m8 = glob.glob(os.path.join(src_dir_p_sep, 'doc', 'docbook', '*.8'))
-            m5 = glob.glob(os.path.join(src_dir_p_sep, 'doc', 'docbook', '*.5'))
+            m8 = glob.glob(
+                os.path.join(src_dir_p_sep, 'doc', 'docbook', '*.8')
+                )
+            m5 = glob.glob(
+                os.path.join(src_dir_p_sep, 'doc', 'docbook', '*.5')
+                )
 
             for i in m8:
                 bn = os.path.basename(i)
-                shutil.copyfile(i, os.path.join(dst_dir, 'usr', 'man', 'man8', bn))
+                shutil.copyfile(
+                    i,
+                    os.path.join(dst_dir, 'usr', 'man', 'man8', bn)
+                    )
                 print(i)
 
             for i in m5:
                 bn = os.path.basename(i)
-                shutil.copyfile(i, os.path.join(dst_dir, 'usr', 'man', 'man5', bn))
+                shutil.copyfile(
+                    i,
+                    os.path.join(dst_dir, 'usr', 'man', 'man5', bn)
+                    )
                 print(i)
 
     return ret

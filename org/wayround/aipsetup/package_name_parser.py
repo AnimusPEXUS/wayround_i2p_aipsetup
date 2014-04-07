@@ -4,20 +4,22 @@ Module with package names parsing facilities
 """
 
 import copy
+import datetime
 import logging
 import os.path
 import re
-import datetime
 
 import org.wayround.utils.list
-import org.wayround.utils.tag
 import org.wayround.utils.text
 
 
 ASP_NAME_REGEXPS = {
     'aipsetup3':
-        r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$',
-    'aipsetup2': r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)-(?P<timestamp>\d{14})-(?P<host>.*)$'
+        r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)'
+        r'-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$',
+    'aipsetup2':
+        r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)'
+        r'-(?P<timestamp>\d{14})-(?P<host>.*)$'
     }
 """
 Regexps for parsing package names
@@ -36,8 +38,13 @@ del(i)
 ALL_DELIMITERS = ['.', '_', '-', '+', '~']
 
 TIMESTAMPS = {
-    'aipsetup3': r'^(?P<year>\d+)(?P<month>\d{2})(?P<day>\d{2})\.(?P<hour>\d{2})(?P<minute>\d{2})(?P<second>\d{2})\.(?P<micro>\d{7})$',
-    'aipsetup2': r'^(?P<year>\d+)(?P<month>\d{2})(?P<day>\d{2})(?P<hour>\d{2})(?P<minute>\d{2})(?P<second>\d{2})$'
+    'aipsetup3':
+        r'^(?P<year>\d+)(?P<month>\d{2})(?P<day>\d{2})\.'
+        r'(?P<hour>\d{2})(?P<minute>\d{2})'
+        r'(?P<second>\d{2})\.(?P<micro>\d{7})$',
+    'aipsetup2':
+        r'^(?P<year>\d+)(?P<month>\d{2})(?P<day>\d{2})'
+        r'(?P<hour>\d{2})(?P<minute>\d{2})(?P<second>\d{2})$'
     }
 
 TIMESTAMPS_COMPILED = {}
@@ -47,6 +54,7 @@ for i in TIMESTAMPS:
     TIMESTAMPS_COMPILED[i] = re.compile(TIMESTAMPS[i])
 
 del(i)
+
 
 def rm_ext_from_pkg_name(name):
     """
@@ -69,6 +77,7 @@ def rm_ext_from_pkg_name(name):
 
     return ret
 
+
 def package_name_parse(filename):
     """
     Parse package name
@@ -83,9 +92,9 @@ def package_name_parse(filename):
     filename = rm_ext_from_pkg_name(filename)
 
     for i in ASP_NAME_REGEXPS:
-        
+
         re_res = ASP_NAME_REGEXPS_COMPILED[i].match(filename)
-        
+
         if re_res != None:
             ret = {
                 're': i,

@@ -1,12 +1,10 @@
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -100,6 +98,8 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-            org.wayround.utils.file.remove_if_exists(os.path.join(dst_dir, 'usr', 'etc'))
+            org.wayround.utils.file.remove_if_exists(
+                os.path.join(dst_dir, 'usr', 'etc')
+                )
 
     return ret

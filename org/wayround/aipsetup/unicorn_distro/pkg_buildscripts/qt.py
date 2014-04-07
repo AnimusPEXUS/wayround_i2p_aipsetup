@@ -1,13 +1,11 @@
 
-import os.path
 import logging
+import os.path
 import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -46,7 +44,8 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-#    RUN[$j]='export CFLAGS=" -march=i486 -mtune=i486  " ; export CXXFLAGS=" -march=i486 -mtune=i486  " #'
+#    RUN[$j]='export CFLAGS=" -march=i486 -mtune=i486  " ;
+#    export CXXFLAGS=" -march=i486 -mtune=i486  " #'
         if 'configure' in actions and ret == 0:
             p = subprocess.Popen(
                 ['./configure'] +
@@ -67,7 +66,6 @@ def main(buildingsite, action=None):
                 )
             p.communicate(input=b'yes\n')
             ret = p.wait()
-
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(

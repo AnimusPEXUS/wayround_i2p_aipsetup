@@ -3,8 +3,6 @@ import os.path
 
 import mako.template
 
-import org.wayround.utils.mako_filters
-
 
 class UI:
 

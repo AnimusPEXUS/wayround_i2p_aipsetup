@@ -1,13 +1,11 @@
 
-import os.path
 import logging
+import os.path
 import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -36,10 +34,6 @@ def main(buildingsite, action=None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
         if 'extract2' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -53,7 +47,8 @@ def main(buildingsite, action=None):
 
         if 'distribute2' in actions and ret == 0:
             ret = subprocess.Popen(
-                ['python2', 'setup.py', 'install', '--root=' + os.path.join(dst_dir)],
+                ['python2', 'setup.py', 'install',
+                 '--root=' + os.path.join(dst_dir)],
                 cwd=src_dir
                 ).wait()
 
@@ -70,7 +65,8 @@ def main(buildingsite, action=None):
 
         if 'distribute3' in actions and ret == 0:
             ret = subprocess.Popen(
-                ['python3', 'setup.py', 'install', '--root=' + os.path.join(dst_dir)],
+                ['python3', 'setup.py', 'install',
+                 '--root=' + os.path.join(dst_dir)],
                 cwd=src_dir
                 ).wait()
 

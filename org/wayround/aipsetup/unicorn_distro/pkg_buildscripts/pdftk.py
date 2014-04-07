@@ -130,7 +130,9 @@ include Makefile.Base
                 logging.error("Can't create dir: `{}'".format(bin_dir))
                 ret = 22
             else:
-                shutil.copy(sbin, org.wayround.utils.path.join(bin_dir, 'pdftk'))
+                shutil.copy(
+                    sbin, org.wayround.utils.path.join(bin_dir, 'pdftk')
+                    )
 
             sman = org.wayround.utils.path.join(src_dir, 'pdftk.1')
             man = org.wayround.utils.path.join(

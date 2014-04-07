@@ -1,15 +1,13 @@
 
-import os.path
 import glob
 import logging
-import subprocess
+import os.path
 import shutil
+import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -68,7 +66,8 @@ def main(buildingsite, action=None):
             except:
                 pass
 
-            libs = glob.glob(os.path.join(src_dir, 'Dist', '*.a')) + glob.glob(os.path.join(src_dir, 'Dist', '*.so'))
+            libs = glob.glob(os.path.join(src_dir, 'Dist', '*.a'))
+            libs += glob.glob(os.path.join(src_dir, 'Dist', '*.so'))
 
             headers = glob.glob(os.path.join(src_dir, 'Dist', '*.h'))
 

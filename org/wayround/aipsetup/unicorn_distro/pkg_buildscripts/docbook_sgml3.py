@@ -1,11 +1,9 @@
 
-import os.path
 import logging
-
-import org.wayround.utils.file
-import org.wayround.utils.archive
+import os.path
 
 import org.wayround.aipsetup.build
+import org.wayround.utils.archive
 
 
 def main(buildingsite, action=None):

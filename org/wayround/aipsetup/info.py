@@ -666,19 +666,19 @@ class PackageInfoCtl:
 +---[{name}]----Info Block End---------------------+
 """.format_map(
                 {
-                'tags'                  : ', '.join(tags),
-                'category'              : category,
-                'name'                  : name,
-                'description'           : r['description'],
-                'home_page'             : r['home_page'],
-                'buildscript'           : r['buildscript'],
-                'basename'              : r['basename'],
-                'filters'               : r['filters'],
-                'installation_priority' : r['installation_priority'],
-                'removable'             : r['removable'],
-                'reducible'             : r['reducible'],
-                'non_installable'       : r['non_installable'],
-                'deprecated'            : r['deprecated']
+                'tags': ', '.join(tags),
+                'category': category,
+                'name': name,
+                'description': r['description'],
+                'home_page': r['home_page'],
+                'buildscript': r['buildscript'],
+                'basename': r['basename'],
+                'filters': r['filters'],
+                'installation_priority': r['installation_priority'],
+                'removable': r['removable'],
+                'reducible': r['reducible'],
+                'non_installable': r['non_installable'],
+                'deprecated': r['deprecated']
                 }
                 )
             )

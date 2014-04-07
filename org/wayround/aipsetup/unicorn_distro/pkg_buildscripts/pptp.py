@@ -1,12 +1,10 @@
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -58,10 +56,14 @@ def main(buildingsite, action=None):
 
                 for i in range(len(_l)):
 
-                    if _l[i].startswith("\tinstall -o root -m 555 pptp $(BINDIR)"):
+                    if _l[i].startswith(
+                        "\tinstall -o root -m 555 pptp $(BINDIR)"
+                        ):
                         _l[i] = "\tinstall pptp $(BINDIR)"
 
-                    if _l[i].startswith("\tinstall -o root -m 555 pptpsetup $(BINDIR)"):
+                    if _l[i].startswith(
+                        "\tinstall -o root -m 555 pptpsetup $(BINDIR)"
+                        ):
                         _l[i] = "\tinstall pptpsetup $(BINDIR)"
 
                 mf = open(os.path.join(src_dir, 'Makefile'), 'w')
@@ -70,7 +72,6 @@ def main(buildingsite, action=None):
             except:
                 logging.exception("Can't patch Makefile")
                 ret = 40
-
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(

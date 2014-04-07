@@ -1,14 +1,11 @@
 
-import os.path
 import logging
-
-import org.wayround.utils.file
+import os.path
 
 import org.wayround.aipsetup.build
-import org.wayround.aipsetup.build
-
 from org.wayround.aipsetup.buildtools import autotools
 from org.wayround.aipsetup.buildtools import cmake
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):

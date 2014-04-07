@@ -1,14 +1,12 @@
 
-import os.path
-import logging
-import shutil
 import glob
+import logging
+import os.path
+import shutil
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -96,7 +94,6 @@ def main(buildingsite, action=None):
                     source_configure_reldir=source_configure_reldir
                     )
 
-
         if 'distribute' in actions and ret == 0:
 
             dst_bin = os.path.join(dst_dir, 'usr', 'bin')
@@ -144,6 +141,5 @@ def main(buildingsite, action=None):
                     os.path.join(src_dir, i),
                     dst_man3,
                     )
-
 
     return ret

@@ -1,13 +1,11 @@
 
-import os.path
 import logging
+import os.path
 import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -67,7 +65,7 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
-            
+
             ret = 3
 
         if 'distribute' in actions and ret == 0:

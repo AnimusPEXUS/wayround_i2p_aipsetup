@@ -30,7 +30,9 @@ class ASPackage:
 
         if not self.filename.endswith('.asp'):
             if not mute:
-                logging.error("Wrong file extension `{}'".format(self.filename))
+                logging.error(
+                    "Wrong file extension `{}'".format(self.filename)
+                    )
             ret = 3
         else:
             try:
@@ -50,9 +52,10 @@ class ASPackage:
                     else:
                         sums_txt = f.read()
                         f.close()
-                        sums = org.wayround.utils.checksum.parse_checksums_text(
-                            sums_txt
-                            )
+                        sums = \
+                            org.wayround.utils.checksum.parse_checksums_text(
+                                sums_txt
+                                )
                         del(sums_txt)
 
                         sums2 = {}
@@ -84,7 +87,10 @@ class ASPackage:
                             cresult = ''
                             if (
                                 not i in sums
-                                or org.wayround.utils.archive.tarobj_check_member_sum(tarf, sums, i) == False
+                                or org.wayround.utils.archive.\
+                                    tarobj_check_member_sum(
+                                        tarf, sums, i
+                                        ) == False
                                 ):
                                 error_found = True
                                 cresult = "FAIL"
@@ -102,27 +108,33 @@ class ASPackage:
                                     )
 
                         if error_found:
-                            logging.error("Error was found while checking package")
+                            logging.error(
+                                "Error was found while checking package"
+                                )
                             ret = 3
                         else:
 
                             # TODO: additionally to this leaf, make test
                             #       by tar -t output
 
-                            fobj = org.wayround.utils.archive.tar_member_get_extract_file(
-                                tarf,
-                                './06.LISTS/DESTDIR.lst.xz'
-                                )
+                            fobj = org.wayround.utils.archive.\
+                                tar_member_get_extract_file(
+                                    tarf,
+                                    './06.LISTS/DESTDIR.lst.xz'
+                                    )
                             if not isinstance(fobj, tarfile.ExFileObject):
                                 ret = False
                             else:
 
                                 try:
-                                    dest_dir_files_list = org.wayround.utils.archive.xzcat(
-                                        fobj,
-                                        convert_to_str='utf-8'
-                                        )
-                                    dest_dir_files_list = dest_dir_files_list.splitlines()
+                                    dest_dir_files_list = \
+                                        org.wayround.utils.archive.xzcat(
+                                            fobj,
+                                            convert_to_str='utf-8'
+                                            )
+
+                                    dest_dir_files_list = \
+                                        dest_dir_files_list.splitlines()
 
                                     for i in [
                                         'bin',
@@ -138,20 +150,20 @@ class ASPackage:
 
                                             if j.startswith(p1):
                                                 logging.error(
-                                                    "{} has file paths starting with {}".format(
-                                                        os.path.basename(self.filename),
-                                                        p1
-                                                        )
+                                "{} has file paths starting with {}".format(
+                                    os.path.basename(self.filename),
+                                    p1
+                                    )
                                                     )
                                                 ret = 5
                                                 break
 
                                             elif j == p2:
                                                 logging.error(
-                                                    "{} has file paths equal to {}".format(
-                                                        os.path.basename(self.filename),
-                                                        p2
-                                                        )
+                                "{} has file paths equal to {}".format(
+                                    os.path.basename(self.filename),
+                                    p2
+                                    )
                                                     )
                                                 ret = 5
                                                 break
@@ -202,9 +214,10 @@ class ASPackage:
                     self.filename, 'md5'
                     )
 
-                sha512s = org.wayround.utils.checksum.parse_checksums_file_text(
-                    filename_sha512
-                    )
+                sha512s = \
+                    org.wayround.utils.checksum.parse_checksums_file_text(
+                        filename_sha512
+                        )
 
                 md5s = org.wayround.utils.checksum.parse_checksums_file_text(
                     filename_md5

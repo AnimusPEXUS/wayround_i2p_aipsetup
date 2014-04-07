@@ -4,9 +4,7 @@ import os.path
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
-import org.wayround.utils.checksum
 import org.wayround.utils.file
-import org.wayround.utils.path
 
 
 def main(buildingsite, action=None):

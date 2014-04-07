@@ -8,6 +8,7 @@ import org.wayround.utils.log
 import org.wayround.utils.osutils
 import org.wayround.utils.path
 
+
 def waf(
     cwd,
     options,
@@ -85,6 +86,4 @@ def waf(
 
             ret = p.returncode
 
-
     return ret
-

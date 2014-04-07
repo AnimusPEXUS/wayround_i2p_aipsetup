@@ -447,7 +447,8 @@ def info_mass_script_apply(command_name, opts, args, adds):
         info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
 
         known_names = set()
-        exts = config['pkg_server']['acceptable_src_file_extensions'].split(' ')
+        exts = \
+            config['pkg_server']['acceptable_src_file_extensions'].split(' ')
 
         sources.sort()
 
@@ -481,11 +482,15 @@ def info_mass_script_apply(command_name, opts, args, adds):
             known_names.add(parsed_name)
 
             if not pkg_name:
-                logging.error("Could not find package name for base `{}'".format(i))
+                logging.error(
+                    "Could not find package name for base `{}'".format(i)
+                    )
                 if not subpath:
                     ret = 4
                 else:
-                    logging.info("Adding `{}' to repository".format(parsed_name))
+                    logging.info(
+                        "Adding `{}' to repository".format(parsed_name)
+                        )
                     total_pkg_path = org.wayround.utils.path.join(
                         config['pkg_server']['repository_dir'],
                         subpath,
@@ -543,14 +548,14 @@ def info_mass_script_apply(command_name, opts, args, adds):
                                 )
                             )
 
-        filenames = (
-            glob.glob(
-                org.wayround.utils.path.join(
-                    config['pkg_server']['info_json_dir'],
-                    '*'
-                    )
-                )
-            )
+        #filenames = (
+        #    glob.glob(
+        #        org.wayround.utils.path.join(
+        #            config['pkg_server']['info_json_dir'],
+        #            '*'
+        #            )
+        #        )
+        #    )
 
         # info_ctl.load_info_records_from_fs(
         #     filenames, False

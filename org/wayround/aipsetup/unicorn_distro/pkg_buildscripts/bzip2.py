@@ -1,16 +1,13 @@
 
-import os.path
-import logging
-import subprocess
 import glob
+import logging
+import os.path
 import shutil
+import subprocess
 
-import org.wayround.utils.file
-import org.wayround.utils.path
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -57,7 +54,8 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'PREFIX=/usr',
-                    'CFLAGS=-Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
+                    'CFLAGS=-Wall -Winline -O2 -g '
+                    '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
                     ],
                 environment={},
                 environment_mode='copy',
@@ -84,7 +82,8 @@ def main(buildingsite, action=None):
                 [
                  'make',
                  '-f', 'Makefile-libbz2_so',
-                 'CFLAGS=-Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
+                 'CFLAGS=-Wall -Winline -O2 -g '
+                 '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
                  ],
                 cwd=src_dir
                 )

@@ -1,16 +1,13 @@
 
 import logging
-import os
 import os.path
 import subprocess
 import tempfile
 
-import org.wayround.utils.archive
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.archive
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -19,7 +16,8 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-#        ['extract', 'exctract_install-tl', 'configure', 'build', 'distribute', 'install-tl'],
+        # ['extract', 'exctract_install-tl', 'configure',
+        #  'build', 'distribute', 'install-tl'],
         ['extract', 'configure', 'build', 'distribute'],
         action,
         "help"
@@ -98,15 +96,16 @@ def main(buildingsite, action=None):
 
             log.close()
 
-
         if 'configure' in actions and ret == 0:
 
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
                     '--prefix=' + tex_live_dir,
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--disable-native-texlive-build',
                     '--host=' + pkg_info['constitution']['host'],
@@ -175,11 +174,15 @@ fi
             f.close()
 
         if 'install-tl' in actions and ret == 0:
-            logging.info("Starting start-tl script in dir `{}'".format(install_tl_dir))
+            logging.info(
+                "Starting start-tl script in dir `{}'".format(install_tl_dir)
+                )
             p = subprocess.Popen(
                 [
                     script,
-                    '-repository=http://mirrors.wayround.org/www.ctan.org/tex/systems/texlive/tlnet/tlpkg',
+                    '-repository='
+                    'http://mirrors.wayround.org/www.ctan.org'
+                    '/tex/systems/texlive/tlnet/tlpkg',
                     '-custom-bin={dst_tex_live_bin}'.format(
                         host=pkg_info['constitution']['paths']['usr'],
                         dst_tex_live_bin=dst_tex_live_bin

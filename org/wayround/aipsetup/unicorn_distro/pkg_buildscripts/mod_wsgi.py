@@ -1,12 +1,10 @@
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -51,7 +49,9 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--with-apxs={}'.format(org.wayround.utils.file.which('apxs'))
+                    '--with-apxs={}'.format(
+                        org.wayround.utils.file.which('apxs')
+                        )
                     ],
                 arguments=[],
                 environment={},

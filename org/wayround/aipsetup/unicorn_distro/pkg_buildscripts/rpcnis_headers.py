@@ -1,12 +1,10 @@
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -31,10 +29,6 @@ def main(buildingsite, action=None):
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):

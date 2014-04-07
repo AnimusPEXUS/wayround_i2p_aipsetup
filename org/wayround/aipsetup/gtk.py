@@ -6,6 +6,7 @@ import org.wayround.utils.gtk
 
 _gtk_session = None
 
+
 def start_session():
     """
     Start GTK session
@@ -34,6 +35,7 @@ def start_session():
 
         _gtk_session = None
 
+
 def stop_session():
     """
     Stop GTK session
@@ -46,6 +48,7 @@ def stop_session():
         from gi.repository import Gtk
 
         Gtk.main_quit()
+
 
 class MainWindow:
     """

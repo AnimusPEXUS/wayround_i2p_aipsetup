@@ -1,13 +1,11 @@
 
-import os.path
 import logging
+import os.path
 import shutil
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -62,7 +60,9 @@ def main(buildingsite, action=None):
                             os.path.join(dst_dir, 'usr')
                             )
                     except:
-                        logging.exception("Error moving `{}' dir into dist".format(i))
+                        logging.exception(
+                            "Error moving `{}' dir into dist".format(i)
+                            )
                         ret = 5
 
     return ret

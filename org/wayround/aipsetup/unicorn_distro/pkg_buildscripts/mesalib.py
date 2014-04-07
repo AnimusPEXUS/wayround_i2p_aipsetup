@@ -1,12 +1,10 @@
 
-import os.path
 import logging
+import os.path
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -33,6 +31,8 @@ def main(buildingsite, action=None):
         separate_build_dir = False
 
         source_configure_reldir = '.'
+
+        # TODO: add autoconf
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -62,8 +62,10 @@ def main(buildingsite, action=None):
                     '--with-egl-platforms=x11,drm,wayland,fbdev,null',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=i686-pc-linux-gnu',
 #                    '--target=' + pkg_info['constitution']['target']

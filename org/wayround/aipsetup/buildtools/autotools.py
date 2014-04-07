@@ -9,13 +9,13 @@ import sys
 import tempfile
 
 import org.wayround.aipsetup.build
-
 import org.wayround.utils.archive
 import org.wayround.utils.error
 import org.wayround.utils.log
 import org.wayround.utils.osutils
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
+
 
 def determine_abs_configure_dir(buildingsite, config_dir):
     """
@@ -28,8 +28,8 @@ def determine_abs_configure_dir(buildingsite, config_dir):
             ) + os.path.sep + config_dir
         )
 
-
     return config_dir
+
 
 def determine_building_dir(
     buildingsite, config_dir, separate_build_dir
@@ -104,7 +104,9 @@ def extract_high(
                     break
 
         if not tarball:
-            log.error("Couldn't find acceptable tarball for current building site")
+            log.error(
+                "Couldn't find acceptable tarball for current building site"
+                )
             ret = 2
         else:
 
@@ -140,7 +142,8 @@ def configure_high(
 
     source_configure_reldir - relative path from source dir to configure dir;
     script_name - configure script name;
-    run_script_not_bash - run {full_path}/configure, not bash {full_path}/configure;
+    run_script_not_bash - run {full_path}/configure, not
+        bash {full_path}/configure;
     relative_call - make {full_path} bee '.'
     """
 
@@ -153,7 +156,9 @@ def configure_high(
         'configure'
         )
 
-    pkg_info = org.wayround.aipsetup.build.BuildingSiteCtl(building_site).read_package_info()
+    pkg_info = \
+        org.wayround.aipsetup.build.BuildingSiteCtl(building_site).\
+            read_package_info()
 
     if not isinstance(pkg_info, dict):
         log.error("Can't read package info")
@@ -199,6 +204,7 @@ def configure_high(
 
     return ret
 
+
 def configure_low(
     log,
     script_path,
@@ -218,7 +224,9 @@ def configure_low(
 
     cmd = []
     if not run_script_not_bash:
-        cmd = ['bash'] + [script_path + os.path.sep + script_name] + opts + args
+        cmd = (['bash'] +
+            [script_path + os.path.sep + script_name] +
+            opts + args)
     else:
         cmd = [script_path + os.path.sep + script_name] + opts + args
 
@@ -272,6 +280,7 @@ def configure_low(
 
     return ret
 
+
 def make_high(
     building_site,
     options,
@@ -312,6 +321,7 @@ def make_high(
     log.close()
 
     return ret
+
 
 def make_low(
     log,

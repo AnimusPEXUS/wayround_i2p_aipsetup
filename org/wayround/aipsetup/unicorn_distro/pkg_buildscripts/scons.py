@@ -1,13 +1,11 @@
 
-import os.path
 import logging
+import os.path
 import subprocess
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -47,13 +45,20 @@ def main(buildingsite, action=None):
 
         if 'bootstrap' in actions and ret == 0:
             ret = subprocess.Popen(
-                [python, 'bootstrap.py', os.path.join(src_dir, 'build', 'scons')],
+                [python,
+                 'bootstrap.py',
+                 os.path.join(src_dir, 'build', 'scons')
+                 ],
                 cwd=src_dir
                 ).wait()
 
         if 'build_and_distribute' in actions and ret == 0:
             ret = subprocess.Popen(
-                [python, 'setup.py', 'install', '--prefix=' + os.path.join(dst_dir, 'usr')],
+                [python,
+                 'setup.py',
+                 'install',
+                 '--prefix=' + os.path.join(dst_dir, 'usr')
+                 ],
                 cwd=os.path.join(src_dir, 'build', 'scons')
                 ).wait()
 

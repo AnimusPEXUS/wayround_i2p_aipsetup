@@ -1,12 +1,12 @@
 
 import collections
 
-import org.wayround.aipsetup.commands_local_sys
 import org.wayround.aipsetup.commands_local_build
-import org.wayround.aipsetup.commands_pkg_server
-import org.wayround.aipsetup.commands_src_server
+import org.wayround.aipsetup.commands_local_sys
 import org.wayround.aipsetup.commands_pkg_client
+import org.wayround.aipsetup.commands_pkg_server
 import org.wayround.aipsetup.commands_src_client
+import org.wayround.aipsetup.commands_src_server
 
 
 def commands():
@@ -42,7 +42,6 @@ def config_init(command_name, opts, args, adds):
 
 def config_print(command_name, opts, args, adds):
 
-    import org.wayround.aipsetup.config
     import io
 
     config = adds['config']

@@ -15,35 +15,38 @@ import org.wayround.aipsetup.clean
 import org.wayround.utils.time
 
 
-def exported_commands():
-    return {
-        'list':pkgsnapshots_print_list,
-        'create':pkgsnapshots_create
-        }
+#def exported_commands():
+#    return {
+#        'list':pkgsnapshots_print_list,
+#        'create':pkgsnapshots_create
+#        }
+#
+#def commands_order():
+#    return [
+#        'list',
+#        'create'
+#        ]
+#
+#def cli_name():
+#    return 'snap'
 
-def commands_order():
-    return [
-        'list',
-        'create'
-        ]
-
-def cli_name():
-    return 'snap'
 
 def pkgsnapshots_print_list(opts, args):
 
     lst = list_snapshots()
 
-    lst.sort(reverse = True)
+    lst.sort(reverse=True)
 
     for i in lst:
         print(i)
 
     return
 
+
 def pkgsnapshots_create(opts, args):
 
     create_snapshot()
+
 
 def create_snapshot():
 
@@ -58,7 +61,9 @@ def create_snapshot():
 
     content = org.wayround.aipsetup.package.list_installed_packages_and_asps()
 
-    if org.wayround.aipsetup.clean.check_list_of_installed_packages_and_asps(content) != 0:
+    if org.wayround.aipsetup.clean.check_list_of_installed_packages_and_asps(
+        content
+        ) != 0:
         logging.error("Snapshot with errors can't be created")
         ret = 1
 
@@ -68,7 +73,7 @@ def create_snapshot():
 
         f = open(full_file_name, 'w')
 
-        f.write(json.dumps(content, indent = 4))
+        f.write(json.dumps(content, indent=4))
 
         f.close()
 
@@ -99,4 +104,3 @@ def list_snapshots():
             lst.append(i)
 
     return lst
-

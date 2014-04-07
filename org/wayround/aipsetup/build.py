@@ -1918,8 +1918,9 @@ def build(
                         info_ctl,
                         source_files[0],
                         const=const,
-                        remove_buildingsite_after_success=
+                        remove_buildingsite_after_success=(
                             remove_buildingsite_after_success
+                            )
                         ) != 0:
 
                         logging.error("Package building failed")

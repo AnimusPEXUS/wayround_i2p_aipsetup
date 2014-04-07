@@ -1,14 +1,12 @@
 
-import os.path
-import logging
 import glob
+import logging
+import os.path
 import shutil
 
-import org.wayround.utils.file
-
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.file
 
 
 def main(buildingsite, action=None):
@@ -57,8 +55,10 @@ def main(buildingsite, action=None):
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + pkg_info['constitution']['paths']['var'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -100,6 +100,7 @@ def main(buildingsite, action=None):
                 )
 
         if 'wrapper' in actions and ret == 0:
+            # TODO: cleanup this mess
             os.makedirs(
                 dst_dir +
                     os.path.sep + 'etc' + os.path.sep +
@@ -122,7 +123,8 @@ def main(buildingsite, action=None):
                 shutil.copy(
                     i,
                     dst_dir +
-                        os.path.sep + 'usr' + os.path.sep + 'share' + os.path.sep +
+                        os.path.sep + 'usr' + os.path.sep + 'share' +
+                        os.path.sep +
                         'mc' + os.path.sep + 'bin'
                     )
 
