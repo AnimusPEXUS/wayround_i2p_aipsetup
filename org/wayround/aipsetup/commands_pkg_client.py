@@ -1,11 +1,13 @@
 
 import collections
+import json
 import logging
+import os.path
 
 import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.controllers
+import org.wayround.aipsetup.get_list_procs
 import org.wayround.aipsetup.info
-import org.wayround.aipsetup.source_groups.gnome
 import org.wayround.utils.text
 
 
@@ -19,13 +21,14 @@ def commands():
             ('asp-list', asp_list),
             ('get', get_asp),
             ('get-lat', get_asp_latest),
-            ('get-lat-cat', get_asp_lat_cat)
+            ('get-lat-cat', get_asp_lat_cat),
+            ('get-by-list', get_asp_by_list),
             ])),
         ('pkg-client-src', collections.OrderedDict([
             ('list', tar_list),
             ('get-lat', get_tar_latest),
             ('get-lat-cat', get_tar_lat_cat),
-            ('get-gnome-core', get_gnome_core)
+            ('get-by-list', get_tar_by_list),
             ]))
         ])
 
@@ -594,38 +597,65 @@ def get_tar_lat_cat(command_name, opts, args, adds):
     return ret
 
 
-def get_gnome_core(command_name, opts, args, adds):
+def get_x_by_list(command_name, opts, args, adds, mode='tar'):
 
     config = adds['config']
 
     ret = 1
 
-    if not len(args) == 1:
-        print("Must be one argument")
+    list_name = None
+    if len(args) > 0:
+        list_name = args[0]
+
+    version = None
+    if len(args) > 1:
+        version = args[1]
+
+    if list_name == None:
+        logging.error("list name is tequired parameter")
+        ret = 1
     else:
+
+        logging.info("Loading list `{}'".format(list_name))
+
+        # TODO: place next to config
+        list_filename = org.wayround.utils.path.abspath(
+            org.wayround.utils.path.join(
+                os.path.dirname(__file__),
+                'unicorn_distro',
+                'pkg_groups',
+                "{}.gpl".format(list_name)
+                )
+            )
+
+        f = open(list_filename)
+        conf = json.loads(f.read())
+        f.close()
 
         pkg_client = \
             org.wayround.aipsetup.controllers.pkg_client_by_config(config)
         src_client = \
             org.wayround.aipsetup.controllers.src_client_by_config(config)
 
-        required_v1, required_v2 = args[0].split('.')
+        acceptable_extensions_order_list = []
+        if mode == 'tar':
+            acceptable_extensions_order_list = \
+                config['pkg_client']['acceptable_src_file_extensions']
 
-        required_v1 = int(required_v1)
-        required_v2 = int(required_v2)
-
-        if org.wayround.aipsetup.source_groups.gnome.get_gnome(
-            pkg_client,
-            src_client,
-            required_v1,
-            required_v2,
-            acceptable_extensions_order_list=(
-                config['pkg_client']['acceptable_src_file_extensions'].\
-                    split(' ')
-                ),
-            verbose=True
-            ) == 0:
-
-            ret = 0
+        ret = org.wayround.aipsetup.get_list_procs.get_by_glp(
+            mode,
+            conf,
+            version,
+            pkg_client, src_client,
+            acceptable_extensions_order_list
+            )
 
     return ret
+
+
+def get_asp_by_list(*args, **kwargs):
+    return get_x_by_list(*args, mode='asp', **kwargs)
+
+
+def get_tar_by_list(*args, **kwargs):
+    return get_x_by_list(*args, mode='tar', **kwargs)

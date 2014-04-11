@@ -111,6 +111,8 @@ class ASPServer:
             '/package/<name>/asps/<name2>', 'GET', self.download_pkg
             )
 
+        self.app.route('/name_by_name', 'GET', self.name_by_name)
+
         return
 
     def start(self):
@@ -118,11 +120,11 @@ class ASPServer:
 
     def index(self):
 
-        search_form = self.ui.search()
-
         ret = self.ui.html(
             title="Index",
-            body=self.ui.index(search_form)
+            body=self.ui.index(
+                self.ui.search()
+                )
             )
 
         return ret
@@ -468,7 +470,7 @@ class ASPServer:
         filters = rec['filters']
 
         filesl = org.wayround.aipsetup.client_src.files(
-            self._src_page_url, basename, name
+            self._src_page_url, basename
             )
 
         if not filesl:
@@ -576,8 +578,8 @@ class ASPServer:
                 i = i.lower()
 
             if (
-                (searchmode == 'filemask' and fnmatch.fnmatch(i, mask)) or
-                (searchmode == 'regexp' and re.match(mask, i))
+                (searchmode == 'filemask' and fnmatch.fnmatch(i, mask))
+                or (searchmode == 'regexp' and re.match(mask, i))
                 ):
                 filtered_names.append(i)
 
@@ -600,6 +602,46 @@ class ASPServer:
 
         elif resultmode == 'json':
             ret = json.dumps(filtered_names, sort_keys=True, indent=2)
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
+
+        return ret
+
+    def name_by_name(self):
+
+        decoded_params = bottle.request.params.decode('utf-8')
+
+        if not 'tarball' in decoded_params:
+            raise bottle.HTTPError(400, "Wrong tarball parameter")
+
+        if not 'resultmode' in decoded_params:
+            decoded_params['resultmode'] = 'html'
+
+        if not decoded_params['resultmode'] in ['html', 'json']:
+            raise bottle.HTTPError(400, "Wrong resultmode parameter")
+
+        tarball = decoded_params['tarball']
+        resultmode = decoded_params['resultmode']
+
+        res = self.info_ctl.get_package_name_by_tarball_filename(
+            tarball, mute=True
+            )
+
+        result_name = None
+        if isinstance(res, str):
+            result_name = res
+
+        if result_name == None:
+            raise bottle.HTTPError(404, "Not found")
+
+        if resultmode == 'html':
+            ret = self.ui.html(
+                title="Result searching for package"
+                    " name by tarball name `{}'".format(tarball),
+                body=self.ui.name_by_name(result=result_name)
+                )
+
+        elif resultmode == 'json':
+            ret = json.dumps(result_name, sort_keys=True, indent=2)
             bottle.response.set_header('Content-Type', APPLICATION_JSON)
 
         return ret

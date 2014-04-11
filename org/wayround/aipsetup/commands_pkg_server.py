@@ -4,11 +4,9 @@ import copy
 import glob
 import logging
 import os.path
-import pprint
 
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.info
-import org.wayround.aipsetup.package_name_parser
 import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 
@@ -29,7 +27,7 @@ def commands():
             ('mass-apply', info_mass_script_apply)
             ])),
         ('pkg-server-repo', collections.OrderedDict([
-            ('reindex', pkg_repo_index_and_update),
+            ('index', pkg_repo_index_and_update),
             ('put', pkg_repo_put_file),
             ('clean', pkg_repo_cleanup)
             ]))
@@ -249,65 +247,6 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
     return ret
 
 
-def info_list_pkg_info_records(command_name, opts, args, adds):
-
-    """
-    List records containing in index
-
-    [FILEMASK]
-
-    Default MASK is *
-    """
-
-    config = adds['config']
-
-    mask = '*'
-
-    if len(args) > 0:
-        mask = args[0]
-
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    info_ctl.get_info_records_list(mask)
-
-    return 0
-
-
-def info_print_pkg_record(command_name, opts, args, adds):
-
-    """
-    Print package info record information
-    """
-
-    config = adds['config']
-
-    ret = 0
-
-    name = None
-
-    if len(args) > 0:
-        name = args[0]
-
-    if name != None:
-
-        info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-        pkg_repo_ctl = \
-            org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
-
-        tag_ctl = org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
-
-        info_ctl.print_info_record(
-            name, pkg_repo_ctl, tag_ctl
-            )
-
-    else:
-        logging.error("Name is not given")
-        ret = 1
-
-    return ret
-
-
 def info_editor(command_name, opts, args, adds):
 
     """
@@ -357,45 +296,6 @@ def info_editor(command_name, opts, args, adds):
                 file_name = file_name + '.json'
 
         org.wayround.aipsetup.infoeditor.main(file_name, config)
-
-    return ret
-
-
-def info_parse_tarball(command_name, opts, args, adds):
-
-    config = adds['config']
-
-    tarball = None
-
-    ret = 0
-
-    if len(args) != 1:
-        logging.error("Tarball name must be supplied")
-        ret = 1
-    else:
-
-        tarball = args[0]
-
-        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
-            tarball,
-            mute=False
-            )
-
-        if not parsed:
-            logging.error("Can't parse {}".format(tarball))
-            ret = 2
-        else:
-
-            pprint.pprint(parsed)
-
-            info_ctl = \
-                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-            pkg_name = (
-                info_ctl.get_package_name_by_tarball_filename(tarball)
-                )
-
-            print("Package name: {}".format(pkg_name))
 
     return ret
 
@@ -548,49 +448,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
                                 )
                             )
 
-        #filenames = (
-        #    glob.glob(
-        #        org.wayround.utils.path.join(
-        #            config['pkg_server']['info_json_dir'],
-        #            '*'
-        #            )
-        #        )
-        #    )
-
-        # info_ctl.load_info_records_from_fs(
-        #     filenames, False
-        #     )
-        # info_ctl.update_outdated_pkg_info_records()
         pkg_repo_index_and_update(command_name, opts, args, adds)
-
-    return ret
-
-
-def info_parse_pkg_name(command_name, opts, args, adds):
-
-    """
-    Parse package name
-
-    NAME
-    """
-
-    ret = 0
-
-    if len(args) != 1:
-        logging.error("File name required")
-        ret = 1
-    else:
-
-        filename = args[0]
-
-        p_re = org.wayround.aipsetup.package_name_parser.package_name_parse(
-            filename
-            )
-
-        if p_re == None:
-            ret = 2
-        else:
-            pprint.pprint(p_re)
 
     return ret
 
@@ -720,39 +578,3 @@ def pkg_repo_put_file(command_name, opts, args, adds):
         ret = index.put_asps_to_index(files, move=move)
 
     return ret
-
-
-def pkg_repo_list_categories(command_name, opts, args, adds):
-
-    config = adds['config']
-
-    ret = 0
-
-    if org.wayround.utils.getopt.check_options(
-            opts,
-            opts_list=[]
-            ) != 0:
-        ret = 1
-
-    if ret == 0:
-
-        pkg_repo_ctl = \
-            org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
-
-        tree = pkg_repo_ctl.build_category_tree('')
-
-        keys = list(tree.keys())
-        keys.sort()
-
-        for i in keys:
-
-            print("{} ::".format(i))
-
-            tree[i].sort()
-
-            for j in tree[i]:
-                print("    {}".format(j))
-
-            print()
-
-    return 0

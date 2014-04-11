@@ -21,7 +21,8 @@ class UI:
             'category_double_dot',
             'package',
             'search',
-            'search_result'
+            'search_result',
+            'name_by_name'
             ]:
             self.templates[i] = mako.template.Template(
                 filename=os.path.join(templates_dir, i + '.html'),
@@ -111,3 +112,9 @@ class UI:
         return self.templates['search_result'].render(
             lines=lines
             )
+        
+    def name_by_name(self, result):
+        return self.templates['name_by_name'].render(
+            result=result
+            )
+        

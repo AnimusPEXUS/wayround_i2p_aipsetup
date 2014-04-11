@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import tempfile
 
+import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.info
 import org.wayround.utils.format.elf
@@ -969,8 +970,7 @@ class BuildingSiteCtl:
     def isWdDirRestricted(self):
         return isWdDirRestricted(self.path)
 
-    def init(self, info_ctl, files=None):
-#, system_type=None
+    def init(self, files=None):
         """
         Initiates building site path for farther package build.
 
@@ -978,21 +978,6 @@ class BuildingSiteCtl:
 
         :rtype: returns 0 if no errors
         """
-
-#        if not isinstance(system_type, SystemType):
-#            raise ValueError(
-#                 "system_type must be of type "
-#                 "org.wayround.aipsetup.build.SystemType"
-#                 )
-
-        if not isinstance(
-            info_ctl,
-            org.wayround.aipsetup.info.PackageInfoCtl
-            ):
-            raise TypeError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
-                )
 
         ret = 0
 
@@ -1059,8 +1044,6 @@ class BuildingSiteCtl:
                     for i in files:
                         logging.info("Copying file {}".format(i))
                         shutil.copy(i, t_dir)
-
-#                    self.apply_info(info_ctl, src_file_name=files[0])
 
         else:
             logging.error("Init error")
@@ -1237,19 +1220,19 @@ class BuildingSiteCtl:
 
     apply_constitution_on_buildingsite.__doc__ += APPLY_DESCR
 
-    def apply_pkg_info_on_buildingsite(self, info_ctl):
+    def apply_pkg_info_on_buildingsite(self, pkg_client):
 
         """
         Applies package information on building site package info
         """
 
         if not isinstance(
-            info_ctl,
-            org.wayround.aipsetup.info.PackageInfoCtl
+            pkg_client,
+            org.wayround.aipsetup.client_pkg.PackageServerClient
             ):
             raise TypeError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
+                "pkg_client must be of type "
+                "org.wayround.aipsetup.client_pkg.PackageServerClient"
                 )
 
         ret = 0
@@ -1278,8 +1261,10 @@ class BuildingSiteCtl:
 
             logging.debug("Getting info from index DB")
 
-            info = info_ctl.get_info_rec_by_tarball_filename(
-                package_info['pkg_nameinfo']['name']
+            info = pkg_client.info(
+                pkg_client.name_by_name(
+                    package_info['pkg_nameinfo']['name']
+                    )
                 )
 
             if not isinstance(info, dict):
@@ -1299,7 +1284,7 @@ class BuildingSiteCtl:
 
     apply_pkg_info_on_buildingsite.__doc__ += APPLY_DESCR
 
-    def apply_info(self, info_ctl, const, src_file_name=None):
+    def apply_info(self, pkg_client, const, src_file_name=None):
         """
         Apply package information to building site
         """
@@ -1311,12 +1296,12 @@ class BuildingSiteCtl:
                 )
 
         if not isinstance(
-            info_ctl,
-            org.wayround.aipsetup.info.PackageInfoCtl
+            pkg_client,
+            org.wayround.aipsetup.client_pkg.PackageServerClient
             ):
             raise TypeError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
+                "pkg_client must be of type "
+                "org.wayround.aipsetup.client_pkg.PackageServerClient"
                 )
 
         path = org.wayround.utils.path.abspath(self.path)
@@ -1353,7 +1338,7 @@ class BuildingSiteCtl:
                 ret = 1
             elif self.apply_constitution_on_buildingsite(const) != 0:
                 ret = 2
-            elif self.apply_pkg_info_on_buildingsite(info_ctl) != 0:
+            elif self.apply_pkg_info_on_buildingsite(pkg_client) != 0:
                 ret = 3
 
         return ret
@@ -1392,7 +1377,7 @@ class BuildingSiteCtl:
         build_ctl,
         pack_ctl,
         buildscript_ctl,
-        info_ctl,
+        pkg_client,
         main_src_file=None,
         const=None,
         remove_buildingsite_after_success=False,
@@ -1432,12 +1417,12 @@ class BuildingSiteCtl:
                 )
 
         if not isinstance(
-            info_ctl,
-            org.wayround.aipsetup.info.PackageInfoCtl
+            pkg_client,
+            org.wayround.aipsetup.client_pkg.PackageServerClient
             ):
             raise TypeError(
-                "info_ctl must be of type "
-                "org.wayround.aipsetup.info.PackageInfoCtl"
+                "pkg_client must be of type "
+                "org.wayround.aipsetup.client_pkg.PackageServerClient"
                 )
 
         rp = org.wayround.utils.path.relpath(self.path, os.getcwd())
@@ -1461,11 +1446,7 @@ class BuildingSiteCtl:
                 "(or new main tarball file forced)"
                 )
 
-            if self.apply_info(
-                info_ctl,
-                const,
-                main_src_file
-                ) != 0:
+            if self.apply_info(pkg_client, const, main_src_file) != 0:
                 logging.error("Can't apply build information to site")
                 ret = 15
 
@@ -1826,6 +1807,8 @@ def build(
     :param source_files: tarball name or list of them.
     """
 
+    # TODO: remove config parameter or move this function to commands modules
+
     if not isinstance(const, Constitution):
         raise ValueError(
             "system_type must be of type "
@@ -1858,14 +1841,12 @@ def build(
 
         else:
 
-            info_ctl = \
-                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
+            pkg_client = \
+                org.wayround.aipsetup.controllers.pkg_client_by_config(config)
 
-            package_info = (
-                info_ctl.get_info_rec_by_tarball_filename(
-                    source_files[0]
-                    )
-                )
+            pkg_name = pkg_client.name_by_name(source_files[0])
+
+            package_info = pkg_client.info(pkg_name)
 
             if not package_info:
                 logging.error(
@@ -1896,7 +1877,7 @@ def build(
                     build_site_dir
                     )
 
-                if bs.init(info_ctl, source_files) != 0:
+                if bs.init(source_files) != 0:
                     logging.error("Error initiating temporary dir")
                     ret = 3
                 else:
@@ -1915,7 +1896,7 @@ def build(
                         build_ctl,
                         pack_ctl,
                         buildscript_ctl,
-                        info_ctl,
+                        pkg_client,
                         source_files[0],
                         const=const,
                         remove_buildingsite_after_success=(

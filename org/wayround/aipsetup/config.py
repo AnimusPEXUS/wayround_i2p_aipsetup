@@ -85,7 +85,9 @@ DEFAULT_CONFIG = collections.OrderedDict(
      ),
 
     ('src_client', collections.OrderedDict([
-        ('server_url', 'http://localhost:8080/')
+        ('server_url', 'http://localhost:8080/'),
+        ('acceptable_src_file_extensions',
+            '${general:acceptable_src_file_extensions}')
         ])
      ),
 

@@ -278,9 +278,7 @@ class SRCServer:
 
         name = decoded_params['name']
 
-        pkgname = ''
-        if 'pkgname' in decoded_params:
-            pkgname = decoded_params['pkgname']
+        pkgname = name
 
         pkgname_paths = []
 

@@ -210,42 +210,6 @@ class PackageInfoCtl:
     def get_info_dir(self):
         return self._info_dir
 
-    def get_lists_of_packages_missing_and_present_info_records(
-        self,
-        names, pkg_index_ctl
-        ):
-
-        """
-        :param names: can be a string or a ``list`` of names to check. if names
-        is ``None`` - check all.
-        """
-
-        index_db = pkg_index_ctl.get_db_connection()
-        info_db = self._info_db
-
-        found = []
-
-        not_found = []
-
-        names_found = []
-
-        if names == None:
-            q = index_db.session.query(index_db.Package).all()
-            for i in q:
-                names_found.append(i.name)
-        else:
-            names_found = names
-
-        for i in names_found:
-            q = info_db.session.query(info_db.Info).filter_by(name=i).first()
-
-            if q == None:
-                not_found.append(q)
-            else:
-                found.append(q)
-
-        return (found, not_found)
-
     def get_package_info_record(self, name=None, record=None):
         """
         This method can accept package name or complete record instance.
@@ -322,29 +286,6 @@ class PackageInfoCtl:
             info_db.session.add(q)
 
         return
-
-    def get_info_records_list(self, mask='*', mute=False):
-
-        info_db = self._info_db
-
-        ret = []
-
-        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
-            all()
-
-        found = 0
-
-        for i in q:
-
-            if fnmatch.fnmatch(i.name, mask):
-                found += 1
-                ret.append(i.name)
-
-        if not mute:
-            org.wayround.utils.text.columned_list_print(ret)
-            logging.info("Total found {} records".format(found))
-
-        return ret
 
     def get_missing_info_records_list(
         self, pkg_index_ctl, create_templates=False, force_rewrite=False
@@ -489,18 +430,6 @@ class PackageInfoCtl:
 
         return ret
 
-    def get_info_rec_by_tarball_filename(self, tarball_filename):
-        ret = None
-
-        r = self.get_package_name_by_tarball_filename(tarball_filename)
-
-        if r:
-            ret = self.get_package_info_record(r)
-        else:
-            ret = None
-
-        return ret
-
     def get_package_name_by_tarball_filename(
         self,
         tarball_filename, mute=True
@@ -562,37 +491,6 @@ class PackageInfoCtl:
 
             else:
                 ret = possible_names[0]
-
-        return ret
-
-    def get_non_automatic_packages_info_list(self):
-
-        info_db = self._info_db
-
-        # FIXME: error
-        lst = []
-        for i in q:
-            lst.append(self.get_package_info_record(i.name, i))
-
-        return lst
-
-    def guess_package_homepage(self, pkg_name):
-
-        src_db = self._info_db
-
-        files = src_db.objects_by_tags([pkg_name])
-
-        ret = {}
-        for i in files:
-            domain = i[1:].split('/')[0]
-
-            if not domain in ret:
-                ret[domain] = 0
-
-            ret[domain] += 1
-        logging.debug(
-            'Possibilities for {} are: {}'.format(pkg_name, repr(ret))
-            )
 
         return ret
 
@@ -809,6 +707,29 @@ class PackageInfoCtl:
 
         logging.info("Totally loaded {} records".format(loaded))
         return
+
+    def get_info_records_list(self, mask='*', mute=False):
+
+        info_db = self._info_db
+
+        ret = []
+
+        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
+            all()
+
+        found = 0
+
+        for i in q:
+
+            if fnmatch.fnmatch(i.name, mask):
+                found += 1
+                ret.append(i.name)
+
+        if not mute:
+            org.wayround.utils.text.columned_list_print(ret)
+            logging.info("Total found {} records".format(found))
+
+        return ret
 
 
 class Tags(org.wayround.utils.tag.TagEngine):

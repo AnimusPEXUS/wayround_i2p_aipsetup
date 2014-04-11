@@ -52,6 +52,9 @@ class PackageServerClient:
     def tarballs_latest(self, pkg_name):
         return tarballs_latest(self._url, pkg_name)
 
+    def name_by_name(self, tarball):
+        return name_by_name(self._url, tarball)
+
 
 def walk(url, path):
 
@@ -148,10 +151,7 @@ def ls(url, path):
     return ret
 
 
-def info(
-    url,
-    pkg_name
-    ):
+def info(url, pkg_name):
 
     """
     path must be string not starting and not ending with slash
@@ -399,6 +399,9 @@ def get_tarball(full_url, out_dir=None, out_to_temp=False):
     does not metter and file wil be downloaded to current dir
     """
 
+    if not isinstance(full_url, str):
+        raise TypeError("`full_url' must be str")
+
     ret = None
 
     basename = os.path.basename(full_url)
@@ -447,5 +450,35 @@ def get_tarball(full_url, out_dir=None, out_to_temp=False):
         ret = res
     else:
         ret = org.wayround.utils.path.abspath(option_O)
+
+    return ret
+
+
+def name_by_name(url, tarball):
+
+    """
+    find package name by tarball name
+    """
+
+    ret = None
+
+    data = urllib.parse.urlencode(
+        {
+         'resultmode': 'json',
+         'tarball': tarball
+         },
+        encoding='utf-8'
+        )
+
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}name_by_name?{}'.format(url, data)
+            )
+    except:
+        pass
+
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
+        ret = json.loads(str(res.read(), 'utf-8'))
 
     return ret

@@ -20,11 +20,13 @@ import org.wayround.utils.list
 
 class MainWindow:
 
-    def __init__(self, info_ctl, tag_ctl, src_repo_ctl):
+    def __init__(self, info_ctl, tag_ctl, src_client, pkg_client):
 
 #        self.config = config
         self.info_ctl = info_ctl
-        self.src_repo_ctl = src_repo_ctl
+#        self.src_repo_ctl = src_repo_ctl
+        self.src_client = src_client
+        self.pkg_client = pkg_client
         self.tag_ctl = tag_ctl
 
         self.currently_opened = None
@@ -362,10 +364,8 @@ class MainWindow:
             dia.run()
             dia.destroy()
         else:
-            lst = self.src_repo_ctl.get_package_source_files(
-                self.ui.name_entry.get_text()[:-5],
-                info_ctl=self.info_ctl,
-                filtered=False
+            lst = self.src_client.files(
+                self.ui.basename_entry.get_text()
                 )
 
             logging.debug("get_package_source_files returned {}".format(lst))
@@ -405,11 +405,7 @@ class MainWindow:
             dia.run()
             dia.destroy()
         else:
-            lst = self.src_repo_ctl.get_package_source_files(
-                self.ui.name_entry.get_text()[:-5],
-                info_ctl=self.info_ctl,
-                filtered=True
-                )
+            lst = self.pkg_client.tarballs(self.ui.name_entry.get_text())
 
             lst.sort(
                 key=functools.cmp_to_key(
@@ -458,13 +454,13 @@ def main(name_to_edit=None, config=None):
 
     info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
 
-    src_repo_ctl = org.wayround.aipsetup.controllers.src_repo_ctl_by_config(
-        config
-        )
+    src_client = org.wayround.aipsetup.controllers.src_client_by_config(config)
+
+    pkg_client = org.wayround.aipsetup.controllers.pkg_client_by_config(config)
 
     tag_ctl = org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
 
-    mw = MainWindow(info_ctl, tag_ctl, src_repo_ctl)
+    mw = MainWindow(info_ctl, tag_ctl, src_client, pkg_client)
 
     if isinstance(name_to_edit, str):
         if mw.load_data(os.path.basename(name_to_edit)) == 0:

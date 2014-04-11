@@ -18,8 +18,8 @@ def commands():
             ('build', build_build),
             ('continue', build_build_plus),
             ('pack', build_pack),
-            ('complete', build_complete)
-            ])),
+            ('complete', build_complete),
+            ]))
         ])
 
 
@@ -93,8 +93,8 @@ def building_site_apply_info(command_name, opts, args, adds):
         )
 
     bs = org.wayround.aipsetup.controllers.bsite_ctl_new(dirname)
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-    ret = bs.apply_info(info_ctl, const, src_file_name=file)
+    pkg_client = org.wayround.aipsetup.controllers.pkg_client_by_config(config)
+    ret = bs.apply_info(pkg_client, const, src_file_name=file)
 
     return ret
 
@@ -169,13 +169,14 @@ def _build_complete_subroutine(
         build_script_ctl = \
             org.wayround.aipsetup.controllers.bscript_ctl_by_config(config)
 
-        info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(config)
 
         ret = bs.complete(
             build_ctl,
             pack_ctl,
             build_script_ctl,
-            info_ctl,
+            pkg_client,
             main_src_file=file,
             remove_buildingsite_after_success=r_bds,
             const=const

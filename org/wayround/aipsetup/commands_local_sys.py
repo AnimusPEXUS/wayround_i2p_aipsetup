@@ -9,11 +9,13 @@ import shlex
 import sys
 
 import org.wayround.aipsetup.controllers
+import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.sysuser
 import org.wayround.utils.checksum
 import org.wayround.utils.getopt
 import org.wayround.utils.log
+import org.wayround.utils.tarball_name_parser
 import org.wayround.utils.terminal
 import org.wayround.utils.text
 import org.wayround.utils.time
@@ -32,6 +34,8 @@ def commands():
             ('generate_deps', system_make_asp_deps),
             ('files', system_list_package_files),
             ('check', package_check),
+            ('parse-asp-name', info_parse_pkg_name),
+            ('parse-tarball-name', info_parse_tarball)
             ])),
         ('sys-clean', collections.OrderedDict([
             ('find_broken', clean_packages_with_broken_files),
@@ -1168,6 +1172,8 @@ def package_check(command_name, opts, args, adds):
     Check package for errors
     """
 
+    # TODO: move it to build commands?
+
     ret = 0
 
     file = None
@@ -1230,5 +1236,73 @@ def clean_sysusers_sys(command_name, opts, args, adds):
         chroot = ['chroot', base_dir]
 
         ret = org.wayround.aipsetup.sysuser.sysusers_sys(chroot)
+
+    return ret
+
+
+def info_parse_pkg_name(command_name, opts, args, adds):
+
+    """
+    Parse package name
+
+    NAME
+    """
+
+    ret = 0
+
+    if len(args) != 1:
+        logging.error("File name required")
+        ret = 1
+    else:
+
+        filename = args[0]
+
+        p_re = org.wayround.aipsetup.package_name_parser.package_name_parse(
+            filename
+            )
+
+        if p_re == None:
+            ret = 2
+        else:
+            pprint.pprint(p_re)
+
+    return ret
+
+
+def info_parse_tarball(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    tarball = None
+
+    ret = 0
+
+    if len(args) != 1:
+        logging.error("Tarball name must be supplied")
+        ret = 1
+    else:
+
+        tarball = args[0]
+
+        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+            tarball,
+            mute=False
+            )
+
+        if not parsed:
+            logging.error("Can't parse {}".format(tarball))
+            ret = 2
+        else:
+
+            pprint.pprint(parsed)
+
+            info_ctl = \
+                org.wayround.aipsetup.controllers.info_ctl_by_config(config)
+
+            pkg_name = (
+                info_ctl.get_package_name_by_tarball_filename(tarball)
+                )
+
+            print("Package name: {}".format(pkg_name))
 
     return ret

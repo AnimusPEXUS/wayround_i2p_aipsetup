@@ -72,7 +72,7 @@ def files(command_name, opts, args, adds):
     """
     List tarballs of pointed names
 
-    [options] name [pkgname]
+    [options] name
     """
 
     config = adds['config']
@@ -87,14 +87,10 @@ def files(command_name, opts, args, adds):
         url = config['src_client']['server_url']
 
         name = args[0]
-        pkgname = ''
-        if len(args) > 1:
-            pkgname = args[1]
 
         res = org.wayround.aipsetup.client_src.files(
             url,
-            name,
-            pkgname
+            name
             )
 
         if res == None:

@@ -28,15 +28,6 @@ def src_server_start(command_name, opts, args, adds):
         )
 
 
-def src_server_reindex(command_name, opts, args, adds):
-
-    import org.wayround.aipsetup.server_src
-
-    return org.wayround.aipsetup.server_src.src_server_reindex(
-        command_name, opts, args, adds
-        )
-
-
 def src_repo_index(command_name, opts, args, adds):
 
     """
