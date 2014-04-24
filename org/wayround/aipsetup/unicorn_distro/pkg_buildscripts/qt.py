@@ -14,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['extract', 'configure', 'build', 'distribute', 'SET'],
             action,
             "help"
             )
@@ -27,7 +27,20 @@ def main(buildingsite, action=None):
 
         pkg_info, actions = r
 
+        name = pkg_info['pkg_info']['name']
+
+        if not name in ['qt4', 'qt5']:
+            raise Exception("Invalid package name")
+
+        number = name[-1]
+
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
+
+        etc_profile_set_dir = org.wayround.utils.path.join(
+            dst_dir, 'etc', 'profile.d', 'SET'
+            )
 
         separate_build_dir = False
 
@@ -44,22 +57,12 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-#    RUN[$j]='export CFLAGS=" -march=i486 -mtune=i486  " ;
-#    export CXXFLAGS=" -march=i486 -mtune=i486  " #'
         if 'configure' in actions and ret == 0:
             p = subprocess.Popen(
                 ['./configure'] +
                     [
-    #                    '-system-nas-sound',
                     '-opensource',
-                    '-prefix', '/usr/lib/qt_w_toolkit',
-                    '-sysconfdir', pkg_info['constitution']['paths']['config'],
-                    '-bindir', '/usr/bin',
-                    '-libdir', '/usr/lib',
-                    '-headerdir', '/usr/include',
-    #                    '--host=' + pkg_info['constitution']['host'],
-    #                    '--build=' + pkg_info['constitution']['build'],
-    #                    '--target=' + pkg_info['constitution']['target']
+                    '-prefix', '/usr/lib/qt{}_w_toolkit'.format(number)
                     ],
                 stdin=subprocess.PIPE,
                 cwd=src_dir
@@ -84,16 +87,39 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'INSTALL_ROOT=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'INSTALL_ROOT=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+        if 'SET' in actions and ret == 0:
+            try:
+                os.makedirs(etc_profile_set_dir)
+            except:
+                logging.error(
+                    "Can't create dir: {}".format(etc_profile_set_dir)
+                    )
+
+            f = open(
+                org.wayround.utils.path.join(
+                    etc_profile_set_dir,
+                    '009.qt{}'.format(number)
+                    ),
+                'w'
+                )
+
+            f.write("""\
+#!/bin/bash
+export PATH=$PATH:/usr/lib/qt{}_w_toolkit/bin
+
+#if [ "${#PKG_CONFIG_PATH}" -ne "0" ]; then
+#    PKG_CONFIG_PATH+=":"
+#fi
+#export PKG_CONFIG_PATH=$PKG_CONFIG_PATH/usr/lib/qt{}_w_toolkit/lib/pkgconfig
+""".format(number))
+            f.close()
 
     return ret

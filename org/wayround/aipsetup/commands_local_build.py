@@ -31,7 +31,7 @@ def building_site_init(command_name, opts, args, adds):
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
 
-    config = adds['config']
+    #    config = adds['config']
 
     init_dir = '.'
 
@@ -44,9 +44,7 @@ def building_site_init(command_name, opts, args, adds):
 
     bs = org.wayround.aipsetup.controllers.bsite_ctl_new(init_dir)
 
-    info_ctl = org.wayround.aipsetup.controllers.info_ctl_by_config(config)
-
-    ret = bs.init(info_ctl, files=files)
+    ret = bs.init(files)
 
     return ret
 

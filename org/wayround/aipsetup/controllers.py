@@ -220,11 +220,16 @@ def asp_package(asp_filename):
 def pkg_client_by_config(config):
     return pkg_client_new(
         config['pkg_client']['server_url'],
-        config['pkg_client']['downloads_dir']
+        config['pkg_client']['downloads_dir'],
+        config['pkg_client']['acceptable_src_file_extensions']
         )
 
 
-def pkg_client_new(url, downloads_dir='/tmp/aipsetup_downloads'):
+def pkg_client_new(
+    url,
+    downloads_dir='/tmp/aipsetup_downloads',
+    acceptable_extensions_order_list=None
+    ):
     return org.wayround.aipsetup.client_pkg.PackageServerClient(
         url,
         downloads_dir

@@ -13,6 +13,7 @@ import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.sysuser
 import org.wayround.utils.checksum
+import org.wayround.utils.file
 import org.wayround.utils.getopt
 import org.wayround.utils.log
 import org.wayround.utils.tarball_name_parser
@@ -46,13 +47,19 @@ def commands():
                 clean_check_list_of_installed_packages_and_asps_auto),
             ('find-garbage', clean_find_garbage),
             ('find-invalid-deps-lists', clean_find_invalid_deps_lists),
-            ('sysusers', clean_sysusers),
-            ('sysusers-sys', clean_sysusers_sys)
+            ('gen-locale', clean_gen_locale),
+            ('sys-users', clean_sys_users),
+            ('sys-perms', clean_sys_perms),
+            ('install-etc', clean_install_etc)
             ])),
         ('sys-deps', collections.OrderedDict([
             ('asps-asp-depends_on', pkgdeps_print_asps_asp_depends_on),
             ('asp-depends', pkgdeps_print_asp_depends),
             ('asps-depending-on-asp', pkgdeps_print_asps_depending_on_asp)
+            ])),
+        ('sys-replica', collections.OrderedDict([
+            ('instr', system_replica_instruction),
+            ('dir-tree', system_create_directory_tree)
             ]))
         ])
 
@@ -517,6 +524,37 @@ def system_make_asp_deps(command_name, opts, args, adds):
             )
 
         ret = system.make_asp_deps(asp_name, mute=False)
+
+    return ret
+
+
+def system_create_directory_tree(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    ret = 0
+
+    destdir = '/'
+
+    if len(args) != 1:
+        logging.error("Must be exactly one argument")
+        ret = 1
+    else:
+
+        destdir = args[0]
+
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(
+                config
+                )
+
+        system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
+            config,
+            pkg_client,
+            destdir
+            )
+
+        ret = system.create_directory_tree()
 
     return ret
 
@@ -1194,11 +1232,85 @@ def package_check(command_name, opts, args, adds):
     return ret
 
 
-def clean_sysusers(command_name, opts, args, adds):
+def clean_gen_locale(command_name, opts, args, adds):
+
+    """
+    (only root) Generate general unicode locale
+    """
+
+    ret = 0
+
+    if os.getuid() != 0:
+        logging.error("Only root allowed to use this command")
+        ret = 1
+    else:
+
+        config = adds['config']
+
+        base_dir = '/'
+        if '-b' in opts:
+            base_dir = opts['-b']
+
+        pkg_client = \
+            org.wayround.aipsetup.controllers.pkg_client_by_config(
+                config
+                )
+
+        system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
+            config,
+            pkg_client,
+            basedir=base_dir
+            )
+
+        ret = system.gen_locale()
+
+    return ret
+
+
+def clean_install_etc(command_name, opts, args, adds):
+
+    """
+    (only root) Install new clean basic UNICORN /etc files
+    """
+
+    ret = 0
+
+    if os.getuid() != 0:
+        logging.error("Only root allowed to use this command")
+        ret = 1
+    else:
+
+        config = adds['config']
+
+        base_dir = '/'
+        if '-b' in opts:
+            base_dir = opts['-b']
+
+        # TODO: move to system.py?
+        # TODO: do over config, not constant
+
+        src_etc_dir = org.wayround.utils.path.join(
+            os.path.dirname(__file__), 'unicorn_distro', 'etc'
+            )
+
+        ret = org.wayround.utils.file.copytree(
+            src_etc_dir,
+            org.wayround.utils.path.join(base_dir, 'etc'),
+            overwrite_files=True,
+            clear_before_copy=False,
+            dst_must_be_empty=False
+            )
+
+    return ret
+
+
+def clean_sys_users(command_name, opts, args, adds):
 
     """
     (only root) Creates system users and their directories under /daemons
     """
+
+    ret = 0
 
     if os.getuid() != 0:
         logging.error("Only root allowed to use this command")
@@ -1213,16 +1325,18 @@ def clean_sysusers(command_name, opts, args, adds):
 
         daemons_dir = config['system_paths']['daemons']
 
-        ret = org.wayround.aipsetup.sysuser.sysusers(base_dir, daemons_dir)
+        ret = org.wayround.aipsetup.sysuser.sys_users(base_dir, daemons_dir)
 
     return ret
 
 
-def clean_sysusers_sys(command_name, opts, args, adds):
+def clean_sys_perms(command_name, opts, args, adds):
 
     """
     (only root) Ensures system files and dirs permissions
     """
+
+    ret = 0
 
     if os.getuid() != 0:
         logging.error("Only root allowed to use this command")
@@ -1233,9 +1347,9 @@ def clean_sysusers_sys(command_name, opts, args, adds):
         if '-b' in opts:
             base_dir = opts['-b']
 
-        chroot = ['chroot', base_dir]
+        chroot = ['chroot', '--userspec=0:0', base_dir]
 
-        ret = org.wayround.aipsetup.sysuser.sysusers_sys(chroot)
+        ret = org.wayround.aipsetup.sysuser.sys_perms(chroot)
 
     return ret
 
@@ -1306,3 +1420,73 @@ def info_parse_tarball(command_name, opts, args, adds):
             print("Package name: {}".format(pkg_name))
 
     return ret
+
+
+def system_replica_instruction(command_name, opts, args, adds):
+
+    print("""\
+--
+This instruction will provide You with information on how to replicate current
+UNICORN system core to other hard drive.
+--
+
+ => TARGET SYSTEM PARTITION TABLES PREPERATIONS <=
+
+    1. Create partition table. You can use cfdisk if You want msdos (old) style
+       MBR table. To manipulate GPT (modern) tables, You can use fdisk or
+       parted. syslinux (extlinux) can be used in both cases. GRUB2 recommended
+       to be used with GPT, not with msdos MBR!
+
+    2. Install bootloader.
+
+        `grub-install --boot-directory=/mnt/sdb2/boot /dev/sdb`
+
+ => CORE ELEMENTS PREPERATIONS <=
+
+    3. Use command `aipsetup3 sys-replica dir-tree /mnt/sdb2` to create needed
+       directories in pointed path. (/mnt/sdb2 here and farther in this text -
+       is path to mounted root of new future system)
+
+    4. Locate already built core components or download them using command:
+
+        `aipsetup3 pkg-client get-by-list core`
+
+       or get sources
+
+        `aipsetup3 pkg-client-src get-by-list core`
+
+       and build them
+
+    5. Install core packages:
+
+        `aipsetup3 sys install -b=/mnt/sdb2 *.asp`
+
+    6. Install /etc structure (default setting for shells, PAM and other basic
+       system components)
+
+        `aipsetup3 sys-clean install-etc -b=/mnt/sdb2`
+
+    7. Install en_US.UTF-8 locale:
+
+        `aipsetup3 sys-clean gen-locale -b=/mnt/sdb2`
+
+    8. Use commands:
+
+        `aipsetup3 sys-clean sys-users -b=/mnt/sdb2`
+        `aipsetup3 sys-clean sys-perms -b=/mnt/sdb2`
+
+        to install system users and correct permissions on executables and
+        directories.
+
+ => THE LAST THING TO DO <=
+
+    9. chroot to new system and do passwd for root user.
+
+--
+That's it! Basic system should be installed by now.
+
+Remember not to use root as Your primary profile. Create a user profile for
+Your self.
+""")
+
+    return 0

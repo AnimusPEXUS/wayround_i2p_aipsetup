@@ -1,0 +1,26 @@
+#!/bin/bash
+
+export PATH=/usr/sbin:/sbin:/usr/bin:/bin
+
+export LANG='en_US.UTF-8'
+#export LC_ALL='en_US.UTF-8'
+
+#export LC_COLLATE=C
+
+#export HOSTNAME="`cat /etc/hostname`"
+#export LESS="-M"
+
+export VISUAL=emacs
+
+export PS1='(\t): \u@\h:\w> '
+
+umask 022
+
+for i in /etc/profile.d/SET/*
+do
+    source $i
+done
+unset i
+
+
+echo "Wellcome to `uname -s` `uname -r` (`tty`)"

@@ -1,12 +1,12 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.wz2100.net/",
-  "buildscript": "std",
-  "basename": "warzone2100",
-  "filters": "",
-  "installation_priority": 5,
-  "removable": true,
-  "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "description": "write something here, please",
+  "basename": "warzone2100",
+  "installation_priority": 5,
+  "filters": "",
+  "reducible": true,
+  "deprecated": false,
+  "home_page": "http://www.wz2100.net/",
+  "removable": true,
+  "buildscript": "wz2100"
 }

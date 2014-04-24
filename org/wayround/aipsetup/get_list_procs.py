@@ -1,10 +1,13 @@
 
 import functools
+import json
 import logging
+import os.path
 import re
 
 import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.client_src
+import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 import org.wayround.utils.terminal
 import org.wayround.utils.types
@@ -52,6 +55,12 @@ def find_gnome_tarball_name(
     if acceptable_extensions_order_list == None:
         acceptable_extensions_order_list = ['.tar.xz', '.tar.bz2', '.tar.gz']
 
+    def source_version_comparator(v1, v2):
+        return org.wayround.utils.version.source_version_comparator(
+            v1, v2,
+            acceptable_extensions_order_list
+            )
+
     tarballs = pkg_client.tarballs(pkgname)
 
     if tarballs == None:
@@ -60,7 +69,7 @@ def find_gnome_tarball_name(
     tarballs.sort(
         reverse=True,
         key=functools.cmp_to_key(
-            org.wayround.utils.version.source_version_comparator
+            source_version_comparator
             )
         )
 
@@ -179,7 +188,8 @@ def find_gnome_tarball_name(
                 if org.wayround.utils.version.\
                     source_version_comparator(
                         i,
-                        next_found_acceptable_tarball
+                        next_found_acceptable_tarball,
+                        acceptable_extensions_order_list
                         ) == 0:
                     found_required_targeted_tarballs.append(i)
 
@@ -384,3 +394,23 @@ def get_by_glp(
         ret = int(errors > 0)
 
     return ret
+
+
+def get_list(config, list_name):
+
+    # TODO: place next to config
+
+    list_filename = org.wayround.utils.path.abspath(
+        org.wayround.utils.path.join(
+            os.path.dirname(__file__),
+            'unicorn_distro',
+            'pkg_groups',
+            "{}.gpl".format(list_name)
+            )
+        )
+
+    f = open(list_filename)
+    conf = json.loads(f.read())
+    f.close()
+
+    return conf

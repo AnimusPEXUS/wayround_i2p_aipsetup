@@ -1271,7 +1271,10 @@ class SourceRepoCtl:
                         org.wayround.utils.tarball_name_parser.\
                             parse_tarball_name(
                                 i,
-                                mute=True
+                                mute=True,
+                                acceptable_source_name_extensions=(
+                                    acceptable_endings
+                                    )
                                 )
                         )
 

@@ -9,6 +9,8 @@ import logging
 import os.path
 import pprint
 import re
+import shutil
+import subprocess
 import tarfile
 
 import org.wayround.aipsetup.client_pkg
@@ -773,6 +775,10 @@ class SystemCtl:
 
     def list_installed_asps(self, mute=False):
 
+        """
+        on success returns list. on error - not list
+        """
+
         destdir = org.wayround.utils.path.abspath(self.basedir)
 
         listdir = org.wayround.utils.path.abspath(
@@ -795,7 +801,6 @@ class SystemCtl:
             for each in filelist:
                 bases.append(os.path.basename(each))
 
-            # TODO: what is it?
             for i in ['sums', 'buildlogs', '.', '..']:
                 if i in bases:
                     bases.remove(i)
@@ -845,26 +850,31 @@ class SystemCtl:
             name_or_list = [name_or_list]
 
         asps_list = self.list_installed_asps(mute=True)
-        asps_list_parsed = {}
+        if not isinstance(asps_list, list):
+            logging.error("Can't get list of installed asps")
+        else:
 
-        for i in asps_list:
-            asps_list_parsed[i] = \
-                org.wayround.aipsetup.package_name_parser.package_name_parse(i)
+            asps_list_parsed = {}
 
-        for i in name_or_list:
+            for i in asps_list:
+                asps_list_parsed[i] = \
+                    org.wayround.aipsetup.package_name_parser.\
+                        package_name_parse(i)
 
-            if not i in ret:
-                ret[i] = []
+            for i in name_or_list:
 
-            for j in asps_list:
+                if not i in ret:
+                    ret[i] = []
 
-                if (isinstance(asps_list_parsed[j], dict)
-                    and asps_list_parsed[j]['groups']['name'] == i):
+                for j in asps_list:
 
-                    ret[i].append(j)
+                    if (isinstance(asps_list_parsed[j], dict)
+                        and asps_list_parsed[j]['groups']['name'] == i):
 
-        if return_single:
-            ret = ret[name_or_list[0]]
+                        ret[i].append(j)
+
+            if return_single:
+                ret = ret[name_or_list[0]]
 
         return ret
 
@@ -1422,8 +1432,6 @@ class SystemCtl:
         return ret
 
     def check_elfs_readiness(self, mute=False):
-
-        # TODO: complete
 
         paths = self.elf_paths()
         elfs = find_all_elf_files(paths, verbose=True)
@@ -2098,6 +2106,100 @@ class SystemCtl:
         if verbose:
             logging.info("Searching elf files in paths: {}".format(paths))
         return find_all_elf_files(paths, verbose=verbose)
+
+    def create_directory_tree(self):
+
+        ret = 0
+
+        for i in [
+            '/boot',
+            '/daemons',
+            '/dev',
+            '/etc',
+            '/home',
+            '/media',
+            '/mnt',
+            '/opt',
+            '/proc',
+            '/root',
+            '/run',
+            '/sys',
+            '/tmp',
+            '/usr/bin',
+            '/usr/sbin',
+            '/usr/lib',
+            '/var'
+            ]:
+
+            joined = org.wayround.utils.path.join(self.basedir, i)
+
+            if not os.path.isdir(joined):
+                try:
+                    os.makedirs(joined)
+                except:
+                    logging.exception(
+                        "Can't create dir {} -- continuing".format(joined)
+                        )
+                    ret = 1
+
+        for i in [
+            'bin', 'sbin', 'lib'
+            ]:
+
+            joined = org.wayround.utils.path.join(self.basedir, i)
+
+            if not os.path.exists(joined) and not os.path.islink(joined):
+
+                try:
+                    os.symlink('usr/{}'.format(i), joined)
+                except:
+                    logging.exception(
+                        "Can't create link usr/{} -- continuing".format(joined)
+                        )
+                    ret = 1
+
+        return ret
+
+    def gen_locale(self):
+
+        ret = 0
+
+        target_dir = org.wayround.utils.path.join(
+            self.basedir,
+            'usr', 'lib', 'locale'
+            )
+
+        if not os.path.isdir(target_dir):
+            try:
+                os.makedirs(target_dir)
+            except:
+                pass
+
+        if not os.path.isdir(target_dir):
+            logging.error("Can't create directory `{}'".format(target_dir))
+            ret = 1
+
+        if ret == 0:
+
+            locale_dir = org.wayround.utils.path.join(
+                target_dir, 'en_US.UTF-8'
+                )
+
+            rel_locale_dir = org.wayround.utils.path.relpath(
+                locale_dir, self.basedir
+                )
+
+            if os.path.exists(locale_dir):
+                shutil.rmtree(locale_dir)
+
+            p = subprocess.Popen(
+                ['chroot', self.basedir,
+                 'localedef', '-f', 'UTF-8', '-i', 'en_US', rel_locale_dir],
+                )
+
+            ret = p.wait()
+
+        return ret
 
 
 def find_all_so_files(paths, verbose=False):

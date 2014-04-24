@@ -49,10 +49,6 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-#                    '--disable-nis',
-                    '--enable-db=ndbm',
-                    '--enable-read-both-confs',
-                    '--enable-selinux',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -65,7 +61,9 @@ def main(buildingsite, action=None):
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={},
+                environment={
+                    'PKG_CONFIG_PATH': '/usr/lib/qt4_w_toolkit/lib/pkgconfig'
+                    },
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,

@@ -20,7 +20,10 @@ import org.wayround.utils.list
 
 class MainWindow:
 
-    def __init__(self, info_ctl, tag_ctl, src_client, pkg_client):
+    def __init__(
+        self, info_ctl, tag_ctl, src_client, pkg_client,
+        acceptable_source_name_extensions
+        ):
 
 #        self.config = config
         self.info_ctl = info_ctl
@@ -28,6 +31,9 @@ class MainWindow:
         self.src_client = src_client
         self.pkg_client = pkg_client
         self.tag_ctl = tag_ctl
+        self.acceptable_source_name_extensions = (
+            acceptable_source_name_extensions
+            )
 
         self.currently_opened = None
 
@@ -407,9 +413,15 @@ class MainWindow:
         else:
             lst = self.pkg_client.tarballs(self.ui.name_entry.get_text())
 
+            def source_version_comparator(v1, v2):
+                return org.wayround.utils.version.source_version_comparator(
+                    v1, v2,
+                    self.acceptable_source_name_extensions
+                    )
+
             lst.sort(
                 key=functools.cmp_to_key(
-                    org.wayround.utils.version.source_version_comparator
+                    source_version_comparator
                     ),
                 reverse=True
                 )
@@ -460,7 +472,12 @@ def main(name_to_edit=None, config=None):
 
     tag_ctl = org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
 
-    mw = MainWindow(info_ctl, tag_ctl, src_client, pkg_client)
+    mw = MainWindow(
+        info_ctl, tag_ctl, src_client, pkg_client,
+        acceptable_source_name_extensions=(
+            config['src_client']['acceptable_src_file_extensions']
+            )
+        )
 
     if isinstance(name_to_edit, str):
         if mw.load_data(os.path.basename(name_to_edit)) == 0:

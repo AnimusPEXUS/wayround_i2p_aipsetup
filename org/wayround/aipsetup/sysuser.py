@@ -8,6 +8,9 @@ import subprocess
 import org.wayround.utils.path
 import org.wayround.utils.terminal
 
+# TODO: consider moving to system.py
+
+
 SYS_UID_MAX = 999
 SYS_GID_MAX = 999
 
@@ -23,6 +26,7 @@ USERS = {
     5: 'mail',
     6: 'adm',
     7: 'systemd-journal',
+    8: 'wheel',
 
     # terminals 10-19
     10: 'pts',
@@ -107,14 +111,26 @@ USERS = {
 GROUPS = copy.copy(USERS)
 
 
-def sysusers(base_dir='/', daemons_dir='/daemons'):
+def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
 
     base_dir = org.wayround.utils.path.abspath(base_dir)
-    base_dir_daemons_dir = org.wayround.utils.path.abspath(
-        org.wayround.utils.path.join(base_dir, daemons_dir)
+    daemons_dir = org.wayround.utils.path.abspath(
+        org.wayround.utils.path.join(base_dir, daemons_dir_no_base)
         )
 
-    chroot = ['chroot', base_dir]
+    daemons_dir_no_base = daemons_dir
+
+    if base_dir != '/':
+        daemons_dir_no_base = daemons_dir[len(base_dir):]
+
+    root = org.wayround.utils.path.join(base_dir, 'root')
+
+    root_no_base = root
+
+    if base_dir != '/':
+        root_no_base = root[len(base_dir):]
+
+    chroot = ['chroot', '--userspec=0:0', base_dir]
 
     errors = 0
 
@@ -165,18 +181,22 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
             errors += 1
     org.wayround.utils.terminal.progress_write_finish()
 
-    print("Checking `{}' dir".format(base_dir_daemons_dir))
-    if not os.path.exists(base_dir_daemons_dir):
+    print("Checking `{}' dir".format(daemons_dir))
+    if not os.path.exists(daemons_dir):
         print("   ..creating")
         try:
-            os.makedirs(base_dir_daemons_dir)
+            os.makedirs(daemons_dir)
         except:
-            print("Error creating dir: {}".format(base_dir_daemons_dir))
+            print("Error creating dir: {}".format(daemons_dir))
 
     print("Creating special user accounts")
     for i in sorted(list(USERS.keys())):
         name = USERS[i]
-        home_path = org.wayround.utils.path.join(base_dir_daemons_dir, name)
+        home_path = org.wayround.utils.path.join(daemons_dir, name)
+        home_path_no_base = home_path
+
+        if base_dir != '/':
+            home_path_no_base = home_path[len(base_dir):]
 
         org.wayround.utils.terminal.progress_write(
             "  ({:3d}%) {}".format(
@@ -186,7 +206,7 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
             )
         p = subprocess.Popen(
             chroot + ['useradd', '-r', '-g', str(i), '-G', name, '-u', str(i),
-             '-d', home_path,
+             '-d', home_path_no_base,
              '-s', '/bin/false',
              name]
             )
@@ -208,14 +228,14 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
             # print("Error creating dir: {}".format(home_path))
 
         p = subprocess.Popen(
-            chroot + ['chown', '-R', '{}:'.format(name), home_path]
+            chroot + ['chown', '-R', '{}:'.format(name), home_path_no_base]
             )
         res = p.wait()
         if res != 0:
             errors += 1
 
         p = subprocess.Popen(
-            chroot + ['chmod', '-R', '700', home_path]
+            chroot + ['chmod', '-R', '700', home_path_no_base]
             )
         res = p.wait()
         if res != 0:
@@ -223,16 +243,16 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
 
     org.wayround.utils.terminal.progress_write_finish()
 
-    print("Ensuring `{}' permissions".format(base_dir_daemons_dir))
+    print("Ensuring `{}' permissions".format(daemons_dir))
     p = subprocess.Popen(
-        chroot + ['chown', 'root:root', base_dir_daemons_dir]
+        chroot + ['chown', '0:0', daemons_dir_no_base]
         )
     res = p.wait()
     if res != 0:
         errors += 1
 
     p = subprocess.Popen(
-        chroot + ['chmode', '755', base_dir_daemons_dir]
+        chroot + ['chmod', '755', daemons_dir_no_base]
         )
     res = p.wait()
     if res != 0:
@@ -248,7 +268,8 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
 
     print("Ensuring `root' user existance")
     p = subprocess.Popen(
-        chroot + ['useradd',
+        chroot +
+        ['useradd',
          '-r',
          '-g', '0',
          '-G', 'root',
@@ -268,17 +289,17 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
     if res != 0:
         errors += 1
 
-    if not os.path.exists('/root'):
+    if not os.path.exists(root):
         try:
-            os.makedirs('/root')
+            os.makedirs(root)
         except:
-            print("Error creating dir: {}".format('/root'))
+            print("Error creating dir: {}".format(root))
 
     p = subprocess.Popen(
         chroot + ['chown',
          '-R',
          'root:root',
-         '/root']
+         root_no_base]
         )
     res = p.wait()
     if res != 0:
@@ -288,7 +309,7 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
         chroot + ['chmod',
          '-R',
          '700',
-         '/root']
+         root_no_base]
         )
     res = p.wait()
     if res != 0:
@@ -316,18 +337,25 @@ def sysusers(base_dir='/', daemons_dir='/daemons'):
     return ret
 
 
-def sysusers_sys(chroot):
+def sys_perms(chroot):
 
     errors = 0
 
     sysuser_sys = org.wayround.utils.path.join(
         org.wayround.utils.path.abspath(os.path.dirname(__file__)),
-        'sysuser_sys.sh'
+        'sys_perms.sh'
         )
+
+    f = open(sysuser_sys)
+    script = f.read()
+    f.close()
+
     print("Starting {}".format(sysuser_sys))
+
     p = subprocess.Popen(
-        chroot + ['bash', sysuser_sys]
+        chroot + ['bash'], stdin=subprocess.PIPE
         )
+    p.communicate(bytes(script, 'utf-8'))
     res = p.wait()
     if res != 0:
         errors += 1

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+chmod 1777 /tmp
+
 usermod -G httpd,ejabberd,ssl httpd
 usermod -G ejabberd,ssl ejabberd
 usermod -G jabberd2,ssl jabberd2
@@ -42,3 +44,7 @@ chmod 4755 "`which sudo`"
 chmod 4755 "`which mount`"
 chmod 4755 "`which exim`"
 chmod 4755 "`which weston-launch`"
+#chmod 4755 /usr/lib/virtualbox/bin/VirtualBox
+
+
+exit 0

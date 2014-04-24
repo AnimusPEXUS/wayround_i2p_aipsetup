@@ -115,7 +115,8 @@ class ASPackage:
                         else:
 
                             # TODO: additionally to this leaf, make test
-                            #       by tar -t output
+                            #       by tar -t output to privent installation of
+                            #       broken DESTDIR
 
                             fobj = org.wayround.utils.archive.\
                                 tar_member_get_extract_file(

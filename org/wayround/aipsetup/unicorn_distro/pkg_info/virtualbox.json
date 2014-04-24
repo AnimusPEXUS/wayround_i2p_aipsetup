@@ -1,0 +1,12 @@
+{
+  "non_installable": false,
+  "basename": "VirtualBox",
+  "description": "",
+  "home_page": "",
+  "reducible": true,
+  "removable": true,
+  "installation_priority": 5,
+  "buildscript": "vbox",
+  "deprecated": true,
+  "filters": ""
+}

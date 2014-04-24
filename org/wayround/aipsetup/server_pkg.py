@@ -42,7 +42,10 @@ def server_start_host(command_name, opts, args, adds):
         tag_ctl,
         config['pkg_server']['host'],
         int(config['pkg_server']['port']),
-        config['src_client']['server_url']
+        config['src_client']['server_url'],
+        acceptable_source_name_extensions=(
+            config['src_client']['acceptable_src_file_extensions']
+            )
         )
 
     app.start()
@@ -59,7 +62,8 @@ class ASPServer:
         tag_ctl,
         host='localhost',
         port=8081,
-        src_page_url='https://localhost:8080/'
+        src_page_url='https://localhost:8080/',
+        acceptable_source_name_extensions=None
         ):
 
         self._src_page_url = src_page_url
@@ -83,6 +87,8 @@ class ASPServer:
         self.pkg_repo_ctl = pkg_repo_ctl
         self.info_ctl = info_ctl
         self.tag_ctl = tag_ctl
+        self.acceptable_source_name_extensions = \
+            acceptable_source_name_extensions
 
         self.ui = org.wayround.aipsetup.server_pkg_ui.UI(templates_dir)
 
@@ -489,9 +495,15 @@ class ASPServer:
         if not isinstance(filesl, list):
             raise bottle.HTTPError(500, "tarball filter error")
 
+        def source_version_comparator(v1, v2):
+            return org.wayround.utils.version.source_version_comparator(
+                v1, v2,
+                self.acceptable_source_name_extensions
+                )
+
         filesl.sort(
             key=functools.cmp_to_key(
-                org.wayround.utils.version.source_version_comparator
+                source_version_comparator
                 ),
             reverse=True
             )

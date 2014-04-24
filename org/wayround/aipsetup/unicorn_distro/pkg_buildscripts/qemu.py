@@ -49,19 +49,18 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-#                    '--disable-nis',
-                    '--enable-db=ndbm',
-                    '--enable-read-both-confs',
-                    '--enable-selinux',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
                         pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target-list=i386-linux-user,i386-softmmu',
+                    '--enable-system',
+                    '--enable-user',
+#                    '--enable-shared',
+#                    '--host=' + pkg_info['constitution']['host'],
+#                    '--build=' + pkg_info['constitution']['build'],
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],

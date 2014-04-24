@@ -1,12 +1,12 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.debian.org",
-  "buildscript": "",
-  "basename": "shadow",
-  "filters": "",
-  "installation_priority": 5,
   "removable": true,
-  "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "description": "write something here, please",
+  "installation_priority": 5,
+  "buildscript": "std",
+  "reducible": true,
+  "basename": "shadow",
+  "deprecated": false,
+  "home_page": "http://www.debian.org",
+  "filters": ""
 }

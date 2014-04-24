@@ -14,7 +14,13 @@ import org.wayround.utils.path
 
 class PackageServerClient:
 
-    def __init__(self, url, downloads_dir='/tmp/aipsetup_downloads'):
+    def __init__(
+        self,
+        url, downloads_dir='/tmp/aipsetup_downloads',
+        acceptable_extensions_order_list=None
+        ):
+        self.acceptable_extensions_order_list = \
+            acceptable_extensions_order_list
         self.downloads_dir = downloads_dir
         self._url = url
         return
@@ -50,7 +56,9 @@ class PackageServerClient:
         return tarballs(self._url, pkg_name)
 
     def tarballs_latest(self, pkg_name):
-        return tarballs_latest(self._url, pkg_name)
+        return tarballs_latest(
+            self._url, pkg_name, self.acceptable_extensions_order_list
+            )
 
     def name_by_name(self, tarball):
         return name_by_name(self._url, tarball)
@@ -345,7 +353,13 @@ def tarballs(url, pkg_name):
     return ret
 
 
-def tarballs_latest(url, pkg_name):
+def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
+
+    def source_version_comparator(v1, v2):
+        return org.wayround.utils.version.source_version_comparator(
+            v1, v2,
+            acceptable_extensions_order_list
+            )
 
     ret = None
 
@@ -376,13 +390,14 @@ def tarballs_latest(url, pkg_name):
             m = max(
                 ret,
                 key=functools.cmp_to_key(
-                    org.wayround.utils.version.source_version_comparator
+                    source_version_comparator
                     )
                 )
 
         for i in ret[:]:
             if (org.wayround.utils.version.source_version_comparator(
-                    i, m
+                    i, m,
+                    acceptable_extensions_order_list
                     )
                 != 0):
 

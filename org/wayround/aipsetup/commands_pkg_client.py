@@ -481,13 +481,13 @@ def _get_tarballs_latest(url, name, config, out_dir=None):
 
     ret = 1
 
-    res = org.wayround.aipsetup.client_pkg.tarballs_latest(url, name)
+    exts = config['pkg_client']['acceptable_src_file_extensions'].split(' ')
+
+    res = org.wayround.aipsetup.client_pkg.tarballs_latest(
+        url, name, exts
+        )
 
     if res != None and len(res) != 0:
-
-        exts = \
-            config['pkg_client']['acceptable_src_file_extensions'].\
-                split(' ')
 
         found = None
         for i in exts:
@@ -618,19 +618,7 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
 
         logging.info("Loading list `{}'".format(list_name))
 
-        # TODO: place next to config
-        list_filename = org.wayround.utils.path.abspath(
-            org.wayround.utils.path.join(
-                os.path.dirname(__file__),
-                'unicorn_distro',
-                'pkg_groups',
-                "{}.gpl".format(list_name)
-                )
-            )
-
-        f = open(list_filename)
-        conf = json.loads(f.read())
-        f.close()
+        conf = org.wayround.aipsetup.get_list_procs.get_list(config, list_name)
 
         pkg_client = \
             org.wayround.aipsetup.controllers.pkg_client_by_config(config)

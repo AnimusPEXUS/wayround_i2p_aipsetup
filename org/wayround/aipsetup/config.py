@@ -23,7 +23,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('editor', 'emacs'),
         ('acceptable_src_file_extensions',
             '.tar.xz .tar.lzma .tar.bz2 .tar.gz '
-            '.txz .tlzma .tbz2 .tgz .7z .zip'),
+            '.txz .tlzma .tbz2 .tgz .7z .zip .jar'),
         ('distro_buildout_dir', EMBEDDED_DISTRO_DIR)
         ])
       ),

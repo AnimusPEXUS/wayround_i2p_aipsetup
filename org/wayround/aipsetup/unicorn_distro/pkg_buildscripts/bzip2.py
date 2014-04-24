@@ -105,10 +105,19 @@ def main(buildingsite, action=None):
 
                     base = os.path.basename(i)
 
-                    shutil.copy(
-                        os.path.join(src_dir, base),
-                        os.path.join(di, base)
-                        )
+                    j = os.path.join(src_dir, base)
+                    j2 = os.path.join(di, base)
+
+                    if os.path.isfile(j) and not os.path.islink(j):
+                        shutil.copy(j, j2)
+
+                    elif os.path.isfile(j) and os.path.islink(j):
+                        lnk = os.readlink(j)
+                        os.symlink(lnk, j2)
+
+                    else:
+                        raise Exception("Programming error")
+
             except:
                 logging.exception("Error")
                 ret = 2

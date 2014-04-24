@@ -50,7 +50,10 @@ def src_server_start(command_name, opts, args, adds):
             config
             ),
         host=host,
-        port=int(port)
+        port=int(port),
+        acceptable_source_name_extensions=(
+            config['src_server']['acceptable_src_file_extensions']
+            )
         )
 
     serv.start()
@@ -91,13 +94,16 @@ class SRCServer:
         self,
         repository_dir,
         src_db, src_paths_db,
-        host='localhost', port=8080
+        host='localhost', port=8080,
+        acceptable_source_name_extensions=None
         ):
 
         self.repository_dir = os.path.abspath(repository_dir)
 
         self.src_db = src_db
         self.src_paths_db = src_paths_db
+        self.acceptable_source_name_extensions = \
+            acceptable_source_name_extensions
 
         self.host = host
         self.port = port
@@ -316,10 +322,16 @@ class SRCServer:
                 if not found:
                     del results[i]
 
+        def source_version_comparator(v1, v2):
+            return org.wayround.utils.version.source_version_comparator(
+                v1, v2,
+                self.acceptable_source_name_extensions
+                )
+
         results.sort(
             reverse=True,
             key=functools.cmp_to_key(
-                org.wayround.utils.version.source_version_comparator
+                source_version_comparator
                 )
             )
 

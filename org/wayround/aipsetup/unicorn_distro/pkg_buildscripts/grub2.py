@@ -1,6 +1,7 @@
 
 import logging
 import os.path
+import subprocess
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
@@ -13,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'patch', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -45,14 +46,24 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+        if 'patch' in actions and ret == 0:
+            if pkg_info['pkg_nameinfo']['groups']['version_dirty'] == '2.00':
+                p = subprocess.Popen(
+                    ['sed',
+                     '-i',
+                     '-e',
+                     '/gets is a/d',
+                     'grub-core/gnulib/stdio.in.h'
+                     ],
+                    cwd=src_dir
+                    )
+                ret = p.wait()
+
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-#                    '--disable-nis',
-                    '--enable-db=ndbm',
-                    '--enable-read-both-confs',
-                    '--enable-selinux',
+                    '--disable-werror',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
