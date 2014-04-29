@@ -61,6 +61,7 @@
         "exim",
         "tar", 
         "tcl", 
+        "tk",
         "texinfo", 
         "util-linux",
         "which",

@@ -284,6 +284,15 @@ class SystemCtl:
 
                         ret = self.install_package(latest_full_path, False)
 
+                    try:
+                        os.unlink(latest_full_path)
+                    except:
+                        logging.exception(
+                            "Can't remove temporary file `{}'".format(
+                                latest_full_path
+                                )
+                            )
+
         return ret
 
     def install_asp(self, asp_package):
@@ -416,7 +425,7 @@ class SystemCtl:
                                             )
                                 if tec != 0:
                                     logging.error(
-                                        "Package destdir decompression error:"
+                                        "Package destdir decompression error."
                                         " tar exit code: {}".format(
                                             tec
                                         )
@@ -541,6 +550,10 @@ class SystemCtl:
                                 script_obj.close()
 
                 tarf.close()
+
+        # TODO: too slow.. not really needed here.. will remove some times
+        #        if ret == 0:
+        #            os.sync()
 
         return ret
 
