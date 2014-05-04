@@ -1,0 +1,12 @@
+{
+  "removable": true,
+  "buildscript": "std",
+  "deprecated": false,
+  "description": "write something here, please",
+  "non_installable": false,
+  "installation_priority": 5,
+  "reducible": true,
+  "home_page": "http://sourceforge.net/projects/giflib",
+  "filters": "- version < 5",
+  "basename": "giflib"
+}

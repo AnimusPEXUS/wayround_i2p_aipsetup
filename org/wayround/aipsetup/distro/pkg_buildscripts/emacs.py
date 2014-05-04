@@ -49,15 +49,21 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-gif=no',
+                    '--with-x-toolkit=gtk3',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--no-system-libs',
-                    '--no-qt-gui'
-#                    "LDFLAGS+=-ltinfow"
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' +
+                        pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                        pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={
-#                    'LDFLAGS':'-ltinfow'
-                    },
+                environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,

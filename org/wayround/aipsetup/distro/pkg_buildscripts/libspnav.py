@@ -49,7 +49,6 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--with-gif=no',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -83,12 +82,15 @@ def main(buildingsite, action=None):
                 )
 
         if 'distribute' in actions and ret == 0:
+            # TODO: fix
+            os.makedirs(dst_dir + '/usr/lib')
+            os.makedirs(dst_dir + '/usr/include')
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + dst_dir
+                    'PREFIX=' + dst_dir + '/usr'
                     ],
                 environment={},
                 environment_mode='copy',

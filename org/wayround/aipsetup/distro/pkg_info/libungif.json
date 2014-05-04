@@ -1,0 +1,12 @@
+{
+  "home_page": "http://sourceforge.net/projects/giflib",
+  "basename": "libungif",
+  "description": "",
+  "deprecated": false,
+  "non_installable": false,
+  "installation_priority": 5,
+  "reducible": true,
+  "removable": true,
+  "buildscript": "std",
+  "filters": ""
+}
