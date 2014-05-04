@@ -13,7 +13,7 @@ import org.wayround.utils.path
 
 CUR_DIR = org.wayround.utils.path.abspath(os.path.dirname(__file__))
 EMBEDDED_DISTRO_DIR = org.wayround.utils.path.join(
-        CUR_DIR, 'unicorn_distro'
+        CUR_DIR, 'distro'
         )
 
 

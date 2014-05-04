@@ -1813,6 +1813,7 @@ def build(
         raise ValueError(
             "system_type must be of type "
             "org.wayround.aipsetup.build.Constitution"
+            ", not `{}'".format(const)
             )
 
     ret = 0

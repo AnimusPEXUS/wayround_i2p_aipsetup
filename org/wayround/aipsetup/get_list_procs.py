@@ -313,7 +313,7 @@ def normal_get(
 
     elif mode == 'asp':
 
-        if pkg_client.get_latest_asp(pkgname) != 0:
+        if not isinstance(pkg_client.get_latest_asp(pkgname), str):
             ret = 1
 
     return ret
@@ -387,8 +387,8 @@ def get_by_glp(
                 kwargs=kwargs
                 ) != 0:
                 errors += 1
-                f = open('!errors!.txt', 'w')
-                f.write("Can't get file for: {}".format(i))
+                f = open('!errors!.txt', 'a')
+                f.write("Can't get file for: {}\n".format(i))
                 f.close()
 
         ret = int(errors > 0)
@@ -403,7 +403,7 @@ def get_list(config, list_name):
     list_filename = org.wayround.utils.path.abspath(
         org.wayround.utils.path.join(
             os.path.dirname(__file__),
-            'unicorn_distro',
+            'distro',
             'pkg_groups',
             "{}.gpl".format(list_name)
             )

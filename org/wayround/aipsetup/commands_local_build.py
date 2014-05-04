@@ -357,7 +357,7 @@ def build_full(command_name, opts, args, adds):
             build
             )
 
-        if const == None:
+        if not isinstance(const, org.wayround.aipsetup.build.Constitution):
             ret = 1
         else:
 

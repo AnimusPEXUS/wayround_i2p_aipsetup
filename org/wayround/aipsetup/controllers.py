@@ -204,7 +204,7 @@ def constitution_by_config(config, host, target, build):
             target_str=target
             )
     except org.wayround.utils.system_type.SystemTypeInvalidFullName:
-        logging.error("Wrong host: {}".format(host))
+        logging.exception("Wrong host: {}".format(host))
         ret = 1
     else:
 

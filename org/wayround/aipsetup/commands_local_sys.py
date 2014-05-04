@@ -12,6 +12,7 @@ import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.sysuser
+import org.wayround.utils.archive
 import org.wayround.utils.checksum
 import org.wayround.utils.file
 import org.wayround.utils.getopt
@@ -1290,15 +1291,19 @@ def clean_install_etc(command_name, opts, args, adds):
         # TODO: do over config, not constant
 
         src_etc_dir = org.wayround.utils.path.join(
-            os.path.dirname(__file__), 'unicorn_distro', 'etc'
+            os.path.dirname(__file__), 'distro', 'unicorn-etc.tar.xz'
             )
 
-        ret = org.wayround.utils.file.copytree(
+        ret = org.wayround.utils.archive.extract_tar_canonical(
             src_etc_dir,
-            org.wayround.utils.path.join(base_dir, 'etc'),
-            overwrite_files=True,
-            clear_before_copy=False,
-            dst_must_be_empty=False
+            base_dir,
+            'xz',
+            verbose_tar=True,
+            verbose_compressor=True,
+            add_tar_options=[
+                '--no-same-owner',
+                '--no-same-permissions'
+                ]
             )
 
     return ret
