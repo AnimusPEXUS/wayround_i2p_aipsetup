@@ -36,7 +36,7 @@ find /usr/lib/systemd/system/ -type d -exec chmod 744 '{}' ';'
 
 
 chmod 4755 /usr/libexec/dbus-daemon-launch-helper
-chmod 4755 /usr/libexec/polkit-agent-helper-1
+chmod 4755 /usr/lib/polkit-1/polkit-agent-helper-1
 chmod 4755 /usr/bin/pkexec
 chmod 4755 "`which xinit`"
 chmod 4755 "`which su`"

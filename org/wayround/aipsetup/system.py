@@ -2141,7 +2141,7 @@ class SystemCtl:
             '/usr/bin',
             '/usr/sbin',
             '/usr/lib',
-            '/var'
+            '/var/mail'
             ]:
 
             joined = org.wayround.utils.path.join(self.basedir, i)
