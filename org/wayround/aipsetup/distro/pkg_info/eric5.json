@@ -1,12 +1,12 @@
 {
-  "basename": "eric5",
-  "buildscript": "eric",
-  "deprecated": false,
   "description": "write something here, please",
-  "filters": "",
   "home_page": "http://eric-ide.python-projects.org/",
+  "buildscript": "eric",
+  "basename": "eric5",
+  "filters": "",
   "installation_priority": 5,
-  "non_installable": false,
+  "removable": true,
   "reducible": true,
-  "removable": true
+  "non_installable": false,
+  "deprecated": false
 }

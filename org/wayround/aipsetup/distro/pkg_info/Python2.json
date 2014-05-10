@@ -1,12 +1,12 @@
 {
-  "basename": "Python",
-  "buildscript": "std",
-  "deprecated": false,
   "description": "None",
-  "filters": "+ version fm *\n- version < 2.0\n- version >= 3.0\n- status re ([abc])|(rc).*",
   "home_page": "http://python.org/",
+  "buildscript": "std",
+  "basename": "Python",
+  "filters": "+ version fm *\n- version < 2.0\n- version >= 3.0\n- status re ([abc])|(rc).*",
   "installation_priority": 1,
-  "non_installable": false,
+  "removable": true,
   "reducible": true,
-  "removable": true
+  "non_installable": false,
+  "deprecated": false
 }

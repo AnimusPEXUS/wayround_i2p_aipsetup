@@ -1,12 +1,12 @@
 {
-  "reducible": true,
-  "deprecated": false,
   "description": "",
-  "removable": true,
-  "installation_priority": 5,
-  "filters": "- version fm *\n+ version fm 2.*\n\n\n",
-  "basename": "gtkmm",
   "home_page": "http://gnome.org",
   "buildscript": "std",
-  "non_installable": false
+  "basename": "gtkmm",
+  "filters": "- version fm *\n+ version fm 2.*\n\n\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

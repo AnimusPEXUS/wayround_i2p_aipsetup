@@ -1,12 +1,12 @@
 {
-  "installation_priority": 5,
-  "removable": true,
-  "non_installable": false,
-  "reducible": true,
-  "filters": "- version re ^\\d+\\.9\\d+(\\.\\d+)*$",
-  "deprecated": false,
   "description": "write something here, please",
   "home_page": "http://www.gnome.org",
+  "buildscript": "std",
   "basename": "clutter-gst",
-  "buildscript": "std"
+  "filters": "- version re ^\\d+\\.9\\d+(\\.\\d+)*$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

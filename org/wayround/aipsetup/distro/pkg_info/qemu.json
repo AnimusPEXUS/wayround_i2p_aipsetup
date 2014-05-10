@@ -1,12 +1,12 @@
 {
-  "deprecated": false,
-  "filters": "- status !re ^$",
-  "removable": true,
-  "home_page": "http://qemu.org",
-  "reducible": true,
   "description": "write something here, please",
-  "installation_priority": 5,
+  "home_page": "http://qemu.org",
+  "buildscript": "qemu",
   "basename": "qemu",
+  "filters": "- status !re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
   "non_installable": false,
-  "buildscript": "qemu"
+  "deprecated": false
 }

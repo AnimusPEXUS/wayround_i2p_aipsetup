@@ -1,12 +1,12 @@
 {
-  "installation_priority": 5,
-  "basename": "gnome-online-miners",
-  "reducible": true,
   "description": "",
-  "filters": "",
-  "deprecated": false,
-  "buildscript": "std",
   "home_page": "",
+  "buildscript": "std",
+  "basename": "gnome-online-miners",
+  "filters": "",
+  "installation_priority": 5,
   "removable": true,
-  "non_installable": false
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

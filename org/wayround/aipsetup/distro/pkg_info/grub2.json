@@ -1,12 +1,12 @@
 {
-  "basename": "grub",
   "description": "",
-  "filters": "- version < 0.90\n- status !re ^$",
-  "removable": true,
-  "buildscript": "grub2",
-  "reducible": true,
-  "deprecated": false,
-  "installation_priority": 5,
   "home_page": "https://www.gnu.org/software/grub/index.html",
-  "non_installable": false
+  "buildscript": "grub2",
+  "basename": "grub",
+  "filters": "- version < 0.90\n- status !re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

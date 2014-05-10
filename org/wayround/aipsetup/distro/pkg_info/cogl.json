@@ -1,12 +1,12 @@
 {
-  "installation_priority": 5,
+  "description": "write something here, please",
   "home_page": "http://www.gnome.org",
   "buildscript": "cogl",
-  "removable": true,
-  "non_installable": false,
   "basename": "cogl",
   "filters": "",
+  "installation_priority": 5,
+  "removable": true,
   "reducible": true,
-  "description": "write something here, please",
+  "non_installable": false,
   "deprecated": false
 }

@@ -1,12 +1,12 @@
 {
-  "filters": "- version < 4\n- version >= 5\n",
-  "basename": "qt-everywhere-opensource-src",
-  "buildscript": "qt",
-  "non_installable": false,
-  "removable": true,
   "description": "write something here, please",
-  "deprecated": false,
-  "reducible": true,
   "home_page": "http://www.qt-project.org/",
-  "installation_priority": 5
+  "buildscript": "qt",
+  "basename": "qt-everywhere-opensource-src",
+  "filters": "- version < 4\n- version >= 5\n",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

@@ -1,12 +1,12 @@
 {
-  "buildscript": "std",
-  "reducible": true,
-  "installation_priority": 5,
   "description": "write something here, please",
-  "filters": "",
-  "deprecated": false,
-  "basename": "gnome-system-log",
-  "non_installable": false,
   "home_page": "http://www.gnome.org",
-  "removable": true
+  "buildscript": "std",
+  "basename": "gnome-system-log",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

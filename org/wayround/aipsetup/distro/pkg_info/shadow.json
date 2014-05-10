@@ -1,12 +1,12 @@
 {
-  "removable": true,
-  "non_installable": false,
   "description": "write something here, please",
-  "installation_priority": 5,
-  "buildscript": "std",
-  "reducible": true,
-  "basename": "shadow",
-  "deprecated": false,
   "home_page": "http://www.debian.org",
-  "filters": ""
+  "buildscript": "std",
+  "basename": "shadow",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }

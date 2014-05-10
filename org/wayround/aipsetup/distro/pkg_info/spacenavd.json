@@ -1,12 +1,12 @@
 {
-  "home_page": "http://sourceforge.net/projects/spacenav/",
   "description": "",
+  "home_page": "http://sourceforge.net/projects/spacenav/",
   "buildscript": "libspnav",
-  "non_installable": false,
-  "deprecated": false,
+  "basename": "spacenavd",
   "filters": "",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,
-  "basename": "spacenavd"
+  "non_installable": false,
+  "deprecated": false
 }

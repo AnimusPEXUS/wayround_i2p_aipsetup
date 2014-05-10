@@ -1,12 +1,12 @@
 {
-  "deprecated": false,
-  "buildscript": "std",
   "description": "write something here, please",
-  "filters": "",
-  "non_installable": false,
-  "removable": true,
-  "installation_priority": 5,
   "home_page": "http://www.gnome.org",
+  "buildscript": "std",
   "basename": "sushi",
-  "reducible": true
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
 }
