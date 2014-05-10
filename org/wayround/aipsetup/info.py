@@ -241,7 +241,7 @@ class PackageInfoCtl:
             keys = SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
 
             for i in keys:
-                ret[i] = eval('q.{}'.format(i))
+                ret[i] = getattr(q, i)
 
             ret['name'] = q.name
 
@@ -898,7 +898,8 @@ def write_info_file(name, struct):
     if 'name' in struct:
         del struct['name']
 
-    txt = json.dumps(struct, indent=2, sort_keys=True)
+    # do not add sort_keys=True here. struct must be OrderedDict
+    txt = json.dumps(struct, indent=2)
 
     try:
         f = open(name, 'w')

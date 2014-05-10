@@ -3,6 +3,7 @@
 Edit package info on disk and update pkginfo database
 """
 
+import collections
 import functools
 import glob
 import logging
@@ -220,6 +221,18 @@ class MainWindow:
             data['non_installable'] = self.ui.non_installable_cb.get_active()
 
             data['deprecated'] = self.ui.deprecated_cb.get_active()
+
+            data_o = collections.OrderedDict()
+
+            keys = \
+                org.wayround.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
+
+            for i in keys:
+                data_o[i] = data[i]
+
+            data_o['name'] = data['name']
+
+            data = data_o
 
             if org.wayround.aipsetup.info.write_info_file(filename, data) != 0:
                 dia = Gtk.MessageDialog(
