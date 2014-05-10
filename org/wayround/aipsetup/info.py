@@ -898,7 +898,7 @@ def write_info_file(name, struct):
     if 'name' in struct:
         del struct['name']
 
-    txt = json.dumps(struct, indent=2)
+    txt = json.dumps(struct, indent=2, sort_keys=True)
 
     try:
         f = open(name, 'w')

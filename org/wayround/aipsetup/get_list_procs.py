@@ -218,8 +218,6 @@ def gnome_get(
     if not mode in ['tar', 'asp']:
         raise ValueError("`mode' must be in ['tar', 'asp']")
 
-    print('test')
-
     if mode == 'tar':
 
         if 'version' in kwargs:
