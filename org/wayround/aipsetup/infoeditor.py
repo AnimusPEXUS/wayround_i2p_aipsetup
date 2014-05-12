@@ -230,7 +230,7 @@ class MainWindow:
             for i in keys:
                 data_o[i] = data[i]
 
-            data_o['name'] = data['name']
+            data_o['name'] = name
 
             data = data_o
 

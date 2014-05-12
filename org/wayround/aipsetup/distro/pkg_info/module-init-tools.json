@@ -1,5 +1,5 @@
 {
-  "description": "write something here, please",
+  "description": "use kmod",
   "home_page": "http://www.kernel.org",
   "buildscript": "module-init-tools",
   "basename": "module-init-tools",
