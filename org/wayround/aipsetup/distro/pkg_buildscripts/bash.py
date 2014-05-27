@@ -14,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'patch', 'configure', 'build', 'distribute'],
+            ['extract', 'patch', 'configure', 'build', 'distribute', 'ln'],
             action,
             "help"
             )
@@ -29,6 +29,7 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
         patch_dir = org.wayround.aipsetup.build.getDIR_PATCHES(buildingsite)
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -123,5 +124,14 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+        if 'ln'  in actions and ret == 0:
+
+            tsl = org.wayround.utils.path.join(dst_dir, 'usr', 'bin', 'sh')
+
+            if os.path.exists(tsl) or os.path.islink(tsl):
+                os.unlink(tsl)
+
+            os.symlink('bash', tsl)
 
     return ret

@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://p11-glue.freedesktop.org/",
-  "buildscript": "std",
+  "buildscript": "p11_kit",
   "basename": "p11-kit",
   "filters": "",
   "installation_priority": 5,

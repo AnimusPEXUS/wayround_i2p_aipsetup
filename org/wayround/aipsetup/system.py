@@ -10,6 +10,7 @@ import os.path
 import pprint
 import re
 import shutil
+import shlex
 import subprocess
 import tarfile
 
@@ -550,10 +551,6 @@ class SystemCtl:
                                 script_obj.close()
 
                 tarf.close()
-
-        # TODO: too slow.. not really needed here.. will remove some times
-        #        if ret == 0:
-        #            os.sync()
 
         return ret
 
@@ -1104,72 +1101,68 @@ class SystemCtl:
         :param mode: see in :func:`find_file_in_files_installed_by_asp`
         :param sub_mute: passed to :func:`find_file_in_files_installed_by_asp`
 
-        :param predefined_asp_tree: if this paramter passed, use it instead of
-            manually creating it
+        :param predefined_asp_tree: if this parameter passed, use it instead
+            of automatically creating it with
+            list_installed_asps_and_their_files()
         """
 
-        ret = 0
-
-        lst = []
-        if predefined_asp_tree:
-            lst = list(predefined_asp_tree.keys())
+        if predefined_asp_tree == None:
+            predefined_asp_tree = \
+                self.list_installed_asps_and_their_files(mute)
         else:
-            lst = self.list_installed_asps(
-                mute=True
+            if not isinstance(predefined_asp_tree, dict):
+                raise ValueError("`predefined_asp_tree' must be dict or None")
+
+        lst = list(predefined_asp_tree.keys())
+
+        lst.sort()
+
+        ret_dict = dict()
+
+        lst_l = len(lst)
+        lst_i = 0
+
+        for pkgname in lst:
+
+            if pkgname.endswith('.xz'):
+                pkgname = pkgname[:-3]
+
+            predefined_file_list = None
+            if predefined_asp_tree:
+                predefined_file_list = predefined_asp_tree[pkgname + '.xz']
+
+            found = self.find_file_in_files_installed_by_asp(
+                pkgname, instr=instr,
+                mode=mode,
+                mute=sub_mute,
+                predefined_file_list=predefined_file_list
                 )
 
-        if not isinstance(lst, list):
-            logging.error("Error getting installed packages list")
-            ret = 1
-        else:
-            lst.sort()
-
-            ret_dict = dict()
-
-            lst_l = len(lst)
-            lst_i = 0
-
-            for pkgname in lst:
-
-                if pkgname.endswith('.xz'):
-                    pkgname = pkgname[:-3]
-
-                predefined_file_list = None
-                if predefined_asp_tree:
-                    predefined_file_list = predefined_asp_tree[pkgname + '.xz']
-
-                found = self.find_file_in_files_installed_by_asp(
-                    pkgname, instr=instr,
-                    mode=mode,
-                    mute=sub_mute,
-                    predefined_file_list=predefined_file_list
-                    )
-
-                if len(found) != 0:
-                    ret_dict[pkgname] = found
-
-                if not mute:
-
-                    lst_i += 1
-
-                    perc = 0
-                    if lst_i == 0:
-                        perc = 0.0
-                    else:
-                        perc = 100.0 / (float(lst_l) / float(lst_i))
-
-                    org.wayround.utils.terminal.progress_write(
-                        "    {:6.2f}% (found {} packages) ({})".format(
-                            perc,
-                            len(ret_dict.keys()),
-                            pkgname
-                            )
-                        )
+            if len(found) != 0:
+                ret_dict[pkgname] = found
 
             if not mute:
-                org.wayround.utils.terminal.progress_write_finish()
 
-            ret = ret_dict
+                lst_i += 1
+
+                perc = 0
+                if lst_i == 0:
+                    perc = 0.0
+                else:
+                    perc = 100.0 / (float(lst_l) / float(lst_i))
+
+                org.wayround.utils.terminal.progress_write(
+                    "    {:6.2f}% (found {} packages) ({})".format(
+                        perc,
+                        len(ret_dict.keys()),
+                        pkgname
+                        )
+                    )
+
+        if not mute:
+            org.wayround.utils.terminal.progress_write_finish()
+
+        ret = ret_dict
 
         return ret
 
@@ -1326,6 +1319,10 @@ class SystemCtl:
 
     def load_asp_deps(self, asp_name, mute=True):
 
+        """
+        Result: dict. keys - file paths; values - lists of file basenames
+        """
+
         ret = None
 
         destdir = org.wayround.utils.path.abspath(self.basedir)
@@ -1363,10 +1360,9 @@ class SystemCtl:
 
         return ret
 
-    def find_old_packages(self, age=None, mute=True):
+    def find_old_packages(self, age=2592000, mute=True):
 
-        if age == None:
-            age = 2592000  # (60 * 60 * 24 * 30)  # 30 days
+        # 2592000 = (60 * 60 * 24 * 30)  # 30 days
 
         ret = []
 
@@ -1471,6 +1467,10 @@ class SystemCtl:
         return 0
 
     def load_asp_deps_all(self, mute=True):
+        """
+        Returns dict: keys - asp names; values - dicts returned by
+                      load_asp_deps()
+        """
 
         ret = {}
 
@@ -1488,6 +1488,10 @@ class SystemCtl:
 
             if isinstance(res, dict):
                 ret[asp_name] = res
+            else:
+                logging.error(
+                    "Error loading deps list for: {}".format(asp_name)
+                    )
 
         return ret
 
@@ -1737,7 +1741,7 @@ class SystemCtl:
         # TODO: optimizations required
 
         """
-        Returns ``list`` on success
+        Returns list on success
         """
 
         ret = 0
@@ -1766,7 +1770,7 @@ class SystemCtl:
                 all_deps |= set(elfs_installed_by_asp_name_deps[i])
 
             if not mute:
-                logging.info("Getting list of all files installed in system")
+                logging.info("Getting list of files installed by all asps")
 
             all_asps_and_files = (
                 self.list_installed_asps_and_their_files(
@@ -2046,7 +2050,7 @@ class SystemCtl:
         Look for dependency problems in current system
         """
 
-        so_files, elf_files = self.find_so_and_elf_files(verbose)
+        so_files, elf_files = self.find_system_so_and_elf_files(verbose)
 
         reqs = find_so_problems_by_given_so_and_elfs(
             so_files, elf_files, verbose
@@ -2098,7 +2102,7 @@ class SystemCtl:
 
         return ret
 
-    def find_so_and_elf_files(self, verbose=False):
+    def find_system_so_and_elf_files(self, verbose=False):
 
         """
         Find All system Shared Object Files and all ELF files real paths.
@@ -2214,6 +2218,232 @@ class SystemCtl:
 
         return ret
 
+    def find_asps_requireing_sos_not_installed_by_asps(self, mute=True):
+
+        """
+        Return: dict. keys - asp names; values - lists of tuples
+        """
+
+        all_deps = self.load_asp_deps_all(mute=mute)
+
+        all_installed_files = \
+            self.list_installed_asps_and_their_files(mute=mute)
+
+        logging.info("Compacting for greater performance..")
+        all_installed_files2 = dict()
+
+        for i in all_installed_files.keys():
+            all_installed_files2[i] = \
+                org.wayround.utils.path.bases(all_installed_files[i])
+
+        all_installed_files = all_installed_files2
+
+        del all_installed_files2
+        logging.info("Ready")
+        logging.info("Searching..")
+
+        ret = {}
+
+        all_deps_keys = list(all_deps.keys())
+        all_deps_keys_l = len(all_deps_keys)
+        i = 0
+
+        for ad_aspname in all_deps_keys:
+
+            for ad_aspname_elf_name in all_deps[ad_aspname].keys():
+
+                for ad_aspname_elf_name_depname \
+                    in all_deps[ad_aspname][ad_aspname_elf_name]:
+
+                    found = False
+
+                    for aif_asp_name in all_installed_files.keys():
+
+                        if ad_aspname_elf_name_depname \
+                            in all_installed_files[aif_asp_name]:
+
+                            found = True
+                            break
+
+                    if not found:
+
+                        if not ad_aspname in ret:
+                            ret[ad_aspname] = []
+
+                        lst2 = ret[ad_aspname]
+
+                        x = (ad_aspname_elf_name,
+                             ad_aspname_elf_name_depname)
+
+                        lst2.append(x)
+                        if not mute:
+                            org.wayround.utils.terminal.progress_write(
+                                "Added: {}\n".format(x)
+                                )
+                            org.wayround.utils.terminal.progress_write(
+                                "Searching.. {} of {} ({:5.2f}% ready)".format(
+                                    i,
+                                    all_deps_keys_l,
+                                    100.0 / (all_deps_keys_l / i)
+                                    )
+                                )
+
+            i += 1
+            if not mute:
+                org.wayround.utils.terminal.progress_write(
+                    "Searching.. {} of {} ({:5.2f}% ready)".format(
+                        i,
+                        all_deps_keys_l,
+                        100.0 / (all_deps_keys_l / i)
+                        )
+                    )
+
+        if not mute:
+            org.wayround.utils.terminal.progress_write_finish()
+
+        return ret
+
+    def find_libtool_la_with_problems(self, mute=True):
+
+        mask = org.wayround.utils.path.join(
+            self.basedir, 'usr', 'lib', '*.la'
+            )
+
+        if not mute:
+            logging.info("Looking for `{}'".format(mask))
+
+        la_files = glob.glob(mask)
+        la_files_len = len(la_files)
+
+        if not mute:
+            logging.info("    found {} file(s)".format(la_files_len))
+
+        la_with_problems = dict()
+
+        if not mute:
+            logging.info("Analising..")
+
+        la_files_len_i = 0
+
+        for i in la_files:
+
+            if not i in la_with_problems:
+                la_with_problems[i] = dict(
+                    so=set(),
+                    la=set(),
+                    dir=list(),
+                    read_error=False
+                    )
+
+            p = subprocess.Popen(
+                [
+                 'bash',
+                 '-c',
+                 '. {} ; echo $dependency_libs'.format(shlex.quote(i))
+                 ],
+                stdout=subprocess.PIPE
+                )
+
+            if p.wait() != 0:
+                la_with_problems[i]['read_error'] = True
+
+            else:
+
+                res = str(p.communicate()[0], 'utf-8').splitlines()[0]
+
+                sp_res = shlex.split(res)
+
+                search_dirs = set(['/usr/lib'])
+
+                for j in sp_res:
+
+                    # dir_ = la_with_problems[i]['dir']
+
+                    if j.startswith('-L'):
+
+                        wj = j[2:]
+
+                        if (not wj.startswith('/usr/lib')
+                            or not os.path.isdir(
+                                org.wayround.utils.path.join(self.basedir, wj)
+                                )
+                            ):
+
+                            # TODO: do we need it?
+                            # NOTE: possible some strange results.
+                            #       for some reasons .la files can contain
+                            #       paths to directories in whiche they were
+                            #       built
+                            # dir_.append(wj)
+
+                            pass
+
+                        else:
+
+                            search_dirs.add(wj)
+
+                for j in sp_res:
+
+                    so = la_with_problems[i]['so']
+                    la = la_with_problems[i]['la']
+
+                    if j.startswith('-l'):
+
+                        wj = j[2:]
+
+                        found = False
+
+                        for k in search_dirs:
+
+                            for l in ['so', 'a']:
+                                if os.path.isfile(
+                                    org.wayround.utils.path.join(
+                                        self.basedir,
+                                        k,
+                                        'lib{}.{}'.format(wj, l)
+                                        )
+                                    ):
+
+                                    found = True
+                                    break
+
+                            if found:
+                                break
+
+                        if not found:
+                            so.add(wj)
+
+                    elif j.endswith('.la'):
+
+                        if not os.path.isfile(
+                            org.wayround.utils.path.join(self.basedir, j)
+                            ):
+                            la.add(j)
+
+                    else:
+                        Exception("Unknown case")
+
+            if (len(la_with_problems[i]['so']) == 0
+                and len(la_with_problems[i]['la']) == 0
+                and len(la_with_problems[i]['dir']) == 0
+                and la_with_problems[i]['read_error'] == False):
+                del la_with_problems[i]
+
+            la_files_len_i += 1
+            if not mute:
+                org.wayround.utils.terminal.progress_write(
+                    '    {} of {} ({:5.2f}%)'.format(
+                        la_files_len_i,
+                        la_files_len,
+                        100 / (la_files_len / la_files_len_i)
+                        )
+                    )
+
+        if not mute:
+            org.wayround.utils.terminal.progress_write_finish()
+
+        return la_with_problems
+
 
 def find_all_so_files(paths, verbose=False):
 
@@ -2227,6 +2457,8 @@ def find_all_so_files(paths, verbose=False):
         so_files += find_so_files(i, verbose)
 
     so_files = org.wayround.utils.path.realpaths(so_files)
+
+    so_files = list(set(so_files))
 
     return so_files
 
@@ -2271,6 +2503,8 @@ def find_all_elf_files(paths, verbose=False):
         elf_files += find_elf_files(i, verbose)
 
     elf_files = org.wayround.utils.path.realpaths(elf_files)
+
+    elf_files = list(set(elf_files))
 
     return elf_files
 

@@ -49,7 +49,7 @@ def main(buildingsite, action=None):
         if 'configure' in actions and ret == 0:
 #            nss_build_all: build_coreconf build_nspr build_dbm all
 
-            makefile = os.path.join(
+            makefile = org.wayround.utils.path.join(
                 src_dir, source_configure_reldir, 'Makefile'
                 )
 
@@ -103,17 +103,20 @@ def main(buildingsite, action=None):
                             buildingsite
                             )
 
-            dist_dir = os.path.join(
+            dist_dir = org.wayround.utils.path.join(
                 src_dir, 'dist'
                 )
 
-            OBJ_dir = glob.glob(dist_dir + os.path.sep + '*.OBJ')
+            OBJ_dir = \
+                glob.glob(org.wayround.utils.path.join(dist_dir, '*.OBJ'))
 
             if len(OBJ_dir) != 1:
                 logging.error("single `dist/Linux*' dir not found")
                 ret = 10
             else:
-                OBJ_dir = dist_dir + os.path.sep + os.path.basename(OBJ_dir[0])
+                OBJ_dir = org.wayround.utils.path.join(
+                    dist_dir, os.path.basename(OBJ_dir[0])
+                    )
 
                 logging.info(
                     "Dereferencing links in {}".format(
@@ -124,13 +127,15 @@ def main(buildingsite, action=None):
                         )
                     )
 
-                files = os.listdir(os.path.join(OBJ_dir, 'bin'))
+                files = os.listdir(
+                    org.wayround.utils.path.join(OBJ_dir, 'bin')
+                    )
 
                 # comment this 'for' if want more files
                 for i in files:
                     if not i in ['certutil', 'nss-config', 'pk12util']:
                         os.unlink(
-                            os.path.join(OBJ_dir, 'bin', i)
+                            org.wayround.utils.path.join(OBJ_dir, 'bin', i)
                             )
 
                 if org.wayround.utils.file.dereference_files_in_dir(
@@ -146,7 +151,7 @@ def main(buildingsite, action=None):
 
                     try:
                         os.mkdir(
-                            os.path.join(OBJ_dir, 'include'),
+                            org.wayround.utils.path.join(OBJ_dir, 'include'),
                             mode=0o755
                             )
                     except:
@@ -154,28 +159,30 @@ def main(buildingsite, action=None):
 
                     try:
                         os.mkdir(
-                            os.path.join(OBJ_dir, 'usr'),
+                            org.wayround.utils.path.join(OBJ_dir, 'usr'),
                             mode=0o755
                             )
                     except:
                         pass
 
                     shutil.move(
-                        os.path.join(OBJ_dir, 'bin'),
-                        os.path.join(OBJ_dir, 'usr')
+                        org.wayround.utils.path.join(OBJ_dir, 'bin'),
+                        org.wayround.utils.path.join(OBJ_dir, 'usr')
                         )
 
                     shutil.move(
-                        os.path.join(OBJ_dir, 'lib'),
-                        os.path.join(OBJ_dir, 'usr')
+                        org.wayround.utils.path.join(OBJ_dir, 'lib'),
+                        org.wayround.utils.path.join(OBJ_dir, 'usr')
                         )
 
                     shutil.move(
-                        os.path.join(OBJ_dir, 'include'),
-                        os.path.join(OBJ_dir, 'usr')
+                        org.wayround.utils.path.join(OBJ_dir, 'include'),
+                        org.wayround.utils.path.join(OBJ_dir, 'usr')
                         )
 
-                    libs = os.listdir(os.path.join(OBJ_dir, 'usr', 'lib'))
+                    libs = os.listdir(
+                        org.wayround.utils.path.join(OBJ_dir, 'usr', 'lib')
+                        )
 
                     libs2 = []
                     for i in libs:
@@ -196,7 +203,9 @@ def main(buildingsite, action=None):
 
                     try:
                         os.mkdir(
-                            os.path.join(OBJ_dir, 'usr', 'include', 'nss'),
+                            org.wayround.utils.path.join(
+                                OBJ_dir, 'usr', 'include', 'nss'
+                                ),
                             mode=0o755
                             )
                     except:
@@ -210,8 +219,10 @@ def main(buildingsite, action=None):
 
                     for i in ['private', 'public']:
                         org.wayround.utils.file.files_by_mask_copy_to_dir(
-                            os.path.join(dist_dir, i, 'nss'),
-                            os.path.join(OBJ_dir, 'usr', 'include', 'nss'),
+                            org.wayround.utils.path.join(dist_dir, i, 'nss'),
+                            org.wayround.utils.path.join(
+                                OBJ_dir, 'usr', 'include', 'nss'
+                                ),
                             mask='*'
                             )
 
@@ -266,22 +277,21 @@ Cflags: -I${{includedir}}
 # -lsmime{nss_major_version} -lssl{nss_major_version}
 # -lsoftokn{nss_major_version}
 
-                    # TODO: use os.path.join
-
                     try:
                         os.mkdir(
-                            OBJ_dir + os.path.sep + 'usr' + os.path.sep +
-                            'lib' + os.path.sep + 'pkgconfig',
+                            org.wayround.utils.path.join(
+                                OBJ_dir, 'usr', 'lib', 'pkgconfig'
+                                ),
                             mode=0o755
                             )
                     except:
                         pass
 
                     f = open(
-                        OBJ_dir + os.path.sep + 'usr' + os.path.sep +
-                        'lib' + os.path.sep + 'pkgconfig' + os.path.sep +
-                        'nss.pc',
-                        'w'
+                            org.wayround.utils.path.join(
+                                OBJ_dir, 'usr', 'lib', 'pkgconfig', 'nss.pc'
+                                ),
+                            'w'
                         )
 
                     f.write(pkg_config)
@@ -449,8 +459,9 @@ fi
                         )
 
                     f = open(
-                        OBJ_dir + os.path.sep + 'usr' + os.path.sep +
-                        'bin' + os.path.sep + 'nss-config',
+                        org.wayround.utils.path.join(
+                            OBJ_dir, 'usr', 'bin', 'nss-config'
+                            ),
                         'w'
                         )
 
@@ -458,18 +469,25 @@ fi
                     f.close()
 
                     files = os.listdir(
-                        OBJ_dir + os.path.sep + 'usr' + os.path.sep + 'bin'
+                        org.wayround.utils.path.join(
+                            OBJ_dir, 'usr', 'bin'
+                            )
+
                         )
 
                     for i in files:
                         os.chmod(
-                            OBJ_dir + os.path.sep + 'usr' + os.path.sep +
-                            'bin' + os.path.sep + i,
+                            org.wayround.utils.path.join(
+                                OBJ_dir, 'usr', 'bin', i
+                                ),
                             mode=0o755
                             )
 
                     logging.info("Moving files to distribution dir")
-                    shutil.move(OBJ_dir + os.path.sep + 'usr', dest_dir)
+                    shutil.move(
+                        org.wayround.utils.path.join(OBJ_dir, 'usr'),
+                        dest_dir
+                        )
                     logging.info("Files moved")
 
     return ret

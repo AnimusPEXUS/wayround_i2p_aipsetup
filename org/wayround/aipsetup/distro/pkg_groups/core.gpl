@@ -43,6 +43,8 @@
         "linux",
         "iproute2",
         "iptables",
+        "icedtea",
+        "ant",
         "m4", 
         "mc",
         "mpc",
@@ -72,6 +74,10 @@
         "which",
         "polkit",
         "xz",
-        "zlib"
+        "zlib",
+        "zip",
+        "unzip",
+        "tcpdump",
+        "man"
     ]
 }

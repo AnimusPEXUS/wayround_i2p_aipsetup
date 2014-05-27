@@ -14,9 +14,6 @@ import org.wayround.utils.system_type
 
 def pkg_repo_ctl_by_config(config):
 
-    # TODO: rename form 'pkg_repo_ctl_by_config'
-    #       to 'pkg_repo_ctl_for_pkg_server'
-
     db_connection = org.wayround.aipsetup.dbconnections.pkg_repo_db(config)
 
     repository_dir = config['pkg_server']['repository_dir']
@@ -232,7 +229,8 @@ def pkg_client_new(
     ):
     return org.wayround.aipsetup.client_pkg.PackageServerClient(
         url,
-        downloads_dir
+        downloads_dir,
+        acceptable_extensions_order_list
         )
 
 

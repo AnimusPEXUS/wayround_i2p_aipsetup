@@ -50,6 +50,7 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '--enable-introspection=yes',
+                    '--enable-vala-bindings',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +

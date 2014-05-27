@@ -231,13 +231,15 @@ class SRCServer:
             filtered_tags = []
 
             for i in all_tags:
-
+		
+                look_for = i
+		
                 if not cs:
-                    i = i.lower()
+                    look_for = look_for.lower()
 
                 if (
-                    (searchmode == 'filemask' and fnmatch.fnmatch(i, mask)) or
-                    (searchmode == 'regexp' and re.match(mask, i))
+                    (searchmode == 'filemask' and fnmatch.fnmatch(look_for, mask)) or
+                    (searchmode == 'regexp' and re.match(mask, look_for))
                     ):
                     filtered_tags.append(i)
 

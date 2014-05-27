@@ -15,9 +15,21 @@
                 } 
             },
 
-            
-        
         "baobab": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            },
+        "cheese": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            },
+        "devhelp": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
@@ -46,6 +58,13 @@
                 } 
             },
         "evince": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            },
+        "evolution": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
@@ -199,6 +218,20 @@
                 "version": "{asked_version}"
                 } 
             },
+        "gnome-panel": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            },
+        "gnome-search-tool": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            }, 
         "gnome-screenshot": {
             "proc": "gnome_get",
             "args": [],
@@ -258,6 +291,13 @@
                 } 
             },
         "gnome-themes-standard": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            },
+        "gnome-tweak-tool": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
@@ -416,6 +456,14 @@
                 } 
             },
  
+
+
+        "vte": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {} 
+            },
+            
 
  
         "NetworkManager": {
@@ -711,13 +759,12 @@
             "proc": "normal_get",
             "args": [],
             "kwargs": {} 
-            },
-        "vte": {
-            "proc": "normal_get",
+            }
+        "gnome-doc-utils": {
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {} 
             }
-            
     }
 
 }

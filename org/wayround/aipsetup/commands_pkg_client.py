@@ -1,20 +1,19 @@
 
 import collections
-import json
 import logging
-import os.path
 
 import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.get_list_procs
 import org.wayround.aipsetup.info
+import org.wayround.utils.path
 import org.wayround.utils.text
 
 
 def commands():
     return collections.OrderedDict([
         ('pkg-client', collections.OrderedDict([
-            ('list', list_),
+            ('search', list_),
             ('list-cat', list_cat),
             ('ls', ls),
             ('print', print_info),
@@ -25,7 +24,7 @@ def commands():
             ('get-by-list', get_asp_by_list),
             ])),
         ('pkg-client-src', collections.OrderedDict([
-            ('list', tar_list),
+            ('search', tar_list),
             ('get-lat', get_tar_latest),
             ('get-lat-cat', get_tar_lat_cat),
             ('get-by-list', get_tar_by_list),
@@ -489,17 +488,7 @@ def _get_tarballs_latest(url, name, config, out_dir=None):
 
     if res != None and len(res) != 0:
 
-        found = None
-        for i in exts:
-            for j in res:
-                if j.endswith(i):
-                    found = j
-                    break
-            if found != None:
-                break
-
-        if found:
-            res = found
+        res = org.wayround.utils.path.select_by_prefered_extension(res, exts)
 
         res = org.wayround.aipsetup.client_pkg.get_tarball(
             res,

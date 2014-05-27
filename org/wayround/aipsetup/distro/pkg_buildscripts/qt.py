@@ -96,12 +96,14 @@ def main(buildingsite, action=None):
                 )
 
         if 'SET' in actions and ret == 0:
-            try:
-                os.makedirs(etc_profile_set_dir)
-            except:
-                logging.error(
-                    "Can't create dir: {}".format(etc_profile_set_dir)
-                    )
+            if not os.path.isdir(etc_profile_set_dir):
+                try:
+                    os.makedirs(etc_profile_set_dir)
+                except:
+                    logging.error(
+                        "Can't create dir: {}".format(etc_profile_set_dir)
+                        )
+                    raise
 
             f = open(
                 org.wayround.utils.path.join(
@@ -113,13 +115,19 @@ def main(buildingsite, action=None):
 
             f.write("""\
 #!/bin/bash
-export PATH=$PATH:/usr/lib/qt{}_w_toolkit/bin
+export PATH=$PATH:/usr/lib/qt{qtnum}_w_toolkit/bin
 
-#if [ "${#PKG_CONFIG_PATH}" -ne "0" ]; then
+#if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
 #    PKG_CONFIG_PATH+=":"
 #fi
-#export PKG_CONFIG_PATH=$PKG_CONFIG_PATH/usr/lib/qt{}_w_toolkit/lib/pkgconfig
-""".format(number))
+#export PKG_CONFIG_PATH=$PKG_CONFIG_PATH/usr/lib/qt{qtnum}_w_toolkit/lib/pkgconfig
+
+if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
+    LD_LIBRARY_PATH+=":"
+fi
+export LD_LIBRARY_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib"
+
+""".format(qtnum=number))
             f.close()
 
     return ret

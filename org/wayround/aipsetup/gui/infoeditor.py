@@ -68,13 +68,6 @@ class InfoEditorUi:
         self.basename_entry = Gtk.Entry()
         paned2_box1.pack_start(self.basename_entry, False, False, 0)
 
-        # TODO: Source Path Prefix must be a tarball server function
-        #  paned2_box1.pack_start(Gtk.Label("Source Path Prefix"), False,
-        #    False, 0)
-        #  self.source_path_prefix = Gtk.Entry()
-        #       paned2_box1.pack_start(self.source_path_prefix, False,
-        #    False, 0)
-
         check_grid = Gtk.Grid()
 
         self.reducible_cb = Gtk.CheckButton.new_with_label("Reducible")

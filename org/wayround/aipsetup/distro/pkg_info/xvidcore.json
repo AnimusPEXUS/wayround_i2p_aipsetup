@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.xvid.org",
-  "buildscript": "",
+  "buildscript": "xvidcore",
   "basename": "xvidcore",
   "filters": "",
   "installation_priority": 5,

@@ -53,7 +53,7 @@ def main(buildingsite, action=None):
 #                    '--disable-libada',
 #                    '--enable-bootstrap',
                     '--enable-64-bit-bfd',
-#                    '--disable-werror',
+                    '--disable-werror',
                     '--enable-libada',
                     '--enable-libssp',
                     '--enable-objc-gc',

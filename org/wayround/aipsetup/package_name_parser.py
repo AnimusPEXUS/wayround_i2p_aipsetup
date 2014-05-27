@@ -80,7 +80,9 @@ def rm_ext_from_pkg_name(name):
 
 def package_name_parse(filename):
     """
-    Parse package name
+    Parse package name.
+
+    Can parse with endings .tar.xz, .asp and .xz
     """
 
     filename = os.path.basename(filename)

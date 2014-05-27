@@ -1,6 +1,6 @@
 {
   "description": "write something here, please",
-  "home_page": "http://web.mit.edu/Kerberos/",
+  "home_page": "http://web.mit.edu/kerberos/",
   "buildscript": "krb5",
   "basename": "krb5",
   "filters": "",

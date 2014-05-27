@@ -213,6 +213,9 @@ def gnome_get(
     args, kwargs
     ):
 
+    """
+    """
+
     ret = None
 
     if not mode in ['tar', 'asp']:
@@ -239,7 +242,7 @@ def gnome_get(
             kwargs['nineties_minors_are_acceptable'] = kwargs['nmaa']
 
         if 'daa' in kwargs:
-            kwargs['nineties_minors_are_acceptable'] = kwargs['daa']
+            kwargs['development_are_acceptable'] = kwargs['daa']
 
         if 'flvirm' in kwargs:
             kwargs['find_lower_version_if_required_missing'] = kwargs['flvirm']
@@ -276,10 +279,17 @@ def gnome_get(
 
 def normal_get(
     mode,
-    pkg_client, src_client, acceptable_extensions_order_list,
+    pkg_client, src_client,
+    acceptable_extensions_order_list,
     pkgname, version,
     args, kwargs
     ):
+
+    """
+    Download tarball or complete ASP package
+
+
+    """
 
     if not mode in ['tar', 'asp']:
         raise ValueError("`mode' must be in ['tar', 'asp']")
@@ -376,14 +386,18 @@ def get_by_glp(
                 if data['proc'] == 'gnome_get':
                     proc = gnome_get
 
-            if proc(
-                mode,
-                pkg_client, src_client, acceptable_extensions_order_list,
-                i,
-                version=version,
-                args=args,
-                kwargs=kwargs
-                ) != 0:
+            if not isinstance(
+                proc(
+                    mode,
+                    pkg_client, src_client, acceptable_extensions_order_list,
+                    i,
+                    version=version,
+                    args=args,
+                    kwargs=kwargs
+                    ),
+                str
+                ):
+
                 errors += 1
                 f = open('!errors!.txt', 'a')
                 f.write("Can't get file for: {}\n".format(i))

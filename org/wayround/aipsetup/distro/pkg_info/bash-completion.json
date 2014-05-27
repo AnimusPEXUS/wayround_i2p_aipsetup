@@ -3,7 +3,7 @@
   "home_page": "",
   "buildscript": "std",
   "basename": "bash-completion",
-  "filters": "",
+  "filters": "- status !re ^$\n- version re \\d{4}",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

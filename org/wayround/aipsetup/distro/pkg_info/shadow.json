@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.debian.org",
-  "buildscript": "std",
+  "buildscript": "shadow",
   "basename": "shadow",
   "filters": "",
   "installation_priority": 5,

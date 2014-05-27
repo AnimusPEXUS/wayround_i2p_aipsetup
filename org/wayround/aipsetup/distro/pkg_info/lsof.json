@@ -3,7 +3,7 @@
   "home_page": "",
   "buildscript": "lsof",
   "basename": "lsof",
-  "filters": "",
+  "filters": "- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

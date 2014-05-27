@@ -1,6 +1,7 @@
 
 import logging
 import os.path
+import glob
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
@@ -13,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'configure', 'build', 'distribute', 'ln'],
         action,
         "help"
         )
@@ -109,5 +110,49 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+        if 'ln' in actions and ret == 0:
+
+            ret = 0
+
+            pkg_name = pkg_info['pkg_info']['name']
+
+            bin_dir = org.wayround.utils.path.join(dst_dir, 'usr', 'bin')
+
+            bin_files = os.listdir(bin_dir)
+
+            if pkg_name == 'tcl':
+                for i in bin_files:
+                    if i.startswith('tclsh') and i != 'tclsh':
+
+                        target_name = org.wayround.utils.path.join(
+                            bin_dir, 'tclsh'
+                            )
+
+                        if (os.path.exists(target_name)
+                            or os.path.islink(target_name)):
+
+                            os.unlink(target_name)
+
+                        os.symlink(i, target_name)
+
+                        break
+
+            if pkg_name == 'tk':
+                for i in bin_files:
+                    if i.startswith('wish') and i != 'wish':
+
+                        target_name = org.wayround.utils.path.join(
+                            bin_dir, 'wish'
+                            )
+
+                        if (os.path.exists(target_name)
+                            or os.path.islink(target_name)):
+
+                            os.unlink(target_name)
+
+                        os.symlink(i, target_name)
+
+                        break
 
     return ret

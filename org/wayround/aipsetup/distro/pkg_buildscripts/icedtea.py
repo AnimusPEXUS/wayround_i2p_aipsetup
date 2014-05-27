@@ -156,8 +156,8 @@ def main(buildingsite, action=None):
             fi.write(
                 """\
 #!/bin/bash
-export PATH=$PATH:/usr/lib/java/jdk/bin:/usr/lib/java/jdk/jre/bin
 export JAVA_HOME=/usr/lib/java/jdk
+export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
 export MANPATH=$MANPATH:$JAVA_HOME/man
 if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"

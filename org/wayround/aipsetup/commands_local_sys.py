@@ -8,6 +8,7 @@ import pprint
 import shlex
 import sys
 
+import org.wayround.aipsetup.client_src
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.sysupdates
@@ -17,6 +18,7 @@ import org.wayround.utils.checksum
 import org.wayround.utils.file
 import org.wayround.utils.getopt
 import org.wayround.utils.log
+import org.wayround.utils.path
 import org.wayround.utils.tarball_name_parser
 import org.wayround.utils.terminal
 import org.wayround.utils.text
@@ -37,21 +39,25 @@ def commands():
             ('files', system_list_package_files),
             ('check', package_check),
             ('parse-asp-name', info_parse_pkg_name),
-            ('parse-tarball-name', info_parse_tarball)
+            ('parse-tar-name', info_parse_tarball)
             ])),
         ('sys-clean', collections.OrderedDict([
-            ('find_broken', clean_packages_with_broken_files),
+            ('find-broken', clean_packages_with_broken_files),
             ('elf-readiness', clean_check_elfs_readiness),
             ('so-problems', clean_find_so_problems),
             ('find-old', clean_find_old_packages),
             ('explicit-asps',
                 clean_check_list_of_installed_packages_and_asps_auto),
             ('find-garbage', clean_find_garbage),
+            ('find-packages-requiring-deleteds',
+                clean_find_packages_requiring_deleteds),
             ('find-invalid-deps-lists', clean_find_invalid_deps_lists),
+            ('find-libtool-la-with-problems',
+                clean_find_libtool_la_with_problems),
             ('gen-locale', clean_gen_locale),
             ('sys-users', clean_sys_users),
             ('sys-perms', clean_sys_perms),
-            ('install-etc', clean_install_etc)
+            ('install-etc', clean_install_etc),
             ])),
         ('sys-deps', collections.OrderedDict([
             ('asps-asp-depends_on', pkgdeps_print_asps_asp_depends_on),
@@ -802,6 +808,8 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
     config = adds['config']
 
+    get_tarballs = '-g' in opts
+
     ret = 0
 
     pkg_client = \
@@ -819,6 +827,8 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
     res.sort()
 
+    errors = False
+
     for i in res:
         parsed_name = \
             org.wayround.aipsetup.package_name_parser.package_name_parse(i)
@@ -832,6 +842,8 @@ def clean_find_old_packages(command_name, opts, args, adds):
                     parsed_name['groups']['timestamp']
                     )
 
+            package_name = parsed_name['groups']['name']
+
             if not package_date:
                 logging.error(
                     "Can't parse timestamp {} in {}".format(
@@ -841,15 +853,52 @@ def clean_find_old_packages(command_name, opts, args, adds):
                     )
             else:
 
-                print(
+                logging.info(
             "    {:30}: {}: {}".format(
-                datetime.datetime.now() - package_date,
+                str(datetime.datetime.now() - package_date),
                 org.wayround.aipsetup.package_name_parser.parse_timestamp(
                     parsed_name['groups']['timestamp']
                     ),
                 i
                 )
                       )
+
+                if get_tarballs:
+
+                    logging.info("        getting..")
+
+                    lat = pkg_client.tarballs_latest(package_name)
+                    if lat != None and len(lat) > 0:
+                        res = \
+                            org.wayround.utils.path.\
+                                select_by_prefered_extension(
+                                    lat, config
+                                    )
+                        res = org.wayround.aipsetup.client_pkg.get_tarball(
+                            res
+                            )
+                        if not isinstance(res, str):
+                            f = open("!errors!.txt", 'a')
+                            f.write(
+                                "Can't get tarball for package `{}'\n".format(
+                                    package_name
+                                    )
+                                )
+                            f.close()
+                            errors = True
+                    else:
+                        f = open("!errors!.txt", 'a')
+                        f.write(
+                            "Can't get latest tarball name "
+                            "from server for package `{}'\n".format(
+                                package_name
+                                )
+                            )
+                        f.close()
+                        errors = True
+
+    if errors:
+        ret = 10
 
     return ret
 
@@ -1110,6 +1159,229 @@ Wrong cleaning can ruin your system
     return ret
 
 
+def clean_find_packages_requiring_deleteds(
+    command_name, opts, args, adds
+    ):
+
+    """
+    gets list of installed files, searches elfs in them, detects elfs, which
+    pointing on garbage elfs
+
+    -b=DIRNAME   - root directory
+    -l=FILENAME  - log
+    -g           - get sources for all found packages
+    """
+
+    config = adds['config']
+
+    base_dir = '/'
+    if '-b' in opts:
+        base_dir = opts['-b']
+
+    log = None
+    if '-l' in opts:
+        log = opts['-l']
+
+    get_sources = '-g' in opts
+
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
+
+    system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
+        config,
+        pkg_client,
+        base_dir
+        )
+
+    res = system.find_asps_requireing_sos_not_installed_by_asps(False)
+
+    if log:
+
+        t = pprint.pformat(res)
+        f = open(log, 'w')
+        f.write(t)
+        f.close()
+        del t
+        del f
+
+    errors = False
+
+    ret = 0
+
+    if get_sources:
+
+        for i in res.keys():
+
+            name = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(i)
+
+            print("    {}".format(name))
+
+            if name == None:
+                x = "Can't parse as package name: `{}'".format(i)
+                logging.error(x)
+                f = open("!errors!.txt", 'a')
+                f.write("{}\n".format(x))
+                f.close()
+                errors = True
+            else:
+                name = name['groups']['name']
+
+                lat = pkg_client.tarballs_latest(name)
+                if lat != None and len(lat) > 0:
+                    res = org.wayround.utils.path.select_by_prefered_extension(
+                        lat, config
+                        )
+                    res = org.wayround.aipsetup.client_pkg.get_tarball(
+                        res
+                        )
+                    if not isinstance(res, str):
+                        f = open("!errors!.txt", 'a')
+                        f.write(
+                            "Can't get tarball for package `{}'\n".format(name)
+                            )
+                        f.close()
+                        errors = True
+                else:
+                    f = open("!errors!.txt", 'a')
+                    f.write(
+                        "Can't get latest tarball name "
+                        "from server for package `{}'\n".format(name)
+                        )
+                    f.close()
+                    errors = True
+
+    if errors:
+        ret = 1
+
+    return ret
+
+
+def clean_find_libtool_la_with_problems(
+    command_name, opts, args, adds
+    ):
+
+    """
+    Search for .la files depending non-existing dependencies
+
+    Search for .la files depending on other non-existing .la files or on absent
+    .so files
+    """
+
+    ret = 0
+
+    config = adds['config']
+
+    base_dir = '/'
+    if '-b' in opts:
+        base_dir = opts['-b']
+
+    log = None
+    if '-l' in opts:
+        log = opts['-l']
+
+    get_sources = '-g' in opts
+
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
+
+    system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
+        config,
+        pkg_client,
+        base_dir
+        )
+
+    res = system.find_libtool_la_with_problems(mute=False)
+
+    if log:
+
+        t = pprint.pformat(res)
+        f = open(log, 'w')
+        f.write(t)
+        f.close()
+        del t
+        del f
+
+    pprint.pprint(res)
+
+    errors = False
+
+    if get_sources:
+
+        asp_names = set()
+
+        asps_and_files = system.list_installed_asps_and_their_files(mute=False)
+        asps_and_files_list = list(asps_and_files.keys())
+
+        for each in list(res.keys()):
+            for each1 in asps_and_files_list:
+                if each in asps_and_files[each1]:
+                    asp_names.add(each1)
+
+        asp_names = list(asp_names)
+        asp_names.sort()
+
+        pkg_names = set()
+
+        for each in asp_names:
+            name = \
+                org.wayround.aipsetup.package_name_parser.package_name_parse(
+                    each
+                    )
+
+            if name != None:
+                pkg_names.add(name['groups']['name'])
+            else:
+                logging.error("Can't parse ASP name: {}".format(each))
+
+        del(asp_names)
+
+        pkg_names = list(pkg_names)
+        pkg_names.sort()
+
+        logging.info(
+            "Packages to download: {}. ({} item[s])".format(
+                ', '.join(pkg_names),
+                len(pkg_names)
+                )
+            )
+
+        for name in pkg_names:
+            print("    {}".format(name))
+            lat = pkg_client.tarballs_latest(name)
+            if lat != None and len(lat) > 0:
+                res = org.wayround.utils.path.select_by_prefered_extension(
+                    lat, config
+                    )
+                res = org.wayround.aipsetup.client_pkg.get_tarball(
+                    res
+                    )
+                if not isinstance(res, str):
+                    f = open("!errors!.txt", 'a')
+                    f.write(
+                        "Can't get tarball for package `{}'\n".format(name)
+                        )
+                    f.close()
+                    errors = True
+            else:
+                f = open("!errors!.txt", 'a')
+                f.write(
+                    "Can't get latest tarball name "
+                    "from server for package `{}'\n".format(name)
+                    )
+                f.close()
+                errors = True
+
+    if errors:
+        ret = 1
+
+    return ret
+
+
 def clean_check_list_of_installed_packages_and_asps_auto(
     command_name, opts, args, adds
     ):
@@ -1280,8 +1552,6 @@ def clean_install_etc(command_name, opts, args, adds):
         logging.error("Only root allowed to use this command")
         ret = 1
     else:
-
-        config = adds['config']
 
         base_dir = '/'
         if '-b' in opts:

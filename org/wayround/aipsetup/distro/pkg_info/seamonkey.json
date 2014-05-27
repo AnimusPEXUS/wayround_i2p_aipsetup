@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.mozilla.org",
-  "buildscript": "seamonkey",
+  "buildscript": "seamonkey_with_xul",
   "basename": "seamonkey",
   "filters": "",
   "installation_priority": 5,

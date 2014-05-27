@@ -355,6 +355,10 @@ def tarballs(url, pkg_name):
 
 def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
 
+    """
+    Full url returned
+    """
+
     def source_version_comparator(v1, v2):
         return org.wayround.utils.version.source_version_comparator(
             v1, v2,
@@ -394,6 +398,7 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
                     )
                 )
 
+        # remain only packages with same version, but with different extensions
         for i in ret[:]:
             if (org.wayround.utils.version.source_version_comparator(
                     i, m,
@@ -406,18 +411,25 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
     return ret
 
 
-def get_tarball(full_url, out_dir=None, out_to_temp=False):
+def get_tarball(
+    full_url, out_dir=None, out_to_temp=False,
+    mute_downloader=True
+    ):
 
     """
+    Download file
+
     if out_to_temp is True, out_dir is used as a base. Else, if out_dir not
-    None, out_dir is used deirectly. if out_dir is None, then out_to_temp
-    does not metter and file wil be downloaded to current dir
+    None, out_dir is used directly. if out_dir is None, then out_to_temp
+    does not metter and file will be downloaded to current dir.
+
+    Return: abspath to file on success
     """
 
     if not isinstance(full_url, str):
         raise TypeError("`full_url' must be str")
 
-    ret = None
+    ret = 1
 
     basename = os.path.basename(full_url)
 
@@ -453,10 +465,18 @@ def get_tarball(full_url, out_dir=None, out_to_temp=False):
 
     option_O = '{}{}{}'.format(out_dir, sep, basename)
 
+    stdout = subprocess.DEVNULL
+    stderr = subprocess.DEVNULL
+    if not mute_downloader:
+        stdout = None
+        stderr = None
+
     p = subprocess.Popen(
         ['wget',
          '--no-check-certificate', '-c', '-O', option_O, full_url
-         ]
+         ],
+        stdout=stdout,
+        stderr=stderr
         )
 
     res = p.wait()

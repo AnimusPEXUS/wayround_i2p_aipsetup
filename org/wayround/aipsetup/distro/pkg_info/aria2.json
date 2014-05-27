@@ -3,7 +3,7 @@
   "home_page": "http://None",
   "buildscript": "aria2",
   "basename": "aria2",
-  "filters": "",
+  "filters": "- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

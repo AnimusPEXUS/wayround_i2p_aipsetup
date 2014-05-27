@@ -49,6 +49,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--enable-gtk-doc',
                     '--enable-introspection',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
@@ -57,11 +58,17 @@ def main(buildingsite, action=None):
                     '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
+#                    '--host=i486-pc-linux-gnu',
+#                    '--build=i486-pc-linux-gnu',
                     '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
+                    '--build=' + pkg_info['constitution']['build']
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
+#                environment={'CFLAGS': ' -march=i486 -mtune=i486 ',
+#                             'CXXFLAGS': ' -march=i486 -mtune=i486 ',
+#                             'CPPFLAGS': ' -march=i486 -mtune=i486 '
+#                             },
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
@@ -75,6 +82,9 @@ def main(buildingsite, action=None):
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
+#                options=['CFLAGS+= -march=i486 -mtune=i486 ',
+#                             'CXXFLAGS+= -march=i486 -mtune=i486 ',
+#                             'CPPFLAGS+= -march=i486 -mtune=i486 '],
                 arguments=[],
                 environment={},
                 environment_mode='copy',

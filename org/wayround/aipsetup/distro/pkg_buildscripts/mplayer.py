@@ -1,6 +1,7 @@
 
 import io
 import logging
+import os.path
 import subprocess
 
 import org.wayround.aipsetup.build
@@ -14,7 +15,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['configure', 'build', 'distribute'],
+            ['extract', 'configure', 'build', 'distribute'],
             action,
             "help"
             )
@@ -30,6 +31,8 @@ def main(buildingsite, action=None):
         separate_build_dir = False
 
         source_configure_reldir = '.'
+
+        src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         lib_ass_f = io.StringIO()
         lib_ass_cflags = ''
@@ -82,6 +85,17 @@ def main(buildingsite, action=None):
             lib_ass_libs = lib_ass_f.readlines()[0].strip()
         lib_ass_f.close()
 
+        if 'extract' in actions:
+            if os.path.isdir(src_dir):
+                logging.info("cleaningup source dir")
+                org.wayround.utils.file.cleanup_dir(src_dir)
+            ret = autotools.extract_high(
+                buildingsite,
+                pkg_info['pkg_info']['basename'],
+                unwrap_dir=True,
+                rename_dir=False
+                )
+
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
@@ -94,16 +108,17 @@ def main(buildingsite, action=None):
                     '--enable-tv-v4l2',
                     '--enable-vcd',
                     '--enable-freetype',
-                    '--enable-ass',
-                    '--enable-gif',
-                    '--enable-png',
-                    '--enable-mng',
-                    '--enable-jpeg',
+#                    '--disable-mmx',
+#                    '--enable-ass',
+#                    '--enable-gif',
+#                    '--enable-png',
+#                    '--enable-mng',
+#                    '--enable-jpeg',
                     '--enable-real',
                     '--enable-xvid-lavc',
                     '--enable-x264-lavc',
-                    '--extra-cflags=' + lib_ass_cflags,
-                    '--extra-ldflags=' + lib_ass_libs,
+#                    '--extra-cflags=' + lib_ass_cflags,
+#                    '--extra-ldflags=' + lib_ass_libs,
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     # '--sysconfdir=' +
@@ -111,9 +126,9 @@ def main(buildingsite, action=None):
                     # '--localstatedir=' +
                     #     pkg_info['constitution']['paths']['var'],
                     # '--enable-shared',
-                    # '--host=' + pkg_info['constitution']['host'],
-                    # '--build=' + pkg_info['constitution']['build'],
-                    # '--target=' + pkg_info['constitution']['target']
+#                    '--host=' + pkg_info['constitution']['host'],
+#                    '--build=' + pkg_info['constitution']['build'],
+                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

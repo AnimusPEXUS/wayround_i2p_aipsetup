@@ -3,7 +3,7 @@
   "home_page": "http://www.freedesktop.org/",
   "buildscript": "std",
   "basename": "telepathy-haze",
-  "filters": "",
+  "filters": "- version re .*99+.*",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,
