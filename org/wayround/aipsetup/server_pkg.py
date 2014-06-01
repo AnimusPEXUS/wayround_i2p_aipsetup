@@ -36,10 +36,14 @@ def server_start_host(command_name, opts, args, adds):
     tag_ctl = \
         org.wayround.aipsetup.controllers.tag_ctl_by_config(config)
 
+    bundles_ctl = \
+        org.wayround.aipsetup.controllers.bundles_ctl_by_config(config)
+
     app = ASPServer(
         pkg_repo_ctl,
         info_ctl,
         tag_ctl,
+        bundles_ctl,
         config['pkg_server']['host'],
         int(config['pkg_server']['port']),
         config['src_client']['server_url'],
@@ -60,6 +64,7 @@ class ASPServer:
         pkg_repo_ctl,
         info_ctl,
         tag_ctl,
+        bundles_ctl,
         host='localhost',
         port=8081,
         src_page_url='https://localhost:8080/',
@@ -87,6 +92,8 @@ class ASPServer:
         self.pkg_repo_ctl = pkg_repo_ctl
         self.info_ctl = info_ctl
         self.tag_ctl = tag_ctl
+        self.bundles_ctl = bundles_ctl
+
         self.acceptable_source_name_extensions = \
             acceptable_source_name_extensions
 
@@ -118,6 +125,9 @@ class ASPServer:
             )
 
         self.app.route('/name_by_name', 'GET', self.name_by_name)
+
+        self.app.route('/bundles', 'GET', self.bundles)
+        self.app.route('/bundles/<name>', 'GET', self.download_bundle)
 
         return
 
@@ -654,6 +664,54 @@ class ASPServer:
 
         elif resultmode == 'json':
             ret = json.dumps(result_name, sort_keys=True, indent=2)
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
+
+        return ret
+
+    def bundles(self):
+
+        decoded_params = bottle.request.params.decode('utf-8')
+
+        if not 'resultmode' in decoded_params:
+            decoded_params['resultmode'] = 'html'
+
+        if not decoded_params['resultmode'] in ['html', 'json']:
+            raise bottle.HTTPError(400, "Wrong resultmode parameter")
+
+        resultmode = decoded_params['resultmode']
+
+        filesl = self.bundles_ctl.list()
+        filesl.sort(reverse=True)
+
+        if resultmode == 'html':
+
+            bundle_files = self.ui.bundles_file_list(filesl)
+
+            txt = self.ui.bundles(
+                bundle_files
+                )
+
+            ret = self.ui.html(
+                title="Available bundles",
+                body=txt
+                )
+
+        elif resultmode == 'json':
+
+            ret = json.dumps(filesl, sort_keys=True, indent=2)
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
+
+        return ret
+
+    def download_bundle(self, name):
+
+        name = os.path.basename(name)
+
+        ret = self.bundles_ctl.get(name)
+
+        if ret == None:
+            raise bottle.HTTPError(404, "Not Found")
+        else:
             bottle.response.set_header('Content-Type', APPLICATION_JSON)
 
         return ret

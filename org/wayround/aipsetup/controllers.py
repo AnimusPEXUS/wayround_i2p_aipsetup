@@ -190,6 +190,14 @@ def tag_ctl_new(tags_json_filename_path, tag_db):
     return ret
 
 
+def bundles_ctl_by_config(config):
+    return bundles_ctl_new(config['pkg_server']['bundles_dir'])
+
+
+def bundles_ctl_new(dir_path):
+    return org.wayround.aipsetup.info.BundlesCtl(dir_path)
+
+
 def constitution_by_config(config, host, target, build):
 
     ret = None

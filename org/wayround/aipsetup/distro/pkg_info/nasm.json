@@ -3,7 +3,7 @@
   "home_page": "http://www.nasm.us",
   "buildscript": "nasm",
   "basename": "nasm",
-  "filters": "",
+  "filters": "- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

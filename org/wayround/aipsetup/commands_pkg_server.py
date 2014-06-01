@@ -29,6 +29,7 @@ def commands():
         ('pkg-server-repo', collections.OrderedDict([
             ('index', pkg_repo_index_and_update),
             ('put', pkg_repo_put_file),
+            ('put-bundle', pkg_repo_put_bundle),
             ('clean', pkg_repo_cleanup)
             ]))
         ])
@@ -550,7 +551,7 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
 def pkg_repo_put_file(command_name, opts, args, adds):
 
     """
-    Copy package to index repository
+    Copy package to package server index repository
 
     -m      move, not copy
     """
@@ -576,5 +577,40 @@ def pkg_repo_put_file(command_name, opts, args, adds):
             org.wayround.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
         ret = index.put_asps_to_index(files, move=move)
+
+    return ret
+
+
+def pkg_repo_put_bundle(command_name, opts, args, adds):
+
+    """
+    Set bundle to package server
+    """
+
+    config = adds['config']
+
+    ret = 0
+
+    files = []
+    if len(args) > 0:
+        files = args[:]
+
+    if len(files) == 0:
+        logging.error("Filenames required")
+        ret = 2
+    else:
+
+        bundles_ctl = \
+            org.wayround.aipsetup.controllers.bundles_ctl_by_config(config)
+
+        for i in args:
+
+            bn = os.path.basename(i)
+
+            f = open(i)
+            t = f.read()
+            f.close()
+
+            bundles_ctl.set(bn, t)
 
     return ret

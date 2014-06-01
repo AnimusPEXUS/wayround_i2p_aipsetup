@@ -2,20 +2,20 @@
 import collections
 import datetime
 import functools
+import json
 import logging
 import os.path
 import pprint
 import shlex
 import sys
 
-import org.wayround.aipsetup.client_src
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.package_name_parser
 import org.wayround.aipsetup.sysupdates
 import org.wayround.aipsetup.sysuser
 import org.wayround.utils.archive
 import org.wayround.utils.checksum
-import org.wayround.utils.file
+import org.wayround.utils.datetime_iso8601
 import org.wayround.utils.getopt
 import org.wayround.utils.log
 import org.wayround.utils.path
@@ -35,7 +35,7 @@ def commands():
             ('remove', system_remove_package),
             ('reduce', system_reduce_asp_to_latest),
             ('find', system_find_package_files),
-            ('generate_deps', system_make_asp_deps),
+            ('generate-deps', system_make_asp_deps),
             ('files', system_list_package_files),
             ('check', package_check),
             ('parse-asp-name', info_parse_pkg_name),
@@ -60,13 +60,14 @@ def commands():
             ('install-etc', clean_install_etc),
             ])),
         ('sys-deps', collections.OrderedDict([
-            ('asps-asp-depends_on', pkgdeps_print_asps_asp_depends_on),
+            ('asps-asp-depends-on', pkgdeps_print_asps_asp_depends_on),
             ('asp-depends', pkgdeps_print_asp_depends),
             ('asps-depending-on-asp', pkgdeps_print_asps_depending_on_asp)
             ])),
         ('sys-replica', collections.OrderedDict([
             ('instr', system_replica_instruction),
-            ('dir-tree', system_create_directory_tree)
+            ('dir-tree', system_create_directory_tree),
+            ('create-bundle', system_create_bundle),
             ]))
         ])
 
@@ -564,6 +565,69 @@ def system_create_directory_tree(command_name, opts, args, adds):
         ret = system.create_directory_tree()
 
     return ret
+
+
+def system_create_bundle(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    pkg_client = \
+        org.wayround.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
+
+    system = org.wayround.aipsetup.controllers.sys_ctl_by_config(
+        config,
+        pkg_client,
+        '/'
+        )
+
+    res = system.list_installed_asps()
+    res2 = []
+
+    for i in res:
+
+        x = i
+
+        if x.endswith('.xz'):
+            x = x[:-3]
+
+        if not x.endswith('.asp'):
+            x = x + '.asp'
+
+        res2.append(x)
+
+    res = res2
+
+    res.sort()
+
+    dto = datetime.datetime.utcnow()
+
+    dt = org.wayround.utils.datetime_iso8601.datetime_to_str(
+        dto,
+        ['-', 'year', 'day', 'month', 'hour', 'min', 'sec', 'utc', ':']
+        )
+
+    bundle = collections.OrderedDict(
+        [
+         ('info', collections.OrderedDict(
+                [('date', dt)])),
+
+         ('list', res),
+         ]
+        )
+
+    bundle_text = json.dumps(bundle, indent=2)
+
+    filename = '{}.json'.format(org.wayround.utils.time.time_stamp(dto))
+
+    f = open(filename, 'w')
+    f.write(bundle_text)
+    f.close()
+
+    logging.info("Saved to {}".format(filename))
+
+    return 0
 
 
 def clean_packages_with_broken_files(command_name, opts, args, adds):
@@ -1217,8 +1281,6 @@ def clean_find_packages_requiring_deleteds(
             name = \
                 org.wayround.aipsetup.package_name_parser.package_name_parse(i)
 
-            print("    {}".format(name))
-
             if name == None:
                 x = "Can't parse as package name: `{}'".format(i)
                 logging.error(x)
@@ -1228,6 +1290,8 @@ def clean_find_packages_requiring_deleteds(
                 errors = True
             else:
                 name = name['groups']['name']
+
+                print("    {}".format(name))
 
                 lat = pkg_client.tarballs_latest(name)
                 if lat != None and len(lat) > 0:

@@ -50,6 +50,7 @@ def main(buildingsite, action=None):
             ret = cmake.cmake_high(
                 buildingsite,
                 options=[
+                    '-DWITH_PLAYER=yes',
                     '-DCMAKE_INSTALL_PREFIX=' +
                         pkg_info['constitution']['paths']['usr'],
 #                    '--mandir=' + pkg_info['constitution']['paths']['man'],

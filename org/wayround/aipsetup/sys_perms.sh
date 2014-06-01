@@ -31,9 +31,11 @@ chown root:root /var/lib/polkit-1
 chmod 0700 /var/lib/polkit-1
 
 # systemd services
-chmod 0644 /usr/lib/systemd/system
-find /usr/lib/systemd/system/ -type d -exec chmod 755 '{}' ';'
-find /usr/lib/systemd/system/ -type f -exec chmod 744 '{}' ';'
+chmod 0755 /usr/lib/systemd/system
+find /usr/lib/systemd/system -type d -exec chmod 755 '{}' ';'
+find /usr/lib/systemd/system -type f -exec chmod 744 '{}' ';'
+
+find /usr/lib/systemd/user -type f -exec chmod 744 '{}' ';'
 
 
 chmod 4755 /usr/libexec/dbus-daemon-launch-helper

@@ -18,10 +18,12 @@ def commands():
             ('ls', ls),
             ('print', print_info),
             ('asp-list', asp_list),
+            ('bundle-list', bundle_list),
             ('get', get_asp),
             ('get-lat', get_asp_latest),
             ('get-lat-cat', get_asp_lat_cat),
             ('get-by-list', get_asp_by_list),
+            ('get-by-bundle', get_by_bundle),
             ])),
         ('pkg-client-src', collections.OrderedDict([
             ('search', tar_list),
@@ -636,3 +638,72 @@ def get_asp_by_list(*args, **kwargs):
 
 def get_tar_by_list(*args, **kwargs):
     return get_x_by_list(*args, mode='tar', **kwargs)
+
+
+def bundle_list(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    url = config['pkg_client']['server_url']
+
+    res = org.wayround.aipsetup.client_pkg.bundles(url)
+
+    if res == None:
+        ret = 2
+    else:
+
+        bases = org.wayround.utils.path.bases(res)
+
+        bases.sort(reverse=True)
+
+        text = org.wayround.utils.text.return_columned_list(
+            bases
+            )
+
+        print(text)
+
+        ret = 0
+
+    return ret
+
+
+def get_by_bundle(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    url = config['pkg_client']['server_url']
+
+    name = None
+
+    ret = 1
+
+    if len(args) != 1:
+        logging.error("Must be one arg")
+        ret = 1
+    else:
+
+        name = args[0]
+
+        res = org.wayround.aipsetup.client_pkg.bundle_get(url, name)
+
+        if res == None:
+            ret = 2
+        else:
+
+            errors = False
+
+            for i in res['list']:
+                if not isinstance(
+                    org.wayround.aipsetup.client_pkg.get_asp(url, i),
+                    str
+                    ):
+                    errors = True
+
+                    f = open('!errors!.txt', 'a')
+                    f.write("Can't get asp package: {}\n".format(i))
+                    f.close()
+
+            if errors:
+                ret = 3
+
+    return ret

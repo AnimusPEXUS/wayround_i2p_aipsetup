@@ -95,6 +95,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('host', 'localhost'),
         ('port', '8081'),
         ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('bundles_dir', '${working_dir}/pkg_bundles'),
         ('repository_dir', '${working_dir}/pkg_repository'),
         ('repository_dir_index_db_config',
             'sqlite:///${working_dir}/pkg_index.sqlite'),

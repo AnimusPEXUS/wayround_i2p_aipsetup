@@ -63,6 +63,12 @@ class PackageServerClient:
     def name_by_name(self, tarball):
         return name_by_name(self._url, tarball)
 
+    def bundles(self):
+        return bundles(self._url)
+
+    def bundle_get(self, name):
+        return bundle_get(self._url, name)
+
 
 def walk(url, path):
 
@@ -302,7 +308,11 @@ def get_asp(url, filename, out_dir=None, out_to_temp=False):
     p = subprocess.Popen(
         ['wget',
          '--no-check-certificate', '-c', '-O', option_O,
-         '{}package/{}/asps/{}'.format(url, pkg_name, basename)
+         '{}package/{}/asps/{}'.format(
+            url,
+            pkg_name,
+            basename
+            )
          ]
         )
 
@@ -510,6 +520,49 @@ def name_by_name(url, tarball):
         res = urllib.request.urlopen(
             '{}name_by_name?{}'.format(url, data)
             )
+    except:
+        pass
+
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
+        ret = json.loads(str(res.read(), 'utf-8'))
+
+    return ret
+
+
+def bundles(url):
+
+    ret = None
+
+    data = urllib.parse.urlencode(
+        {
+         'resultmode': 'json'
+         },
+        encoding='utf-8'
+        )
+
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}bundles?{}'.format(url, data)
+        )
+    except:
+        pass
+
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
+        ret = json.loads(str(res.read(), 'utf-8'))
+
+    return ret
+
+
+def bundle_get(url, name):
+
+    ret = None
+
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}bundles/{}'.format(url, name)
+        )
     except:
         pass
 

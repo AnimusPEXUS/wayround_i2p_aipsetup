@@ -1,4 +1,5 @@
 
+import copy
 import glob
 import logging
 import os.path
@@ -52,6 +53,10 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = '.'
 
+        envi = copy.copy(os.environ)
+        if 'JAVA_HOME' in envi:
+            del envi['JAVA_HOME']
+
         if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
@@ -64,9 +69,16 @@ def main(buildingsite, action=None):
                 )
 
         if 'configure' in actions and ret == 0:
+
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+#                    '--disable-tests',
+#                    '--disable-jdk-tests',
+#                    '--disable-langtools-tests',
+#                    '--disable-hotspot-tests',
+#                    '--disable-bootstrap',
+#                    '--with-jdk-home=/home/agu/_sda3/_UNICORN/b2/java/jdk1.7.0_55',
                     '--with-jdk-home=/usr/lib/java/jdk',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
@@ -80,7 +92,7 @@ def main(buildingsite, action=None):
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={},
+                environment=envi,
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
@@ -94,7 +106,7 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[],
                 arguments=[],
-                environment={},
+                environment=envi,
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir

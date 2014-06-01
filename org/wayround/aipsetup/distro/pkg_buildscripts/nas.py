@@ -46,7 +46,7 @@ def main(buildingsite, action=None):
 
         if 'xmkmf' in actions and ret == 0:
             ret = subprocess.Popen(
-                ['xmkmf'],
+                ['bash', '-c', 'xmkmf'],
                 cwd=src_dir
                 ).wait()
 

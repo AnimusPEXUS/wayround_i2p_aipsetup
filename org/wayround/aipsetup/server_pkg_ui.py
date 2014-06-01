@@ -18,6 +18,8 @@ class UI:
             'asps_file_list',
             'tarballs',
             'tarballs_file_list',
+            'bundles',
+            'bundles_file_list',
             'category_double_dot',
             'package',
             'search',
@@ -103,6 +105,17 @@ class UI:
             files_list=files_list
             )
 
+    def bundles_file_list(self, files):
+        return self.templates['bundles_file_list'].render(
+            files=files
+            )
+
+    def bundles(self, files_list):
+
+        return self.templates['bundles'].render(
+            files_list=files_list
+            )
+
     def search(self, searchmode='filemask', mask='*', cs=True):
         return self.templates['search'].render(
             searchmode=searchmode, mask=mask, cs=cs
@@ -112,9 +125,8 @@ class UI:
         return self.templates['search_result'].render(
             lines=lines
             )
-        
+
     def name_by_name(self, result):
         return self.templates['name_by_name'].render(
             result=result
             )
-        

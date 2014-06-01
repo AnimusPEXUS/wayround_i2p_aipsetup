@@ -818,6 +818,58 @@ class TagsControl:
         return
 
 
+class BundlesCtl:
+
+    def __init__(self, dir_path):
+
+        self._path = dir_path
+
+    def list(self):
+        lst = []
+        if os.path.isdir(self._path):
+            lst = os.listdir(self._path)
+        return lst
+
+    def get(self, name, load_json=False):
+
+        ret = None
+
+        fn = org.wayround.utils.path.join(self._path, name)
+
+        if os.path.isfile(fn):
+
+            f = open(fn)
+            txt = f.read()
+            f.close()
+
+            ret = txt
+            if load_json:
+                try:
+                    ret = json.loads(ret)
+                except:
+                    logging.exception(
+                        "Can't load json from file: {}".format(fn)
+                        )
+                    ret = None
+
+        return ret
+
+    def set(self, name, data):
+
+        if not os.path.isdir(self._path):
+            os.makedirs(self._path)
+
+        fn = org.wayround.utils.path.join(self._path, name)
+
+        f = open(fn, 'w')
+        if isinstance(data, str):
+            f.write(data)
+        else:
+            f.write(json.dumps(data, indent=2))
+        f.close()
+        return
+
+
 def is_info_dicts_equal(d1, d2):
 
     """

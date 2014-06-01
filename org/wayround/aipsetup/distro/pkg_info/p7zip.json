@@ -3,7 +3,7 @@
   "home_page": "http://sourceforge.net/projects/p7zip",
   "buildscript": "p7zip",
   "basename": "p7zip",
-  "filters": "",
+  "filters": "- status !re ^$\n+ status re src",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

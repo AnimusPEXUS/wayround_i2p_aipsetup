@@ -8,7 +8,6 @@ org.wayround.utils.program.logging_setup(loglevel='INFO')
 
 import org.wayround.aipsetup.commands
 import org.wayround.aipsetup.config
-import org.wayround.aipsetup.gtk
 import org.wayround.aipsetup.dbconnections
 
 config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
@@ -20,6 +19,7 @@ ret = org.wayround.utils.program.program(
     )
 
 try:
+    import org.wayround.aipsetup.gtk
     org.wayround.aipsetup.gtk.stop_session()
 except:
     logging.error("Exception while stopping Gtk+ session")
