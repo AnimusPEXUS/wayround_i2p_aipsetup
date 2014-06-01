@@ -1,0 +1,12 @@
+{
+  "description": "write something here, please",
+  "home_page": "http://www.sun.com",
+  "buildscript": "openjdk",
+  "basename": "openjdk",
+  "filters": "- version < 8\n- version >= 9",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}

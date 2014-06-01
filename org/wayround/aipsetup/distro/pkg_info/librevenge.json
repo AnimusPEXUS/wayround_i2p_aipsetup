@@ -1,0 +1,12 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "librevenge",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}

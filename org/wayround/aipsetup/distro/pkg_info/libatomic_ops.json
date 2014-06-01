@@ -1,0 +1,12 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "libatomic_ops",
+  "filters": "- status !re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}

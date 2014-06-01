@@ -1,0 +1,12 @@
+{
+  "description": "",
+  "home_page": "https://xmlgraphics.apache.org/fop/",
+  "buildscript": "fop",
+  "basename": "fop",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}

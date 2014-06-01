@@ -1,0 +1,12 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "libe_book",
+  "basename": "libe-book",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}
