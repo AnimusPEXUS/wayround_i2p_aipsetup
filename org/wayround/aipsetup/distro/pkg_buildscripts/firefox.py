@@ -13,8 +13,8 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract_sm',
-             'configure_sm', 'build_sm', 'distribute_sm'
+            ['extract',
+             'configure', 'build', 'distribute'
              ],
             action,
             "help"
@@ -32,11 +32,11 @@ def main(buildingsite, action=None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir_sm = True
+        separate_build_dir_xul = True
 
         source_configure_reldir = '.'
 
-        if 'extract_sm' in actions:
+        if 'extract' in actions and ret == 0:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 if org.wayround.utils.file.cleanup_dir(src_dir) != 0:
@@ -52,27 +52,26 @@ def main(buildingsite, action=None):
                     rename_dir=False
                     )
 
-        if 'configure_sm' in actions and ret == 0:
+        if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-application=suite',
-                    '--enable-calendar',
+                    '--enable-application=browser',
                     '--enable-default-toolkit=cairo-gtk2',
                     '--enable-freetype2',
-                    '--enable-safe-browsing',
                     '--enable-shared',
-                    '--enable-shared-js',
-                    '--enable-storage',
+#                    '--enable-shared-js',
                     '--enable-xft',
                     '--with-pthreads',
-                    '--with-system-nspr',
-                    '--with-system-nss',
+#                    '--disable-webrtc',
+#                    '--enable-optimize',
+#                    '--with-system-nspr',
+#                    '--with-system-nss',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' + \
+                    '--sysconfdir=' +
                         pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' + \
+                    '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build']
@@ -81,24 +80,24 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir_sm,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
                 )
 
-        if 'build_sm' in actions and ret == 0:
+        if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir_sm,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'distribute_sm' in actions and ret == 0:
+        if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -108,28 +107,8 @@ def main(buildingsite, action=None):
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir_sm,
+                use_separate_buildding_dir=separate_build_dir_xul,
                 source_configure_reldir=source_configure_reldir
                 )
-
-            # NPAPI now with xulrunner only
-
-#            inc_dir = os.path.join(dst_dir, 'usr', 'include')
-#
-#            lst = os.listdir(inc_dir)
-#
-##            sea_inc_dir = None
-#
-#            if not len(lst) == 1:
-#                logging.error(
-#                    "Can't find seamonkey includes dir in {}".format(inc_dir)
-#                    )
-#                ret = 30
-#            else:
-#                pass
-##                sea_inc_dir = lst[0]
-#
-#
-##                os.symlink(sea_inc_dir, os.path.join(inc_dir, 'npapi'))
 
     return ret

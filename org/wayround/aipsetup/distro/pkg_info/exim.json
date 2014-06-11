@@ -3,7 +3,7 @@
   "home_page": "http://www.exim.org",
   "buildscript": "exim",
   "basename": "exim",
-  "filters": "",
+  "filters": "- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

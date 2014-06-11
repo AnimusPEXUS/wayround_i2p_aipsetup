@@ -117,10 +117,10 @@ def main(buildingsite, action=None):
 #!/bin/bash
 export PATH=$PATH:/usr/lib/qt{qtnum}_w_toolkit/bin
 
-#if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
-#    PKG_CONFIG_PATH+=":"
-#fi
-#export PKG_CONFIG_PATH=$PKG_CONFIG_PATH/usr/lib/qt{qtnum}_w_toolkit/lib/pkgconfig
+if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
+    PKG_CONFIG_PATH+=":"
+fi
+export PKG_CONFIG_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib/pkgconfig"
 
 if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"

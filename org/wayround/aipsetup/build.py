@@ -846,11 +846,8 @@ class PackCtl:
             'destdir_checksum',
             'destdir_filelist',
             'destdir_deps_bin',
-    #        'remove_source_and_build_dirs',
             'compress_patches_destdir_and_logs',
             'compress_files_in_lists_dir',
-    #        'remove_patches_destdir_buildlogs_and_temp_dirs',
-    #        'remove_decompressed_files_from_lists_dir',
             'make_checksums_for_building_site',
             'pack_buildingsite'
             ]:

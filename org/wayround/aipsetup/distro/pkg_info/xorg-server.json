@@ -3,7 +3,7 @@
   "home_page": "http://www.x.org",
   "buildscript": "std",
   "basename": "xorg-server",
-  "filters": "",
+  "filters": "- version re .*\\.9\\d+.*\n- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

@@ -51,10 +51,42 @@ def main(buildingsite, action=None):
 
         if 'configure' in actions and ret == 0:
 
+            t_conf = os.path.join(src_dir_p_sep, '.config')
+
             shutil.copyfile(
                 os.path.join(src_dir_p_sep, 'defconfig'),
-                os.path.join(src_dir_p_sep, '.config')
+                t_conf
                 )
+
+            f = open(t_conf, 'a')
+            f.write("""
+CONFIG_BACKEND=file
+CONFIG_CTRL_IFACE=y
+CONFIG_DEBUG_FILE=y
+CONFIG_DEBUG_SYSLOG=y
+CONFIG_DEBUG_SYSLOG_FACILITY=LOG_DAEMON
+CONFIG_DRIVER_NL80211=y
+CONFIG_DRIVER_WEXT=y
+CONFIG_DRIVER_WIRED=y
+CONFIG_EAP_GTC=y
+CONFIG_EAP_LEAP=y
+CONFIG_EAP_MD5=y
+CONFIG_EAP_MSCHAPV2=y
+CONFIG_EAP_OTP=y
+CONFIG_EAP_PEAP=y
+CONFIG_EAP_TLS=y
+CONFIG_EAP_TTLS=y
+CONFIG_IEEE8021X_EAPOL=y
+CONFIG_IPV6=y
+CONFIG_LIBNL32=y
+CONFIG_PEERKEY=y
+CONFIG_PKCS12=y
+CONFIG_READLINE=y
+CONFIG_SMARTCARD=y
+CONFIG_WPS=y
+CFLAGS += -I/usr/include/libnl3
+""")
+            f.close()
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(

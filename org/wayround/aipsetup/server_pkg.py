@@ -171,8 +171,6 @@ class ASPServer:
         if not os.path.isfile(filename):
             raise bottle.HTTPError(404, "File `{}' not found".format(base))
 
-        logging.info("answering with file `{}'".format(filename))
-
         return bottle.static_file(
             filename=base,
             root=os.path.dirname(filename),

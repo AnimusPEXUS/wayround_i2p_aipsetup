@@ -3,7 +3,7 @@
   "home_page": " http://www.infradead.org/~tgr/libnl/",
   "buildscript": "std",
   "basename": "libnl",
-  "filters": "",
+  "filters": "- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,
