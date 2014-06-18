@@ -966,7 +966,7 @@ def write_info_file(name, struct):
 
     return ret
 
-
+# TODO: adopt lists.filter_text_parse()
 def filter_text_parse(filter_text):
     """
     Returns list of command structures
@@ -995,13 +995,14 @@ def filter_text_parse(filter_text):
                     action=struct[0],
                     subject=struct[1],
                     function=struct[2],
-                    data=struct[3],
+                    data=struct[3]
                     )
                 ret.append(struct)
 
     return ret
 
 
+# TODO: adopt lists.filter_list()
 def filter_tarball_list(input_list, filter_text):
 
     """
