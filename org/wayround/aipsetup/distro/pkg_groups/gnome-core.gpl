@@ -120,6 +120,13 @@
                 "version": "{asked_version}"
                 } 
             },
+        "gnome-common": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                } 
+            },
         "gnome-contacts": {
             "proc": "gnome_get",
             "args": [],
@@ -464,16 +471,23 @@
             "kwargs": {} 
             },
             
+        
+        "ORBit2":{
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
 
+        "GConf":{
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
  
         "NetworkManager": {
             "proc": "normal_get",
             "args": [],
-            "kwargs": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {} 
-            } 
+            "kwargs": {}
             },
         "at-spi2-atk": {
             "proc": "normal_get",
@@ -650,6 +664,16 @@
             "args": [],
             "kwargs": {} 
             },
+        "exempi": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {} 
+            },
+        "libopenraw": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {} 
+            },
         "libgdata": {
             "proc": "normal_get",
             "args": [],
@@ -759,7 +783,7 @@
             "proc": "normal_get",
             "args": [],
             "kwargs": {} 
-            }
+            },
         "gnome-doc-utils": {
             "proc": "gnome_get",
             "args": [],

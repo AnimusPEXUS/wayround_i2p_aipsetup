@@ -1,8 +1,8 @@
 {
   "description": "",
-  "home_page": "http://freedesktop.org/",
-  "buildscript": "exempi",
-  "basename": "exempi",
+  "home_page": "https://gitorious.org/uhttpmock",
+  "buildscript": "std",
+  "basename": "uhttpmock",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

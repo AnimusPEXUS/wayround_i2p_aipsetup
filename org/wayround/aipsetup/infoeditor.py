@@ -403,7 +403,7 @@ class MainWindow:
                 org.wayround.utils.gtk.text_view(
                     '\n'.join(lst),
                     "{} - Non-filtered tarballs".format(
-                        self.ui.name_entry.get_text()[:-5]
+                        self.ui.name_entry.get_text()
                         )
                     )
 
@@ -432,13 +432,6 @@ class MainWindow:
                     self.acceptable_source_name_extensions
                     )
 
-            lst.sort(
-                key=functools.cmp_to_key(
-                    source_version_comparator
-                    ),
-                reverse=True
-                )
-
             logging.debug("get_package_source_files returned {}".format(lst))
 
             if not isinstance(lst, list):
@@ -452,10 +445,17 @@ class MainWindow:
                 dia.run()
                 dia.destroy()
             else:
+                lst.sort(
+                    key=functools.cmp_to_key(
+                        source_version_comparator
+                        ),
+                    reverse=True
+                    )
+
                 org.wayround.utils.gtk.text_view(
                     '\n'.join(lst),
                     "{} - Filtered tarballs".format(
-                        self.ui.name_entry.get_text()[:-5]
+                        self.ui.name_entry.get_text()
                         )
                     )
 

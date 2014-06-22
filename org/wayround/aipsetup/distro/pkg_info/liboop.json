@@ -1,8 +1,8 @@
 {
   "description": "",
-  "home_page": "http://freedesktop.org/",
-  "buildscript": "exempi",
-  "basename": "exempi",
+  "home_page": "http://www.lysator.liu.se/liboop/",
+  "buildscript": "std",
+  "basename": "liboop",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

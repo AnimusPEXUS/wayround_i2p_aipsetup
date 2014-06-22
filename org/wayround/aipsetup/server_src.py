@@ -231,9 +231,9 @@ class SRCServer:
             filtered_tags = []
 
             for i in all_tags:
-		
+
                 look_for = i
-		
+
                 if not cs:
                     look_for = look_for.lower()
 
