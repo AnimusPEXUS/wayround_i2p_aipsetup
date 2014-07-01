@@ -1,8 +1,8 @@
 {
-  "description": "None",
-  "home_page": "http://None",
-  "buildscript": "",
-  "basename": "PyQt-x11-gpl",
+  "description": "",
+  "home_page": "",
+  "buildscript": "pyqt",
+  "basename": "PyQt-gpl",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

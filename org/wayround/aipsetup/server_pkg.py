@@ -20,7 +20,6 @@ APPLICATION_JSON = 'application/json; codepage=utf-8'
 
 
 def server_start_host(command_name, opts, args, adds):
-
     """
     Start serving UNICORN ASP packages Web Server
     """
@@ -60,16 +59,16 @@ def server_start_host(command_name, opts, args, adds):
 class ASPServer:
 
     def __init__(
-        self,
-        pkg_repo_ctl,
-        info_ctl,
-        tag_ctl,
-        bundles_ctl,
-        host='localhost',
-        port=8081,
-        src_page_url='https://localhost:8080/',
-        acceptable_source_name_extensions=None
-        ):
+            self,
+            pkg_repo_ctl,
+            info_ctl,
+            tag_ctl,
+            bundles_ctl,
+            host='localhost',
+            port=8081,
+            src_page_url='https://localhost:8080/',
+            acceptable_source_name_extensions=None
+            ):
 
         self._src_page_url = src_page_url
 
@@ -164,8 +163,8 @@ class ASPServer:
             )
 
         if not filename.startswith(
-            self.pkg_repo_ctl.get_repository_dir() + os.path.sep
-            ):
+                self.pkg_repo_ctl.get_repository_dir() + os.path.sep
+                ):
             raise bottle.HTTPError(404, "Wrong package name `{}'".format(name))
 
         if not os.path.isfile(filename):
@@ -241,7 +240,7 @@ class ASPServer:
                      'name': self.pkg_repo_ctl.get_category_by_id(
                             i
                             )
-                    }
+                     }
                 )
 
             for i in pack_ids:
@@ -336,22 +335,22 @@ class ASPServer:
 
         if resultmode == 'html':
 
-            keys = list(org.wayround.aipsetup.info.\
-                SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES.keys())
+            keys = list(org.wayround.aipsetup.info.
+                        SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES.keys())
 
             rows = collections.OrderedDict()
 
             for i in [
-                'tags', 'name', 'description', 'newest_src', 'newest_pkg'
-                ]:
+                    'tags', 'name', 'description', 'newest_src', 'newest_pkg'
+                    ]:
                 if i in keys:
                     keys.remove(i)
 
             for i in keys:
 
                 rows[i] = (
-                    org.wayround.aipsetup.info.\
-                        SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES[i],
+                    org.wayround.aipsetup.info.
+                    SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES[i],
                     str(pkg_info[i])
                     )
 
@@ -598,9 +597,9 @@ class ASPServer:
                 i = i.lower()
 
             if (
-                (searchmode == 'filemask' and fnmatch.fnmatch(i, mask))
-                or (searchmode == 'regexp' and re.match(mask, i))
-                ):
+                    (searchmode == 'filemask' and fnmatch.fnmatch(i, mask))
+                    or (searchmode == 'regexp' and re.match(mask, i))
+                    ):
                 filtered_names.append(i)
 
         filtered_names.sort()
@@ -610,14 +609,14 @@ class ASPServer:
         if resultmode == 'html':
             ret = self.ui.html(
                 title="List of package names found by request mode "
-                    "`{}', using mask `{}' in `{}' mode".format(
+                "`{}', using mask `{}' in `{}' mode".format(
                     searchmode_name,
                     mask,
                     cs_name
                     ),
                 body=self.ui.search(searchmode=searchmode, mask=mask, cs=cs)
-                    +
-                    self.ui.search_result(lines=filtered_names)
+                +
+                self.ui.search_result(lines=filtered_names)
                 )
 
         elif resultmode == 'json':
@@ -647,7 +646,7 @@ class ASPServer:
             )
 
         result_name = None
-        if isinstance(res, str):
+        if isinstance(res, list):
             result_name = res
 
         if result_name == None:
@@ -656,7 +655,7 @@ class ASPServer:
         if resultmode == 'html':
             ret = self.ui.html(
                 title="Result searching for package"
-                    " name by tarball name `{}'".format(tarball),
+                " name by tarball name `{}'".format(tarball),
                 body=self.ui.name_by_name(result=result_name)
                 )
 

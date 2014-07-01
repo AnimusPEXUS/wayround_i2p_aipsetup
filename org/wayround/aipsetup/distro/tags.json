@@ -1,37 +1,37 @@
 {
   "AfterStep": [
-    "X",
-    "MW"
+    "MW",
+    "X"
   ],
   "Python2.7": [
-    "scripting",
-    "learning",
-    "programming",
     "system",
+    "web",
+    "scripting",
+    "programming",
     "python",
-    "web"
+    "learning"
   ],
   "Python3.2": [
-    "scripting",
-    "learning",
-    "programming",
     "system",
+    "web",
+    "scripting",
+    "programming",
     "python",
-    "web"
+    "learning"
   ],
   "gajim": [
     "chat",
-    "voip",
-    "jabber",
-    "xmpp",
     "python",
-    "jingle"
+    "jingle",
+    "xmpp",
+    "voip",
+    "jabber"
   ],
   "pycairo": [
-    "pycairo",
     "gtk",
     "cairo",
-    "freedesktop",
-    "python"
+    "python",
+    "pycairo",
+    "freedesktop"
   ]
 }

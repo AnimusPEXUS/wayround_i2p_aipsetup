@@ -467,30 +467,8 @@ class PackageInfoCtl:
 
                 if isinstance(res, list) and len(res) == 1:
                     possible_names.append(i.name)
-
-            if len(possible_names) < 1:
-                if not mute:
-                    logging.error(
-                        "Not found package name "
-                        "for tarball `{}'".format(tarball_filename)
-                        )
-
-                ret = None
-
-            elif len(possible_names) > 1:
-                if not mute:
-                    logging.error(
-                        "Too many possible package names "
-                        "for tarball `{}':".format(tarball_filename)
-                        )
-
-                for i in q:
-                    print("       {}".format(possible_names))
-
-                ret = None
-
-            else:
-                ret = possible_names[0]
+                    
+            ret = possible_names
 
         return ret
 

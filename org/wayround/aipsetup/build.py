@@ -130,11 +130,11 @@ APPLY_DESCR = """\
 class Constitution:
 
     def __init__(
-        self,
-        host_str='i486-pc-linux-gnu',
-        build_str='i486-pc-linux-gnu',
-        target_str='i486-pc-linux-gnu'
-        ):
+            self,
+            host_str='i486-pc-linux-gnu',
+            build_str='i486-pc-linux-gnu',
+            target_str='i486-pc-linux-gnu'
+            ):
 
         self.host = org.wayround.utils.system_type.SystemType(host_str)
         self.build = org.wayround.utils.system_type.SystemType(build_str)
@@ -156,14 +156,14 @@ class Constitution:
 class BuildCtl:
 
     def __init__(
-        self,
-        buildingsite_ctl
-        ):
+            self,
+            buildingsite_ctl
+            ):
 
         if not isinstance(
-            buildingsite_ctl,
-            BuildingSiteCtl
-            ):
+                buildingsite_ctl,
+                BuildingSiteCtl
+                ):
             raise TypeError(
                 "buildingsite_ctl must be an instance of "
                 "org.wayround.aipsetup.build.BuildingSiteCtl"
@@ -207,7 +207,7 @@ class BuildCtl:
 
         ret = 0
 
-        if package_info == None:
+        if package_info is None:
             logging.error(
                 "Error getting information "
                 "from building site's(`{}') `package_info.json'".format(
@@ -250,14 +250,14 @@ class BuildCtl:
 class PackCtl:
 
     def __init__(
-        self,
-        buildingsite_ctl
-        ):
+            self,
+            buildingsite_ctl
+            ):
 
         if not isinstance(
-            buildingsite_ctl,
-            BuildingSiteCtl
-            ):
+                buildingsite_ctl,
+                BuildingSiteCtl
+                ):
             raise TypeError(
                 "buildingsite_ctl must be an instance of "
                 "org.wayround.aipsetup.build.BuildingSiteCtl"
@@ -267,7 +267,6 @@ class PackCtl:
         self.path = org.wayround.utils.path.abspath(buildingsite_ctl.path)
 
     def destdir_verify_paths_correctness(self):
-
         """
         Check for forbidden files in destdir
 
@@ -295,7 +294,6 @@ class PackCtl:
         return ret
 
     def destdir_set_modes(self):
-
         """
         Ensure all files (and dirs) in DESTDIR have ``0o755`` mode.
 
@@ -432,7 +430,6 @@ class PackCtl:
         return ret
 
     def destdir_deps_bin(self):
-
         """
         Create dependency tree listing for ELFs in DESTDIR
         """
@@ -502,16 +499,16 @@ class PackCtl:
                     file_list_i += 1
 
                     org.wayround.utils.terminal.progress_write(
-                        "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".\
-                            format_map(
-                                {
-                                    'perc':
-                                        (100 /
-                                         (float(file_list_l) / file_list_i)),
+                        "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".
+                        format_map(
+                            {
+                                'perc':
+                                (100 /
+                                 (float(file_list_l) / file_list_i)),
                                     'elfs': elfs,
                                     'n_elfs': n_elfs
-                                    }
-                                )
+                                }
+                            )
                         )
 
                 org.wayround.utils.terminal.progress_write_finish()
@@ -549,9 +546,9 @@ class PackCtl:
             )
 
         for i in [
-            DIR_SOURCE,
-            DIR_BUILDING
-            ]:
+                DIR_SOURCE,
+                DIR_BUILDING
+                ]:
             dirname = org.wayround.utils.path.abspath(
                 os.path.join(
                     self.path,
@@ -578,10 +575,10 @@ class PackCtl:
             )
 
         for i in [
-            DIR_PATCHES,
-            DIR_DESTDIR,
-            DIR_BUILD_LOGS
-            ]:
+                DIR_PATCHES,
+                DIR_DESTDIR,
+                DIR_BUILD_LOGS
+                ]:
             dirname = org.wayround.utils.path.abspath(
                 os.path.join(
                     self.path,
@@ -628,12 +625,12 @@ class PackCtl:
             outfile = infile + '.xz'
 
             if org.wayround.utils.exec.process_file(
-                'xz',
-                infile,
-                outfile,
-                stderr=None,
-                options=['-9', '-v', '-M', (200 * 1024 ** 2)]
-                ) != 0:
+                    'xz',
+                    infile,
+                    outfile,
+                    stderr=None,
+                    options=['-9', '-v', '-M', (200 * 1024 ** 2)]
+                    ) != 0:
                 logging.error("Error compressing files in lists dir")
                 ret = 1
                 break
@@ -654,11 +651,11 @@ class PackCtl:
             )
 
         for i in [
-            DIR_PATCHES,
-            DIR_DESTDIR,
-            DIR_BUILD_LOGS,
-            DIR_TEMP
-            ]:
+                DIR_PATCHES,
+                DIR_DESTDIR,
+                DIR_BUILD_LOGS,
+                DIR_TEMP
+                ]:
             dirname = org.wayround.utils.path.abspath(
                 os.path.join(
                     self.path,
@@ -752,7 +749,6 @@ class PackCtl:
         return ret
 
     def pack_buildingsite(self):
-
         """
         Create new package from building site and place it under ../pack
         deirectory
@@ -768,7 +764,7 @@ class PackCtl:
             ret_on_error=None
             )
 
-        if package_info == None:
+        if package_info is None:
             logging.error("error getting information about package")
             ret = 1
         else:
@@ -833,7 +829,6 @@ class PackCtl:
         return ret
 
     def complete(self):
-
         """
         Do all specter of pack operations on building site
         """
@@ -841,16 +836,16 @@ class PackCtl:
         ret = 0
 
         for i in [
-            'destdir_verify_paths_correctness',
-            'destdir_set_modes',
-            'destdir_checksum',
-            'destdir_filelist',
-            'destdir_deps_bin',
-            'compress_patches_destdir_and_logs',
-            'compress_files_in_lists_dir',
-            'make_checksums_for_building_site',
-            'pack_buildingsite'
-            ]:
+                'destdir_verify_paths_correctness',
+                'destdir_set_modes',
+                'destdir_checksum',
+                'destdir_filelist',
+                'destdir_deps_bin',
+                'compress_patches_destdir_and_logs',
+                'compress_files_in_lists_dir',
+                'make_checksums_for_building_site',
+                'pack_buildingsite'
+                ]:
 
             if eval("self.{}()".format(i)) != 0:
                 logging.error("Error on {}".format(i))
@@ -994,7 +989,7 @@ class BuildingSiteCtl:
         if ret == 0:
 
             if ((os.path.exists(path))
-                and not os.path.isdir(path)):
+                    and not os.path.isdir(path)):
                 logging.error(
                     "File already exists and it is not a building site"
                     )
@@ -1048,7 +1043,6 @@ class BuildingSiteCtl:
         return ret
 
     def read_package_info(self, ret_on_error=None):
-
         """
         Reads package info applied to building site
 
@@ -1159,7 +1153,6 @@ class BuildingSiteCtl:
         return ret
 
     def apply_pkg_nameinfo_on_buildingsite(self, filename):
-
         """
         Applies package name parsing result on building site package info
         """
@@ -1206,7 +1199,7 @@ class BuildingSiteCtl:
 
         const = const.return_aipsetup3_compliant()
 
-        if const == None:
+        if const is None:
             ret = 1
 
         else:
@@ -1218,15 +1211,14 @@ class BuildingSiteCtl:
     apply_constitution_on_buildingsite.__doc__ += APPLY_DESCR
 
     def apply_pkg_info_on_buildingsite(self, pkg_client):
-
         """
         Applies package information on building site package info
         """
 
         if not isinstance(
-            pkg_client,
-            org.wayround.aipsetup.client_pkg.PackageServerClient
-            ):
+                pkg_client,
+                org.wayround.aipsetup.client_pkg.PackageServerClient
+                ):
             raise TypeError(
                 "pkg_client must be of type "
                 "org.wayround.aipsetup.client_pkg.PackageServerClient"
@@ -1237,16 +1229,16 @@ class BuildingSiteCtl:
         package_info = self.read_package_info(ret_on_error={})
 
         if (
-            not isinstance(package_info, dict)
-            or not 'pkg_nameinfo' in package_info
-            or not isinstance(package_info['pkg_nameinfo'], dict)
-            or not 'groups' in package_info['pkg_nameinfo']
-            or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
-            or not 'name' in package_info['pkg_nameinfo']['groups']
-            or not isinstance(
-                package_info['pkg_nameinfo']['groups']['name'], str
-                )
-            ):
+                not isinstance(package_info, dict)
+                or 'pkg_nameinfo' not in package_info
+                or not isinstance(package_info['pkg_nameinfo'], dict)
+                or 'groups' not in package_info['pkg_nameinfo']
+                or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
+                or 'name' not in package_info['pkg_nameinfo']['groups']
+                or not isinstance(
+                    package_info['pkg_nameinfo']['groups']['name'], str
+                    )
+                ):
 
             logging.error(
                 "package_info['pkg_nameinfo']['groups'] undetermined"
@@ -1258,24 +1250,31 @@ class BuildingSiteCtl:
 
             logging.debug("Getting info from index DB")
 
-            info = pkg_client.info(
-                pkg_client.name_by_name(
-                    package_info['pkg_nameinfo']['name']
-                    )
+            n_b_n = pkg_client.name_by_name(
+                package_info['pkg_nameinfo']['name']
                 )
 
-            if not isinstance(info, dict):
-                logging.error("Can't read info from DB")
-                package_info['pkg_info'] = {}
-                ret = 4
+            if len(n_b_n) != 1:
+                logging.error(
+                    "Can't select between package names: {}".format(n_b_n))
+                ret = 5
 
             else:
 
-                package_info['pkg_info'] = info
+                info = pkg_client.info(n_b_n[0])
 
-                self.write_package_info(package_info)
+                if not isinstance(info, dict):
+                    logging.error("Can't read info from DB")
+                    package_info['pkg_info'] = {}
+                    ret = 4
 
-                ret = 0
+                else:
+
+                    package_info['pkg_info'] = info
+
+                    self.write_package_info(package_info)
+
+                    ret = 0
 
         return ret
 
@@ -1293,9 +1292,9 @@ class BuildingSiteCtl:
                 )
 
         if not isinstance(
-            pkg_client,
-            org.wayround.aipsetup.client_pkg.PackageServerClient
-            ):
+                pkg_client,
+                org.wayround.aipsetup.client_pkg.PackageServerClient
+                ):
             raise TypeError(
                 "pkg_client must be of type "
                 "org.wayround.aipsetup.client_pkg.PackageServerClient"
@@ -1318,7 +1317,7 @@ class BuildingSiteCtl:
 
         if ret == 0:
 
-            if self.read_package_info(None) == None:
+            if self.read_package_info(None) is None:
                 logging.info(
                     "Applying new package info to dir `{}'".format(
                         org.wayround.utils.path.abspath(
@@ -1356,30 +1355,29 @@ class BuildingSiteCtl:
             scr_name = ''
 
         if (
-            scr_name == ''
-            or
-            not isinstance(
-                buildscript_ctl.load_buildscript(
-                    scr_name
-                    ),
-                dict
-                )
-            ):
+                scr_name == ''
+                or
+                not isinstance(
+                    buildscript_ctl.load_buildscript(
+                        scr_name
+                        ),
+                    dict
+                    )
+                ):
             ret = 1
 
         return ret
 
     def complete(
-        self,
-        build_ctl,
-        pack_ctl,
-        buildscript_ctl,
-        pkg_client,
-        main_src_file=None,
-        const=None,
-        remove_buildingsite_after_success=False,
-        ):
-
+            self,
+            build_ctl,
+            pack_ctl,
+            buildscript_ctl,
+            pkg_client,
+            main_src_file=None,
+            const=None,
+            remove_buildingsite_after_success=False,
+            ):
         """
         Applies package information on building site, does building and
         packaging and optionally deletes building site after everything is
@@ -1414,9 +1412,9 @@ class BuildingSiteCtl:
                 )
 
         if not isinstance(
-            pkg_client,
-            org.wayround.aipsetup.client_pkg.PackageServerClient
-            ):
+                pkg_client,
+                org.wayround.aipsetup.client_pkg.PackageServerClient
+                ):
             raise TypeError(
                 "pkg_client must be of type "
                 "org.wayround.aipsetup.client_pkg.PackageServerClient"
@@ -1425,8 +1423,8 @@ class BuildingSiteCtl:
         rp = org.wayround.utils.path.relpath(self.path, os.getcwd())
 
         logging.info(
-            "+++++++++++ Starting Complete build under `{}' +++++++++++".\
-                format(rp)
+            "+++++++++++ Starting Complete build under `{}' +++++++++++".
+            format(rp)
             )
 
         building_site = org.wayround.utils.path.abspath(self.path)
@@ -1434,9 +1432,7 @@ class BuildingSiteCtl:
         ret = 0
 
         if (self._complete_info_correctness_check(buildscript_ctl) != 0
-            or
-            isinstance(main_src_file, str)
-            ):
+                or isinstance(main_src_file, str)):
 
             logging.warning(
                 "buildscript information not available "
@@ -1483,8 +1479,8 @@ class BuildingSiteCtl:
                         )
 
         logging.info(
-            "+++++++++++ Finished Complete build under `{}' +++++++++++".\
-                format(rp)
+            "+++++++++++ Finished Complete build under `{}' +++++++++++".
+            format(rp)
             )
 
         return ret
@@ -1669,7 +1665,7 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
 
                 actions, action = r
 
-                if action != None and not isinstance(action, str):
+                if action is not None and not isinstance(action, str):
                     logging.error("Wrong command 2")
                     ret = 3
                 else:
@@ -1686,7 +1682,6 @@ def build_script_wrap(buildingsite, desired_actions, action, help_text):
 
 
 def build_actions_selector(actions, action):
-
     """
     Used by :func:`build_script_wrap` to build it's valid return action list
 
@@ -1721,7 +1716,7 @@ def build_actions_selector(actions, action):
             continued_action = False
 
         # if not action available - return error
-        if not action in actions:
+        if action not in actions:
 
             ret = 2
 
@@ -1788,13 +1783,12 @@ def isWdDirRestricted(path):
 
 
 def build(
-    config,
-    source_files,
-    buildingsites_dir,
-    remove_buildingsite_after_success=False,
-    const=None
-    ):
-
+        config,
+        source_files,
+        buildingsites_dir,
+        remove_buildingsite_after_success=False,
+        const=None
+        ):
     """
     Gathering function for all package building process
 
@@ -1805,6 +1799,8 @@ def build(
     """
 
     # TODO: remove config parameter or move this function to commands modules
+    # NOTE: (for TODO above) can't decide where to put this function: it's not
+    #       a command nor it's a basic build mechanizm. let's leave it here
 
     if not isinstance(const, Constitution):
         raise ValueError(
@@ -1844,71 +1840,88 @@ def build(
 
             pkg_name = pkg_client.name_by_name(source_files[0])
 
-            package_info = pkg_client.info(pkg_name)
-
-            if not package_info:
-                logging.error(
-                    "Can't find package information for tarball `{}'".format(
-                        source_files[0]
-                        )
+            if len(pkg_name) != 1:
+                logging.error("""\
+Can't select between those package names (for {})
+(please, fix package names to not make collisions):
+   {}
+""".format(
+                    source_files[0],
+                    pkg_name
                     )
-                ret = 2
+                    )
+                ret = 4
             else:
+                pkg_name = pkg_name[0]
 
-                tmp_dir_prefix = \
-                    "{name}-{version}-{status}-{timestamp}-".format_map(
-                        {
-                            'name': package_info['name'],
-                            'version': par_res['groups']['version'],
-                            'status': par_res['groups']['status'],
-                            'timestamp':
-                                org.wayround.utils.time.currenttime_stamp()
-                            }
+            if ret == 0:
+
+                package_info = pkg_client.info(pkg_name)
+
+                if not package_info:
+                    logging.error(
+                        "Can't get package "
+                        "information for tarball `{}'".format(
+                            source_files[0]
+                            )
                         )
-
-                build_site_dir = tempfile.mkdtemp(
-                    prefix=tmp_dir_prefix,
-                    dir=buildingsites_dir
-                    )
-
-                bs = org.wayround.aipsetup.controllers.bsite_ctl_new(
-                    build_site_dir
-                    )
-
-                if bs.init(source_files) != 0:
-                    logging.error("Error initiating temporary dir")
-                    ret = 3
+                    ret = 2
                 else:
 
-                    build_ctl = \
-                        org.wayround.aipsetup.controllers.build_ctl_new(bs)
+                    tmp_dir_prefix = \
+                        "{name}-{version}-{status}-{timestamp}-".format_map(
+                            {
+                                'name': package_info['name'],
+                                'version': par_res['groups']['version'],
+                                'status': par_res['groups']['status'],
+                                'timestamp':
+                                    org.wayround.utils.time.currenttime_stamp()
+                                }
+                            )
 
-                    pack_ctl = \
-                        org.wayround.aipsetup.controllers.pack_ctl_new(bs)
+                    build_site_dir = tempfile.mkdtemp(
+                        prefix=tmp_dir_prefix,
+                        dir=buildingsites_dir
+                        )
 
-                    buildscript_ctl = \
-                        org.wayround.aipsetup.controllers.\
+                    bs = org.wayround.aipsetup.controllers.bsite_ctl_new(
+                        build_site_dir
+                        )
+
+                    if bs.init(source_files) != 0:
+                        logging.error("Error initiating temporary dir")
+                        ret = 3
+                    else:
+
+                        build_ctl = \
+                            org.wayround.aipsetup.controllers.build_ctl_new(bs)
+
+                        pack_ctl = \
+                            org.wayround.aipsetup.controllers.pack_ctl_new(bs)
+
+                        buildscript_ctl = \
+                            org.wayround.aipsetup.controllers.\
                             bscript_ctl_by_config(config)
 
-                    if bs.complete(
-                        build_ctl,
-                        pack_ctl,
-                        buildscript_ctl,
-                        pkg_client,
-                        source_files[0],
-                        const=const,
-                        remove_buildingsite_after_success=(
-                            remove_buildingsite_after_success
-                            )
-                        ) != 0:
+                        if bs.complete(
+                                build_ctl,
+                                pack_ctl,
+                                buildscript_ctl,
+                                pkg_client,
+                                source_files[0],
+                                const=const,
+                                remove_buildingsite_after_success=(
+                                    remove_buildingsite_after_success
+                                    )
+                                ) != 0:
 
-                        logging.error("Package building failed")
-                        ret = 5
+                            logging.error("Package building failed")
+                            ret = 5
 
-                    else:
-                        logging.info(
-                            "Complete package building ended with no error"
-                            )
-                        ret = 0
+                        else:
+                            logging.info(
+                                "Complete package building ended with no error"
+                                )
+                            ret = 0
 
     return ret

@@ -24,7 +24,6 @@ def commands():
 
 
 def building_site_init(command_name, opts, args, adds):
-
     """
     Initiate new building site dir, copying spplyed tarballs to 00.TARBALLS
 
@@ -50,7 +49,6 @@ def building_site_init(command_name, opts, args, adds):
 
 
 def building_site_apply_info(command_name, opts, args, adds):
-
     """
     Apply info to building dir
 
@@ -98,7 +96,6 @@ def building_site_apply_info(command_name, opts, args, adds):
 
 
 def build_build_plus(command_name, opts, args, adds):
-
     """
     Starts named action from script applied to current building site
 
@@ -137,14 +134,14 @@ def build_build_plus(command_name, opts, args, adds):
 
 
 def _build_complete_subroutine(
-    config,
-    host,
-    target,
-    build,
-    dirname,
-    file,
-    r_bds
-    ):
+        config,
+        host,
+        target,
+        build,
+        dirname,
+        file,
+        r_bds
+        ):
 
     ret = 0
 
@@ -184,7 +181,6 @@ def _build_complete_subroutine(
 
 
 def build_complete(command_name, opts, args, adds):
-
     """
     Complete package building process in existing building site
 
@@ -278,14 +274,14 @@ def build_complete(command_name, opts, args, adds):
         for i in args:
 
             if _build_complete_subroutine(
-                config,
-                host,
-                target,
-                build,
-                i,
-                None,
-                r_bds
-                ) != 0:
+                    config,
+                    host,
+                    target,
+                    build,
+                    i,
+                    None,
+                    r_bds
+                    ) != 0:
                 error = True
 
         ret = int(error)
@@ -294,7 +290,6 @@ def build_complete(command_name, opts, args, adds):
 
 
 def build_full(command_name, opts, args, adds):
-
     """
     Place named source files in new building site and build new package from
     them
@@ -350,6 +345,7 @@ def build_full(command_name, opts, args, adds):
 
     if ret == 0:
 
+        logging.info("Applying constitution")
         const = org.wayround.aipsetup.controllers.constitution_by_config(
             config,
             host,
@@ -364,20 +360,22 @@ def build_full(command_name, opts, args, adds):
             if multiple_packages:
                 sources.sort()
                 rets = 0
+                logging.info("Passing packages `{}' to build".format(sources))
                 for i in sources:
                     if org.wayround.aipsetup.build.build(
-                        config,
-                        [i],
-                        remove_buildingsite_after_success=r_bds,
-                        buildingsites_dir=building_site_dir,
-                        const=const
-                        ) != 0:
+                            config,
+                            [i],
+                            remove_buildingsite_after_success=r_bds,
+                            buildingsites_dir=building_site_dir,
+                            const=const
+                            ) != 0:
                         rets += 1
                 if rets == 0:
                     ret = 0
                 else:
                     ret = 1
             else:
+                logging.info("Passing package `{}' to build".format(sources))
                 ret = org.wayround.aipsetup.build.build(
                     config,
                     sources,
@@ -390,7 +388,6 @@ def build_full(command_name, opts, args, adds):
 
 
 def build_pack(command_name, opts, args, adds):
-
     """
     Fullcircle action set for creating package
 
@@ -421,7 +418,6 @@ def build_pack(command_name, opts, args, adds):
 
 
 def build_build(command_name, opts, args, adds):
-
     """
     Configures, builds, distributes and prepares software accordingly to info
 

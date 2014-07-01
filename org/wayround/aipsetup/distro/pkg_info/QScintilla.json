@@ -1,6 +1,6 @@
 {
   "description": "write something here, please",
-  "home_page": "http://www.riverbankcomputing.co.uk",
+  "home_page": "sf.net/projects/pyqt",
   "buildscript": "",
   "basename": "QScintilla",
   "filters": "",
@@ -8,5 +8,5 @@
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": true
 }

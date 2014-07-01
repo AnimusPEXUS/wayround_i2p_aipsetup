@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.freedesktop.org",
-  "buildscript": "std",
+  "buildscript": "dbus_python",
   "basename": "dbus-python",
   "filters": "",
   "installation_priority": 5,

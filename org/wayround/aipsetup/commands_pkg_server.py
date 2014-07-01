@@ -45,7 +45,6 @@ def pkg_server_start(command_name, opts, args, adds):
 
 
 def pkg_repo_cleanup(command_name, opts, args, adds):
-
     """
     Removes old packages from package repository
     """
@@ -63,7 +62,6 @@ def pkg_repo_cleanup(command_name, opts, args, adds):
 
 
 def info_find_missing_pkg_info_records(command_name, opts, args, adds):
-
     """
     Search packages which have no corresponding info records
 
@@ -99,7 +97,6 @@ def info_find_missing_pkg_info_records(command_name, opts, args, adds):
 
 
 def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
-
     """
     Finds pkg info records which differs to FS .json files
     """
@@ -130,7 +127,6 @@ def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
 
 
 def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
-
     """
     Loads pkg info records which differs to FS .json files
     """
@@ -149,7 +145,6 @@ def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
 
 
 def info_delete_pkg_info_records(command_name, opts, args, adds):
-
     """
     mask must be given or operation will fail
 
@@ -179,7 +174,6 @@ def info_delete_pkg_info_records(command_name, opts, args, adds):
 
 
 def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
-
     """
     Save package information from database to info directory.
 
@@ -207,7 +201,6 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
 
 
 def info_load_package_info_from_filesystem(command_name, opts, args, adds):
-
     """
     Load missing package information from named files
 
@@ -249,7 +242,6 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
 
 
 def info_editor(command_name, opts, args, adds):
-
     """
     Start special info-file editor
     """
@@ -302,7 +294,6 @@ def info_editor(command_name, opts, args, adds):
 
 
 def info_mass_script_apply(command_name, opts, args, adds):
-
     """
     Mass buildscript applience
 
@@ -382,9 +373,10 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
             known_names.add(parsed_name)
 
-            if not pkg_name:
+            if len(pkg_name) != 1:
+                name = pkg_name[0]
                 logging.error(
-                    "Could not find package name for base `{}'".format(i)
+                    "Could not determine package name for base `{}'".format(i)
                     )
                 if not subpath:
                     ret = 4
@@ -426,7 +418,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
                 p1 = org.wayround.utils.path.join(
                     info_dir,
-                    pkg_name + '.json'
+                    name + '.json'
                     )
 
                 info = org.wayround.aipsetup.info.read_info_file(p1)
@@ -441,11 +433,11 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
                         org.wayround.aipsetup.info.write_info_file(p1, info)
 
-                        logging.info("Applied to {}".format(pkg_name))
+                        logging.info("Applied to {}".format(name))
                     else:
                         logging.warning(
                             "{} already have defined script".format(
-                                pkg_name
+                                name
                                 )
                             )
 
@@ -477,7 +469,6 @@ def save_info_tags(command_name, opts, args, adds):
 
 
 def pkg_repo_index(command_name, opts, args, adds):
-
     """
     Scan repository and save it's categories and packages indexes
     to database
@@ -516,7 +507,6 @@ def pkg_repo_index(command_name, opts, args, adds):
 
 
 def pkg_repo_index_and_update(command_name, opts, args, adds):
-
     """
     Perform scan and templates creation
     """
@@ -524,24 +514,24 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
     ret = 0
 
     if pkg_repo_index(
-        command_name, opts={}, args=[], adds=adds
-        ) != 0:
+            command_name, opts={}, args=[], adds=adds
+            ) != 0:
 
         ret = 1
 
     else:
 
         if info_find_missing_pkg_info_records(
-            command_name, opts={'-t': None}, args=[], adds=adds
-            ) != 0:
+                command_name, opts={'-t': None}, args=[], adds=adds
+                ) != 0:
 
             ret = 2
 
         else:
 
             if info_load_package_info_from_filesystem(
-                command_name, opts={}, args=[], adds=adds
-                ) != 0:
+                    command_name, opts={}, args=[], adds=adds
+                    ) != 0:
 
                 ret = 3
 
@@ -549,7 +539,6 @@ def pkg_repo_index_and_update(command_name, opts, args, adds):
 
 
 def pkg_repo_put_file(command_name, opts, args, adds):
-
     """
     Copy package to package server index repository
 
@@ -582,7 +571,6 @@ def pkg_repo_put_file(command_name, opts, args, adds):
 
 
 def pkg_repo_put_bundle(command_name, opts, args, adds):
-
     """
     Set bundle to package server
     """

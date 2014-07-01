@@ -1,8 +1,8 @@
 {
   "description": "write something here, please",
-  "home_page": "http://None",
-  "buildscript": "",
-  "basename": "QScintilla2",
+  "home_page": "sf.net/projects/pyqt",
+  "buildscript": "qscintilla",
+  "basename": "QScintilla-gpl",
   "filters": "",
   "installation_priority": 5,
   "removable": true,
