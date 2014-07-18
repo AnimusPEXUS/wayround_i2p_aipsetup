@@ -12,11 +12,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -50,18 +50,24 @@ def main(buildingsite, action=None):
                     '--disable-silent-rules',
                     '--enable-gtk-doc',
                     '--enable-logind',
-#                    '--enable-static',
+                    # '--enable-microhttpd',
+                    # '--enable-qrencode',
+                    # '--enable-static',
+                    # '--disable-tests',
+                    # '--disable-coverage',
                     '--enable-shared',
                     '--enable-compat-libs',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build']
-                    #'--target=' + pkg_info['constitution']['target']
+                    # '--host=i686-pc-linux-gnu'
+                    # '--build='
+                    # '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

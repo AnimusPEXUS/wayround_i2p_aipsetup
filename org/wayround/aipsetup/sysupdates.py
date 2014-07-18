@@ -4,6 +4,7 @@ Update system bindings and such
 """
 
 import subprocess
+import logging
 
 
 def sysupdates_all_actions(opts, args):
@@ -30,22 +31,26 @@ def all_actions():
 
 
 def ldconfig():
+    logging.info('ldconfig')
     return subprocess.Popen(['ldconfig']).wait()
 
 
 def update_mime_database():
+    logging.info('update-mime-database')
     return subprocess.Popen(
         ['update-mime-database', '/usr/share/mime']
         ).wait()
 
 
 def gdk_pixbuf_query_loaders():
+    logging.info('gdk-pixbuf-query-loaders')
     return subprocess.Popen(
         ['gdk-pixbuf-query-loaders', '--update-cache']
         ).wait()
 
 
 def pango_querymodules():
+    logging.info('pango-querymodules')
     f = open('/etc/pango/pango.modules', 'wb')
     r = subprocess.Popen(
         ['pango-querymodules'], stdout=f
@@ -55,6 +60,7 @@ def pango_querymodules():
 
 
 def glib_compile_schemas():
+    logging.info('glib-compile-schemas')
     r = subprocess.Popen(
         ['glib-compile-schemas', '/usr/share/glib-2.0/schemas'],
         ).wait()
@@ -62,6 +68,7 @@ def glib_compile_schemas():
 
 
 def gtk_query_immodules_2_0():
+    logging.info('gtk-query-immodules-2.0')
     f = open('/etc/gtk-2.0/gtk.immodules', 'wb')
     r = subprocess.Popen(
         ['gtk-query-immodules-2.0'],
@@ -72,6 +79,7 @@ def gtk_query_immodules_2_0():
 
 
 def gtk_query_immodules_3_0():
+    logging.info('gtk-query-immodules-3.0')
     r = subprocess.Popen(
         ['gtk-query-immodules-3.0', '--update-cache']
         ).wait()

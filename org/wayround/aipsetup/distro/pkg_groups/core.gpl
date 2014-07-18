@@ -65,7 +65,7 @@
         "Python2",
         "Python3",
         "qt4",
-        "qt5"
+        "qt5",
         "scons",
         "sed", 
         "shadow",
@@ -83,6 +83,6 @@
         "which",
         "xz",
         "zip",
-        "zlib",
+        "zlib"
     ]
 }
