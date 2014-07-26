@@ -22,7 +22,7 @@ import org.wayround.aipsetup.info
 import org.wayround.utils.format.elf
 import org.wayround.utils.path
 import org.wayround.utils.system_type
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 import org.wayround.utils.terminal
 import org.wayround.utils.time
 
@@ -1166,7 +1166,7 @@ class BuildingSiteCtl:
         base = os.path.basename(filename)
 
         parse_result = \
-            org.wayround.utils.tarball_name_parser.parse_tarball_name(base)
+            org.wayround.utils.tarball.parse_tarball_name(base)
 
         if not isinstance(parse_result, dict):
             logging.error("Can't correctly parse file name")
@@ -1811,7 +1811,7 @@ def build(
 
     ret = 0
 
-    par_res = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+    par_res = org.wayround.utils.tarball.parse_tarball_name(
         source_files[0],
         mute=True
         )
@@ -1840,19 +1840,30 @@ def build(
 
             pkg_name = pkg_client.name_by_name(source_files[0])
 
-            if len(pkg_name) != 1:
-                logging.error("""\
+            if pkg_name is None:
+                logging.error(
+                    "Can't determine package name."
+                    " Is server running?".format(
+                        source_files[0],
+                        pkg_name
+                        )
+                    )
+                ret = 10
+
+            if ret == 0:
+                if len(pkg_name) != 1:
+                    logging.error("""\
 Can't select between those package names (for {})
 (please, fix package names to not make collisions):
    {}
 """.format(
-                    source_files[0],
-                    pkg_name
-                    )
-                    )
-                ret = 4
-            else:
-                pkg_name = pkg_name[0]
+                        source_files[0],
+                        pkg_name
+                        )
+                        )
+                    ret = 4
+                else:
+                    pkg_name = pkg_name[0]
 
             if ret == 0:
 

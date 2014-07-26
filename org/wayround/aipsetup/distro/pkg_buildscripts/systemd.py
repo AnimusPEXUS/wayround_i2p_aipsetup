@@ -47,11 +47,11 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--disable-silent-rules',
+                    # '--disable-silent-rules',
                     '--enable-gtk-doc',
                     '--enable-logind',
-                    # '--enable-microhttpd',
-                    # '--enable-qrencode',
+                    '--enable-microhttpd',
+                    '--enable-qrencode',
                     # '--enable-static',
                     # '--disable-tests',
                     # '--disable-coverage',
@@ -70,7 +70,9 @@ def main(buildingsite, action=None):
                     # '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={},
+                environment={
+                    # 'CFLAGS': '-fno-lto'
+                    },
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,

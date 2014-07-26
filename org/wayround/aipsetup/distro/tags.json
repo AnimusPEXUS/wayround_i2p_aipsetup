@@ -4,34 +4,34 @@
     "X"
   ],
   "Python2.7": [
+    "scripting",
+    "python",
+    "programming",
     "system",
     "web",
-    "scripting",
-    "programming",
-    "python",
     "learning"
   ],
   "Python3.2": [
+    "scripting",
+    "python",
+    "programming",
     "system",
     "web",
-    "scripting",
-    "programming",
-    "python",
     "learning"
   ],
   "gajim": [
-    "chat",
+    "voip",
+    "jabber",
     "python",
     "jingle",
     "xmpp",
-    "voip",
-    "jabber"
+    "chat"
   ],
   "pycairo": [
-    "gtk",
+    "freedesktop",
     "cairo",
     "python",
     "pycairo",
-    "freedesktop"
+    "gtk"
   ]
 }

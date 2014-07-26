@@ -8,7 +8,7 @@ import os.path
 import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.info
 import org.wayround.utils.path
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 
 
 def commands():
@@ -357,7 +357,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
                 continue
 
             pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
-            parsed_name = org.wayround.utils.tarball_name_parser.\
+            parsed_name = org.wayround.utils.tarball.\
                 parse_tarball_name(i, mute=True)
 
             if not parsed_name:

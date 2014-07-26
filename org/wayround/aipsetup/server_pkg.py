@@ -13,6 +13,7 @@ import org.wayround.aipsetup.controllers
 import org.wayround.aipsetup.server_pkg_ui
 import org.wayround.aipsetup.client_src
 import org.wayround.utils.version
+import org.wayround.utils.tarball
 
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
@@ -493,7 +494,7 @@ class ASPServer:
             filesl = []
 
         filesl = (
-            org.wayround.aipsetup.info.filter_tarball_list(
+            org.wayround.utils.tarball.filter_tarball_list(
                 filesl,
                 filters
                 )

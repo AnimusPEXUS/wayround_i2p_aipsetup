@@ -59,62 +59,71 @@ def main(buildingsite, action=None):
 
             pth_files = os.listdir(pth_dir)
 
-            rolling = None
+            if len(pth_files) == 0:
+                print("provide patches")
+                ret = 30
+            else:
 
-            patches = []
+                rolling = None
 
-            for i in pth_files:
-                if i.find('-patch.sh.') != -1 and not i.endswith('.asc'):
-                    rolling = i
-                    break
+                patches = []
 
-            for i in pth_files:
-                if i.find('.patch.') != -1 and not i.endswith('.asc'):
-                    patches.append(i)
+                for i in pth_files:
+                    if i.find('-patch.sh.') != -1 and not i.endswith('.asc'):
+                        rolling = i
+                        break
 
-            patches.sort()
+                for i in pth_files:
+                    if i.find('.patch.') != -1 and not i.endswith('.asc'):
+                        patches.append(i)
 
-            if rolling:
+                patches.sort()
 
-                compressor = (
-                    org.wayround.utils.archive.\
+                if rolling:
+
+                    compressor = (
+                        org.wayround.utils.archive.
                         determine_compressor_by_filename(
                             rolling
                             )
-                    )
-
-                p = subprocess.Popen([compressor, '-d', rolling], cwd=pth_dir)
-                if p.wait() != 0:
-
-                    ret = 1
-
-                else:
-                    rolling = rolling[
-                        0:
-                        - len(
-                            org.wayround.utils.archive.\
-                                determine_extension_by_filename(rolling)
-                            )
-                        ]
-
-                    logging.info("Applying rolling patch {}".format(rolling))
+                        )
 
                     p = subprocess.Popen(
-                        ['bash',
-                         org.wayround.utils.path.join(pth_dir, rolling)],
-                        cwd=src_dir
+                        [compressor, '-d', rolling], cwd=pth_dir
                         )
-                    p.wait()
+                    if p.wait() != 0:
+
+                        ret = 1
+
+                    else:
+                        rolling = rolling[
+                            0:
+                            - len(
+                                org.wayround.utils.archive.
+                                determine_extension_by_filename(rolling)
+                                )
+                            ]
+
+                        logging.info(
+                            "Applying rolling patch {}".format(rolling)
+                            )
+
+                        p = subprocess.Popen(
+                            ['bash',
+                             org.wayround.utils.path.join(pth_dir, rolling)],
+                            cwd=src_dir
+                            )
+                        p.wait()
 
             if ret == 0:
 
                 for i in patches:
 
                     compressor = (
-                        org.wayround.utils.archive.\
-                            determine_compressor_by_filename(
-                                i
-                                )
+                        org.wayround.utils.archive.
+                        determine_compressor_by_filename(
+                            i
+                            )
                         )
 
                     p = subprocess.Popen([compressor, '-d', i], cwd=pth_dir)
@@ -126,8 +135,8 @@ def main(buildingsite, action=None):
                         i = i[
                             0:
                             - len(
-                                org.wayround.utils.archive.\
-                                    determine_extension_by_filename(i)
+                                org.wayround.utils.archive.
+                                determine_extension_by_filename(i)
                                 )
                             ]
 
@@ -157,13 +166,13 @@ def main(buildingsite, action=None):
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -203,11 +212,11 @@ def main(buildingsite, action=None):
         if 'links' in actions and ret == 0:
 
             for s in [
-                ('*w.so*', 'w.so', '.so'),
-                ('*w_g.so*', 'w_g.so', '_g.so'),
-                ('*w.a*', 'w.a', '.a'),
-                ('*w_g.a*', 'w_g.a', '_g.a')
-                ]:
+                    ('*w.so*', 'w.so', '.so'),
+                    ('*w_g.so*', 'w_g.so', '_g.so'),
+                    ('*w.a*', 'w.a', '.a'),
+                    ('*w_g.a*', 'w_g.a', '_g.a')
+                    ]:
 
                 files = glob.glob(
                     org.wayround.utils.path.join(dst_lib_dir, s[0])
@@ -241,8 +250,8 @@ def main(buildingsite, action=None):
         if 'pc' in actions and ret == 0:
 
             for s in [
-                ('*w.pc', 'w.pc', '.pc'),
-                ]:
+                    ('*w.pc', 'w.pc', '.pc'),
+                    ]:
 
                 files = glob.glob(
                     org.wayround.utils.path.join(dst_pc_lib_dir, s[0])

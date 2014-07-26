@@ -19,7 +19,7 @@ import org.wayround.aipsetup.repository
 import org.wayround.utils.db
 import org.wayround.utils.file
 import org.wayround.utils.path
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 import org.wayround.utils.terminal
 import org.wayround.utils.version
 
@@ -76,7 +76,7 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
     ('deprecated', "Is Deprecated?")
     ])
 
-#pkg_info_file_template = Template(text="""\
+# pkg_info_file_template = Template(text="""\
 #<package>
 #
 #    <!-- This file is generated using aipsetup v3 -->
@@ -101,6 +101,7 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
 
 
 class PackageInfo(org.wayround.utils.db.BasicDB):
+
     """
     Main package index DB handling class
     """
@@ -108,6 +109,7 @@ class PackageInfo(org.wayround.utils.db.BasicDB):
     Base = sqlalchemy.ext.declarative.declarative_base()
 
     class Info(Base):
+
         """
         Class for holding package information
         """
@@ -224,13 +226,13 @@ class PackageInfoCtl:
 
         ret = None
 
-        if name != None:
+        if name is not None:
             q = info_db.session.query(info_db.Info).filter_by(name=name).\
                 first()
         else:
             q = record
 
-        if q == None:
+        if q is None:
 
             ret = None
 
@@ -254,7 +256,7 @@ class PackageInfoCtl:
         q = info_db.session.query(info_db.Info).filter_by(name=name).first()
 
         creating_new = False
-        if q == None:
+        if q is None:
             q = info_db.Info()
             creating_new = True
 
@@ -288,13 +290,13 @@ class PackageInfoCtl:
         return
 
     def get_missing_info_records_list(
-        self, pkg_index_ctl, create_templates=False, force_rewrite=False
-        ):
+            self, pkg_index_ctl, create_templates=False, force_rewrite=False
+            ):
 
         if not isinstance(
-            pkg_index_ctl,
-            org.wayround.aipsetup.repository.PackageRepoCtl
-            ):
+                pkg_index_ctl,
+                org.wayround.aipsetup.repository.PackageRepoCtl
+                ):
             raise ValueError(
                 "pkg_index_ctl must be of type "
                 "org.wayround.aipsetup.repository.PackageRepoCtl"
@@ -324,7 +326,7 @@ class PackageInfoCtl:
                 info_db.Info
                 ).filter_by(name=each.name).first()
 
-            if q2 == None:
+            if q2 is None:
 
                 pkgs_missing += 1
                 missing.append(each.name)
@@ -354,9 +356,9 @@ class PackageInfoCtl:
                             )
 
                     if write_info_file(
-                        filename,
-                        SAMPLE_PACKAGE_INFO_STRUCTURE
-                        ) != 0:
+                            filename,
+                            SAMPLE_PACKAGE_INFO_STRUCTURE
+                            ) != 0:
                         pkgs_failed += 1
                         logging.error(
                             "failed writing template to `{}'".format(filename)
@@ -395,8 +397,8 @@ class PackageInfoCtl:
         ret = []
 
         query_result = (
-            info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
-                all()
+            info_db.session.query(info_db.Info).order_by(info_db.Info.name).
+            all()
             )
 
         for i in query_result:
@@ -431,13 +433,13 @@ class PackageInfoCtl:
         return ret
 
     def get_package_name_by_tarball_filename(
-        self,
-        tarball_filename, mute=True
-        ):
+            self,
+            tarball_filename, mute=True
+            ):
 
         ret = None
 
-        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+        parsed = org.wayround.utils.tarball.parse_tarball_name(
             tarball_filename,
             mute=mute
             )
@@ -460,14 +462,14 @@ class PackageInfoCtl:
 
             for i in q:
 
-                res = filter_tarball_list(
+                res = org.wayround.utils.tarball.filter_tarball_list(
                     lst,
                     i.filters
                     )
 
                 if isinstance(res, list) and len(res) == 1:
                     possible_names.append(i.name)
-                    
+
             ret = possible_names
 
         return ret
@@ -498,14 +500,14 @@ class PackageInfoCtl:
 
         r = self.get_package_info_record(name=name)
 
-        if r == None:
+        if r is None:
             logging.error("Not found named info record")
         else:
 
             cid = pkg_index_ctl.get_package_category_by_name(
                 name
                 )
-            if cid != None:
+            if cid is not None:
                 category = pkg_index_ctl.get_category_path_string(
                     cid
                     )
@@ -514,8 +516,7 @@ class PackageInfoCtl:
 
             tag_db = tag_ctl.tag_db
 
-            tags = tag_db.get_tags(name[:-4])
-            tags.sort()
+            tags = sorted(tag_db.get_tags(name[:-4]))
 
             print("""\
 +---[{name}]----Overal Information-----------------+
@@ -542,19 +543,19 @@ class PackageInfoCtl:
 +---[{name}]----Info Block End---------------------+
 """.format_map(
                 {
-                'tags': ', '.join(tags),
-                'category': category,
-                'name': name,
-                'description': r['description'],
-                'home_page': r['home_page'],
-                'buildscript': r['buildscript'],
-                'basename': r['basename'],
-                'filters': r['filters'],
-                'installation_priority': r['installation_priority'],
-                'removable': r['removable'],
-                'reducible': r['reducible'],
-                'non_installable': r['non_installable'],
-                'deprecated': r['deprecated']
+                    'tags': ', '.join(tags),
+                    'category': category,
+                    'name': name,
+                    'description': r['description'],
+                    'home_page': r['home_page'],
+                    'buildscript': r['buildscript'],
+                    'basename': r['basename'],
+                    'filters': r['filters'],
+                    'installation_priority': r['installation_priority'],
+                    'removable': r['removable'],
+                    'reducible': r['reducible'],
+                    'non_installable': r['non_installable'],
+                    'deprecated': r['deprecated']
                 }
                 )
             )
@@ -582,8 +583,8 @@ class PackageInfoCtl:
         return
 
     def save_info_records_to_fs(
-        self, mask='*', force_rewrite=False
-        ):
+            self, mask='*', force_rewrite=False
+            ):
 
         info_db = self._info_db
 
@@ -615,8 +616,8 @@ class PackageInfoCtl:
         return 0
 
     def load_info_records_from_fs(
-        self, filenames=[], rewrite_existing=False
-        ):
+            self, filenames=[], rewrite_existing=False
+            ):
         """
         If names list is given - load only named and don't delete
         existing
@@ -655,7 +656,7 @@ class PackageInfoCtl:
                 q = info_db.session.query(info_db.Info).filter_by(
                     name=name
                     ).first()
-                if q == None:
+                if q is None:
                     missing.append(i)
             else:
                 missing.append(i)
@@ -739,8 +740,7 @@ class TagsControl:
 
                 tag_db.clear()
 
-                keys = list(d.keys())
-                keys.sort()
+                keys = sorted(d.keys())
 
                 count = len(keys)
                 num = 0
@@ -849,7 +849,6 @@ class BundlesCtl:
 
 
 def is_info_dicts_equal(d1, d2):
-
     """
     Compare two package info structures
 
@@ -859,17 +858,17 @@ def is_info_dicts_equal(d1, d2):
     ret = True
 
     for i in [
-        'description',
-        'home_page',
-        'buildscript',
-        'basename',
-        'filters',
-        'installation_priority',
-        'removable',
-        'reducible',
-        'non_installable',
-        'deprecated',
-        ]:
+            'description',
+            'home_page',
+            'buildscript',
+            'basename',
+            'filters',
+            'installation_priority',
+            'removable',
+            'reducible',
+            'non_installable',
+            'deprecated',
+            ]:
         if d1[i] != d2[i]:
             ret = False
             break
@@ -941,226 +940,5 @@ def write_info_file(name, struct):
             f.write(txt)
         finally:
             f.close()
-
-    return ret
-
-# TODO: adopt lists.filter_text_parse()
-def filter_text_parse(filter_text):
-    """
-    Returns list of command structures
-
-    ret = [
-        dict(
-            action   = '-' or '+',
-            subject  = in ['path', 'filename', 'version', 'status'],
-            function = <depends on subject> (no spaces allowed),
-            data     = <depends on subject> (can contain spaces)
-            )
-        ]
-
-    """
-    ret = []
-
-    lines = filter_text.splitlines()
-
-    for i in lines:
-        if i != '' and not i.isspace() and not i.startswith('#'):
-            struct = i.split(' ', maxsplit=3)
-            if not len(struct) == 4:
-                logging.error("Wrong filter line: `{}'".format(i))
-            else:
-                struct = dict(
-                    action=struct[0],
-                    subject=struct[1],
-                    function=struct[2],
-                    data=struct[3]
-                    )
-                ret.append(struct)
-
-    return ret
-
-
-# TODO: adopt lists.filter_list()
-def filter_tarball_list(input_list, filter_text):
-
-    """
-    Filters supplied list with supplied filter
-
-    subjects not in check_for_subjects will always be positive (but can be
-    filtered out by proper leading rules)
-    """
-
-    ret = []
-
-    inp_list = set(copy.copy(input_list))
-    out_list = copy.copy(inp_list)
-
-    filters = filter_text_parse(filter_text)
-
-    for f in filters:
-
-        action = f['action']
-        subject = f['subject']
-        function = f['function']
-        no = False
-        data = f['data']
-
-        if not action in ['+', '-']:
-            logging.error("Wrong action: `{}'".format(action))
-            ret = 10
-            break
-
-        if function.startswith('!'):
-            no = True
-            function = function[1:]
-
-        if not subject in ['filename', 'version', 'status']:
-            logging.error("Wrong subject : `{}'".format(subject))
-            ret = 1
-            break
-
-        if subject == 'filename' or subject == 'status':
-
-            if not function in ['begins', 'contains', 'ends', 'fm', 're']:
-                logging.error(
-                    "Wrong `{}' function : `{}'".format(subject, function)
-                    )
-                ret = 3
-                break
-
-        elif subject == 'version':
-
-            if not function in [
-                    '<', '<=', '==', '>=', '>', 're', 'fm',
-                    'begins', 'contains', 'ends'
-                    ]:
-                logging.error(
-                    "Wrong `version' function : `{}'".format(function)
-                    )
-                ret = 4
-                break
-
-        else:
-            raise Exception("Programming error")
-
-        if not isinstance(ret, int):
-
-            working_list = None
-
-            if action == '+':
-                working_list = copy.copy(inp_list)
-
-            elif action == '-':
-                working_list = copy.copy(out_list)
-            else:
-                raise Exception("Programming Error")
-
-            for item in working_list:
-
-                working_item = item
-
-                if subject == 'filename':
-                    working_item = os.path.basename(item)
-
-                elif subject in ['version', 'status']:
-
-                    working_item = None
-
-                    parsed = org.wayround.utils.tarball_name_parser.\
-                        parse_tarball_name(
-                            os.path.basename(item),
-                            mute=True
-                            )
-
-                    if not isinstance(parsed, dict):
-                        # TODO: it's not error, but may be it's need to do
-                        # something than just a `pass'
-                        pass
-                    else:
-                        if subject == 'version':
-                            working_item = parsed['groups']['version']
-
-                        elif subject == 'status':
-                            working_item = parsed['groups']['status']
-
-                        else:
-                            raise Exception("Programming error")
-
-                else:
-                    raise Exception("Programming error")
-
-                matched = False
-
-                if function == 'begins':
-                    matched = working_item.startswith(data)
-
-                elif function == 'contains':
-                    matched = working_item.find(data) != -1
-
-                elif function == 'end':
-                    matched = working_item.endswith(data)
-
-                elif function == 're':
-                    matched = re.match(data, working_item) != None
-
-                elif function == 'fm':
-                    logging.debug(
-                        "filter_tarball_list: "
-                        "fm-matching `{}' and `{}'".format(
-                            working_item,
-                            data
-                            )
-                        )
-                    matched = fnmatch.fnmatch(working_item, data)
-
-                elif function in ['<', '<=', '==', '>=', '>']:
-                    matched = (
-                        org.wayround.aipsetup.version.lb_comparator(
-                            working_item,
-                            function + ' ' + data
-                            )
-                        )
-                else:
-                    raise Exception("Programming error")
-
-                if no:
-                    matched = not matched
-
-                if matched:
-
-                    logging.debug(
-                        "filter_tarball_list: "
-                        "match: `{}'\n       `{}'".format(item, f)
-                        )
-
-                    if action == '+':
-                        logging.debug(
-                            "filter_tarball_list: adding: {}".format(item)
-                            )
-                        out_list.add(item)
-
-                    elif action == '-':
-                        logging.debug(
-                            "filter_tarball_list: removing: {}".format(
-                                item
-                                )
-                            )
-                        if item in out_list:
-                            out_list.remove(item)
-
-                    else:
-                        raise Exception("Programming error")
-
-                else:
-                    logging.debug(
-                        "filter_tarball_list: NOT "
-                        "match: `{}'\n       `{}'".format(item, f)
-                        )
-
-    if not isinstance(ret, int):
-        ret = out_list
-
-    if isinstance(ret, set):
-        ret = list(ret)
 
     return ret

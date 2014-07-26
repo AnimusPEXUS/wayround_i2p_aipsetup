@@ -20,7 +20,7 @@ import org.wayround.utils.db
 import org.wayround.utils.file
 import org.wayround.utils.path
 import org.wayround.utils.tag
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 import org.wayround.utils.terminal
 
 
@@ -1268,7 +1268,7 @@ class SourceRepoCtl:
                 else:
 
                     parsed_src_filename = (
-                        org.wayround.utils.tarball_name_parser.\
+                        org.wayround.utils.tarball.\
                             parse_tarball_name(
                                 i,
                                 mute=True,

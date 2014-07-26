@@ -35,7 +35,6 @@ def commands():
 
 
 def list_(command_name, opts, args, adds):
-
     """
     List package names known to server
 
@@ -86,7 +85,6 @@ def list_(command_name, opts, args, adds):
 
 
 def list_cat(command_name, opts, args, adds):
-
     """
     List all packages in category and sub categories
     """
@@ -105,9 +103,9 @@ def list_cat(command_name, opts, args, adds):
         path = args[0]
 
         for path, cats, packs in org.wayround.aipsetup.client_pkg.walk(
-            url,
-            path
-            ):
+                url,
+                path
+                ):
 
             print("{}:".format(path))
             catsn = []
@@ -133,7 +131,6 @@ def list_cat(command_name, opts, args, adds):
 
 
 def ls(command_name, opts, args, adds):
-
     """
     Print List of packages and categories in named category path
 
@@ -163,7 +160,7 @@ def ls(command_name, opts, args, adds):
             url, path
             )
 
-        if res == None:
+        if res is None:
             ret = 2
 
         else:
@@ -196,7 +193,6 @@ Packages ({} items):
 
 
 def print_info(command_name, opts, args, adds):
-
     """
     Get and print package information
 
@@ -216,19 +212,19 @@ def print_info(command_name, opts, args, adds):
 
         res = org.wayround.aipsetup.client_pkg.info(url, args[0])
 
-        if res == None:
+        if res is None:
             ret = 2
         else:
 
             text = ''
 
             for i in org.wayround.aipsetup.info.\
-                SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES.keys():
+                    SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES.keys():
 
                 if i in res:
 
                     text += "    | {}: {}\n".format(
-                        org.wayround.aipsetup.info.\
+                        org.wayround.aipsetup.info.
                             SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES[i],
                         res[i]
                         )
@@ -241,7 +237,6 @@ def print_info(command_name, opts, args, adds):
 
 
 def asp_list(command_name, opts, args, adds):
-
     """
     Get and print list of package asps on server
 
@@ -261,7 +256,7 @@ def asp_list(command_name, opts, args, adds):
 
         res = org.wayround.aipsetup.client_pkg.asps(url, args[0])
 
-        if res == None:
+        if res is None:
             ret = 2
         else:
 
@@ -279,7 +274,6 @@ def asp_list(command_name, opts, args, adds):
 
 
 def get_asp(command_name, opts, args, adds):
-
     """
     Download asp file from package server
 
@@ -305,7 +299,6 @@ def get_asp(command_name, opts, args, adds):
 
 
 def get_asp_latest(command_name, opts, args, adds):
-
     """
     Download latest asp file from package server
 
@@ -336,7 +329,6 @@ def get_asp_latest(command_name, opts, args, adds):
 
 
 def get_asp_lat_cat(command_name, opts, args, adds):
-
     """
     Download all latest asps in category and subcategories
 
@@ -369,7 +361,7 @@ def get_asp_lat_cat(command_name, opts, args, adds):
             path
             )
 
-        if res == None:
+        if res is None:
             ret = 2
         else:
 
@@ -405,7 +397,7 @@ def get_asp_lat_cat(command_name, opts, args, adds):
                         out_dir,
                         False
                         )
-                    if res2 == None:
+                    if res2 is None:
                         errors = True
                         f = open('!errors.txt', 'a')
                         f.write(
@@ -419,7 +411,6 @@ def get_asp_lat_cat(command_name, opts, args, adds):
 
 
 def tar_list(command_name, opts, args, adds):
-
     """
     List all tarballs for named package
     """
@@ -437,7 +428,7 @@ def tar_list(command_name, opts, args, adds):
 
         res = org.wayround.aipsetup.client_pkg.tarballs(url, args[0])
 
-        if res == None:
+        if res is None:
             ret = 2
         else:
 
@@ -455,7 +446,6 @@ def tar_list(command_name, opts, args, adds):
 
 
 def get_tar_latest(command_name, opts, args, adds):
-
     """
     Dwonload latest tarball for named package
     """
@@ -473,12 +463,12 @@ def get_tar_latest(command_name, opts, args, adds):
 
         name = args[0]
 
-        ret = _get_tarballs_latest(url, name, config)
+        ret = _get_tarballs_latest(url, name, config, mute=False)
 
     return ret
 
 
-def _get_tarballs_latest(url, name, config, out_dir=None):
+def _get_tarballs_latest(url, name, config, out_dir=None, mute=True):
 
     ret = 1
 
@@ -488,13 +478,14 @@ def _get_tarballs_latest(url, name, config, out_dir=None):
         url, name, exts
         )
 
-    if res != None and len(res) != 0:
+    if res is not None and len(res) != 0:
 
         res = org.wayround.utils.path.select_by_prefered_extension(res, exts)
 
         res = org.wayround.aipsetup.client_pkg.get_tarball(
             res,
-            out_dir=out_dir
+            out_dir=out_dir,
+            mute_downloader=mute
             )
 
         if isinstance(res, str):
@@ -506,7 +497,6 @@ def _get_tarballs_latest(url, name, config, out_dir=None):
 
 
 def get_tar_lat_cat(command_name, opts, args, adds):
-
     """
     Download all latest tarballs in category and subcategories
 
@@ -539,7 +529,7 @@ def get_tar_lat_cat(command_name, opts, args, adds):
             path
             )
 
-        if res == None:
+        if res is None:
             ret = 2
         else:
 
@@ -589,6 +579,13 @@ def get_tar_lat_cat(command_name, opts, args, adds):
 
 
 def get_x_by_list(command_name, opts, args, adds, mode='tar'):
+    """
+    Gets tarball or asp by criteries
+
+    listname [selected_item [selected_item [selected_item [selected_item ...]]]]
+
+    -v=VERSION
+    """
 
     config = adds['config']
 
@@ -599,11 +596,11 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
         list_name = args[0]
 
     version = None
-    if len(args) > 1:
-        version = args[1]
+    if '-v' in opts:
+        version = opts['-v']
 
-    if list_name == None:
-        logging.error("list name is tequired parameter")
+    if list_name is None:
+        logging.error("list name is required parameter")
         ret = 1
     else:
 
@@ -635,9 +632,13 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
 def get_asp_by_list(*args, **kwargs):
     return get_x_by_list(*args, mode='asp', **kwargs)
 
+get_asp_by_list.__doc__ = get_x_by_list.__doc__
+
 
 def get_tar_by_list(*args, **kwargs):
     return get_x_by_list(*args, mode='tar', **kwargs)
+
+get_tar_by_list.__doc__ = get_x_by_list.__doc__
 
 
 def bundle_list(command_name, opts, args, adds):
@@ -648,7 +649,7 @@ def bundle_list(command_name, opts, args, adds):
 
     res = org.wayround.aipsetup.client_pkg.bundles(url)
 
-    if res == None:
+    if res is None:
         ret = 2
     else:
 
@@ -686,7 +687,7 @@ def get_by_bundle(command_name, opts, args, adds):
 
         res = org.wayround.aipsetup.client_pkg.bundle_get(url, name)
 
-        if res == None:
+        if res is None:
             ret = 2
         else:
 
@@ -694,9 +695,9 @@ def get_by_bundle(command_name, opts, args, adds):
 
             for i in res['list']:
                 if not isinstance(
-                    org.wayround.aipsetup.client_pkg.get_asp(url, i),
-                    str
-                    ):
+                        org.wayround.aipsetup.client_pkg.get_asp(url, i),
+                        str
+                        ):
                     errors = True
 
                     f = open('!errors!.txt', 'a')

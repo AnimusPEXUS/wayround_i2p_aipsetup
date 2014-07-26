@@ -19,7 +19,7 @@ import org.wayround.utils.datetime_iso8601
 import org.wayround.utils.getopt
 import org.wayround.utils.log
 import org.wayround.utils.path
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 import org.wayround.utils.terminal
 import org.wayround.utils.text
 import org.wayround.utils.time
@@ -1737,7 +1737,7 @@ def info_parse_tarball(command_name, opts, args, adds):
 
         tarball = args[0]
 
-        parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+        parsed = org.wayround.utils.tarball.parse_tarball_name(
             tarball,
             mute=False
             )

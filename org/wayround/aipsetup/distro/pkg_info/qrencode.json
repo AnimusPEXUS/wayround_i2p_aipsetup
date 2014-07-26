@@ -1,9 +1,9 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.kernel.org",
+  "description": "",
+  "home_page": "",
   "buildscript": "std",
-  "basename": "util-linux",
-  "filters": "- status !re ^$",
+  "basename": "qrencode",
+  "filters": "",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

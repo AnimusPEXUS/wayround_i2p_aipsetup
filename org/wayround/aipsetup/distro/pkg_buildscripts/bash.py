@@ -13,11 +13,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'patch', 'configure', 'build', 'distribute', 'ln'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'patch', 'configure', 'build', 'distribute', 'ln'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -49,25 +49,33 @@ def main(buildingsite, action=None):
         if 'patch' in actions and ret == 0:
             patches = os.listdir(patch_dir)
 
-            patches2 = []
+            if len(patches) == 0:
+                print("provide patches")
+                ret = 30
+            else:
 
-            for i in patches:
-                if not i.endswith('.sig'):
-                    patches2.append(i)
+                patches2 = []
 
-            patches = patches2
-            del patches2
+                for i in patches:
+                    if not i.endswith('.sig'):
+                        patches2.append(i)
 
-            patches.sort()
+                patches = patches2
+                del patches2
 
-            for i in patches:
-                logging.info("Patching using {}".format(i))
-                if subprocess.Popen(
-                    ['patch', '-i', patch_dir + os.path.sep + i, '-p0'],
-                    cwd=src_dir
-                    ).wait() != 0:
-                    logging.error("Patch error")
-                    ret = 1
+                patches.sort()
+
+                for i in patches:
+                    logging.info("Patching using {}".format(i))
+                    if subprocess.Popen(
+                            ['patch',
+                             '-i',
+                             patch_dir + os.path.sep + i,
+                             '-p0'],
+                            cwd=src_dir
+                            ).wait() != 0:
+                        logging.error("Patch error")
+                        ret = 1
 
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
@@ -78,9 +86,9 @@ def main(buildingsite, action=None):
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
@@ -125,7 +133,7 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'ln'  in actions and ret == 0:
+        if 'ln' in actions and ret == 0:
 
             tsl = org.wayround.utils.path.join(dst_dir, 'usr', 'bin', 'sh')
 

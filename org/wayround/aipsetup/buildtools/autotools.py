@@ -14,7 +14,7 @@ import org.wayround.utils.error
 import org.wayround.utils.log
 import org.wayround.utils.osutils
 import org.wayround.utils.path
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 
 
 def determine_abs_configure_dir(buildingsite, config_dir):
@@ -95,7 +95,7 @@ def extract_high(
 
         tarball = None
         for i in tarball_dir_files:
-            parsed = org.wayround.utils.tarball_name_parser.parse_tarball_name(
+            parsed = org.wayround.utils.tarball.parse_tarball_name(
                 i, mute=True
                 )
             if isinstance(parsed, dict):

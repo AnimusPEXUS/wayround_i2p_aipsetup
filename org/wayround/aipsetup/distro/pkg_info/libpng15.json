@@ -3,7 +3,7 @@
   "home_page": "http://www.sourceforge.net",
   "buildscript": "std",
   "basename": "libpng",
-  "filters": "- version fm *\n+ version fm 1.5.*\n- filename contains beta\n- filename contains config",
+  "filters": "- version fm *\n+ version fm 1.5.*\n- filename contains beta\n- filename contains config\n- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

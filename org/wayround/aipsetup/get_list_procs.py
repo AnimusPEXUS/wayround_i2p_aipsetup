@@ -8,7 +8,7 @@ import re
 import org.wayround.aipsetup.client_pkg
 import org.wayround.aipsetup.client_src
 import org.wayround.utils.path
-import org.wayround.utils.tarball_name_parser
+import org.wayround.utils.tarball
 import org.wayround.utils.terminal
 import org.wayround.utils.types
 import org.wayround.utils.version
@@ -24,7 +24,7 @@ def check_nineties(parsed):
         ret = re.match(
             r'^9\d+$',
             parsed_groups_version_list[1]
-            ) != None
+            ) is not None
 
     return ret
 
@@ -36,23 +36,23 @@ def check_development(parsed):
     ret = re.match(
         r'^\d*[13579]$',
         parsed_groups_version_list[1]
-        ) != None
+        ) is not None
 
     return ret
 
 
 def find_gnome_tarball_name(
-    pkg_client,
-    pkgname,
-    required_v1=None,
-    required_v2=None,
-    find_lower_version_if_required_missing=True,
-    development_are_acceptable=True,
-    nineties_minors_are_acceptable=True,
-    acceptable_extensions_order_list=None
-    ):
+        pkg_client,
+        pkgname,
+        required_v1=None,
+        required_v2=None,
+        find_lower_version_if_required_missing=True,
+        development_are_acceptable=True,
+        nineties_minors_are_acceptable=True,
+        acceptable_extensions_order_list=None
+        ):
 
-    if acceptable_extensions_order_list == None:
+    if acceptable_extensions_order_list is None:
         acceptable_extensions_order_list = ['.tar.xz', '.tar.bz2', '.tar.gz']
 
     def source_version_comparator(v1, v2):
@@ -63,7 +63,7 @@ def find_gnome_tarball_name(
 
     tarballs = pkg_client.tarballs(pkgname)
 
-    if tarballs == None:
+    if tarballs is None:
         tarballs = []
 
     tarballs.sort(
@@ -75,11 +75,11 @@ def find_gnome_tarball_name(
 
     found_required_targeted_tarballs = []
 
-    if (required_v1 == None or required_v2 == None) and len(tarballs) != 0:
+    if (required_v1 is None or required_v2 is None) and len(tarballs) != 0:
 
         for i in tarballs:
 
-            parsed = org.wayround.utils.tarball_name_parser.\
+            parsed = org.wayround.utils.tarball.\
                 parse_tarball_name(i, mute=True)
 
             parsed_groups_version_list = parsed['groups']['version_list']
@@ -92,54 +92,54 @@ def find_gnome_tarball_name(
                 int(parsed_groups_version_list[1])
 
             if (
-                (is_nineties
-                 and nineties_minors_are_acceptable == True
-                 )
-                or (is_development
-                    and development_are_acceptable == True
-                    )
-                or (not is_nineties
-                    and not is_development
-                    )
-                ):
+                    (is_nineties
+                     and nineties_minors_are_acceptable == True
+                     )
+                    or (is_development
+                        and development_are_acceptable == True
+                        )
+                    or (not is_nineties
+                        and not is_development
+                        )
+                    ):
 
-                if required_v1 == None:
+                if required_v1 is None:
                     required_v1 = int(parsed['groups']['version_list'][0])
 
-                if required_v2 == None:
+                if required_v2 is None:
                     required_v2 = int_parsed_groups_version_list_1
 
                 break
 
     for i in tarballs:
 
-        parsed = org.wayround.utils.tarball_name_parser.\
+        parsed = org.wayround.utils.tarball.\
             parse_tarball_name(i, mute=True)
 
         if parsed:
 
             parsed_groups_version_list = parsed['groups']['version_list']
             if (int(parsed_groups_version_list[0]) == required_v1
-                and
-                int(parsed_groups_version_list[1]) == required_v2
+                    and
+                    int(parsed_groups_version_list[1]) == required_v2
                 ):
 
                 is_nineties = check_nineties(parsed)
 
                 if ((is_nineties and nineties_minors_are_acceptable)
-                    or
-                    (not is_nineties)):
+                        or
+                        (not is_nineties)):
 
                     found_required_targeted_tarballs.append(i)
 
     if (len(found_required_targeted_tarballs) == 0
-        and find_lower_version_if_required_missing == True):
+            and find_lower_version_if_required_missing == True):
 
         next_found_acceptable_tarball = None
 
         for i in tarballs:
 
-            parsed = org.wayround.utils.tarball_name_parser.\
+            parsed = org.wayround.utils.tarball.\
                 parse_tarball_name(i, mute=True)
 
             if parsed:
@@ -157,32 +157,32 @@ def find_gnome_tarball_name(
 
                 is_development = check_development(parsed)
 
-                if next_found_acceptable_tarball == None:
+                if next_found_acceptable_tarball is None:
 
                     if (is_nineties
-                        and nineties_minors_are_acceptable == True
-                        and int_parsed_groups_version_list_1 < required_v2
+                            and nineties_minors_are_acceptable == True
+                            and int_parsed_groups_version_list_1 < required_v2
                         ):
                         next_found_acceptable_tarball = i
 
-                    if (next_found_acceptable_tarball == None
-                        and is_development
-                        and development_are_acceptable == True
-                        and int_parsed_groups_version_list_1 < required_v2
+                    if (next_found_acceptable_tarball is None
+                            and is_development
+                            and development_are_acceptable == True
+                            and int_parsed_groups_version_list_1 < required_v2
                         ):
                         next_found_acceptable_tarball = i
 
-                    if (next_found_acceptable_tarball == None
-                        and not is_nineties
-                        and not is_development
-                        and int_parsed_groups_version_list_1 < required_v2
+                    if (next_found_acceptable_tarball is None
+                            and not is_nineties
+                            and not is_development
+                            and int_parsed_groups_version_list_1 < required_v2
                         ):
                         next_found_acceptable_tarball = i
 
-                if next_found_acceptable_tarball != None:
+                if next_found_acceptable_tarball is not None:
                     break
 
-        if next_found_acceptable_tarball != None:
+        if next_found_acceptable_tarball is not None:
 
             for i in tarballs:
                 if org.wayround.utils.version.\
@@ -200,19 +200,18 @@ def find_gnome_tarball_name(
                 ret = j
                 break
 
-    if ret == None and len(found_required_targeted_tarballs) != 0:
+    if ret is None and len(found_required_targeted_tarballs) != 0:
         ret = found_required_targeted_tarballs[0]
 
     return ret
 
 
 def gnome_get(
-    mode,
-    pkg_client, src_client, acceptable_extensions_order_list,
-    pkgname, version,
-    args, kwargs
-    ):
-
+        mode,
+        pkg_client, src_client, acceptable_extensions_order_list,
+        pkgname, version,
+        args, kwargs
+        ):
     """
     """
 
@@ -256,15 +255,19 @@ def gnome_get(
             **kwargs
             )
 
-        if tarball == None:
+        if tarball is None:
             ret = 2
         else:
 
             if not isinstance(
-                org.wayround.aipsetup.client_pkg.get_tarball(tarball),
-                str
-                ):
+                    org.wayround.aipsetup.client_pkg.get_tarball(tarball),
+                    str
+                    ):
                 ret = 3
+
+            else:
+
+                ret = 0
 
     elif mode == 'asp':
         ret = normal_get(
@@ -278,13 +281,12 @@ def gnome_get(
 
 
 def normal_get(
-    mode,
-    pkg_client, src_client,
-    acceptable_extensions_order_list,
-    pkgname, version,
-    args, kwargs
-    ):
-
+        mode,
+        pkg_client, src_client,
+        acceptable_extensions_order_list,
+        pkgname, version,
+        args, kwargs
+        ):
     """
     Download tarball or complete ASP package
 
@@ -306,15 +308,15 @@ def normal_get(
                     if k.endswith(j):
                         found = k
                         break
-                if found != None:
+                if found is not None:
                     break
-            if found == None:
+            if found is None:
                 found = res[0]
 
             if not isinstance(
-                org.wayround.aipsetup.client_pkg.get_tarball(found),
-                str
-                ):
+                    org.wayround.aipsetup.client_pkg.get_tarball(found),
+                    str
+                    ):
                 ret = 3
         else:
             ret = 2
@@ -328,29 +330,30 @@ def normal_get(
 
 
 def get_by_glp(
-    mode,
-    conf,
-    version,
-    pkg_client, src_client,
-    acceptable_extensions_order_list
-    ):
+        mode,
+        conf,
+        version,
+        pkg_client, src_client,
+        acceptable_extensions_order_list,
+        mute=False
+        ):
 
     if not mode in ['tar', 'asp']:
         raise ValueError("`mode' must be in ['tar', 'asp']")
 
     if not isinstance(
-        pkg_client,
-        org.wayround.aipsetup.client_pkg.PackageServerClient
-        ):
+            pkg_client,
+            org.wayround.aipsetup.client_pkg.PackageServerClient
+            ):
         raise TypeError(
             "`pkg_client' must be inst of "
             "org.wayround.aipsetup.client_pkg.PackageServerClient"
             )
 
     if not isinstance(
-        src_client,
-        org.wayround.aipsetup.client_src.SourceServerClient
-        ):
+            src_client,
+            org.wayround.aipsetup.client_src.SourceServerClient
+            ):
         raise TypeError(
             "`pkg_client' must be inst of "
             "org.wayround.aipsetup.client_src.SourceServerClient"
@@ -359,8 +362,8 @@ def get_by_glp(
     ret = 0
 
     if ('ask_version' in conf
-        and conf['ask_version'] == True
-        and version == None):
+            and conf['ask_version'] == True
+            and version == None):
 
         logging.error("Version is required")
 
@@ -371,6 +374,9 @@ def get_by_glp(
         complex_ = isinstance(conf['names'], dict)
 
         for i in sorted(conf['names']):
+
+            if not mute:
+                print("   getting `{}': ".format(i), end='')
 
             proc = normal_get
 
@@ -386,22 +392,28 @@ def get_by_glp(
                 if data['proc'] == 'gnome_get':
                     proc = gnome_get
 
-            if not isinstance(
-                proc(
-                    mode,
-                    pkg_client, src_client, acceptable_extensions_order_list,
-                    i,
-                    version=version,
-                    args=args,
-                    kwargs=kwargs
-                    ),
-                str
-                ):
+            res = proc(
+                mode,
+                pkg_client, src_client, acceptable_extensions_order_list,
+                i,
+                version=version,
+                args=args,
+                kwargs=kwargs
+                )
 
+            if isinstance(res, int) and res != 0:
                 errors += 1
                 f = open('!errors!.txt', 'a')
                 f.write("Can't get file for: {}\n".format(i))
                 f.close()
+
+                if not mute:
+                    print('ERROR')
+
+            else:
+
+                if not mute:
+                    print('OK')
 
         ret = int(errors > 0)
 
