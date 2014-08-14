@@ -69,6 +69,7 @@
         "Python3",
         "qt4",
         "qt5",
+        "ruby",
         "scons",
         "sed", 
         "shadow",
