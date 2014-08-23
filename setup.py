@@ -12,12 +12,12 @@ setup(
     author_email='animus@wayround.org',
     url='http://wiki.wayround.org/soft/aipsetup',
     packages=[
-      'org.wayround.aipsetup',
-      'org.wayround.aipsetup.buildtools',
-      ],
+        'org.wayround.aipsetup',
+        'org.wayround.aipsetup.buildtools',
+        ],
     scripts=['aipsetup3.py'],
     package_data={
-        'org.wayround.aipsetup':[
+        'org.wayround.aipsetup': [
             os.path.join('ui', '*'),
             os.path.join('distro', '*.py'),
             os.path.join('distro', '*.json'),
