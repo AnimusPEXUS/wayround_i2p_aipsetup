@@ -5,6 +5,7 @@
 /.eric5project
 /aipsetup3.e4p
 /aipsetup3.e5p
+/aipsetup.egg-info
 *~
 *.pyc
 *.pyo
