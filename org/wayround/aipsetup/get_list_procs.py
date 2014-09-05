@@ -47,8 +47,8 @@ def find_gnome_tarball_name(
         required_v1=None,
         required_v2=None,
         find_lower_version_if_required_missing=True,
-        development_are_acceptable=True,
-        nineties_minors_are_acceptable=True,
+        development_are_acceptable=False,
+        nineties_minors_are_acceptable=False,
         acceptable_extensions_order_list=None
         ):
 
@@ -222,6 +222,8 @@ def gnome_get(
 
     if mode == 'tar':
 
+        version_numbers = None, None
+
         if 'version' in kwargs:
             listed_version = kwargs['version']
 
@@ -230,10 +232,10 @@ def gnome_get(
             else:
                 version = listed_version.format(asked_version=version)
 
-        version_numbers = version.split('.')
+            version_numbers = version.split('.')
 
-        for i in range(len(version_numbers)):
-            version_numbers[i] = int(version_numbers[i])
+            for i in range(len(version_numbers)):
+                version_numbers[i] = int(version_numbers[i])
 
         kwargs = {}
 
@@ -329,6 +331,74 @@ def normal_get(
     return ret
 
 
+def _get_by_glp_subroutine(
+        mode,
+        pkg_client,
+        src_client,
+        name,
+        acceptable_extensions_order_list,
+        version,
+        proc,
+        args,
+        kwargs,
+        mute
+        ):
+
+    ret = 0
+
+    if not mute:
+        print("   getting `{}': ".format(name), end='')
+
+    res = proc(
+        mode,
+        pkg_client,
+        src_client,
+        acceptable_extensions_order_list,
+        name,
+        version=version,
+        args=args,
+        kwargs=kwargs
+        )
+
+    if isinstance(res, int) and res != 0:
+        ret = 1
+
+        if not mute:
+            print('ERROR')
+
+    else:
+
+        if not mute:
+            print('OK')
+
+    return ret
+
+
+def _get_by_glp_subroutine2(data):
+
+    proc = normal_get
+    args = []
+    kwargs = {}
+
+    if 'proc' in data:
+        if data['proc'] == 'normal_get':
+            proc = normal_get
+
+        elif data['proc'] == 'gnome_get':
+            proc = gnome_get
+
+        else:
+            raise Exception("invalid `proc' value: {}".format(data['proc']))
+
+    if 'args' in data:
+        args = data['args']
+
+    if 'kwargs' in data:
+        args = data['kwargs']
+
+    return proc, args, kwargs
+
+
 def get_by_glp(
         mode,
         conf,
@@ -369,53 +439,88 @@ def get_by_glp(
 
         ret = 1
     else:
-        errors = 0
 
-        complex_ = isinstance(conf['names'], dict)
+        names_obj = conf['names']
+        names_obj_t = type(names_obj)
 
-        for i in sorted(conf['names']):
+        if names_obj_t not in [list, dict]:
+            logging.error("invalid type of `names' section")
+            ret = 2
 
-            if not mute:
-                print("   getting `{}': ".format(i), end='')
+        if ret == 0:
 
-            proc = normal_get
+            errors = 0
 
-            args = []
-            kwargs = {}
+            if names_obj_t == list:
 
-            if complex_:
-                data = conf['names'][i]
+                data_dict = {}
 
-                if data['proc'] == 'normal_get':
-                    proc = normal_get
+                for i in names_obj:
 
-                if data['proc'] == 'gnome_get':
-                    proc = gnome_get
+                    i_type = type(i)
 
-            res = proc(
-                mode,
-                pkg_client, src_client, acceptable_extensions_order_list,
-                i,
-                version=version,
-                args=args,
-                kwargs=kwargs
-                )
+                    if i_type == str:
+                        if i in data_dict:
+                            logging.warning(
+                                "`{}' already in names."
+                                " duplicated. using new..".format(i)
+                                )
+                        data_dict[i] = {
+                            'name': i,
+                            'proc': 'normal_get',
+                            'args': (),
+                            'kwargs': {}
+                            }
+                    elif i_type == dict:
+                        if i['name'] in data_dict:
+                            logging.warning(
+                                "`{}' already in names."
+                                " duplicated. using new..".format(i['name'])
+                                )
+                        data_dict[i] = {
+                            'name': i['name'],
+                            'proc': 'normal_get',
+                            'args': (),
+                            'kwargs': {}
+                            }
+                    else:
+                        raise Exception("imvalid data. programming error")
 
-            if isinstance(res, int) and res != 0:
-                errors += 1
-                f = open('!errors!.txt', 'a')
-                f.write("Can't get file for: {}\n".format(i))
-                f.close()
+                names_obj = data_dict
+                names_obj_t = dict
 
-                if not mute:
-                    print('ERROR')
+            for i in sorted(list(names_obj.keys())):
+                i_name = i
 
-            else:
+                if ('name' in names_obj[i]
+                        and names_obj[i]['name'] != i_name):
+                    logging.error(
+                        "`{}' != `{}'".format(
+                            names_obj[i]['name'],
+                            i_name
+                            )
+                        )
 
-                if not mute:
-                    print('OK')
+                # TODO: unwrap subroutine, if used only one
+                proc, args, kwargs = _get_by_glp_subroutine2(names_obj[i])
 
-        ret = int(errors > 0)
+                # TODO: unwrap subroutine, if used only one
+                errors += _get_by_glp_subroutine(
+                    mode,
+                    pkg_client,
+                    src_client,
+                    i_name,
+                    acceptable_extensions_order_list,
+                    version,
+                    proc,
+                    args,
+                    kwargs,
+                    mute
+                    )
+
+
+
+            ret = int(errors > 0)
 
     return ret
 

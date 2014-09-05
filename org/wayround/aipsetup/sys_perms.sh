@@ -30,12 +30,20 @@ chmod 0700 /etc/polkit-1/localauthority
 chown root:root /var/lib/polkit-1
 chmod 0700 /var/lib/polkit-1
 
-# systemd services
-chmod 0755 /usr/lib/systemd/system
-find /usr/lib/systemd/system -type d -exec chmod 755 '{}' ';'
-find /usr/lib/systemd/system -type f -exec chmod 744 '{}' ';'
+# systemd service files
 
-find /usr/lib/systemd/user -type f -exec chmod 744 '{}' ';'
+for i in \
+    '/usr/lib/systemd/system' \
+    '/usr/lib/systemd/user' \
+    '/etc/systemd/system' \
+    '/etc/systemd/user' 
+do
+
+    chmod 0755 "$i"
+    find "$i" -type d -exec chmod 755 '{}' ';'
+    find "$i" -type f -exec chmod 644 '{}' ';'
+
+done
 
 
 chmod 4755 /usr/libexec/dbus-daemon-launch-helper

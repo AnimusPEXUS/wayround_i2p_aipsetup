@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "",
+  "buildscript": "std",
   "basename": "xf86-video-nouveau",
   "filters": "",
   "installation_priority": 5,

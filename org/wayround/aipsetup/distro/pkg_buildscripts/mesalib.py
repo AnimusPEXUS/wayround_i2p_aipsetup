@@ -49,17 +49,32 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-gallium-egl',
+                    '--enable-texture-float',
+
                     '--enable-gles1',
                     '--enable-gles2',
+
                     '--enable-openvg',
+
                     '--enable-osmesa',
                     '--with-osmesa-bits=32',
-                    '--enable-xorg',
+
                     '--enable-xa',
+                    '--enable-gbm',
+
+                    '--enable-egl',
+                    '--enable-gallium-egl',
+                    '--enable-gallium-gbm',
+
+#                    '--enable-glx-tls',
+
+                    '--enable-xorg',
+                    '--with-egl-platforms=x11,drm,wayland,fbdev,null',
+                    '--enable-gallium-drivers=nouveau,r300,r600,radeonsi,svga,swrast',
+
 #                    '--enable-d3d1x',
 #                    '--enable-opencl',
-                    '--with-egl-platforms=x11,drm,wayland,fbdev,null',
+
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -67,10 +82,13 @@ def main(buildingsite, action=None):
                     '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--host=i686-pc-linux-gnu',
+#                    '--host=i686-pc-linux-gnu',
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
+                # environment={
+                #     'CFLAGS': '-fno-lto'
+                #     },
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,

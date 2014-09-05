@@ -62,6 +62,7 @@ def main(buildingsite, action=None):
                     '--enable-bootstrap',
                     '--enable-threads=posix',
                     '--enable-multiarch',
+                    '--enable-multilib',
                     '--enable-checking=release',
                     '--with-gmp=/usr',
                     '--with-mpfr=/usr',

@@ -28,7 +28,10 @@
         "gcc",
         "gdb", 
         "gettext",
-        "glib", 
+        {
+            "name": "glib",
+            "proc": "gnome_get"
+        }, 
         "glibc",
         "gmp",
         "gperf",

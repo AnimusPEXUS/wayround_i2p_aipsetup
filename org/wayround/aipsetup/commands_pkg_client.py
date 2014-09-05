@@ -622,7 +622,8 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
             mode,
             conf,
             version,
-            pkg_client, src_client,
+            pkg_client,
+            src_client,
             acceptable_extensions_order_list
             )
 

@@ -344,7 +344,7 @@ class PackageInfoCtl:
 
                     if os.path.exists(filename):
                         if not force_rewrite:
-                            logging.info("XML info file already exists")
+                            logging.info("JSON info file already exists")
                             pkgs_exists += 1
                             continue
                         else:

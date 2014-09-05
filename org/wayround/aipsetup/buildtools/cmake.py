@@ -45,10 +45,11 @@ def determine_building_dir(
                 )
             )
     else:
-        building_dir = (
-            org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
-            + os.path.sep
-            + config_dir
+        building_dir = org.wayround.utils.path.abspath(
+            org.wayround.utils.path.join(
+                org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite),
+                config_dir
+                )
             )
 
     return building_dir

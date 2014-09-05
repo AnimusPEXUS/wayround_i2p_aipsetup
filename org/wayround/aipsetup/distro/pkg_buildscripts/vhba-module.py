@@ -6,7 +6,6 @@ import subprocess
 import org.wayround.utils.file
 
 import org.wayround.aipsetup.build
-import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
 
 
@@ -75,8 +74,8 @@ def main(buildingsite, action=None):
                 makefile.close()
 
                 for each in range(len(lines)):
-                    if lines[each] == '\t$(KMAKE) modules_install\n':
-                        lines[each] = '\t$(KMAKE) modules_install INSTALL_MOD_PATH=$(DESTDIR)\n'
+                    if lines[each] == '\t$(MAKE) -C $(KDIR) M=$(PWD) $@\n':
+                        lines[each] = '\t$(MAKE) -C $(KDIR) M=$(PWD) INSTALL_MOD_PATH=$(DESTDIR) $@\n'
 
                 makefile = open(src_dir + os.path.sep + 'Makefile', 'w')
                 makefile.writelines(lines)
