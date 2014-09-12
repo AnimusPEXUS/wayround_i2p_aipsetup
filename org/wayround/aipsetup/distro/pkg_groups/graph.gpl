@@ -4,11 +4,5 @@
     "openexr", "ilmbase",
     "giflib", "giflib4", "libungif",
     "openimageio", "DevIL",
-    
-    "libdrm", 
-    
-    "fontconfig",
-    
-    "libevdev"
     ]
 }

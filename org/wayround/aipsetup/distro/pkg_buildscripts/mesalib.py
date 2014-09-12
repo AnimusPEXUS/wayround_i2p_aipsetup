@@ -62,15 +62,19 @@ def main(buildingsite, action=None):
                     '--enable-xa',
                     '--enable-gbm',
 
-                    '--enable-egl',
+#                    '--enable-egl',
                     '--enable-gallium-egl',
-                    '--enable-gallium-gbm',
+#                    '--enable-gallium-gbm',
+
+                    '--enable-dri',
+                    '--enable-dri3',
 
 #                    '--enable-glx-tls',
 
                     '--enable-xorg',
                     '--with-egl-platforms=x11,drm,wayland,fbdev,null',
-                    '--enable-gallium-drivers=nouveau,r300,r600,radeonsi,svga,swrast',
+                    '--with-gallium-drivers=nouveau,svga,swrast',
+                    '--with-dri-drivers=nouveau,i915,i965,r200,radeon,swrast',
 
 #                    '--enable-d3d1x',
 #                    '--enable-opencl',

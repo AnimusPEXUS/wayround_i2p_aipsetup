@@ -71,7 +71,7 @@ def main(buildingsite, action=None):
                     ],
                 arguments=[],
                 environment={
-                    'CFLAGS': '-fno-lto'
+                    # 'CFLAGS': '-fno-lto'
                     },
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,

@@ -1,0 +1,21 @@
+{
+    "names": [
+        {
+            "name": "gtk-sharp",
+            "proc": "gnome_get"
+        },
+        "gtkspell",
+        "gtkspell3",
+        "itstool",
+        "libcanberra",
+        "libe-book",
+        "libmusicbrainz",
+        "librevenge",
+        "libzeitgeist",
+        {
+            "name": "webkitgtk",
+            "proc": "gnome_get"
+        },
+        "zeitgeist"
+    ]
+}

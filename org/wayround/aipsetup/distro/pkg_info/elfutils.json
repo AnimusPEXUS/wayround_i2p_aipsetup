@@ -1,8 +1,8 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "",
-  "basename": "",
+  "buildscript": "elfutils",
+  "basename": "elfutils",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

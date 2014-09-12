@@ -58,7 +58,7 @@ def main(buildingsite, action=None):
                 options=[
                     '--enable-application=suite',
                     '--enable-calendar',
-                    '--enable-default-toolkit=cairo-gtk2',
+                    '--enable-default-toolkit=cairo-gtk3',
                     '--enable-freetype2',
                     '--enable-safe-browsing',
                     '--enable-shared',
@@ -66,8 +66,8 @@ def main(buildingsite, action=None):
                     '--enable-storage',
                     '--enable-xft',
                     '--with-pthreads',
-                    '--with-system-nspr',
-                    '--with-system-nss',
+                    # '--with-system-nspr',
+                    # '--with-system-nss',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + \

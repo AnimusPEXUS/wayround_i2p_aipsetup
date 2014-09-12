@@ -31,25 +31,15 @@
             },
         "clutter": {
             "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
             },
         "clutter-gst": {
             "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
             },
         "clutter-gtk": {
             "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
+            "kwargs": {"daa": true}
             },
+
         "devhelp": {
             "proc": "gnome_get",
             "args": [],
@@ -517,6 +507,41 @@
             "args": [],
             "kwargs": {}
             },
+        "libgee": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "libsoup": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "gvfs": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "gtk-doc": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "vala": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "tracker": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "gnome-doc-utils": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
 
 
         "ORBit2":{
@@ -636,22 +661,12 @@
             "args": [],
             "kwargs": {}
             },
-        "gtk-doc": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "gupnp": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
             },
         "gupnp-igd": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gvfs": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
@@ -676,18 +691,13 @@
             "args": [],
             "kwargs": {}
             },
-        "libopenraw": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "libgdata": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
             },
         "libgee": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },
@@ -741,11 +751,6 @@
             "args": [],
             "kwargs": {}
             },
-        "libsoup": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "libwnck": {
             "proc": "normal_get",
             "args": [],
@@ -778,21 +783,6 @@
             },
         "rest": {
             "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "tracker": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "vala": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gnome-doc-utils": {
-            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             }

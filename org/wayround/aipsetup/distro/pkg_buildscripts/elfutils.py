@@ -27,10 +27,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
-        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
-        cc_file = os.path.join(dst_dir, 'usr', 'bin', 'cc')
 
-        libcpp_file = os.path.join(dst_dir, 'usr', 'lib', 'cpp')
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -51,46 +49,20 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    # experimental options
-                    # '--enable-targets=all',
-                    '--enable-tls',
-                    '--enable-nls',
-
-                    '--disable-lto',
-
-                    # normal options
-                    '--enable-__cxa_atexit',
-                    '--with-arch-32=i486',
-                    '--with-tune=generic',
-                    '--enable-languages=all,go,objc,obj-c++,ada',
-                    '--enable-bootstrap',
-                    '--enable-threads=posix',
-                    '--enable-multiarch',
-                    '--enable-multilib',
-                    '--enable-checking=release',
-                    '--with-gmp=/usr',
-                    '--with-mpfr=/usr',
-                    # '--with-build-time-tools=
-                    # /home/agu/_sda3/_UNICORN/b/gnat/
-                    # gnat-gpl-2014-x86-linux-bin',
-                    '--enable-shared',
+                    '--program-prefix=eu-',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                    pkg_info['constitution']['paths']['config'],
+                        pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                    pkg_info['constitution']['paths']['var'],
+                        pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={
-                    # 'CC': '/home/agu/_sda3/_UNICORN/b/gnat/
-                    #  gnat-gpl-2014-x86-linux-bin/bin/gcc',
-                    # 'CXX': '/home/agu/_sda3/_UNICORN/b/
-                    # gnat/gnat-gpl-2014-x86-linux-bin/bin/g++',
-                    },
+                environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
@@ -116,23 +88,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
-
-            if not os.path.exists(cc_file):
-                os.symlink('gcc', cc_file)
-
-            if (not os.path.exists(libcpp_file)
-                    and not os.path.islink(libcpp_file)):
-                os.symlink('../bin/cpp', libcpp_file)
 
     return ret

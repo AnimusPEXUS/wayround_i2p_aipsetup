@@ -58,7 +58,7 @@ def main(buildingsite, action=None):
                     '--enable-pdf=yes',
                     '--enable-png=yes',
                     '--enable-ps=yes',
-                    '--enable-qt',
+#                    '--enable-qt',
                     '--enable-quartz-font=auto',
                     '--enable-quartz-image=auto',
                     '--enable-quartz=auto',
@@ -78,6 +78,7 @@ def main(buildingsite, action=None):
 #                    '--enable-xlib-xcb',
 #                    '--enable-xlib-xrender',
 
+                    '--disable-static',
                     '--enable-xml=yes',
 
                     '--with-x',
@@ -94,7 +95,9 @@ def main(buildingsite, action=None):
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={},
+                environment={
+                    # 'CFLAGS': ' -ffat-lto-objects '
+                    },
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,

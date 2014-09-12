@@ -85,13 +85,16 @@ DIR_ALL = [
 DIR_LIST = DIR_ALL
 ':data:`DIR_ALL` copy'
 
-INVALID_DESTDIR_ROOT_LINKS = [
+INVALID_MOVABLE_DESTDIR_ROOT_LINKS = [
     'bin',
     'sbin',
     'lib',
-    'lib64',
-    'mnt'
+    'lib64'
     ]
+
+INVALID_DESTDIR_ROOT_LINKS = [
+    'mnt'
+    ] + INVALID_MOVABLE_DESTDIR_ROOT_LINKS
 
 
 # WARNING: this list is suspiciously similar to what in complete
@@ -278,6 +281,26 @@ class PackCtl:
         ret = 0
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        try:
+            os.makedirs(destdir + os.path.sep + 'usr')
+        except:
+            pass
+
+
+        for i in INVALID_MOVABLE_DESTDIR_ROOT_LINKS:
+
+            p1 = destdir + os.path.sep + i
+
+            if os.path.islink(p1) or os.path.exists(p1):
+
+                org.wayround.utils.file.copytree(
+                    p1,
+                    destdir + os.path.sep + 'usr' + os.path.sep + i,
+                    dst_must_be_empty=False
+                    )
+                #shutil.copytree(p1, destdir + os.path.sep + 'usr')
+                shutil.rmtree(p1)
 
         for i in INVALID_DESTDIR_ROOT_LINKS:
 

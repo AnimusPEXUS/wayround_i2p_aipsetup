@@ -17,7 +17,12 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            [   
+                'extract',
+                'configure',
+                'build',
+                'distribute'
+                ],
             action,
             "help"
             )
@@ -91,7 +96,9 @@ def main(buildingsite, action=None):
                     'ZLIB_LIBS=-lz',
                     'NSS_USE_SYSTEM_SQLITE=1'
                     ],
-                environment={},
+                environment={
+                    'BUILD_OPT': '1'
+                    },
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir

@@ -16,26 +16,28 @@ import org.wayround.utils.version
 
 def check_nineties(parsed):
 
-    parsed_groups_version_list = parsed['groups']['version_list']
-
     ret = False
 
-    if len(parsed_groups_version_list) > 2:
-        ret = re.match(
-            r'^9\d+$',
-            parsed_groups_version_list[1]
-            ) is not None
+    vl = parsed['groups']['version_list']
+    vl_l = len(vl)
+
+    if vl_l > 1:
+
+        for i in range(1, vl_l):
+
+            ret = re.match(r'^9\d+$', vl[i]) is not None
+
+            if ret:
+                break
 
     return ret
 
 
 def check_development(parsed):
 
-    parsed_groups_version_list = parsed['groups']['version_list']
-
     ret = re.match(
         r'^\d*[13579]$',
-        parsed_groups_version_list[1]
+        parsed['groups']['version_list'][1]
         ) is not None
 
     return ret
@@ -73,8 +75,6 @@ def find_gnome_tarball_name(
             )
         )
 
-    found_required_targeted_tarballs = []
-
     if (required_v1 is None or required_v2 is None) and len(tarballs) != 0:
 
         for i in tarballs:
@@ -87,9 +87,6 @@ def find_gnome_tarball_name(
             is_nineties = check_nineties(parsed)
 
             is_development = check_development(parsed)
-
-            int_parsed_groups_version_list_1 = \
-                int(parsed_groups_version_list[1])
 
             if (
                     (is_nineties
@@ -107,9 +104,11 @@ def find_gnome_tarball_name(
                     required_v1 = int(parsed['groups']['version_list'][0])
 
                 if required_v2 is None:
-                    required_v2 = int_parsed_groups_version_list_1
+                    required_v2 = int(parsed['groups']['version_list'][1])
 
                 break
+
+    found_required_targeted_tarballs = []
 
     for i in tarballs:
 
@@ -150,8 +149,9 @@ def find_gnome_tarball_name(
                 int_parsed_groups_version_list_1 = \
                     int(parsed_groups_version_list[1])
 
-                if int_parsed_groups_version_list_1 >= required_v2:
-                    continue
+                if required_v2 is not None:
+                    if int_parsed_groups_version_list_1 >= required_v2:
+                        continue
 
                 is_nineties = check_nineties(parsed)
 
@@ -208,9 +208,13 @@ def find_gnome_tarball_name(
 
 def gnome_get(
         mode,
-        pkg_client, src_client, acceptable_extensions_order_list,
-        pkgname, version,
-        args, kwargs
+        pkg_client,
+        src_client,
+        acceptable_extensions_order_list,
+        pkgname,
+        version,
+        args,
+        kwargs
         ):
     """
     """
@@ -274,9 +278,13 @@ def gnome_get(
     elif mode == 'asp':
         ret = normal_get(
             mode,
-            pkg_client, src_client, acceptable_extensions_order_list,
-            pkgname, version,
-            args, kwargs
+            pkg_client,
+            src_client,
+            acceptable_extensions_order_list,
+            pkgname,
+            version,
+            args,
+            kwargs
             )
 
     return ret
@@ -477,14 +485,12 @@ def get_by_glp(
                                 "`{}' already in names."
                                 " duplicated. using new..".format(i['name'])
                                 )
-                        data_dict[i] = {
-                            'name': i['name'],
-                            'proc': 'normal_get',
-                            'args': (),
-                            'kwargs': {}
-                            }
+                        data_dict[i['name']] = i
+                        if 'name' in i:
+                            del i['name']
+
                     else:
-                        raise Exception("imvalid data. programming error")
+                        raise Exception("invalid data. programming error")
 
                 names_obj = data_dict
                 names_obj_t = dict

@@ -1,0 +1,109 @@
+{
+    "names": [
+        "cairo",
+        "cairomm",
+        "pixman",
+        "py2cairo",
+        "pycairo",
+
+        "colord",
+        "colord-gtk",
+        {
+            "name": "dbus",
+            "proc": "gnome_get"
+        },
+        {
+            "name": "dbus-glib",
+            "proc": "gnome_get"
+        },
+        {
+            "name": "dbus-python",
+            "proc": "gnome_get"
+        },
+        "desktop-file-utils",
+        "libdrm",
+
+        "fontconfig",
+
+        {
+            "name": "libevdev",
+            "proc": "gnome_get"
+        },
+
+        "freetype",
+
+        "libgusb",
+
+        "geoclue",
+
+        "harfbuzz",
+
+        "hicolor-icon-theme",
+
+        "libmbim",
+
+        "liboil",
+
+        "exempi",
+        "libopenraw",
+
+        "libqmi",
+
+        "libspectre",
+
+        "media-player-info",
+
+        "libnice",
+
+        "p11-kit",
+
+        "pkg-config",
+
+        "polkit",
+
+        "poppler",
+        "poppler-data",
+
+        {
+            "name": "pulseaudio",
+            "proc": "gnome_get"
+        },
+
+        "shared-mime-info",
+
+        "startup-notification",
+
+        "icon-naming-utils",
+
+        "tango-icon-theme",
+
+        {
+            "name": "udisks",
+            "proc": "gnome_get",
+            "kwargs": {"daa": true, "nmaa": false}
+        },
+        {
+            "name": "upower",
+            "proc": "gnome_get",
+            "kwargs": {"daa": true, "nmaa": true}
+        },
+
+        {
+            "name": "pango",
+            "proc": "gnome_get"
+        },
+        {
+            "name": "pangomm",
+            "proc": "gnome_get"
+        },
+
+        "libxcb",
+        "xcb-proto",
+        "xcb-util",
+        "xcb-util-cursor",
+        "xcb-util-image",
+        "xcb-util-keysyms",
+        "xcb-util-renderutil",
+        "xcb-util-wm"
+    ]
+}
