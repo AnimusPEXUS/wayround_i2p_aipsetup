@@ -13,7 +13,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'build', 'distribute'],
+        ['extract', 'distribute'],
         action,
         "help"
         )
@@ -61,6 +61,8 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[],
                 arguments=[
+                    'bios', 'efi32', 'efi64', 
+                    'installer',
                     'install',
                     'INSTALLROOT=' + dst_dir
                     ],

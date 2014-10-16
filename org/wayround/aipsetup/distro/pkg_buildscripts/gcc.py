@@ -1,6 +1,7 @@
 
 import logging
 import os.path
+import subprocess
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
@@ -13,7 +14,8 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'configure', 'build',
+         'before_checks', 'checks', 'distribute'],
         action,
         "help"
         )
@@ -104,6 +106,25 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[],
                 arguments=[],
+                environment={},
+                environment_mode='copy',
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
+                )
+
+        if 'before_checks' in actions and ret == 0:
+            print(
+                "stop: checks! If You want them (it's good if You do)\n"
+                "then continue build with command: aipsetup3 build continue checks+\n"
+                "else continue build with command: aipsetup3 build continue distribute+\n"
+                )
+            ret = 1
+
+        if 'checks' in actions and ret == 0:
+            ret = autotools.make_high(
+                buildingsite,
+                options=['-k'],
+                arguments=['check'],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,

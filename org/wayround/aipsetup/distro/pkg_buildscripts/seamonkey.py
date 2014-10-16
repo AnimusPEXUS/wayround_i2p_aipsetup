@@ -65,9 +65,11 @@ def main(buildingsite, action=None):
                     '--enable-shared-js',
                     '--enable-storage',
                     '--enable-xft',
+                    '--disable-optimize',
+                    '--enable-gstreamer=1.0',
                     '--with-pthreads',
-                    # '--with-system-nspr',
-                    # '--with-system-nss',
+                    '--with-system-nspr',
+                    '--with-system-nss',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' + \

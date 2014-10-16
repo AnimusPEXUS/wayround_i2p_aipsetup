@@ -25,7 +25,7 @@ USERS = {
     4: 'ftp',
     5: 'mail',
     6: 'adm',
-    7: 'systemd-journal',
+    7: 'gdm',
     8: 'wheel',
 
     # terminals 10-19
@@ -104,7 +104,16 @@ USERS = {
     96: 'freenet',
     97: 'jabberd2',
     98: 'mongodb',
-    99: 'aipsetupserv'
+    99: 'aipsetupserv',
+
+    100: 'systemd-bus-proxy',
+    101: 'systemd-network',
+    102: 'systemd-resolve',
+    103: 'systemd-timesync',
+    104: 'systemd-journal',
+    105: 'systemd-journal-gateway',
+    106: 'systemd-journal-remote',
+    107: 'systemd-journal-upload'
     }
 
 
@@ -153,7 +162,7 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     for i in grp.getgrall():
         if 0 < i.gr_gid <= SYS_GID_MAX:
             org.wayround.utils.terminal.progress_write(
-                "  ({:3d}%) {}".format(
+                "  ({:4d}) {}".format(
                     i.gr_gid,
                     i.gr_name
                     )
@@ -168,7 +177,7 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     for i in sorted(list(GROUPS.keys())):
         name = GROUPS[i]
         org.wayround.utils.terminal.progress_write(
-            "  ({:3d}%) {}".format(
+            "  ({:4d}) {}".format(
                 i,
                 name
                 )

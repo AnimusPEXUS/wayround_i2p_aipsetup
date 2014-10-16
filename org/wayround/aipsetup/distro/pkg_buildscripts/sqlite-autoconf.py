@@ -57,7 +57,11 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+#                    '--target=' + pkg_info['constitution']['target'],
+                    'CFLAGS= -DSQLITE_ENABLE_FTS3=1 '
+                            '-DSQLITE_ENABLE_COLUMN_METADATA=1 '
+                            '-DSQLITE_ENABLE_UNLOCK_NOTIFY=1 '
+                            '-DSQLITE_SECURE_DELETE=1 '
                     ],
                 arguments=[],
                 environment={},
