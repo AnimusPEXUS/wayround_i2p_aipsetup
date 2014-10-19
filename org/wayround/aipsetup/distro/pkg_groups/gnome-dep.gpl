@@ -9,11 +9,17 @@
         "itstool",
         "libcanberra",
         "libe-book",
+        "libndp",
         "libmusicbrainz",
         "librevenge",
+        "libxkbcommon",
         "libzeitgeist",
         {
             "name": "webkitgtk",
+            "proc": "gnome_get"
+        },
+        {
+            "name": "webkitgtk2.4",
             "proc": "gnome_get"
         },
         "zeitgeist"

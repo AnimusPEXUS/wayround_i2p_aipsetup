@@ -8,21 +8,8 @@
 
         "colord",
         "colord-gtk",
-        {
-            "name": "dbus",
-            "proc": "gnome_get"
-        },
-        {
-            "name": "dbus-glib",
-            "proc": "gnome_get"
-        },
-        {
-            "name": "dbus-python",
-            "proc": "gnome_get"
-        },
         "desktop-file-utils",
         "libdrm",
-
         "fontconfig",
 
         {
@@ -41,6 +28,7 @@
         "hicolor-icon-theme",
 
         "libmbim",
+        "libinput",
 
         "liboil",
 

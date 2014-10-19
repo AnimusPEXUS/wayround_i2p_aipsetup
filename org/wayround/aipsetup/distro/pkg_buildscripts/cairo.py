@@ -47,9 +47,9 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-#                    '--enable-cogl',
+                    # '--enable-cogl',
                     '--enable-directfb=auto',
-#                    '--enable-drm',
+                    # '--enable-drm',
                     '--enable-fc=auto',
                     '--enable-ft=auto',
                     '--enable-gl',
@@ -70,8 +70,9 @@ def main(buildingsite, action=None):
                     '--enable-xcb',
                     '--enable-xcb-shm',
 
-                    '--disable-egl',
+                    '--enable-egl',
                     '--enable-glx',
+                    # '--enable-wgl',
 
                     # xlib is deprecated
 #                    '--enable-xlib',

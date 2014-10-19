@@ -1,10 +1,10 @@
 
 import logging
 import os.path
-import subprocess
 
 import org.wayround.aipsetup.build
-import org.wayround.aipsetup.buildtools.autotools as autotools
+from org.wayround.aipsetup.buildtools import autotools
+from org.wayround.aipsetup.buildtools import cmake
 import org.wayround.utils.file
 
 
@@ -14,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
+            ['extract', 'cmake', 'build', 'distribute'],
             action,
             "help"
             )
@@ -28,6 +28,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -44,47 +46,35 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'configure' in actions and ret == 0:
-            nss_cflags = ''
-            p=subprocess.Popen(['pkg-config', '--cflags', 'nspr', 'nss'], stdout=subprocess.PIPE)
-            pr = p.communicate()
-            nss_cflags = str(pr[0], 'utf-8').strip()
-
-            nss_libs = ''
-            p=subprocess.Popen(['pkg-config', '--libs', 'nspr', 'nss'], stdout=subprocess.PIPE)
-            pr = p.communicate()
-            nss_libs = str(pr[0], 'utf-8').strip()
-
-            ret = autotools.configure_high(
+        if 'cmake' in actions and ret == 0:
+            ret = cmake.cmake_high(
                 buildingsite,
                 options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    # '--target=' + pkg_info['constitution']['target']
-                    'CFLAGS=' + nss_cflags,
-                    'LDFLAGS=' + nss_libs
+                    '-DCMAKE_INSTALL_PREFIX=' +
+                        pkg_info['constitution']['paths']['usr'],
+                    '-DPORT=GTK',
+                    '-DCMAKE_EXE_LINKER_FLAGS= -latomic ',
+#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+#                    '--sysconfdir=' +
+#                        pkg_info['constitution']['paths']['config'],
+#                    '--localstatedir=' +
+#                        pkg_info['constitution']['paths']['var'],
+#                    '--enable-shared',
+#                    '--host=' + pkg_info['constitution']['host'],
+#                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                source_subdir=source_configure_reldir,
+                build_in_separate_dir=separate_build_dir
                 )
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options=[],
+                options=['-j2'],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
@@ -98,11 +88,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',

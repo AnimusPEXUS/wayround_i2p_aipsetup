@@ -13,6 +13,18 @@
         "cloog",
         "cmake",
         "coreutils", 
+        {
+            "name": "dbus",
+            "proc": "gnome_get"
+        },
+        {
+            "name": "dbus-glib",
+            "proc": "gnome_get"
+        },
+        {
+            "name": "dbus-python",
+            "proc": "gnome_get"
+        },
         "dejagnu", 
         "diffutils", 
         "e2fsprogs",
@@ -46,6 +58,7 @@
         "iproute2",
         "iptables",
         "isl",
+        "kbd",
         "kmod",
         "libcap2",
         "libcap-ng",
@@ -66,6 +79,7 @@
         "openexr",
         "openssh",
         "openssl",
+        "openvpn",
         "patch", 
         "pcre",
         "perl", 

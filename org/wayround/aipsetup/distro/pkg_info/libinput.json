@@ -1,8 +1,8 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.gnome.org",
-  "buildscript": "clutter",
-  "basename": "clutter",
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "libinput",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

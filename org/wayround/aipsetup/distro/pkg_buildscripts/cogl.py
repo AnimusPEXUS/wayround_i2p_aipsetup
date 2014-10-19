@@ -49,6 +49,9 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--enable-waylang-egl-platform',
+                    '--enable-wayland-egl-server',
+                    '--enable-kms-egl-platform',
                     '--enable-gtk-doc',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],

@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.freedesktop.org",
-  "buildscript": "",
+  "buildscript": "std",
   "basename": "media-player-info",
   "filters": "",
   "installation_priority": 5,

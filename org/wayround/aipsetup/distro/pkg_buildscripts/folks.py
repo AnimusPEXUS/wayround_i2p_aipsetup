@@ -1,7 +1,6 @@
 
 import logging
 import os.path
-import subprocess
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
@@ -13,11 +12,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -28,6 +27,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -45,19 +46,10 @@ def main(buildingsite, action=None):
                 )
 
         if 'configure' in actions and ret == 0:
-            nss_cflags = ''
-            p=subprocess.Popen(['pkg-config', '--cflags', 'nspr', 'nss'], stdout=subprocess.PIPE)
-            pr = p.communicate()
-            nss_cflags = str(pr[0], 'utf-8').strip()
-
-            nss_libs = ''
-            p=subprocess.Popen(['pkg-config', '--libs', 'nspr', 'nss'], stdout=subprocess.PIPE)
-            pr = p.communicate()
-            nss_libs = str(pr[0], 'utf-8').strip()
-
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--disable-fatal-warnings',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -67,9 +59,7 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    # '--target=' + pkg_info['constitution']['target']
-                    'CFLAGS=' + nss_cflags,
-                    'LDFLAGS=' + nss_libs
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -98,11 +88,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',

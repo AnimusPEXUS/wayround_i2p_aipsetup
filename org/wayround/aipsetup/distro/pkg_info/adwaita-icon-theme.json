@@ -1,9 +1,9 @@
 {
   "description": "write something here, please",
-  "home_page": "http://www.openvpn.net",
-  "buildscript": "openvpn",
-  "basename": "openvpn",
-  "filters": "",
+  "home_page": "http://www.gnome.org",
+  "buildscript": "std",
+  "basename": "adwaita-icon-theme",
+  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

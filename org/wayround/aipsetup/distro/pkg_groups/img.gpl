@@ -1,8 +1,0 @@
-{
-"names" : [
-    "openjpeg1", "openjpeg2", "libjpeg-turbo",
-    "openexr", "ilmbase",
-    "giflib", "giflib4", "libungif",
-    "openimageio", "DevIL"
-    ]
-}

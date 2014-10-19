@@ -13,11 +13,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -28,6 +28,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -98,11 +100,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',

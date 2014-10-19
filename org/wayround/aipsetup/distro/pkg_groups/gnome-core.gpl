@@ -4,7 +4,6 @@
 
     "names" : {
 
-
         "gtk-engines": {
             "proc": "gnome_get",
             "args": [],
@@ -14,6 +13,14 @@
                 "daa": false
                 }
             },
+
+        "adwaita-icon-theme": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+        },
 
         "baobab": {
             "proc": "gnome_get",
@@ -30,10 +37,10 @@
                 }
             },
         "clutter": {
-            "proc": "gnome_get",
+            "proc": "gnome_get"
             },
         "clutter-gst": {
-            "proc": "gnome_get",
+            "proc": "gnome_get"
             },
         "clutter-gtk": {
             "proc": "gnome_get",
