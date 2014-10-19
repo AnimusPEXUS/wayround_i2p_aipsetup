@@ -11,8 +11,8 @@ class InfoEditorUi:
 
         main_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
         main_box.set_margin_top(5)
-        main_box.set_margin_left(5)
-        main_box.set_margin_right(5)
+        main_box.set_margin_start(5)
+        main_box.set_margin_end(5)
         main_box.set_margin_bottom(5)
         window.add(main_box)
 
