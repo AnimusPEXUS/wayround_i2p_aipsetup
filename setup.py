@@ -6,11 +6,11 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.0.123',
+    version='3.0.124',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
-    url='https://github.com/AnimusPEXUS/org_wayround_xmpp',
+    url='https://github.com/AnimusPEXUS/org_wayround_aipsetup',
     packages=[
         'org.wayround.aipsetup',
         'org.wayround.aipsetup.buildtools',
