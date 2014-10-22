@@ -39,7 +39,8 @@ def commands():
             ('files', system_list_package_files),
             ('check', package_check),
             ('parse-asp-name', info_parse_pkg_name),
-            ('parse-tar-name', info_parse_tarball)
+            ('parse-tar-name', info_parse_tarball),
+            ('convert-certdata.txt', system_convert_certdata_txt)
             ])),
         ('sys-clean', collections.OrderedDict([
             ('find-broken', clean_packages_with_broken_files),
@@ -143,7 +144,6 @@ def system_install_package(command_name, opts, args, adds):
 
 
 def system_package_list(command_name, opts, args, adds):
-
     """
     List installed packages
 
@@ -179,9 +179,7 @@ def system_package_list(command_name, opts, args, adds):
             config, pkg_client, basedir
             )
 
-        lst = system.list_installed_packages(mask)
-
-        lst.sort()
+        lst = sorted(system.list_installed_packages(mask))
 
         org.wayround.utils.text.columned_list_print(
             lst, fd=sys.stdout.fileno()
@@ -191,7 +189,6 @@ def system_package_list(command_name, opts, args, adds):
 
 
 def system_package_list_asps(command_name, opts, args, adds):
-
     """
     List installed package's ASPs
 
@@ -279,7 +276,7 @@ def system_list_package_files(command_name, opts, args, adds):
 
         latest = system.latest_installed_package_s_asp(pkg_name)
 
-        if latest == None:
+        if latest is None:
             logging.error(
                 "Error getting latest installed asp of package `{}'".format(
                     pkg_name
@@ -287,9 +284,11 @@ def system_list_package_files(command_name, opts, args, adds):
                 )
             ret = 2
         else:
-            files = system.list_files_installed_by_asp(latest, mute=True)
+            files = sorted(
+                system.list_files_installed_by_asp(
+                    latest,
+                    mute=True))
 
-            files.sort()
             for i in files:
                 print(i)
 
@@ -297,7 +296,6 @@ def system_list_package_files(command_name, opts, args, adds):
 
 
 def system_remove_package(command_name, opts, args, adds):
-
     """
     Removes package matching NAME.
 
@@ -350,7 +348,6 @@ def system_remove_package(command_name, opts, args, adds):
 
 
 def system_find_package_files(command_name, opts, args, adds):
-
     """
     Looks for LOOKFOR in all installed packages using one of methods:
 
@@ -418,8 +415,7 @@ def system_find_package_files(command_name, opts, args, adds):
             for i in rd_keys:
                 print("\t{}:".format(i))
 
-                pp_lst = ret[i]
-                pp_lst.sort()
+                pp_lst = sorted(ret[i])
 
                 for j in pp_lst:
                     print("\t\t{}".format(j))
@@ -434,7 +430,6 @@ def system_find_package_files(command_name, opts, args, adds):
 
 
 def system_reduce_asp_to_latest(command_name, opts, args, adds):
-
     """
     Forcibly reduces named asp, excluding files installed by latest package's
     asp
@@ -498,7 +493,6 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
 
 
 def system_make_asp_deps(command_name, opts, args, adds):
-
     """
     generates dependencies listing for named asp and places it under
     /destdir/var/log/packages/deps
@@ -597,9 +591,7 @@ def system_create_bundle(command_name, opts, args, adds):
 
         res2.append(x)
 
-    res = res2
-
-    res.sort()
+    res = sorted(res2)
 
     dto = datetime.datetime.utcnow()
 
@@ -610,11 +602,11 @@ def system_create_bundle(command_name, opts, args, adds):
 
     bundle = collections.OrderedDict(
         [
-         ('info', collections.OrderedDict(
-                [('date', dt)])),
+            ('info', collections.OrderedDict(
+             [('date', dt)])),
 
-         ('list', res),
-         ]
+            ('list', res),
+            ]
         )
 
     bundle_text = json.dumps(bundle, indent=2)
@@ -631,7 +623,6 @@ def system_create_bundle(command_name, opts, args, adds):
 
 
 def clean_packages_with_broken_files(command_name, opts, args, adds):
-
     """
     Find packages with broken files
     """
@@ -713,9 +704,9 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
     for i in list(problems.keys()):
 
         if (len(
-            problems[i]['missing']
-            ) == 0
-            and len(problems[i]['broken']) == 0):
+                problems[i]['missing']
+                ) == 0
+                and len(problems[i]['broken']) == 0):
             del problems[i]
 
     print()
@@ -736,7 +727,6 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
 
 def clean_check_elfs_readiness(command_name, opts, args, adds):
-
     """
     Performs system ELF files read checks
 
@@ -763,7 +753,6 @@ def clean_check_elfs_readiness(command_name, opts, args, adds):
 
 
 def clean_find_so_problems(command_name, opts, args, adds):
-
     """
     Find so libraries missing in system and write package names requiring those
     missing libraries.
@@ -788,8 +777,7 @@ def clean_find_so_problems(command_name, opts, args, adds):
         verbose=True
         )
 
-    libs = list(problems.keys())
-    libs.sort()
+    libs = sorted(problems.keys())
 
     log = org.wayround.utils.log.Log(
         os.getcwd(), 'problems'
@@ -818,8 +806,7 @@ def clean_find_so_problems(command_name, opts, args, adds):
             files, mode='end', mute=False, predefined_asp_tree=tree
             )
 
-        pkgs2_l = list(pkgs2.keys())
-        pkgs2_l.sort()
+        pkgs2_l = sorted(pkgs2.keys())
 
         count_checked += 1
 
@@ -862,7 +849,6 @@ def clean_find_so_problems(command_name, opts, args, adds):
 
 
 def clean_find_old_packages(command_name, opts, args, adds):
-
     """
     Find packages older then month
     """
@@ -887,9 +873,7 @@ def clean_find_old_packages(command_name, opts, args, adds):
         basedir='/'
         )
 
-    res = system.find_old_packages()
-
-    res.sort()
+    res = sorted(system.find_old_packages())
 
     errors = False
 
@@ -918,26 +902,26 @@ def clean_find_old_packages(command_name, opts, args, adds):
             else:
 
                 logging.info(
-            "    {:30}: {}: {}".format(
-                str(datetime.datetime.now() - package_date),
-                org.wayround.aipsetup.package_name_parser.parse_timestamp(
-                    parsed_name['groups']['timestamp']
-                    ),
-                i
-                )
-                      )
+                    "    {:30}: {}: {}".format(
+                        str(datetime.datetime.now() - package_date),
+                        org.wayround.aipsetup.package_name_parser.parse_timestamp(
+                            parsed_name['groups']['timestamp']
+                            ),
+                        i
+                        )
+                    )
 
                 if get_tarballs:
 
                     logging.info("        getting..")
 
                     lat = pkg_client.tarballs_latest(package_name)
-                    if lat != None and len(lat) > 0:
+                    if lat is not None and len(lat) > 0:
                         res = \
                             org.wayround.utils.path.\
-                                select_by_prefered_extension(
-                                    lat, config
-                                    )
+                            select_by_prefered_extension(
+                                lat, config
+                                )
                         res = org.wayround.aipsetup.client_pkg.get_tarball(
                             res
                             )
@@ -1014,14 +998,14 @@ def clean_find_invalid_deps_lists(command_name, opts, args, adds):
                     for k in asp_deps[j]:
                         if not isinstance(k, str):
                             logging.error(
-                    "{} has wrong dependencies list items for {}".format(i, j)
+                                "{} has wrong dependencies list items for {}".format(
+                                    i, j)
                                 )
 
     return ret
 
 
 def clean_find_garbage(command_name, opts, args, adds):
-
     """
     Search system for garbage making log and cleaning script
 
@@ -1130,7 +1114,7 @@ def clean_find_garbage(command_name, opts, args, adds):
                                 )
 
                         if (not file_name_with_dest_dir
-                            in asps_lkd_to_garbage[asp_name]):
+                                in asps_lkd_to_garbage[asp_name]):
                             asps_lkd_to_garbage[
                                 asp_name
                                 ][file_name_with_dest_dir] = set()
@@ -1141,11 +1125,11 @@ def clean_find_garbage(command_name, opts, args, adds):
                             (set(libs) & set(asp_deps[asp_name][file_name]))
 
                         if len(
-                            asps_lkd_to_garbage[
-                                asp_name][file_name_with_dest_dir]
-                               ) == 0:
-                            del asps_lkd_to_garbage[
+                                asps_lkd_to_garbage[
                                     asp_name][file_name_with_dest_dir]
+                                ) == 0:
+                            del asps_lkd_to_garbage[
+                                asp_name][file_name_with_dest_dir]
 
                     if len(asps_lkd_to_garbage[asp_name]) == 0:
                         del asps_lkd_to_garbage[asp_name]
@@ -1192,7 +1176,8 @@ exit 1
 
                     if not p:
                         log.error(
-            "Can't parse ASP name `{}' to add it to download script".format(i)
+                            "Can't parse ASP name `{}' to add it to download script".format(
+                                i)
                             )
                     else:
                         required_packages.add(p['groups']['name'])
@@ -1216,7 +1201,7 @@ Do not run cleaning script at once!
 Check everything is correct!
 Wrong cleaning can ruin your system
 """
-                    )
+                                )
 
             log.close()
 
@@ -1224,9 +1209,8 @@ Wrong cleaning can ruin your system
 
 
 def clean_find_packages_requiring_deleteds(
-    command_name, opts, args, adds
-    ):
-
+        command_name, opts, args, adds
+        ):
     """
     gets list of installed files, searches elfs in them, detects elfs, which
     pointing on garbage elfs
@@ -1281,7 +1265,7 @@ def clean_find_packages_requiring_deleteds(
             name = \
                 org.wayround.aipsetup.package_name_parser.package_name_parse(i)
 
-            if name == None:
+            if name is None:
                 x = "Can't parse as package name: `{}'".format(i)
                 logging.error(x)
                 f = open("!errors!.txt", 'a')
@@ -1294,7 +1278,7 @@ def clean_find_packages_requiring_deleteds(
                 print("    {}".format(name))
 
                 lat = pkg_client.tarballs_latest(name)
-                if lat != None and len(lat) > 0:
+                if lat is not None and len(lat) > 0:
                     res = org.wayround.utils.path.select_by_prefered_extension(
                         lat, config
                         )
@@ -1324,9 +1308,8 @@ def clean_find_packages_requiring_deleteds(
 
 
 def clean_find_libtool_la_with_problems(
-    command_name, opts, args, adds
-    ):
-
+        command_name, opts, args, adds
+        ):
     """
     Search for .la files depending non-existing dependencies
 
@@ -1386,8 +1369,7 @@ def clean_find_libtool_la_with_problems(
                 if each in asps_and_files[each1]:
                     asp_names.add(each1)
 
-        asp_names = list(asp_names)
-        asp_names.sort()
+        asp_names = sorted(asp_names)
 
         pkg_names = set()
 
@@ -1397,7 +1379,7 @@ def clean_find_libtool_la_with_problems(
                     each
                     )
 
-            if name != None:
+            if name is not None:
                 pkg_names.add(name['groups']['name'])
             else:
                 logging.error("Can't parse ASP name: {}".format(each))
@@ -1417,7 +1399,7 @@ def clean_find_libtool_la_with_problems(
         for name in pkg_names:
             print("    {}".format(name))
             lat = pkg_client.tarballs_latest(name)
-            if lat != None and len(lat) > 0:
+            if lat is not None and len(lat) > 0:
                 res = org.wayround.utils.path.select_by_prefered_extension(
                     lat, config
                     )
@@ -1447,9 +1429,8 @@ def clean_find_libtool_la_with_problems(
 
 
 def clean_check_list_of_installed_packages_and_asps_auto(
-    command_name, opts, args, adds
-    ):
-
+        command_name, opts, args, adds
+        ):
     """
     Searches for packages with more when one asp installed
     """
@@ -1542,7 +1523,6 @@ def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
 
 
 def package_check(command_name, opts, args, adds):
-
     """
     Check package for errors
     """
@@ -1556,7 +1536,7 @@ def package_check(command_name, opts, args, adds):
     if len(args) == 1:
         file = args[0]
 
-    if file == None:
+    if file is None:
         logging.error("Filename required")
         ret = 2
 
@@ -1570,7 +1550,6 @@ def package_check(command_name, opts, args, adds):
 
 
 def clean_gen_locale(command_name, opts, args, adds):
-
     """
     (only root) Generate general unicode locale
     """
@@ -1605,7 +1584,6 @@ def clean_gen_locale(command_name, opts, args, adds):
 
 
 def clean_install_etc(command_name, opts, args, adds):
-
     """
     (only root) Install new clean basic UNICORN /etc files
     """
@@ -1644,7 +1622,6 @@ def clean_install_etc(command_name, opts, args, adds):
 
 
 def clean_sys_users(command_name, opts, args, adds):
-
     """
     (only root) Creates system users and their directories under /daemons
     """
@@ -1670,7 +1647,6 @@ def clean_sys_users(command_name, opts, args, adds):
 
 
 def clean_sys_perms(command_name, opts, args, adds):
-
     """
     (only root) Ensures system files and dirs permissions
     """
@@ -1694,7 +1670,6 @@ def clean_sys_perms(command_name, opts, args, adds):
 
 
 def info_parse_pkg_name(command_name, opts, args, adds):
-
     """
     Parse package name
 
@@ -1714,7 +1689,7 @@ def info_parse_pkg_name(command_name, opts, args, adds):
             filename
             )
 
-        if p_re == None:
+        if p_re is None:
             ret = 2
         else:
             pprint.pprint(p_re)
@@ -1829,3 +1804,29 @@ Your self.
 """)
 
     return 0
+
+
+def system_convert_certdata_txt(command_name, opts, args, adds):
+    ret = 0
+
+    filename = None
+    if len(args) != 1:
+        print("(only) filename must be passed")
+        ret =1
+    else:
+        filename = args[0]
+
+    if ret == 0:
+        res = org.wayround.aipsetup.system.convert_certdata_txt_for_system(
+            filename
+            )
+        f = open('ca-bundle.crt.tmp', 'wb')
+        f.write(res)
+        f.close()
+        
+        print(
+            "'ca-bundle.crt.tmp' written."
+            " copy it into /etc/ssl and rename as 'ca-bundle.crt'"
+            )
+
+    return ret

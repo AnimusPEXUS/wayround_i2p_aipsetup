@@ -66,6 +66,7 @@ def main(buildingsite, action=None):
                     '--enable-storage',
                     '--enable-xft',
                     '--disable-optimize',
+                    # '--disable-webrtc',
                     '--enable-gstreamer=1.0',
                     '--with-pthreads',
                     '--with-system-nspr',

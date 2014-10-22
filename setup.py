@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.0.120',
+    version='3.0.121',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -17,7 +17,13 @@ setup(
         'org.wayround.aipsetup.gui'
         ],
     scripts=['aipsetup3.py'],
-    install_requires=['org_wayround_utils'],
+    install_requires=[
+        'org_wayround_utils',
+        'certdata',
+        'sqlalchemy',
+        'bottle',
+        'mako'
+        ],
     package_data={
         'org.wayround.aipsetup': [
             os.path.join('gui', '*.glade'),
