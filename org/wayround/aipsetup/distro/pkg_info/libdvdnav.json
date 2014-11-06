@@ -3,7 +3,7 @@
   "home_page": "http://dvdnav.mplayerhq.hu/releases/",
   "buildscript": "libdvdnavread",
   "basename": "libdvdnav",
-  "filters": "",
+  "filters": "- version re \\d{4}\n- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

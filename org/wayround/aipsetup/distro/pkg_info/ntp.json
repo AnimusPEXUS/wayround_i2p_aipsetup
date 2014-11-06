@@ -3,7 +3,7 @@
   "home_page": "http://www.ntp.org",
   "buildscript": "ntp",
   "basename": "ntp",
-  "filters": "",
+  "filters": "- status fm *RC*\n- status fm *beta*\n",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

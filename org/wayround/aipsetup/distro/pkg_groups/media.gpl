@@ -1,0 +1,10 @@
+{
+    "names": [
+        "libsndfile",
+        "x264",
+        "ffmpeg",
+        "mplayer",
+        "lame",
+        "flac"
+    ]
+}

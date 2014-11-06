@@ -1,6 +1,7 @@
 
 import logging
 import os.path
+import subprocess
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
@@ -12,11 +13,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'build2', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'build2', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -47,18 +48,26 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    # '--with-freetype',
                     '--without-v4l',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--build=i486-pc-linux-gnu',
-#                    '--host=i686-pc-linux-gnu'
+                    #                    '--build=i486-pc-linux-gnu',
+                    #                    '--host=i686-pc-linux-gnu',
+                    #'FREETYPE_CFLAGS={}'.format(
+                    #    subprocess.call(
+                    #        ['pkg-config', '--cflags', 'freetype2'])
+                    #    ),
+                    #'FREETYPE_LDFLAGS={}'.format(
+                    #    subprocess.call(['pkg-config', '--libs', 'freetype2'])
+                    #    )
                     ],
                 arguments=[],
                 environment={},

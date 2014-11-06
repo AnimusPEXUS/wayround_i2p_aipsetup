@@ -49,6 +49,11 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    # '--with-jobs=1',
+                    '--with-zlib=system',
+                    '--with-alsa',
+                    # '--with-freetype',
+                    '--with-x',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +

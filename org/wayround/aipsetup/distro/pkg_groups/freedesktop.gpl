@@ -27,6 +27,8 @@
 
         "hicolor-icon-theme",
 
+        "libepoxy",
+
         "libmbim",
         "libinput",
 

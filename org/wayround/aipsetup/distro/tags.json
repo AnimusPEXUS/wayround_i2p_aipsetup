@@ -4,34 +4,34 @@
     "MW"
   ],
   "Python2.7": [
-    "system",
+    "scripting",
     "python",
+    "system",
     "programming",
     "web",
-    "scripting",
     "learning"
   ],
   "Python3.2": [
-    "system",
+    "scripting",
     "python",
+    "system",
     "programming",
     "web",
-    "scripting",
     "learning"
   ],
   "gajim": [
+    "chat",
     "python",
     "voip",
-    "xmpp",
-    "jingle",
     "jabber",
-    "chat"
+    "jingle",
+    "xmpp"
   ],
   "pycairo": [
-    "python",
-    "gtk",
-    "pycairo",
     "cairo",
-    "freedesktop"
+    "pycairo",
+    "freedesktop",
+    "gtk",
+    "python"
   ]
 }

@@ -49,6 +49,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-database=gdbm',
                     '--with-speex',
                     '--enable-speex',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],

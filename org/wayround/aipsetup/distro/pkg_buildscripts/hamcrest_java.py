@@ -1,9 +1,12 @@
 
 import logging
 import os.path
+import subprocess
+import shutil
 
 import org.wayround.aipsetup.build
 import org.wayround.aipsetup.buildtools.autotools as autotools
+import org.wayround.utils.path
 import org.wayround.utils.file
 
 
@@ -28,9 +31,16 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
+        src_build_dir = org.wayround.utils.path.join(
+            src_dir,
+            'build'
+            )
+
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        dst_usr_dir = os.path.join(dst_dir, 'usr')
+        dst_classpath_dir = org.wayround.utils.path.join(
+            dst_dir, 'usr', 'lib', 'java', 'classpath'
+            )
 
         separate_build_dir = False
 
@@ -48,35 +58,33 @@ def main(buildingsite, action=None):
                 )
 
         if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
+            build_target = []
+            # if pkg_info['pkg_nameinfo']['groups']['version'] == '1.3':
+            #     build_target = []
+            p = subprocess.Popen(
+                [
+                    'ant',
+                    '-Dversion={}'.format(
+                        pkg_info['pkg_nameinfo']['groups']['version']
+                        )
+                    ] + build_target,
+                cwd=src_dir
                 )
+            ret = p.wait()
 
         if 'distribute' in actions and ret == 0:
-            #try:
-            #    os.makedirs(dst_usr_dir)
-            #except:
-            #    pass
+            try:
+                os.makedirs(dst_classpath_dir)
+            except:
+                pass
 
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_usr_dir,
-                    'DIST=' + os.path.dirname(dst_usr_dir),
-                    #'INDAT=', 'INEXE='
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
+            shutil.copy(
+                org.wayround.utils.path.join(
+                    src_build_dir, 'hamcrest-all-{}.jar'.format(
+                        pkg_info['pkg_nameinfo']['groups']['version']
+                        )
+                    ),
+                dst_classpath_dir
                 )
 
     return ret

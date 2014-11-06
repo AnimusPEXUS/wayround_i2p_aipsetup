@@ -418,7 +418,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
                 p1 = org.wayround.utils.path.join(
                     info_dir,
-                    name + '.json'
+                    parsed_name + '.json'
                     )
 
                 info = org.wayround.aipsetup.info.read_info_file(p1)
@@ -433,11 +433,11 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
                         org.wayround.aipsetup.info.write_info_file(p1, info)
 
-                        logging.info("Applied to {}".format(name))
+                        logging.info("Applied to {}".format(parsed_name))
                     else:
                         logging.warning(
                             "{} already have defined script".format(
-                                name
+                                parsed_name
                                 )
                             )
 

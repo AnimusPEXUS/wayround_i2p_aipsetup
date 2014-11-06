@@ -73,12 +73,21 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    #                    '--disable-tests',
-                    #                    '--disable-jdk-tests',
-                    #                    '--disable-langtools-tests',
-                    #                    '--disable-hotspot-tests',
-                    #                    '--disable-bootstrap',
-                    #                    '--with-jdk-home=/home/agu/_sda3/_UNICORN/b2/java/jdk1.7.0_55',
+                    # '--disable-tests',
+                    # '--disable-jdk-tests',
+                    # '--disable-langtools-tests',
+                    # '--disable-hotspot-tests',
+                    # '--disable-bootstrap',
+                    # '--with-jdk-home=/home/agu/_sda3/_UNICORN/b2/java/jdk1.7.0_55',
+                    '--enable-system-zlib',
+                    '--enable-system-jpeg',
+                    '--enable-system-png',
+                    '--enable-system-gif',
+                    '--enable-system-lcms',
+                    '--enable-system-gtk',
+                    '--enable-system-gio',
+                    '--enable-system-fontconfig',
+
                     '--with-jdk-home=/usr/lib/java/jdk',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
@@ -89,7 +98,7 @@ def main(buildingsite, action=None):
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    #                    '--target=' + pkg_info['constitution']['target']
+                    # '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment=envi,
@@ -176,7 +185,6 @@ if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
 fi
 export LD_LIBRARY_PATH+=\
 "$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
-
 """
                 )
 
@@ -186,9 +194,7 @@ export LD_LIBRARY_PATH+=\
             fi.write(
                 """\
 #!/bin/bash
-
 export CLASSPATH='/usr/lib/java/classpath/*'
-
 """
                 )
 

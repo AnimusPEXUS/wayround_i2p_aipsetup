@@ -66,7 +66,7 @@ def main(buildingsite, action=None):
                     '--enable-storage',
                     '--enable-xft',
                     '--disable-optimize',
-                    # '--disable-webrtc',
+                    '--disable-webrtc',
                     '--enable-gstreamer=1.0',
                     '--with-pthreads',
                     '--with-system-nspr',
@@ -77,8 +77,8 @@ def main(buildingsite, action=None):
                         pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + \
                         pkg_info['constitution']['paths']['var'],
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build']
+                    # '--host=' + pkg_info['constitution']['host'],
+                    # '--build=' + pkg_info['constitution']['build']
                     ],
                 arguments=[],
                 environment={},

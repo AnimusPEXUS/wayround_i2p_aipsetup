@@ -1,6 +1,16 @@
 {
 "names" : [
-    "openjpeg1", "openjpeg2", "libjpeg-turbo", "mjpegtools", "libjpeg", "jpeg",
+    "openjpeg1", "openjpeg2", 
+    
+    {
+     "name": "libjpeg-turbo", 
+     "proc": "gnome_get",
+     "kwargs": {
+         "daa": true
+     }
+    },
+    
+    "mjpegtools", "libjpeg", "jpeg", "jasper",
 
     "openexr", "ilmbase",
 
@@ -10,6 +20,8 @@
 
     "djvulibre",
 
-    "tiff"
+    "tiff",
+
+    "lcms", "lcms2"
     ]
 }

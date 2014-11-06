@@ -1,7 +1,7 @@
 {
   "description": "None",
   "home_page": "http://python.org/",
-  "buildscript": "python_with_debuger",
+  "buildscript": "std",
   "basename": "Python",
   "filters": "+ version fm *\n- version < 2.0\n- version >= 3.0\n- status re ([abc])|(rc).*",
   "installation_priority": 1,

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+chown root: /
+chmod 755 /
+
 chmod 1777 /tmp
 
 usermod -G httpd,ejabberd,ssl httpd
@@ -49,12 +52,15 @@ done
 chmod 4755 /usr/libexec/dbus-daemon-launch-helper
 chmod 4755 /usr/lib/polkit-1/polkit-agent-helper-1
 chmod 4755 /usr/bin/pkexec
-chmod 4755 "`which xinit`"
+
+# starting from 1.16 xorg-server chmod is not needed and device handlers retrived from systemd
+# chmod 4755 "`which xinit`"
+
 chmod 4755 "`which su`"
 chmod 4755 "`which sudo`"
-chmod 4755 "`which mount`"
-chmod 4755 "`which exim`"
-chmod 4755 "`which weston-launch`"
+# chmod 4755 "`which mount`"
+# chmod 4755 "`which exim`"
+# chmod 4755 "`which weston-launch`"
 #chmod 4755 /usr/lib/virtualbox/bin/VirtualBox
 
 
