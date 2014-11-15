@@ -1,0 +1,12 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "icedtea_sound",
+  "basename": "icedtea-sound",
+  "filters": "",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}
