@@ -28,6 +28,7 @@
             "proc": "gnome_get"
         },
         "curl",
+        "db",
         "dejagnu",
         "dhcp",
         "dhcpcd",
@@ -68,10 +69,14 @@
         "kmod",
         "libcap2",
         "libcap-ng",
+        "libgcrypt",
         "libseccomp",
         "libidn",
         "libtool",
+        "libtirpc",
         "libunistring",
+        "libnftnl",
+        "libmnl",
         "json-c",
         "linux",
         "Linux-PAM",
@@ -84,6 +89,7 @@
         "net-snmp",
         "ntp",
         "ncurses",
+        "nftables",
         "openexr",
         "openssh",
         "openssl",
@@ -96,6 +102,7 @@
         "ppp",
         "Python2",
         "Python3",
+        "readline",
         "ruby",
         "scons",
         "sed",
@@ -120,6 +127,7 @@
         "xz",
         "yasm",
         "zip",
-        "zlib"
+        "zlib",
+        "qrencode"
     ]
 }

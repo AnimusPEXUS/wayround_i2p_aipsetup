@@ -1,0 +1,18 @@
+{
+    "names" : [
+        "gnupg1",
+        "gnupg2",
+        "gnutls",
+        "gpa",
+        "gpgme",
+        "libassuan",
+        "libgcrypt",
+        "libgpg-error",
+        "libksba",
+        "libtasn1",
+        "nettle",
+        "npth",
+        "opencdk",
+        "scute"
+        ]
+}
