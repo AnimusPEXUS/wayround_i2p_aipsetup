@@ -12,11 +12,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -62,32 +62,32 @@ def main(buildingsite, action=None):
                     '--enable-xa',
                     '--enable-gbm',
 
-#                    '--enable-egl',
+                    #                    '--enable-egl',
                     '--enable-gallium-egl',
-#                    '--enable-gallium-gbm',
+                    #                    '--enable-gallium-gbm',
 
                     '--enable-dri',
                     '--enable-dri3',
 
-#                    '--enable-glx-tls',
+                    #                    '--enable-glx-tls',
 
                     '--enable-xorg',
                     '--with-egl-platforms=x11,drm,wayland,fbdev,null',
                     '--with-gallium-drivers=nouveau,svga,swrast',
                     '--with-dri-drivers=nouveau,i915,i965,r200,radeon,swrast',
 
-#                    '--enable-d3d1x',
-#                    '--enable-opencl',
+                    #                    '--enable-d3d1x',
+                    #                    '--enable-opencl',
 
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-#                    '--host=i686-pc-linux-gnu',
-#                    '--target=' + pkg_info['constitution']['target']
+                    #                    '--host=i686-pc-linux-gnu',
+                    #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 # environment={

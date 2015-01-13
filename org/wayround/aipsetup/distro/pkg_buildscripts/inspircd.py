@@ -3,8 +3,7 @@ import logging
 import os.path
 
 import org.wayround.aipsetup.build
-from org.wayround.aipsetup.buildtools import autotools
-from org.wayround.aipsetup.buildtools import cmake
+import org.wayround.aipsetup.buildtools.autotools as autotools
 import org.wayround.utils.file
 
 
@@ -13,11 +12,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'cmake', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -31,7 +30,7 @@ def main(buildingsite, action=None):
 
         dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir = True
+        separate_build_dir = False
 
         source_configure_reldir = '.'
 
@@ -46,41 +45,29 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'cmake' in actions and ret == 0:
-            ret = cmake.cmake_high(
+        if 'configure' in actions and ret == 0:
+            ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '-DCMAKE_INSTALL_PREFIX=' +
-                        pkg_info['constitution']['paths']['usr'],
-                    '-DSTOP_ON_WARNING=OFF',
-#                    '-DCMAKE_SYSTEM_PROCESSOR=i486',
-#                    '-DCMAKE_LIBRARY_ARCHITECTURE=i486',
-#                    '-DCMAKE_HOST_SYSTEM_PROCESSOR=i486',
-                    '-DCMAKE_CXX_FLAGS= -march=i686 -mtune=i686 ',
-                    '-DCMAKE_C_FLAGS= -march=i686 -mtune=i686 ',
-#                    '-DCMAKE_LIBRARY_ARCHITECTURE=i486',
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' +
-#                        pkg_info['constitution']['paths']['var'],
-#                    '--enable-shared',
-#                    '--host=' + pkg_info['constitution']['host'],
-#                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    '--prefix=/daemons/irc/inspircd', 
+                    '--enable-gnutls', 
+                    '--enable-openssl', 
+                    '--enable-epoll'
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_subdir=source_configure_reldir,
-                build_in_separate_dir=separate_build_dir
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=True,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options=[
-                    ],
+                options=[],
                 arguments=[],
                 environment={},
                 environment_mode='copy',

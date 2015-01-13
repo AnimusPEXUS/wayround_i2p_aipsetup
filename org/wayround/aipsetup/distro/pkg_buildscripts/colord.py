@@ -49,6 +49,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--disable-argyllcms-sensor',
                     '--enable-vala',
                     '--with-daemon-user=colord',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],

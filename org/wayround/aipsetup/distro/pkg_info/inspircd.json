@@ -1,8 +1,8 @@
 {
   "description": "write something here, please",
-  "home_page": "http://www.sourceforge.net",
-  "buildscript": "std",
-  "basename": "mjpegtools",
+  "home_page": "https://github.com/legoscia/ejabberd-ircd",
+  "buildscript": "inspircd",
+  "basename": "inspircd",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

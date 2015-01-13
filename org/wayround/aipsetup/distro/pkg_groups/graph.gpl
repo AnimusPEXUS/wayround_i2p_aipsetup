@@ -1,7 +1,10 @@
 {
 "names" : [
+
+    "ghostscript",
+
     "openjpeg1", "openjpeg2", 
-    
+
     {
      "name": "libjpeg-turbo", 
      "proc": "gnome_get",
@@ -9,7 +12,7 @@
          "daa": true
      }
     },
-    
+
     "mjpegtools", "libjpeg", "jpeg", "jasper",
 
     "openexr", "ilmbase",
@@ -22,6 +25,8 @@
 
     "tiff",
 
-    "lcms", "lcms2"
+    "lcms", "lcms2",
+
+    "libpng"
     ]
 }

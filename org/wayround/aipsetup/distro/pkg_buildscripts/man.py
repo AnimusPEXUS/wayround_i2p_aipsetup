@@ -13,7 +13,7 @@ def main(buildingsite, action=None):
 
     r = org.wayround.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'configure', 'build', 'distribute', 'fixconfig'],
         action,
         "help"
         )
@@ -83,5 +83,22 @@ def main(buildingsite, action=None):
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
+
+        if 'fixconfig' in actions and ret == 0:
+
+            cfg_file = os.path.join(
+                dst_dir, 'usr', 'share', 'misc', 'man.conf'
+                )
+
+            with open(cfg_file) as f:
+                fl = f.read().splitlines()
+
+            for i in range(len(fl)):
+
+                if fl[i] == 'PAGER\t\t/bin/less -is':
+                    fl[i] = 'PAGER\t\t/bin/less -is -R'
+
+            with open(cfg_file, 'w') as f:
+                f.write('\n'.join(fl))
 
     return ret

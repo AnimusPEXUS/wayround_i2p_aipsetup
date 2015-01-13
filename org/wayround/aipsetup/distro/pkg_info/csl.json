@@ -1,8 +1,8 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
-  "basename": "glw",
+  "buildscript": "",
+  "basename": "",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

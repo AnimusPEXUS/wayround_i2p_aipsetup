@@ -54,6 +54,8 @@ def main(buildingsite, action=None):
                         pkg_info['constitution']['paths']['usr'],
                     '-DPORT=GTK',
                     '-DCMAKE_EXE_LINKER_FLAGS= -latomic ',
+                    # '-DCMAKE_STATIC_LINKER_FLAGS= -latomic ',
+                    '-DCMAKE_SHARED_LINKER_FLAGS= -latomic '
 #                    '--mandir=' + pkg_info['constitution']['paths']['man'],
 #                    '--sysconfdir=' +
 #                        pkg_info['constitution']['paths']['config'],

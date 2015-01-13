@@ -12,11 +12,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = org.wayround.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -27,6 +27,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -47,43 +49,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    # '--enable-cogl',
-                    '--enable-directfb=auto',
-                    # '--enable-drm',
-                    '--enable-fc=auto',
-                    '--enable-ft=yes',
-                    '--enable-gl',
-                    '--enable-gallium=auto',
-#                    '--enable-glesv2',
-                    '--enable-pdf=yes',
-                    '--enable-png=yes',
-                    '--enable-ps=yes',
-#                    '--enable-qt',
-                    '--enable-quartz-font=auto',
-                    '--enable-quartz-image=auto',
-                    '--enable-quartz=auto',
-                    '--enable-script=yes',
-                    '--enable-svg=yes',
-                    '--enable-tee=yes',
-                    '--enable-vg=auto',
-                    '--enable-wg=auto',
-                    '--enable-xcb',
-                    '--enable-xcb-shm',
-
-                    '--enable-egl',
-                    '--enable-glx',
-                    # '--enable-wgl',
-
-                    # xlib is deprecated
-#                    '--enable-xlib',
-#                    '--enable-xlib-xcb',
-#                    '--enable-xlib-xrender',
-
-                    '--disable-static',
-                    '--enable-xml=yes',
-
-                    '--with-x',
-
+                    # '--without-cairo',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -96,9 +62,7 @@ def main(buildingsite, action=None):
 #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
-                environment={
-                    # 'CFLAGS': ' -ffat-lto-objects '
-                    },
+                environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir,
@@ -124,11 +88,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        org.wayround.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',

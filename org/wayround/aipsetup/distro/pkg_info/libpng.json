@@ -1,0 +1,12 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "basename": "libpng",
+  "filters": "- version fm 1.0.*\n- version fm 1.1.*\n- version fm 1.2.*\n- version fm 1.3.*\n- version fm 1.4.*\n- version fm 1.5.*\n- filename contains beta\n- filename contains config\n- status !re ^$",
+  "installation_priority": 5,
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false
+}
