@@ -58,16 +58,16 @@ def main(buildingsite, action=None):
                 options=[
                     '--enable-calendar',
                     '--enable-application=mail',
-                    '--enable-default-toolkit=cairo-gtk2',
+                    '--enable-default-toolkit=cairo-gtk3',
                     '--enable-freetype2',
                     '--enable-shared',
-#                    '--enable-shared-js',
+                    '--enable-shared-js',
                     '--enable-xft',
                     '--with-pthreads',
-#                    '--disable-webrtc',
-#                    '--enable-optimize',
-#                    '--with-system-nspr',
-#                    '--with-system-nss',
+                    '--enable-webrtc',
+                    '--enable-optimize',
+                    '--with-system-nspr',
+                    '--with-system-nss',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -83,8 +83,8 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir_xul,
                 script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                run_script_not_bash=True,
+                relative_call=True
                 )
 
         if 'build' in actions and ret == 0:

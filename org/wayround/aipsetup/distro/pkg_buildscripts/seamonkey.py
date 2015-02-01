@@ -65,8 +65,8 @@ def main(buildingsite, action=None):
                     '--enable-shared-js',
                     '--enable-storage',
                     '--enable-xft',
-                    '--disable-optimize',
-                    '--disable-webrtc',
+                    '--enable-optimize=-O3 -fno-keep-inline-dllexport',
+                    '--enable-webrtc',
                     '--enable-gstreamer=1.0',
                     '--with-pthreads',
                     '--with-system-nspr',
@@ -86,8 +86,8 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir,
                 use_separate_buildding_dir=separate_build_dir_sm,
                 script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+                run_script_not_bash=True,
+                relative_call=True
                 )
 
         if 'build_sm' in actions and ret == 0:

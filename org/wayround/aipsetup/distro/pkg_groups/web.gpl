@@ -1,0 +1,11 @@
+{
+    "names" : [
+        "nss", "nspr",
+
+        "js185", "mozjs",
+
+        "firefox", "thunderbird", "seamonkey",
+
+        "xulrunner"
+    ]
+}

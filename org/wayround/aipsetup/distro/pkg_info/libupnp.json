@@ -1,9 +1,9 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://libgd.org",
+  "description": "",
+  "home_page": "",
   "buildscript": "std",
-  "basename": "libgd",
-  "filters": "- status !re ^$",
+  "basename": "libupnp",
+  "filters": "",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

@@ -1,9 +1,9 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.sourceforge.net",
-  "buildscript": "",
+  "buildscript": "std",
   "basename": "clamav",
-  "filters": "",
+  "filters": "- status !re ^$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

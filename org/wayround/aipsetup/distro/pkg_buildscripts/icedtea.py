@@ -35,11 +35,11 @@ def main(buildingsite, action=None):
 
         src_dir = org.wayround.aipsetup.build.getDIR_SOURCE(buildingsite)
 
+        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
+
         src_jdk_dir = os.path.join(src_dir, 'openjdk.build', 'j2sdk-image')
 
         java_exec = os.path.join(src_jdk_dir, 'bin', 'java')
-
-        dst_dir = org.wayround.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         java_dir = os.path.join(dst_dir, 'usr', 'lib', 'java')
 
@@ -183,8 +183,7 @@ export MANPATH=$MANPATH:$JAVA_HOME/man
 if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"
 fi
-export LD_LIBRARY_PATH+=\
-"$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
+export LD_LIBRARY_PATH+="$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
 """
                 )
 

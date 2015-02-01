@@ -3,10 +3,10 @@
   "home_page": "http://icedtea.classpath.org/",
   "buildscript": "icedtea",
   "basename": "icedtea",
-  "filters": "",
+  "filters": "use openjdk8",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": true
 }

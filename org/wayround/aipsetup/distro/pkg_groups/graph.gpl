@@ -19,7 +19,7 @@
 
     "giflib", "giflib4", "libungif",
 
-    "openimageio", "DevIL",
+    "openimageio", "DevIL", "libgd",
 
     "djvulibre",
 

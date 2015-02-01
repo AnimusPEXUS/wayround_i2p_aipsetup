@@ -57,14 +57,14 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '--enable-application=browser',
-                    '--enable-default-toolkit=cairo-gtk2',
+                    '--enable-default-toolkit=cairo-gtk3',
                     '--enable-freetype2',
                     '--enable-shared',
 #                    '--enable-shared-js',
                     '--enable-xft',
                     '--with-pthreads',
-                    '--disable-webrtc',
-                    '--disable-optimize',
+                    '--enable-webrtc',
+                    '--enable-optimize', # -O3 -fno-keep-inline-dllexport
                     '--with-system-nspr',
                     '--with-system-nss',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],

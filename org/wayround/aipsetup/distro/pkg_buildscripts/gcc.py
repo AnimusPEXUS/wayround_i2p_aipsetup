@@ -60,6 +60,15 @@ def main(buildingsite, action=None):
 
                     '--disable-lto',
 
+                    '--enable-targets='
+                        'i486-pc-linux-gnu,'
+                        'i586-pc-linux-gnu,'
+                        'i686-pc-linux-gnu,'
+                        'i786-pc-linux-gnu,'                        
+                        'ia64-pc-linux-gnu,'
+                        'x86_64-pc-linux-gnu,'
+                        'aarch64-linux-gnu',
+
                     # normal options
                     '--enable-__cxa_atexit',
                     '--with-arch-32=i486',
@@ -84,7 +93,8 @@ def main(buildingsite, action=None):
                     pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+                    #'--target=' + pkg_info['constitution']['target'],
+                    '--target=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],
                 environment={

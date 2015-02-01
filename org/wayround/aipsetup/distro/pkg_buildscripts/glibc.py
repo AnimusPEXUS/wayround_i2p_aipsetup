@@ -77,9 +77,11 @@ def main(buildingsite, action=None):
                         pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
-                    '--host=' + pkg_info['constitution']['host'],
+                    # '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
+                    # '--target=' + pkg_info['constitution']['target']
+                    #'--host=ia64-pc-linux-gnu'
+                    '--host=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],
                 environment={},
