@@ -6,5 +6,5 @@
 *.pyo
 #*#
 /dist
-/org/wayround/aipsetup/unicorn_distro/*.sqlite
+*.sqlite
 /MANIFEST

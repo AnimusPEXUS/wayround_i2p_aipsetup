@@ -2,30 +2,30 @@
 
 import logging
 
-import org.wayround.utils.program
+import wayround_org.utils.program
 
-org.wayround.utils.program.logging_setup(loglevel='INFO')
+wayround_org.utils.program.logging_setup(loglevel='INFO')
 
-import org.wayround.aipsetup.commands
-import org.wayround.aipsetup.config
-import org.wayround.aipsetup.dbconnections
+import wayround_org.aipsetup.commands
+import wayround_org.aipsetup.config
+import wayround_org.aipsetup.dbconnections
 
-config = org.wayround.aipsetup.config.load_config('/etc/aipsetup.conf')
+config = wayround_org.aipsetup.config.load_config('/etc/aipsetup.conf')
 
-commands = org.wayround.aipsetup.commands.commands()
+commands = wayround_org.aipsetup.commands.commands()
 
-ret = org.wayround.utils.program.program(
+ret = wayround_org.utils.program.program(
     'aipsetup3', commands, additional_data={'config': config}
     )
 
 try:
-    import org.wayround.aipsetup.gtk
-    org.wayround.aipsetup.gtk.stop_session()
+    import wayround_org.aipsetup.gtk
+    wayround_org.aipsetup.gtk.stop_session()
 except:
     logging.error("Exception while stopping Gtk+ session")
 
 try:
-    org.wayround.aipsetup.dbconnections.close_all()
+    wayround_org.aipsetup.dbconnections.close_all()
 except:
     logging.exception("Exception while closing database connections")
 

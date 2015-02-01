@@ -6,26 +6,26 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.0.133',
+    version='3.1',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
-    url='https://github.com/AnimusPEXUS/org_wayround_aipsetup',
+    url='https://github.com/AnimusPEXUS/wayround_org_aipsetup',
     packages=[
-        'org.wayround.aipsetup',
-        'org.wayround.aipsetup.buildtools',
-        'org.wayround.aipsetup.gui'
+        'wayround_org.aipsetup',
+        'wayround_org.aipsetup.buildtools',
+        'wayround_org.aipsetup.gui'
         ],
     scripts=['aipsetup3.py'],
     install_requires=[
-        'org_wayround_utils',
+        'wayround_org_utils',
         'certdata',
         'sqlalchemy',
         'bottle',
         'mako'
         ],
     package_data={
-        'org.wayround.aipsetup': [
+        'wayround_org.aipsetup': [
             os.path.join('*.sh'),
             os.path.join('distro', '*.tar.xz'),
             os.path.join('gui', '*.glade'),
