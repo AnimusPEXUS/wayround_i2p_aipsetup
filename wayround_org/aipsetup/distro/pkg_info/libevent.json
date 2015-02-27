@@ -1,9 +1,9 @@
 {
   "description": "write something here, please",
-  "home_page": "http://www.monkey.org",
-  "buildscript": "",
+  "home_page": "http://libevent.org/",
+  "buildscript": "std",
   "basename": "libevent",
-  "filters": "",
+  "filters": "- status !re ^stable$",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

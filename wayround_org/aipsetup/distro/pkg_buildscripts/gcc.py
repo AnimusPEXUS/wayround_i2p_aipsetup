@@ -64,15 +64,16 @@ def main(buildingsite, action=None):
                         'i486-pc-linux-gnu,'
                         'i586-pc-linux-gnu,'
                         'i686-pc-linux-gnu,'
-                        'i786-pc-linux-gnu,'                        
+                        'i786-pc-linux-gnu,'
                         'ia64-pc-linux-gnu,'
                         'x86_64-pc-linux-gnu,'
                         'aarch64-linux-gnu',
 
                     # normal options
                     '--enable-__cxa_atexit',
-                    '--with-arch-32=i486',
-                    '--with-tune=generic',
+                    # disabled for experiment
+                    # '--with-arch-32=i486',
+                    # '--with-tune=generic',
                     '--enable-languages=all,go,objc,obj-c++,ada',
                     '--enable-bootstrap',
                     '--enable-threads=posix',
@@ -94,7 +95,7 @@ def main(buildingsite, action=None):
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     #'--target=' + pkg_info['constitution']['target'],
-                    '--target=x86_64-pc-linux-gnu'
+                    #'--target=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],
                 environment={

@@ -1,8 +1,8 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "miniupnpd",
-  "basename": "miniupnpd",
+  "buildscript": "std",
+  "basename": "gupnp-vala",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

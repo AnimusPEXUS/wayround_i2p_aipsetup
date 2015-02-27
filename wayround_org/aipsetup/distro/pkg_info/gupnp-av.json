@@ -1,8 +1,8 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "miniupnpd",
-  "basename": "miniupnpd",
+  "buildscript": "std",
+  "basename": "gupnp-av",
   "filters": "",
   "installation_priority": 5,
   "removable": true,

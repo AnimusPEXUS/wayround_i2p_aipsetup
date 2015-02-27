@@ -1,26 +1,22 @@
 
 import logging
 import os.path
-import time
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 
-# For history
-# RUN[$j]='echo "CFLAGS += -march=i486 -mtune=native" > configparms
 def main(buildingsite, action=None):
 
     ret = 0
 
     r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'extract_glibc-ports',
-             'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -31,6 +27,12 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+
+        separate_build_dir = False
+
+        source_configure_reldir = '.'
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -43,51 +45,27 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'extract_glibc-ports' in actions:
-            ret = autotools.extract_high(
-                buildingsite,
-                'glibc-ports',
-                unwrap_dir=False,
-                rename_dir='ports'
-                )
-            if ret != 0:
-                logging.warning(
-                    "glibc-ports are not found. "
-                    "this is Ok starting from glibc-2.17"
-                    )
-                logging.info("sleeping for 10 seconds and continuing")
-                time.sleep(10)
-                ret = 0
-
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--enable-obsolete-rpc',
-                    '--enable-kernel=3.17',
-                    '--enable-tls',
-                    '--with-elf',
-                    '--enable-multi-arch',
-                    # '--with-headers=/usr/src/linux',
-                    # '--with-headers=/usr/src/linux/include',
-                    '--enable-shared',
+                    # '--disable-asciidoc',  # TODO: enable doc generation
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     # '--target=' + pkg_info['constitution']['target']
-                    #'--host=ia64-pc-linux-gnu'
-                    #'--host=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_configure_reldir='.',
-                use_separate_buildding_dir=True,
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
@@ -100,8 +78,8 @@ def main(buildingsite, action=None):
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=True,
-                source_configure_reldir='.'
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
         if 'distribute' in actions and ret == 0:
@@ -110,16 +88,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=True,
-                source_configure_reldir='.'
+                use_separate_buildding_dir=separate_build_dir,
+                source_configure_reldir=source_configure_reldir
                 )
 
     return ret
