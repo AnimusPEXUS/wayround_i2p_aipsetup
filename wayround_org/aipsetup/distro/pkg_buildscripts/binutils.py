@@ -49,9 +49,20 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    # '--enable-targets='
+                    # 'i486-pc-linux-gnu,'
+                    # 'i586-pc-linux-gnu,'
+                    # 'i686-pc-linux-gnu,'
+                    # 'i786-pc-linux-gnu,'
+                    # 'ia64-pc-linux-gnu,'
+                    # 'x86_64-pc-linux-gnu,'
+                    # 'aarch64-linux-gnu',
+
                     '--enable-targets=all',
-#                    '--disable-libada',
-#                    '--enable-bootstrap',
+
+
+                    #                    '--disable-libada',
+                    #                    '--enable-bootstrap',
                     '--enable-64-bit-bfd',
                     '--disable-werror',
                     '--enable-libada',
@@ -60,13 +71,14 @@ def main(buildingsite, action=None):
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target']
+                    # '--target=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],
                 environment={},

@@ -58,14 +58,14 @@ def main(buildingsite, action=None):
                     '--enable-tls',
                     '--enable-nls',
 
-                    '--enable-targets='
-                    'i486-pc-linux-gnu,'
-                    'i586-pc-linux-gnu,'
-                    'i686-pc-linux-gnu,'
-                    'i786-pc-linux-gnu,'
-                    'ia64-pc-linux-gnu,'
-                    'x86_64-pc-linux-gnu,'
-                    'aarch64-linux-gnu',
+                    # '--enable-targets='
+                    # 'i486-pc-linux-gnu,'
+                    # 'i586-pc-linux-gnu,'
+                    # 'i686-pc-linux-gnu,'
+                    # 'i786-pc-linux-gnu,'
+                    # 'ia64-pc-linux-gnu,'
+                    # 'x86_64-pc-linux-gnu,'
+                    # 'aarch64-linux-gnu',
 
                     # then lto enabled it causes problems to systemd.
                     # some time has passed since then - trying to enable lto
@@ -99,7 +99,7 @@ def main(buildingsite, action=None):
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     '--target=' + pkg_info['constitution']['target'],
-                    #'--target=x86_64-pc-linux-gnu'
+                    # '--target=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],
                 environment={

@@ -15,12 +15,12 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'extract_glibc-ports',
-             'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'extract_glibc-ports',
+         'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -68,15 +68,21 @@ def main(buildingsite, action=None):
                     '--enable-tls',
                     '--with-elf',
                     '--enable-multi-arch',
-                    # '--with-headers=/usr/src/linux',
-                    '--with-headers=/usr/src/linux/include',
+
+
+                    # this is from configure --help. configure looking for
+                    # linux/version.h file
+
+                    #'--with-headers=/usr/src/linux/include',
+
+
                     '--enable-shared',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     # '--target=' + pkg_info['constitution']['target']
