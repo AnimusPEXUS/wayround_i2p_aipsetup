@@ -34,6 +34,9 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # string
     ('buildscript', ''),
 
+    # string
+    ('version_tool', ''),
+
     # file name base
     ('basename', ''),
 
@@ -60,6 +63,9 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
 
     # to make search faster and exclude not related sources
     ('source_path_prefixes', []),
+
+    # run time dependenties. (man pages reader requiers 'less' command i.e.)
+    ('runtime_deps', []),
 
     # depends on .so files in following packages
     ('so_deps', []),

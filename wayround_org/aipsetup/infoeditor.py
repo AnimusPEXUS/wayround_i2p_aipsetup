@@ -139,10 +139,6 @@ class MainWindow:
 
                 self.ui.buildscript_entry.set_text(str(data['buildscript']))
 
-                self.ui.install_priority_scale.set_value(
-                    float(data['installation_priority'])
-                    )
-
                 self.ui.removable_cb.set_active(bool(data['removable']))
 
                 self.ui.reducible_cb.set_active(bool(data['reducible']))
@@ -209,10 +205,9 @@ class MainWindow:
 
             data['buildscript'] = self.ui.buildscript_entry.get_text()
 
-            data['basename'] = self.ui.basename_entry.get_text()
+            data['version_tool'] = self.ui.version_tool_entry.get_text()
 
-            data['installation_priority'] = \
-                int(self.ui.install_priority_scale.get_value())
+            data['basename'] = self.ui.basename_entry.get_text()
 
             data['removable'] = self.ui.removable_cb.get_active()
 
