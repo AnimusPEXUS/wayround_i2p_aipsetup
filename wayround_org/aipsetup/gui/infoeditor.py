@@ -126,6 +126,39 @@ class InfoEditorUi:
 
         paned2_box2 = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
 
+
+
+        self.filters_tw = Gtk.TextView()
+        filters_tw_sw = Gtk.ScrolledWindow()
+        filters_tw_sw.add(self.filters_tw)
+        paned2_box2.pack_start(filters_tw_sw, True, True, 0)
+
+        paned2_box2.pack_start(Gtk.Label("Description"), False, False, 0)
+        self.description_tw = Gtk.TextView()
+        description_tw_sw = Gtk.ScrolledWindow()
+        description_tw_sw.add(self.description_tw)
+        paned2_box2.pack_start(description_tw_sw, True, True, 0)
+
+        paned2_box1.set_size_request(150, -1)
+        paned2_box2.set_size_request(150, -1)
+
+        paned2.add1(paned2_box1)
+        paned2.add2(paned2_box2)
+
+        paned1.add1(tree_view1_sw)
+        paned1.add2(paned2)
+
+        main_box.pack_start(main_button_box, False, False, 0)
+        main_box.pack_start(paned1, True, True, 0)
+
+        main_box.show_all()
+
+        return
+        
+    def _init_tab_main(self):
+        return        
+
+    def _init_tab_filter(self):
         exp_lab = Gtk.Label(
             """\
 [+-] [(filename)|(version)|(status)] [!]COMPARATOR value
@@ -173,37 +206,6 @@ so for name 'cgkit-2.0.0-py3k.tar.gz' parsing reult is:
 
         paned2_box2.pack_start(filters_label_and_help, False, False, 0)
 
-        self.filters_tw = Gtk.TextView()
-        filters_tw_sw = Gtk.ScrolledWindow()
-        filters_tw_sw.add(self.filters_tw)
-        paned2_box2.pack_start(filters_tw_sw, True, True, 0)
-
-        paned2_box2.pack_start(Gtk.Label("Description"), False, False, 0)
-        self.description_tw = Gtk.TextView()
-        description_tw_sw = Gtk.ScrolledWindow()
-        description_tw_sw.add(self.description_tw)
-        paned2_box2.pack_start(description_tw_sw, True, True, 0)
-
-        paned2_box1.set_size_request(150, -1)
-        paned2_box2.set_size_request(150, -1)
-
-        paned2.add1(paned2_box1)
-        paned2.add2(paned2_box2)
-
-        paned1.add1(tree_view1_sw)
-        paned1.add2(paned2)
-
-        main_box.pack_start(main_button_box, False, False, 0)
-        main_box.pack_start(paned1, True, True, 0)
-
-        main_box.show_all()
-
-        return
-        
-    def _init_tab_main(self):
-        return        
-
-    def _init_tab_filter(self):
         return        
 
     def _init_tab_paths(self):
