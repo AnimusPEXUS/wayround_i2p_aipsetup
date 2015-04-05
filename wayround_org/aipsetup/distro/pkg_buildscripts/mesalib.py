@@ -54,7 +54,7 @@ def main(buildingsite, action=None):
                     '--enable-gles1',
                     '--enable-gles2',
 
-                    '--enable-openvg',
+                    #'--enable-openvg',
 
                     '--enable-osmesa',
                     '--with-osmesa-bits=32',

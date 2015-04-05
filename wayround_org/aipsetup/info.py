@@ -56,7 +56,16 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     ('non_installable', False),
 
     # package outdated and need to be removed
-    ('deprecated', False)
+    ('deprecated', False),
+
+    # to make search faster and exclude not related sources
+    ('source_path_prefixes', []),
+
+    # depends on .so files in following packages
+    ('so_deps', []),
+
+    # following packages required to build this package
+    ('build_deps', [])
 
     ])
 """

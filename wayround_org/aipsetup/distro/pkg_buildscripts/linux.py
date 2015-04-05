@@ -25,11 +25,11 @@ def main(buildingsite, action=None):
          'distr_kernel',
          'distr_modules',
          'distr_firmware',
-         'distr_headers_internal',
+         #'distr_headers_internal',
          'distr_headers_normal',
-         'distr_headers_internal_repeat',
-         'distr_arch_headers_internal',
-         'remove_install_files_from_includes',
+         #'distr_headers_internal_repeat',
+         #'distr_arch_headers_internal',
+         #'remove_install_files_from_includes',
          'distr_man',
          'copy_source'
          ],
@@ -196,7 +196,8 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[],
                 arguments=[
-                    'headers_install_all',
+                    'headers_install',
+                    # 'headers_install_all',
                     'INSTALL_HDR_PATH=' +
                         wayround_org.utils.path.join(dst_dir, 'usr')
                     ],

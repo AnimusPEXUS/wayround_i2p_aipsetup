@@ -44,15 +44,16 @@ USERS = {
     28: 'cdrom',
     29: 'tape',
     30: 'pulse',
-    31: 'usbfs',
-    32: 'usbdev',
-    33: 'usbbus',
-    34: 'usblist',
-    35: 'alsa',
+    31: 'pulse-access',
+    32: 'usbfs',
+    33: 'usbdev',
+    34: 'usbbus',
+    35: 'usblist',
+    36: 'alsa',
 
 
-    # daemons 36-99
-    36: 'colord',
+    # daemons 39-99
+    39: 'colord',
 
     40: 'messagebus',
     41: 'sshd',
@@ -147,7 +148,7 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     for i in pwd.getpwall():
         if 0 < i.pw_uid <= SYS_UID_MAX:
             wayround_org.utils.terminal.progress_write(
-                "  ({:3d}%) {}".format(
+                "  uid {:4d} {}".format(
                     i.pw_uid,
                     i.pw_name
                     )
@@ -162,7 +163,7 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     for i in grp.getgrall():
         if 0 < i.gr_gid <= SYS_GID_MAX:
             wayround_org.utils.terminal.progress_write(
-                "  ({:4d}) {}".format(
+                "  gid {:4d} {}".format(
                     i.gr_gid,
                     i.gr_name
                     )
@@ -177,7 +178,7 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     for i in sorted(list(GROUPS.keys())):
         name = GROUPS[i]
         wayround_org.utils.terminal.progress_write(
-            "  ({:4d}) {}".format(
+            "  gid {:4d} {}".format(
                 i,
                 name
                 )
@@ -208,7 +209,7 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
             home_path_no_base = home_path[len(base_dir):]
 
         wayround_org.utils.terminal.progress_write(
-            "  ({:3d}%) {}".format(
+            "  uid {:4d} {}".format(
                 i,
                 name
                 )

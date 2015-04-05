@@ -1,9 +1,9 @@
 {
   "description": "",
-  "home_page": "http://freeglut.sourceforge.net/",
-  "buildscript": "std_cmake",
-  "basename": "freeglut",
-  "filters": "- status !re ^$",
+  "home_page": "http://www.gnupg.org",
+  "buildscript": "std",
+  "basename": "nettle",
+  "filters": "- version fm *\n+ version fm 2.*",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

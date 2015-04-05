@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "tor",
+  "buildscript": "std",
   "basename": "tor",
   "filters": "",
   "installation_priority": 5,

@@ -1,5 +1,7 @@
 {
     "names" : [
+        "intltool",
+        "inetutils",
         "acl",
         "apache-ant",
         "attr",
@@ -10,6 +12,7 @@
         "dev86",
         "bind9",
         "binutils",
+        "bluez",
         "bzip2",
         "check",
         "cloog",

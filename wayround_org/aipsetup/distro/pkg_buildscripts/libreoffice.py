@@ -50,16 +50,21 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--with-system-cairo',
+                    '--enable-gtk3',
+                    '--disable-gtk',
+                    '--without-junit',
+                    # TODO: track fixing of this
+                    '--with-system-npapi-headers=no',
+                    '--with-system-postgresql',
+                    '--with-system-headers',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--disable-gtk',
-                    '--without-junit',
-#                    '--with-system-headers',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
                     ],

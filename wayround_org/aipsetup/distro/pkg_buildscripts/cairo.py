@@ -12,11 +12,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -54,30 +54,36 @@ def main(buildingsite, action=None):
                     '--enable-ft=yes',
                     '--enable-gl',
                     '--enable-gallium=auto',
-#                    '--enable-glesv2',
+                    #                    '--enable-glesv2',
                     '--enable-pdf=yes',
                     '--enable-png=yes',
                     '--enable-ps=yes',
-#                    '--enable-qt',
+                    '--enable-svg=yes',
+                    #                    '--enable-qt',
+
                     '--enable-quartz-font=auto',
                     '--enable-quartz-image=auto',
                     '--enable-quartz=auto',
+
                     '--enable-script=yes',
-                    '--enable-svg=yes',
+
+
                     '--enable-tee=yes',
                     '--enable-vg=auto',
                     '--enable-wg=auto',
                     '--enable-xcb',
                     '--enable-xcb-shm',
+                    '--enable-xlib-xcb',
+                    '--enable-gobject=yes',
 
                     '--enable-egl',
                     '--enable-glx',
                     # '--enable-wgl',
 
                     # xlib is deprecated
-#                    '--enable-xlib',
-#                    '--enable-xlib-xcb',
-#                    '--enable-xlib-xrender',
+                    #                    '--enable-xlib',
+                    #                    '--enable-xlib-xcb',
+                    #                    '--enable-xlib-xrender',
 
                     '--disable-static',
                     '--enable-xml=yes',
@@ -87,13 +93,13 @@ def main(buildingsite, action=None):
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={

@@ -10,7 +10,7 @@
         "libgpg-error",
         "libksba",
         "libtasn1",
-        "nettle",
+        "nettle", "nettle2",
         "npth",
         "opencdk",
         "scute"

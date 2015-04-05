@@ -13,8 +13,7 @@ def main(buildingsite, action=None):
 
     r = wayround_org.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract_sm',
-             'configure_sm', 'build_sm', 'distribute_sm'
+            ['extract', 'configure', 'build', 'distribute'
              ],
             action,
             "help"
@@ -32,11 +31,11 @@ def main(buildingsite, action=None):
 
         dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir_sm = True
+        separate_build_dir = True
 
         source_configure_reldir = '.'
 
-        if 'extract_sm' in actions:
+        if 'extract' in actions:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 if wayround_org.utils.file.cleanup_dir(src_dir) != 0:
@@ -52,7 +51,7 @@ def main(buildingsite, action=None):
                     rename_dir=False
                     )
 
-        if 'configure_sm' in actions and ret == 0:
+        if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
@@ -65,7 +64,8 @@ def main(buildingsite, action=None):
                     '--enable-shared-js',
                     '--enable-storage',
                     '--enable-xft',
-                    '--enable-optimize=-O3 -fno-keep-inline-dllexport',
+                    #'--enable-optimize=-O3 -fno-keep-inline-dllexport',
+                    '--enable-optimize',
                     '--enable-webrtc',
                     '--enable-gstreamer=1.0',
                     '--with-pthreads',
@@ -76,7 +76,7 @@ def main(buildingsite, action=None):
                     '--sysconfdir=' + \
                         pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' + \
-                        pkg_info['constitution']['paths']['var'],
+                        pkg_info['constitution']['paths']['var']
                     # '--host=' + pkg_info['constitution']['host'],
                     # '--build=' + pkg_info['constitution']['build']
                     ],
@@ -84,24 +84,24 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir_sm,
+                use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
                 run_script_not_bash=True,
                 relative_call=True
                 )
 
-        if 'build_sm' in actions and ret == 0:
+        if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir_sm,
+                use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'distribute_sm' in actions and ret == 0:
+        if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -111,7 +111,7 @@ def main(buildingsite, action=None):
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir_sm,
+                use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
 

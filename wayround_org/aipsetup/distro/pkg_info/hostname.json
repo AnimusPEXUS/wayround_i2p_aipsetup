@@ -1,12 +1,12 @@
 {
-  "description": "",
+  "description": "use hostname from inetutils",
   "home_page": "",
-  "buildscript": "libepoxy",
-  "basename": "libepoxy",
+  "buildscript": "hostname",
+  "basename": "hostname",
   "filters": "",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": true
 }

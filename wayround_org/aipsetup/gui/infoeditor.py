@@ -7,6 +7,7 @@ class InfoEditorUi:
     def __init__(self):
 
         window = Gtk.Window()
+        window.set_default_size(800, 600)
         self.window = window
 
         main_box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
@@ -198,3 +199,18 @@ so for name 'cgkit-2.0.0-py3k.tar.gz' parsing reult is:
         main_box.show_all()
 
         return
+        
+    def _init_tab_main(self):
+        return        
+
+    def _init_tab_filter(self):
+        return        
+
+    def _init_tab_paths(self):
+        return        
+
+    def _init_tab_dependencies(self):
+        return        
+
+    def _init_tab_tags(self):
+        return        

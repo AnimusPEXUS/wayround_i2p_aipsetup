@@ -176,6 +176,7 @@ def close_all():
     """
     Closes all open DB connections
     """
+    # is words (only words not the meaning) global can be removed here?
     global _info_db_connection
     global _pkg_repo_db_connection
     global _tag_db_connection

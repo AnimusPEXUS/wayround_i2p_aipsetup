@@ -13,8 +13,7 @@ def main(buildingsite, action=None):
 
     r = wayround_org.aipsetup.build.build_script_wrap(
             buildingsite,
-            ['extract_xul',
-             'configure_xul', 'build_xul', 'distribute_xul'
+            ['extract', 'configure', 'build', 'distribute'
              ],
             action,
             "help"
@@ -32,11 +31,11 @@ def main(buildingsite, action=None):
 
         dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        separate_build_dir_xul = True
+        separate_build_dir = True
 
         source_configure_reldir = '.'
 
-        if 'extract_xul' in actions and ret == 0:
+        if 'extract' in actions and ret == 0:
             if os.path.isdir(src_dir):
                 logging.info("cleaningup source dir")
                 if wayround_org.utils.file.cleanup_dir(src_dir) != 0:
@@ -52,22 +51,23 @@ def main(buildingsite, action=None):
                     rename_dir=False
                     )
 
-        if 'configure_xul' in actions and ret == 0:
+        if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
                     '--enable-application=xulrunner',
-                    '--enable-default-toolkit=cairo-gtk2',
+                    '--enable-default-toolkit=cairo-gtk3',
                     '--enable-freetype2',
                     '--enable-shared',
                     '--disable-optimize',
-#                    '--enable-shared-js',
+                    '--enable-shared-js',
                     '--enable-xft',
                     '--with-pthreads',
 #                    '--disable-webrtc',
-#                    '--enable-optimize',
-#                    '--with-system-nspr',
-#                    '--with-system-nss',
+                    '--enable-gstreamer=1.0',
+                    '--enable-optimize',
+                    '--with-system-nspr',
+                    '--with-system-nss',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -81,24 +81,24 @@ def main(buildingsite, action=None):
                 environment={},
                 environment_mode='copy',
                 source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir_xul,
+                use_separate_buildding_dir=separate_build_dir,
                 script_name='configure',
                 run_script_not_bash=False,
                 relative_call=False
                 )
 
-        if 'build_xul' in actions and ret == 0:
+        if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir_xul,
+                use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
 
-        if 'distribute_xul' in actions and ret == 0:
+        if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
                 options=[],
@@ -108,7 +108,7 @@ def main(buildingsite, action=None):
                     ],
                 environment={},
                 environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir_xul,
+                use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
 

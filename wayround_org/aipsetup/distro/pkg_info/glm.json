@@ -1,9 +1,9 @@
 {
   "description": "",
-  "home_page": "http://freeglut.sourceforge.net/",
+  "home_page": "",
   "buildscript": "std_cmake",
-  "basename": "freeglut",
-  "filters": "- status !re ^$",
+  "basename": "glm",
+  "filters": "",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

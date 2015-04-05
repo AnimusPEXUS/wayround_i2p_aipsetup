@@ -1,9 +1,9 @@
 {
   "description": "",
-  "home_page": "http://freeglut.sourceforge.net/",
-  "buildscript": "std_cmake",
-  "basename": "freeglut",
-  "filters": "- status !re ^$",
+  "home_page": "",
+  "buildscript": "rp_pppoe",
+  "basename": "rp-pppoe",
+  "filters": "",
   "installation_priority": 5,
   "removable": true,
   "reducible": true,

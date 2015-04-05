@@ -1902,16 +1902,21 @@ Can't select between those package names (for {})
                     ret = 2
                 else:
 
-                    tmp_dir_prefix = \
-                        "{name}-{version}-{status}-{timestamp}-".format_map(
-                            {
-                                'name': package_info['name'],
-                                'version': par_res['groups']['version'],
-                                'status': par_res['groups']['status'],
-                                'timestamp':
-                                    wayround_org.utils.time.currenttime_stamp()
-                                }
-                            )
+                    # tmp_dir_prefix = \
+                    #     "{name}-{version}-{status}-{timestamp}-".format_map(
+                    #         {
+                    #             'name': package_info['name'],
+                    #             'version': par_res['groups']['version'],
+                    #             'status': par_res['groups']['status'],
+                    #             'timestamp':
+                    #                 wayround_org.utils.time.currenttime_stamp()
+                    #             }
+                    #         )
+
+                    tmp_dir_prefix = "{}-{}-".format(
+                        package_info['name'],
+                        par_res['groups']['version']
+                        )
 
                     build_site_dir = tempfile.mkdtemp(
                         prefix=tmp_dir_prefix,

@@ -187,6 +187,13 @@
                 "version": "{asked_version}"
                 }
             },
+        "gnome-games": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
         "gnome-icon-theme": {
             "proc": "gnome_get",
             "args": [],
@@ -366,6 +373,13 @@
                 "nmaa": false
                 }
         },
+        "gtkhtml": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
         "gtksourceview": {
             "proc": "gnome_get",
             "args": [],
@@ -402,6 +416,13 @@
                 }
             },
         "nautilus": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
+        "notification-daemon": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
@@ -789,6 +810,16 @@
             "kwargs": {}
             },
         "rest": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "source-highlight": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "polkit-gnome": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}

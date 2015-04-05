@@ -58,22 +58,26 @@ def main(buildingsite, action=None):
                     '--enable-tls',
                     '--enable-nls',
 
-                    '--disable-lto',
-
                     '--enable-targets='
-                        'i486-pc-linux-gnu,'
-                        'i586-pc-linux-gnu,'
-                        'i686-pc-linux-gnu,'
-                        'i786-pc-linux-gnu,'
-                        'ia64-pc-linux-gnu,'
-                        'x86_64-pc-linux-gnu,'
-                        'aarch64-linux-gnu',
+                    'i486-pc-linux-gnu,'
+                    'i586-pc-linux-gnu,'
+                    'i686-pc-linux-gnu,'
+                    'i786-pc-linux-gnu,'
+                    'ia64-pc-linux-gnu,'
+                    'x86_64-pc-linux-gnu,'
+                    'aarch64-linux-gnu',
+
+                    # then lto enabled it causes problems to systemd.
+                    # some time has passed since then - trying to enable lto
+                    #'--disable-lto',
 
                     # normal options
                     '--enable-__cxa_atexit',
+
                     # disabled for experiment
-                    # '--with-arch-32=i486',
-                    # '--with-tune=generic',
+                    #'--with-arch-32=i486',
+                    #'--with-tune=generic',
+
                     '--enable-languages=all,go,objc,obj-c++,ada',
                     '--enable-bootstrap',
                     '--enable-threads=posix',
@@ -94,7 +98,7 @@ def main(buildingsite, action=None):
                     pkg_info['constitution']['paths']['var'],
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-                    #'--target=' + pkg_info['constitution']['target'],
+                    '--target=' + pkg_info['constitution']['target'],
                     #'--target=x86_64-pc-linux-gnu'
                     ],
                 arguments=[],

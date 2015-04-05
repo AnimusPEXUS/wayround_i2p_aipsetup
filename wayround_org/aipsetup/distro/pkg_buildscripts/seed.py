@@ -1,6 +1,7 @@
 
 import logging
 import os.path
+import subprocess
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
@@ -13,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = wayround_org.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'autogen', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -45,11 +46,22 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+        if 'autogen' in actions and ret == 0:
+            if not os.path.isfile(os.path.join(src_dir, 'configure')):
+                if not os.path.isfile(os.path.join(src_dir, 'autogen.sh')):
+                    logging.error(
+                        "./configure not found and autogen.sh is absent"
+                        )
+                    ret = 2
+                else:
+                    p = subprocess.Popen(['./autogen.sh'], cwd=src_dir)
+                    ret = p.wait()
+
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    # '--disable-asciidoc',  # TODO: enable doc generation
+                    '--with-webkit=4.0',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +

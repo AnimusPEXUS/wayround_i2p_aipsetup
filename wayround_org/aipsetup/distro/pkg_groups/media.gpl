@@ -1,10 +1,77 @@
 {
     "names": [
+        "qemu",
+        "sane-backends",
         "libsndfile",
         "x264",
         "ffmpeg",
         "mplayer",
         "lame",
-        "flac"
+        "flac",
+        "cdparanoia-III",
+"celt",
+"cortado",
+"ezstream",
+"flac",
+"icecast",
+"ices",
+"libao",
+"libfishsound",
+"libogg",
+"liboggz",
+"libshout",
+"libtheora",
+"libvorbis",
+"libquicktime",
+"mgm",
+"opus",
+"opus-tools",
+"opusfile",
+"rogg",
+"speex", "speexdsp",
+"vorbis-tools",
+"xvidcore",
+
+
+    "ghostscript",
+    
+    "FreeImage",
+
+    "openjpeg1", "openjpeg2", 
+
+    {
+     "name": "libjpeg-turbo", 
+     "proc": "gnome_get",
+     "kwargs": {
+         "daa": true
+     }
+    },
+
+    "mjpegtools", "libjpeg", "jpeg", "jasper",
+
+    "openexr", "ilmbase",
+
+    "giflib", "giflib4", "libungif",
+
+    "openimageio", "DevIL", "libgd", "vigra",
+
+    "djvulibre",
+
+    "tiff",
+
+    "lcms", "lcms2",
+
+    "libpng",
+
+    "frei0r", "frei0r-plugins",
+
+    "gimp", "gap",
+
+    "gegl",
+    
+    "gmerlin",
+    "gmerlin-avdecoder",
+    "gmerlin-effectv",
+    "gmerlin-encoders"
     ]
 }

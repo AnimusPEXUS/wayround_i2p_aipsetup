@@ -47,7 +47,17 @@ def main(buildingsite, action=None):
                 )
 
         if 'autogen' in actions and ret == 0:
-            p = subprocess.Popen(['bash', './autogen.sh'], cwd=src_dir)
+            p = open(os.path.join(src_dir, 'autogen.sh'))
+            pl = p.read().splitlines()
+            p.close()
+            for i in range(len(pl)):
+                if pl[i].startswith('git'):
+                    pl[i] = '#{}'.format(pl[i])
+            p = open(os.path.join(src_dir, 'autogen.sh'), 'w')
+            p.write('\n'.join(pl))
+            p.close()
+
+            p = subprocess.Popen(['./autogen.sh'], cwd=src_dir)
             ret = p.wait()
 
         if 'configure' in actions and ret == 0:

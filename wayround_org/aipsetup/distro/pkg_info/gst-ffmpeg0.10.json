@@ -8,5 +8,5 @@
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": true
 }

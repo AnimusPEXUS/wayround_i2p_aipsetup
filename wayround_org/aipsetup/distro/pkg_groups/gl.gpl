@@ -4,6 +4,7 @@
         "glu",
         "glut",
         "glw",
+        "glm",
         "mesa-demos",
         "glew",
         "freeglut",

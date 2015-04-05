@@ -4,6 +4,7 @@
             "name": "gtk-sharp",
             "proc": "gnome_get"
         },
+        "gdl",
         "gtkspell",
         "gtkspell3",
         "itstool",
@@ -23,6 +24,10 @@
             "proc": "gnome_get"
         },
         "zeitgeist",
-        "graphviz"
+        "graphviz",
+
+        "accountsservice",
+
+        "ibus", "ibus-anthy", "ibus-chewing", "ibus-gjs"
     ]
 }

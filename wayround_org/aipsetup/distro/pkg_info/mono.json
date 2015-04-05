@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
-  "home_page": "http://www.go-mono.com",
-  "buildscript": "",
+  "home_page": "http://www.mono-project.com",
+  "buildscript": "std",
   "basename": "mono",
   "filters": "",
   "installation_priority": 5,
