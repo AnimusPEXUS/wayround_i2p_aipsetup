@@ -22,16 +22,16 @@ import wayround_org.utils.list
 class MainWindow:
 
     def __init__(
-        self, info_ctl, tag_ctl, src_client, pkg_client,
-        acceptable_source_name_extensions
-        ):
+            self, info_ctl, tag_ctl, src_client, pkg_client, src_paths_ctl,
+            acceptable_source_name_extensions
+            ):
 
-#        self.config = config
         self.info_ctl = info_ctl
-#        self.src_repo_ctl = src_repo_ctl
         self.src_client = src_client
         self.pkg_client = pkg_client
         self.tag_ctl = tag_ctl
+        self.src_paths_ctl = src_paths_ctl
+
         self.acceptable_source_name_extensions = (
             acceptable_source_name_extensions
             )
@@ -149,12 +149,29 @@ class MainWindow:
 
                 self.ui.deprecated_cb.set_active(bool(data['deprecated']))
 
+                self.ui.source_path_prefixes_tw.get_buffer().set_text(
+                    '\n'.join(data['source_path_prefixes'])
+                    )
+
+                self.ui.build_deps.set_values_list(
+                    data['build_deps']
+                    )
+
+                self.ui.so_deps.set_values_list(
+                    data['so_deps']
+                    )
+
+                self.ui.runtime_deps.set_values_list(
+                    data['runtime_deps']
+                    )
+
                 self.currently_opened = filename
                 self.ui.window.set_title(
                     filename + " - aipsetup v3 .json info file editor"
                     )
 
                 self.scroll_package_list_to_name(os.path.basename(filename))
+
 
 #        self.window.set_sensitive(True)
 
@@ -191,9 +208,9 @@ class MainWindow:
 
             tags = \
                 wayround_org.utils.list.\
-                    list_strip_remove_empty_remove_duplicated_lines(
-                        tags
-                        )
+                list_strip_remove_empty_remove_duplicated_lines(
+                    tags
+                )
 
             tag_db = self.tag_ctl.tag_db
 
@@ -216,6 +233,31 @@ class MainWindow:
             data['non_installable'] = self.ui.non_installable_cb.get_active()
 
             data['deprecated'] = self.ui.deprecated_cb.get_active()
+
+            data['source_path_prefixes'] = \
+                self.ui.source_path_prefixes_tw.get_buffer().get_text(
+                    self.ui.source_path_prefixes_tw.get_buffer(
+                        ).get_start_iter(),
+                    self.ui.source_path_prefixes_tw.get_buffer(
+                        ).get_end_iter(),
+                    False
+                    ).split('\n')
+
+            for i in range(len(data['source_path_prefixes']) - 1, -1, -1):
+                if (
+                        data['source_path_prefixes'][i].isspace()
+                        or
+                        data['source_path_prefixes'][i] == ''
+                        ):
+                    del data['source_path_prefixes'][i]
+
+            for i in range(len(data['source_path_prefixes'])):
+                data['source_path_prefixes'][i] =\
+                    data['source_path_prefixes'][i].strip()
+
+            data['build_deps'] = self.ui.build_deps.get_values_list()
+            data['so_deps'] = self.ui.so_deps.get_values_list()
+            data['runtime_deps'] = self.ui.runtime_deps.get_values_list()
 
             data_o = collections.OrderedDict()
 
@@ -277,14 +319,20 @@ class MainWindow:
 
         files.sort()
 
-        self.ui.tree_view1.set_model(None)
+        model = self.ui.tree_view1.get_model()
+        model2 = self.ui.add_deps_list_tw.get_model()
 
-        lst = Gtk.ListStore(str)
+        while len(model) != 0:
+            model.remove(model.get_iter_first())
+
+        while len(model2) != 0:
+            model2.remove(model2.get_iter_first())
+
         for i in files:
             base = os.path.basename(i)
-            lst.append([base])
+            model.append([base])
+            model2.append([base[:-5]])
 
-        self.ui.tree_view1.set_model(lst)
         if self.currently_opened:
             self.scroll_package_list_to_name(
                 os.path.basename(self.currently_opened)
@@ -325,28 +373,28 @@ class MainWindow:
     def onWindow1KeyPressed(self, widget, event):
 
         if (
-            (event.keyval == Gdk.KEY_q)
-            and
-            (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
-            ):
+                (event.keyval == Gdk.KEY_q)
+                and
+                (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
+                ):
             wayround_org.aipsetup.gtk.stop_session()
 
         if (
-            (event.keyval == Gdk.KEY_s)
-            and
-            (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
-            ):
+                (event.keyval == Gdk.KEY_s)
+                and
+                (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
+                ):
             self.onSaveAndUpdateButtonActivated(None)
 
         if (
-            ((event.keyval == Gdk.KEY_F5))
-            or
-            (
-             (event.keyval == Gdk.KEY_r)
-             and
-             (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
-             )
-            ):
+                ((event.keyval == Gdk.KEY_F5))
+                or
+                (
+                    (event.keyval == Gdk.KEY_r)
+                    and
+                    (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
+                    )
+                ):
             self.onListRealoadButtonActivated(None)
 
     def onSaveAndUpdateButtonActivated(self, button):
@@ -464,7 +512,7 @@ class MainWindow:
         sel = view.get_selection()
 
         model, itera = sel.get_selected()
-        if not model == None and not itera == None:
+        if not model is None and not itera is None:
             self.load_data(model[itera][0])
 
         return
@@ -480,8 +528,11 @@ def main(name_to_edit=None, config=None):
 
     tag_ctl = wayround_org.aipsetup.controllers.tag_ctl_by_config(config)
 
+    src_paths_ctl = \
+        wayround_org.aipsetup.controllers.src_paths_repo_ctl_by_config(config)
+
     mw = MainWindow(
-        info_ctl, tag_ctl, src_client, pkg_client,
+        info_ctl, tag_ctl, src_client, pkg_client, src_paths_ctl,
         acceptable_source_name_extensions=(
             config['src_client']['acceptable_src_file_extensions']
             )

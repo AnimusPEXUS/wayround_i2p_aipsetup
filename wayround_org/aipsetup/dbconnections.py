@@ -150,7 +150,7 @@ def src_paths_repo_db(config):
 
     if not _src_paths_repo_db_connection:
         _src_paths_repo_db_connection = src_paths_repo_db_new_connection(
-            config['src_server']['src_paths_index_db_config']
+            config['pkg_server']['info_db_config']
             )
 
     return _src_paths_repo_db_connection
@@ -165,7 +165,7 @@ def src_paths_repo_db_new_connection(config_string):
             config_string
             )
         )
-    ret = wayround_org.aipsetup.repository.SourcePathsRepo(
+    ret = wayround_org.aipsetup.info.SourcePathsRepo(
         config_string
         )
 

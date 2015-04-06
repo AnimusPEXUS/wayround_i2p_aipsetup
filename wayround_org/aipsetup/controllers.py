@@ -54,30 +54,6 @@ def src_repo_ctl_new(sources_dir, src_repo_db):
     return ret
 
 
-def src_paths_repo_ctl_by_config(config):
-
-    database_connection = \
-        wayround_org.aipsetup.dbconnections.src_paths_repo_db(config)
-
-    sources_paths_json_filename = config['src_server']['src_paths_json']
-
-    ret = src_paths_repo_ctl_new(
-        sources_paths_json_filename,
-        database_connection
-        )
-
-    return ret
-
-
-def src_paths_repo_ctl_new(sources_paths_json_filename, src_paths_repo_db):
-
-    ret = wayround_org.aipsetup.repository.SourcePathsRepoCtl(
-        sources_paths_json_filename, src_paths_repo_db
-        )
-
-    return ret
-
-
 def info_ctl_by_config(config):
 
     info_db = wayround_org.aipsetup.dbconnections.info_db(config)

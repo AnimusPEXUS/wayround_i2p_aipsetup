@@ -25,6 +25,7 @@ import wayround_org.utils.terminal
 
 
 class PackageRepo(wayround_org.utils.db.BasicDB):
+
     """
     Main package index DB handling class
     """
@@ -32,6 +33,7 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
     Base = sqlalchemy.ext.declarative.declarative_base()
 
     class Package(Base):
+
         """
         Package class
 
@@ -60,6 +62,7 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
             )
 
     class Category(Base):
+
         """
         Class for package categories
 
@@ -101,10 +104,6 @@ class SourceRepo(wayround_org.utils.tag.TagEngine):
     pass
 
 
-class SourcePathsRepo(wayround_org.utils.tag.TagEngine):
-    pass
-
-
 class PackageRepoCtl:
 
     def __init__(self, repository_dir, garbage_dir, db_connection):
@@ -125,19 +124,17 @@ class PackageRepoCtl:
         return self._db_connection
 
     def is_repo_package(self, path):
-
         """
         Check whatever path is [aipsetup package index] package
         """
 
         return (os.path.isdir(path)
-            and os.path.isfile(
+                and os.path.isfile(
                 os.path.join(path, '.package')
                 )
-            )
+                )
 
     def get_package_files(self, name):
-
         """
         Returns list of indexed package's asps
         """
@@ -145,7 +142,7 @@ class PackageRepoCtl:
         ret = 0
 
         pid = self.get_package_id(name)
-        if pid == None:
+        if pid is None:
             logging.error("Error getting package `{}' ID".format(name))
             ret = 1
         else:
@@ -217,7 +214,6 @@ class PackageRepoCtl:
         return ret
 
     def get_category_by_path(self, path):
-
         """
         In case of success, returns category id
         """
@@ -248,7 +244,7 @@ class PackageRepoCtl:
                     ret = None
                     break
 
-                if ret == None:
+                if ret is None:
                     break
 
         return ret
@@ -261,7 +257,7 @@ class PackageRepoCtl:
 
         q = index_db.session.query(index_db.Package).filter_by(name=name).\
             first()
-        if q != None:
+        if q is not None:
             ret = q.pid
 
         return ret
@@ -273,7 +269,7 @@ class PackageRepoCtl:
         ret = None
 
         q = index_db.session.query(index_db.Package).filter_by(pid=pid).first()
-        if q != None:
+        if q is not None:
             ret = q.cid
 
         return ret
@@ -287,7 +283,7 @@ class PackageRepoCtl:
         q = index_db.session.query(index_db.Package).filter_by(name=name).\
             first()
 
-        if q != None:
+        if q is not None:
             ret = q.cid
 
         return ret
@@ -299,7 +295,7 @@ class PackageRepoCtl:
         ret = None
 
         q = index_db.session.query(index_db.Package).filter_by(pid=pid).first()
-        if q != None:
+        if q is not None:
             ret = q.name
 
         return ret
@@ -308,7 +304,7 @@ class PackageRepoCtl:
 
         index_db = self._db_connection
 
-        if cid == None:
+        if cid is None:
             lst = index_db.session.query(index_db.Package).all()
         else:
             lst = index_db.session.query(
@@ -328,7 +324,7 @@ class PackageRepoCtl:
         index_db = self._db_connection
 
         lst = None
-        if cid == None:
+        if cid is None:
             lst = index_db.session.query(index_db.Package).all()
         else:
             lst = index_db.session.query(
@@ -345,7 +341,7 @@ class PackageRepoCtl:
 
         index_db = self._db_connection
 
-        if cid == None:
+        if cid is None:
             lst = index_db.session.query(index_db.Package).all()
         else:
             lst = index_db.session.query(
@@ -397,7 +393,6 @@ class PackageRepoCtl:
         return ids
 
     def get_category_idname_dict(self, parent_cid=0):
-
         """
         Return dict in which keys are ids and values are names
         """
@@ -405,7 +400,7 @@ class PackageRepoCtl:
         index_db = self._db_connection
 
         lst = None
-        if parent_cid == None:
+        if parent_cid is None:
             lst = index_db.session.query(
                 index_db.Category
                 ).order_by(
@@ -440,7 +435,7 @@ class PackageRepoCtl:
         ret = []
         pkg = None
 
-        if pid == None:
+        if pid is None:
             logging.error(
                 "Error getting package `{}' data from DB".format(pid_or_name)
                 )
@@ -454,7 +449,7 @@ class PackageRepoCtl:
                 index_db.Package
                 ).filter_by(pid=pid).first()
 
-            if pkg != None:
+            if pkg is not None:
 
                 r = pkg.cid
 
@@ -477,7 +472,7 @@ class PackageRepoCtl:
         ret = []
         categ = None
 
-        if cid == None:
+        if cid is None:
             logging.error(
                 "Error getting category `{}' data from DB".format(
                     cid
@@ -489,7 +484,7 @@ class PackageRepoCtl:
                 index_db.Category
                 ).filter_by(cid=cid).first()
 
-            if categ != None:
+            if categ is not None:
 
                 r = categ.parent_cid
 
@@ -570,8 +565,8 @@ class PackageRepoCtl:
         last_pkg_id = 0
 
         for os_walk_iter in os.walk(
-            repo_dir
-            ):
+                repo_dir
+                ):
 
             if os_walk_iter[0] == repo_dir:
                 category_locations[''] = self._srfpac_cat_struct(
@@ -719,7 +714,6 @@ class PackageRepoCtl:
         return ret
 
     def put_asps_to_index(self, files, move=False):
-
         """
         Put many asps to aipsetup package index
 
@@ -771,7 +765,6 @@ class PackageRepoCtl:
         return ret
 
     def put_asp_to_index(self, filename, move=False):
-
         """
         Moves file to aipsetup package index
         """
@@ -845,9 +838,9 @@ class PackageRepoCtl:
         return ret
 
     def detect_package_collisions(
-        self,
-        category_locations, package_locations
-        ):
+            self,
+            category_locations, package_locations
+            ):
 
         ret = 0
 
@@ -1059,10 +1052,10 @@ class PackageRepoCtl:
                 perc = 100.0 / (float(lst_l) / lst_i)
 
             wayround_org.utils.terminal.progress_write(
-                    "    {:6.2f}% (package {})".format(
-                        perc,
-                        pkgs[i]
-                        )
+                "    {:6.2f}% (package {})".format(
+                    perc,
+                    pkgs[i]
+                    )
                 )
 
             self.cleanup_repo_package(pkgs[i])
@@ -1108,7 +1101,6 @@ class PackageRepoCtl:
         return ret
 
     def build_category_tree(self, start_path=''):
-
         """
         Build category tree starting from ``start_path``
 
@@ -1162,13 +1154,13 @@ class SourceRepoCtl:
         self.database_connection = database_connection
 
     def index_sources(
-        self,
-        subdir_name,
-        acceptable_src_file_extensions,
-        force_reindex=False,
-        first_delete_found=False,
-        clean_only=False
-        ):
+            self,
+            subdir_name,
+            acceptable_src_file_extensions,
+            force_reindex=False,
+            first_delete_found=False,
+            clean_only=False
+            ):
 
         if not isinstance(acceptable_src_file_extensions, str):
             raise TypeError("`acceptable_src_file_extensions' must be str")
@@ -1187,14 +1179,14 @@ class SourceRepoCtl:
         return ret
 
     def _index_sources_directory(
-        self,
-        root_dir_name,
-        sub_dir_name,
-        acceptable_endings=None,
-        force_reindex=False,
-        first_delete_found=False,
-        clean_only=False
-        ):
+            self,
+            root_dir_name,
+            sub_dir_name,
+            acceptable_endings=None,
+            force_reindex=False,
+            first_delete_found=False,
+            clean_only=False
+            ):
 
         root_dir_name = wayround_org.utils.path.realpath(root_dir_name)
 
@@ -1268,14 +1260,14 @@ class SourceRepoCtl:
                 else:
 
                     parsed_src_filename = (
-                        wayround_org.utils.tarball.\
-                            parse_tarball_name(
-                                i,
-                                mute=True,
-                                acceptable_source_name_extensions=(
-                                    acceptable_endings
-                                    )
+                        wayround_org.utils.tarball.
+                        parse_tarball_name(
+                            i,
+                            mute=True,
+                            acceptable_source_name_extensions=(
+                                acceptable_endings
                                 )
+                            )
                         )
 
                     if parsed_src_filename:
@@ -1337,10 +1329,10 @@ class SourceRepoCtl:
                     )
 
                 if os.path.islink(rp) or not os.path.isfile(
-                    wayround_org.utils.path.realpath(
-                        rp
-                        )
-                    ):
+                        wayround_org.utils.path.realpath(
+                            rp
+                            )
+                        ):
                     to_deletion.append(i)
                     deleted_count += 1
 
@@ -1380,53 +1372,3 @@ class SourceRepoCtl:
             )
 
         return 0
-
-
-class SourcePathsRepoCtl:
-
-    def __init__(self, sources_paths_json_filename, database_connection):
-
-        if not isinstance(database_connection, SourcePathsRepo):
-            raise ValueError(
-                "database_connection must be of type "
-                "wayround_org.aipsetup.repository.SourcePathsRepo"
-                )
-
-        self.sources_paths_json_filename = sources_paths_json_filename
-        self.database_connection = database_connection
-
-    def load(self):
-
-        f = open(self.sources_paths_json_filename)
-        txt = f.read()
-        f.close()
-
-        data = json.loads(txt)
-
-        self.database_connection.clear()
-
-        for name in data.keys():
-
-            for i in range(len(data[name]) - 1, -1, -1):
-                if data[name][i] == '' or data[name][i].isspace():
-                    del data[name][i]
-
-            self.database_connection.set_tags(name, data[name])
-
-        self.database_connection.commit()
-
-        return
-
-    def save(self):
-
-        data = self.database_connection.get_objects_and_tags_dict()
-
-        txt = json.dumps(
-            data, sort_keys=True, indent=2
-            )
-
-        f = open(self.sources_paths_json_filename, 'w')
-        f.write(txt)
-        f.close()
-
-        return

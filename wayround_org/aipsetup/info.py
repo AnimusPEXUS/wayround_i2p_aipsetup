@@ -44,9 +44,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # by they filenames
     ('filters', ''),
 
-    # from 0 to 9. default 5. lower number - higher priority
-    ('installation_priority', 5),
-
     # can package be deleted without hazard to aipsetup functionality
     # (including system stability)?
     ('removable', True),
@@ -64,14 +61,14 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # to make search faster and exclude not related sources
     ('source_path_prefixes', []),
 
-    # run time dependenties. (man pages reader requiers 'less' command i.e.)
-    ('runtime_deps', []),
+    # following packages required to build this package
+    ('build_deps', []),
 
     # depends on .so files in following packages
     ('so_deps', []),
 
-    # following packages required to build this package
-    ('build_deps', [])
+    # run time dependenties. (man pages reader requiers 'less' command i.e.)
+    ('runtime_deps', [])
 
     ])
 """
@@ -167,10 +164,10 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
             default=''
             )
 
-        installation_priority = sqlalchemy.Column(
-            sqlalchemy.Integer,
+        version_tool = sqlalchemy.Column(
+            sqlalchemy.UnicodeText,
             nullable=False,
-            default=5
+            default=''
             )
 
         removable = sqlalchemy.Column(
@@ -809,6 +806,22 @@ class TagsControl:
                 f.close()
 
         return
+
+
+class SourcePathsRepo(wayround_org.utils.tag.TagEngine):
+    pass
+
+
+class BuildDepsRepo(wayround_org.utils.tag.TagEngine):
+    pass
+
+
+class SODepsRepo(wayround_org.utils.tag.TagEngine):
+    pass
+
+
+class RuntimeDepsRepo(wayround_org.utils.tag.TagEngine):
+    pass
 
 
 class BundlesCtl:

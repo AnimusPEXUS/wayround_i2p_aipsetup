@@ -1,6 +1,114 @@
 
 from gi.repository import Gtk
 
+import wayround_org.utils.list
+
+
+class DepList:
+
+    def __init__(self, title, add_list_widget):
+
+        self._add_list_widget = add_list_widget
+
+        c = Gtk.TreeViewColumn("Package Name")
+        r = Gtk.CellRendererText()
+        c.pack_start(r, True)
+        c.add_attribute(r, 'text', 0)
+
+        tw = Gtk.TreeView()
+        self.tw = tw
+        tw.append_column(c)
+        tw.set_model(Gtk.ListStore(str))
+
+        tw_sw = Gtk.ScrolledWindow()
+        tw_sw.add(tw)
+
+        tw_sw_f = Gtk.Frame()
+        tw_sw_f.add(tw_sw)
+
+        frame = Gtk.Frame()
+        self.frame = frame
+
+        add_button = Gtk.Button("Add")
+        del_button = Gtk.Button("Delete")
+
+        b2 = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
+
+        b2.pack_start(add_button, False, False, 0)
+        b2.pack_start(del_button, False, False, 0)
+
+        add_button.connect('clicked', self._add_clicked)
+        del_button.connect('clicked', self._del_clicked)
+
+        b = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+        b.set_margin_top(5)
+        b.set_margin_start(5)
+        b.set_margin_end(5)
+        b.set_margin_bottom(5)
+
+        b.pack_start(tw_sw_f, True, True, 0)
+        b.pack_start(b2, False, False, 0)
+
+        frame.add(b)
+        frame.set_label(title)
+
+        return
+
+    def get_widget(self):
+        return self.frame
+
+    def set_values_list(self, ls):
+
+        model = self.tw.get_model()
+
+        while len(model) != 0:
+            del(model[0])
+
+        for i in ls:
+            model.append([i])
+
+        return
+
+    def get_values_list(self):
+
+        values = []
+
+        ls = []
+
+        for i in model:
+            ls.append(i[0])
+
+        for i in range(len(ls) - 1, -1, -1):
+            if (ls.isspace() or ls == ''):
+                del ls[i]
+
+        for i in range(len(ls)):
+            ls[i] = ls[i].strip()
+
+        ls = wayround_org.utils.list.list_remove_duplicated_lines()
+
+        ls.sort()
+
+        return ls
+
+    def _add_clicked(self, widget):
+        sel = self._add_list_widget.get_selection()
+
+        model, itera = sel.get_selected()
+        if not model is None and not itera is None:
+            self.tw.get_model().append([model[itera][0]])
+
+        return
+
+    def _del_clicked(self, widget):
+        sel = self.tw.get_selection()
+
+        model, itera = sel.get_selected()
+        if not model is None and not itera is None:
+            del model[itera]
+
+        return
+
 
 class InfoEditorUi:
 
@@ -39,6 +147,8 @@ class InfoEditorUi:
         self.quit_button = quit_button
 
         tree_view1 = Gtk.TreeView()
+        tree_view1.set_model(Gtk.ListStore(str))
+
         self.tree_view1 = tree_view1
         c = Gtk.TreeViewColumn("File Names")
         r = Gtk.CellRendererText()
@@ -258,10 +368,72 @@ so for name 'cgkit-2.0.0-py3k.tar.gz' parsing reult is:
         return b
 
     def _init_tab_paths(self):
-        return Gtk.Box()
+        b = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+
+        b.set_margin_top(5)
+        b.set_margin_start(5)
+        b.set_margin_end(5)
+        b.set_margin_bottom(5)
+
+        self.source_path_prefixes_tw = Gtk.TextView()
+
+        sw = Gtk.ScrolledWindow()
+        sw.add(self.source_path_prefixes_tw)
+
+        b.pack_start(sw, True, True, 0)
+
+        return b
 
     def _init_tab_dependencies(self):
-        return Gtk.Box()
+
+        b = Gtk.Box.new(Gtk.Orientation.VERTICAL, 5)
+
+        c = Gtk.TreeViewColumn("Package Name")
+        r = Gtk.CellRendererText()
+        c.pack_start(r, True)
+        c.add_attribute(r, 'text', 0)
+
+        add_list_tw = Gtk.TreeView()
+        self.add_deps_list_tw = add_list_tw
+        add_list_tw.append_column(c)
+        add_list_tw.set_model(Gtk.ListStore(str))
+
+        add_list_tw_sw = Gtk.ScrolledWindow()
+        add_list_tw_sw.add(add_list_tw)
+
+        add_list_tw_sw_f = Gtk.Frame()
+        add_list_tw_sw_f.add(add_list_tw_sw)
+
+        self.build_deps = DepList(
+            "Buildtime Dependencies",
+            add_list_tw
+            )
+
+        self.so_deps = DepList(
+            "Shared Object (.so files') Dependencies",
+            add_list_tw
+            )
+
+        self.runtime_deps = DepList(
+            "Runtime Dependencies",
+            add_list_tw
+            )
+
+        b.pack_start(self.build_deps.get_widget(), True, True, 0)
+        b.pack_start(self.so_deps.get_widget(), True, True, 0)
+        b.pack_start(self.runtime_deps.get_widget(), True, True, 0)
+
+        b2 = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
+
+        b2.set_margin_top(5)
+        b2.set_margin_start(5)
+        b2.set_margin_end(5)
+        b2.set_margin_bottom(5)
+
+        b2.pack_start(add_list_tw_sw_f, True, True, 0)
+        b2.pack_start(b, True, True, 0)
+
+        return b2
 
     def _init_tab_tags(self):
 
