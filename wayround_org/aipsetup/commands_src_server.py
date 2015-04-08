@@ -12,9 +12,7 @@ def commands():
         ('src-server',
             collections.OrderedDict([
                 ('start', src_server_start),
-                ('index', src_repo_index),
-                ('load-paths', load_paths),
-                ('save-paths', save_paths)
+                ('index', src_repo_index)
             ]))
         ])
 
@@ -29,7 +27,6 @@ def src_server_start(command_name, opts, args, adds):
 
 
 def src_repo_index(command_name, opts, args, adds):
-
     """
     Create sources and repositories indexes
 
@@ -51,7 +48,7 @@ def src_repo_index(command_name, opts, args, adds):
 
     subdir_name = wayround_org.utils.path.realpath(
         wayround_org.utils.path.abspath(
-                config['src_server']['tarball_repository_root']
+            config['src_server']['tarball_repository_root']
             )
         )
 
@@ -67,22 +64,22 @@ def src_repo_index(command_name, opts, args, adds):
                 )
 
         if (
-            not (
-                wayround_org.utils.path.realpath(
-                    wayround_org.utils.path.abspath(subdir_name)
-                    ) + '/'
-                 ).startswith(
+                not (
+                    wayround_org.utils.path.realpath(
+                        wayround_org.utils.path.abspath(subdir_name)
+                        ) + '/'
+                    ).startswith(
                     wayround_org.utils.path.realpath(
                         wayround_org.utils.path.abspath(
                             config['src_server']['tarball_repository_root']
                             )
                         ) + '/'
                     )
-            or not os.path.isdir(wayround_org.utils.path.abspath(subdir_name))
-            ):
+                or not os.path.isdir(wayround_org.utils.path.abspath(subdir_name))
+                ):
             logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
             logging.debug(
-"""\
+                """\
 passed: {}
 config: {}
 exists: {}
@@ -104,7 +101,7 @@ exists: {}
 
             src_ctl = \
                 wayround_org.aipsetup.controllers.\
-                    src_repo_ctl_by_config(config)
+                src_repo_ctl_by_config(config)
 
             ret = src_ctl.index_sources(
                 wayround_org.utils.path.realpath(subdir_name),
@@ -114,31 +111,5 @@ exists: {}
                 force_reindex=forced_reindex,
                 clean_only=clean_only
                 )
-
-    return ret
-
-
-def save_paths(command_name, opts, args, adds):
-    ret = 0
-
-    config = adds['config']
-
-    src_paths_repo_ctl = \
-        wayround_org.aipsetup.controllers.src_paths_repo_ctl_by_config(config)
-
-    src_paths_repo_ctl.save()
-
-    return ret
-
-
-def load_paths(command_name, opts, args, adds):
-    ret = 0
-
-    config = adds['config']
-
-    src_paths_repo_ctl = \
-        wayround_org.aipsetup.controllers.src_paths_repo_ctl_by_config(config)
-
-    src_paths_repo_ctl.load()
 
     return ret

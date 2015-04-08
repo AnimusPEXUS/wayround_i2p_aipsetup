@@ -30,72 +30,67 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
     Main package index DB handling class
     """
 
-    Base = sqlalchemy.ext.declarative.declarative_base()
+    def init_table_mappings(self, init_table_data):
 
-    class Package(Base):
+        class Package(self.decl_base):
 
-        """
-        Package class
+            """
+            Package class
 
-        There can be many packages with same name, but this
-        is only for tucking down duplicates and eradicate
-        them.
-        """
+            There can be many packages with same name, but this
+            is only for tucking down duplicates and eradicate
+            them.
+            """
 
-        __tablename__ = 'package'
+            __tablename__ = 'package'
 
-        pid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            primary_key=True
-            )
+            pid = sqlalchemy.Column(
+                sqlalchemy.Integer,
+                primary_key=True
+                )
 
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            name = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        cid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            default=0
-            )
+            cid = sqlalchemy.Column(
+                sqlalchemy.Integer,
+                nullable=False,
+                default=0
+                )
 
-    class Category(Base):
+        self.package_table_mapping = Package
 
-        """
-        Class for package categories
+        class Category(self.decl_base):
 
-        There can be categories with same names
-        """
+            """
+            Class for package categories
 
-        __tablename__ = 'category'
+            There can be categories with same names
+            """
 
-        cid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            primary_key=True
-            )
+            __tablename__ = 'category'
 
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            cid = sqlalchemy.Column(
+                sqlalchemy.Integer,
+                primary_key=True
+                )
 
-        parent_cid = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            default=0
-            )
+            name = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-    def __init__(self, config):
+            parent_cid = sqlalchemy.Column(
+                sqlalchemy.Integer,
+                nullable=False,
+                default=0
+                )
 
-        wayround_org.utils.db.BasicDB.__init__(
-            self,
-            config,
-            echo=False,
-            create_all=True
-            )
+        self.category_table_mapping = Category
 
         return
 
@@ -190,12 +185,14 @@ class PackageRepoCtl:
         ret = None
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
-        q = index_db.session.query(index_db.Category).filter_by(cid=cid).\
-            first()
+        q = session.query(index_db.Category).filter_by(cid=cid).first()
 
         if q:
             ret = q.name
+
+        session.close()
 
         return ret
 
@@ -204,9 +201,9 @@ class PackageRepoCtl:
         ret = None
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
-        q = index_db.session.query(index_db.Category).filter_by(cid=cid).\
-            first()
+        q = session.query(index_db.Category).filter_by(cid=cid).first()
 
         if q:
             ret = q.parent_cid
@@ -252,143 +249,156 @@ class PackageRepoCtl:
     def get_package_id(self, name):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         ret = None
 
-        q = index_db.session.query(index_db.Package).filter_by(name=name).\
-            first()
+        q = session.query(index_db.Package).filter_by(name=name).first()
+
         if q is not None:
             ret = q.pid
+
+        session.close()
 
         return ret
 
     def get_package_category(self, pid):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         ret = None
 
-        q = index_db.session.query(index_db.Package).filter_by(pid=pid).first()
+        q = session.query(index_db.Package).filter_by(pid=pid).first()
+
         if q is not None:
             ret = q.cid
+
+        session.close()
 
         return ret
 
     def get_package_category_by_name(self, name):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         ret = None
 
-        q = index_db.session.query(index_db.Package).filter_by(name=name).\
-            first()
+        q = session.query(index_db.Package).filter_by(name=name).first()
 
         if q is not None:
             ret = q.cid
+
+        session.close()
 
         return ret
 
     def get_package_by_id(self, pid):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         ret = None
 
-        q = index_db.session.query(index_db.Package).filter_by(pid=pid).first()
+        q = session.query(index_db.Package).filter_by(pid=pid).first()
+
         if q is not None:
             ret = q.name
+
+        session.close()
 
         return ret
 
     def get_package_name_list(self, cid=None):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         if cid is None:
-            lst = index_db.session.query(index_db.Package).all()
+            lst = session.query(index_db.Package).all()
         else:
-            lst = index_db.session.query(
-                index_db.Package
-                ).filter_by(cid=cid).all()
+            lst = session.query(index_db.Package).filter_by(cid=cid).all()
 
         lst_names = []
         for i in lst:
             lst_names.append(i.name)
 
         lst_names.sort()
+
+        session.close()
 
         return lst_names
 
     def get_package_id_list(self, cid=None):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         lst = None
         if cid is None:
-            lst = index_db.session.query(index_db.Package).all()
+            lst = session.query(index_db.Package).all()
         else:
-            lst = index_db.session.query(
-                index_db.Package
-                ).filter_by(cid=cid).all()
+            lst = session.query(index_db.Package).filter_by(cid=cid).all()
 
         ids = []
         for i in lst:
             ids.append(i.pid)
+
+        session.close()
 
         return ids
 
     def get_package_idname_dict(self, cid=None):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         if cid is None:
-            lst = index_db.session.query(index_db.Package).all()
+            lst = session.query(index_db.Package).all()
         else:
-            lst = index_db.session.query(
-                index_db.Package
-                ).filter_by(cid=cid).all()
+            lst = session.query(index_db.Package).filter_by(cid=cid).all()
 
         dic = {}
         for i in lst:
             dic[int(i.pid)] = i.name
+
+        session.close()
 
         return dic
 
     def get_category_name_list(self, parent_cid=0):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
-        lst = index_db.session.query(
-            index_db.Category
-            ).filter_by(
-                parent_cid=parent_cid
-                ).order_by(
-                    index_db.Category.name
-                    ).all()
+        lst = session.query(index_db.Category.name)\
+            .filter_by(parent_cid=parent_cid)\
+            .order_by(index_db.Category.name)\
+            .all()
 
         lst_names = []
         for i in lst:
-            lst_names.append(i.name)
+            lst_names.append(i[0])
 
-        lst_names.sort()
+        session.close()
 
         return lst_names
 
     def get_category_id_list(self, parent_cid=0):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
-        lst = index_db.session.query(
-            index_db.Category
-            ).filter_by(
-                parent_cid=parent_cid
-                ).order_by(
-                    index_db.Category.name
-                    ).all()
+        lst = session.query(index_db.Category.cid)\
+            .filter_by(parent_cid=parent_cid)\
+            .order_by(index_db.Category.name).all()
 
         ids = []
         for i in lst:
-            ids.append(i.cid)
+            ids.append(i[0])
+
+        session.close()
 
         return ids
 
@@ -398,26 +408,24 @@ class PackageRepoCtl:
         """
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         lst = None
         if parent_cid is None:
-            lst = index_db.session.query(
-                index_db.Category
-                ).order_by(
-                    index_db.Category.name
-                    ).all()
+            lst = session.query(index_db.Category)\
+                .order_by(index_db.Category.name)\
+                .all()
         else:
-            lst = index_db.session.query(
-                index_db.Category
-                ).filter_by(
-                    parent_cid=parent_cid
-                    ).order_by(
-                        index_db.Category.name
-                        ).all()
+            lst = session.query(index_db.Category)\
+                .filter_by(parent_cid=parent_cid)\
+                .order_by(index_db.Category.name)\
+                .all()
 
         dic = {}
         for i in lst:
             dic[int(i.cid)] = i.name
+
+        session.close()
 
         return dic
 
@@ -445,9 +453,11 @@ class PackageRepoCtl:
 
         else:
             index_db = self._db_connection
-            pkg = index_db.session.query(
-                index_db.Package
-                ).filter_by(pid=pid).first()
+            session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
+
+            pkg = session.query(index_db.Package)\
+                .filter_by(pid=pid)\
+                .first()
 
             if pkg is not None:
 
@@ -456,18 +466,21 @@ class PackageRepoCtl:
                 ret.insert(0, (pkg.pid, pkg.name))
 
                 while r != 0:
-                    cat = index_db.session.query(
-                        index_db.Category
-                        ).filter_by(cid=r).first()
+                    cat = session.query(index_db.Category)\
+                        .filter_by(cid=r)\
+                        .first()
 
                     ret.insert(0, (cat.cid, cat.name))
                     r = cat.parent_cid
+
+            session.close()
 
         return ret
 
     def get_category_path(self, cid):
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         ret = []
         categ = None
@@ -480,9 +493,9 @@ class PackageRepoCtl:
                 )
             ret = None
         else:
-            categ = index_db.session.query(
-                index_db.Category
-                ).filter_by(cid=cid).first()
+            categ = session.query(index_db.Category)\
+                .filter_by(cid=cid)\
+                .first()
 
             if categ is not None:
 
@@ -491,12 +504,14 @@ class PackageRepoCtl:
                 ret.insert(0, (categ.cid, categ.name))
 
                 while r != 0:
-                    cat = index_db.session.query(
-                        index_db.Category
-                        ).filter_by(cid=r).first()
+                    cat = session.query(index_db.Category)\
+                        .filter_by(cid=r)\
+                        .first()
 
                     ret.insert(0, (cat.cid, cat.name))
                     r = cat.parent_cid
+
+        session.close()
 
         return ret
 
@@ -525,7 +540,7 @@ class PackageRepoCtl:
 
         return ret
 
-    # TODO: I don't like this function
+    # TODO: I don't like this method
     def _join_pkg_path(self, pkg_path):
         lst = []
 
@@ -650,12 +665,13 @@ class PackageRepoCtl:
             del category_locations_internal['']
 
         index_db = self._db_connection
+        session = sqlalchemy.orm.Session(index_db.decl_base.metadata.bind)
 
         logging.info("Deleting old data from DB")
-        index_db.session.query(index_db.Category).delete()
-        index_db.session.query(index_db.Package).delete()
+        session.query(index_db.Category).delete()
+        session.query(index_db.Package).delete()
 
-        index_db.session.commit()
+        session.commit()
 
         logging.info("Adding new data to DB")
         for i in category_locations_internal.keys():
@@ -666,7 +682,7 @@ class PackageRepoCtl:
             new_obj.name = category_locations_internal[i]['name']
             new_obj.parent_cid = category_locations_internal[i]['parent_cid']
 
-            index_db.session.add(new_obj)
+            session.add(new_obj)
 
         for i in package_locations.keys():
 
@@ -676,10 +692,13 @@ class PackageRepoCtl:
             new_obj.name = package_locations[i]['name']
             new_obj.cid = package_locations[i]['cid']
 
-            index_db.session.add(new_obj)
+            session.add(new_obj)
 
-        index_db.session.commit()
+        session.commit()
+
         logging.info("DB saved")
+
+        session.close()
 
         return ret
 
@@ -1023,6 +1042,8 @@ class PackageRepoCtl:
                 except:
                     logging.exception("Can't move file or dir")
 
+        return
+
     def cleanup_repo(self):
 
         garbage_dir = self._garbage_dir
@@ -1151,7 +1172,9 @@ class SourceRepoCtl:
                 )
 
         self.sources_dir = sources_dir
-        self.database_connection = database_connection
+        self.src_db = database_connection
+        
+        return
 
     def index_sources(
             self,
@@ -1240,7 +1263,7 @@ class SourceRepoCtl:
                     self.database_connection.del_object_tags(i)
                     removed += 1
 
-                self.database_connection.commit()
+                self.src_db.commit()
 
                 wayround_org.utils.terminal.progress_write_finish()
 
@@ -1248,7 +1271,7 @@ class SourceRepoCtl:
             failed_count = 0
             skipped_count = 0
             logging.info("Loading DB to save new data")
-            src_tag_objects = set(self.database_connection.get_objects())
+            src_tag_objects = set(self.src_db.get_objects())
 
             for i in source_index:
                 index += 1

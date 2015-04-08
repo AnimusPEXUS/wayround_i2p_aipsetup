@@ -46,9 +46,6 @@ def src_server_start(command_name, opts, args, adds):
         wayround_org.aipsetup.dbconnections.src_repo_db(
             config
             ),
-        wayround_org.aipsetup.dbconnections.src_paths_repo_db(
-            config
-            ),
         host=host,
         port=int(port),
         acceptable_source_name_extensions=(
@@ -93,7 +90,7 @@ class SRCServer:
     def __init__(
         self,
         repository_dir,
-        src_db, src_paths_db,
+        src_db,
         host='localhost', port=8080,
         acceptable_source_name_extensions=None
         ):
@@ -101,7 +98,6 @@ class SRCServer:
         self.repository_dir = os.path.abspath(repository_dir)
 
         self.src_db = src_db
-        self.src_paths_db = src_paths_db
         self.acceptable_source_name_extensions = \
             acceptable_source_name_extensions
 
@@ -288,16 +284,19 @@ class SRCServer:
 
         pkgname = name
 
-        pkgname_paths = []
+        pkgname_paths = None
 
         if pkgname == None:
             pkgname = ''
 
-        if pkgname != '':
-            pkgname_paths = self.src_paths_db.get_tags(pkgname)
+        if 'paths' in decoded_params:
+            pkgname_paths = json.loads(decoded_params['paths'])
 
-            if len(pkgname_paths) == 0:
-                pkgname_paths.append('')
+        if type(pkgname_paths) != list:
+            pkgname_paths = []
+
+        if len(pkgname_paths) == 0:
+            pkgname_paths.append('')
 
         if name == '' or name.isspace():
             raise bottle.HTTPError(400, "`name' must be non empty")
@@ -310,7 +309,7 @@ class SRCServer:
 
         resultmode = decoded_params['resultmode']
 
-        results = self.src_db.get_objects_by_tag(name)
+        results = self.src_db.get_by_tag(name)
 
         if pkgname != '':
             for i in range(len(results) - 1, -1, -1):

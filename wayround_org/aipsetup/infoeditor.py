@@ -22,15 +22,13 @@ import wayround_org.utils.list
 class MainWindow:
 
     def __init__(
-            self, info_ctl, tag_ctl, src_client, pkg_client, src_paths_ctl,
+            self, info_ctl, src_client, pkg_client,
             acceptable_source_name_extensions
             ):
 
         self.info_ctl = info_ctl
         self.src_client = src_client
         self.pkg_client = pkg_client
-        self.tag_ctl = tag_ctl
-        self.src_paths_ctl = src_paths_ctl
 
         self.acceptable_source_name_extensions = (
             acceptable_source_name_extensions
@@ -126,10 +124,8 @@ class MainWindow:
 
                 self.ui.homepage_entry.set_text(str(data['home_page']))
 
-                tag_db = self.tag_ctl.tag_db
-
                 b = Gtk.TextBuffer()
-                b.set_text('\n'.join(tag_db.get_tags(name)))
+                b.set_text('\n'.join(data['tags']))
                 self.ui.tags_tw.set_buffer(b)
 
                 b = self.ui.filters_tw.get_buffer()
@@ -206,17 +202,14 @@ class MainWindow:
             tags = \
                 b.get_text(b.get_start_iter(), b.get_end_iter(), False)
 
-            tags = \
-                wayround_org.utils.list.\
-                list_strip_remove_empty_remove_duplicated_lines(
+            tags = wayround_org.utils.list\
+                .list_strip_remove_empty_remove_duplicated_lines(
                     tags
-                )
+                    )
 
-            tag_db = self.tag_ctl.tag_db
+            tag_db = self.info_ctl.tag_db
 
             tag_db.set_tags(name, tags)
-
-            self.tag_ctl.save_tags_to_fs()
 
             data['home_page'] = self.ui.homepage_entry.get_text()
 
@@ -265,6 +258,16 @@ class MainWindow:
                 wayround_org.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
 
             for i in keys:
+                if i in [
+                    'tags',
+                    'source_path_prefixes',
+                    'build_deps',
+                    'so_deps',
+                    'runtime_deps',
+                    'last_set_date'
+                    ]:
+                    continue
+                
                 data_o[i] = data[i]
 
             data_o['name'] = name
@@ -427,7 +430,10 @@ class MainWindow:
             dia.destroy()
         else:
             lst = self.src_client.files(
-                self.ui.basename_entry.get_text()
+                self.ui.basename_entry.get_text(),
+                self.info_ctl.source_path_prefixes_db.get_tags(
+                    self.ui.basename_entry.get_text()
+                    )
                 )
 
             logging.debug("get_package_source_files returned {}".format(lst))
@@ -526,13 +532,8 @@ def main(name_to_edit=None, config=None):
 
     pkg_client = wayround_org.aipsetup.controllers.pkg_client_by_config(config)
 
-    tag_ctl = wayround_org.aipsetup.controllers.tag_ctl_by_config(config)
-
-    src_paths_ctl = \
-        wayround_org.aipsetup.controllers.src_paths_repo_ctl_by_config(config)
-
     mw = MainWindow(
-        info_ctl, tag_ctl, src_client, pkg_client, src_paths_ctl,
+        info_ctl, src_client, pkg_client,
         acceptable_source_name_extensions=(
             config['src_client']['acceptable_src_file_extensions']
             )

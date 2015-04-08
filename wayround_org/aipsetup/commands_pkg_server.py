@@ -137,8 +137,6 @@ def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
 
     info_ctl.update_outdated_pkg_info_records()
 
-    load_info_tags(command_name, {}, [], adds)
-
     # TODO: ret is need to be made
 
     return 0
@@ -160,7 +158,7 @@ def info_delete_pkg_info_records(command_name, opts, args, adds):
     if len(args) > 0:
         mask = args[0]
 
-    if mask != None:
+    if mask is not None:
 
         info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
 
@@ -235,8 +233,6 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
     info_ctl.load_info_records_from_fs(
         filenames, rewrite_all
         )
-
-    load_info_tags(command_name, {}, [], adds)
 
     return ret
 
@@ -326,7 +322,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
     if len(args) > 1:
         sources = args[1:]
 
-    if script_name == None:
+    if script_name is None:
         logging.error("Script name required")
         ret = 3
 
@@ -444,28 +440,6 @@ def info_mass_script_apply(command_name, opts, args, adds):
         pkg_repo_index_and_update(command_name, opts, args, adds)
 
     return ret
-
-
-def load_info_tags(command_name, opts, args, adds):
-
-    config = adds['config']
-
-    tag_ctl = wayround_org.aipsetup.controllers.tag_ctl_by_config(config)
-
-    tag_ctl.load_tags_from_fs()
-
-    return 0
-
-
-def save_info_tags(command_name, opts, args, adds):
-
-    config = adds['config']
-
-    tag_ctl = wayround_org.aipsetup.controllers.tag_ctl_by_config(config)
-
-    tag_ctl.save_tags_to_fs()
-
-    return 0
 
 
 def pkg_repo_index(command_name, opts, args, adds):

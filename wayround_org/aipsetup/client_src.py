@@ -16,8 +16,8 @@ class SourceServerClient:
     def search(self, mask, searchmode='filemask', cs=True):
         return search(self._url, mask, searchmode, cs)
 
-    def files(self, name):
-        return files(self._url, name)
+    def files(self, name, paths):
+        return files(self._url, name, paths)
 
     def get(self, path, wd='.'):
         return get(self._url, path, wd)
@@ -52,14 +52,15 @@ def search(url, mask, searchmode='filemask', cs=True):
     return ret
 
 
-def files(url, name):
+def files(url, name, paths):
 
     ret = None
 
     data = urllib.parse.urlencode(
         {
          'resultmode': 'json',
-         'name': name
+         'name': name,
+         'paths': json.dumps(paths)
          },
         encoding='utf-8'
         )

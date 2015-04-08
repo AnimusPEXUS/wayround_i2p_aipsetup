@@ -71,6 +71,8 @@ class DepList:
 
     def get_values_list(self):
 
+        model = self.tw.get_model()
+
         values = []
 
         ls = []
@@ -85,7 +87,8 @@ class DepList:
         for i in range(len(ls)):
             ls[i] = ls[i].strip()
 
-        ls = wayround_org.utils.list.list_remove_duplicated_lines()
+        ls = wayround_org.utils.list.\
+            list_strip_remove_empty_remove_duplicated_lines(ls)
 
         ls.sort()
 

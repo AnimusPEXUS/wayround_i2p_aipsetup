@@ -33,16 +33,12 @@ def server_start_host(command_name, opts, args, adds):
     info_ctl = \
         wayround_org.aipsetup.controllers.info_ctl_by_config(config)
 
-    tag_ctl = \
-        wayround_org.aipsetup.controllers.tag_ctl_by_config(config)
-
     bundles_ctl = \
         wayround_org.aipsetup.controllers.bundles_ctl_by_config(config)
 
     app = ASPServer(
         pkg_repo_ctl,
         info_ctl,
-        tag_ctl,
         bundles_ctl,
         config['pkg_server']['host'],
         int(config['pkg_server']['port']),
@@ -63,7 +59,6 @@ class ASPServer:
             self,
             pkg_repo_ctl,
             info_ctl,
-            tag_ctl,
             bundles_ctl,
             host='localhost',
             port=8081,
@@ -91,7 +86,6 @@ class ASPServer:
 
         self.pkg_repo_ctl = pkg_repo_ctl
         self.info_ctl = info_ctl
-        self.tag_ctl = tag_ctl
         self.bundles_ctl = bundles_ctl
 
         self.acceptable_source_name_extensions = \
