@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "http://ogre3d.org/",
   "buildscript": "std_cmake",
+  "version_tool": "",
   "basename": "ogre_src_v",
   "filters": "- version < 1.7\n- version >= 1.8\n- status !re ^$",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

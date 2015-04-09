@@ -2,11 +2,16 @@
   "description": "write something here, please",
   "home_page": "sf.net/projects/pyqt",
   "buildscript": "",
+  "version_tool": "",
   "basename": "QScintilla",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": true
+  "deprecated": true,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

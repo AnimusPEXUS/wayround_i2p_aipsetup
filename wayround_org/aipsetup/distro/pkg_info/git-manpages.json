@@ -2,11 +2,18 @@
   "description": "write something here, please",
   "home_page": "http://git-scm.com/",
   "buildscript": "git_manpages",
+  "version_tool": "",
   "basename": "git-manpages",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/kernel.org/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

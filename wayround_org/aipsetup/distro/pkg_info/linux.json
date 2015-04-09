@@ -2,11 +2,18 @@
   "description": "",
   "home_page": "http://www.kernel.org/",
   "buildscript": "linux",
+  "version_tool": "",
   "basename": "linux",
   "filters": "",
-  "installation_priority": 5,
   "removable": false,
   "reducible": false,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/kernel.org/kernel.org/ftp.kernel.org/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

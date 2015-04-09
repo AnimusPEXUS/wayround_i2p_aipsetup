@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "http://www.gnome.org",
   "buildscript": "pygobject2",
+  "version_tool": "",
   "basename": "pygobject",
   "filters": "- version < 2\n- version >= 3\n- version re ^(\\d+)\\.(\\d*[13579])(\\.\\d+)*$\n",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

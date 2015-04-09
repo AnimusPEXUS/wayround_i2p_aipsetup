@@ -2,11 +2,18 @@
   "description": "write something here, please",
   "home_page": "http://www.isc.org",
   "buildscript": "std",
+  "version_tool": "",
   "basename": "bind",
   "filters": "- version re .*\\d\\d\\d\\d+.*\n- status re .*\\d\\d\\d\\d+.*",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/isc.org/isc/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

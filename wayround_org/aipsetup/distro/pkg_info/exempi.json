@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "http://freedesktop.org/",
   "buildscript": "exempi",
+  "version_tool": "",
   "basename": "exempi",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

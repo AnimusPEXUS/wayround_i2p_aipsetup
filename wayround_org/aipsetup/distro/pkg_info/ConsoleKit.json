@@ -2,11 +2,16 @@
   "description": "use systemd",
   "home_page": "",
   "buildscript": "ConsoleKit",
+  "version_tool": "",
   "basename": "ConsoleKit",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": true
+  "deprecated": true,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

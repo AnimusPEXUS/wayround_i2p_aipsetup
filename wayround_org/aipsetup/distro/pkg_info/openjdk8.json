@@ -2,11 +2,16 @@
   "description": "write something here, please",
   "home_page": "http://www.sun.com",
   "buildscript": "openjdk8",
+  "version_tool": "",
   "basename": "jdk",
   "filters": "- version < 8\n- version >= 9",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

@@ -12,6 +12,7 @@ import logging
 import os.path
 import re
 import sys
+import datetime
 
 import sqlalchemy.ext.declarative
 
@@ -34,15 +35,15 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # string
     ('buildscript', ''),
 
+    # string
+    ('version_tool', ''),
+
     # file name base
     ('basename', ''),
 
     # filters. various filters to provide correct list of acceptable tarballs
     # by they filenames
     ('filters', ''),
-
-    # from 0 to 9. default 5. lower number - higher priority
-    ('installation_priority', 5),
 
     # can package be deleted without hazard to aipsetup functionality
     # (including system stability)?
@@ -58,14 +59,20 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # package outdated and need to be removed
     ('deprecated', False),
 
+    # list of str
+    ('tags', []),
+
     # to make search faster and exclude not related sources
     ('source_path_prefixes', []),
+
+    # following packages required to build this package
+    ('build_deps', []),
 
     # depends on .so files in following packages
     ('so_deps', []),
 
-    # following packages required to build this package
-    ('build_deps', [])
+    # run time dependenties. (man pages reader requiers 'less' command i.e.)
+    ('runtime_deps', [])
 
     ])
 """
@@ -78,7 +85,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
     ('buildscript', "Building Script"),
     ('basename', 'Tarball basename'),
     ('filters', "Filters"),
-    ('installation_priority', "Installation Priority"),
     ('removable', "Is Removable?"),
     ('reducible', "Is Reducible?"),
     ('non_installable', "Is Non Installable?"),
@@ -115,131 +121,114 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
     Main package index DB handling class
     """
 
-    Base = sqlalchemy.ext.declarative.declarative_base()
+    def init_table_mappings(self, init_table_data):
 
-    class Info(Base):
+        class Info(self.decl_base):
 
-        """
-        Class for holding package information
-        """
-        __tablename__ = 'package_info'
+            __tablename__ = 'info'
 
-        name = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            primary_key=True,
-            default=''
-            )
+            name = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                primary_key=True,
+                default=''
+                )
 
-        basename = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            basename = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        filters = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            filters = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        home_page = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            home_page = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        description = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            description = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        buildscript = sqlalchemy.Column(
-            sqlalchemy.UnicodeText,
-            nullable=False,
-            default=''
-            )
+            buildscript = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        installation_priority = sqlalchemy.Column(
-            sqlalchemy.Integer,
-            nullable=False,
-            default=5
-            )
+            version_tool = sqlalchemy.Column(
+                sqlalchemy.UnicodeText,
+                nullable=False,
+                default=''
+                )
 
-        removable = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
+            removable = sqlalchemy.Column(
+                sqlalchemy.Boolean,
+                nullable=False,
+                default=True
+                )
 
-        reducible = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=True
-            )
+            reducible = sqlalchemy.Column(
+                sqlalchemy.Boolean,
+                nullable=False,
+                default=True
+                )
 
-        non_installable = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=False
-            )
+            non_installable = sqlalchemy.Column(
+                sqlalchemy.Boolean,
+                nullable=False,
+                default=False
+                )
 
-        deprecated = sqlalchemy.Column(
-            sqlalchemy.Boolean,
-            nullable=False,
-            default=False
-            )
+            deprecated = sqlalchemy.Column(
+                sqlalchemy.Boolean,
+                nullable=False,
+                default=False
+                )
 
-    def __init__(self, config):
+            last_set_date = sqlalchemy.Column(
+                sqlalchemy.DateTime,
+                nullable=False
+                )
 
-        wayround_org.utils.db.BasicDB.__init__(
-            self,
-            config,
-            echo=False,
-            create_all=True
-            )
+        self.Info = Info
 
         return
 
+    def get_names(self):
 
-class PackageInfoCtl:
+        session = sqlalchemy.orm.Session(self.decl_base.metadata.bind)
 
-    def __init__(self, info_dir, info_db):
+        q = session\
+            .query(sqlalchemy.distinct(self.Info.name))\
+            .order_by(self.Info.name)\
+            .all()
 
-        if not isinstance(info_dir, str):
-            raise TypeError("`info_dir' must be str")
+        ret = list()
 
-        if not isinstance(info_db, PackageInfo):
-            raise TypeError("`info_db' must be PackageInfo")
+        for i in q:
+            ret.append(i[0])
 
-        self._info_dir = wayround_org.utils.path.abspath(info_dir)
-        self._info_db = info_db
+        session.close()
 
-        return
+        return ret
 
-    def get_info_dir(self):
-        return self._info_dir
+    def get_by_name(self, name):
 
-    def get_package_info_record(self, name=None, record=None):
-        """
-        This method can accept package name or complete record instance.
-
-        If name is given, record is not used and method does db query itself.
-
-        If name is not given, record is used as if it were this method's query
-        result.
-        """
-
-        info_db = self._info_db
+        session = sqlalchemy.orm.Session(self.decl_base.metadata.bind)
 
         ret = None
 
-        if name is not None:
-            q = info_db.session.query(info_db.Info).filter_by(name=name).\
-                first()
-        else:
-            q = record
+        q = session.query(self.Info).filter_by(name=name).\
+            first()
 
         if q is None:
 
@@ -252,49 +241,223 @@ class PackageInfoCtl:
             keys = SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
 
             for i in keys:
+                if i in [
+                        'tags',
+                        'source_path_prefixes',
+                        'build_deps',
+                        'so_deps',
+                        'runtime_deps'
+                        ]:
+                    continue
+                #ret[i] = eval("q['{}']".format(i))
                 ret[i] = getattr(q, i)
 
             ret['name'] = q.name
 
+        session.close()
+
         return ret
 
-    def set_package_info_record(self, name, struct):
+    def set_by_name(self, name, struct):
 
-        info_db = self._info_db
+        session = sqlalchemy.orm.Session(self.decl_base.metadata.bind)
 
-        q = info_db.session.query(info_db.Info).filter_by(name=name).first()
+        q = session.query(self.Info).filter_by(name=name).first()
 
         creating_new = False
         if q is None:
-            q = info_db.Info()
+            q = self.Info()
             creating_new = True
 
         keys = set(SAMPLE_PACKAGE_INFO_STRUCTURE.keys())
 
         for i in keys:
+
+            if i in [
+                    'tags',
+                    'source_path_prefixes',
+                    'build_deps',
+                    'so_deps',
+                    'runtime_deps',
+                    'last_set_date'
+                    ]:
+                continue
+
             kt = type(SAMPLE_PACKAGE_INFO_STRUCTURE[i])
 
-            if not kt in [builtins.int, builtins.str, builtins.bool]:
+            if not kt in [int, str, bool, datetime.datetime]:
                 raise TypeError("Wrong type supplied: {}".format(kt))
 
-            ktt = 'str'
             if kt == builtins.int:
-                ktt = 'int'
+                setattr(q, i, int(struct[i]))
+                #a = getattr(q, i)
+                #a = int(struct[i])
+
             elif kt == builtins.str:
-                ktt = 'str'
+                setattr(q, i, str(struct[i]))
+                #a = getattr(q, i)
+                #a = str(struct[i])
+
             elif kt == builtins.bool:
-                ktt = 'bool'
+                setattr(q, i, bool(struct[i]))
+                #a = getattr(q, i)
+                #a = bool(struct[i])
+
             else:
                 raise Exception("Programming Error")
 
-            exec(
-                "q.{name} = {type}(struct['{name}'])".format(type=ktt, name=i)
-                )
-
         q.name = name
 
+        q.last_set_date = datetime.datetime.utcnow()
+
         if creating_new:
-            info_db.session.add(q)
+            session.add(q)
+
+        session.commit()
+        session.close()
+
+        return
+
+    def get_last_set_date(self, name):
+
+        ret = None
+
+        session = sqlalchemy.orm.Session(self.decl_base.metadata.bind)
+
+        q = session.query(self.Info).filter_by(name=name).first()
+
+        if q is not None:
+            ret = q.last_set_date
+
+        session.close()
+
+        return ret
+
+
+class PackageInfoCtl:
+
+    def __init__(
+            self,
+            info_dir,
+            info_db
+            ):
+
+        if not isinstance(info_dir, str):
+            raise TypeError("`info_dir' must be str")
+
+        if not isinstance(info_db, PackageInfo):
+            raise TypeError("`info_db' must be PackageInfo")
+
+        self._info_dir = wayround_org.utils.path.abspath(info_dir)
+
+        self.info_db = info_db
+
+        self.tag_db = Tags(
+            bind=self.info_db.decl_base.metadata.bind,
+            decl_base=self.info_db.decl_base,
+            init_table_data='tags'
+            )
+
+        self.source_path_prefixes_db = SourcePathsRepo(
+            bind=self.info_db.decl_base.metadata.bind,
+            decl_base=self.info_db.decl_base,
+            init_table_data='source_path_prefixes'
+            )
+
+        self.build_deps_db = BuildDepsRepo(
+            bind=self.info_db.decl_base.metadata.bind,
+            decl_base=self.info_db.decl_base,
+            init_table_data='build_deps'
+            )
+
+        self.so_deps_db = SODepsRepo(
+            bind=self.info_db.decl_base.metadata.bind,
+            decl_base=self.info_db.decl_base,
+            init_table_data='so_deps'
+            )
+
+        self.runtime_deps_db = RuntimeDepsRepo(
+            bind=self.info_db.decl_base.metadata.bind,
+            decl_base=self.info_db.decl_base,
+            init_table_data='runtime_deps'
+            )
+
+        self.info_db.decl_base.metadata.create_all()
+
+        return
+
+    def get_info_dir(self):
+        return self._info_dir
+
+    def get_package_info_record(self, name):
+
+        _debug = True
+
+        info_db = self.info_db
+
+        ret = info_db.get_by_name(name)
+
+        ret['tags'] = self.tag_db.get_object_tags(name)
+
+        ret['source_path_prefixes'] =\
+            self.source_path_prefixes_db.get_object_tags(name)
+
+        ret['build_deps'] = self.build_deps_db.get_object_tags(name)
+
+        ret['so_deps'] = self.so_deps_db.get_object_tags(name)
+
+        ret['runtime_deps'] = self.runtime_deps_db.get_object_tags(name)
+
+        if _debug:
+            print("requested: `{}' response:\n{}".format(name, ret))
+
+        return ret
+
+    def set_package_info_record(self, name, struct):
+
+        info_db = self.info_db
+
+        info_db.set_by_name(name, struct)
+
+        self.tag_db.set_object_tags(
+            name,
+            wayround_org.utils.list.
+            list_strip_remove_empty_remove_duplicated_lines(
+                struct['tags']
+                )
+            )
+
+        self.source_path_prefixes_db.set_object_tags(
+            name,
+            wayround_org.utils.list.
+            list_strip_remove_empty_remove_duplicated_lines(
+                struct['source_path_prefixes']
+                )
+            )
+
+        self.build_deps_db.set_object_tags(
+            name,
+            wayround_org.utils.list.
+            list_strip_remove_empty_remove_duplicated_lines(
+                struct['build_deps']
+                )
+            )
+
+        self.so_deps_db.set_object_tags(
+            name,
+            wayround_org.utils.list.
+            list_strip_remove_empty_remove_duplicated_lines(
+                struct['so_deps']
+                )
+            )
+
+        self.runtime_deps_db.set_object_tags(
+            name,
+            wayround_org.utils.list.
+            list_strip_remove_empty_remove_duplicated_lines(
+                struct['runtime_deps']
+                )
+            )
 
         return
 
@@ -311,12 +474,11 @@ class PackageInfoCtl:
                 "wayround_org.aipsetup.repository.PackageRepoCtl"
                 )
 
-        info_db = self._info_db
+        info_db = self.info_db
+
         index_db = pkg_index_ctl.get_db_connection()
 
-        q = index_db.session.query(
-            index_db.Package
-            ).order_by(index_db.Package.name).all()
+        pkg_names = index_db.get_package_names()
 
         pkgs_checked = 0
         pkgs_missing = 0
@@ -327,28 +489,26 @@ class PackageInfoCtl:
 
         missing = []
 
-        for each in q:
+        for each in pkg_names:
 
             pkgs_checked += 1
 
-            q2 = info_db.session.query(
-                info_db.Info
-                ).filter_by(name=each.name).first()
+            q2 = info_db.get_by_name(each)
 
             if q2 is None:
 
                 pkgs_missing += 1
-                missing.append(each.name)
+                missing.append(each)
 
                 logging.warning(
-                    "missing package DB info record: {}".format(each.name)
+                    "missing package DB info record: {}".format(each)
                     )
 
                 if create_templates:
 
                     filename = os.path.join(
                         self._info_dir,
-                        '{}.json'.format(each.name)
+                        '{}.json'.format(each)
                         )
 
                     if os.path.exists(filename):
@@ -401,43 +561,32 @@ class PackageInfoCtl:
 
     def get_outdated_info_records_list(self, mute=True):
 
-        info_db = self._info_db
+        info_db = self.info_db
 
         ret = []
 
-        query_result = (
-            info_db.session.query(info_db.Info).order_by(info_db.Info.name).
-            all()
-            )
+        obj_lst = info_db.get_names()
 
-        for i in query_result:
+        for i in obj_lst:
 
             filename = os.path.join(
                 self._info_dir,
-                '{}.json'.format(i.name)
+                '{}.json'.format(i)
                 )
 
             if not os.path.exists(filename):
                 if not mute:
                     logging.warning("File missing: {}".format(filename))
-                ret.append(i.name)
                 continue
 
-            d1 = read_info_file(filename)
+            ctime = datetime.datetime.fromtimestamp(
+                os.stat(filename).st_ctime
+                )
 
-            if not isinstance(d1, dict):
-                if not mute:
-                    logging.error("Error parsing file: {}".format(filename))
-                ret.append(i.name)
-                continue
+            info_ctime = info_db.get_last_set_date(i)
 
-            d2 = self.get_package_info_record(record=i)
-            if not is_info_dicts_equal(d1, d2):
-                if not mute:
-                    logging.warning(
-                        "xml init file differs to `{}' record".format(i.name)
-                        )
-                ret.append(i.name)
+            if info_ctime is None or ctime > info_ctime:
+                ret.append(i)
 
         return ret
 
@@ -459,13 +608,16 @@ class PackageInfoCtl:
 
             lst = [tarball_filename]
 
-            info_db = self._info_db
+            info_db = self.info_db
+            session = sqlalchemy.orm.Session(info_db.decl_base.metadata.bind)
 
-            q = info_db.session.query(
+            q = session.query(
                 info_db.Info
                 ).filter_by(
                     basename=parsed['groups']['name']
                     ).all()
+
+            session.close()
 
             possible_names = []
 
@@ -506,6 +658,8 @@ class PackageInfoCtl:
     def print_info_record(self, name, pkg_index_ctl, tag_ctl):
 
         # TODO: move this method to package_client
+        # TODO: we have no tag_ctl longer, it's table control moved under
+        #       info_ctl
 
         r = self.get_package_info_record(name=name)
 
@@ -569,9 +723,12 @@ class PackageInfoCtl:
                 )
             )
 
+        return
+
     def delete_info_records(self, mask='*'):
 
-        info_db = self._info_db
+        info_db = self.info_db
+        session = sqlalchemy.orm.Session(info_db.decl_base.metadata.bind)
 
         q = info_db.session.query(info_db.Info).all()
 
@@ -589,35 +746,40 @@ class PackageInfoCtl:
 
         logging.info("Totally deleted {} records".format(deleted))
 
+        session.close()
+
         return
 
     def save_info_records_to_fs(
             self, mask='*', force_rewrite=False
             ):
 
-        info_db = self._info_db
+        info_db = self.info_db
 
-        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
-            all()
+        obj_lst = info_db.get_names()
 
-        for i in q:
-            if fnmatch.fnmatch(i.name, mask):
+        for i in obj_lst:
+            if fnmatch.fnmatch(i, mask):
+
                 filename = os.path.join(
                     self._info_dir,
-                    '{}.json'.format(i.name))
+                    '{}.json'.format(i))
+
                 if not force_rewrite and os.path.exists(filename):
                     logging.warning(
                         "File exists - skipping: {}".format(filename)
                         )
                     continue
+
                 if force_rewrite and os.path.exists(filename):
                     logging.info(
                         "File exists - rewriting: {}".format(filename)
                         )
+
                 if not os.path.exists(filename):
                     logging.info("Writing: {}".format(filename))
 
-                r = self.get_package_info_record(record=i)
+                r = self.get_package_info_record(i)
                 if isinstance(r, dict):
                     if write_info_file(filename, r) != 0:
                         logging.error("can't write file {}".format(filename))
@@ -628,11 +790,11 @@ class PackageInfoCtl:
             self, filenames=[], rewrite_existing=False
             ):
         """
-        If names list is given - load only named and don't delete
-        existing
+        If names list is given - load only named and don't delete existing
         """
 
-        info_db = self._info_db
+        info_db = self.info_db
+        session = sqlalchemy.orm.Session(info_db.decl_base.metadata.bind)
 
         files = []
         loaded = 0
@@ -662,7 +824,7 @@ class PackageInfoCtl:
             name = os.path.basename(i)[:-5]
 
             if not rewrite_existing:
-                q = info_db.session.query(info_db.Info).filter_by(
+                q = session.query(info_db.Info).filter_by(
                     name=name
                     ).first()
                 if q is None:
@@ -690,20 +852,23 @@ class PackageInfoCtl:
                 loaded += 1
             else:
                 logging.error("Can't get info from file {}".format(i))
-        info_db.commit()
-    #    wayround_org.utils.file.progress_write_finish()
+
+        session.commit()
 
         logging.info("Totally loaded {} records".format(loaded))
+
+        session.close()
+
         return
 
     def get_info_records_list(self, mask='*', mute=False):
 
-        info_db = self._info_db
+        info_db = self.info_db
+        session = sqlalchemy.orm.Session(info_db.decl_base.metadata.bind)
 
         ret = []
 
-        q = info_db.session.query(info_db.Info).order_by(info_db.Info.name).\
-            all()
+        q = session.query(info_db.Info).order_by(info_db.Info.name).all()
 
         found = 0
 
@@ -717,6 +882,8 @@ class PackageInfoCtl:
             wayround_org.utils.text.columned_list_print(ret)
             logging.info("Total found {} records".format(found))
 
+        session.close()
+
         return ret
 
 
@@ -724,85 +891,20 @@ class Tags(wayround_org.utils.tag.TagEngine):
     pass
 
 
-class TagsControl:
+class SourcePathsRepo(wayround_org.utils.tag.TagEngine):
+    pass
 
-    def __init__(self, tag_db, tags_json):
 
-        self.tag_db = tag_db
-        self.tags_json = tags_json
+class BuildDepsRepo(wayround_org.utils.tag.TagEngine):
+    pass
 
-    def load_tags_from_fs(self):
 
-        tag_db = self.tag_db
+class SODepsRepo(wayround_org.utils.tag.TagEngine):
+    pass
 
-        file_name = self.tags_json
 
-        try:
-            f = open(file_name, 'r')
-        except:
-            logging.exception("Couldn't open file `{}'".format(file_name))
-        else:
-            try:
-                txt = f.read()
-
-                d = json.loads(txt)
-
-                tag_db.clear()
-
-                keys = sorted(d.keys())
-
-                count = len(keys)
-                num = 0
-                for i in keys:
-                    num += 1
-
-                    if num == 0:
-                        perc = 0
-                    else:
-                        perc = float(100) / (float(count) / float(num))
-                    wayround_org.utils.terminal.progress_write(
-                        '    {:6.2f}%'.format(perc)
-                        )
-                    tag_db.set_tags(i, d[i])
-
-                wayround_org.utils.terminal.progress_write_finish()
-            finally:
-
-                f.close()
-
-        return
-
-    def save_tags_to_fs(self):
-
-        tag_db = self.tag_db
-
-        file_name = self.tags_json
-
-        logging.info("Getting tags from DB")
-
-        d = tag_db.get_objects_and_tags_dict()
-
-        logging.info("Creating JSON object")
-
-        txt = json.dumps(d, sort_keys=True, indent=2)
-
-        logging.info("Saving to file `{}'".format(file_name))
-        try:
-            f = open(file_name, 'w')
-        except:
-            logging.exception("Couldn't create file `{}'".format(file_name))
-        else:
-            try:
-                f.write(txt)
-            except:
-                raise
-            else:
-                logging.info("Saved")
-            finally:
-
-                f.close()
-
-        return
+class RuntimeDepsRepo(wayround_org.utils.tag.TagEngine):
+    pass
 
 
 class BundlesCtl:
@@ -935,6 +1037,18 @@ def write_info_file(name, struct):
 
     if 'name' in struct:
         del struct['name']
+
+    struct_o = collections.OrderedDict()
+
+    for i in SAMPLE_PACKAGE_INFO_STRUCTURE.keys():
+        if i in [
+                'last_set_date'
+                ]:
+            continue
+
+        struct_o[i] = struct[i]
+
+    struct = struct_o
 
     # do not add sort_keys=True here. struct must be OrderedDict
     txt = json.dumps(struct, indent=2)

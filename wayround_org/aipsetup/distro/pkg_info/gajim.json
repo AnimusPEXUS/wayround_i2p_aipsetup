@@ -2,11 +2,17 @@
   "description": "good pythonic xmpp client\n\nsupports voip, plugins and many other things\n\npython2.7 is required\n",
   "home_page": "http://gajim.org/",
   "buildscript": "gajim",
+  "version_tool": "",
   "basename": "gajim",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": [],
+  "name": "/mnt/sda3/home/agu/_UNICORN/pkg_info/gajim.json"
 }

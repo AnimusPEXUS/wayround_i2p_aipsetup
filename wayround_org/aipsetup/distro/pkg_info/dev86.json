@@ -2,11 +2,18 @@
   "description": "write something here, please",
   "home_page": "http://www.debath.co.uk/",
   "buildscript": "dev86",
+  "version_tool": "",
   "basename": "Dev86src",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/debath.co.uk/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

@@ -47,37 +47,6 @@ def info_db_new_connection(config_string):
     return ret
 
 
-def tag_db(config):
-    """
-    Returns tag database connection creating it if needed
-    """
-
-    global _tag_db_connection
-
-    if not _tag_db_connection:
-        _tag_db_connection = \
-            tag_db_new_connection(config['pkg_server']['tags_db_config'])
-
-    return _tag_db_connection
-
-
-def tag_db_new_connection(config_string):
-    """
-    Returns tag database connection creating it if needed
-    """
-
-    logging.info(
-        "Getting tag DB connection: {}".format(
-            config_string
-            )
-        )
-    ret = wayround_org.aipsetup.info.Tags(
-        config_string
-        )
-
-    return ret
-
-
 def pkg_repo_db(config):
     """
     Returns package index database connection creating it if needed
@@ -141,61 +110,27 @@ def src_repo_db_new_connection(config_string):
     return ret
 
 
-def src_paths_repo_db(config):
-    """
-    Returns sources database connection creating it if needed
-    """
-
-    global _src_paths_repo_db_connection
-
-    if not _src_paths_repo_db_connection:
-        _src_paths_repo_db_connection = src_paths_repo_db_new_connection(
-            config['src_server']['src_paths_index_db_config']
-            )
-
-    return _src_paths_repo_db_connection
-
-
-def src_paths_repo_db_new_connection(config_string):
-    """
-    Returns sources database connection creating it if needed
-    """
-    logging.info(
-        "Getting src paths repo DB connection: {}".format(
-            config_string
-            )
-        )
-    ret = wayround_org.aipsetup.repository.SourcePathsRepo(
-        config_string
-        )
-
-    return ret
-
-
 def close_all():
     """
     Closes all open DB connections
     """
-    # is words (only words not the meaning) global can be removed here?
+    # is words (only words not the meaning) 'global' can be removed here?
     global _info_db_connection
     global _pkg_repo_db_connection
-    global _tag_db_connection
     global _src_repo_db_connection
-    global _src_paths_repo_db_connection
+
+    # TODO: db classes shoud have no close() methods. remove garbage code.
 
     if _info_db_connection:
-        _info_db_connection.close()
+        if hasattr(_info_db_connection, 'close'):
+            _info_db_connection.close()
 
     if _pkg_repo_db_connection:
-        _pkg_repo_db_connection.close()
-
-    if _tag_db_connection:
-        _tag_db_connection.close()
+        if hasattr(_pkg_repo_db_connection, 'close'):
+            _pkg_repo_db_connection.close()
 
     if _src_repo_db_connection:
-        _src_repo_db_connection.close()
-
-    if _src_paths_repo_db_connection:
-        _src_paths_repo_db_connection.close()
+        if hasattr(_src_repo_db_connection, 'close'):
+            _src_repo_db_connection.close()
 
     return

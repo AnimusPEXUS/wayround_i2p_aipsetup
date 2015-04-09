@@ -2,11 +2,18 @@
   "description": "",
   "home_page": "http://www.gnome.org/",
   "buildscript": "std",
+  "version_tool": "",
   "basename": "gconf-editor",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/gnome.org/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }
