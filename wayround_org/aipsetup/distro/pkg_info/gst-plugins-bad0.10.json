@@ -2,11 +2,16 @@
   "description": "write something here, please",
   "home_page": "http://www.freedesktop.org",
   "buildscript": "std",
+  "version_tool": "",
   "basename": "gst-plugins-bad",
   "filters": "- version fm *\n+ version fm 0.10.*\n",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": true
+  "deprecated": true,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "http://www.freedesktop.org/",
   "buildscript": "std",
+  "version_tool": "",
   "basename": "farstream",
   "filters": "+ version fm *\n- version fm 0.1.*\n",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

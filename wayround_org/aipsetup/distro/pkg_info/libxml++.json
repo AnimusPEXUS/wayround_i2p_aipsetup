@@ -2,11 +2,16 @@
   "description": "WARNING\n\nas libxml++-2.36.0.tar.xz is too complicated for parsing, it need to be renamed to libxmlplusplus-2.36.0.tar.xz in order to properly work with aipsetup",
   "home_page": "http://www.gnome.org",
   "buildscript": "std",
+  "version_tool": "",
   "basename": "libxmlplusplus",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

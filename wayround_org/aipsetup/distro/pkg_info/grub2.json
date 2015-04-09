@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "https://www.gnu.org/software/grub/index.html",
   "buildscript": "grub2",
+  "version_tool": "",
   "basename": "grub",
   "filters": "- version < 0.90\n- status !re ^$",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

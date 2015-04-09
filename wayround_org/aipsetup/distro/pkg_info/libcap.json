@@ -2,11 +2,16 @@
   "description": "deprecated. use libcap2",
   "home_page": "http://www.kernel.org",
   "buildscript": "libcap",
+  "version_tool": "",
   "basename": "libcap",
   "filters": "- version >= 2",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": true
+  "deprecated": true,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

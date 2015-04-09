@@ -2,11 +2,16 @@
   "description": "write something here, please",
   "home_page": "http://www.gnome.org",
   "buildscript": "gtk_with_docs",
+  "version_tool": "",
   "basename": "gtk+",
   "filters": "- version fm *\n+ version fm 2.*\n- version !re 2\\.\\d*[02468]\n- version >= 2.90\n",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

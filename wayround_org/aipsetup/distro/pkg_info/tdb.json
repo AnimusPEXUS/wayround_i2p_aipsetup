@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "http://samba.org/",
   "buildscript": "std_waf",
+  "version_tool": "",
   "basename": "tdb",
   "filters": "- version fm 1.2.*",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

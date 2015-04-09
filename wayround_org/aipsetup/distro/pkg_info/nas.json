@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "http://radscan.com/",
   "buildscript": "nas",
+  "version_tool": "",
   "basename": "nas",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

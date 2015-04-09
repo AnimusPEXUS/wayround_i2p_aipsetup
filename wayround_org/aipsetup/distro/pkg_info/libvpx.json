@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "",
   "buildscript": "libvpx",
+  "version_tool": "",
   "basename": "libvpx",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

@@ -2,11 +2,16 @@
   "description": "write something here, please",
   "home_page": "http://web.mit.edu/kerberos/",
   "buildscript": "krb5",
+  "version_tool": "",
   "basename": "krb5",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

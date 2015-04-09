@@ -2,11 +2,16 @@
   "description": "see commoncpp2",
   "home_page": "http://www.gnu.org",
   "buildscript": "",
+  "version_tool": "",
   "basename": "commoncpp",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": true,
-  "deprecated": true
+  "deprecated": true,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

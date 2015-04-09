@@ -2,11 +2,16 @@
   "description": "This is glibc plugin. optional in glibc build time.",
   "home_page": "http://www.gnu.org",
   "buildscript": "glibc",
+  "version_tool": "",
   "basename": "glibc-ports",
   "filters": "",
-  "installation_priority": 5,
   "removable": false,
   "reducible": false,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

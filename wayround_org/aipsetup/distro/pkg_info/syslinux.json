@@ -2,11 +2,16 @@
   "description": "linux kernel boot loader used in this distribution",
   "home_page": "http://www.kernel.org",
   "buildscript": "syslinux",
+  "version_tool": "",
   "basename": "syslinux",
   "filters": "",
-  "installation_priority": 0,
   "removable": false,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

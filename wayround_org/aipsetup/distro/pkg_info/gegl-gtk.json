@@ -2,11 +2,18 @@
   "description": "",
   "home_page": "",
   "buildscript": "",
-  "basename": "",
+  "version_tool": "",
+  "basename": "gegl-gtk",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/gimp.org/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

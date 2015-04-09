@@ -2,11 +2,16 @@
   "description": "write something here, please",
   "home_page": "http://sourceforge.net/projects/p7zip",
   "buildscript": "p7zip",
+  "version_tool": "",
   "basename": "p7zip",
   "filters": "- status !re ^$\n+ status re src",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

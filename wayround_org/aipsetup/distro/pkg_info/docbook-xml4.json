@@ -2,11 +2,16 @@
   "description": "",
   "home_page": "",
   "buildscript": "docbook_xml4",
+  "version_tool": "",
   "basename": "docbook-xml",
   "filters": "- version fm *\n+ version fm 4.*\n",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }

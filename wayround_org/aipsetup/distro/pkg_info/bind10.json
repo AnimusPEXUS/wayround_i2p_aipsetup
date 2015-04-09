@@ -2,11 +2,18 @@
   "description": "",
   "home_page": "http://www.isc.org",
   "buildscript": "bind10",
+  "version_tool": "",
   "basename": "bind10",
   "filters": "",
-  "installation_priority": 5,
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/isc.org/isc/"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
 }
