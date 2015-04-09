@@ -198,7 +198,7 @@ class ASPServer:
                 path
                 )
 
-            if cat_id == None:
+            if cat_id is None:
                 return bottle.HTTPError(404, "Category not found")
 
             double_dot = ''
@@ -264,7 +264,7 @@ class ASPServer:
                 path
                 )
 
-            if cat_id == None:
+            if cat_id is None:
                 return bottle.HTTPError(404, "Category not found")
 
             cats_ids = self.pkg_repo_ctl.get_category_id_list(
@@ -350,13 +350,13 @@ class ASPServer:
                     )
 
             cid = self.pkg_repo_ctl.get_package_category_by_name(name)
-            if cid != None:
+            if cid is not None:
                 category = self.pkg_repo_ctl.get_category_path_string(cid)
             else:
                 category = "< Package not categorized! >"
 
-            tag_db = self.tag_ctl.tag_db
-            tags = tag_db.get_tags(name)
+            tag_db = self.info_ctl.tag_db
+            tags = tag_db.get_object_tags(name)
 
             txt = self.ui.package(
                 name,
@@ -471,20 +471,20 @@ class ASPServer:
 
         rec = self.info_ctl.get_package_info_record(name)
 
-        if rec == None:
+        if rec is None:
             raise bottle.HTTPError(404, "Can't get package information")
 
         basename = rec['basename']
         filters = rec['filters']
 
         filesl = wayround_org.aipsetup.client_src.files(
-            self._src_page_url, basename
+            self._src_page_url, basename, rec['source_path_prefixes']
             )
 
         if not filesl:
             raise bottle.HTTPError(404, "Error getting tarball list")
 
-        if filesl == None:
+        if filesl is None:
             filesl = []
 
         filesl = (
@@ -644,7 +644,7 @@ class ASPServer:
         if isinstance(res, list):
             result_name = res
 
-        if result_name == None:
+        if result_name is None:
             raise bottle.HTTPError(404, "Not found")
 
         if resultmode == 'html':
@@ -701,7 +701,7 @@ class ASPServer:
 
         ret = self.bundles_ctl.get(name)
 
-        if ret == None:
+        if ret is None:
             raise bottle.HTTPError(404, "Not Found")
         else:
             bottle.response.set_header('Content-Type', APPLICATION_JSON)

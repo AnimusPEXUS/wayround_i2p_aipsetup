@@ -33,12 +33,12 @@ def search(url, mask, searchmode='filemask', cs=True):
 
     data = urllib.parse.urlencode(
         {
-         'mask': mask,
-         'searchmode': searchmode,
-         'cs': cst,
-         'action': 'search',
-         'resultmode': 'json'
-         },
+            'mask': mask,
+            'searchmode': searchmode,
+            'cs': cst,
+            'action': 'search',
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
@@ -54,24 +54,31 @@ def search(url, mask, searchmode='filemask', cs=True):
 
 def files(url, name, paths):
 
+    _debug = True
+
     ret = None
 
+    pre_data = {
+        'resultmode': 'json',
+        'name': name
+        }
+
+    if paths is not None:
+        pre_data['paths'] = json.dumps(paths)
+
     data = urllib.parse.urlencode(
-        {
-         'resultmode': 'json',
-         'name': name,
-         'paths': json.dumps(paths)
-         },
+        pre_data,
         encoding='utf-8'
         )
 
-    logging.debug("Data to send:\n{}".format(data))
+    if _debug:
+        print("Data to send:\n{}".format(data))
 
     res = None
     try:
         res = urllib.request.urlopen('{}files?{}'.format(url, data))
     except:
-        pass
+        logging.exception("Can't get file list from source server")
 
     if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))

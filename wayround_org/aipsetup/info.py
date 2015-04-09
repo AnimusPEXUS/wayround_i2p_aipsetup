@@ -85,7 +85,6 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
     ('buildscript', "Building Script"),
     ('basename', 'Tarball basename'),
     ('filters', "Filters"),
-    ('installation_priority', "Installation Priority"),
     ('removable', "Is Removable?"),
     ('reducible', "Is Reducible?"),
     ('non_installable', "Is Non Installable?"),
@@ -250,6 +249,7 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
                         'runtime_deps'
                         ]:
                     continue
+                #ret[i] = eval("q['{}']".format(i))
                 ret[i] = getattr(q, i)
 
             ret['name'] = q.name
@@ -289,16 +289,19 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
                 raise TypeError("Wrong type supplied: {}".format(kt))
 
             if kt == builtins.int:
-                a = getattr(q, i)
-                a = int(struct[i])
+                setattr(q, i, int(struct[i]))
+                #a = getattr(q, i)
+                #a = int(struct[i])
 
             elif kt == builtins.str:
-                a = getattr(q, i)
-                a = str(struct[i])
+                setattr(q, i, str(struct[i]))
+                #a = getattr(q, i)
+                #a = str(struct[i])
 
             elif kt == builtins.bool:
-                a = getattr(q, i)
-                a = bool(struct[i])
+                setattr(q, i, bool(struct[i]))
+                #a = getattr(q, i)
+                #a = bool(struct[i])
 
             else:
                 raise Exception("Programming Error")
@@ -387,24 +390,26 @@ class PackageInfoCtl:
         return self._info_dir
 
     def get_package_info_record(self, name):
-        """
-        This method can accept package name.
-        """
+
+        _debug = True
 
         info_db = self.info_db
 
         ret = info_db.get_by_name(name)
 
-        ret['tags'] = self.tag_db.get_tags(name)
+        ret['tags'] = self.tag_db.get_object_tags(name)
 
         ret['source_path_prefixes'] =\
-            self.source_path_prefixes_db.get_tags(name)
+            self.source_path_prefixes_db.get_object_tags(name)
 
-        ret['build_deps'] = self.build_deps_db.get_tags(name)
+        ret['build_deps'] = self.build_deps_db.get_object_tags(name)
 
-        ret['so_deps'] = self.so_deps_db.get_tags(name)
+        ret['so_deps'] = self.so_deps_db.get_object_tags(name)
 
-        ret['runtime_deps'] = self.runtime_deps_db.get_tags(name)
+        ret['runtime_deps'] = self.runtime_deps_db.get_object_tags(name)
+
+        if _debug:
+            print("requested: `{}' response:\n{}".format(name, ret))
 
         return ret
 
@@ -606,7 +611,7 @@ class PackageInfoCtl:
             info_db = self.info_db
             session = sqlalchemy.orm.Session(info_db.decl_base.metadata.bind)
 
-            q = info_db.session.query(
+            q = session.query(
                 info_db.Info
                 ).filter_by(
                     basename=parsed['groups']['name']
@@ -758,7 +763,7 @@ class PackageInfoCtl:
 
                 filename = os.path.join(
                     self._info_dir,
-                    '{}.json'.format(i.name))
+                    '{}.json'.format(i))
 
                 if not force_rewrite and os.path.exists(filename):
                     logging.warning(
@@ -1032,6 +1037,18 @@ def write_info_file(name, struct):
 
     if 'name' in struct:
         del struct['name']
+
+    struct_o = collections.OrderedDict()
+
+    for i in SAMPLE_PACKAGE_INFO_STRUCTURE.keys():
+        if i in [
+                'last_set_date'
+                ]:
+            continue
+
+        struct_o[i] = struct[i]
+
+    struct = struct_o
 
     # do not add sort_keys=True here. struct must be OrderedDict
     txt = json.dumps(struct, indent=2)

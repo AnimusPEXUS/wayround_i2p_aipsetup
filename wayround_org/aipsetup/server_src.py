@@ -309,7 +309,7 @@ class SRCServer:
 
         resultmode = decoded_params['resultmode']
 
-        results = self.src_db.get_by_tag(name)
+        results = self.src_db.get_objects_by_tag(name)
 
         if pkgname != '':
             for i in range(len(results) - 1, -1, -1):

@@ -61,7 +61,7 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
                 default=0
                 )
 
-        self.package_table_mapping = Package
+        self.Package = Package
 
         class Category(self.decl_base):
 
@@ -90,7 +90,7 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
                 default=0
                 )
 
-        self.category_table_mapping = Category
+        self.Category = Category
 
         return
 
@@ -1173,7 +1173,7 @@ class SourceRepoCtl:
 
         self.sources_dir = sources_dir
         self.src_db = database_connection
-        
+
         return
 
     def index_sources(
@@ -1210,6 +1210,9 @@ class SourceRepoCtl:
             first_delete_found=False,
             clean_only=False
             ):
+
+        # TODO: this method should be rewriten again because of addition
+        #        performance reasons
 
         root_dir_name = wayround_org.utils.path.realpath(root_dir_name)
 
@@ -1260,7 +1263,7 @@ class SourceRepoCtl:
                     wayround_org.utils.terminal.progress_write(
                         "    removed {} of {}".format(removed, found_count)
                         )
-                    self.database_connection.del_object_tags(i)
+                    self.src_db.del_object_tags(i)
                     removed += 1
 
                 self.src_db.commit()
@@ -1294,7 +1297,7 @@ class SourceRepoCtl:
                         )
 
                     if parsed_src_filename:
-                        self.database_connection.set_tags(
+                        self.src_db.set_object_tags(
                             i,
                             [parsed_src_filename['groups']['name']]
                             )
@@ -1328,15 +1331,18 @@ class SourceRepoCtl:
 
             del source_index
 
-        self.database_connection.commit()
         logging.info("Searching non existing index items")
-        src_tag_objects = self.database_connection.get_objects(order='object')
+
+        src_tag_objects = self.src_db.get_objects()
+
         deleted_count = 0
         found_scanned_count = 0
         skipped_count = 0
         src_tag_objects_l = len(src_tag_objects)
         i_i = 0
+
         to_deletion = []
+
         for i in src_tag_objects:
 
             logging.debug(
@@ -1378,11 +1384,7 @@ class SourceRepoCtl:
 
         wayround_org.utils.terminal.progress_write_finish()
 
-        self.database_connection.commit()
-
-        self.database_connection.del_object_tags(to_deletion, False)
-
-        self.database_connection.commit()
+        self.src_db.del_object_tags(to_deletion, False)
 
         logging.info(
             "Records: added {added}; deleted {deleted}".format(
@@ -1391,7 +1393,8 @@ class SourceRepoCtl:
                 )
             )
         logging.info(
-            "DB Size: {} record(s)".format(self.database_connection.get_size())
+            "Source Data Base Size: {} record(s)".format(
+                self.src_db.get_size())
             )
 
         return 0

@@ -81,7 +81,7 @@ class DepList:
             ls.append(i[0])
 
         for i in range(len(ls) - 1, -1, -1):
-            if (ls.isspace() or ls == ''):
+            if (ls[i].isspace() or ls[i] == ''):
                 del ls[i]
 
         for i in range(len(ls)):
@@ -140,10 +140,14 @@ class InfoEditorUi:
         save_button = Gtk.Button("Save")
         self.save_button = save_button
 
-        show_not_filtered_button = Gtk.Button("Not Filtered")
+        show_not_filtered_button = Gtk.Button("Not Filtered..")
         self.show_not_filtered_button = show_not_filtered_button
 
-        show_filtered_button = Gtk.Button("Filtered")
+        show_path_filtered_button = Gtk.Button("'Source Paths' Filtered..")
+        self.show_path_filtered_button = show_path_filtered_button
+
+        show_filtered_button = \
+            Gtk.Button("'Source Paths' and 'Filtes' Filtered..")
         self.show_filtered_button = show_filtered_button
 
         quit_button = Gtk.Button("Quit")
@@ -153,7 +157,7 @@ class InfoEditorUi:
         tree_view1.set_model(Gtk.ListStore(str))
 
         self.tree_view1 = tree_view1
-        c = Gtk.TreeViewColumn("File Names")
+        c = Gtk.TreeViewColumn("File Name")
         r = Gtk.CellRendererText()
         c.pack_start(r, True)
         c.add_attribute(r, 'text', 0)
@@ -175,9 +179,10 @@ class InfoEditorUi:
         b3.set_margin_end(5)
         b3.set_margin_bottom(5)
 
-        b3.pack_start(save_button, False, False, 0)
         b3.pack_start(show_not_filtered_button, False, False, 0)
+        b3.pack_start(show_path_filtered_button, False, False, 0)
         b3.pack_start(show_filtered_button, False, False, 0)
+        b3.pack_end(save_button, False, False, 0)
 
         notebook = Gtk.Notebook()
         self.notebook = notebook

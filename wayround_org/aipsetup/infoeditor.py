@@ -60,6 +60,11 @@ class MainWindow:
             self.onShowAllSourceFilesButtonActivated
             )
 
+        self.ui.show_path_filtered_button.connect(
+            'clicked',
+            self.onShowPathFilteredSourceFilesButtonActivated
+            )
+
         self.ui.show_filtered_button.connect(
             'clicked',
             self.onShowFilteredSourceFilesButtonActivated
@@ -199,17 +204,20 @@ class MainWindow:
                 b.get_text(b.get_start_iter(), b.get_end_iter(), False)
 
             b = self.ui.tags_tw.get_buffer()
-            tags = \
-                b.get_text(b.get_start_iter(), b.get_end_iter(), False)
+            tags = b.get_text(
+                b.get_start_iter(),
+                b.get_end_iter(),
+                False
+                )
+
+            tags = tags.splitlines()
 
             tags = wayround_org.utils.list\
                 .list_strip_remove_empty_remove_duplicated_lines(
                     tags
                     )
 
-            tag_db = self.info_ctl.tag_db
-
-            tag_db.set_tags(name, tags)
+            data['tags'] = tags
 
             data['home_page'] = self.ui.homepage_entry.get_text()
 
@@ -252,27 +260,7 @@ class MainWindow:
             data['so_deps'] = self.ui.so_deps.get_values_list()
             data['runtime_deps'] = self.ui.runtime_deps.get_values_list()
 
-            data_o = collections.OrderedDict()
-
-            keys = \
-                wayround_org.aipsetup.info.SAMPLE_PACKAGE_INFO_STRUCTURE.keys()
-
-            for i in keys:
-                if i in [
-                    'tags',
-                    'source_path_prefixes',
-                    'build_deps',
-                    'so_deps',
-                    'runtime_deps',
-                    'last_set_date'
-                    ]:
-                    continue
-                
-                data_o[i] = data[i]
-
-            data_o['name'] = name
-
-            data = data_o
+            data['name'] = name
 
             if wayround_org.aipsetup.info.write_info_file(filename, data) != 0:
                 dia = Gtk.MessageDialog(
@@ -400,6 +388,8 @@ class MainWindow:
                 ):
             self.onListRealoadButtonActivated(None)
 
+        return
+
     def onSaveAndUpdateButtonActivated(self, button):
         if self.ui.name_entry.get_text() == '':
             dia = Gtk.MessageDialog(
@@ -414,6 +404,8 @@ class MainWindow:
             dia.destroy()
         else:
             self.save_data(self.currently_opened, update_db=True)
+
+        return
 
     def onShowAllSourceFilesButtonActivated(self, button):
 
@@ -431,9 +423,7 @@ class MainWindow:
         else:
             lst = self.src_client.files(
                 self.ui.basename_entry.get_text(),
-                self.info_ctl.source_path_prefixes_db.get_tags(
-                    self.ui.basename_entry.get_text()
-                    )
+                None
                 )
 
             logging.debug("get_package_source_files returned {}".format(lst))
@@ -456,8 +446,54 @@ class MainWindow:
                         )
                     )
 
+        return
+
+    def onShowPathFilteredSourceFilesButtonActivated(self, button):
+
+        if self.ui.name_entry.get_text() == '':
+            dia = Gtk.MessageDialog(
+                self.ui.window,
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                "Record not selected\n\n"
+                "(hint: double click on list item to select one)"
+                )
+            dia.run()
+            dia.destroy()
+        else:
+            lst = self.src_client.files(
+                self.ui.basename_entry.get_text(),
+                self.info_ctl.source_path_prefixes_db.get_object_tags(
+                    self.ui.basename_entry.get_text()
+                    )
+                )
+
+            logging.debug("get_package_source_files returned {}".format(lst))
+
+            if not isinstance(lst, list):
+                dia = Gtk.MessageDialog(
+                    self.ui.window,
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    "Error getting source files from database"
+                    )
+                dia.run()
+                dia.destroy()
+            else:
+                wayround_org.utils.gtk.text_view(
+                    '\n'.join(lst),
+                    "{} - Path-filtered tarballs".format(
+                        self.ui.name_entry.get_text()
+                        )
+                    )
+
+        return
+
     def onQuitButtonClicked(self, button):
         wayround_org.aipsetup.gtk.stop_session()
+        return
 
     def onShowFilteredSourceFilesButtonActivated(self, button):
 
@@ -512,6 +548,7 @@ class MainWindow:
 
     def onListRealoadButtonActivated(self, button):
         self.load_list()
+        return
 
     def onPackageListItemActivated(self, view, path, column):
 

@@ -193,8 +193,6 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
 
     ret = info_ctl.save_info_records_to_fs(mask, force)
 
-    save_info_tags(command_name, {}, [], adds)
-
     return ret
 
 
