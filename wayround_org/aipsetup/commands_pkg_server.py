@@ -24,7 +24,8 @@ def commands():
             ('update', info_update_outdated_pkg_info_records),
             ('delete', info_delete_pkg_info_records),
             ('editor', info_editor),
-            ('mass-apply', info_mass_script_apply)
+            ('mass-apply', info_mass_script_apply),
+            ('triangulate-dependencies', info_triangulate_dependencies)
             ])),
         ('pkg-server-repo', collections.OrderedDict([
             ('index', pkg_repo_index_and_update),
@@ -439,6 +440,11 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
     return ret
 
+def info_triangulate_dependencies(command_name, opts, args, adds):
+    
+    ret = 0
+    
+    return ret
 
 def pkg_repo_index(command_name, opts, args, adds):
     """

@@ -391,7 +391,7 @@ class PackageInfoCtl:
 
     def get_package_info_record(self, name):
 
-        _debug = True
+        _debug = False
 
         info_db = self.info_db
 
@@ -478,7 +478,8 @@ class PackageInfoCtl:
 
         index_db = pkg_index_ctl.get_db_connection()
 
-        pkg_names = index_db.get_package_names()
+        pkg_names = pkg_index_ctl.get_package_name_list()
+        #pkg_names = index_db.get_package_names()
 
         pkgs_checked = 0
         pkgs_missing = 0

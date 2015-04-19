@@ -629,7 +629,8 @@ class PackCtl:
                     filename,
                     'xz',
                     verbose_tar=False,
-                    verbose_compressor=True
+                    verbose_compressor=True,
+                    additional_tar_options=['--sort=name']
                     )
 
         return ret

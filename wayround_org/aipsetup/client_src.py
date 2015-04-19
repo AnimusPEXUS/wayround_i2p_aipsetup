@@ -54,7 +54,7 @@ def search(url, mask, searchmode='filemask', cs=True):
 
 def files(url, name, paths):
 
-    _debug = True
+    _debug = False
 
     ret = None
 

@@ -189,7 +189,7 @@ class InfoEditorUi:
         notebook.set_scrollable(True)
         notebook.set_tab_pos(Gtk.PositionType.LEFT)
 
-        l = Gtk.Label("Main")
+        l = Gtk.Label("General")
         l.set_alignment(0, 0.5)
         notebook.append_page(
             self._init_tab_main(),

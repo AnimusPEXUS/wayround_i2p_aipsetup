@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.sourceforge.net",
-  "buildscript": "std",
+  "buildscript": "inkscape",
   "version_tool": "",
   "basename": "inkscape",
   "filters": "- status !re ^$",

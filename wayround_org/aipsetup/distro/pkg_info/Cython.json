@@ -10,7 +10,10 @@
   "non_installable": false,
   "deprecated": false,
   "tags": [],
-  "source_path_prefixes": [],
+  "source_path_prefixes": [
+    "/python.org/",
+    "/cython.org/"
+  ],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

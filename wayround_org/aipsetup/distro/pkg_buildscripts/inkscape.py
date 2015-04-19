@@ -13,11 +13,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute', 'SET'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'autogen', 'configure', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -27,20 +27,9 @@ def main(buildingsite, action=None):
 
         pkg_info, actions = r
 
-        name = pkg_info['pkg_info']['name']
-
-        if not name in ['qt4', 'qt5']:
-            raise Exception("Invalid package name")
-
-        number = name[-1]
-
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
 
         dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        etc_profile_set_dir = wayround_org.utils.path.join(
-            dst_dir, 'etc', 'profile.d', 'SET'
-            )
 
         separate_build_dir = False
 
@@ -57,19 +46,42 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+        if 'autogen' in actions and ret == 0:
+            if not os.path.isfile(os.path.join(src_dir, 'configure')):
+                if not os.path.isfile(os.path.join(src_dir, 'autogen.sh')):
+                    logging.error(
+                        "./configure not found and autogen.sh is absent"
+                        )
+                    ret = 2
+                else:
+                    p = subprocess.Popen(['./autogen.sh'], cwd=src_dir)
+                    ret = p.wait()
+
         if 'configure' in actions and ret == 0:
-            p = subprocess.Popen(
-                ['./configure'] +
-                    [
-                    '-opensource',
-                    '-confirm-license',
-                    '-prefix', '/usr/lib/qt{}_w_toolkit'.format(number)
+            ret = autotools.configure_high(
+                buildingsite,
+                options=[
+                    '--enable-gtk3-experimental',
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' +
+                    pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                    pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+                    # '--target=' + pkg_info['constitution']['target']
                     ],
-                stdin=subprocess.PIPE,
-                cwd=src_dir
+                arguments=[],
+                environment={},
+                environment_mode='copy',
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
-            # p.communicate(input=b'yes\n')
-            ret = p.wait()
 
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
@@ -88,47 +100,12 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'INSTALL_ROOT=' + dst_dir
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=separate_build_dir,
                 source_configure_reldir=source_configure_reldir
                 )
-
-        if 'SET' in actions and ret == 0:
-            if not os.path.isdir(etc_profile_set_dir):
-                try:
-                    os.makedirs(etc_profile_set_dir)
-                except:
-                    logging.error(
-                        "Can't create dir: {}".format(etc_profile_set_dir)
-                        )
-                    raise
-
-            f = open(
-                wayround_org.utils.path.join(
-                    etc_profile_set_dir,
-                    '009.qt{}'.format(number)
-                    ),
-                'w'
-                )
-
-            f.write("""\
-#!/bin/bash
-export PATH=$PATH:/usr/lib/qt{qtnum}_w_toolkit/bin
-
-if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
-    PKG_CONFIG_PATH+=":"
-fi
-export PKG_CONFIG_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib/pkgconfig"
-
-if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
-    LD_LIBRARY_PATH+=":"
-fi
-export LD_LIBRARY_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib"
-
-""".format(qtnum=number))
-            f.close()
 
     return ret
