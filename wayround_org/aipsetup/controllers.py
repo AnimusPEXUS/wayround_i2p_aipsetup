@@ -11,15 +11,30 @@ import wayround_org.aipsetup.repository
 import wayround_org.aipsetup.system
 import wayround_org.utils.system_type
 
+_pkg_repo_ctl = None
+_src_repo_ctl = None
+_info_ctl = None
+
 
 def pkg_repo_ctl_by_config(config):
 
-    db_connection = wayround_org.aipsetup.dbconnections.pkg_repo_db(config)
+    global _pkg_repo_ctl
 
-    repository_dir = config['pkg_server']['repository_dir']
-    garbage_dir = config['pkg_server']['garbage_dir']
+    ret = None
 
-    ret = pkg_repo_ctl_new(repository_dir, garbage_dir, db_connection)
+    if _pkg_repo_ctl is None:
+
+        db_connection = wayround_org.aipsetup.dbconnections.pkg_repo_db(config)
+
+        repository_dir = config['pkg_server']['repository_dir']
+        garbage_dir = config['pkg_server']['garbage_dir']
+
+        ret = pkg_repo_ctl_new(repository_dir, garbage_dir, db_connection)
+        _pkg_repo_ctl = ret
+
+    else:
+
+        ret = _pkg_repo_ctl
 
     return ret
 
@@ -27,7 +42,9 @@ def pkg_repo_ctl_by_config(config):
 def pkg_repo_ctl_new(repository_dir, garbage_dir, pkg_repo_db):
 
     ret = wayround_org.aipsetup.repository.PackageRepoCtl(
-        repository_dir, garbage_dir, pkg_repo_db
+        repository_dir,
+        garbage_dir,
+        pkg_repo_db
         )
 
     return ret
@@ -35,12 +52,23 @@ def pkg_repo_ctl_new(repository_dir, garbage_dir, pkg_repo_db):
 
 def src_repo_ctl_by_config(config):
 
-    database_connection = \
-        wayround_org.aipsetup.dbconnections.src_repo_db(config)
+    global _src_repo_ctl
 
-    sources_dir = config['src_server']['tarball_repository_root']
+    ret = None
 
-    ret = src_repo_ctl_new(sources_dir, database_connection)
+    if _src_repo_ctl is None:
+
+        database_connection = \
+            wayround_org.aipsetup.dbconnections.src_repo_db(config)
+
+        sources_dir = config['src_server']['tarball_repository_root']
+
+        ret = src_repo_ctl_new(sources_dir, database_connection)
+        _src_repo_ctl = ret
+
+    else:
+
+        ret = _src_repo_ctl
 
     return ret
 
@@ -56,9 +84,19 @@ def src_repo_ctl_new(sources_dir, src_repo_db):
 
 def info_ctl_by_config(config):
 
-    info_db = wayround_org.aipsetup.dbconnections.info_db(config)
+    global _info_ctl
 
-    ret = info_ctl_new(config['pkg_server']['info_json_dir'], info_db)
+    if _info_ctl is None:
+
+        info_db = wayround_org.aipsetup.dbconnections.info_db(config)
+
+        ret = info_ctl_new(config['pkg_server']['info_json_dir'], info_db)
+
+        _info_ctl = ret
+
+    else:
+
+        ret = _info_ctl
 
     return ret
 

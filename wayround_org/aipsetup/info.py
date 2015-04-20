@@ -203,6 +203,16 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
 
         return
 
+    def get_mapped_info_table(self):
+        ret = None
+        if self.Info.__tablename__ in self.decl_base.metadata.tables:
+            ret = self.decl_base.metadata.tables[self.Info.__tablename__]
+        return ret
+
+    def create_tables(self):
+        self.get_mapped_info_table().create(checkfirst=True)
+        return
+
     def get_names(self):
 
         session = sqlalchemy.orm.Session(self.decl_base.metadata.bind)
@@ -358,27 +368,30 @@ class PackageInfoCtl:
             init_table_data='tags'
             )
 
+        meta_bind = self.info_db.decl_base.metadata.bind
+        decl_base = self.info_db.decl_base
+
         self.source_path_prefixes_db = SourcePathsRepo(
-            bind=self.info_db.decl_base.metadata.bind,
-            decl_base=self.info_db.decl_base,
+            bind=meta_bind,
+            decl_base=decl_base,
             init_table_data='source_path_prefixes'
             )
 
         self.build_deps_db = BuildDepsRepo(
-            bind=self.info_db.decl_base.metadata.bind,
-            decl_base=self.info_db.decl_base,
+            bind=meta_bind,
+            decl_base=decl_base,
             init_table_data='build_deps'
             )
 
         self.so_deps_db = SODepsRepo(
-            bind=self.info_db.decl_base.metadata.bind,
-            decl_base=self.info_db.decl_base,
+            bind=meta_bind,
+            decl_base=decl_base,
             init_table_data='so_deps'
             )
 
         self.runtime_deps_db = RuntimeDepsRepo(
-            bind=self.info_db.decl_base.metadata.bind,
-            decl_base=self.info_db.decl_base,
+            bind=meta_bind,
+            decl_base=decl_base,
             init_table_data='runtime_deps'
             )
 

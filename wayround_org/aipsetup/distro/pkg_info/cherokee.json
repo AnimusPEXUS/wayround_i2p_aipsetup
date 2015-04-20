@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://None",
-  "buildscript": "std",
+  "buildscript": "cherokee",
   "version_tool": "",
   "basename": "cherokee",
   "filters": "",

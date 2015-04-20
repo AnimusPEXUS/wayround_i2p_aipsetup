@@ -94,6 +94,23 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
 
         return
 
+    def get_mapped_package_table(self):
+        ret = None
+        if self.Package.__tablename__ in self.decl_base.metadata.tables:
+            ret = self.decl_base.metadata.tables[self.Package.__tablename__]
+        return ret
+
+    def get_mapped_category_table(self):
+        ret = None
+        if self.Category.__tablename__ in self.decl_base.metadata.tables:
+            ret = self.decl_base.metadata.tables[self.Category.__tablename__]
+        return ret
+
+    def create_tables(self):
+        self.get_mapped_package_table().create(checkfirst=True)
+        self.get_mapped_category_table().create(checkfirst=True)
+        return
+
 
 class SourceRepo(wayround_org.utils.tag.TagEngine):
     pass

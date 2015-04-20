@@ -84,8 +84,8 @@ def main(buildingsite, action=None):
                     '--with-mysqli',
                     '--with-readline',
                     '--enable-fastcgi',
-                    #'--with-apxs2',
-                    
+                    '--with-apxs2=/usr/bin/apxs',
+
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -121,29 +121,16 @@ def main(buildingsite, action=None):
         if 'afterbuild' in actions and ret == 0:
 
             try:
-                os.makedirs(os.path.join(dst_dir, 'daemons', 'httpd', 'conf'))
+                os.makedirs(os.path.join(dst_dir, 'daemons', 'httpd', 'etc'))
             except:
                 logging.exception("can't make dir")
 
             f = open(
-                os.path.join(
-                    dst_dir,
-                    'daemons',
-                    'httpd',
-                    'conf',
-                    'httpd.conf'),'w')
+                os.path.join(dst_dir, 'daemons', 'httpd', 'etc', 'httpd.conf'),
+                'w'
+                )
             f.write('\n\nLoadModule rewrite_module modules/mod_rewrite.so\n\n')
             f.close()
-
-            # RUN[$j]='make install INSTALL_ROOT="$bs_install_dir"'
-
-            # RUN[$j]='cd "$bs_install_dir" #'
-
-            # RUN[$j]='find -maxdepth 1 -type d "(" -name ".channels" -o -name
-            # ".registry" ")" -print -exec rm -vr "{}" ";"'
-
-            # RUN[$j]='find -maxdepth 1 -type f -name ".*" -print -exec rm "{}"
-            # ";"'
 
         if 'distribute' in actions and ret == 0:
             ret = autotools.make_high(
@@ -162,21 +149,17 @@ def main(buildingsite, action=None):
         if 'afterbuild2' in actions and ret == 0:
 
             os.rename(
+                os.path.join(dst_dir, 'daemons', 'httpd', 'etc', 'httpd.conf'),
                 os.path.join(
-                    dst_dir,
-                    'daemons',
-                    'httpd',
-                    'conf',
-                    'httpd.conf'),
-                os.path.join(
-                    dst_dir,
-                    'daemons',
-                    'httpd',
-                    'conf',
-                    'httpd.conf.php')
+                    dst_dir, 'daemons', 'httpd', 'etc', 'httpd.php.conf'
+                    )
                 )
 
-            # RUN[$j]='mv "$bs_install_dir/daemons/httpd/conf/httpd.conf"
-            # "$bs_install_dir/daemons/httpd/conf/httpd.conf.php"'
+            os.unlink(
+                os.path.join(
+                    dst_dir, 'daemons', 'httpd', 'etc',
+                    'httpd.conf.bak'
+                    )
+                )
 
     return ret

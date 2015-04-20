@@ -49,14 +49,20 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--with-apr=/usr/bin/apr-1-config',
-                    '--prefix=/daemons/httpd',
+                    #'--prefix=/daemons/httpd',
+                    '--prefix=/usr/share/httpd',
                     '--libdir=/usr/lib',
                     '--bindir=/usr/bin',
                     '--sbindir=/usr/sbin',
                     '--mandir=/usr/share/man',
                     '--includedir=/usr/include',
                     '--oldincludedir=/usr/include',
+                    '--datarootdir=/usr/share',
+                    '--sysconfdir=/daemons/httpd/etc',
+                    '--sharedstatedir=/daemons/httpd/com',
+                    '--localstatedir=/daemons/httpd/var',
+
+                    '--with-apr=/usr/bin/apr-1-config',
                     '--enable-shared',
                     '--enable-modules=all',
                     '--enable-mods-shared=all',

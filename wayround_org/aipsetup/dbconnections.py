@@ -44,6 +44,8 @@ def info_db_new_connection(config_string):
         config_string
         )
 
+    ret.create_tables()
+
     return ret
 
 
@@ -76,6 +78,8 @@ def pkg_repo_db_new_connection(config_string):
         config_string
         )
 
+    ret.create_tables()
+
     return ret
 
 
@@ -106,6 +110,8 @@ def src_repo_db_new_connection(config_string):
     ret = wayround_org.aipsetup.repository.SourceRepo(
         config_string
         )
+
+    ret.create_tables()
 
     return ret
 

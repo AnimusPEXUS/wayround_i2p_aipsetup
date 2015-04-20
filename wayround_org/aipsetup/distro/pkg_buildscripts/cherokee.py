@@ -1,10 +1,10 @@
 
 import logging
 import os.path
+import subprocess
 
 import wayround_org.aipsetup.build
-from wayround_org.aipsetup.buildtools import autotools
-from wayround_org.aipsetup.buildtools import cmake
+import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 
@@ -14,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = wayround_org.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'cmake', 'build', 'distribute'],
+        ['extract', 'autogen', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -46,52 +46,43 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-        if 'cmake' in actions and ret == 0:
+        if 'autogen' in actions and ret == 0:
+            if not os.path.isfile(os.path.join(src_dir, 'configure')):
+                if not os.path.isfile(os.path.join(src_dir, 'autogen.sh')):
+                    logging.error(
+                        "./configure not found and autogen.sh is absent"
+                        )
+                    ret = 2
+                else:
+                    p = subprocess.Popen(['./autogen.sh'], cwd=src_dir)
+                    ret = p.wait()
 
-            usr_share_mysql = '/usr/share/mysql'
-
-            ret = cmake.cmake_high(
+        if 'configure' in actions and ret == 0:
+            ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '-DCMAKE_INSTALL_PREFIX=/usr',
-
-                    '-DMYSQL_DATADIR=/usr/share/mysql/data',
-
-                    '-DINSTALL_SBINDIR=/usr/bin',
-                    '-DINSTALL_LIBDIR=/usr/lib',
-                    '-DINSTALL_MANDIR=/usr/share/man',
-
-                    '-DINSTALL_DOCREADMEDIR=/usr/share/mysql',
-                    '-DINSTALL_INCLUDEDIR=/usr/include/mysql',
-
-                    '-DINSTALL_DOCDIR={}/docs'.format(usr_share_mysql),
-                    '-DINSTALL_INFODIR={}/docs'.format(usr_share_mysql),
-                    '-DINSTALL_MYSQLDATADIR={}/data'.format(usr_share_mysql),
-                    '-DINSTALL_MYSQLSHAREDIR={}/share'.format(usr_share_mysql),
-                    '-DINSTALL_MYSQLTESTDIR={}/mysql-test'.format(
-                        usr_share_mysql
-                        ),
-                    '-DINSTALL_PLUGINDIR={}/lib/plugin'.format(
-                        usr_share_mysql
-                        ),
-                    '-DINSTALL_SCRIPTDIR={}/scripts'.format(usr_share_mysql),
-                    '-DINSTALL_SHAREDIR={}/share'.format(usr_share_mysql),
-                    '-DINSTALL_SQLBENCHDIR={}'.format(usr_share_mysql),
-                    '-DINSTALL_SUPPORTFILESDIR={}/support-files'.format(
-                        usr_share_mysql
-                        ),
-
-                    '-DWITH_SSL=yes',
-                    '-DWITH_READLINE=yes',
-                    '-DWITH_EXTRA_CHARSETS=all',
-                    '-DWITH_EMBEDDED_SERVER=yes',
-                    '-DWITH_CHARSET=utf8'
+                    '--with-wwwroot=/var/www',
+                    '--with-wwwuser=httpd',
+                    '--with-wwwgroup=httpd',
+                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
+                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--sysconfdir=' +
+                    pkg_info['constitution']['paths']['config'],
+                    '--localstatedir=' +
+                    pkg_info['constitution']['paths']['var'],
+                    '--enable-shared',
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+                    # '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
                 environment_mode='copy',
-                source_subdir=source_configure_reldir,
-                build_in_separate_dir=separate_build_dir
+                source_configure_reldir=source_configure_reldir,
+                use_separate_buildding_dir=separate_build_dir,
+                script_name='configure',
+                run_script_not_bash=False,
+                relative_call=False
                 )
 
         if 'build' in actions and ret == 0:
