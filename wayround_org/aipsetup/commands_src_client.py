@@ -1,7 +1,8 @@
 
 import collections
 
-import wayround_org.aipsetup.client_src
+
+import wayround_org.utils.path
 import wayround_org.utils.text
 
 
@@ -16,7 +17,6 @@ def commands():
 
 
 def search(command_name, opts, args, adds):
-
     """
     Search tarball names known to server
 
@@ -27,6 +27,8 @@ def search(command_name, opts, args, adds):
         -n                   non case sensitive
         -p=NAME              reduce search to package name paths
     """
+
+    import wayround_org.aipsetup.client_src
 
     config = adds['config']
 
@@ -68,12 +70,13 @@ def search(command_name, opts, args, adds):
 
 
 def files(command_name, opts, args, adds):
-
     """
     List tarballs of pointed names
 
     [options] name
     """
+
+    import wayround_org.aipsetup.client_src
 
     config = adds['config']
 
@@ -90,10 +93,11 @@ def files(command_name, opts, args, adds):
 
         res = wayround_org.aipsetup.client_src.files(
             url,
-            name
+            name,
+            []
             )
 
-        if res == None:
+        if res is None:
             ret = 1
             print("No result")
         else:
@@ -111,13 +115,14 @@ def files(command_name, opts, args, adds):
 
 
 def get(command_name, opts, args, adds):
-
     """
     Get tarball
 
     This command internally uses wget to download named file to current
     directory
     """
+
+    import wayround_org.aipsetup.client_src
 
     config = adds['config']
 

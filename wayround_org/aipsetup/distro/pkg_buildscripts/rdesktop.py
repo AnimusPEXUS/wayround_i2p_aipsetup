@@ -1,6 +1,7 @@
 
 import logging
 import os.path
+import subprocess
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
@@ -13,7 +14,7 @@ def main(buildingsite, action=None):
 
     r = wayround_org.aipsetup.build.build_script_wrap(
         buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
+        ['extract', 'autogen', 'configure', 'build', 'distribute'],
         action,
         "help"
         )
@@ -27,6 +28,8 @@ def main(buildingsite, action=None):
         pkg_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+
+        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         separate_build_dir = False
 
@@ -43,37 +46,32 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
+        if 'autogen' in actions and ret == 0:
+            if not os.path.isfile(os.path.join(src_dir, 'configure')):
+                if not os.path.isfile(os.path.join(src_dir, 'autogen.sh')):
+                    logging.error(
+                        "./configure not found and autogen.sh is absent"
+                        )
+                    ret = 2
+                else:
+                    p = subprocess.Popen(['./autogen.sh'], cwd=src_dir)
+                    ret = p.wait()
+
         if 'configure' in actions and ret == 0:
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
-                    '--disable-gtk',
-                    '--enable-gtk3',
-                    '--enable-glib',
-                    '--enable-gobject',
-                    '--enable-python',
-                    '--enable-introspection',
-                    '--disable-mono',
-                    #'--disable-python-dbus',
-                    '--disable-pygtk',
-                    '--disable-qt3',
-                    '--enable-qt4',
-                    '--with-distro=lfs',
-                    
-#                    '--with-distro=' +
-#                        pkg_info['constitution']['system_title'],
-#                    '--with-dist-version=2.00',
-#                    '--without-systemdsystemunitdir',
+                    '--disable-smartcard',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    # '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -102,11 +100,7 @@ def main(buildingsite, action=None):
                 options=[],
                 arguments=[
                     'install',
-                    'DESTDIR=' + (
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
+                    'DESTDIR=' + dst_dir
                     ],
                 environment={},
                 environment_mode='copy',

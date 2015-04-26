@@ -10,7 +10,9 @@
   "non_installable": false,
   "deprecated": false,
   "tags": [],
-  "source_path_prefixes": [],
+  "source_path_prefixes": [
+    "/midnight-commander.org/"
+  ],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

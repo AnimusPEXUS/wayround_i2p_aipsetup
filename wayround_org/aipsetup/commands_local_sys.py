@@ -9,20 +9,14 @@ import pprint
 import shlex
 import sys
 
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.package_name_parser
-import wayround_org.aipsetup.sysupdates
-import wayround_org.aipsetup.sysuser
-import wayround_org.utils.archive
-import wayround_org.utils.checksum
-import wayround_org.utils.datetime_iso8601
-import wayround_org.utils.getopt
-import wayround_org.utils.log
+
 import wayround_org.utils.path
-import wayround_org.utils.tarball
+import wayround_org.utils.getopt
+import wayround_org.utils.archive
 import wayround_org.utils.terminal
+import wayround_org.utils.datetime_iso8601
 import wayround_org.utils.text
-import wayround_org.utils.time
+import wayround_org.utils.log
 
 
 def commands():
@@ -81,6 +75,9 @@ def system_install_package(command_name, opts, args, adds):
 
     If -b is given - it is used as destination root
     """
+
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.sysupdates
 
     config = adds['config']
 
@@ -152,6 +149,8 @@ def system_package_list(command_name, opts, args, adds):
     -b is same as in install
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 0
@@ -196,6 +195,9 @@ def system_package_list_asps(command_name, opts, args, adds):
 
     -b is same as in install
     """
+
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.version
 
     config = adds['config']
 
@@ -246,6 +248,8 @@ def system_package_list_asps(command_name, opts, args, adds):
 
 
 def system_list_package_files(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -305,6 +309,9 @@ def system_remove_package(command_name, opts, args, adds):
                available or which is not removable
     """
 
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.sysupdates
+
     config = adds['config']
 
     ret = 0
@@ -363,6 +370,8 @@ def system_find_package_files(command_name, opts, args, adds):
     fm               LOOKFOR is file mask
     ================ ===================================
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -437,6 +446,9 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
     [-b=DESTDIR] ASP_NAME
     """
 
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.package_name_parser
+
     config = adds['config']
 
     ret = 0
@@ -498,6 +510,8 @@ def system_make_asp_deps(command_name, opts, args, adds):
     /destdir/var/log/packages/deps
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 0
@@ -532,6 +546,8 @@ def system_make_asp_deps(command_name, opts, args, adds):
 
 def system_create_directory_tree(command_name, opts, args, adds):
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 0
@@ -562,6 +578,8 @@ def system_create_directory_tree(command_name, opts, args, adds):
 
 
 def system_create_bundle(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -626,6 +644,8 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
     """
     Find packages with broken files
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -734,6 +754,8 @@ def clean_check_elfs_readiness(command_name, opts, args, adds):
     can be used to detect broken elf files.
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     pkg_client = \
@@ -757,6 +779,8 @@ def clean_find_so_problems(command_name, opts, args, adds):
     Find so libraries missing in system and write package names requiring those
     missing libraries.
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -853,6 +877,9 @@ def clean_find_old_packages(command_name, opts, args, adds):
     Find packages older then month
     """
 
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.package_name_parser
+
     # TODO: add arguments
     # TODO: must work with basedir!
 
@@ -917,11 +944,9 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
                     lat = pkg_client.tarballs_latest(package_name)
                     if lat is not None and len(lat) > 0:
-                        res = \
-                            wayround_org.utils.path.\
-                            select_by_prefered_extension(
-                                lat, config
-                                )
+                        res = wayround_org.utils.path.select_by_prefered_extension(
+                            lat, config
+                            )
                         res = wayround_org.aipsetup.client_pkg.get_tarball(
                             res
                             )
@@ -952,6 +977,8 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
 
 def clean_find_invalid_deps_lists(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -1013,6 +1040,11 @@ def clean_find_garbage(command_name, opts, args, adds):
     --script-type=bash - system cleaning script language (only bash supported)
     --so               - look only for .so files garbage in /usr/lib directory
     """
+
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.package_name_parser
+    import wayround_org.aipsetup.client_pkg
+    import wayround_org.aipsetup.system
 
     config = adds['config']
 
@@ -1220,6 +1252,10 @@ def clean_find_packages_requiring_deleteds(
     -g           - get sources for all found packages
     """
 
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.package_name_parser
+    import wayround_org.aipsetup.client_pkg
+
     config = adds['config']
 
     base_dir = '/'
@@ -1316,6 +1352,10 @@ def clean_find_libtool_la_with_problems(
     Search for .la files depending on other non-existing .la files or on absent
     .so files
     """
+
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.package_name_parser
+    import wayround_org.aipsetup.client_pkg
 
     ret = 0
 
@@ -1435,6 +1475,8 @@ def clean_check_list_of_installed_packages_and_asps_auto(
     Searches for packages with more when one asp installed
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     logging.info("Working. Please wait, it will be not long...")
@@ -1446,6 +1488,8 @@ def clean_check_list_of_installed_packages_and_asps_auto(
 
 
 def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -1468,6 +1512,8 @@ def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
 
 
 def pkgdeps_print_asp_depends(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
 
     ret = 0
 
@@ -1502,6 +1548,8 @@ def pkgdeps_print_asp_depends(command_name, opts, args, adds):
 
 def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     pkg_client = \
@@ -1529,6 +1577,8 @@ def package_check(command_name, opts, args, adds):
 
     # TODO: move it to build commands?
 
+    import wayround_org.aipsetup.controllers
+
     ret = 0
 
     file = None
@@ -1553,6 +1603,8 @@ def clean_gen_locale(command_name, opts, args, adds):
     """
     (only root) Generate general unicode locale
     """
+
+    import wayround_org.aipsetup.controllers
 
     ret = 0
 
@@ -1626,6 +1678,8 @@ def clean_sys_users(command_name, opts, args, adds):
     (only root) Creates system users and their directories under /daemons
     """
 
+    import wayround_org.aipsetup.sysuser
+
     ret = 0
 
     if os.getuid() != 0:
@@ -1650,6 +1704,8 @@ def clean_sys_perms(command_name, opts, args, adds):
     """
     (only root) Ensures system files and dirs permissions
     """
+
+    import wayround_org.aipsetup.sysuser
 
     ret = 0
 
@@ -1676,6 +1732,8 @@ def info_parse_pkg_name(command_name, opts, args, adds):
     NAME
     """
 
+    import wayround_org.aipsetup.package_name_parser
+
     ret = 0
 
     if len(args) != 1:
@@ -1698,6 +1756,9 @@ def info_parse_pkg_name(command_name, opts, args, adds):
 
 
 def info_parse_tarball(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
+    import wayround_org.utils.tarball
 
     config = adds['config']
 
@@ -1740,8 +1801,8 @@ def system_replica_instruction(command_name, opts, args, adds):
 
     print("""\
 --
-This instruction will provide You with information on how to replicate current
-UNICORN system core to other hard drive.
+This instruction provids information on how to replicate current
+UNICORN system core to other filesystem partition.
 --
 
  => TARGET SYSTEM PARTITION TABLES PREPERATIONS <=
@@ -1809,10 +1870,12 @@ Your self.
 def system_convert_certdata_txt(command_name, opts, args, adds):
     ret = 0
 
+    import wayround_org.aipsetup.system
+
     filename = None
     if len(args) != 1:
         print("(only) filename must be passed")
-        ret =1
+        ret = 1
     else:
         filename = args[0]
 
@@ -1823,7 +1886,7 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
         f = open('ca-bundle.crt.tmp', 'wb')
         f.write(res)
         f.close()
-        
+
         print(
             "'ca-bundle.crt.tmp' written."
             " copy it into /etc/ssl and rename as 'ca-bundle.crt'"

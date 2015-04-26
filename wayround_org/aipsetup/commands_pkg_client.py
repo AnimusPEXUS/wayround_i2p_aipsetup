@@ -2,10 +2,7 @@
 import collections
 import logging
 
-import wayround_org.aipsetup.client_pkg
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.get_list_procs
-import wayround_org.aipsetup.info
+
 import wayround_org.utils.path
 import wayround_org.utils.text
 
@@ -45,6 +42,8 @@ def list_(command_name, opts, args, adds):
         -n                   non case sensitive
     """
 
+
+    import wayround_org.aipsetup.client_pkg
     config = adds['config']
 
     ret = 1
@@ -89,6 +88,8 @@ def list_cat(command_name, opts, args, adds):
     List all packages in category and sub categories
     """
 
+
+    import wayround_org.aipsetup.client_pkg
     config = adds['config']
 
     ret = 1
@@ -136,6 +137,8 @@ def ls(command_name, opts, args, adds):
 
     arguments: path
     """
+
+    import wayround_org.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -199,6 +202,9 @@ def print_info(command_name, opts, args, adds):
     attributes: package_name
     """
 
+    import wayround_org.aipsetup.info
+    import wayround_org.aipsetup.client_pkg
+
     config = adds['config']
 
     ret = 1
@@ -243,6 +249,8 @@ def asp_list(command_name, opts, args, adds):
     attributes: package_name
     """
 
+    import wayround_org.aipsetup.client_pkg
+
     config = adds['config']
 
     ret = 1
@@ -280,6 +288,8 @@ def get_asp(command_name, opts, args, adds):
     attributes: file_base_name
     """
 
+    import wayround_org.aipsetup.client_pkg
+
     config = adds['config']
 
     ret = 1
@@ -304,6 +314,8 @@ def get_asp_latest(command_name, opts, args, adds):
 
     attributes: file_base_name
     """
+
+    import wayround_org.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -336,6 +348,8 @@ def get_asp_lat_cat(command_name, opts, args, adds):
     -o           include deprecated
     -n           include non-installable
     """
+
+    import wayround_org.aipsetup.client_pkg
 
     config = adds['config']
     out_dir = ''
@@ -415,6 +429,8 @@ def tar_list(command_name, opts, args, adds):
     List all tarballs for named package
     """
 
+    import wayround_org.aipsetup.client_pkg
+
     config = adds['config']
 
     ret = 1
@@ -470,6 +486,8 @@ def get_tar_latest(command_name, opts, args, adds):
 
 def _get_tarballs_latest(url, name, config, out_dir=None, mute=True):
 
+    import wayround_org.aipsetup.client_pkg
+
     ret = 1
 
     exts = config['pkg_client']['acceptable_src_file_extensions'].split(' ')
@@ -504,6 +522,7 @@ def get_tar_lat_cat(command_name, opts, args, adds):
     -o           include deprecated
     -n           include non-installable
     """
+    import wayround_org.aipsetup.client_pkg
 
     config = adds['config']
     out_dir = ''
@@ -587,6 +606,9 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
     -v=VERSION
     """
 
+    import wayround_org.aipsetup.get_list_procs
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 1
@@ -644,6 +666,8 @@ get_tar_by_list.__doc__ = get_x_by_list.__doc__
 
 def bundle_list(command_name, opts, args, adds):
 
+    import wayround_org.aipsetup.client_pkg
+
     config = adds['config']
 
     url = config['pkg_client']['server_url']
@@ -670,6 +694,8 @@ def bundle_list(command_name, opts, args, adds):
 
 
 def get_by_bundle(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.client_pkg
 
     config = adds['config']
 

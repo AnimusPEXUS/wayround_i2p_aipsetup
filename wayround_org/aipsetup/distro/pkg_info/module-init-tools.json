@@ -1,7 +1,7 @@
 {
   "description": "use kmod",
   "home_page": "http://www.kernel.org",
-  "buildscript": "module-init-tools",
+  "buildscript": "moduleinittools",
   "version_tool": "",
   "basename": "module-init-tools",
   "filters": "",

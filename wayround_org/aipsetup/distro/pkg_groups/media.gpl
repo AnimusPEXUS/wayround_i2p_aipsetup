@@ -36,6 +36,8 @@
     "ghostscript",
     
     "FreeImage",
+    
+    "sox", "librsvgmm",
 
     "openjpeg1", "openjpeg2", 
 

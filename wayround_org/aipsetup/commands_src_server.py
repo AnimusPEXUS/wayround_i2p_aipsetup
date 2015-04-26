@@ -3,7 +3,7 @@ import collections
 import logging
 import os.path
 
-import wayround_org.aipsetup.controllers
+
 import wayround_org.utils.path
 
 
@@ -38,6 +38,8 @@ def src_repo_index(command_name, opts, args, adds):
     -f - force reindexing files already in index
     -c - only index clean
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 

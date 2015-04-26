@@ -5,10 +5,8 @@ import glob
 import logging
 import os.path
 
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.info
+
 import wayround_org.utils.path
-import wayround_org.utils.tarball
 
 
 def commands():
@@ -50,6 +48,8 @@ def pkg_repo_cleanup(command_name, opts, args, adds):
     Removes old packages from package repository
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     # TODO: more descriptive help text required
@@ -72,6 +72,8 @@ def info_find_missing_pkg_info_records(command_name, opts, args, adds):
 
     -f forces rewrite existing .json files
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -101,6 +103,8 @@ def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
     """
     Finds pkg info records which differs to FS .json files
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -132,6 +136,8 @@ def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
     Loads pkg info records which differs to FS .json files
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
@@ -149,6 +155,8 @@ def info_delete_pkg_info_records(command_name, opts, args, adds):
 
     MASK
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -181,6 +189,8 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
     Existing files are skipped, unless -f is set
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     mask = '*'
@@ -207,6 +217,8 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
 
     -a force load all records, not only missing.
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -241,9 +253,10 @@ def info_editor(command_name, opts, args, adds):
     Start special info-file editor
     """
 
-    config = adds['config']
-
     import wayround_org.aipsetup.infoeditor
+    import wayround_org.aipsetup.controllers
+
+    config = adds['config']
 
     ret = 0
 
@@ -300,6 +313,9 @@ def info_mass_script_apply(command_name, opts, args, adds):
     -i=subpath
           create package section in repository under pointed subpath
     """
+
+    import wayround_org.aipsetup.controllers
+    import wayround_org.aipsetup.info
 
     config = adds['config']
 
@@ -440,17 +456,21 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
     return ret
 
+
 def info_triangulate_dependencies(command_name, opts, args, adds):
-    
+
     ret = 0
-    
+
     return ret
+
 
 def pkg_repo_index(command_name, opts, args, adds):
     """
     Scan repository and save it's categories and packages indexes
     to database
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -523,6 +543,8 @@ def pkg_repo_put_file(command_name, opts, args, adds):
     -m      move, not copy
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 0
@@ -552,6 +574,8 @@ def pkg_repo_put_bundle(command_name, opts, args, adds):
     """
     Set bundle to package server
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 

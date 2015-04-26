@@ -625,27 +625,25 @@ class SystemCtl:
                 shared_objects = set()
                 for i in lines:
                     if os.path.isfile(i):
-                        e = wayround_org.utils.format.elf.ELF(i)
-                        if e.elf_type_name == 'ET_DYN':
-                            shared_objects.add(i)
+                        if os.path.dirname(i) in [
+                                wayround_org.utils.path.join(
+                                    self.basedir, 'usr', 'lib'
+                                    ),
+                                wayround_org.utils.path.join(
+                                    self.basedir, 'usr', 'lib64'
+                                    )
+                                ]:
+                            e = wayround_org.utils.format.elf.ELF(i)
+                            if e.elf_type_name == 'ET_DYN':
+                                shared_objects.add(i)
 
                 if exclude:
                     shared_objects -= set(exclude)
 
-                shared_objects_tl = sorted(shared_objects)
-
-                for i in shared_objects_tl:
+                for i in sorted(shared_objects):
                     logging.info("   excluded: {}".format(i))
 
-                del(shared_objects_tl)
-
                 lines = list(set(lines) - set(shared_objects))
-
-                logging.info(
-                    "Excluded {} shared objects".format(
-                        len(shared_objects)
-                        )
-                    )
 
                 lines.sort(reverse=True)
 
@@ -684,6 +682,26 @@ class SystemCtl:
                                         rm_file_name
                                         )
                                     )
+
+                            else:
+
+                                rm_file_name_dir = os.path.dirname(
+                                    rm_file_name
+                                    )
+
+                                if not os.path.islink(rm_file_name_dir):
+                                    if wayround_org.utils.file.is_dir_empty(
+                                            rm_file_name_dir
+                                            ):
+                                        try:
+                                            os.rmdir(rm_file_name_dir)
+                                        except:
+                                            logging.exception(
+                                                "Couldn't remove dir: {}".format(
+                                                    rm_file_name_dir
+                                                    )
+                                                )
+
                         else:
                             try:
                                 os.rmdir(rm_file_name)
@@ -703,6 +721,9 @@ class SystemCtl:
                         asp_name
                         )
                     )
+
+                for i in sorted(shared_objects):
+                    logging.info("   excluded: {}".format(i))
 
             for i in [
                     self._installed_pkg_dir_buildlogs,
@@ -2056,6 +2077,7 @@ class SystemCtl:
 
         ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
         ret = wayround_org.utils.path.realpaths(ret)
+        ret = list(set(ret))
 
         return ret
 
@@ -2072,6 +2094,7 @@ class SystemCtl:
 
         ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
         ret = wayround_org.utils.path.realpaths(ret)
+        ret = list(set(ret))
 
         return ret
 
@@ -2335,12 +2358,12 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith('/usr/lib')
-                            or not os.path.isdir(
-                            wayround_org.utils.path.join(
+                                    or not os.path.isdir(
+                                    wayround_org.utils.path.join(
                                         self.basedir,
                                         wj)
-                            )
-                            ):
+                                    )
+                                ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

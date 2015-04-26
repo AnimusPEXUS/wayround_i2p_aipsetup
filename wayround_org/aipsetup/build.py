@@ -174,6 +174,7 @@ class BuildCtl:
 
         self.buildingsite_ctl = buildingsite_ctl
         self.path = wayround_org.utils.path.abspath(buildingsite_ctl.path)
+        return
 
     def complete(self, buildscript_ctl):
         """
@@ -220,10 +221,8 @@ class BuildCtl:
             ret = 1
         else:
 
-            script = (
-                buildscript_ctl.load_buildscript(
-                    package_info['pkg_info']['buildscript']
-                    )
+            script = buildscript_ctl.load_buildscript(
+                package_info['pkg_info']['buildscript']
                 )
 
             if not isinstance(script, dict):
@@ -231,21 +230,54 @@ class BuildCtl:
                 ret = 2
             else:
 
-                try:
-                    ret = script['main'](building_site, action)
-                except KeyboardInterrupt:
-                    raise
-                except:
-                    logging.exception(
-                        "Error starting `main' function in `{}'".format(
-                            package_info['pkg_info']['buildscript']
-                            )
-                        )
-                    ret = 3
+                if 'Builder' in script:
+                    builder = script['Builder'](building_site)
 
-                logging.info(
-                    "action `{}' ended with code {}".format(action, ret)
-                    )
+                    if action == 'help':
+                        builder.print_help()
+                    else:
+
+                        try:
+                            ret = builder.run_action(action)
+                        except KeyboardInterrupt:
+                            # TODO: I don't like this exception
+                            raise
+                        except:
+                            logging.exception(
+                                "Error running action"
+                                " `{}' in Builder class".format(
+                                    action
+                                    )
+                                )
+                            ret = 3
+
+                        logging.info(
+                            "action `{}' ended with code {}".format(
+                                action,
+                                ret)
+                            )
+
+                elif 'main' in script:
+
+                    try:
+                        ret = script['main'](building_site, action)
+                    except KeyboardInterrupt:
+                        # TODO: I don't like this exception
+                        raise
+                    except:
+                        logging.exception(
+                            "Error starting `main' function in `{}'".format(
+                                package_info['pkg_info']['buildscript']
+                                )
+                            )
+                        ret = 3
+
+                    logging.info(
+                        "action `{}' ended with code {}".format(action, ret)
+                        )
+                else:
+                    logging.error("Invalid build script structure")
+                    ret = 4
 
         return ret
 
@@ -286,7 +318,6 @@ class PackCtl:
             os.makedirs(destdir + os.path.sep + 'usr')
         except:
             pass
-
 
         for i in INVALID_MOVABLE_DESTDIR_ROOT_LINKS:
 
@@ -1709,10 +1740,15 @@ def build_actions_selector(actions, action):
     """
     Used by :func:`build_script_wrap` to build it's valid return action list
 
-    :rtype: ``None`` if error. tuple (actions, action), where ``action = None``
-        if ``action == 'complete'``. If ``action == 'help'``, both values
-        returned without changes. If action is one of actions, ``actions =
-        [action]``. If action is one of actions and action ends with + sign,
+    :rtype: ``None`` if error.
+        tuple (actions, action), where ``action = None``
+        if ``action == 'complete'``.
+
+        If ``action == 'help'``, both values returned without changes.
+
+        If action is one of actions, ``actions = [action]``.
+
+        If action is one of actions and action ends with + sign,
         ``actions = actions[(action position):]``
     """
 
@@ -1914,9 +1950,14 @@ Can't select between those package names (for {})
                     #             }
                     #         )
 
-                    tmp_dir_prefix = "{}-{}-".format(
+                    _ts = wayround_org.utils.time.currenttime_stamp()
+                    while '.' in _ts:
+                        _ts = _ts.replace('.', '')
+
+                    tmp_dir_prefix = "{}-{}-{}-".format(
                         package_info['name'],
-                        par_res['groups']['version']
+                        par_res['groups']['version'],
+                        _ts
                         )
 
                     build_site_dir = tempfile.mkdtemp(

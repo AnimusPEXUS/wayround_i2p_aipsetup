@@ -78,7 +78,7 @@ def main(buildingsite, action=None):
                     #'--with-arch-32=i486',
                     #'--with-tune=generic',
 
-                    '--enable-languages=all,go,objc,obj-c++,ada',
+                    '--enable-languages=c,c++,java,objc,obj-c++,ada,fortran',
                     '--enable-bootstrap',
                     '--enable-threads=posix',
                     '--enable-multiarch',

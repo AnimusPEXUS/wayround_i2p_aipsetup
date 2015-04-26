@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "vhba-module",
+  "buildscript": "vhbamodule",
   "version_tool": "",
   "basename": "vhba-module",
   "filters": "",

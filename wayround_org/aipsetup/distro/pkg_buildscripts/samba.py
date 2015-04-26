@@ -52,6 +52,7 @@ def main(buildingsite, action=None):
                     '--with-pam',
                     '--with-pam_smbpass',
                     '--enable-fhs',
+                    '--with-systemd',
 #                    '--with-swatdir=/usr/share/samba/swat',
                     '--sysconfdir=/etc/samba',
 #                    '--libexecdir=/usr/libexec',

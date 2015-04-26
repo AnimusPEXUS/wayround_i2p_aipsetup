@@ -1,6 +1,7 @@
 {
     "names" : [
-        "MesaLib",
+        "MesaLib", "mesa",
+        "MesaGLUT",
         "glu",
         "glut",
         "glw",

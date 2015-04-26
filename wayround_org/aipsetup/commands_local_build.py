@@ -3,8 +3,8 @@ import collections
 import logging
 import os.path
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.controllers
+
+import wayround_org.utils.path
 
 
 def commands():
@@ -19,6 +19,10 @@ def commands():
             ('continue', build_build_plus),
             ('pack', build_pack),
             ('complete', build_complete),
+            ])),
+        ('bsys', collections.OrderedDict([
+            ('create', bsys_create),
+            ('build', bsys_build)
             ]))
         ])
 
@@ -29,6 +33,8 @@ def building_site_init(command_name, opts, args, adds):
 
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
+
+    import wayround_org.aipsetup.controllers
 
     #    config = adds['config']
 
@@ -54,6 +60,8 @@ def building_site_apply_info(command_name, opts, args, adds):
 
     [DIRNAME [FILENAME]]
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -107,6 +115,8 @@ def build_build_plus(command_name, opts, args, adds):
     started (if not error will occur)
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 0
@@ -143,6 +153,8 @@ def _build_complete_subroutine(
         r_bds
         ):
 
+    import wayround_org.aipsetup.controllers
+
     ret = 0
 
     const = wayround_org.aipsetup.controllers.constitution_by_config(
@@ -152,7 +164,7 @@ def _build_complete_subroutine(
         build
         )
 
-    if const == None:
+    if const is None:
         ret = 1
     else:
 
@@ -209,6 +221,8 @@ def build_complete(command_name, opts, args, adds):
     --target=TRIPLET
     ================ ====================================
     """
+
+    import wayround_org.aipsetup.controllers
 
     config = adds['config']
 
@@ -308,6 +322,9 @@ def build_full(command_name, opts, args, adds):
     ================ ====================================
     """
 
+    import wayround_org.aipsetup.build
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     r_bds = '-d' in opts
@@ -396,6 +413,8 @@ def build_pack(command_name, opts, args, adds):
     DIRNAME - set building site. Default is current directory
     """
 
+    import wayround_org.aipsetup.controllers
+
     ret = 0
 
     dir_name = '.'
@@ -426,6 +445,8 @@ def build_build(command_name, opts, args, adds):
     DIRNAME - set building site. Default is current directory
     """
 
+    import wayround_org.aipsetup.controllers
+
     config = adds['config']
 
     ret = 0
@@ -450,3 +471,14 @@ def build_build(command_name, opts, args, adds):
         ret = build_ctl.complete(buildscript_ctl)
 
     return ret
+
+
+def bsys_create(command_name, opts, args, adds):
+
+    config = adds['config']
+
+    return 1
+
+def bsys_build(command_name, opts, args, adds):
+
+    return 1

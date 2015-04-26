@@ -49,19 +49,26 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    #                    '--target-list=i386-linux-user,i386-softmmu',
+                    '--with-gtkabi=3.0',
+                    #'--cpu=x86_64',
+                    '--audio-drv-list=alsa,oss,sdl',
+                    '--enable-kvm',
+                    '--enable-system',
+                    '--enable-user',
+                    '--enable-linux-user',
+                    #'--enable-bsd-user',
+                    #'--enable-guest-base',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
-#                    '--target-list=i386-linux-user,i386-softmmu',
-                    '--enable-system',
-                    '--enable-user',
-#                    '--enable-shared',
-#                    '--host=' + pkg_info['constitution']['host'],
-#                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    pkg_info['constitution']['paths']['var'],
+                    #                    '--enable-shared',
+                    #                    '--host=' + pkg_info['constitution']['host'],
+                    #                    '--build=' + pkg_info['constitution']['build'],
+                    #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

@@ -1,5 +1,8 @@
 {
     "names" : [
+        "bridge-utils",
+        "boost",
+        "talloc",
         "intltool",
         "inetutils",
         "acl",
@@ -137,6 +140,10 @@
         "yasm",
         "zip",
         "zlib",
-        "qrencode"
+        "qrencode",
+        "zint", "zbat",
+        "cups", "cups-filters",
+        "qpdf",
+        "wireless_tools", "wpa_supplicant", "kismet"
     ]
 }

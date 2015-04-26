@@ -10,7 +10,9 @@
   "non_installable": false,
   "deprecated": false,
   "tags": [],
-  "source_path_prefixes": [],
+  "source_path_prefixes": [
+    "/hp.com/wireless_tools/"
+  ],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []
