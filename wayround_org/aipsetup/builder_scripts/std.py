@@ -52,7 +52,10 @@ class Builder:
 
     def define_actions(self):
         return collections.OrderedDict([
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('dst_cleanup', self.builder_action_dst_cleanup),
             ('extract', self.builder_action_extract),
+            ('patch', self.builder_action_patch),
             ('autogen', self.builder_action_autogen),
             ('configure', self.builder_action_configure),
             ('build', self.builder_action_build),
@@ -74,20 +77,53 @@ class Builder:
                 actions = [actions[actions.index(action)]]
 
         for i in actions:
-            ret = self.action_dict[i]()
+            logging.info(
+                "======== Starting '{}' action".format(i)
+                )
+            try:
+                ret = self.action_dict[i]()
+            except:
+                logging.exception(
+                    "======== Exception on '{}' action".format(i)
+                    )
+                ret = 100
+            else:
+                logging.info(
+                    "======== Finished '{}' action with code {}".format(
+                        i, ret
+                        )
+                    )
             if ret != 0:
                 break
 
         return ret
 
-    def builder_action_extract(self):
+    def builder_action_src_cleanup(self):
         """
-        Standard sources extraction actions
+        Standard sources cleanup
         """
 
         if os.path.isdir(self.src_dir):
             logging.info("cleaningup source dir")
             wayround_org.utils.file.cleanup_dir(self.src_dir)
+
+        return 0
+
+    def builder_action_dst_cleanup(self):
+        """
+        Standard destdir cleanup
+        """
+
+        if os.path.isdir(self.src_dir):
+            logging.info("cleaningup destination dir")
+            wayround_org.utils.file.cleanup_dir(self.dst_dir)
+
+        return 0
+
+    def builder_action_extract(self):
+        """
+        Standard sources extraction actions
+        """
 
         ret = autotools.extract_high(
             self.buildingsite,
@@ -97,6 +133,9 @@ class Builder:
             )
 
         return ret
+
+    def builder_action_patch(self):
+        return 0
 
     def builder_action_autogen(self):
         ret = 0

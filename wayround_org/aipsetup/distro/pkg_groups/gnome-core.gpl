@@ -510,6 +510,14 @@
                 }
             },
 
+        "gnome-screensaver": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
+
 
 
         "glib": {

@@ -15,6 +15,8 @@ import pprint
 import shutil
 import subprocess
 import tempfile
+import importlib
+import types
 
 import wayround_org.aipsetup.client_pkg
 import wayround_org.aipsetup.controllers
@@ -156,6 +158,44 @@ class Constitution:
             }
 
 
+class BuildScriptCtrl:
+
+    def __init__(self):
+        return
+
+    def load_buildscript(self, name):
+        """
+        Loads building script with exec function and returns it's global
+        dictionary. ``None`` is returned in case of error.
+        """
+
+        ret = None
+
+        if not type(name) == str or not name.isidentifier():
+            logging.error(
+                "Invalid build module name `{}'".format(name)
+                )
+            ret = 1
+
+        if not isinstance(ret, int):
+
+            try:
+                module = importlib.import_module(
+                    'wayround_org.aipsetup.builder_scripts.{}'.format(name)
+                    )
+            except:
+                logging.exception(
+                    "Error loading build script `{}'".format(name)
+                    )
+                ret = 2
+
+            else:
+
+                ret = module
+
+        return ret
+
+
 class BuildCtl:
 
     def __init__(
@@ -225,13 +265,13 @@ class BuildCtl:
                 package_info['pkg_info']['buildscript']
                 )
 
-            if not isinstance(script, dict):
-                logging.error("Some error while loading script")
+            if type(script) != types.ModuleType:
+                logging.error("Some error while loading builder module")
                 ret = 2
             else:
 
-                if 'Builder' in script:
-                    builder = script['Builder'](building_site)
+                if hasattr(script, 'Builder'):
+                    builder = script.Builder(building_site)
 
                     if action == 'help':
                         builder.print_help()
@@ -240,7 +280,6 @@ class BuildCtl:
                         try:
                             ret = builder.run_action(action)
                         except KeyboardInterrupt:
-                            # TODO: I don't like this exception
                             raise
                         except:
                             logging.exception(
@@ -257,12 +296,11 @@ class BuildCtl:
                                 ret)
                             )
 
-                elif 'main' in script:
+                elif hasattr(script, 'main'):
 
                     try:
-                        ret = script['main'](building_site, action)
+                        ret = script.main(building_site, action)
                     except KeyboardInterrupt:
-                        # TODO: I don't like this exception
                         raise
                     except:
                         logging.exception(
@@ -989,6 +1027,7 @@ class BuildingSiteCtl:
 
     def __init__(self, path):
         self.path = wayround_org.utils.path.abspath(path)
+        return
 
     def getDIR_TARBALL(self):
         return getDIR_TARBALL(self.path)
@@ -1396,7 +1435,7 @@ class BuildingSiteCtl:
 
     apply_info.__doc__ += APPLY_DESCR
 
-    def _complete_info_correctness_check(self, buildscript_ctl):
+    def _complete_info_correctness_check(self):
 
         ret = 0
 
@@ -1409,16 +1448,7 @@ class BuildingSiteCtl:
         except:
             scr_name = ''
 
-        if (
-                scr_name == ''
-                or
-                not isinstance(
-                    buildscript_ctl.load_buildscript(
-                        scr_name
-                        ),
-                    dict
-                    )
-                ):
+        if scr_name == '':
             ret = 1
 
         return ret
@@ -1486,7 +1516,7 @@ class BuildingSiteCtl:
 
         ret = 0
 
-        if (self._complete_info_correctness_check(buildscript_ctl) != 0
+        if (self._complete_info_correctness_check() != 0
                 or isinstance(main_src_file, str)):
 
             logging.warning(
@@ -1499,7 +1529,7 @@ class BuildingSiteCtl:
                 ret = 15
 
         if ret == 0:
-            if self._complete_info_correctness_check(buildscript_ctl) != 0:
+            if self._complete_info_correctness_check() != 0:
 
                 logging.error(
                     "`{}' has wrong build script name".format(main_src_file)
@@ -1537,92 +1567,6 @@ class BuildingSiteCtl:
             "+++++++++++ Finished Complete build under `{}' +++++++++++".
             format(rp)
             )
-
-        return ret
-
-
-class BuildScriptCtrl:
-
-    def __init__(self, dirname):
-
-        self.dirname = dirname
-
-    def load_buildscript(self, name):
-        """
-        Loads building script with exec function and returns it's global
-        dictionary. ``None`` is returned in case of error.
-        """
-
-        ret = None
-
-        buildscript_filename = wayround_org.utils.path.abspath(
-            os.path.join(
-                self.dirname,
-                '{}.py'.format(name)
-                )
-            )
-
-        if not os.path.isfile(buildscript_filename):
-            logging.error(
-                "Can't find building script `{}'".format(buildscript_filename)
-                )
-            ret = 1
-
-        else:
-
-            txt = ''
-            try:
-                f = open(buildscript_filename, 'r')
-            except:
-                logging.exception(
-                    "Can't read file `{}'".format(buildscript_filename)
-                    )
-                ret = 2
-            else:
-                txt = f.read()
-                f.close()
-
-                globals_dict = {}
-                locals_dict = globals_dict
-
-                try:
-                    exec(
-                        compile(
-                            txt,
-                            buildscript_filename,
-                            'exec'
-                            ),
-                        globals_dict,
-                        locals_dict
-                        )
-
-                except:
-                    logging.exception(
-                        "Can't load building script `{}'".format(
-                            buildscript_filename
-                            )
-                        )
-                    ret = 3
-
-                else:
-
-                    try:
-                        ret = globals_dict
-                    except:
-                        logging.exception(
-                            "Error while calling "
-                            "for build_script() from `{}'".format(
-                                buildscript_filename
-                                )
-                            )
-                        ret = 5
-
-                    else:
-                        logging.info(
-                            "Loaded building script: `{}'".format(
-                                buildscript_filename
-                                )
-                            )
 
         return ret
 

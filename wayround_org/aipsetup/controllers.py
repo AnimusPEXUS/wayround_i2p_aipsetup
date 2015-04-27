@@ -165,20 +165,12 @@ def pack_ctl_new(bs):
 
 
 def bscript_ctl_by_config(config):
-
-    ret = bscript_ctl_new(
-        config['local_build']['building_scripts_dir']
-        )
-
+    ret = bscript_ctl_new()
     return ret
 
 
-def bscript_ctl_new(dirname):
-
-    ret = wayround_org.aipsetup.build.BuildScriptCtrl(
-        dirname
-        )
-
+def bscript_ctl_new():
+    ret = wayround_org.aipsetup.build.BuildScriptCtrl()
     return ret
 
 
