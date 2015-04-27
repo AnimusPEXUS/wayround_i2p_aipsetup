@@ -13,11 +13,6 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def __init__(self, buildingsite):
-        super().__init__(buildingsite)
-        print('test test test test test test test')
-        return
-
     def define_custom_data(self):
         ret = dict()
         ret['makefile'] = os.path.join(self.src_dir, 'Makefile')
@@ -27,7 +22,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def define_actions(self):
-        ret = super().define_actions()
         ret = collections.OrderedDict([
             ('verify_tarball', self.builder_action_verify_tarball),
             ('src_cleanup', self.builder_action_src_cleanup),

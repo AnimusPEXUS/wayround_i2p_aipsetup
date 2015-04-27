@@ -167,8 +167,11 @@ class PackageRepoCtl:
             else:
 
                 package_dir = wayround_org.utils.path.abspath(
-                    self._repository_dir
-                    + os.path.sep + package_path + os.path.sep + 'pack'
+                    wayround_org.utils.path.join(
+                        self._repository_dir,
+                        package_path,
+                        'pack'
+                        )
                     )
 
                 logging.debug(

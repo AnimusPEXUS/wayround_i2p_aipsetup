@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 
+import sys
+
+if sys.path[0] == '':
+    del sys.path[0]
+
 import logging
 
 import wayround_org.utils.program

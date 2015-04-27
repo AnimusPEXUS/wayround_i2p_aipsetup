@@ -2,121 +2,43 @@
 import logging
 import os.path
 import subprocess
+import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 
-def main(buildingsite, action=None):
+import wayround_org.aipsetup.builder_scripts.std
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'build2', 'distribute'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_custom_data(self):
+        return {}
 
-    else:
+    def define_actions(self):
+        ret = collections.OrderedDict([
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('extract', self.builder_action_extract),
+            ('patch', self.builder_action_patch),
+            ('autogen', self.builder_action_autogen),
+            ('configure', self.builder_action_configure),
+            ('build_depend', self.builder_action_build_depend),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute)
+            ])
+        return ret
 
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    # '--with-freetype',
-                    '--without-v4l',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                    pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                    pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    #                    '--build=i486-pc-linux-gnu',
-                    #                    '--host=i686-pc-linux-gnu',
-                    #'FREETYPE_CFLAGS={}'.format(
-                    #    subprocess.call(
-                    #        ['pkg-config', '--cflags', 'freetype2'])
-                    #    ),
-                    #'FREETYPE_LDFLAGS={}'.format(
-                    #    subprocess.call(['pkg-config', '--libs', 'freetype2'])
-                    #    )
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=['depend'],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'build2' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + (
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+    def builder_action_build_depend(self):
+        ret = autotools.make_high(
+            self.buildingsite,
+            options=[],
+            arguments=['depend'],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
