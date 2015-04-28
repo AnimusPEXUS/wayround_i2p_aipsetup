@@ -3,8 +3,10 @@
 Update system bindings and such
 """
 
+import os
 import subprocess
 import logging
+import wayround_org.utils.checksum
 
 
 def sysupdates_all_actions(opts, args):
@@ -16,6 +18,7 @@ def all_actions():
     ret = 0
 
     try:
+        os.sync()
         ldconfig()
         update_mime_database()
         gdk_pixbuf_query_loaders()
@@ -23,8 +26,10 @@ def all_actions():
         glib_compile_schemas()
         gtk_query_immodules_2_0()
         gtk_query_immodules_3_0()
+        os.sync()
 
     except:
+        logging.exception("Updates error")
         ret = 1
 
     return ret
@@ -35,11 +40,59 @@ def ldconfig():
     return subprocess.Popen(['ldconfig']).wait()
 
 
+def _update_mime_database_check():
+    """
+    return: 0 - passed, not 0 - not passed
+    """
+    wayround_org.utils.checksum.make_dir_checksums(
+        '/usr/share/mime',
+        '/usr/share/mime/sha512sums.tmp',
+        rel_to='/',
+        exclude=[
+            '/usr/share/mime/sha512sums',
+            '/usr/share/mime/sha512sums.tmp'
+            ]
+        )
+    summ1 = wayround_org.utils.checksum.make_file_checksum(
+        '/usr/share/mime/sha512sums'
+        )
+    summ2 = wayround_org.utils.checksum.make_file_checksum(
+        '/usr/share/mime/sha512sums.tmp'
+        )
+    ret = int(summ1 != summ2)
+    os.unlink('/usr/share/mime/sha512sums.tmp')
+    return ret
+
+
+def _update_mime_database_recalculate():
+    p = subprocess.Popen(
+        ['update-mime-database', '/usr/share/mime']
+        )
+    ret = p.wait()
+
+    wayround_org.utils.checksum.make_dir_checksums(
+        '/usr/share/mime',
+        '/usr/share/mime/sha512sums',
+        rel_to='/',
+        exclude=[
+            '/usr/share/mime/sha512sums',
+            '/usr/share/mime/sha512sums.tmp'
+            ]
+        )
+    return ret
+
+
 def update_mime_database():
     logging.info('update-mime-database')
-    return subprocess.Popen(
-        ['update-mime-database', '/usr/share/mime']
-        ).wait()
+    ret = 0
+    if (not os.path.isfile('/usr/share/mime/sha512sums')
+            or _update_mime_database_check() != 0):
+        logging.info("    regeneration required. please wait..")
+        ret = _update_mime_database_recalculate()
+    else:
+        logging.info("    regeneration not required")
+
+    return ret
 
 
 def gdk_pixbuf_query_loaders():
