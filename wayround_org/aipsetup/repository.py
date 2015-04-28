@@ -167,8 +167,7 @@ class PackageRepoCtl:
                     wayround_org.utils.path.join(
                         self._repository_dir,
                         package_path,
-                        'pack',
-                        host
+                        'pack'
                         )
                     )
 

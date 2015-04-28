@@ -9,11 +9,13 @@ import re
 
 import bottle
 
+import wayround_org.utils.version
+import wayround_org.utils.tarball
+import wayround_org.utils.system_type
+
 import wayround_org.aipsetup.controllers
 import wayround_org.aipsetup.server_pkg_ui
 import wayround_org.aipsetup.client_src
-import wayround_org.utils.version
-import wayround_org.utils.tarball
 
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
@@ -105,7 +107,8 @@ class ASPServer:
         self.app.route('/category/<path:path>', 'GET', self.category)
         self.app.route('/package', 'GET', self.package_redir)
         self.app.route('/package/<name>', 'GET', self.package)
-        self.app.route('/package/<name>/asps', 'GET', self.asps)
+        self.app.route('/package/<name>/hosts', 'GET', self.hosts)
+        self.app.route('/package/<name>/asps/<host>', 'GET', self.asps)
 #        self.app.route('/package/<name>/asps_latest', 'GET', self.asps_latest)
         self.app.route('/package/<name>/tarballs', 'GET', self.tarballs)
 #        self.app.route(
@@ -149,7 +152,8 @@ class ASPServer:
 
         base = os.path.basename(name2)
 
-        host = os.path.basename(host)
+        if wayround_org.utils.system_type.parse_triplet(host) is None:
+            raise bottle.HTTPError(400, "Invalid host triplet")
 
         path = self.pkg_repo_ctl.get_package_path_string(name)
 
@@ -379,7 +383,7 @@ class ASPServer:
 
         return ret
 
-    def asps(self, name):
+    def hosts(self, name):
 
         decoded_params = bottle.request.params.decode('utf-8')
 
@@ -392,7 +396,50 @@ class ASPServer:
         if not resultmode in ['html', 'json']:
             raise bottle.HTTPError(400, "Invalid resultmode")
 
-        filesl = self.pkg_repo_ctl.get_package_files(name)
+        filesl = self.pkg_repo_ctl.get_package_hosts(name)
+        if not isinstance(filesl, list):
+            raise bottle.HTTPError(
+                404,
+                "Error getting host list. Is package name correct?"
+                )
+
+        filesl.sort()
+
+        if resultmode == 'html':
+
+            txt = self.ui.hosts(
+                name, filesl
+                )
+
+            ret = self.ui.html(
+                title="Package: '{}'".format(name),
+                body=txt
+                )
+
+        elif resultmode == 'json':
+
+            ret = json.dumps(filesl, sort_keys=True, indent=2)
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
+
+        return ret
+
+    def asps(self, name, host):
+
+        decoded_params = bottle.request.params.decode('utf-8')
+
+        if wayround_org.utils.system_type.parse_triplet(host) is None:
+            raise bottle.HTTPError(400, "Invalid host triplet")
+
+        ret = ''
+
+        resultmode = 'html'
+        if 'resultmode' in decoded_params:
+            resultmode = decoded_params['resultmode']
+
+        if not resultmode in ['html', 'json']:
+            raise bottle.HTTPError(400, "Invalid resultmode")
+
+        filesl = self.pkg_repo_ctl.get_package_files(name, host)
         if not isinstance(filesl, list):
             raise bottle.HTTPError(
                 404,

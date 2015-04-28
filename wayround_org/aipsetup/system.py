@@ -14,15 +14,18 @@ import shlex
 import subprocess
 import tarfile
 
-import wayround_org.aipsetup.client_pkg
-import wayround_org.aipsetup.package
-import wayround_org.aipsetup.package_name_parser
-import wayround_org.aipsetup.version
+
 import wayround_org.utils.file
 import wayround_org.utils.format.elf
 import wayround_org.utils.list
 import wayround_org.utils.path
 import wayround_org.utils.terminal
+import wayround_org.utils.system_type
+
+import wayround_org.aipsetup.client_pkg
+import wayround_org.aipsetup.package
+import wayround_org.aipsetup.package_name_parser
+import wayround_org.aipsetup.version
 
 import certdata.certdata
 
@@ -52,7 +55,8 @@ class SystemCtl:
             installed_pkg_dir='/var/log/packages',
             installed_pkg_dir_buildlogs='/var/log/packages/buildlogs',
             installed_pkg_dir_sums='/var/log/packages/sums',
-            installed_pkg_dir_deps='/var/log/packages/deps'
+            installed_pkg_dir_deps='/var/log/packages/deps',
+            host=None
             ):
         """
         :param basedir: path to root directory of target system
@@ -69,6 +73,9 @@ class SystemCtl:
                 "wayround_org.aipsetup.client_pkg.PackageServerClient"
                 )
 
+        if wayround_org.utils.system_type.parse_triplet(host) is None:
+            raise ValueError("Invalid host triplet")
+
         self.basedir = wayround_org.utils.path.abspath(basedir)
 
         self._pkg_client = pkg_client
@@ -77,6 +84,8 @@ class SystemCtl:
         self._installed_pkg_dir_buildlogs = installed_pkg_dir_buildlogs
         self._installed_pkg_dir_sums = installed_pkg_dir_sums
         self._installed_pkg_dir_deps = installed_pkg_dir_deps
+
+        self._host = host
 
         return
 
@@ -146,7 +155,7 @@ class SystemCtl:
         return ret
 
     def install_package(
-            self, name, force=False
+            self, name, force=False, force_host=None
             ):
         """
         Install package
@@ -167,6 +176,14 @@ class SystemCtl:
                    older asps from system using :func:`reduce_asps`
 
         """
+
+        host = self._host
+
+        if force_host is not None:
+            host = force_host
+
+        if wayround_org.utils.system_type.parse_triplet(host) is None:
+            raise ValueError("Invalid host triplet")
 
         ret = 0
 
@@ -271,6 +288,7 @@ class SystemCtl:
 
                     latest_full_path = self._pkg_client.get_latest_asp(
                         name,
+                        host,
                         out_dir=self._pkg_client.downloads_dir,
                         out_to_temp=True
                         )
@@ -286,14 +304,14 @@ class SystemCtl:
 
                         ret = self.install_package(latest_full_path, False)
 
-                    try:
-                        os.unlink(latest_full_path)
-                    except:
-                        logging.exception(
-                            "Can't remove temporary file `{}'".format(
-                                latest_full_path
+                        try:
+                            os.unlink(latest_full_path)
+                        except:
+                            logging.exception(
+                                "Can't remove temporary file `{}'".format(
+                                    latest_full_path
+                                    )
                                 )
-                            )
 
         return ret
 

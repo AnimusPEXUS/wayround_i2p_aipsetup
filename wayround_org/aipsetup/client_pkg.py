@@ -15,10 +15,10 @@ import wayround_org.utils.path
 class PackageServerClient:
 
     def __init__(
-        self,
-        url, downloads_dir='/tmp/aipsetup_downloads',
-        acceptable_extensions_order_list=None
-        ):
+            self,
+            url, downloads_dir='/tmp/aipsetup_downloads',
+            acceptable_extensions_order_list=None
+            ):
         self.acceptable_extensions_order_list = \
             acceptable_extensions_order_list
         self.downloads_dir = downloads_dir
@@ -40,20 +40,23 @@ class PackageServerClient:
     def info(self, pkg_name):
         return info(self._url, pkg_name)
 
-    def asps(self, pkg_name):
-        return asps(self._url, pkg_name)
+    def hosts(self, pkg_name):
+        return hosts(self._url, pkg_name)
 
-    def asps_latest(self, pkg_name):
-        return asps_latest(self._url, pkg_name)
+    def asps(self, pkg_name, host):
+        return asps(self._url, pkg_name, host)
 
-    def get_asp(self, filename, out_dir=None, out_to_temp=False):
-        return get_asp(self._url, filename, out_dir, out_to_temp)
+    def asps_latest(self, pkg_name, host):
+        return asps_latest(self._url, pkg_name, host)
 
-    def get_latest_asp(self, pkg_name, out_dir=None, out_to_temp=False):
-        return get_latest_asp(self._url, pkg_name, out_dir, out_to_temp)
+    def get_asp(self, host, filename, out_dir=None, out_to_temp=False):
+        return get_asp(self._url, host, filename, out_dir, out_to_temp)
+
+    def get_latest_asp(self, pkg_name, host, out_dir=None, out_to_temp=False):
+        return get_latest_asp(self._url, pkg_name, host, out_dir, out_to_temp)
 
     def tarballs(self, pkg_name):
-        return tarballs(self._url, pkg_name)
+        return tarballs(self._url, pkg_name, host)
 
     def tarballs_latest(self, pkg_name):
         return tarballs_latest(
@@ -71,14 +74,13 @@ class PackageServerClient:
 
 
 def walk(url, path):
-
     """
     path must be string not starting and not ending with slash
     """
 
     res = ls(url, path)
 
-    if res != None:
+    if res is not None:
 
         cats = res['categories']
         packs = res['packages']
@@ -116,11 +118,11 @@ def list_(url, mask, searchmode='filemask', cs=True):
 
     data = urllib.parse.urlencode(
         {
-         'mask': mask,
-         'searchmode': searchmode,
-         'cs': cst,
-         'resultmode': 'json'
-         },
+            'mask': mask,
+            'searchmode': searchmode,
+            'cs': cst,
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
@@ -137,7 +139,6 @@ def list_(url, mask, searchmode='filemask', cs=True):
 
 
 def ls(url, path):
-
     """
     path must be string not starting and not ending with slash
     """
@@ -146,8 +147,8 @@ def ls(url, path):
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
@@ -166,7 +167,6 @@ def ls(url, path):
 
 
 def info(url, pkg_name):
-
     """
     path must be string not starting and not ending with slash
     """
@@ -175,8 +175,8 @@ def info(url, pkg_name):
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
@@ -194,21 +194,21 @@ def info(url, pkg_name):
     return ret
 
 
-def asps(url, pkg_name):
+def hosts(url, pkg_name):
 
     ret = None
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/asps?{}'.format(url, pkg_name, data)
+            '{}package/{}/hosts?{}'.format(url, pkg_name, host, data)
         )
     except:
         pass
@@ -219,21 +219,52 @@ def asps(url, pkg_name):
     return ret
 
 
-def asps_latest(url, pkg_name):
+def asps(url, pkg_name, host):
+
+    if wayround_org.utils.system_type.parse_triplet(host) is None:
+        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
 
     ret = None
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/asps?{}'.format(url, pkg_name, data)
+            '{}package/{}/asps/{}?{}'.format(url, pkg_name, host, data)
+        )
+    except:
+        pass
+
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
+        ret = json.loads(str(res.read(), 'utf-8'))
+
+    return ret
+
+
+def asps_latest(url, pkg_name, host):
+
+    if wayround_org.utils.system_type.parse_triplet(host) is None:
+        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
+
+    ret = None
+
+    data = urllib.parse.urlencode(
+        {
+            'resultmode': 'json'
+            },
+        encoding='utf-8'
+        )
+
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}/asps/{}?{}'.format(url, pkg_name, host, data)
         )
     except:
         pass
@@ -255,13 +286,15 @@ def asps_latest(url, pkg_name):
     return ret
 
 
-def get_asp(url, filename, out_dir=None, out_to_temp=False):
-
+def get_asp(url, host, filename, out_dir=None, out_to_temp=False):
     """
     if out_to_temp is True, out_dir is used as a base. Else, if out_dir not
     None, out_dir is used deirectly. if out_dir is None, then out_to_temp
     does not metter and file wil be downloaded to current dir
     """
+
+    if wayround_org.utils.system_type.parse_triplet(host) is None:
+        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
 
     ret = None
 
@@ -273,7 +306,7 @@ def get_asp(url, filename, out_dir=None, out_to_temp=False):
 
     sep = ''
 
-    if out_dir == None:
+    if out_dir is None:
 
         out_to_temp = False
         out_dir = ''
@@ -308,11 +341,12 @@ def get_asp(url, filename, out_dir=None, out_to_temp=False):
     p = subprocess.Popen(
         ['wget',
          '--no-check-certificate', '-c', '-O', option_O,
-         '{}package/{}/asps/{}'.format(
-            url,
-            pkg_name,
-            basename
-            )
+         '{}package/{}/asps/{}/{}'.format(
+             url,
+             pkg_name,
+             host,
+             basename
+             )
          ]
         )
 
@@ -326,14 +360,17 @@ def get_asp(url, filename, out_dir=None, out_to_temp=False):
     return ret
 
 
-def get_latest_asp(url, pkg_name, out_dir=None, out_to_temp=False):
+def get_latest_asp(url, pkg_name, host, out_dir=None, out_to_temp=False):
+
+    if wayround_org.utils.system_type.parse_triplet(host) is None:
+        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
 
     ret = None
 
-    ltst = asps_latest(url, pkg_name)
+    ltst = asps_latest(url, pkg_name, host)
 
-    if ltst != None:
-        ret = get_asp(url, ltst, out_dir, out_to_temp)
+    if ltst is not None:
+        ret = get_asp(url, host, ltst, out_dir, out_to_temp)
 
     return ret
 
@@ -344,8 +381,8 @@ def tarballs(url, pkg_name):
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
@@ -364,7 +401,6 @@ def tarballs(url, pkg_name):
 
 
 def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
-
     """
     Full url returned
     """
@@ -379,8 +415,8 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
@@ -411,10 +447,10 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
         # remain only packages with same version, but with different extensions
         for i in ret[:]:
             if (wayround_org.utils.version.source_version_comparator(
-                    i, m,
-                    acceptable_extensions_order_list
-                    )
-                != 0):
+                i, m,
+                acceptable_extensions_order_list
+                )
+                    != 0):
 
                 ret.remove(i)
 
@@ -422,10 +458,9 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
 
 
 def get_tarball(
-    full_url, out_dir=None, out_to_temp=False,
-    mute_downloader=True
-    ):
-
+        full_url, out_dir=None, out_to_temp=False,
+        mute_downloader=True
+        ):
     """
     Download file
 
@@ -445,7 +480,7 @@ def get_tarball(
 
     sep = ''
 
-    if out_dir == None:
+    if out_dir is None:
 
         out_to_temp = False
         out_dir = ''
@@ -500,7 +535,6 @@ def get_tarball(
 
 
 def name_by_name(url, tarball):
-
     """
     find package name by tarball name
     """
@@ -509,9 +543,9 @@ def name_by_name(url, tarball):
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json',
-         'tarball': tarball
-         },
+            'resultmode': 'json',
+            'tarball': tarball
+            },
         encoding='utf-8'
         )
 
@@ -535,8 +569,8 @@ def bundles(url):
 
     data = urllib.parse.urlencode(
         {
-         'resultmode': 'json'
-         },
+            'resultmode': 'json'
+            },
         encoding='utf-8'
         )
 
