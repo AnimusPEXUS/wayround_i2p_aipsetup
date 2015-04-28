@@ -76,7 +76,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
         #('src_paths_index_db_config',
         #    'sqlite:///${working_dir}/src_paths_index.sqlite'),
         #('src_paths_json', '${working_dir}/src_paths.json'),
-        ('xmpp_admins', 'animus@wayround.org animus@wayround.org'),
+        ('xmpp_admins', 'animus@wayround.org'),
         ('xmpp_account', ''),
         ('xmpp_password', ''),
         ('acceptable_src_file_extensions',
@@ -104,7 +104,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('info_db_config', 'sqlite:///${working_dir}/pkg_info.sqlite'),
         #('tags_db_config', 'sqlite:///${working_dir}/pkg_tags.sqlite'),
         ('tags_json', '${working_dir}/tags.json'),
-        ('xmpp_admins', 'animus@wayround.org animus@wayround.org'),
+        ('xmpp_admins', 'animus@wayround.org'),
         ('xmpp_account', ''),
         ('xmpp_password', ''),
         ('acceptable_src_file_extensions',
@@ -123,7 +123,6 @@ DEFAULT_CONFIG = collections.OrderedDict(
 
     ('local_build', collections.OrderedDict([
         ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
-        ('building_scripts_dir', '${working_dir}/pkg_buildscripts'),
         ('building_sites_dir', '${working_dir}/b')
         ])
      ),

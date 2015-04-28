@@ -115,7 +115,7 @@ class ASPServer:
         self.app.route('/search', 'GET', self.search)
 
         self.app.route(
-            '/package/<name>/asps/<name2>', 'GET', self.download_pkg
+            '/package/<name>/asps/<host>/<name2>', 'GET', self.download_pkg
             )
 
         self.app.route('/name_by_name', 'GET', self.name_by_name)
@@ -145,15 +145,17 @@ class ASPServer:
     def js(self, filename):
         return bottle.static_file(filename, root=self.js_dir)
 
-    def download_pkg(self, name, name2):
+    def download_pkg(self, name, host, name2):
 
         base = os.path.basename(name2)
+
+        host = os.path.basename(host)
 
         path = self.pkg_repo_ctl.get_package_path_string(name)
 
         filename = wayround_org.utils.path.abspath(
             wayround_org.utils.path.join(
-                self.pkg_repo_ctl.get_repository_dir(), path, 'pack', base
+                self.pkg_repo_ctl.get_repository_dir(), path, 'pack', host, base
                 )
             )
 

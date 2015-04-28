@@ -146,7 +146,50 @@ class PackageRepoCtl:
                 )
                 )
 
-    def get_package_files(self, name):
+    def get_package_hosts(self, name):
+
+        ret = 0
+
+        pid = self.get_package_id(name)
+        if pid is None:
+            logging.error("Error getting package `{}' ID".format(name))
+            ret = 1
+        else:
+
+            package_path = self.get_package_path_string(pid)
+
+            if not isinstance(package_path, str):
+                logging.error("Can't get path for package `{}'".format(pid))
+                ret = 2
+            else:
+
+                package_dir = wayround_org.utils.path.abspath(
+                    wayround_org.utils.path.join(
+                        self._repository_dir,
+                        package_path,
+                        'pack',
+                        host
+                        )
+                    )
+
+                if not os.path.isdir(package_dir):
+                    # NOTE: not an error condition: absent dir means no files
+                    ret = []
+
+                else:
+
+                    ret = []
+
+                    files = os.listdir(package_dir)
+                    files.sort()
+
+                    for i in files:
+                        if os.path.isdir(os.path.join(package_dir, i)):
+                            ret.append(i)
+
+        return ret
+
+    def get_package_files(self, name, host):
         """
         Returns list of indexed package's asps
         """
@@ -170,33 +213,39 @@ class PackageRepoCtl:
                     wayround_org.utils.path.join(
                         self._repository_dir,
                         package_path,
-                        'pack'
+                        'pack',
+                        host
                         )
                     )
 
-                logging.debug(
-                    "Looking for package files in `{}'".format(package_dir)
-                    )
+                if not os.path.isdir(package_dir):
+                    # NOTE: not an error condition: absent dir means no files
+                    ret = []
 
-                files = glob.glob(os.path.join(package_dir, '*.asp'))
+                else:
+                    logging.debug(
+                        "Looking for package files in `{}'".format(package_dir)
+                        )
 
-                needed_files = []
+                    files = glob.glob(os.path.join(package_dir, '*.asp'))
 
-                for i in files:
+                    needed_files = []
 
-                    parsed = wayround_org.aipsetup.package_name_parser.\
-                        package_name_parse(i)
+                    for i in files:
 
-                    if parsed and parsed['groups']['name'] == name:
-                        needed_files.append(
-                            os.path.sep +
-                            wayround_org.utils.path.relpath(
-                                i,
-                                self._repository_dir
+                        parsed = wayround_org.aipsetup.package_name_parser.\
+                            package_name_parse(i)
+
+                        if parsed and parsed['groups']['name'] == name:
+                            needed_files.append(
+                                os.path.sep +
+                                wayround_org.utils.path.relpath(
+                                    i,
+                                    self._repository_dir
+                                    )
                                 )
-                            )
 
-                ret = needed_files
+                    ret = needed_files
 
         return ret
 
@@ -727,7 +776,7 @@ class PackageRepoCtl:
         ret = 0
 
         for i in ['pack']:
-            full_path = path + os.path.sep + i
+            full_path = wayround_org.utils.path.join(path, i)
 
             if not os.path.exists(full_path):
                 try:
@@ -774,7 +823,7 @@ class PackageRepoCtl:
         for file in files:
 
             full_path = wayround_org.utils.path.abspath(
-                repository_path + os.path.sep + subdir
+                wayround_org.utils.path.join(repository_path, subdir)
                 )
 
             if not os.path.exists(full_path):
@@ -854,7 +903,11 @@ class PackageRepoCtl:
                         ret = 11
                     else:
 
-                        path = package_path + os.path.sep + 'pack'
+                        path = wayround_org.utils.path.join(
+                            package_path,
+                            'pack',
+                            parsed['groups']['host']
+                            )
 
                         if not isinstance(path, str):
                             logging.error(
@@ -931,34 +984,16 @@ class PackageRepoCtl:
 
         return ret
 
-    def cleanup_repo_package_pack(self, name):
-
-        g_path = wayround_org.utils.path.join(self._garbage_dir, name)
-
-        if not os.path.exists(g_path):
-            os.makedirs(g_path, exist_ok=True)
+    def cleanup_repo_package_pack_host(self, g_path, name, host):
 
         path = wayround_org.utils.path.join(
             self._repository_dir,
-            self.get_package_path_string(name), 'pack'
+            self.get_package_path_string(name),
+            'pack',
+            host
             )
 
-        path = wayround_org.utils.path.abspath(path)
-
-        self.create_required_dirs_at_package(wayround_org.utils.path.join(
-            self._repository_dir,
-            self.get_package_path_string(name)
-            ))
-
-        files = os.listdir(path)
-        files.sort()
-
-        for i in files:
-            p1 = wayround_org.utils.path.join(path, i)
-
-            if not os.path.isfile(p1) or os.path.islink(p1):
-                logging.warning("Removing {}".format(p1))
-                wayround_org.utils.file.remove_if_exists(p1)
+        self._ccc1(path)
 
         files = os.listdir(path)
         files.sort()
@@ -966,23 +1001,6 @@ class PackageRepoCtl:
         for i in files:
 
             p1 = wayround_org.utils.path.join(path, i)
-
-            if os.path.isfile(p1) and not os.path.islink(p1):
-
-                if self.put_asp_to_index(p1) != 0:
-
-                    logging.warning(
-                        "Can't move file to index. moving to garbage"
-                        )
-
-                    shutil.move(p1, wayround_org.utils.path.join(g_path, i))
-
-        files = os.listdir(path)
-        files.sort()
-
-        for i in files:
-
-            p1 = path + os.path.sep + i
 
             if os.path.exists(p1):
 
@@ -1000,20 +1018,19 @@ class PackageRepoCtl:
                     try:
                         shutil.move(p1, p2)
                     except:
-                        logging.exception("Can't garbage")
+                        logging.exception("Can't put to garbage")
 
         files = os.listdir(path)
         files.sort(
             key=functools.cmp_to_key(
                 wayround_org.aipsetup.version.package_version_comparator
                 ),
-
             reverse=True
             )
 
         if len(files) > 5:
             for i in files[5:]:
-                p1 = path + os.path.sep + i
+                p1 = os.path.join(path, i)
 
                 logging.warning(
                     "Removing outdated package: {}".format(
@@ -1024,6 +1041,68 @@ class PackageRepoCtl:
                     os.unlink(p1)
                 except:
                     logging.exception("Error")
+
+        return
+
+    def _ccc1(self, path):
+
+        files = os.listdir(path)
+        files.sort()
+
+        for i in files:
+
+            p1 = wayround_org.utils.path.join(path, i)
+
+            if os.path.isfile(p1) and not os.path.islink(p1):
+
+                if self.put_asp_to_index(p1, move=True) != 0:
+
+                    logging.warning(
+                        "Can't move file to index. moving to garbage"
+                        )
+
+                    shutil.move(p1, wayround_org.utils.path.join(g_path, i))
+
+        return
+
+    def cleanup_repo_package_pack(self, name):
+
+        g_path = wayround_org.utils.path.join(self._garbage_dir, name)
+
+        if not os.path.exists(g_path):
+            os.makedirs(g_path, exist_ok=True)
+
+        path = wayround_org.utils.path.join(
+            self._repository_dir,
+            self.get_package_path_string(name),
+            'pack'
+            )
+
+        path = wayround_org.utils.path.abspath(path)
+
+        self.create_required_dirs_at_package(wayround_org.utils.path.join(
+            self._repository_dir,
+            self.get_package_path_string(name)
+            ))
+
+        files = os.listdir(path)
+        files.sort()
+
+        for i in files:
+            p1 = wayround_org.utils.path.join(path, i)
+
+            if os.path.islink(p1):
+                logging.warning("Removing {}".format(p1))
+                wayround_org.utils.file.remove_if_exists(p1)
+
+        self._ccc1(path)
+
+        files = os.listdir(path)
+        files.sort()
+
+        for host in files:
+            if os.path.isdir(os.path.join(path, host)):
+                self.cleanup_repo_package_pack_host(g_path, name, host)
 
         return
 
