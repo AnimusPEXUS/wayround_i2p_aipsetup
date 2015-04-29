@@ -4,11 +4,44 @@ import logging
 import os.path
 import shutil
 import subprocess
+import collections
+
+import wayround_org.utils.file
+import wayround_org.utils.path
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
-import wayround_org.utils.path
+import wayround_org.aipsetup.builder_scripts.std
+
+
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('extract', self.builder_action_extract),
+            ('configure', self.builder_action_configure),
+            ('build', self.builder_action_build),
+            ('distr_kernel', self.builder_action_distr_kernel),
+            ('distr_modules', self.builder_action_distr_modules),
+            ('distr_firmware', self.builder_action_distr_firmware),
+
+            # ('distr_headers_internal',
+            #       self.builder_action_distr_headers_internal),
+
+            ('distr_headers_normal', self.builder_action_distr_headers_normal),
+
+            # ('distr_headers_internal_repeat',
+            #       self.builder_action_distr_headers_internal_repeat),
+            # ('distr_arch_headers_internal',
+            #       self.builder_action_distr_arch_headers_internal),
+            # ('remove_install_files_from_includes',
+            #       self.builder_action_remove_install_files_from_includes),
+
+            ('distr_man', self.builder_action_distr_man),
+            ('copy_source', self.builder_action_copy_source)
+            ])
 
 
 def main(buildingsite, action=None):
@@ -18,21 +51,21 @@ def main(buildingsite, action=None):
     r = wayround_org.aipsetup.build.build_script_wrap(
         buildingsite,
         [
-         'extract', 'configure',
+            'extract', 'configure',
 
-         'build',
+            'build',
 
-         'distr_kernel',
-         'distr_modules',
-         'distr_firmware',
-         #'distr_headers_internal',
-         'distr_headers_normal',
-         #'distr_headers_internal_repeat',
-         #'distr_arch_headers_internal',
-         #'remove_install_files_from_includes',
-         'distr_man',
-         'copy_source'
-         ],
+            'distr_kernel',
+            'distr_modules',
+            'distr_firmware',
+            #'distr_headers_internal',
+            'distr_headers_normal',
+            #'distr_headers_internal_repeat',
+            #'distr_arch_headers_internal',
+            #'remove_install_files_from_includes',
+            'distr_man',
+            'copy_source'
+            ],
         action,
         "help"
         )
@@ -157,9 +190,10 @@ def main(buildingsite, action=None):
                         os.symlink(
                             wayround_org.utils.path.join(
                                 os.path.sep + 'usr',
-                            'src',
-                            'linux-{}'.format(
-                                pkg_info['pkg_nameinfo']['groups']['version']
+                                'src',
+                                'linux-{}'.format(
+                                    pkg_info['pkg_nameinfo'][
+                                        'groups']['version']
                                 )
                                 ),
                             new_link
@@ -199,7 +233,7 @@ def main(buildingsite, action=None):
                     'headers_install',
                     # 'headers_install_all',
                     'INSTALL_HDR_PATH=' +
-                        wayround_org.utils.path.join(dst_dir, 'usr')
+                    wayround_org.utils.path.join(dst_dir, 'usr')
                     ],
                 environment={},
                 environment_mode='copy',

@@ -1,118 +1,100 @@
 
 import logging
 import os.path
+import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
 
-    ret = 0
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+    def define_custom_data(self):
+        ret = dict()
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def builder_action_configure(self):
 
-    else:
+        target = self.package_info['constitution']['target']
+        host = self.package_info['constitution']['host']
+        build = self.package_info['constitution']['build']
+        prefix = self.package_info['constitution']['paths']['usr']
 
-        pkg_info, actions = r
+        prefix = self.package_info['constitution']['paths']['usr']
+        mandir = self.package_info['constitution']['paths']['man']
+        sysconfdir = self.package_info['constitution']['paths']['config']
+        localstatedir = self.package_info['constitution']['paths']['var']
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        if ('crossbuilder_mode' in self.custom_data
+                and self.custom_data['crossbuilder_mode'] == True):
+            pass
+            #prefix = os.path.join(
+            #    '/', 'usr', 'lib', 'unicorn_crossbuilders', target
+            #    )
+            # mandir = os.path.join(prefix, 'man')
+            # sysconfdir = os.path.join(prefix, 'etc')
+            # localstatedir = os.path.join(prefix, 'var')
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        ret = autotools.configure_high(
+            self.buildingsite,
+            options=[
+                # '--enable-targets='
+                # 'i486-pc-linux-gnu,'
+                # 'i586-pc-linux-gnu,'
+                # 'i686-pc-linux-gnu,'
+                # 'i786-pc-linux-gnu,'
+                # 'ia64-pc-linux-gnu,'
+                # 'x86_64-pc-linux-gnu,'
+                # 'aarch64-linux-gnu',
 
-        separate_build_dir = False
+                '--enable-targets=all',
 
-        source_configure_reldir = '.'
+                #                    '--disable-libada',
+                #                    '--enable-bootstrap',
+                '--enable-64-bit-bfd',
+                '--disable-werror',
+                '--enable-libada',
+                '--enable-libssp',
+                '--enable-objc-gc',
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+                '--prefix=' + prefix,
+                '--mandir=' + mandir,
+                '--sysconfdir=' + sysconfdir,
+                '--localstatedir=' + localstatedir,
+
+                '--host=' + host,
+                '--build=' + build,
+                '--target=' + target
+                ],
+            arguments=[],
+            environment={},
+            environment_mode='copy',
+            source_configure_reldir=self.source_configure_reldir,
+            use_separate_buildding_dir=self.separate_build_dir,
+            script_name='configure',
+            run_script_not_bash=False,
+            relative_call=False
+            )
+
+        return ret
+
+    def builder_action_dst_cleanup(self):
+        """
+        Standard destdir cleanup
+        """
+        if ('crossbuilder_mode' in self.custom_data
+                and self.custom_data['crossbuilder_mode'] == True):
+            logging.info(
+                "Destination directory cleanup skipped doe to "
+                "'crossbuilder_mode'"
                 )
+        else:
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    # '--enable-targets='
-                    # 'i486-pc-linux-gnu,'
-                    # 'i586-pc-linux-gnu,'
-                    # 'i686-pc-linux-gnu,'
-                    # 'i786-pc-linux-gnu,'
-                    # 'ia64-pc-linux-gnu,'
-                    # 'x86_64-pc-linux-gnu,'
-                    # 'aarch64-linux-gnu',
+            if os.path.isdir(self.src_dir):
+                logging.info("cleaningup destination dir")
+                wayround_org.utils.file.cleanup_dir(self.dst_dir)
 
-                    '--enable-targets=all',
-
-
-                    #                    '--disable-libada',
-                    #                    '--enable-bootstrap',
-                    '--enable-64-bit-bfd',
-                    '--disable-werror',
-                    '--enable-libada',
-                    '--enable-libssp',
-                    '--enable-objc-gc',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                    pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                    pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    '--target=' + pkg_info['constitution']['target']
-                    # '--target=x86_64-pc-linux-gnu'
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+        return 0

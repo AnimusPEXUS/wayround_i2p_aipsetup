@@ -68,7 +68,7 @@ class Builder:
     def run_action(self, action=None):
         ret = 0
 
-        actions = self.action_dict.keys()
+        actions = list(self.action_dict.keys())
 
         if action is not None and isinstance(action, str):
             if action.endswith('+'):
