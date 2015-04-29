@@ -29,9 +29,9 @@ def main(buildingsite, action=None):
 
     else:
 
-        self.package_info, actions = r
+        pkg_info, actions = r
 
-        basename = self.package_info['pkg_info']['basename']
+        basename = pkg_info['pkg_info']['basename']
 
         logging.info(
                 "Detected (and accepted) basename is: [{}]".format(basename)
@@ -51,7 +51,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                self.package_info['pkg_info']['basename'],
+                pkg_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )
@@ -61,22 +61,22 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '--prefix=' +
-                        self.package_info['constitution']['paths']['usr'],
+                        pkg_info['constitution']['paths']['usr'],
                     '--mandir=' +
-                        self.package_info['constitution']['paths']['man'],
+                        pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        self.package_info['constitution']['paths']['config'],
+                        pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        self.package_info['constitution']['paths']['var'],
+                        pkg_info['constitution']['paths']['var'],
 #                    '--prefix=' + os.path.join(dst_dir, 'usr'),
 #                    '--mandir=' +
 #                        os.path.join(dst_dir, 'usr', 'share', 'man'),
 #                    '--sysconfdir=' + os.path.join(dst_dir, 'etc'),
 #                    '--localstatedir=' + os.path.join(dst_dir, 'var'),
                     '--enable-shared',
-                    '--host=' + self.package_info['constitution']['host'],
-                    '--build=' + self.package_info['constitution']['build'],
-#                    '--target=' + self.package_info['constitution']['target']
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build'],
+#                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

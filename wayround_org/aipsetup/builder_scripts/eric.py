@@ -25,9 +25,9 @@ def main(buildingsite, action=None):
 
     else:
 
-        self.package_info, actions = r
+        pkg_info, actions = r
 
-        num = self.package_info['pkg_info']['name'][-1]
+        num = pkg_info['pkg_info']['name'][-1]
 
         if num == '4':
             num = '2'
@@ -48,7 +48,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                self.package_info['pkg_info']['basename'],
+                pkg_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )

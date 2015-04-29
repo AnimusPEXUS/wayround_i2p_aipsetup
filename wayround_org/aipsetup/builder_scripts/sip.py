@@ -26,7 +26,7 @@ def main(buildingsite, action=None):
 
     else:
 
-        self.package_info, actions = r
+        pkg_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
 
@@ -36,7 +36,7 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = '.'
 
-        name = self.package_info['pkg_info']['name']
+        name = pkg_info['pkg_info']['name']
 
         if 'extract_py2' in actions:
             if os.path.isdir(src_dir):
@@ -44,7 +44,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                self.package_info['pkg_info']['basename'],
+                pkg_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )
@@ -90,7 +90,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                self.package_info['pkg_info']['basename'],
+                pkg_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )

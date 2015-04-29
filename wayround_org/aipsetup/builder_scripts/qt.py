@@ -25,9 +25,9 @@ def main(buildingsite, action=None):
 
     else:
 
-        self.package_info, actions = r
+        pkg_info, actions = r
 
-        name = self.package_info['pkg_info']['name']
+        name = pkg_info['pkg_info']['name']
 
         if not name in ['qt4', 'qt5']:
             raise Exception("Invalid package name")
@@ -52,7 +52,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                self.package_info['pkg_info']['basename'],
+                pkg_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )

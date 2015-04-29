@@ -35,9 +35,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
-    builder_action_dst_cleanup =\
-        wayround_org.aipsetup.builder_scripts.binutils.Builder\
-        .builder_action_dst_cleanup
+    def builder_action_dst_cleanup(self):
+        """
+        Standard destdir cleanup
+        """
+        if ('crossbuilder_mode' in self.custom_data
+                and self.custom_data['crossbuilder_mode'] == True):
+            logging.info(
+                "Destination directory cleanup skipped doe to "
+                "'crossbuilder_mode'"
+                )
+        else:
+
+            if os.path.isdir(self.src_dir):
+                logging.info("cleaningup destination dir")
+                wayround_org.utils.file.cleanup_dir(self.dst_dir)
+
+        return 0
 
     def builder_action_configure(self):
 

@@ -23,7 +23,7 @@ def main(buildingsite, action=None):
 
     else:
 
-        self.package_info, actions = r
+        pkg_info, actions = r
 
         tar_dir = wayround_org.aipsetup.build.getDIR_TARBALL(buildingsite)
 
@@ -48,7 +48,7 @@ def main(buildingsite, action=None):
                     os.path.join(
                         xml_dir, 'docbook' + '-' +
                         '.'.join(
-                            list(self.package_info['pkg_nameinfo']['groups']['version'])
+                            list(pkg_info['pkg_nameinfo']['groups']['version'])
                             )
                         )
                     )
