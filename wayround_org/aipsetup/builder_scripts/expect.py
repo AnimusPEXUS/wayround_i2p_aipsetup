@@ -25,7 +25,7 @@ def main(buildingsite, action=None):
 
     else:
 
-        pkg_info, actions = r
+        self.package_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
 
@@ -73,7 +73,7 @@ def main(buildingsite, action=None):
 
                 ret = autotools.extract_high(
                     buildingsite,
-                    pkg_info['pkg_info']['basename'],
+                    self.package_info['pkg_info']['basename'],
                     unwrap_dir=True,
                     rename_dir=False
                     )
@@ -89,16 +89,16 @@ def main(buildingsite, action=None):
                     '--enable-wince',
                     '--with-tcl=/usr/lib',
                     '--with-tk=/usr/lib',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    '--prefix=' + self.package_info['constitution']['paths']['usr'],
+                    '--mandir=' + self.package_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                        self.package_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                        self.package_info['constitution']['paths']['var'],
                     '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host']
-#                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    '--host=' + self.package_info['constitution']['host']
+#                    '--build=' + self.package_info['constitution']['build'],
+#                    '--target=' + self.package_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

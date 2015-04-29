@@ -59,8 +59,8 @@ def _update_mime_database_check():
     summ2 = wayround_org.utils.checksum.make_file_checksum(
         '/usr/share/mime/sha512sums.tmp'
         )
-    ret = int(summ1 != summ2)
     os.unlink('/usr/share/mime/sha512sums.tmp')
+    ret = int(summ1 != summ2)
     return ret
 
 

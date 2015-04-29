@@ -76,7 +76,7 @@ def main(buildingsite, action=None):
 
     else:
 
-        pkg_info, actions = r
+        self.package_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
 
@@ -100,7 +100,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                pkg_info['pkg_info']['basename'],
+                self.package_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )
@@ -146,7 +146,7 @@ def main(buildingsite, action=None):
                     wayround_org.utils.path.join(dst_boot_dir, 'vmlinuz'),
                     wayround_org.utils.path.join(
                         dst_boot_dir, 'vmlinuz-{}'.format(
-                            pkg_info['pkg_nameinfo']['groups']['version']
+                            self.package_info['pkg_nameinfo']['groups']['version']
                             )
                         )
                     )
@@ -192,7 +192,7 @@ def main(buildingsite, action=None):
                                 os.path.sep + 'usr',
                                 'src',
                                 'linux-{}'.format(
-                                    pkg_info['pkg_nameinfo'][
+                                    self.package_info['pkg_nameinfo'][
                                         'groups']['version']
                                 )
                                 ),
@@ -346,7 +346,7 @@ Continue with command
                         'usr',
                         'src',
                         'linux-{}'.format(
-                            pkg_info['pkg_nameinfo']['groups']['version']
+                            self.package_info['pkg_nameinfo']['groups']['version']
                             )
                         ),
                     overwrite_files=True,
@@ -371,7 +371,7 @@ Continue with command
                         os.symlink(
                             '.{}linux-{}'.format(
                                 os.path.sep,
-                                pkg_info['pkg_nameinfo']['groups']['version']
+                                self.package_info['pkg_nameinfo']['groups']['version']
                                 ),
                             new_link
                             )

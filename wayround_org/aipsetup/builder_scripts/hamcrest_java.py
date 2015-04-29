@@ -27,7 +27,7 @@ def main(buildingsite, action=None):
 
     else:
 
-        pkg_info, actions = r
+        self.package_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
 
@@ -52,20 +52,20 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                pkg_info['pkg_info']['basename'],
+                self.package_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )
 
         if 'build' in actions and ret == 0:
             build_target = []
-            # if pkg_info['pkg_nameinfo']['groups']['version'] == '1.3':
+            # if self.package_info['pkg_nameinfo']['groups']['version'] == '1.3':
             #     build_target = []
             p = subprocess.Popen(
                 [
                     'ant',
                     '-Dversion={}'.format(
-                        pkg_info['pkg_nameinfo']['groups']['version']
+                        self.package_info['pkg_nameinfo']['groups']['version']
                         )
                     ] + build_target,
                 cwd=src_dir
@@ -81,7 +81,7 @@ def main(buildingsite, action=None):
             shutil.copy(
                 wayround_org.utils.path.join(
                     src_build_dir, 'hamcrest-all-{}.jar'.format(
-                        pkg_info['pkg_nameinfo']['groups']['version']
+                        self.package_info['pkg_nameinfo']['groups']['version']
                         )
                     ),
                 dst_classpath_dir

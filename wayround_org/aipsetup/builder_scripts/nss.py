@@ -33,7 +33,7 @@ def main(buildingsite, action=None):
 
     else:
 
-        pkg_info, actions = r
+        self.package_info, actions = r
 
         src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
 
@@ -46,7 +46,7 @@ def main(buildingsite, action=None):
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,
-                pkg_info['pkg_info']['basename'],
+                self.package_info['pkg_info']['basename'],
                 unwrap_dir=True,
                 rename_dir=False
                 )
@@ -239,20 +239,20 @@ def main(buildingsite, action=None):
                     nss_minor_version = 0
                     nss_patch_version = 0
 
-                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                    if (len(self.package_info['pkg_nameinfo']['groups']['version_list'])
                         > 0):
                         nss_major_version = \
-                        pkg_info['pkg_nameinfo']['groups']['version_list'][0]
+                        self.package_info['pkg_nameinfo']['groups']['version_list'][0]
 
-                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                    if (len(self.package_info['pkg_nameinfo']['groups']['version_list'])
                         > 1):
                         nss_minor_version = \
-                        pkg_info['pkg_nameinfo']['groups']['version_list'][1]
+                        self.package_info['pkg_nameinfo']['groups']['version_list'][1]
 
-                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                    if (len(self.package_info['pkg_nameinfo']['groups']['version_list'])
                         > 2):
                         nss_patch_version = \
-                        pkg_info['pkg_nameinfo']['groups']['version_list'][2]
+                        self.package_info['pkg_nameinfo']['groups']['version_list'][2]
 
                     logging.info(
                         "Applying version {}.{}.{}".format(

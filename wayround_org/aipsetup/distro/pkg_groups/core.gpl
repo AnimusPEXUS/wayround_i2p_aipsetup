@@ -144,6 +144,7 @@
         "zint", "zbat",
         "cups", "cups-filters",
         "qpdf",
-        "wireless_tools", "wpa_supplicant", "kismet"
+        "wireless_tools", "wpa_supplicant", "kismet",
+        "tree"
     ]
 }

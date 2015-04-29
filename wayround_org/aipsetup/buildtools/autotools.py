@@ -32,8 +32,8 @@ def determine_abs_configure_dir(buildingsite, config_dir):
 
 
 def determine_building_dir(
-    buildingsite, config_dir, separate_build_dir
-    ):
+        buildingsite, config_dir, separate_build_dir
+        ):
     """
     Determine building dir taking in account config_dir and separate_build_dir
     """
@@ -58,12 +58,12 @@ def determine_building_dir(
 
 
 def extract_high(
-    building_site,
-    tarball_basename,
-    unwrap_dir,
-    rename_dir,
-    more_when_one_extracted_ok=False
-    ):
+        building_site,
+        tarball_basename,
+        unwrap_dir,
+        rename_dir,
+        more_when_one_extracted_ok=False
+        ):
 
     ret = 0
 
@@ -126,17 +126,17 @@ def extract_high(
 
 
 def configure_high(
-    building_site,
-    options,
-    arguments,
-    environment,
-    environment_mode,
-    source_configure_reldir,
-    use_separate_buildding_dir,
-    script_name,
-    run_script_not_bash,
-    relative_call
-    ):
+        building_site,
+        options,
+        arguments,
+        environment,
+        environment_mode,
+        source_configure_reldir,
+        use_separate_buildding_dir,
+        script_name,
+        run_script_not_bash,
+        relative_call
+        ):
     """
     Start configuration script
 
@@ -158,7 +158,7 @@ def configure_high(
 
     pkg_info = \
         wayround_org.aipsetup.build.BuildingSiteCtl(building_site).\
-            read_package_info()
+        read_package_info()
 
     if not isinstance(pkg_info, dict):
         log.error("Can't read package info")
@@ -206,16 +206,16 @@ def configure_high(
 
 
 def configure_low(
-    log,
-    script_path,
-    working_dir,
-    opts,
-    args,
-    env,
-    run_script_not_bash,
-    relative_call,
-    script_name
-    ):
+        log,
+        script_path,
+        working_dir,
+        opts,
+        args,
+        env,
+        run_script_not_bash,
+        relative_call,
+        script_name
+        ):
 
     ret = 0
 
@@ -225,8 +225,8 @@ def configure_low(
     cmd = []
     if not run_script_not_bash:
         cmd = (['bash'] +
-            [script_path + os.path.sep + script_name] +
-            opts + args)
+               [script_path + os.path.sep + script_name] +
+               opts + args)
     else:
         cmd = [script_path + os.path.sep + script_name] + opts + args
 
@@ -282,14 +282,14 @@ def configure_low(
 
 
 def make_high(
-    building_site,
-    options,
-    arguments,
-    environment,
-    environment_mode,
-    use_separate_buildding_dir,
-    source_configure_reldir
-    ):
+        building_site,
+        options,
+        arguments,
+        environment,
+        environment_mode,
+        use_separate_buildding_dir,
+        source_configure_reldir
+        ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
 
@@ -324,12 +324,12 @@ def make_high(
 
 
 def make_low(
-    log,
-    opts,
-    args,
-    env,
-    working_dir
-    ):
+        log,
+        opts,
+        args,
+        env,
+        working_dir
+        ):
 
     ret = 0
 

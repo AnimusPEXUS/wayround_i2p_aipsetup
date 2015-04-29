@@ -1,0 +1,19 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "tree",
+  "version_tool": "",
+  "basename": "tree",
+  "filters": "",
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [
+    "/indstate.edu/mama/mama.indstate.edu"
+  ],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
+}

@@ -9,20 +9,17 @@ import wayround_org.utils.path
 
 def commands():
     return collections.OrderedDict([
-        ('bsite', collections.OrderedDict([
-            ('init', building_site_init),
-            ('apply', building_site_apply_info)
-            ])),
         ('build', collections.OrderedDict([
             ('full', build_full),
             ('build', build_build),
             ('continue', build_build_plus),
             ('pack', build_pack),
             ('complete', build_complete),
-            ])),
-        ('bsys', collections.OrderedDict([
-            ('create', bsys_create),
-            ('build', bsys_build)
+            ('site', collections.OrderedDict([
+                ('init', building_site_init),
+                ('apply', building_site_apply_info),
+                ('apply-by-name', building_site_apply_info_by_name)
+                ]))
             ]))
         ])
 
@@ -99,6 +96,61 @@ def building_site_apply_info(command_name, opts, args, adds):
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
     pkg_client = wayround_org.aipsetup.controllers.pkg_client_by_config(config)
     ret = bs.apply_info(pkg_client, const, src_file_name=file)
+
+    return ret
+
+
+def building_site_apply_info_by_name(command_name, opts, args, adds):
+    """
+    Apply info to building dir
+
+    [DIRNAME] PACKAGE_INFO_NAME
+    """
+
+    import wayround_org.aipsetup.controllers
+
+    config = adds['config']
+
+    dirname = '.'
+    package_name = None
+
+    len_args = len(args)
+
+    if len_args == 1:
+        dirname = '.'
+        package_name = args[0]
+
+    elif len_args == 2:
+        dirname = args[0]
+        package_name = args[1]
+
+    else:
+        logging.error("Must be 1 or 2 parameters")
+        ret = 1
+
+    host = config['system_settings']['host']
+    build = config['system_settings']['build']
+    target = config['system_settings']['target']
+
+    if '--host' in opts:
+        host = opts['--host']
+
+    if '--build' in opts:
+        build = opts['--build']
+
+    if '--target' in opts:
+        target = opts['--target']
+
+    const = wayround_org.aipsetup.controllers.constitution_by_config(
+        config,
+        host,
+        target,
+        build
+        )
+
+    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
+    pkg_client = wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+    ret = bs.apply_info_by_name(pkg_client, const, package_name)
 
     return ret
 
@@ -471,14 +523,3 @@ def build_build(command_name, opts, args, adds):
         ret = build_ctl.complete(buildscript_ctl)
 
     return ret
-
-
-def bsys_create(command_name, opts, args, adds):
-
-    config = adds['config']
-
-    return 1
-
-def bsys_build(command_name, opts, args, adds):
-
-    return 1

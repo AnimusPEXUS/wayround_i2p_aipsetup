@@ -1304,9 +1304,13 @@ class BuildingSiteCtl:
 
     apply_constitution_on_buildingsite.__doc__ += APPLY_DESCR
 
-    def apply_pkg_info_on_buildingsite(self, pkg_client):
+    def apply_pkg_info_on_buildingsite(self, pkg_client, package_name=None):
         """
         Applies package information on building site package info
+
+        if package_name is None, it will be asked from info server to parse
+        tarball name and determine package info name. If more than one
+        returned - this is error.
         """
 
         if not isinstance(
@@ -1318,66 +1322,69 @@ class BuildingSiteCtl:
                 "wayround_org.aipsetup.client_pkg.PackageServerClient"
                 )
 
-        ret = 0
-
         package_info = self.read_package_info(ret_on_error={})
 
-        if (
-                not isinstance(package_info, dict)
-                or 'pkg_nameinfo' not in package_info
-                or not isinstance(package_info['pkg_nameinfo'], dict)
-                or 'groups' not in package_info['pkg_nameinfo']
-                or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
-                or 'name' not in package_info['pkg_nameinfo']['groups']
-                or not isinstance(
-                    package_info['pkg_nameinfo']['groups']['name'], str
-                    )
-                ):
+        ret = 0
 
-            logging.error(
-                "package_info['pkg_nameinfo']['groups'] undetermined"
-                )
-            package_info['pkg_info'] = {}
-            ret = 1
+        if package_name is None:
 
-        else:
+            if (
+                    not isinstance(package_info, dict)
+                    or 'pkg_nameinfo' not in package_info
+                    or not isinstance(package_info['pkg_nameinfo'], dict)
+                    or 'groups' not in package_info['pkg_nameinfo']
+                    or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
+                    or 'name' not in package_info['pkg_nameinfo']['groups']
+                    or not isinstance(
+                        package_info['pkg_nameinfo']['groups']['name'], str
+                        )
+                    ):
 
-            logging.debug("Getting info from index DB")
-
-            n_b_n = pkg_client.name_by_name(
-                package_info['pkg_nameinfo']['name']
-                )
-
-            if len(n_b_n) != 1:
                 logging.error(
-                    "Can't select between package names: {}".format(n_b_n))
-                ret = 5
+                    "package_info['pkg_nameinfo']['groups'] undetermined"
+                    )
+                package_info['pkg_info'] = {}
+                ret = 1
 
             else:
 
-                info = pkg_client.info(n_b_n[0])
+                logging.debug("Getting info from index DB")
 
-                if not isinstance(info, dict):
-                    logging.error("Can't read info from DB")
-                    package_info['pkg_info'] = {}
-                    ret = 4
+                n_b_n = pkg_client.name_by_name(
+                    package_info['pkg_nameinfo']['name']
+                    )
+
+                if len(n_b_n) != 1:
+                    logging.error(
+                        "Can't select between package names: {}".format(n_b_n))
+                    ret = 5
 
                 else:
 
-                    package_info['pkg_info'] = info
+                    package_name = n_b_n[0]
 
-                    self.write_package_info(package_info)
+        if ret == 0:
 
-                    ret = 0
+            info = pkg_client.info(package_name)
+
+            if not isinstance(info, dict):
+                logging.error("Can't read info from DB")
+                package_info['pkg_info'] = {}
+                ret = 4
+
+            else:
+
+                package_info['pkg_info'] = info
+
+                ret = 0
+
+                self.write_package_info(package_info)
 
         return ret
 
     apply_pkg_info_on_buildingsite.__doc__ += APPLY_DESCR
 
-    def apply_info(self, pkg_client, const, src_file_name=None):
-        """
-        Apply package information to building site
-        """
+    def _apply_info_common01(self, pkg_client, const):
 
         if not isinstance(const, Constitution):
             raise ValueError(
@@ -1393,6 +1400,15 @@ class BuildingSiteCtl:
                 "pkg_client must be of type "
                 "wayround_org.aipsetup.client_pkg.PackageServerClient"
                 )
+
+        return
+
+    def apply_info(self, pkg_client, const, src_file_name=None):
+        """
+        Apply package information to building site
+        """
+
+        self._apply_info_common01(pkg_client, const)
 
         path = wayround_org.utils.path.abspath(self.path)
 
@@ -1430,6 +1446,45 @@ class BuildingSiteCtl:
                 ret = 2
             elif self.apply_pkg_info_on_buildingsite(pkg_client) != 0:
                 ret = 3
+            else:
+                # no error
+                pass
+
+        return ret
+
+    def apply_info_by_name(self, pkg_client, const, package_name):
+        """
+        Apply package information to building site by using predefined package
+        name
+        """
+
+        self._apply_info_common01(pkg_client, const)
+
+        path = wayround_org.utils.path.abspath(self.path)
+
+        ret = 0
+
+        if self.read_package_info(None) is None:
+            logging.info(
+                "Applying new package info to dir `{}'".format(
+                    wayround_org.utils.path.abspath(
+                        path
+                        )
+                    )
+                )
+
+            self.write_package_info({})
+
+        if self.apply_constitution_on_buildingsite(const) != 0:
+            ret = 2
+        elif self.apply_pkg_info_on_buildingsite(
+                pkg_client,
+                package_name=package_name
+                ) != 0:
+            ret = 3
+        else:
+            # no error
+            pass
 
         return ret
 
@@ -1532,7 +1587,7 @@ class BuildingSiteCtl:
             if self._complete_info_correctness_check() != 0:
 
                 logging.error(
-                    "`{}' has wrong build script name".format(main_src_file)
+                    "`{}' has wrong build module name".format(main_src_file)
                     )
                 ret = 16
 
