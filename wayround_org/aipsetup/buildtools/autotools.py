@@ -47,6 +47,10 @@ def determine_building_dir(
                 buildingsite
                 )
             )
+    elif isinstance(separate_build_dir, str):
+        building_dir = wayround_org.utils.path.abspath(
+            separate_build_dir
+            )
     else:
         building_dir = (
             wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
@@ -62,19 +66,21 @@ def extract_high(
         tarball_basename,
         unwrap_dir,
         rename_dir,
-        more_when_one_extracted_ok=False
+        more_when_one_extracted_ok=False,
+        log=None
         ):
 
+    building_site = wayround_org.utils.path.abspath(building_site)
+
+    own_log = False
+    if log is None:
+        own_log = True
+        log = wayround_org.utils.log.Log(
+            wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
+            'extract'
+            )
+
     ret = 0
-
-    building_site = wayround_org.utils.path.abspath(building_site)
-
-    log = wayround_org.utils.log.Log(
-        wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
-        'extract'
-        )
-
-    building_site = wayround_org.utils.path.abspath(building_site)
 
     tarball_dir = wayround_org.aipsetup.build.getDIR_TARBALL(building_site)
 
@@ -120,7 +126,8 @@ def extract_high(
                 more_when_one_extracted_ok=more_when_one_extracted_ok
                 )
 
-    log.close()
+    if own_log:
+        log.close()
 
     return ret
 
@@ -135,7 +142,8 @@ def configure_high(
         use_separate_buildding_dir,
         script_name,
         run_script_not_bash,
-        relative_call
+        relative_call,
+        log=None
         ):
     """
     Start configuration script
@@ -151,10 +159,13 @@ def configure_high(
 
     building_site = wayround_org.utils.path.abspath(building_site)
 
-    log = wayround_org.utils.log.Log(
-        wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
-        'configure'
-        )
+    own_log = False
+    if log is None:
+        own_log = True
+        log = wayround_org.utils.log.Log(
+            wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
+            'configure'
+            )
 
     pkg_info = \
         wayround_org.aipsetup.build.BuildingSiteCtl(building_site).\
@@ -200,7 +211,8 @@ def configure_high(
             script_name
             )
 
-    log.close()
+    if own_log:
+        log.close()
 
     return ret
 
@@ -231,8 +243,10 @@ def configure_low(
         cmd = [script_path + os.path.sep + script_name] + opts + args
 
     log.info("directory: {}".format(working_dir))
-    log.info("command: {}".format(cmd))
-    log.info("command(joined): {}".format(' '.join(cmd)))
+    log.info("command:")
+    for i in cmd:
+        log.info("    {}".format(i))
+    #log.info("command(joined): {}".format(' '.join(cmd)))
 
     p = None
     try:
@@ -288,15 +302,19 @@ def make_high(
         environment,
         environment_mode,
         use_separate_buildding_dir,
-        source_configure_reldir
+        source_configure_reldir,
+        log=None
         ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
 
-    log = wayround_org.utils.log.Log(
-        wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
-        'make'
-        )
+    own_log = False
+    if log is None:
+        own_log = True
+        log = wayround_org.utils.log.Log(
+            wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
+            'make'
+            )
 
     env = wayround_org.utils.osutils.env_vars_edit(
         environment,
@@ -306,7 +324,7 @@ def make_high(
     if len(environment) > 0:
         log.info(
             "Environment modifications: {}".format(
-                repr(i) for i in list(environment.keys())
+                repr(environment)
                 )
             )
 
@@ -318,7 +336,8 @@ def make_high(
 
     ret = make_low(log, options, arguments, env, working_dir)
 
-    log.close()
+    if own_log:
+        log.close()
 
     return ret
 
@@ -336,7 +355,9 @@ def make_low(
     cmd = ['make'] + opts + args
 
     log.info("directory: {}".format(working_dir))
-    log.info("command: {}".format(cmd))
+    log.info("command:")
+    for i in cmd:
+        log.info("    {}".format(i))
 
     p = None
     try:

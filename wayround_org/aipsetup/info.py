@@ -744,14 +744,14 @@ class PackageInfoCtl:
         info_db = self.info_db
         session = sqlalchemy.orm.Session(info_db.decl_base.metadata.bind)
 
-        q = info_db.session.query(info_db.Info).all()
+        q = session.query(info_db.Info).all()
 
         deleted = 0
 
         for i in q:
 
             if fnmatch.fnmatch(i.name, mask):
-                info_db.session.delete(i)
+                session.delete(i)
                 deleted += 1
                 logging.info(
                     "deleted pkg info: {}".format(i.name)

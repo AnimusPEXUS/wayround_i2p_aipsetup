@@ -4,13 +4,15 @@
   "buildscript": "nss",
   "version_tool": "",
   "basename": "nss",
-  "filters": "",
+  "filters": "- filename fm *with-nspr*",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
   "tags": [],
-  "source_path_prefixes": [],
+  "source_path_prefixes": [
+    "/mozilla.org/nss/"
+  ],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

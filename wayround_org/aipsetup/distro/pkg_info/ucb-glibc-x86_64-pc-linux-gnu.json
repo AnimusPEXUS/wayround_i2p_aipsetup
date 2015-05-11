@@ -1,18 +1,16 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://None",
-  "buildscript": "nspr",
+  "description": "",
+  "home_page": "",
+  "buildscript": "crossbuilder_glibc",
   "version_tool": "",
-  "basename": "nspr",
+  "basename": "",
   "filters": "",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
   "tags": [],
-  "source_path_prefixes": [
-    "/mozilla.org/nspr/"
-  ],
+  "source_path_prefixes": [],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

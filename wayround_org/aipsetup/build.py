@@ -17,6 +17,7 @@ import subprocess
 import tempfile
 import importlib
 import types
+import collections
 
 import wayround_org.aipsetup.client_pkg
 import wayround_org.aipsetup.controllers
@@ -132,30 +133,143 @@ APPLY_DESCR = """\
 """
 
 
+def _constitution_configurer_sub01(
+        value, config, package_info, name,
+
+        host_from_param,
+        build_from_param,
+        target_from_param
+        ):
+
+    if value is None or value.lower() in ['n', 'none', 'no', 'off', '0']:
+        value = None
+    else:
+
+        value_l = value.lower()
+
+        if value == 'cfg':
+            if config is None:
+                raise Exception("system configuration error")
+            value = config['system_settings'][name]
+        elif value == 'pi':
+            if package_info is None:
+                raise Exception("package info not configured")
+            value = package_info['constitution'][name]
+
+        elif value_l in ['h', 'host']:
+            value = host_from_param
+
+        elif value_l in ['b', 'build']:
+            value = build_from_param
+
+        elif value_l in ['t', 'target']:
+            value = target_from_param
+
+        else:
+            pass
+
+    return value
+
+
+def constitution_configurer(
+        config,
+        package_info,
+        host_from_param,
+        build_from_param,
+        target_from_param
+        ):
+
+    paths = dict(config['system_paths'])
+
+    if host_from_param == build_from_param == target_from_param is None:
+        host_from_param = config['system_settings']['host']
+        build_from_param = config['system_settings']['build']
+        target_from_param = config['system_settings']['target']
+
+    else:
+
+        host_from_param = _constitution_configurer_sub01(
+            host_from_param,
+            config,
+            package_info,
+            'host',
+            host_from_param,
+            build_from_param,
+            target_from_param
+            )
+
+        build_from_param = _constitution_configurer_sub01(
+            build_from_param,
+            config,
+            package_info,
+            'build',
+            host_from_param,
+            build_from_param,
+            target_from_param
+            )
+
+        target_from_param = _constitution_configurer_sub01(
+            target_from_param,
+            config,
+            package_info,
+            'target',
+            host_from_param,
+            build_from_param,
+            target_from_param
+            )
+
+    return host_from_param, build_from_param, target_from_param, paths
+
+
 class Constitution:
 
     def __init__(
             self,
-            host_str='i486-pc-linux-gnu',
-            build_str='i486-pc-linux-gnu',
-            target_str='i486-pc-linux-gnu'
+            host_str=None,
+            build_str=None,
+            target_str=None,
+            paths=None
             ):
 
-        self.host = wayround_org.utils.system_type.SystemType(host_str)
-        self.build = wayround_org.utils.system_type.SystemType(build_str)
-        self.target = wayround_org.utils.system_type.SystemType(target_str)
+        self.host = None
+        self.build = None
+        self.target = None
 
-        self.paths = {}
+        if paths is None:
+            paths = {}
+
+        if host_str is not None:
+            self.host = wayround_org.utils.system_type.SystemType(host_str)
+
+        if build_str is not None:
+            self.build = wayround_org.utils.system_type.SystemType(build_str)
+
+        if target_str is not None:
+            self.target = wayround_org.utils.system_type.SystemType(target_str)
+
+        self.paths = paths
+        return
 
     def return_aipsetup3_compliant(self):
-        return {
-            'host': str(self.host),
-            'build': str(self.build),
-            'target': str(self.target),
+        ret = {
+            'host': None,
+            'build': None,
+            'target': None,
             'paths': copy.copy(self.paths),
             'system_title': 'UNICORN',
             'system_version': '3.0'
             }
+
+        if self.host is not None:
+            ret['host'] = str(self.host)
+
+        if self.build is not None:
+            ret['build'] = str(self.build)
+
+        if self.target is not None:
+            ret['target'] = str(self.target)
+
+        return ret
 
 
 class BuildScriptCtrl:
@@ -278,22 +392,39 @@ class BuildCtl:
                     else:
 
                         try:
-                            ret = builder.run_action(action)
-                        except KeyboardInterrupt:
-                            raise
+                            actions_container = builder.get_defined_actions()
                         except:
                             logging.exception(
-                                "Error running action"
-                                " `{}' in Builder class".format(
-                                    action
+                                "Error getting defined actions from `{}'".format(
+                                    script
                                     )
                                 )
-                            ret = 3
+                            ret = 4
+
+                        else:
+
+                            try:
+                                ret = run_builder_action(
+                                    self.buildingsite_ctl.getDIR_BUILD_LOGS(),
+                                    actions_container,
+                                    action=action,
+                                    )
+                            except KeyboardInterrupt:
+                                raise
+                            except:
+                                logging.exception(
+                                    "Error running action"
+                                    " `{}' in Builder class".format(
+                                        action
+                                        )
+                                    )
+                                ret = 3
 
                         logging.info(
                             "action `{}' ended with code {}".format(
                                 action,
-                                ret)
+                                ret
+                                )
                             )
 
                 elif hasattr(script, 'main'):
@@ -940,7 +1071,7 @@ class PackCtl:
                 'pack_buildingsite'
                 ]:
 
-            if eval("self.{}()".format(i)) != 0:
+            if getattr(self, i)() != 0:
                 logging.error("Error on {}".format(i))
                 ret = 1
                 break
@@ -1056,6 +1187,9 @@ class BuildingSiteCtl:
     def isWdDirRestricted(self):
         return isWdDirRestricted(self.path)
 
+    def is_building_site(self):
+        return os.path.isfile(os.path.join(self.path, 'package_info.json'))
+
     def init(self, files=None):
         """
         Initiates building site path for farther package build.
@@ -1129,7 +1263,7 @@ class BuildingSiteCtl:
 
                     for i in files:
                         logging.info("Copying file {}".format(i))
-                        shutil.copy(i, t_dir)
+                        shutil.copy2(i, t_dir)
 
         else:
             logging.error("Init error")
@@ -1156,24 +1290,23 @@ class BuildingSiteCtl:
 
         if not os.path.isfile(pi_filename):
             logging.error("`{}' not found".format(pi_filename))
+            ret = ret_on_error
         else:
             txt = ''
             f = None
             try:
                 f = open(pi_filename, 'r')
-
             except:
                 logging.exception("Can't open `{}'".format(pi_filename))
-
+                ret = ret_on_error
             else:
                 txt = f.read()
                 f.close()
-
                 try:
                     ret = json.loads(txt)
                 except:
                     logging.exception("Error in `{}'".format(pi_filename))
-
+                    ret = ret_on_error
         return ret
 
     def write_package_info(self, info):
@@ -1210,7 +1343,8 @@ class BuildingSiteCtl:
                         sort_keys=True
                         )
                 except:
-                    raise ValueError("Can't represent data for package info")
+                    logging.exception("Can't represent data for package info")
+                    ret = 1
                 else:
                     f.write(txt)
 
@@ -1626,7 +1760,7 @@ class BuildingSiteCtl:
         return ret
 
 
-def getDIR_x(path, _x='TARBALL'):
+def getDIR_x(path, x='TARBALL'):
     '''
     Returns absolute path to DIR_{_x}
     '''
@@ -1634,7 +1768,8 @@ def getDIR_x(path, _x='TARBALL'):
     ret = wayround_org.utils.path.abspath(
         wayround_org.utils.path.join(
             path,
-            eval('DIR_{}'.format(_x)))
+            eval('DIR_{}'.format(x))
+            )
         )
 
     return ret
@@ -2003,5 +2138,79 @@ Can't select between those package names (for {})
                                 "Complete package building ended with no error"
                                 )
                             ret = 0
+
+    return ret
+
+
+def run_builder_action(
+        log_output_directory,
+        actions_container_object,
+        action=None,
+        ):
+
+    # TODO: add support for list of 2-tuples
+
+    if not isinstance(
+            actions_container_object,
+            collections.OrderedDict
+            ):
+        raise TypeError("`actions_container_object' must be OrderedDict")
+
+    ret = 0
+
+    actions = list(actions_container_object.keys())
+
+    if action is not None and isinstance(action, str):
+        if action.endswith('+'):
+            actions = actions[actions.index(action[:-1]):]
+        else:
+            actions = [actions[actions.index(action)]]
+
+    for i in actions:
+
+        log = wayround_org.utils.log.Log(log_output_directory, i)
+
+        log.info(
+            "========= Starting '{}' action".format(i)
+            )
+        try:
+            ret = actions_container_object[i](log)
+        except KeyboardInterrupt:
+            raise
+        except:
+            log.exception(
+                "========= Exception on '{}' action".format(i)
+                )
+            ret = 100
+        else:
+            log.info(
+                "========= Finished '{}' action with code {}".format(
+                    i, ret
+                    )
+                )
+        if ret != 0:
+            break
+
+        log.close()
+
+    return ret
+
+
+def calc_conf_hbt_options(builder_obj):
+
+    host = builder_obj.host
+    build = builder_obj.build
+    target = builder_obj.target
+
+    ret = []
+
+    if host is not None:
+        ret.append('--host=' + host)
+
+    if build is not None:
+        ret.append('--build=' + build)
+
+    if target is not None:
+        ret.append('--target=' + target)
 
     return ret

@@ -16,41 +16,30 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = dict()
         return ret
 
-    def builder_action_configure(self):
-
-        target = self.package_info['constitution']['target']
-        host = self.package_info['constitution']['host']
-        build = self.package_info['constitution']['build']
-        prefix = self.package_info['constitution']['paths']['usr']
+    def builder_action_configure(self, log):
 
         prefix = self.package_info['constitution']['paths']['usr']
         mandir = self.package_info['constitution']['paths']['man']
         sysconfdir = self.package_info['constitution']['paths']['config']
         localstatedir = self.package_info['constitution']['paths']['var']
 
-        if ('crossbuilder_mode' in self.custom_data
-                and self.custom_data['crossbuilder_mode'] == True):
-            pass
-            #prefix = os.path.join(
-            #    '/', 'usr', 'lib', 'unicorn_crossbuilders', target
-            #    )
-            # mandir = os.path.join(prefix, 'man')
-            # sysconfdir = os.path.join(prefix, 'etc')
-            # localstatedir = os.path.join(prefix, 'var')
-
         ret = autotools.configure_high(
             self.buildingsite,
             options=[
-                # '--enable-targets='
-                # 'i486-pc-linux-gnu,'
+                #'--enable-targets='
+                #'i486-pc-linux-gnu,'
                 # 'i586-pc-linux-gnu,'
                 # 'i686-pc-linux-gnu,'
                 # 'i786-pc-linux-gnu,'
                 # 'ia64-pc-linux-gnu,'
-                # 'x86_64-pc-linux-gnu,'
-                # 'aarch64-linux-gnu',
+                #'x86_64-pc-linux-gnu,'
+                #'aarch64-linux-gnu',
 
                 '--enable-targets=all',
+
+                # WARNING: enabling this will cause problem on building native
+                #          GCC
+                #'--with-sysroot',
 
                 #                    '--disable-libada',
                 #                    '--enable-bootstrap',
@@ -60,15 +49,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-libssp',
                 '--enable-objc-gc',
 
+                '--enable-lto',
+                '--enable-ld',
+                #'--enable-gold',
+
                 '--prefix=' + prefix,
                 '--mandir=' + mandir,
                 '--sysconfdir=' + sysconfdir,
                 '--localstatedir=' + localstatedir,
 
-                '--host=' + host,
-                '--build=' + build,
-                '--target=' + target
-                ],
+                #'--host=' + self.host,
+                #'--build=' + self.build,
+                #'--target=' + self.target
+                ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self),
             arguments=[],
             environment={},
             environment_mode='copy',
@@ -80,21 +73,3 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         return ret
-
-    def builder_action_dst_cleanup(self):
-        """
-        Standard destdir cleanup
-        """
-        if ('crossbuilder_mode' in self.custom_data
-                and self.custom_data['crossbuilder_mode'] == True):
-            logging.info(
-                "Destination directory cleanup skipped doe to "
-                "'crossbuilder_mode'"
-                )
-        else:
-
-            if os.path.isdir(self.src_dir):
-                logging.info("cleaningup destination dir")
-                wayround_org.utils.file.cleanup_dir(self.dst_dir)
-
-        return 0

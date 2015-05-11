@@ -61,6 +61,7 @@ def building_site_apply_info(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
+    pkg_info = adds['package_info']
 
     dirname = '.'
     file = None
@@ -73,24 +74,20 @@ def building_site_apply_info(command_name, opts, args, adds):
 
     # TODO: add check for dirname correctness
 
-    host = config['system_settings']['host']
-    build = config['system_settings']['build']
-    target = config['system_settings']['target']
+    host, build, target, paths = \
+        wayround_org.aipsetup.build.constitution_configurer(
+            config,
+            pkg_info,
+            opts.get('--host', None),
+            opts.get('--build', None),
+            opts.get('--target', None)
+            )
 
-    if '--host' in opts:
-        host = opts['--host']
-
-    if '--build' in opts:
-        build = opts['--build']
-
-    if '--target' in opts:
-        target = opts['--target']
-
-    const = wayround_org.aipsetup.controllers.constitution_by_config(
-        config,
+    const = wayround_org.aipsetup.build.Constitution(
         host,
+        build,
         target,
-        build
+        paths
         )
 
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
@@ -110,6 +107,7 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
+    pkg_info = adds['package_info']
 
     dirname = '.'
     package_name = None
@@ -128,24 +126,19 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
         logging.error("Must be 1 or 2 parameters")
         ret = 1
 
-    host = config['system_settings']['host']
-    build = config['system_settings']['build']
-    target = config['system_settings']['target']
-
-    if '--host' in opts:
-        host = opts['--host']
-
-    if '--build' in opts:
-        build = opts['--build']
-
-    if '--target' in opts:
-        target = opts['--target']
-
-    const = wayround_org.aipsetup.controllers.constitution_by_config(
+    host, build, target, paths = wayround_org.aipsetup.build.constitution_configurer(
         config,
+        pkg_info,
+        opts.get('--host', None),
+        opts.get('--build', None),
+        opts.get('--target', None)
+        )
+
+    const = wayround_org.aipsetup.build.Constitution(
         host,
+        build,
         target,
-        build
+        paths
         )
 
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
@@ -198,8 +191,9 @@ def build_build_plus(command_name, opts, args, adds):
 def _build_complete_subroutine(
         config,
         host,
-        target,
         build,
+        target,
+        paths,
         dirname,
         file,
         r_bds
@@ -209,11 +203,11 @@ def _build_complete_subroutine(
 
     ret = 0
 
-    const = wayround_org.aipsetup.controllers.constitution_by_config(
-        config,
+    const = wayround_org.aipsetup.build.Constitution(
         host,
+        build,
         target,
-        build
+        paths
         )
 
     if const is None:
@@ -277,23 +271,19 @@ def build_complete(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
+    pkg_info = adds['package_info']
 
     ret = 0
 
     r_bds = '-d' in opts
 
-    host = config['system_settings']['host']
-    build = config['system_settings']['build']
-    target = config['system_settings']['target']
-
-    if '--host' in opts:
-        host = opts['--host']
-
-    if '--build' in opts:
-        build = opts['--build']
-
-    if '--target' in opts:
-        target = opts['--target']
+    host, build, target, paths = wayround_org.aipsetup.build.constitution_configurer(
+        config,
+        pkg_info,
+        opts.get('--host', None),
+        opts.get('--build', None),
+        opts.get('--target', None),
+        )
 
     args_l = len(args)
 
@@ -302,8 +292,9 @@ def build_complete(command_name, opts, args, adds):
         ret = _build_complete_subroutine(
             config,
             host,
-            target,
             build,
+            target,
+            paths,
             '.',
             None,
             r_bds
@@ -314,8 +305,9 @@ def build_complete(command_name, opts, args, adds):
         ret = _build_complete_subroutine(
             config,
             host,
-            target,
             build,
+            target,
+            paths,
             '.',
             args[0],
             r_bds
@@ -326,8 +318,9 @@ def build_complete(command_name, opts, args, adds):
         ret = _build_complete_subroutine(
             config,
             host,
-            target,
             build,
+            target,
+            paths,
             args[0],
             args[1],
             r_bds
@@ -342,8 +335,9 @@ def build_complete(command_name, opts, args, adds):
             if _build_complete_subroutine(
                     config,
                     host,
-                    target,
                     build,
+                    target,
+                    paths,
                     i,
                     None,
                     r_bds
@@ -378,6 +372,7 @@ def build_full(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
+    pkg_info = adds['package_info']
 
     r_bds = '-d' in opts
 
@@ -389,9 +384,13 @@ def build_full(command_name, opts, args, adds):
 
     building_site_dir = config['local_build']['building_scripts_dir']
 
-    host = config['system_settings']['host']
-    build = config['system_settings']['build']
-    target = config['system_settings']['target']
+    host, build, target, paths = wayround_org.aipsetup.build.constitution_configurer(
+        config,
+        pkg_info,
+        opts.get('--host', None),
+        opts.get('--build', None),
+        opts.get('--target', None)
+        )
 
     if len(args) > 0:
         sources = args
@@ -403,23 +402,15 @@ def build_full(command_name, opts, args, adds):
         logging.error("No source files supplied")
         ret = 2
 
-    if '--host' in opts:
-        host = opts['--host']
-
-    if '--build' in opts:
-        build = opts['--build']
-
-    if '--target' in opts:
-        target = opts['--target']
-
     if ret == 0:
 
         logging.info("Applying constitution")
-        const = wayround_org.aipsetup.controllers.constitution_by_config(
-            config,
+
+        const = wayround_org.aipsetup.build.Constitution(
             host,
+            build,
             target,
-            build
+            paths
             )
 
         if not isinstance(const, wayround_org.aipsetup.build.Constitution):

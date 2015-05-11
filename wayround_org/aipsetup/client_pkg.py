@@ -56,7 +56,7 @@ class PackageServerClient:
         return get_latest_asp(self._url, pkg_name, host, out_dir, out_to_temp)
 
     def tarballs(self, pkg_name):
-        return tarballs(self._url, pkg_name, host)
+        return tarballs(self._url, pkg_name)
 
     def tarballs_latest(self, pkg_name):
         return tarballs_latest(

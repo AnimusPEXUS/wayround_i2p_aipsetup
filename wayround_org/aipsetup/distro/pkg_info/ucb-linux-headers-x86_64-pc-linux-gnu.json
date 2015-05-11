@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "crossbuilder_tc",
+  "buildscript": "crossbuilder_linux_headers",
   "version_tool": "",
   "basename": "",
   "filters": "",

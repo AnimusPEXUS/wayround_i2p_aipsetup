@@ -507,7 +507,8 @@ class SystemCtl:
                                         )
 
                                     if not os.path.islink(f_d_p):
-                                        os.chown(f_d_p, 0, 0)
+                                        if os.getuid() == 0:
+                                            os.chown(f_d_p, 0, 0)
                                         os.chmod(f_d_p, 0o755)
 
                                 for i in files:
@@ -519,7 +520,8 @@ class SystemCtl:
                                         )
 
                                     if not os.path.islink(f_f_p):
-                                        os.chown(f_f_p, 0, 0)
+                                        if os.getuid() == 0:
+                                            os.chown(f_f_p, 0, 0)
                                         os.chmod(f_f_p, 0o755)
                             finally:
                                 installed_file_list.close()

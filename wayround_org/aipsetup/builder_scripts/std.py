@@ -4,10 +4,13 @@ import os.path
 import subprocess
 import collections
 import inspect
+import time
+
+import wayround_org.utils.file
+import wayround_org.utils.log
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
 
 
 class Builder:
@@ -15,8 +18,6 @@ class Builder:
     def __init__(self, buildingsite):
 
         self.buildingsite = buildingsite
-
-        self.action_dict = self.define_actions()
 
         bs = wayround_org.aipsetup.build.BuildingSiteCtl(buildingsite)
 
@@ -26,7 +27,15 @@ class Builder:
             buildingsite
             )
 
+        self.bld_dir = wayround_org.aipsetup.build.getDIR_BUILDING(
+            buildingsite
+            )
+
         self.dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(
+            buildingsite
+            )
+
+        self.log_dir = wayround_org.aipsetup.build.getDIR_BUILD_LOGS(
             buildingsite
             )
 
@@ -36,14 +45,33 @@ class Builder:
 
         self.source_configure_reldir = '.'
 
+        self.is_crossbuild = (
+            self.package_info['constitution']['target']
+            != self.package_info['constitution']['host']
+            )
+
         self.custom_data = self.define_custom_data()
 
+        self.action_dict = self.define_actions()
+
         return
+
+    @property
+    def target(self):
+        return self.package_info['constitution']['target']
+
+    @property
+    def host(self):
+        return self.package_info['constitution']['host']
+
+    @property
+    def build(self):
+        return self.package_info['constitution']['build']
 
     def print_help(self):
         txt = ''
         for i in self.action_dict.keys():
-            txt += '{:20}    {}\n'.format(
+            txt += '{:40}    {}\n'.format(
                 i,
                 inspect.getdoc(self.action_dict[i])
                 )
@@ -52,8 +80,9 @@ class Builder:
 
     def define_actions(self):
         return collections.OrderedDict([
-            ('src_cleanup', self.builder_action_src_cleanup),
             ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
             ('extract', self.builder_action_extract),
             ('patch', self.builder_action_patch),
             ('autogen', self.builder_action_autogen),
@@ -62,65 +91,46 @@ class Builder:
             ('distribute', self.builder_action_distribute)
             ])
 
+    def get_defined_actions(self):
+        return self.action_dict
+
     def define_custom_data(self):
         return {}
 
-    def run_action(self, action=None):
-        ret = 0
-
-        actions = list(self.action_dict.keys())
-
-        if action is not None and isinstance(action, str):
-            if action.endswith('+'):
-                actions = actions[actions.index(action[:-1]):]
-            else:
-                actions = [actions[actions.index(action)]]
-
-        for i in actions:
-            logging.info(
-                "======== Starting '{}' action".format(i)
-                )
-            try:
-                ret = self.action_dict[i]()
-            except:
-                logging.exception(
-                    "======== Exception on '{}' action".format(i)
-                    )
-                ret = 100
-            else:
-                logging.info(
-                    "======== Finished '{}' action with code {}".format(
-                        i, ret
-                        )
-                    )
-            if ret != 0:
-                break
-
-        return ret
-
-    def builder_action_src_cleanup(self):
+    def builder_action_src_cleanup(self, log):
         """
         Standard sources cleanup
         """
 
         if os.path.isdir(self.src_dir):
-            logging.info("cleaningup source dir")
+            log.info("cleaningup source dir")
             wayround_org.utils.file.cleanup_dir(self.src_dir)
 
         return 0
 
-    def builder_action_dst_cleanup(self):
+    def builder_action_bld_cleanup(self, log):
+        """
+        Standard building dir cleanup
+        """
+
+        if os.path.isdir(self.bld_dir):
+            log.info("cleaningup building dir")
+            wayround_org.utils.file.cleanup_dir(self.bld_dir)
+
+        return 0
+
+    def builder_action_dst_cleanup(self, log):
         """
         Standard destdir cleanup
         """
 
-        if os.path.isdir(self.src_dir):
-            logging.info("cleaningup destination dir")
+        if os.path.isdir(self.dst_dir):
+            log.info("cleaningup destination dir")
             wayround_org.utils.file.cleanup_dir(self.dst_dir)
 
         return 0
 
-    def builder_action_extract(self):
+    def builder_action_extract(self, log):
         """
         Standard sources extraction actions
         """
@@ -134,23 +144,57 @@ class Builder:
 
         return ret
 
-    def builder_action_patch(self):
+    def builder_action_patch(self, log):
         return 0
 
-    def builder_action_autogen(self):
+    def builder_action_autogen(self, log):
         ret = 0
-        if not os.path.isfile(os.path.join(self.src_dir, 'configure')):
-            if not os.path.isfile(os.path.join(self.src_dir, 'autogen.sh')):
-                logging.error(
-                    "./configure not found and autogen.sh is absent"
+        if not os.path.isfile(
+                wayround_org.utils.path.join(
+                    self.src_dir,
+                    self.source_configure_reldir,
+                    'configure'
+                    )
+                ):
+            if os.path.isfile(
+                    wayround_org.utils.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir,
+                        'autogen.sh'
+                        )
+                    ):
+                p = subprocess.Popen(
+                    ['./autogen.sh'],
+                    cwd=os.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir
+                        )
+                    )
+                ret = p.wait()
+            elif os.path.isfile(
+                    wayround_org.utils.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir,
+                        'bootstrap'
+                        )
+                    ):
+                p = subprocess.Popen(
+                    ['./bootstrap'],
+                    cwd=os.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir
+                        )
+                    )
+                ret = p.wait()
+            else:
+                log.error(
+                    "./configure not found and no generators found"
                     )
                 ret = 2
-            else:
-                p = subprocess.Popen(['./autogen.sh'], cwd=self.src_dir)
-                ret = p.wait()
         return ret
 
-    def builder_action_configure(self):
+    def builder_action_configure(self, log):
+
         ret = autotools.configure_high(
             self.buildingsite,
             options=[
@@ -163,10 +207,10 @@ class Builder:
                 '--localstatedir=' +
                 self.package_info['constitution']['paths']['var'],
                 '--enable-shared',
-                '--host=' + self.package_info['constitution']['host'],
-                '--build=' + self.package_info['constitution']['build'],
+                # '--host=' + self.package_info['constitution']['host'],
+                # '--build=' + self.package_info['constitution']['build'],
                 # '--target=' + self.package_info['constitution']['target']
-                ],
+                ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self),
             arguments=[],
             environment={},
             environment_mode='copy',
@@ -178,7 +222,7 @@ class Builder:
             )
         return ret
 
-    def builder_action_build(self):
+    def builder_action_build(self, log):
         ret = autotools.make_high(
             self.buildingsite,
             options=[],
@@ -190,7 +234,7 @@ class Builder:
             )
         return ret
 
-    def builder_action_distribute(self):
+    def builder_action_distribute(self, log):
         ret = autotools.make_high(
             self.buildingsite,
             options=[],

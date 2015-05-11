@@ -16,6 +16,7 @@ import wayround_org.aipsetup.builder_scripts.binutils
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
+        self.separate_build_dir = True
         ret = dict()
         ret['cc_file'] = os.path.join(self.dst_dir, 'usr', 'bin', 'cc')
         ret['libcpp_file'] = os.path.join(self.dst_dir, 'usr', 'lib', 'cpp')
@@ -23,8 +24,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = collections.OrderedDict([
-            ('src_cleanup', self.builder_action_src_cleanup),
             ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
             ('extract', self.builder_action_extract),
             ('configure', self.builder_action_configure),
             ('build', self.builder_action_build),
@@ -35,44 +37,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
-    def builder_action_dst_cleanup(self):
-        """
-        Standard destdir cleanup
-        """
-        if ('crossbuilder_mode' in self.custom_data
-                and self.custom_data['crossbuilder_mode'] == True):
-            logging.info(
-                "Destination directory cleanup skipped doe to "
-                "'crossbuilder_mode'"
-                )
-        else:
-
-            if os.path.isdir(self.src_dir):
-                logging.info("cleaningup destination dir")
-                wayround_org.utils.file.cleanup_dir(self.dst_dir)
-
-        return 0
-
-    def builder_action_configure(self):
-
-        target = self.package_info['constitution']['target']
-        host = self.package_info['constitution']['host']
-        build = self.package_info['constitution']['build']
+    def builder_action_configure(self, log):
 
         prefix = self.package_info['constitution']['paths']['usr']
         mandir = self.package_info['constitution']['paths']['man']
         sysconfdir = self.package_info['constitution']['paths']['config']
         localstatedir = self.package_info['constitution']['paths']['var']
-
-        if ('crossbuilder_mode' in self.custom_data
-                and self.custom_data['crossbuilder_mode'] == True):
-            pass
-            #prefix = os.path.join(
-            #    '/', 'usr', 'lib', 'unicorn_crossbuilders', target
-            #    )
-            # mandir = os.path.join(prefix, 'man')
-            # sysconfdir = os.path.join(prefix, 'etc')
-            # localstatedir = os.path.join(prefix, 'var')
 
         ret = autotools.configure_high(
             self.buildingsite,
@@ -102,7 +72,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'--with-arch-32=i486',
                 #'--with-tune=generic',
 
-                '--enable-languages=c,c++,java,objc,obj-c++,ada,fortran',
+                #'--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran',
+                #'--enable-languages=ada',
                 '--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
@@ -120,10 +92,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--sysconfdir=' + sysconfdir,
                 '--localstatedir=' + localstatedir,
 
-                '--host=' + host,
-                '--build=' + build,
-                '--target=' + target
-                ],
+                #'--host=' + self.host,
+                #'--build=' + self.build,
+                #'--target=' + self.target
+                ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self),
             arguments=[],
             environment={
                 # 'CC': '/home/agu/_sda3/_UNICORN/b/gnat/
@@ -140,7 +112,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_before_checks(self):
+    def builder_action_before_checks(self, log):
         print(
             "stop: checks! If You want them (it's good if You do)\n"
             "then continue build with command: aipsetup build continue checks+\n"
@@ -149,7 +121,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 1
         return ret
 
-    def builder_action_checks(self):
+    def builder_action_checks(self, log):
         ret = autotools.make_high(
             self.buildingsite,
             options=['-k'],
@@ -161,7 +133,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_after_distribute(self):
+    def builder_action_after_distribute(self, log):
 
         if not os.path.exists(self.custom_data['cc_file']):
             os.symlink('gcc', self.custom_data['cc_file'])
