@@ -37,80 +37,48 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
-    def builder_action_configure(self, log):
+    def builder_action_configure_define_options(self, log):
+        return super().builder_action_configure_define_options(log) + [
+            # experimental options
+            # '--enable-targets=all',
+            '--enable-tls',
+            '--enable-nls',
 
-        prefix = self.package_info['constitution']['paths']['usr']
-        mandir = self.package_info['constitution']['paths']['man']
-        sysconfdir = self.package_info['constitution']['paths']['config']
-        localstatedir = self.package_info['constitution']['paths']['var']
+            # '--enable-targets='
+            # 'i486-pc-linux-gnu,'
+            # 'i586-pc-linux-gnu,'
+            # 'i686-pc-linux-gnu,'
+            # 'i786-pc-linux-gnu,'
+            # 'ia64-pc-linux-gnu,'
+            # 'x86_64-pc-linux-gnu,'
+            # 'aarch64-linux-gnu',
 
-        ret = autotools.configure_high(
-            self.buildingsite,
-            options=[
-                # experimental options
-                # '--enable-targets=all',
-                '--enable-tls',
-                '--enable-nls',
+            # then lto enabled it causes problems to systemd.
+            # some time has passed since then - trying to enable lto
+            #'--disable-lto',
 
-                # '--enable-targets='
-                # 'i486-pc-linux-gnu,'
-                # 'i586-pc-linux-gnu,'
-                # 'i686-pc-linux-gnu,'
-                # 'i786-pc-linux-gnu,'
-                # 'ia64-pc-linux-gnu,'
-                # 'x86_64-pc-linux-gnu,'
-                # 'aarch64-linux-gnu',
+            # normal options
+            '--enable-__cxa_atexit',
 
-                # then lto enabled it causes problems to systemd.
-                # some time has passed since then - trying to enable lto
-                #'--disable-lto',
+            # disabled for experiment
+            #'--with-arch-32=i486',
+            #'--with-tune=generic',
 
-                # normal options
-                '--enable-__cxa_atexit',
-
-                # disabled for experiment
-                #'--with-arch-32=i486',
-                #'--with-tune=generic',
-
-                #'--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran',
-                #'--enable-languages=ada',
-                '--enable-bootstrap',
-                '--enable-threads=posix',
-                '--enable-multiarch',
-                '--enable-multilib',
-                '--enable-checking=release',
-                '--with-gmp=/usr',
-                '--with-mpfr=/usr',
-                # '--with-build-time-tools=
-                # /home/agu/_sda3/_UNICORN/b/gnat/
-                # gnat-gpl-2014-x86-linux-bin',
-                '--enable-shared',
-
-                '--prefix=' + prefix,
-                '--mandir=' + mandir,
-                '--sysconfdir=' + sysconfdir,
-                '--localstatedir=' + localstatedir,
-
-                #'--host=' + self.host,
-                #'--build=' + self.build,
-                #'--target=' + self.target
-                ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self),
-            arguments=[],
-            environment={
-                # 'CC': '/home/agu/_sda3/_UNICORN/b/gnat/
-                #  gnat-gpl-2014-x86-linux-bin/bin/gcc',
-                # 'CXX': '/home/agu/_sda3/_UNICORN/b/
-                # gnat/gnat-gpl-2014-x86-linux-bin/bin/g++',
-                },
-            environment_mode='copy',
-            source_configure_reldir=self.source_configure_reldir,
-            use_separate_buildding_dir=self.separate_build_dir,
-            script_name='configure',
-            run_script_not_bash=False,
-            relative_call=False
-            )
-        return ret
+            #'--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+            '--enable-languages=c,c++,java,objc,obj-c++,fortran',
+            #'--enable-languages=ada',
+            '--enable-bootstrap',
+            '--enable-threads=posix',
+            '--enable-multiarch',
+            '--enable-multilib',
+            '--enable-checking=release',
+            '--with-gmp=/usr',
+            '--with-mpfr=/usr',
+            # '--with-build-time-tools=
+            # /home/agu/_sda3/_UNICORN/b/gnat/
+            # gnat-gpl-2014-x86-linux-bin',
+            '--enable-shared'
+            ]
 
     def builder_action_before_checks(self, log):
         print(

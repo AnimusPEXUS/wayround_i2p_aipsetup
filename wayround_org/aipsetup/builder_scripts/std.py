@@ -78,6 +78,9 @@ class Builder:
         print(txt)
         return 0
 
+    def get_defined_actions(self):
+        return self.action_dict
+
     def define_actions(self):
         return collections.OrderedDict([
             ('dst_cleanup', self.builder_action_dst_cleanup),
@@ -90,9 +93,6 @@ class Builder:
             ('build', self.builder_action_build),
             ('distribute', self.builder_action_distribute)
             ])
-
-    def get_defined_actions(self):
-        return self.action_dict
 
     def define_custom_data(self):
         return {}
@@ -138,6 +138,7 @@ class Builder:
         ret = autotools.extract_high(
             self.buildingsite,
             self.package_info['pkg_info']['basename'],
+            log=log,
             unwrap_dir=True,
             rename_dir=False
             )
@@ -149,13 +150,15 @@ class Builder:
 
     def builder_action_autogen(self, log):
         ret = 0
-        if not os.path.isfile(
+        if os.path.isfile(
                 wayround_org.utils.path.join(
                     self.src_dir,
                     self.source_configure_reldir,
                     'configure'
                     )
                 ):
+            log.info("./configure found. generator will not be used")
+        else:
             if os.path.isfile(
                     wayround_org.utils.path.join(
                         self.src_dir,
@@ -193,24 +196,27 @@ class Builder:
                 ret = 2
         return ret
 
+    def builder_action_configure_define_options(self, log):
+        return [
+            '--prefix=' +
+            self.package_info['constitution']['paths']['usr'],
+            '--mandir=' +
+            self.package_info['constitution']['paths']['man'],
+            '--sysconfdir=' +
+            self.package_info['constitution']['paths']['config'],
+            '--localstatedir=' +
+            self.package_info['constitution']['paths']['var'],
+            '--enable-shared'
+            ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self)
+
     def builder_action_configure(self, log):
+
+        defined_options = self.builder_action_configure_define_options(log)
 
         ret = autotools.configure_high(
             self.buildingsite,
-            options=[
-                '--prefix=' +
-                self.package_info['constitution']['paths']['usr'],
-                '--mandir=' +
-                self.package_info['constitution']['paths']['man'],
-                '--sysconfdir=' +
-                self.package_info['constitution']['paths']['config'],
-                '--localstatedir=' +
-                self.package_info['constitution']['paths']['var'],
-                '--enable-shared',
-                # '--host=' + self.package_info['constitution']['host'],
-                # '--build=' + self.package_info['constitution']['build'],
-                # '--target=' + self.package_info['constitution']['target']
-                ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self),
+            log=log,
+            options=defined_options,
             arguments=[],
             environment={},
             environment_mode='copy',
@@ -225,6 +231,7 @@ class Builder:
     def builder_action_build(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[],
             environment={},
@@ -237,6 +244,7 @@ class Builder:
     def builder_action_distribute(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'install',

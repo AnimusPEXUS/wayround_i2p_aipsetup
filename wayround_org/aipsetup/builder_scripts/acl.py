@@ -7,131 +7,87 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_custom_data(self):
+        return {'subset': 'acl'}
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute',
-         'fix_symlinks', 'fix_la_file'],
-        action,
-        "help"
-        )
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('patch', self.builder_action_patch),
+            ('autogen', self.builder_action_autogen),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute),
+            ('fix_symlinks', self.builder_action_fix_symlinks),
+            ('fix_la_file', self.builder_action_fix_la_file)
+            ])
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def builder_action_distribute(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install', 'install-dev', 'install-lib',
+                'DESTDIR=' + dst_dir
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
 
-    else:
+    def builder_action_fix_symlinks(self, log):
+        subset = self.custom_data['subset']
 
-        pkg_info, actions = r
+        ret = 0
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        try:
+            for i in ['lib' + subset + '.a', 'lib' + subset + '.la']:
+                ffn = os.path.join(self.dst_dir, 'usr', 'lib', i)
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+                if os.path.exists(ffn):
+                    os.unlink(ffn)
 
-        separate_build_dir = False
+                os.symlink(os.path.join('..', 'libexec', i), ffn)
 
-        source_configure_reldir = '.'
+            for i in ['lib' + subset + '.so']:
+                ffn = os.path.join(self.dst_dir, 'usr', 'libexec', i)
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+                if os.path.exists(ffn):
+                    os.unlink(ffn)
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--prefix=' + os.path.join(dst_dir, 'usr'),
-                    '--mandir=' + os.path.join(dst_dir, 'usr', 'share', 'man'),
-                    '--sysconfdir=' + os.path.join(dst_dir, 'etc'),
-                    '--localstatedir=' + os.path.join(dst_dir, 'var'),
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
+                os.symlink(os.path.join('..', 'lib', i), ffn)
+        except:
+            logging.exception('error')
+            ret = 1
+        return ret
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+    def builder_action_fix_la_file(self, log):
+        subset = self.custom_data['subset']
 
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install', 'install-dev', 'install-lib',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        ret = 0
 
-        if 'fix_symlinks' in actions and ret == 0:
+        la_file_name = os.path.join(
+            self.dst_dir, 'usr', 'lib', 'lib' + subset + '.la'
+            )
 
-            try:
-                for i in ['libacl.a', 'libacl.la']:
-                    ffn = os.path.join(dst_dir, 'usr', 'lib', i)
+        #print("la_file_name == {}".format(la_file_name))
 
-                    if os.path.exists(ffn):
-                        os.unlink(ffn)
+        la_file = open(la_file_name)
+        lines = la_file.read().splitlines()
+        la_file.close()
 
-                    os.symlink(os.path.join('..', 'libexec', i), ffn)
+        for i in range(len(lines)):
+            while self.dst_dir in lines[i]:
+                lines[i] = lines[i].replace(self.dst_dir, '')
 
-                for i in ['libacl.so']:
-                    ffn = os.path.join(dst_dir, 'usr', 'libexec', i)
-
-                    if os.path.exists(ffn):
-                        os.unlink(ffn)
-
-                    os.symlink(os.path.join('..', 'lib', i), ffn)
-            except:
-                logging.exception('error')
-                ret = 1
-
-        if 'fix_la_file' in actions and ret == 0:
-
-            la_file_name = os.path.join(dst_dir, 'usr', 'lib', 'libacl.la')
-
-            print("la_file_name == {}".format(la_file_name))
-
-            la_file = open(la_file_name)
-            lines = la_file.read().splitlines()
-            la_file.close()
-
-            for i in range(len(lines)):
-                while dst_dir in lines[i]:
-                    lines[i] = lines[i].replace(dst_dir, '')
-
-            la_file = open(la_file_name, 'w')
-            la_file.write('\n'.join(lines))
-            la_file.close()
-
-    return ret
+        la_file = open(la_file_name, 'w')
+        la_file.write('\n'.join(lines))
+        la_file.close()
+        return ret

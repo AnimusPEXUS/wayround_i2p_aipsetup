@@ -2166,12 +2166,21 @@ def run_builder_action(
         else:
             actions = [actions[actions.index(action)]]
 
+    longest_logname = 0
+    for i in list(actions_container_object.keys()):
+        if len(i) > longest_logname:
+            longest_logname = len(i)
+
     for i in actions:
 
-        log = wayround_org.utils.log.Log(log_output_directory, i)
+        log = wayround_org.utils.log.Log(
+            log_output_directory,
+            i,
+            longest_logname=longest_logname
+            )
 
         log.info(
-            "========= Starting '{}' action".format(i)
+            "=>------[Starting '{}' action".format(i)
             )
         try:
             ret = actions_container_object[i](log)
@@ -2179,12 +2188,12 @@ def run_builder_action(
             raise
         except:
             log.exception(
-                "========= Exception on '{}' action".format(i)
+                "=>------[Exception on '{}' action".format(i)
                 )
             ret = 100
         else:
             log.info(
-                "========= Finished '{}' action with code {}".format(
+                "=>------[Finished '{}' action with code {}".format(
                     i, ret
                     )
                 )

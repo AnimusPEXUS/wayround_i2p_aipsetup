@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "SDL2",
   "version_tool": "",
-  "basename": "SDL_image",
+  "basename": "SDL2",
   "filters": "- status !re ^$",
   "removable": true,
   "reducible": true,

@@ -4,14 +4,15 @@
   "buildscript": "std",
   "version_tool": "",
   "basename": "SDL_sound",
-  "filters": "",
+  "filters": "- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
   "tags": [],
   "source_path_prefixes": [
-    "/icculus.org/icculus.org/SDL_sound/"
+    "/icculus.org/icculus.org/SDL_sound/",
+    "/libsdl.org/"
   ],
   "build_deps": [],
   "so_deps": [],

@@ -4,13 +4,15 @@
   "buildscript": "std",
   "version_tool": "",
   "basename": "SDL_mixer",
-  "filters": "",
+  "filters": "- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
   "tags": [],
-  "source_path_prefixes": [],
+  "source_path_prefixes": [
+    "/libsdl.org/"
+  ],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

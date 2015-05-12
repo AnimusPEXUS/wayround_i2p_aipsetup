@@ -62,17 +62,19 @@ def cmake_high(
     environment,
     environment_mode,
     source_subdir,
-    build_in_separate_dir
+    build_in_separate_dir,
+    log=None,
     ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
 
-    log = wayround_org.utils.log.Log(
-        wayround_org.aipsetup.build.getDIR_BUILD_LOGS(
-            building_site
-            ),
-        'cmake'
-        )
+    own_log = False
+    if log is None:
+        own_log = True
+        log = wayround_org.utils.log.Log(
+            wayround_org.aipsetup.build.getDIR_BUILD_LOGS(building_site),
+            'cmake'
+            )
 
     env = wayround_org.utils.osutils.env_vars_edit(
         environment,
@@ -107,7 +109,8 @@ def cmake_high(
         env=env
         )
 
-    log.close()
+    if own_log:
+        log.close()
 
     return ret
 

@@ -145,6 +145,7 @@
         "cups", "cups-filters",
         "qpdf",
         "wireless_tools", "wpa_supplicant", "kismet",
-        "tree"
+        "tree",
+        "xfsdump", "xfsprogs"
     ]
 }

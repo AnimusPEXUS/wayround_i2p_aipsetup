@@ -10,84 +10,68 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('patch', self.builder_action_patch),
+            ('autogen', self.builder_action_autogen),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute)
+            ])
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'build', 'dist'],
-            action,
-            "help"
+    def builder_action_build(self, log):
+        p = subprocess.Popen(
+            ['make'],
+            cwd=self.src_dir
             )
+        ret = p.wait()
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+    def builder_action_distribute(self, log):
+        ret = 0
+        
+        try:
+            os.makedirs(
+                os.path.join(self.dst_dir, 'usr', 'include'),
+                exist_ok=True
                 )
+        except:
+            log.exception("Can't create dir")
+            ret = 2
 
-        if 'build' in actions and ret == 0:
-            ret = subprocess.Popen(
-                ['make'],
-                cwd=src_dir
+        try:
+            os.makedirs(
+                os.path.join(self.dst_dir, 'usr', 'lib'),
+                exist_ok=True
                 )
+        except:
+            log.exception("Can't create dir")
+            ret = 2
 
-        if 'dist' in actions and ret == 0:
+        if ret == 0:
 
-            try:
-                os.makedirs(
-                    os.path.join(dst_dir, 'usr', 'include')
-                    )
-            except:
-                pass
+            libs = glob.glob(os.path.join(self.src_dir, 'Dist', '*.a'))
+            libs += glob.glob(os.path.join(self.src_dir, 'Dist', '*.so'))
 
-            try:
-                os.makedirs(
-                    os.path.join(dst_dir, 'usr', 'lib')
-                    )
-            except:
-                pass
-
-            libs = glob.glob(os.path.join(src_dir, 'Dist', '*.a'))
-            libs += glob.glob(os.path.join(src_dir, 'Dist', '*.so'))
-
-            headers = glob.glob(os.path.join(src_dir, 'Dist', '*.h'))
+            headers = glob.glob(os.path.join(self.src_dir, 'Dist', '*.h'))
 
             for i in libs:
                 i = os.path.basename(i)
                 shutil.copy(
-                    os.path.join(src_dir, 'Dist', i),
-                    os.path.join(dst_dir, 'usr', 'lib', i)
+                    os.path.join(self.src_dir, 'Dist', i),
+                    os.path.join(self.dst_dir, 'usr', 'lib', i)
                     )
 
             for i in headers:
                 i = os.path.basename(i)
                 shutil.copy(
-                    os.path.join(src_dir, 'Dist', i),
-                    os.path.join(dst_dir, 'usr', 'include', i)
+                    os.path.join(self.src_dir, 'Dist', i),
+                    os.path.join(self.dst_dir, 'usr', 'include', i)
                     )
 
-#            ret = subprocess.Popen(
-#                ['make', 'install', 'DESTDIR=' + dst_dir],
-#                cwd=src_dir
-#                )
-
-    return ret
+        return
