@@ -7,7 +7,84 @@ import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
+
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    def builder_action_patch(self, log):
+
+        # disabled patching for experiment
+        return 0
+
+        ret = 0
+
+        if (self.package_info['pkg_nameinfo']['groups']['version_dirty']
+                == '2.00'):
+
+            fn = self.src_dir + '/grub-core/gnulib/stdio.in.h'
+
+            f = open(fn)
+            ftl = f.readlines()
+            f.close()
+
+            for i in ftl:
+                if 'gets is a' in i:
+                    ftl.remove(i)
+                    break
+
+            f = open(fn, 'w')
+            f.writelines(ftl)
+            f.close()
+
+            fn = self.src_dir + '/util/grub-mkfont.c'
+
+            f = open(fn)
+            ftl = f.readlines()
+            f.close()
+
+            for i in range(len(ftl)):
+                if ftl[i] == '#include <freetype/ftsynth.h>\n':
+                    ftl[i] = '#include <freetype2/ftsynth.h>\n'
+                    break
+
+            f = open(fn, 'w')
+            f.writelines(ftl)
+            f.close()
+
+            """
+
+            p = subprocess.Popen(
+                ['sed',
+                 '-i',
+                 '-e',
+                 '/gets is a/d',
+                 'grub-core/gnulib/stdio.in.h'
+                 ],
+                cwd=self.src_dir,
+                stdout=log.stdout,
+                stderr=log.stderr
+                )
+            ret = p.wait()
+
+            p = subprocess.Popen(
+                ['sed',
+                 '-i',
+                 '-e',
+                 '/gets is a/d',
+                 'grub-core/gnulib/stdio.in.h'
+                 ],
+                cwd=self.src_dir,
+                stdout=log.stdout,
+                stderr=log.stderr
+                )
+            ret = p.wait()
+
+            """
+
+        return ret
+
+"""
 def main(buildingsite, action=None):
 
     ret = 0
@@ -60,13 +137,13 @@ def main(buildingsite, action=None):
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
+                    pkg_info['constitution']['paths']['config'],
                     '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
+                    pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},
@@ -104,3 +181,4 @@ def main(buildingsite, action=None):
                 )
 
     return ret
+"""

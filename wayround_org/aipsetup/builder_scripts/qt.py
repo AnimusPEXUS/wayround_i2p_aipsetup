@@ -2,119 +2,104 @@
 import logging
 import os.path
 import subprocess
+import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
 
-    ret = 0
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'configure', 'build', 'distribute', 'SET'],
-            action,
-            "help"
-            )
+    def define_custom_data(self):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        name = pkg_info['pkg_info']['name']
+        name = self.package_info['pkg_info']['name']
 
         if not name in ['qt4', 'qt5']:
             raise Exception("Invalid package name")
 
-        number = name[-1]
+        return {
+            'qt_number_str': name[-1],
+            'etc_profile_set_dir': wayround_org.utils.path.join(
+                self.dst_dir, 'etc', 'profile.d', 'SET'
+                )
+            }
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('patch', self.builder_action_patch),
+            ('configure', self.builder_action_configure),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute),
+            ('environments', self.builder_action_environments)
+            ])
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+    def builder_action_configure(self, log):
 
-        etc_profile_set_dir = wayround_org.utils.path.join(
-            dst_dir, 'etc', 'profile.d', 'SET'
+        p = subprocess.Popen(
+            ['./configure'] +
+            [
+                '-opensource',
+                '-confirm-license',
+                '-prefix', '/usr/lib/qt{}_w_toolkit'.format(
+                    self.custom_data['qt_number_str']
+                    )
+                ],
+            stdin=subprocess.PIPE,
+            cwd=self.src_dir
+            )
+        # p.communicate(input=b'yes\n')
+        ret = p.wait()
+
+        return ret
+
+    def builder_action_distribute(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install',
+                'INSTALL_ROOT=' + dst_dir
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_environments(self, log):
+
+        if not os.path.isdir(etc_profile_set_dir):
+            try:
+                os.makedirs(
+                    self.custom_data['etc_profile_set_dir'],
+                    exist_ok=True
+                    )
+            except:
+                logging.error(
+                    "Can't create dir: {}".format(
+                        self.custom_data['etc_profile_set_dir']
+                        )
+                    )
+                raise
+
+        f = open(
+            wayround_org.utils.path.join(
+                etc_profile_set_dir,
+                '009.qt{}'.format(self.custom_data['qt_number_str'])
+                ),
+            'w'
             )
 
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'configure' in actions and ret == 0:
-            p = subprocess.Popen(
-                ['./configure'] +
-                    [
-                    '-opensource',
-                    '-confirm-license',
-                    '-prefix', '/usr/lib/qt{}_w_toolkit'.format(number)
-                    ],
-                stdin=subprocess.PIPE,
-                cwd=src_dir
-                )
-            # p.communicate(input=b'yes\n')
-            ret = p.wait()
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'INSTALL_ROOT=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'SET' in actions and ret == 0:
-            if not os.path.isdir(etc_profile_set_dir):
-                try:
-                    os.makedirs(etc_profile_set_dir)
-                except:
-                    logging.error(
-                        "Can't create dir: {}".format(etc_profile_set_dir)
-                        )
-                    raise
-
-            f = open(
-                wayround_org.utils.path.join(
-                    etc_profile_set_dir,
-                    '009.qt{}'.format(number)
-                    ),
-                'w'
-                )
-
-            f.write("""\
+        f.write("""\
 #!/bin/bash
 export PATH=$PATH:/usr/lib/qt{qtnum}_w_toolkit/bin
 
@@ -128,7 +113,7 @@ if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
 fi
 export LD_LIBRARY_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib"
 
-""".format(qtnum=number))
-            f.close()
+""".format(qtnum=self.custom_data['qt_number_str']))
+        f.close()
 
-    return ret
+        return 0

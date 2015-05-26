@@ -2,226 +2,196 @@
 import logging
 import os.path
 import shutil
+import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
+# FIXME: host/build/target fix required
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'fix_exim_install', 'config_exim',
-         'config_eximon', 'build', 'distribute'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_custom_data(self):
+        return {}
 
-    else:
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('fix_exim_install', self.builder_action_fix_exim_install),
+            ('config_exim', self.builder_action_config_exim),
+            ('config_eximon', self.builder_action_config_eximon),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute),
+            ('rename_configs', self.builder_action_rename_configs),
+            ('sendmail_link', self.builder_action_sendmail_link)
+            ])
 
-        pkg_info, actions = r
+    def builder_action_fix_exim_install(self, log):
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        exim_install = os.path.join(self.src_dir, 'scripts', 'exim_install')
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        f = open(exim_install, 'r')
+        ft = f.read()
+        f.close()
 
-        editme = os.path.join(src_dir, 'src', 'EDITME')
+        ftl = ft.splitlines()
 
-        editme_makefile = os.path.join(src_dir, 'Local', 'Makefile')
+        for i in range(len(ftl)):
+            if ftl[i].startswith('do_chown=yes'):
+                log.info('edit: do_chown=yes to do_chown=no')
+                ftl[i] = 'do_chown=no'
 
-        editme_mon = os.path.join(src_dir, 'exim_monitor', 'EDITME')
+        ft = '\n'.join(ftl)
+        f = open(exim_install, 'w')
+        ft = f.write(ft)
+        f.close()
 
-        editme_makefile_mon = os.path.join(src_dir, 'Local', 'eximon.conf')
+        return 0
 
-        exim_install = os.path.join(src_dir, 'scripts', 'exim_install')
+    def builder_action_config_exim(self, log):
 
-        separate_build_dir = False
+        ret = 0
 
-        source_configure_reldir = '.'
+        editme = os.path.join(self.src_dir, 'src', 'EDITME')
+        editme_makefile = os.path.join(self.src_dir, 'Local', 'Makefile')
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'fix_exim_install' in actions and ret == 0:
-            f = open(exim_install, 'r')
+        try:
+            shutil.copy(editme, editme_makefile)
+        except:
+            ret = 1
+        else:
+            f = open(editme_makefile, 'r')
             ft = f.read()
             f.close()
 
             ftl = ft.splitlines()
 
             for i in range(len(ftl)):
-                if ftl[i].startswith('do_chown=yes'):
-                    ftl[i] = 'do_chown=no'
 
-            ft = '\n'.join(ftl)
-            f = open(exim_install, 'w')
-            ft = f.write(ft)
-            f.close()
+                if ftl[i].startswith('BIN_DIRECTORY=/usr/exim/bin'):
+                    log.info("edit: '{}'".format(ftl[i]))
+                    ftl[i] = 'BIN_DIRECTORY=/usr/bin'
 
-        if 'config_exim' in actions and ret == 0:
+                if ftl[i].startswith('CONFIGURE_FILE=/usr/exim/configure'):
+                    log.info("edit: '{}'".format(ftl[i]))
+                    ftl[i] = 'CONFIGURE_FILE=/etc/exim/configure'
 
-            try:
-                shutil.copy(editme, editme_makefile)
-            except:
-                ret = 1
-            else:
-                f = open(editme_makefile, 'r')
-                ft = f.read()
-                f.close()
+                if ftl[i].startswith('EXIM_USER='):
+                    log.info("edit: '{}'".format(ftl[i]))
+                    ftl[i] = 'EXIM_USER=ref:exim'
 
-                ftl = ft.splitlines()
+                if ftl[i].startswith('# EXIM_GROUP='):
+                    log.info("edit: '{}'".format(ftl[i]))
+                    ftl[i] = 'EXIM_GROUP=ref:exim'
 
-                for i in range(len(ftl)):
+                for j in [
+                    # '# LOOKUP_CDB=yes',
+                    # '# LOOKUP_DSEARCH=yes',
+                    # '# LOOKUP_IBASE=yes',
 
-                    if ftl[i].startswith('BIN_DIRECTORY=/usr/exim/bin'):
-                        ftl[i] = 'BIN_DIRECTORY=/usr/bin'
+                    # '# LOOKUP_LDAP=yes',
+                    # '# LDAP_LIB_TYPE=OPENLDAP2',
 
-                    if ftl[i].startswith('CONFIGURE_FILE=/usr/exim/configure'):
-                        ftl[i] = 'CONFIGURE_FILE=/etc/exim/configure'
+                    # '# LOOKUP_MYSQL=yes',
+                    # '# LOOKUP_NIS=yes',
+                    # '# LOOKUP_NISPLUS=yes',
+                    # '# LOOKUP_ORACLE=yes',
+                    # '# LOOKUP_PASSWD=yes',
+                    # '# LOOKUP_PGSQL=yes',
+                    # '# LOOKUP_SQLITE=yes',
+                    # '# LOOKUP_SQLITE_PC=sqlite3',
+                    # '# LOOKUP_WHOSON=yes',
+                    '# SUPPORT_MAILDIR=yes',
+                    '# SUPPORT_MAILSTORE=yes',
+                    '# SUPPORT_MBX=yes',
 
-                    if ftl[i].startswith('EXIM_USER='):
-                        ftl[i] = 'EXIM_USER=ref:exim'
+                    '# AUTH_CRAM_MD5=yes',
+                    '# AUTH_CYRUS_SASL=yes',
+                    '# AUTH_DOVECOT=yes',
+                    '# AUTH_GSASL=yes',
+                    '# AUTH_GSASL_PC=libgsasl',
+                    # '# AUTH_HEIMDAL_GSSAPI=yes',
+                    # '# AUTH_HEIMDAL_GSSAPI_PC=heimdal-gssapi',
+                    '# AUTH_PLAINTEXT=yes',
+                    '# AUTH_SPA=yes',
+                    # '# AUTH_LIBS=-lsasl2',
+                    # '# AUTH_LIBS=-lgsasl',
+                    # '# AUTH_LIBS=-lgssapi -lheimntlm -lkrb5 -lhx509 '
+                    #                          '-lcom_err -lhcrypto -lasn1 -lwind -lroken -lcrypt',
 
-                    if ftl[i].startswith('# EXIM_GROUP='):
-                        ftl[i] = 'EXIM_GROUP=ref:exim'
+                    '# HAVE_ICONV=yes',
+                    '# SUPPORT_TLS=yes',
 
-                    for j in [
-#                        '# LOOKUP_CDB=yes',
-#                        '# LOOKUP_DSEARCH=yes',
-#                        '# LOOKUP_IBASE=yes',
+                    '# USE_OPENSSL_PC=openssl',
+                    # '# TLS_LIBS=-lssl -lcrypto',
 
-#                        '# LOOKUP_LDAP=yes',
-#                        '# LDAP_LIB_TYPE=OPENLDAP2',
+                    # '# TLS_LIBS=-L/usr/local/openssl/lib -lssl -lcrypto',
 
-#                        '# LOOKUP_MYSQL=yes',
-#                        '# LOOKUP_NIS=yes',
-#                        '# LOOKUP_NISPLUS=yes',
-#                        '# LOOKUP_ORACLE=yes',
-#                        '# LOOKUP_PASSWD=yes',
-#                        '# LOOKUP_PGSQL=yes',
-#                        '# LOOKUP_SQLITE=yes',
-#                        '# LOOKUP_SQLITE_PC=sqlite3',
-#                        '# LOOKUP_WHOSON=yes',
-                        '# SUPPORT_MAILDIR=yes',
-                        '# SUPPORT_MAILSTORE=yes',
-                        '# SUPPORT_MBX=yes',
-
-                        '# AUTH_CRAM_MD5=yes',
-                        '# AUTH_CYRUS_SASL=yes',
-                        '# AUTH_DOVECOT=yes',
-                        '# AUTH_GSASL=yes',
-                        '# AUTH_GSASL_PC=libgsasl',
-#                        '# AUTH_HEIMDAL_GSSAPI=yes',
-#                        '# AUTH_HEIMDAL_GSSAPI_PC=heimdal-gssapi',
-                        '# AUTH_PLAINTEXT=yes',
-                        '# AUTH_SPA=yes',
-#                        '# AUTH_LIBS=-lsasl2',
-#                        '# AUTH_LIBS=-lgsasl',
-#                        '# AUTH_LIBS=-lgssapi -lheimntlm -lkrb5 -lhx509 '
-#                          '-lcom_err -lhcrypto -lasn1 -lwind -lroken -lcrypt',
-
-                        '# HAVE_ICONV=yes',
-                        '# SUPPORT_TLS=yes',
-
-                        '# USE_OPENSSL_PC=openssl',
-#                        '# TLS_LIBS=-lssl -lcrypto',
-
-#                        '# TLS_LIBS=-L/usr/local/openssl/lib -lssl -lcrypto',
-
-#                        '# USE_GNUTLS=yes',
-#                        '# USE_GNUTLS_PC=gnutls',
-#                        '# TLS_LIBS=-lgnutls -ltasn1 -lgcrypt'
+                    # '# USE_GNUTLS=yes',
+                    # '# USE_GNUTLS_PC=gnutls',
+                    # '# TLS_LIBS=-lgnutls -ltasn1 -lgcrypt'
 
                         '# WITH_CONTENT_SCAN=yes',
                         '# SUPPORT_PAM=yes',
                         ]:
 
-                        if ftl[i].startswith(j):
-                            ftl[i] = j[2:]
+                    if ftl[i].startswith(j):
+                        log.info("edit: '{}' to '{}'".format(ftl[i], j[2:]))
+                        ftl[i] = j[2:]
 
-                    if ftl[i].startswith(
+                if ftl[i].startswith(
                         '# AUTH_LIBS=-lgssapi -lheimntlm -lkrb5 -lhx509 '
                         '-lcom_err -lhcrypto -lasn1 -lwind -lroken -lcrypt'
                         ):
 
-                        ftl.insert(i + 1, 'AUTH_LIBS=-lsasl2 -lgsasl')
+                    log.info("edit: '{}'".format(ftl[i]))
 
-                ftl.append('EXTRALIBS+=-lpam')
+                    ftl.insert(i + 1, 'AUTH_LIBS=-lsasl2 -lgsasl')
 
-                if ret == 0:
+            ftl.append('EXTRALIBS+=-lpam')
 
-                    ft = '\n'.join(ftl)
-                    f = open(editme_makefile, 'w')
-                    ft = f.write(ft)
-                    f.close()
+            if ret == 0:
 
-                    ret = 0
+                ft = '\n'.join(ftl)
+                f = open(editme_makefile, 'w')
+                ft = f.write(ft)
+                f.close()
 
-        if 'config_eximon' in actions and ret == 0:
-
-            try:
-                shutil.copy(editme_mon, editme_makefile_mon)
-            except:
-                ret = 1
-            else:
                 ret = 0
+        return ret
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+    def builder_action_config_eximon(self, log):
+        editme_mon = os.path.join(self.src_dir, 'exim_monitor', 'EDITME')
+        editme_makefile_mon = \
+            os.path.join(self.src_dir, 'Local', 'eximon.conf')
 
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        shutil.copy(editme_mon, editme_makefile_mon)
+        return 0
 
-            for i in [
-                os.path.join(dst_dir, 'etc', 'exim', 'configure'),
-                os.path.join(dst_dir, 'etc', 'aliases')
+    def builder_action_rename_configs(self, log):
+        for i in [
+                os.path.join(self.dst_dir, 'etc', 'exim', 'configure'),
+                os.path.join(self.dst_dir, 'etc', 'aliases')
                 ]:
 
-                if os.path.exists(i):
-                    shutil.move(
-                        i,
-                        i + '.example'
-                        )
+            if os.path.exists(i):
+                log.info("rename: '{}' to '{}'".format(i, i + '.example'))
+                shutil.move(i, i + '.example')
+        return 0
 
-            lnk = os.path.join(dst_dir, 'usr', 'bin', 'sendmail')
+    def builder_action_sendmail_link(self, log):
+        lnk = os.path.join(self.dst_dir, 'usr', 'bin', 'sendmail')
 
-            if os.path.exists(lnk) or os.path.islink(lnk):
-                os.unlink(lnk)
+        if os.path.exists(lnk) or os.path.islink(lnk):
+            os.unlink(lnk)
 
-            os.symlink('./exim', lnk)
-
-    return ret
+        log.info("link: '{}'".format(lnk))
+        os.symlink('./exim', lnk)
+        return 0

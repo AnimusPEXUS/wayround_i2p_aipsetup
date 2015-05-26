@@ -2,105 +2,85 @@
 import logging
 import os.path
 import subprocess
+import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
+# FIXME: host/build/target fix required
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'bootstrap', 'build', 'distribute'],
-            action,
-            "help"
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    def define_custom_data(self):
+        return {}
+
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('patch', self.builder_action_patch),
+            ('bootstrap', self.builder_action_bootstrap),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute)
+            ])
+
+    def builder_action_bootstrap(self, log):
+        p = subprocess.Popen(
+            [
+                'bash',
+                './bootstrap.sh',
+                '--prefix=/usr',
+                #                 '--with-python-version=3.3'
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
             )
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+        ret = p.wait()
+        return ret
 
-    else:
+    def builder_action_build(self, log):
+        p = subprocess.Popen(
+            [
+                os.path.join(self.src_dir, 'bjam'),
+                '--prefix=' + os.path.join(self.dst_dir, 'usr'),
+                #                    '--build-type=complete',
+                #                    '--layout=versioned',
+                'threading=multi',
+                'link=shared',
+                'stage',
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
 
-        pkg_info, actions = r
+        ret = p.wait()
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        return ret
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+    def builder_action_distribute(self, log):
+        p = subprocess.Popen(
+            [
+                os.path.join(self.src_dir, 'bjam'),
+                '--prefix=' + os.path.join(self.dst_dir, 'usr'),
+                #                    '--build-type=complete',
+                #                    '--layout=versioned',
+                'threading=multi',
+                'link=shared',
+                'install',
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
 
-        if 'bootstrap' in actions and ret == 0:
-            ret = subprocess.Popen(
-                [
-                 'bash',
-                 './bootstrap.sh',
-                 '--prefix=/usr',
-#                 '--with-python-version=3.3'
-                 ],
-                cwd=src_dir
-                ).wait()
-
-        if 'build' in actions and ret == 0:
-
-            log = wayround_org.utils.log.Log(
-                wayround_org.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
-                'build'
-                )
-
-            p = subprocess.Popen(
-                [
-                    os.path.join(src_dir, 'bjam'),
-                    '--prefix=' + os.path.join(
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            ),
-                        'usr'
-                        ),
-#                    '--build-type=complete',
-#                    '--layout=versioned',
-                    'threading=multi',
-                    'link=shared',
-                    'stage',
-                    ],
-                    cwd=src_dir,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    )
-
-            wayround_org.utils.log.process_output_logger(p, log)
-
-            p.wait()
-
-            log.stop()
-
-        if 'distribute' in actions and ret == 0:
-            ret = subprocess.Popen(
-                [
-                    os.path.join(src_dir, 'bjam'),
-                    '--prefix=' + os.path.join(
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            ),
-                        'usr'
-                        ),
-#                    '--build-type=complete',
-#                    '--layout=versioned',
-                    'threading=multi',
-                    'link=shared',
-                    'install',
-                    ],
-                    cwd=src_dir
-                    ).wait()
-
-    return ret
+        ret = p.wait()
+        return ret

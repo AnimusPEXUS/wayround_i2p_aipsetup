@@ -1,5 +1,4 @@
 
-import logging
 import os.path
 import shutil
 import subprocess
@@ -32,7 +31,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
-    def builder_action_verify_tarball(self):
+    def builder_action_verify_tarball(self, log):
         files = os.listdir(self.tar_dir)
         tzdata = None
         ret = 0
@@ -43,18 +42,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 break
 
         if tzdata is None:
-            logging.error("tzdata missing in tarball dir")
-            logging.error("It can be taken from IANA site")
+            log.error("tzdata missing in tarball dir")
+            log.error("It can be taken from IANA site")
 
             ret = 100
 
         return ret
 
-    def builder_action_extract(self):
+    def builder_action_extract(self, log):
 
         ret = autotools.extract_high(
             self.buildingsite,
             'tzdata',
+            log=log,
             unwrap_dir=False,
             rename_dir=False,
             more_when_one_extracted_ok=True
@@ -62,7 +62,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure(self):
+    def builder_action_configure(self, log):
         ret = 0
 
         try:
@@ -79,14 +79,14 @@ printtdata:
             f.write(txt)
             f.close()
         except:
-            logging.exception("Can't do some actions on Makefile")
+            log.exception("Can't do some actions on Makefile")
             ret = 1
         else:
             ret = 0
 
         return ret
 
-    def builder_action_distribute(self):
+    def builder_action_distribute(self, log):
         ret = 0
 
         os.makedirs(self.custom_data['zoneinfo'])
@@ -98,7 +98,8 @@ printtdata:
         p = subprocess.Popen(
             ['make', 'printtdata'],
             cwd=self.src_dir,
-            stdout=subprocess.PIPE
+            stdout=subprocess.PIPE,
+            stderr=log.stderr
             )
         r = p.wait()
         if r != 0:
@@ -108,18 +109,20 @@ printtdata:
             zonefiles = txt.split(' ')
             zonefiles.sort()
 
-            logging.info("ZF: {}".format(', '.join(zonefiles)))
+            log.info("ZF: {}".format(', '.join(zonefiles)))
 
             for tz in zonefiles:
 
-                logging.info("Working with {} zone info".format(tz))
+                log.info("Working with {} zone info".format(tz))
 
                 p = subprocess.Popen(
                     ['zic',
                      '-L', '/dev/null',
                      '-d', self.custom_data['zoneinfo'],
                      '-y', 'sh yearistype.sh', tz],
-                    cwd=self.src_dir
+                    cwd=self.src_dir,
+                    stdout=log.stdout,
+                    stderr=log.stderr
                     )
                 p.wait()
 
@@ -128,7 +131,9 @@ printtdata:
                      '-L', '/dev/null',
                      '-d', self.custom_data['zoneinfop'],
                      '-y', 'sh yearistype.sh', tz],
-                    cwd=self.src_dir
+                    cwd=self.src_dir,
+                    stdout=log.stdout,
+                    stderr=log.stderr
                     )
                 p.wait()
 
@@ -137,7 +142,9 @@ printtdata:
                      '-L', 'leapseconds',
                      '-d', self.custom_data['zoneinfor'],
                      '-y', 'sh yearistype.sh', tz],
-                    cwd=self.src_dir
+                    cwd=self.src_dir,
+                    stdout=log.stdout,
+                    stderr=log.stderr
                     )
                 p.wait()
 

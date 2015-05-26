@@ -1,104 +1,34 @@
 
-import logging
 import os.path
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def builder_action_configure_define_options(self, log):
+        return ['-d']
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute', 'fixconfig'],
-        action,
-        "help"
-        )
+    def define_actions(self):
+        ret = super().define_actions()
+        ret['fix_config'] = self.builder_action_fix_config
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def builder_action_fix_config(self, log):
 
-    else:
+        cfg_file = os.path.join(
+            self.dst_dir, 'usr', 'share', 'misc', 'man.conf'
+            )
 
-        pkg_info, actions = r
+        with open(cfg_file) as f:
+            fl = f.read().splitlines()
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        for i in range(len(fl)):
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+            if fl[i] == 'PAGER\t\t/bin/less -is':
+                fl[i] = 'PAGER\t\t/bin/less -is -R'
 
-        separate_build_dir = False
+        with open(cfg_file, 'w') as f:
+            f.write('\n'.join(fl))
 
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=['-d'],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'fixconfig' in actions and ret == 0:
-
-            cfg_file = os.path.join(
-                dst_dir, 'usr', 'share', 'misc', 'man.conf'
-                )
-
-            with open(cfg_file) as f:
-                fl = f.read().splitlines()
-
-            for i in range(len(fl)):
-
-                if fl[i] == 'PAGER\t\t/bin/less -is':
-                    fl[i] = 'PAGER\t\t/bin/less -is -R'
-
-            with open(cfg_file, 'w') as f:
-                f.write('\n'.join(fl))
-
-    return ret
+        return 0

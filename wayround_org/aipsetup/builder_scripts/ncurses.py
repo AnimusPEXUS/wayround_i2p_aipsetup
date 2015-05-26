@@ -1,6 +1,5 @@
 
 import glob
-import logging
 import os.path
 import subprocess
 
@@ -9,262 +8,207 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.archive
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
 
-    ret = 0
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'patch', 'configure', 'build', 'distribute', 'links',
-         'pc'],
-        action,
-        "help"
-        )
+    def define_custom_data(self):
+        ret = {}
+        ret['pth_dir'] = \
+            wayround_org.aipsetup.build.getDIR_PATCHES(self.buildingsite)
+        ret['dst_lib_dir'] = \
+            wayround_org.utils.path.join(self.dst_dir, 'usr', 'lib')
+        ret['dst_pc_lib_dir'] = \
+            wayround_org.utils.path.join(ret['dst_lib_dir'], 'pkgconfig')
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_actions(self):
+        ret = super().define_actions()
+        ret['links'] = self.builder_action_links
+        ret['pc'] = self.builder_action_pc
+        return ret
 
-    else:
+    def builder_action_patch(self, log):
 
-        pkg_info, actions = r
+        ret = 0
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        pth_dir = self.custom_data['pth_dir']
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        pth_files = os.listdir(pth_dir)
 
-        pth_dir = wayround_org.aipsetup.build.getDIR_PATCHES(buildingsite)
+        if len(pth_files) == 0:
+            log.error("provide patches")
+            ret = 30
+        else:
 
-        dst_lib_dir = wayround_org.utils.path.join(dst_dir, 'usr', 'lib')
+            rolling = None
 
-        dst_pc_lib_dir = wayround_org.utils.path.join(dst_lib_dir, 'pkgconfig')
+            patches = []
 
-        separate_build_dir = False
+            for i in pth_files:
+                if i.find('-patch.sh.') != -1 and not i.endswith('.asc'):
+                    rolling = i
+                    break
 
-        source_configure_reldir = '.'
+            for i in pth_files:
+                if i.find('.patch.') != -1 and not i.endswith('.asc'):
+                    patches.append(i)
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+            patches.sort()
 
-        if 'patch' in actions and ret == 0:
+            if rolling:
 
-            pth_files = os.listdir(pth_dir)
+                compressor = (
+                    wayround_org.utils.archive.
+                    determine_compressor_by_filename(
+                        rolling
+                        )
+                    )
 
-            if len(pth_files) == 0:
-                print("provide patches")
-                ret = 30
-            else:
+                p = subprocess.Popen(
+                    [compressor, '-d', rolling], cwd=pth_dir
+                    )
+                if p.wait() != 0:
 
-                rolling = None
+                    ret = 1
 
-                patches = []
-
-                for i in pth_files:
-                    if i.find('-patch.sh.') != -1 and not i.endswith('.asc'):
-                        rolling = i
-                        break
-
-                for i in pth_files:
-                    if i.find('.patch.') != -1 and not i.endswith('.asc'):
-                        patches.append(i)
-
-                patches.sort()
-
-                if rolling:
-
-                    compressor = (
-                        wayround_org.utils.archive.
-                        determine_compressor_by_filename(
-                            rolling
+                else:
+                    rolling = rolling[
+                        0:
+                        - len(
+                            wayround_org.utils.archive.
+                            determine_extension_by_filename(rolling)
                             )
+                        ]
+
+                    log.info(
+                        "Applying rolling patch {}".format(rolling)
                         )
 
                     p = subprocess.Popen(
-                        [compressor, '-d', rolling], cwd=pth_dir
+                        ['bash',
+                         wayround_org.utils.path.join(pth_dir, rolling)],
+                        cwd=self.src_dir,
+                        stdout=log.stdout,
+                        stderr=log.stderr
                         )
-                    if p.wait() != 0:
+                    p.wait()
 
-                        ret = 1
+        if ret == 0:
 
-                    else:
-                        rolling = rolling[
-                            0:
-                            - len(
-                                wayround_org.utils.archive.
-                                determine_extension_by_filename(rolling)
-                                )
-                            ]
+            for i in patches:
 
-                        logging.info(
-                            "Applying rolling patch {}".format(rolling)
-                            )
-
-                        p = subprocess.Popen(
-                            ['bash',
-                             wayround_org.utils.path.join(pth_dir, rolling)],
-                            cwd=src_dir
-                            )
-                        p.wait()
-
-            if ret == 0:
-
-                for i in patches:
-
-                    compressor = (
-                        wayround_org.utils.archive.
-                        determine_compressor_by_filename(
-                            i
-                            )
+                compressor = (
+                    wayround_org.utils.archive.
+                    determine_compressor_by_filename(
+                        i
                         )
-
-                    p = subprocess.Popen([compressor, '-d', i], cwd=pth_dir)
-                    if p.wait() != 0:
-
-                        ret = 1
-
-                    else:
-                        i = i[
-                            0:
-                            - len(
-                                wayround_org.utils.archive.
-                                determine_extension_by_filename(i)
-                                )
-                            ]
-
-                        logging.info("Applying weakly patch {}".format(i))
-
-                        p = subprocess.Popen(
-                            ['patch', '-p1', '-i',
-                             wayround_org.utils.path.join(pth_dir, i)],
-                            cwd=src_dir
-                            )
-                        p.wait()
-
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--enable-shared',
-                    '--enable-widec',
-                    '--enable-const',
-                    '--enable-ext-colors',
-                    '--enable-pc-files',
-                    '--with-shared',
-                    '--with-gpm',
-                    '--with-ticlib',
-                    '--with-termlib',
-                    '--with-pkg-config',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                    pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                    pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-                    #                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'links' in actions and ret == 0:
-
-            for s in [
-                    ('*w.so*', 'w.so', '.so'),
-                    ('*w_g.so*', 'w_g.so', '_g.so'),
-                    ('*w.a*', 'w.a', '.a'),
-                    ('*w_g.a*', 'w_g.a', '_g.a')
-                    ]:
-
-                files = glob.glob(
-                    wayround_org.utils.path.join(dst_lib_dir, s[0])
                     )
 
-                for i in files:
-                    o_name = os.path.basename(i)
-                    l_name = o_name.replace(s[1], s[2])
+                p = subprocess.Popen([compressor, '-d', i], cwd=pth_dir)
+                if p.wait() != 0:
 
-                    rrr = wayround_org.utils.path.join(dst_lib_dir, l_name)
+                    ret = 1
 
-                    if os.path.exists(rrr):
-                        os.unlink(rrr)
-                    os.symlink(o_name, rrr)
+                else:
+                    i = i[
+                        0:
+                        - len(
+                            wayround_org.utils.archive.
+                            determine_extension_by_filename(i)
+                            )
+                        ]
 
-            links = os.listdir(dst_lib_dir)
+                    log.info("Applying weakly patch {}".format(i))
 
-            for i in links:
+                    p = subprocess.Popen(
+                        ['patch', '-p1', '-i',
+                         wayround_org.utils.path.join(pth_dir, i)],
+                        cwd=self.src_dir,
+                        stdout=log.stdout,
+                        stderr=log.stderr
+                        )
+                    p.wait()
+        return ret
 
-                flp = wayround_org.utils.path.join(dst_lib_dir, i)
+    def builder_action_configure_define_options(self, log):
+        return super().builder_action_configure_define_options(log) + [
+            '--enable-shared',
+            '--enable-widec',
+            '--enable-const',
+            '--enable-ext-colors',
+            '--enable-pc-files',
+            '--with-shared',
+            '--with-gpm',
+            '--with-ticlib',
+            '--with-termlib',
+            '--with-pkg-config'
+            ]
 
-                if os.path.islink(flp):
+    def builder_action_links(self, log):
 
-                    rflp = wayround_org.utils.path.realpath(flp)
-                    r_name = os.path.basename(rflp)
+        ret = 0
 
-                    if os.path.exists(flp):
-                        os.unlink(flp)
-                    os.symlink(r_name, flp)
+        dst_lib_dir = self.custom_data['dst_lib_dir']
 
-        if 'pc' in actions and ret == 0:
+        for s in [
+                ('*w.so*', 'w.so', '.so'),
+                ('*w_g.so*', 'w_g.so', '_g.so'),
+                ('*w.a*', 'w.a', '.a'),
+                ('*w_g.a*', 'w_g.a', '_g.a')
+                ]:
 
-            for s in [
-                    ('*w.pc', 'w.pc', '.pc'),
-                    ]:
+            files = glob.glob(
+                wayround_org.utils.path.join(dst_lib_dir, s[0])
+                )
 
-                files = glob.glob(
-                    wayround_org.utils.path.join(dst_pc_lib_dir, s[0])
-                    )
+            for i in files:
+                o_name = os.path.basename(i)
+                l_name = o_name.replace(s[1], s[2])
 
-                for i in files:
-                    o_name = os.path.basename(i)
-                    l_name = o_name.replace(s[1], s[2])
+                rrr = wayround_org.utils.path.join(dst_lib_dir, l_name)
 
-                    rrr = wayround_org.utils.path.join(dst_pc_lib_dir, l_name)
+                if os.path.exists(rrr):
+                    os.unlink(rrr)
+                os.symlink(o_name, rrr)
 
-                    if os.path.exists(rrr):
-                        os.unlink(rrr)
-                    os.symlink(o_name, rrr)
+        links = os.listdir(dst_lib_dir)
 
-    return ret
+        for i in links:
+
+            flp = wayround_org.utils.path.join(dst_lib_dir, i)
+
+            if os.path.islink(flp):
+
+                rflp = wayround_org.utils.path.realpath(flp)
+                r_name = os.path.basename(rflp)
+
+                if os.path.exists(flp):
+                    os.unlink(flp)
+                os.symlink(r_name, flp)
+        return ret
+
+    def builder_action_pc(self, log):
+        ret = 0
+
+        dst_pc_lib_dir = self.custom_data['dst_pc_lib_dir']
+
+        for s in [
+                ('*w.pc', 'w.pc', '.pc'),
+                ]:
+
+            files = glob.glob(
+                wayround_org.utils.path.join(dst_pc_lib_dir, s[0])
+                )
+
+            for i in files:
+                o_name = os.path.basename(i)
+                l_name = o_name.replace(s[1], s[2])
+
+                rrr = wayround_org.utils.path.join(dst_pc_lib_dir, l_name)
+
+                if os.path.exists(rrr):
+                    os.unlink(rrr)
+                os.symlink(o_name, rrr)
+        return ret

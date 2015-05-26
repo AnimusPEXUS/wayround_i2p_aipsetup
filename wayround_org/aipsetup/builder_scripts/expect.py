@@ -8,131 +8,62 @@ import wayround_org.utils.archive
 import wayround_org.utils.file
 
 
-def main(buildingsite, action=None):
+import wayround_org.aipsetup.builder_scripts.std
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_custom_data(self):
+        return {}
 
-    else:
+    def builder_action_extract(self, log):
+        files = os.listdir(self.tar_dir)
 
-        pkg_info, actions = r
+        tcl_found = False
+        tk_found = False
+        for i in files:
+            if i.startswith('tcl'):
+                tcl_found = i
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+            if i.startswith('tk'):
+                tk_found = i
 
-        tar_dir = wayround_org.aipsetup.build.getDIR_TARBALL(buildingsite)
+        if not tcl_found:
+            log.error(
+                "Tcl and Tk source tarballs must be in tarballs dir"
+                )
+            ret = 20
+        else:
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+            """
+            if os.path.isdir(self.src_dir):
+                logging.info("cleaningup source dir")
+                wayround_org.utils.file.cleanup_dir(self.src_dir)
+            """
 
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-
-            files = os.listdir(tar_dir)
-
-            tcl_found = False
-            tk_found = False
-            for i in files:
-                if i.startswith('tcl'):
-                    tcl_found = i
-
-                if i.startswith('tk'):
-                    tk_found = i
-
-            if not tcl_found:
-                logging.error(
-                    "Tcl and Tk source tarballs must be in tarballs dir"
-                    )
-                ret = 20
-            else:
-
-                if os.path.isdir(src_dir):
-                    logging.info("cleaningup source dir")
-                    wayround_org.utils.file.cleanup_dir(src_dir)
-
-                logging.info("Extracting Tcl")
-                wayround_org.utils.archive.extract(
-                    os.path.join(tar_dir, tcl_found), buildingsite
-                    )
-
-                logging.info("Extracting Tk")
-                wayround_org.utils.archive.extract(
-                    os.path.join(tar_dir, tk_found), buildingsite
-                    )
-
-                ret = autotools.extract_high(
-                    buildingsite,
-                    pkg_info['pkg_info']['basename'],
-                    unwrap_dir=True,
-                    rename_dir=False
-                    )
-
-        if 'configure' in actions and ret == 0:
-
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--enable-threads',
-                    '--enable-64bit',
-                    '--enable-64bit-vis',
-                    '--enable-wince',
-                    '--with-tcl=/usr/lib',
-                    '--with-tk=/usr/lib',
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host']
-#                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
+            logging.info("Extracting Tcl")
+            wayround_org.utils.archive.extract(
+                os.path.join(self.tar_dir, tcl_found),
+                self.buildingsite,
+                log=log,
                 )
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
+            logging.info("Extracting Tk")
+            wayround_org.utils.archive.extract(
+                os.path.join(self.tar_dir, tk_found),
+                self.buildingsite,
+                log=log
                 )
 
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+            ret = super().builder_action_extract(log)
+        return ret
 
-    return ret
+    def builder_action_configure_define_options(self, log):
+        return super().builder_action_configure_define_options(log) + [
+            '--enable-threads',
+            '--enable-64bit',
+            '--enable-64bit-vis',
+            '--enable-wince',
+            '--with-tcl=/usr/lib',
+            '--with-tk=/usr/lib',
+            ]

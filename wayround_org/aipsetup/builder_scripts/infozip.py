@@ -1,67 +1,46 @@
 
-import logging
 import os.path
 import subprocess
 
-import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+
+import wayround_org.aipsetup.builder_scripts.std
+
+# FIXME: host/build/target fix required
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        del ret['autogen']
+        del ret['configure']
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'build', 'distribute'],
-        action,
-        "help"
-        )
+    def builder_action_build(self, log):
+        p = subprocess.Popen(
+            ['make',
+             '-f', 'unix/Makefile',
+             'generic',
+             'CFLAGS=" -march=i486 -mtune=i486 "'
+             ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'build' in actions and ret == 0:
-            p = subprocess.Popen(
-                ['make',
-                 '-f', 'unix/Makefile',
-                 'generic',
-                 'CFLAGS=" -march=i486 -mtune=i486 "'
-                 ],
-                cwd=src_dir
-                )
-            ret = p.wait()
-
-        if 'distribute' in actions and ret == 0:
-            p = subprocess.Popen(
-                ['make',
-                 '-f', 'unix/Makefile',
-                 'install',
-                 'prefix={}/usr'.format(dst_dir)
-                 ],
-                cwd=src_dir
-                )
-            ret = p.wait()
-
-    return ret
+    def builder_action_distribute(self, log):
+        p = subprocess.Popen(
+            ['make',
+             '-f', 'unix/Makefile',
+             'install',
+             'prefix={}/usr'.format(self.dst_dir)
+             ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret

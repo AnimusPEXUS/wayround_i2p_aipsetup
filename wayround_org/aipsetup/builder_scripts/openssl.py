@@ -1,96 +1,60 @@
 
-import logging
-import os.path
 
-import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+# FIXME: host/build/target fix required
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'distribute'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_actions(self):
+        ret = super().define_actions()
+        del ret['build']
+        return ret
 
-    else:
+    def builder_action_configure_define_options(self, log):
+        # super().builder_action_configure_define_options(log) +
+        ret = [
+            '--prefix=/usr',
+            '--openssldir=/etc/ssl',
+            'shared',
+            'zlib-dynamic'
+            ]
+        """
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    '--mandir=',
+                    '--sysconfdir=',
+                    '--localstatedir=',
+                    '--host=',
+                    '--build=',
+                    '--target='
+                    ]:
+                if ret[i].startswith(j):
+                    del ret[i]
+        """
+        return ret
 
-        pkg_info, actions = r
+    def builder_action_configure_define_script_name(self, log):
+        return 'config'
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--prefix=/usr',
-                    '--openssldir=/etc/ssl',
-                    'shared',
-                    'zlib-dynamic'
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='config',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-#        if 'build' in actions and ret == 0:
-#            ret = autotools.make_high(
-#                buildingsite,
-#                options = [],
-#                arguments = [],
-#                environment = {},
-#                environment_mode = 'copy',
-#                use_separate_buildding_dir = separate_build_dir,
-#                source_configure_reldir = source_configure_reldir
-#                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'MANDIR=/usr/share/man',
-#                    'MANSUFFIX=ssl',
-                    'INSTALL_PREFIX=' + (
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+    def builder_action_distribute(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install',
+                'MANDIR=/usr/share/man',
+                # 'MANSUFFIX=ssl',
+                'INSTALL_PREFIX=' + self.dst_dir
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret

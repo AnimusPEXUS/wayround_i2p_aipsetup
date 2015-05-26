@@ -1,65 +1,53 @@
 
-import logging
 import os.path
 import subprocess
+import collections
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
+
+# TODO: add fixes and patches
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_custom_data(self):
+        # 'python2' value may go here
+        return None
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'bootstrap', 'build_and_distribute'],
-            action,
-            "help"
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('bootstrap', self.builder_action_bootstrap),
+            ('distribute', self.builder_action_distribute)
+            ])
+
+    def builder_action_bootstrap(self, log):
+        p = subprocess.Popen(
+            [
+                'python2',
+                'bootstrap.py',
+                os.path.join(self.src_dir, 'build', 'scons')
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
             )
+        ret = p.wait()
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        python = 'python2'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'bootstrap' in actions and ret == 0:
-            ret = subprocess.Popen(
-                [python,
-                 'bootstrap.py',
-                 os.path.join(src_dir, 'build', 'scons')
-                 ],
-                cwd=src_dir
-                ).wait()
-
-        if 'build_and_distribute' in actions and ret == 0:
-            ret = subprocess.Popen(
-                [python,
-                 'setup.py',
-                 'install',
-                 '--prefix=' + os.path.join(dst_dir, 'usr')
-                 ],
-                cwd=os.path.join(src_dir, 'build', 'scons')
-                ).wait()
-
-    return ret
+    def builder_action_distribute(self, log):
+        p = subprocess.Popen(
+            [python,
+             'setup.py',
+             'install',
+             '--prefix=' + os.path.join(self.dst_dir, 'usr')
+             ],
+            cwd=os.path.join(self.src_dir, 'build', 'scons'),
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret

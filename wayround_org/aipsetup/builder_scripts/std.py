@@ -31,6 +31,10 @@ class Builder:
             buildingsite
             )
 
+        self.patches_dir = wayround_org.aipsetup.build.getDIR_PATCHES(
+            buildingsite
+            )
+
         self.dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(
             buildingsite
             )
@@ -81,6 +85,9 @@ class Builder:
     def get_defined_actions(self):
         return self.action_dict
 
+    def define_custom_data(self):
+        return None
+
     def define_actions(self):
         return collections.OrderedDict([
             ('dst_cleanup', self.builder_action_dst_cleanup),
@@ -93,9 +100,6 @@ class Builder:
             ('build', self.builder_action_build),
             ('distribute', self.builder_action_distribute)
             ])
-
-    def define_custom_data(self):
-        return {}
 
     def builder_action_src_cleanup(self, log):
         """
@@ -149,15 +153,20 @@ class Builder:
         return 0
 
     def builder_action_autogen(self, log):
+        cfg_script_name = self.builder_action_configure_define_script_name(log)
         ret = 0
         if os.path.isfile(
                 wayround_org.utils.path.join(
                     self.src_dir,
                     self.source_configure_reldir,
-                    'configure'
+                    cfg_script_name
                     )
                 ):
-            log.info("./configure found. generator will not be used")
+            log.info(
+                "./{} found. generator will not be used".format(
+                    cfg_script_name
+                    )
+                )
         else:
             if os.path.isfile(
                     wayround_org.utils.path.join(
@@ -171,7 +180,9 @@ class Builder:
                     cwd=os.path.join(
                         self.src_dir,
                         self.source_configure_reldir
-                        )
+                        ),
+                    stdout=log.stdout,
+                    stderr=log.stderr
                     )
                 ret = p.wait()
             elif os.path.isfile(
@@ -186,12 +197,16 @@ class Builder:
                     cwd=os.path.join(
                         self.src_dir,
                         self.source_configure_reldir
-                        )
+                        ),
+                    stdout=log.stdout,
+                    stderr=log.stderr
                     )
                 ret = p.wait()
             else:
                 log.error(
-                    "./configure not found and no generators found"
+                    "./{} not found and no generators found".format(
+                        cfg_script_name
+                        )
                     )
                 ret = 2
         return ret
@@ -207,24 +222,40 @@ class Builder:
             '--localstatedir=' +
             self.package_info['constitution']['paths']['var'],
             '--enable-shared'
-            ] + wayround_org.aipsetup.build.calc_conf_hbt_options(self)
+            ] + autotools.calc_conf_hbt_options(self)
+
+    def builder_action_configure_define_script_name(self, log):
+        return 'configure'
+
+    def builder_action_configure_define_run_script_not_bash(self, log):
+        return False
+
+    def builder_action_configure_define_relative_call(self, log):
+        return False
+
+    def builder_action_configure_define_environment(self, log):
+        return {}
 
     def builder_action_configure(self, log):
 
         defined_options = self.builder_action_configure_define_options(log)
+        defined_script_name = self.builder_action_configure_define_script_name(
+            log)
 
         ret = autotools.configure_high(
             self.buildingsite,
             log=log,
             options=defined_options,
             arguments=[],
-            environment={},
+            environment=self.builder_action_configure_define_environment(log),
             environment_mode='copy',
             source_configure_reldir=self.source_configure_reldir,
             use_separate_buildding_dir=self.separate_build_dir,
-            script_name='configure',
-            run_script_not_bash=False,
-            relative_call=False
+            script_name=defined_script_name,
+            run_script_not_bash=self.builder_action_configure_define_run_script_not_bash(
+                log),
+            relative_call=self.builder_action_configure_define_relative_call(
+                log)
             )
         return ret
 

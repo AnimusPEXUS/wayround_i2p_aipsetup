@@ -1,107 +1,96 @@
 
-import logging
 import os.path
 import subprocess
+import collections
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.path
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
 
-    ret = 0
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'build', 'distribute'],
-        action,
-        "help"
-        )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
+    def define_custom_data(self):
         src_ant_dir = wayround_org.utils.path.join(
-            src_dir,
+            self.src_dir,
             'apache-ant-{}'.format(
-                pkg_info['pkg_nameinfo']['groups']['version']
+                self.package_info['pkg_nameinfo']['groups']['version']
                 )
             )
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
         dst_ant_dir = wayround_org.utils.path.join(
-            dst_dir, 'usr', 'lib', 'java', 'apache-ant'
+            self.dst_dir, 'usr', 'lib', 'java', 'apache-ant'
             )
 
-        etc_dir = os.path.join(dst_dir, 'etc', 'profile.d', 'SET')
+        etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
         apacheant009 = os.path.join(etc_dir, '009.apache-ant')
 
-        separate_build_dir = False
+        return {
+            'src_ant_dir': src_ant_dir,
+            'dst_ant_dir': dst_ant_dir,
+            'etc_dir': etc_dir,
+            'apacheant009': apacheant009
+            }
 
-        source_configure_reldir = '.'
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute)
+            ])
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+    def builder_action_build(self, log):
+        p = subprocess.Popen(
+            [
+                'ant',
+                '-Dversion={}'.format(
+                    self.package_info['pkg_nameinfo']['groups']['version']
+                    ),
+                # '-lib', '/usr/lib/java/classpath',
+                'dist'
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
 
-        if 'build' in actions and ret == 0:
-            p = subprocess.Popen(
-                [
-                    'ant',
-                    '-Dversion={}'.format(
-                        pkg_info['pkg_nameinfo']['groups']['version']
-                        ),
-                    # '-lib', '/usr/lib/java/classpath',
-                    'dist'
-                    ],
-                cwd=src_dir
-                )
-            ret = p.wait()
+    def builder_action_distribute(self, log):
+        os.makedirs(
+            self.custom_data['dst_ant_dir'],
+            exist_ok=True
+            )
 
-        if 'distribute' in actions and ret == 0:
-            try:
-                os.makedirs(dst_ant_dir)
-            except:
-                pass
+        wayround_org.utils.file.copytree(
+            src_ant_dir,
+            dst_ant_dir,
+            overwrite_files=True,
+            clear_before_copy=True,
+            dst_must_be_empty=True
+            )
 
-            wayround_org.utils.file.copytree(
-                src_ant_dir,
-                dst_ant_dir,
-                overwrite_files=True,
-                clear_before_copy=True,
-                dst_must_be_empty=True
-                )
+        os.makedirs(
+            self.custom_data['etc_dir'], 
+            exist_ok=True
+            )
 
-            os.makedirs(etc_dir, exist_ok=True)
+        fi = open(
+            self.custom_data['apacheant009'], 
+            'w'
+            )
 
-            fi = open(apacheant009, 'w')
-
-            fi.write(
-                """\
+        fi.write(
+            """\
 #!/bin/bash
 export ANT_HOME='/usr/lib/java/apache-ant'
 export PATH="$PATH:$ANT_HOME/bin"
 """
-                )
+            )
 
-            fi.close()
-
-    return ret
+        fi.close()
+        return ret

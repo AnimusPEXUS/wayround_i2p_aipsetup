@@ -24,23 +24,29 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
+    def builder_action_configure_define_options(self, log):
+        return [
+            '-DCMAKE_INSTALL_PREFIX=' +
+            self.package_info['constitution']['paths']['usr'],
+            #    '--mandir=' + pkg_info['constitution']['paths']['man'],
+            #    '--sysconfdir=' +
+            #    pkg_info['constitution']['paths']['config'],
+            #    '--localstatedir=' +
+            #    pkg_info['constitution']['paths']['var'],
+            #    '--enable-shared',
+            #    '--host=' + pkg_info['constitution']['host'],
+            #    '--build=' + pkg_info['constitution']['build'],
+            #    '--target=' + pkg_info['constitution']['target']
+            ] + cmake.calc_conf_hbt_options(self)
+
     def builder_action_configure(self, log):
+
+        defined_options = self.builder_action_configure_define_options(log)
+
         ret = cmake.cmake_high(
             self.buildingsite,
             log=log,
-            options=[
-                '-DCMAKE_INSTALL_PREFIX=' +
-                self.package_info['constitution']['paths']['usr'],
-                #                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                #                    '--sysconfdir=' +
-                #                        pkg_info['constitution']['paths']['config'],
-                #                    '--localstatedir=' +
-                #                        pkg_info['constitution']['paths']['var'],
-                #                    '--enable-shared',
-                #                    '--host=' + pkg_info['constitution']['host'],
-                #                    '--build=' + pkg_info['constitution']['build'],
-                #                    '--target=' + pkg_info['constitution']['target']
-                ],
+            options=defined_options,
             arguments=[],
             environment={},
             environment_mode='copy',

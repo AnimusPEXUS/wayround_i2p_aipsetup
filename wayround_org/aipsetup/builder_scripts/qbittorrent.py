@@ -1,8 +1,17 @@
 
+import logging
+import os.path
+import subprocess
+import collections
+import inspect
+import time
 
-import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.utils.file
+import wayround_org.utils.log
 
+import wayround_org.aipsetup.build
 import wayround_org.aipsetup.builder_scripts.std
+import wayround_org.aipsetup.buildtools.autotools as autotools
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -14,7 +23,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'BUILDROOT=' + self.dst_dir
+                'INSTALL_ROOT=' + self.dst_dir
                 ],
             environment={},
             environment_mode='copy',

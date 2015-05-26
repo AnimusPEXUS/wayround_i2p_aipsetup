@@ -1,66 +1,54 @@
 
-import logging
 import os.path
+import collections
 
-import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
 
 
-def main(buildingsite, action=None):
+import wayround_org.aipsetup.builder_scripts.std
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'distribute'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('distribute', self.builder_action_distribute)
+            ])
 
-    else:
+    def builder_action_extract(self, log):
+        ret = autotools.extract_high(
+            self.buildingsite,
+            self.package_info['pkg_info']['basename'],
+            log=log,
+            unwrap_dir=False,
+            rename_dir=False,
+            more_when_one_extracted_ok=True
+            )
+        return ret
 
-        pkg_info, actions = r
+    def builder_action_distribute(self, log):
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        man_dir = os.path.join(self.dst_dir, 'usr', 'share', 'man')
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        mans = os.listdir(self.src_dir)
 
-        man_dir = os.path.join(dst_dir, 'usr', 'share', 'man')
+        for i in mans:
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=False,
-                rename_dir=False,
-                more_when_one_extracted_ok=True
+            m = os.path.join(man_dir, i)
+            sm = os.path.join(self.src_dir, i)
+
+            os.makedirs(m)
+
+            wayround_org.utils.file.copytree(
+                src_dir=sm,
+                dst_dir=m,
+                overwrite_files=True,
+                clear_before_copy=False,
+                dst_must_be_empty=False
                 )
 
-        if 'distribute' in actions and ret == 0:
-
-            mans = os.listdir(src_dir)
-
-            for i in mans:
-
-                m = os.path.join(man_dir, i)
-                sm = os.path.join(src_dir, i)
-
-                os.makedirs(m)
-
-                wayround_org.utils.file.copytree(
-                    src_dir=sm,
-                    dst_dir=m,
-                    overwrite_files=True,
-                    clear_before_copy=False,
-                    dst_must_be_empty=False
-                    )
-
-    return ret
+        return 0

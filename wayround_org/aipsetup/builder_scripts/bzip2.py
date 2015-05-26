@@ -4,145 +4,148 @@ import logging
 import os.path
 import shutil
 import subprocess
+import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.builder_scripts.std
 
-def main(buildingsite, action=None):
+# FIXME: host/build/target fix required
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'build', 'distribute', 'so', 'copy_so', 'fix_links'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def define_custom_data(self):
+        return {}
 
-    else:
+    def define_actions(self):
+        return collections.OrderedDict([
+            ('dst_cleanup', self.builder_action_dst_cleanup),
+            ('src_cleanup', self.builder_action_src_cleanup),
+            ('bld_cleanup', self.builder_action_bld_cleanup),
+            ('extract', self.builder_action_extract),
+            ('build', self.builder_action_build),
+            ('distribute', self.builder_action_distribute),
+            ('so', self.builder_action_so),
+            ('copy_so', self.builder_action_copy_so),
+            ('fix_links', self.builder_action_fix_links),
+            ])
 
-        pkg_info, actions = r
+    def builder_action_build(self, log):
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'PREFIX=/usr',
+                'CFLAGS=-Wall -Winline -O2 -g '
+                '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        return ret
 
-        separate_build_dir = False
+    def builder_action_distribute(self, log):
 
-        source_configure_reldir = '.'
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install',
+                'PREFIX=' + os.path.join(self.dst_dir, 'usr')
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+        return ret
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'PREFIX=/usr',
-                    'CFLAGS=-Wall -Winline -O2 -g '
-                    '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+    def builder_action_so(self, log):
 
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'PREFIX=' + os.path.join(dst_dir, 'usr')
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        ret = 0
 
-        if 'so' in actions and ret == 0:
-            p = subprocess.Popen(
-                [
-                 'make',
-                 '-f', 'Makefile-libbz2_so',
-                 'CFLAGS=-Wall -Winline -O2 -g '
-                 '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
-                 ],
-                cwd=src_dir
-                )
-            ret = p.wait()
+        p = subprocess.Popen(
+            [
+                'make',
+                '-f', 'Makefile-libbz2_so',
+                'CFLAGS=-Wall -Winline -O2 -g '
+                '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
 
-        if 'copy_so' in actions and ret == 0:
+        ret = p.wait()
 
-            di = os.path.join(dst_dir, 'usr', 'lib')
+        return ret
 
-            try:
-                os.makedirs(di)
-            except:
-                logging.error("Error Creating {}".format(di))
+    def builder_action_copy_so(self, log):
 
-            try:
-                sos = glob.glob(src_dir + '/*.so.*')
+        ret = 0
 
-                for i in sos:
+        di = os.path.join(self.dst_dir, 'usr', 'lib')
 
-                    base = os.path.basename(i)
+        os.makedirs(di, exist_ok=True)
 
-                    j = os.path.join(src_dir, base)
-                    j2 = os.path.join(di, base)
+        try:
+            sos = glob.glob(self.src_dir + '/*.so.*')
 
-                    if os.path.isfile(j) and not os.path.islink(j):
-                        shutil.copy(j, j2)
+            for i in sos:
 
-                    elif os.path.isfile(j) and os.path.islink(j):
-                        lnk = os.readlink(j)
-                        os.symlink(lnk, j2)
+                base = os.path.basename(i)
 
-                    else:
-                        raise Exception("Programming error")
+                j = os.path.join(self.src_dir, base)
+                j2 = os.path.join(di, base)
 
-            except:
-                logging.exception("Error")
-                ret = 2
+                if os.path.isfile(j) and not os.path.islink(j):
+                    shutil.copy(j, j2)
 
-        if 'fix_links' in actions and ret == 0:
+                elif os.path.isfile(j) and os.path.islink(j):
+                    lnk = os.readlink(j)
+                    os.symlink(lnk, j2)
 
-            bin_dir = os.path.join(dst_dir, 'usr', 'bin')
-            files = os.listdir(bin_dir)
+                else:
+                    raise Exception("Programming error")
 
-            try:
-                for i in files:
+        except:
+            log.exception("Error")
+            ret = 2
 
-                    ff = os.path.join(bin_dir, i)
+        return ret
 
-                    if os.path.islink(ff):
+    def builder_action_fix_links(self, log):
 
-                        base = os.path.basename(os.readlink(ff))
+        ret = 0
 
-                        if os.path.exists(ff):
-                            os.unlink(ff)
+        bin_dir = os.path.join(self.dst_dir, 'usr', 'bin')
+        files = os.listdir(bin_dir)
 
-                        os.symlink(base, ff)
+        try:
+            for i in files:
 
-            except:
-                logging.exception("Error")
-                ret = 3
+                ff = os.path.join(bin_dir, i)
 
-    return ret
+                if os.path.islink(ff):
+
+                    base = os.path.basename(os.readlink(ff))
+
+                    if os.path.exists(ff):
+                        os.unlink(ff)
+
+                    os.symlink(base, ff)
+
+        except:
+            log.exception("Error")
+            ret = 3
+        return ret

@@ -1,13 +1,8 @@
 
-import logging
 import os.path
-import subprocess
 import collections
-import inspect
 
-import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
 
 import wayround_org.aipsetup.builder_scripts.std
 
@@ -23,9 +18,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_build(self):
+    def builder_action_build(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[],
             environment={},
@@ -35,9 +31,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute(self):
+    def builder_action_distribute(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'install',
