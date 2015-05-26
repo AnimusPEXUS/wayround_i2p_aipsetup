@@ -1,9 +1,9 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.sourceware.org",
-  "buildscript": "std",
+  "description": "",
+  "home_page": "",
+  "buildscript": "qbittorrent",
   "version_tool": "",
-  "basename": "libffi",
+  "basename": "qbittorrent",
   "filters": "",
   "removable": true,
   "reducible": true,

@@ -1,9 +1,9 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.sourceware.org",
+  "description": "",
+  "home_page": "",
   "buildscript": "std",
   "version_tool": "",
-  "basename": "libffi",
+  "basename": "libtorrent-rasterbar",
   "filters": "",
   "removable": true,
   "reducible": true,

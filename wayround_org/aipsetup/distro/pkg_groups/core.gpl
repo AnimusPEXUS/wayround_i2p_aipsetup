@@ -146,6 +146,7 @@
         "qpdf",
         "wireless_tools", "wpa_supplicant", "kismet",
         "tree",
-        "xfsdump", "xfsprogs"
+        "xfsdump", "xfsprogs",
+        "itstool"
     ]
 }

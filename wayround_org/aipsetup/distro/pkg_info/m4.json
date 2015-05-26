@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://gnu.org/",
-  "buildscript": "m4",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "m4",
   "filters": "",

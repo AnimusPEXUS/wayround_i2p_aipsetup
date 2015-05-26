@@ -17,17 +17,39 @@ import wayround_org.utils.path
 import wayround_org.utils.tarball
 
 
+def calc_conf_hbt_options(builder_obj):
+
+    host = builder_obj.host
+    build = builder_obj.build
+    target = builder_obj.target
+
+    ret = []
+
+    if host is not None:
+        ret.append('--host=' + host)
+
+    if build is not None:
+        ret.append('--build=' + build)
+
+    if target is not None:
+        ret.append('--target=' + target)
+
+    return ret
+
+
 def determine_abs_configure_dir(buildingsite, config_dir):
     """
     Determine config dir taking in account config_dir
     """
 
-    config_dir = wayround_org.utils.path.abspath(
-        wayround_org.aipsetup.build.getDIR_SOURCE(
-            buildingsite
-            ) + os.path.sep + config_dir
+    config_dir = wayround_org.utils.path.join(
+        wayround_org.utils.path.abspath(
+            wayround_org.aipsetup.build.getDIR_SOURCE(
+                buildingsite
+                )
+            ), 
+        config_dir
         )
-
     return config_dir
 
 
@@ -53,9 +75,10 @@ def determine_building_dir(
             )
     else:
         building_dir = (
-            wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-            + os.path.sep
-            + config_dir
+            wayround_org.utils.path.join(
+                wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite),
+                config_dir
+                )
             )
 
     return building_dir
@@ -253,8 +276,8 @@ def configure_low(
         p = subprocess.Popen(
             cmd,
             env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=log.stdout,
+            stderr=log.stderr,
             cwd=working_dir
             )
     except:
@@ -269,8 +292,6 @@ def configure_low(
         ret = 100
 
     else:
-
-        wayround_org.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()
@@ -364,8 +385,8 @@ def make_low(
         p = subprocess.Popen(
             cmd,
             env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=log.stdout,
+            stderr=log.stderr,
             cwd=working_dir
             )
     except:
@@ -380,8 +401,6 @@ def make_low(
         ret = 100
 
     else:
-
-        wayround_org.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()

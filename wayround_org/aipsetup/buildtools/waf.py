@@ -48,8 +48,8 @@ def waf(
         p = subprocess.Popen(
             args=cmd,
             cwd=cwd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=log.stdout,
+            stderr=log.stderr,
             env=env
             )
     except:
@@ -63,8 +63,6 @@ def waf(
             )
         ret = 100
     else:
-
-        wayround_org.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()

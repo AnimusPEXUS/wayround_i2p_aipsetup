@@ -14,6 +14,29 @@ import wayround_org.utils.osutils
 import wayround_org.utils.path
 
 
+def calc_conf_hbt_options(builder_obj):
+
+    host = builder_obj.host
+    build = builder_obj.build
+    target = builder_obj.target
+
+    ret = []
+
+    if host is not None:
+        ret.append('-DCMAKE_C_COMPILER={}-gcc'.format(host))
+        ret.append('-DCMAKE_CXX_COMPILER={}-g++'.format(host))
+
+    # TODO: provide equivalent for --target and --build options
+
+    # if build is not None:
+    #    ret.append('--build=' + build)
+
+    # if target is not None:
+    #    ret.append('--target=' + target)
+
+    return ret
+
+
 def determine_abs_configure_dir(buildingsite, config_dir):
     """
     Determine config dir taking in account config_dir
@@ -29,8 +52,8 @@ def determine_abs_configure_dir(buildingsite, config_dir):
 
 
 def determine_building_dir(
-    buildingsite, config_dir, separate_build_dir
-    ):
+        buildingsite, config_dir, separate_build_dir
+        ):
     """
     Determine building dir taking in account config_dir and separate_build_dir
     """
@@ -56,15 +79,15 @@ def determine_building_dir(
 
 
 def cmake_high(
-    building_site,
-    options,
-    arguments,
-    environment,
-    environment_mode,
-    source_subdir,
-    build_in_separate_dir,
-    log=None,
-    ):
+        building_site,
+        options,
+        arguments,
+        environment,
+        environment_mode,
+        source_subdir,
+        build_in_separate_dir,
+        log=None,
+        ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
 
@@ -116,14 +139,14 @@ def cmake_high(
 
 
 def cmake_low(
-    log,
-    build_dir,
-    src_dir,
-    working_dir,
-    opts,
-    args,
-    env
-    ):
+        log,
+        build_dir,
+        src_dir,
+        working_dir,
+        opts,
+        args,
+        env
+        ):
 
     ret = 0
 
@@ -132,16 +155,18 @@ def cmake_low(
     log.info("directory: {}".format(working_dir))
     log.info("src: {}".format(src_dir))
     log.info("build dir: {}".format(build_dir))
-    log.info("command: {}".format(cmd))
-    log.info("command(joined): {}".format(' '.join(cmd)))
+    log.info("command:")
+    for i in cmd:
+        log.info("    {}".format(i))
+    #log.info("command(joined): {}".format(' '.join(cmd)))
 
     p = None
     try:
         p = subprocess.Popen(
             cmd,
             env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=log.stdout,
+            stderr=log.stderr,
             cwd=working_dir
             )
     except:
@@ -156,8 +181,6 @@ def cmake_low(
         ret = 100
 
     else:
-
-        wayround_org.utils.log.process_output_logger(p, log)
 
         try:
             p.wait()

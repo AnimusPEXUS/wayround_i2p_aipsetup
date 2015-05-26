@@ -2197,29 +2197,10 @@ def run_builder_action(
                     i, ret
                     )
                 )
-        if ret != 0:
-            break
 
         log.close()
 
-    return ret
-
-
-def calc_conf_hbt_options(builder_obj):
-
-    host = builder_obj.host
-    build = builder_obj.build
-    target = builder_obj.target
-
-    ret = []
-
-    if host is not None:
-        ret.append('--host=' + host)
-
-    if build is not None:
-        ret.append('--build=' + build)
-
-    if target is not None:
-        ret.append('--target=' + target)
+        if ret != 0:
+            break
 
     return ret
