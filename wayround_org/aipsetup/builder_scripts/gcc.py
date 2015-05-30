@@ -5,6 +5,7 @@ import subprocess
 import collections
 
 import wayround_org.utils.file
+import wayround_org.utils.path
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
@@ -72,8 +73,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-multiarch',
             '--enable-multilib',
             '--enable-checking=release',
-            '--with-gmp=/usr',
-            '--with-mpfr=/usr',
+            '--with-gmp={}'.format(
+                wayround_org.utils.path.join(
+                    self.target_host_root,
+                    '/usr'
+                    )
+                ),
+            '--with-mpfr={}'.format(
+                wayround_org.utils.path.join(
+                    self.target_host_root,
+                    '/usr'
+                    )
+                ),
             # '--with-build-time-tools=
             # /home/agu/_sda3/_UNICORN/b/gnat/
             # gnat-gpl-2014-x86-linux-bin',

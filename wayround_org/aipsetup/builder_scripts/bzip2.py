@@ -18,7 +18,17 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        return {}
+        thr = {}
+        if self.is_crossbuild:
+            thr['CFLAGS'] = ' -I{}'.format(
+                os.path.join(self.target_host_root, 'usr', 'include')
+                )
+            thr['LDFLAGS'] = '-L{}'.format(
+                os.path.join(self.target_host_root, 'usr', 'lib')
+                )
+        return {
+            'thr': thr
+            }
 
     def define_actions(self):
         return collections.OrderedDict([
@@ -41,8 +51,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'PREFIX=/usr',
-                'CFLAGS=-Wall -Winline -O2 -g '
-                '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
+                'CC={}-gcc'.format(self.host),
+                'AR={}-ar'.format(self.host),
+                'RANLIB={}-ranlib'.format(self.host),
+                'CFLAGS=  -fpic -fPIC -Wall -Winline -O2 -g '
+                '-D_FILE_OFFSET_BITS=64 ' +
+                self.custom_data['thr']['CFLAGS'],
+                'LDFLAGS=' + self.custom_data['thr']['LDFLAGS'],
+                'libbz2.a',
+                'bzip2',
+                'bzip2recover'
                 ],
             environment={},
             environment_mode='copy',
@@ -72,21 +90,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_so(self, log):
 
-        ret = 0
-
-        p = subprocess.Popen(
-            [
-                'make',
-                '-f', 'Makefile-libbz2_so',
-                'CFLAGS=-Wall -Winline -O2 -g '
-                '-D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i486'
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'CC={}-gcc'.format(self.host),
+                'AR={}-ar'.format(self.host),
+                'RANLIB={}-ranlib'.format(self.host),
+                'CFLAGS= -fpic -fPIC -Wall -Winline -O2 -g '
+                '-D_FILE_OFFSET_BITS=64 ' +
+                self.custom_data['thr']['CFLAGS'],
+                'LDFLAGS= ' + self.custom_data['thr']['LDFLAGS'],
                 ],
-            cwd=self.src_dir,
-            stdout=log.stdout,
-            stderr=log.stderr
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir,
+            make_filename='Makefile-libbz2_so'
             )
-
-        ret = p.wait()
 
         return ret
 

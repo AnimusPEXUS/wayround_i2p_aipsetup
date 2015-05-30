@@ -47,7 +47,7 @@ def determine_abs_configure_dir(buildingsite, config_dir):
             wayround_org.aipsetup.build.getDIR_SOURCE(
                 buildingsite
                 )
-            ), 
+            ),
         config_dir
         )
     return config_dir
@@ -324,7 +324,8 @@ def make_high(
         environment_mode,
         use_separate_buildding_dir,
         source_configure_reldir,
-        log=None
+        log=None,
+        make_filename='Makefile'
         ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
@@ -355,7 +356,14 @@ def make_high(
         use_separate_buildding_dir
         )
 
-    ret = make_low(log, options, arguments, env, working_dir)
+    ret = make_low(
+        log,
+        options,
+        arguments,
+        env,
+        working_dir,
+        make_filename=make_filename
+        )
 
     if own_log:
         log.close()
@@ -368,12 +376,13 @@ def make_low(
         opts,
         args,
         env,
-        working_dir
+        working_dir,
+        make_filename='Makefile'
         ):
 
     ret = 0
 
-    cmd = ['make'] + opts + args
+    cmd = ['make', '-f', make_filename] + opts + args
 
     log.info("directory: {}".format(working_dir))
     log.info("command:")

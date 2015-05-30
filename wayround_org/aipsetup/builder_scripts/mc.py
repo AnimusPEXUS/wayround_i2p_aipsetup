@@ -13,6 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_actions(self):
         ret = super().define_actions()
         ret['wrapper'] = self.builder_action_wrapper
+        ret['asc_support'] = self.builder_action_asc_support
         return ret
 
     def builder_action_wrapper(self, log):
@@ -38,5 +39,39 @@ alias mc=". /usr/share/mc/bin/mc-wrapper.sh"
 """
             )
         f.close()
+
+        return 0
+
+    def builder_action_asc_support(self, log):
+        exts_file = os.path.join(self.dst_dir, 'etc', 'mc', 'mc.ext')
+
+        f = open(exts_file)
+        ftl = f.readlines()
+        f.close()
+
+        if not '# asc\n' in ftl:
+
+            log.info("Adding ASC support")
+
+            ind = ftl.index('# tar\n')
+
+            ind = ftl.index('\n', ind)
+
+            ftl = (ftl[:ind] + [
+                '\n',
+                '# asc\n',
+                'shell/i/.asc\n'
+                '\tOpen=%cd %p/utar://\n'
+                '\tView=%view{ascii} /usr/libexec/mc/ext.d/archive.sh view tar\n'
+                ] +
+                ftl[ind:])
+
+            f = open(exts_file, 'w')
+            f.writelines(ftl)
+            f.close()
+
+        else:
+
+            log.info("ASC support already on place")
 
         return 0

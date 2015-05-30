@@ -29,6 +29,33 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['dst_man_dir'] = wayround_org.utils.path.join(
             self.dst_dir, 'usr', 'share', 'man', 'man9'
             )
+
+        crossbuild_arch_params = []
+
+        if self.is_crossbuild:
+
+            target = self.package_info['constitution']['target']
+
+            st = wayround_org.utils.system_type.SystemType(target)
+            cpu = st.cpu
+
+            # print("cpu: {}".format(cpu))
+            linux_headers_arch = None
+            if re.match(r'^i[4-6]86$', cpu) or re.match(r'^x86(_32)?$', cpu):
+                linux_headers_arch = 'x86'
+            elif re.match(r'^x86_64$', cpu):
+                linux_headers_arch = 'x86_64'
+            else:
+                logging.error("Don't know which linux ARCH apply")
+                ret = 3
+
+            crossbuild_arch_params += [
+                'ARCH=' + linux_headers_arch,
+                'CROSS_COMPILE={}-'.format(self.host)
+                ]
+
+        ret['crossbuild_arch_params'] = crossbuild_arch_params
+
         return ret
 
     def define_actions(self):
@@ -46,6 +73,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #       self.builder_action_distr_headers_internal),
 
             ('distr_headers_normal', self.builder_action_distr_headers_normal),
+            # ('distr_headers_all', self.builder_action_distr_headers_all),
 
             # ('distr_headers_internal_repeat',
             #       self.builder_action_distr_headers_internal_repeat),
@@ -81,6 +109,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         logging.info("'aipsetup build continue build+'")
         return 1
 
+    def builder_action_build(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[] + self.custom_data['crossbuild_arch_params'],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
     def builder_action_distr_kernel(self, log):
         if not os.path.exists(self.custom_data['dst_boot_dir']):
             os.makedirs(self.custom_data['dst_boot_dir'])
@@ -91,7 +132,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'install',
                 'INSTALL_PATH=' + self.custom_data['dst_boot_dir']
-                ],
+                ] + self.custom_data['crossbuild_arch_params'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -106,7 +147,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     'vmlinuz'
                     ),
                 wayround_org.utils.path.join(
-                    dst_boot_dir,
+                    self.custom_data['dst_boot_dir'],
                     'vmlinuz-{}'.format(
                         self.package_info['pkg_nameinfo']['groups']['version']
                         )
@@ -121,7 +162,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'modules_install',
                 'INSTALL_MOD_PATH=' + self.dst_dir
-                ],
+                ] + self.custom_data['crossbuild_arch_params'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -175,7 +216,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'firmware_install',
                 'INSTALL_MOD_PATH=' + self.dst_dir
-                ],
+                ] + self.custom_data['crossbuild_arch_params'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -199,29 +240,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         arch_params = []
         install_hdr_path = wayround_org.utils.path.join(self.dst_dir, 'usr')
 
+        """
         if self.is_crossbuild:
-
-            target = self.package_info['constitution']['target']
-
-            st = wayround_org.utils.system_type.SystemType(target)
-            cpu = st.cpu
-
-            # print("cpu: {}".format(cpu))
-            linux_headers_arch = None
-            if re.match(r'^i[4-6]86$', cpu) or re.match(r'^x86(_32)?$', cpu):
-                linux_headers_arch = 'x86'
-            elif re.match(r'^x86_64$', cpu):
-                linux_headers_arch = 'x86_64'
-            else:
-                logging.error("Don't know which linux ARCH apply")
-                ret = 3
-
-            arch_params += ['ARCH=' + linux_headers_arch]
 
             install_hdr_path = wayround_org.utils.path.join(
                 self.dst_dir, 'usr', 'lib', 'unicorn_crossbuilders',
-                target, 'usr'
+                self.target, 'usr'
                 )
+        """
 
         if ret == 0:
 
@@ -233,7 +259,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     'headers_install',
                     # 'headers_install_all',
                     'INSTALL_HDR_PATH=' + install_hdr_path
-                    ] + arch_params,
+                    ] + self.custom_data['crossbuild_arch_params'],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=self.separate_build_dir,
@@ -316,7 +342,7 @@ Continue with command
             options=[],
             arguments=[
                 'mandocs'
-                ],
+                ] + self.custom_data['crossbuild_arch_params'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,

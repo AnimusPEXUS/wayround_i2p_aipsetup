@@ -67,7 +67,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     )
 
                 p = subprocess.Popen(
-                    [compressor, '-d', rolling], cwd=pth_dir
+                    [compressor, '-kfd', rolling], cwd=pth_dir
                     )
                 if p.wait() != 0:
 
@@ -106,7 +106,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         )
                     )
 
-                p = subprocess.Popen([compressor, '-d', i], cwd=pth_dir)
+                p = subprocess.Popen([compressor, '-kfd', i], cwd=pth_dir)
                 if p.wait() != 0:
 
                     ret = 1
@@ -143,7 +143,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-gpm',
             '--with-ticlib',
             '--with-termlib',
-            '--with-pkg-config'
+            '--with-pkg-config',
+            #'--without-ada'
             ]
 
     def builder_action_links(self, log):

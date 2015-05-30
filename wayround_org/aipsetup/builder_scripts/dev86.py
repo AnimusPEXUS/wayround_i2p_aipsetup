@@ -6,6 +6,8 @@ import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
+# FIXME: host/build/target fix required
+
 
 def main(buildingsite, action=None):
 

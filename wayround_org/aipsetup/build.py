@@ -18,6 +18,7 @@ import tempfile
 import importlib
 import types
 import collections
+import re
 
 import wayround_org.aipsetup.client_pkg
 import wayround_org.aipsetup.controllers
@@ -141,13 +142,28 @@ def _constitution_configurer_sub01(
         target_from_param
         ):
 
-    if value is None or value.lower() in ['n', 'none', 'no', 'off', '0']:
-        value = None
+    if value is None:
+        try:
+            value = package_info['constitution'][name]
+        except:
+            try:
+                value = config['system_settings'][name]
+            except:
+                raise Exception(
+                    "Can't get `{}' value for package"
+                    ", as it is not in package constitution"
+                    ", nor in system settings".format(name)
+                    )
+                value = None
+
     else:
 
         value_l = value.lower()
 
-        if value == 'cfg':
+        if value_l in ['n', 'none', 'no', 'off', '0']:
+            value = None
+
+        elif value == 'cfg':
             if config is None:
                 raise Exception("system configuration error")
             value = config['system_settings'][name]
@@ -156,17 +172,38 @@ def _constitution_configurer_sub01(
                 raise Exception("package info not configured")
             value = package_info['constitution'][name]
 
-        elif value_l in ['h', 'host']:
-            value = host_from_param
-
-        elif value_l in ['b', 'build']:
-            value = build_from_param
-
-        elif value_l in ['t', 'target']:
-            value = target_from_param
-
         else:
-            pass
+            re_res = re.match(
+                r'^(?P<bht>(b(uild)?)|(h(ost)?)|(t(arget)?))(?P<bht_o>[ps]?)$',
+                value_l
+                )
+            if re_res is None:
+                #raise Exception("invalid parameter value")
+                pass
+
+            else:
+                bht = re_res.group('bht')
+                bht_o = re_res.group('bht_o')
+
+                if bht_o == 'p':
+                    ss = package_info['constitution']
+                elif bht_o == 's':
+                    ss = config['system_settings']
+                else:
+                    ss = {
+                        'host': host_from_param,
+                        'build': build_from_param,
+                        'target': target_from_param
+                        }
+
+                if bht in ['h', 'host']:
+                    value = ss['host']
+
+                elif bht in ['b', 'build']:
+                    value = ss['build']
+
+                elif bht in ['t', 'target']:
+                    value = ss['target']
 
     return value
 
@@ -176,49 +213,65 @@ def constitution_configurer(
         package_info,
         host_from_param,
         build_from_param,
-        target_from_param
+        target_from_param,
+        target_host_root
         ):
 
-    paths = dict(config['system_paths'])
+    _debug = True
 
-    if host_from_param == build_from_param == target_from_param is None:
-        host_from_param = config['system_settings']['host']
-        build_from_param = config['system_settings']['build']
-        target_from_param = config['system_settings']['target']
+    try:
+        paths = package_info['constitution']['paths']
+    except:
+        paths = dict(config['system_paths'])
 
-    else:
+    if _debug:
+        logging.info("in host_from_param: {}".format(host_from_param))
+        logging.info("in build_from_param: {}".format(build_from_param))
+        logging.info("in target_from_param: {}".format(target_from_param))
 
-        host_from_param = _constitution_configurer_sub01(
-            host_from_param,
-            config,
-            package_info,
-            'host',
-            host_from_param,
-            build_from_param,
-            target_from_param
-            )
+    if target_host_root is None:
+        try:
+            target_host_root = package_info['constitution']['target_host_root']
+        except:
+            target_host_root = None
 
-        build_from_param = _constitution_configurer_sub01(
-            build_from_param,
-            config,
-            package_info,
-            'build',
-            host_from_param,
-            build_from_param,
-            target_from_param
-            )
+    host_from_param = _constitution_configurer_sub01(
+        host_from_param,
+        config,
+        package_info,
+        'host',
+        host_from_param,
+        build_from_param,
+        target_from_param
+        )
 
-        target_from_param = _constitution_configurer_sub01(
-            target_from_param,
-            config,
-            package_info,
-            'target',
-            host_from_param,
-            build_from_param,
-            target_from_param
-            )
+    build_from_param = _constitution_configurer_sub01(
+        build_from_param,
+        config,
+        package_info,
+        'build',
+        host_from_param,
+        build_from_param,
+        target_from_param
+        )
 
-    return host_from_param, build_from_param, target_from_param, paths
+    target_from_param = _constitution_configurer_sub01(
+        target_from_param,
+        config,
+        package_info,
+        'target',
+        host_from_param,
+        build_from_param,
+        target_from_param
+        )
+
+    if _debug:
+        logging.info("out host_from_param: {}".format(host_from_param))
+        logging.info("out build_from_param: {}".format(build_from_param))
+        logging.info("out target_from_param: {}".format(target_from_param))
+
+    return host_from_param, build_from_param, target_from_param, paths, \
+        target_host_root
 
 
 class Constitution:
@@ -228,7 +281,8 @@ class Constitution:
             host_str=None,
             build_str=None,
             target_str=None,
-            paths=None
+            paths=None,
+            target_host_root=None
             ):
 
         self.host = None
@@ -248,6 +302,7 @@ class Constitution:
             self.target = wayround_org.utils.system_type.SystemType(target_str)
 
         self.paths = paths
+        self.target_host_root = target_host_root
         return
 
     def return_aipsetup3_compliant(self):
@@ -257,17 +312,24 @@ class Constitution:
             'target': None,
             'paths': copy.copy(self.paths),
             'system_title': 'UNICORN',
-            'system_version': '3.0'
+            'system_version': '3.0',
+            'target_host_root': self.target_host_root
             }
 
         if self.host is not None:
             ret['host'] = str(self.host)
+        else:
+            ret['host'] = None
 
         if self.build is not None:
             ret['build'] = str(self.build)
+        else:
+            ret['build'] = None
 
         if self.target is not None:
             ret['target'] = str(self.target)
+        else:
+            ret['target'] = None
 
         return ret
 
@@ -1153,6 +1215,9 @@ class PackCtl:
 
         return ret
 
+def read_package_info(path, ret_on_error=None):
+    bs = BuildingSiteCtl(path)
+    return bs.read_package_info(ret_on_error)
 
 class BuildingSiteCtl:
 
@@ -1343,7 +1408,7 @@ class BuildingSiteCtl:
                         sort_keys=True
                         )
                 except:
-                    logging.exception("Can't represent data for package info")
+                    logging.exception("Can't parse package_info.json text")
                     ret = 1
                 else:
                     f.write(txt)
@@ -1572,9 +1637,7 @@ class BuildingSiteCtl:
 
                 self.write_package_info({})
 
-            if self.apply_pkg_nameinfo_on_buildingsite(
-                    src_file_name
-                    ) != 0:
+            if self.apply_pkg_nameinfo_on_buildingsite(src_file_name) != 0:
                 ret = 1
             elif self.apply_constitution_on_buildingsite(const) != 0:
                 ret = 2
@@ -1705,6 +1768,7 @@ class BuildingSiteCtl:
 
         ret = 0
 
+        """
         if (self._complete_info_correctness_check() != 0
                 or isinstance(main_src_file, str)):
 
@@ -1716,6 +1780,11 @@ class BuildingSiteCtl:
             if self.apply_info(pkg_client, const, main_src_file) != 0:
                 logging.error("Can't apply build information to site")
                 ret = 15
+        """
+
+        if self.apply_info(pkg_client, const, main_src_file) != 0:
+            logging.error("Can't apply build information to site")
+            ret = 15
 
         if ret == 0:
             if self._complete_info_correctness_check() != 0:
@@ -1973,172 +2042,6 @@ def isWdDirRestricted(path):
             if i == dir_str_abs:
                 ret = True
                 break
-    return ret
-
-
-def build(
-        config,
-        source_files,
-        buildingsites_dir,
-        remove_buildingsite_after_success=False,
-        const=None
-        ):
-    """
-    Gathering function for all package building process
-
-    Uses :func:`wayround_org.aipsetup.buildingsite.init` to create building
-    site. Farther process controlled by :func:`complete`.
-
-    :param source_files: tarball name or list of them.
-    """
-
-    # TODO: remove config parameter or move this function to commands modules
-    # NOTE: (for TODO above) can't decide where to put this function: it's not
-    #       a command nor it's a basic build mechanizm. let's leave it here
-
-    if not isinstance(const, Constitution):
-        raise ValueError(
-            "system_type must be of type "
-            "wayround_org.aipsetup.build.Constitution"
-            ", not `{}'".format(const)
-            )
-
-    ret = 0
-
-    par_res = wayround_org.utils.tarball.parse_tarball_name(
-        source_files[0],
-        mute=True
-        )
-
-    if not isinstance(par_res, dict):
-        logging.error("Can't parse source file name")
-        ret = 1
-    else:
-
-        if not os.path.isdir(buildingsites_dir):
-            try:
-                os.makedirs(buildingsites_dir)
-            except:
-                logging.error(
-                    "Can't create directory: {}".format(buildingsites_dir)
-                    )
-
-        if not os.path.isdir(buildingsites_dir):
-            logging.error("Directory not exists: {}".format(buildingsites_dir))
-            ret = 7
-
-        else:
-
-            pkg_client = \
-                wayround_org.aipsetup.controllers.pkg_client_by_config(config)
-
-            pkg_name = pkg_client.name_by_name(source_files[0])
-
-            if pkg_name is None:
-                logging.error(
-                    "Can't determine package name."
-                    " Is server running?".format(
-                        source_files[0],
-                        pkg_name
-                        )
-                    )
-                ret = 10
-
-            if ret == 0:
-                if len(pkg_name) != 1:
-                    logging.error("""\
-Can't select between those package names (for {})
-(please, fix package names to not make collisions):
-   {}
-""".format(
-                        source_files[0],
-                        pkg_name
-                        )
-                        )
-                    ret = 4
-                else:
-                    pkg_name = pkg_name[0]
-
-            if ret == 0:
-
-                package_info = pkg_client.info(pkg_name)
-
-                if not package_info:
-                    logging.error(
-                        "Can't get package "
-                        "information for tarball `{}'".format(
-                            source_files[0]
-                            )
-                        )
-                    ret = 2
-                else:
-
-                    # tmp_dir_prefix = \
-                    #     "{name}-{version}-{status}-{timestamp}-".format_map(
-                    #         {
-                    #             'name': package_info['name'],
-                    #             'version': par_res['groups']['version'],
-                    #             'status': par_res['groups']['status'],
-                    #             'timestamp':
-                    #                 wayround_org.utils.time.currenttime_stamp()
-                    #             }
-                    #         )
-
-                    _ts = wayround_org.utils.time.currenttime_stamp()
-                    while '.' in _ts:
-                        _ts = _ts.replace('.', '')
-
-                    tmp_dir_prefix = "{}-{}-{}-".format(
-                        package_info['name'],
-                        par_res['groups']['version'],
-                        _ts
-                        )
-
-                    build_site_dir = tempfile.mkdtemp(
-                        prefix=tmp_dir_prefix,
-                        dir=buildingsites_dir
-                        )
-
-                    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(
-                        build_site_dir
-                        )
-
-                    if bs.init(source_files) != 0:
-                        logging.error("Error initiating temporary dir")
-                        ret = 3
-                    else:
-
-                        build_ctl = \
-                            wayround_org.aipsetup.controllers.build_ctl_new(bs)
-
-                        pack_ctl = \
-                            wayround_org.aipsetup.controllers.pack_ctl_new(bs)
-
-                        buildscript_ctl = \
-                            wayround_org.aipsetup.controllers.\
-                            bscript_ctl_by_config(config)
-
-                        if bs.complete(
-                                build_ctl,
-                                pack_ctl,
-                                buildscript_ctl,
-                                pkg_client,
-                                source_files[0],
-                                const=const,
-                                remove_buildingsite_after_success=(
-                                    remove_buildingsite_after_success
-                                    )
-                                ) != 0:
-
-                            logging.error("Package building failed")
-                            ret = 5
-
-                        else:
-                            logging.info(
-                                "Complete package building ended with no error"
-                                )
-                            ret = 0
-
     return ret
 
 

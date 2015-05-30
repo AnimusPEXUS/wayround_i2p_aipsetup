@@ -2,6 +2,7 @@
 import collections
 import logging
 import os.path
+import tempfile
 
 
 import wayround_org.utils.path
@@ -12,7 +13,7 @@ def commands():
         ('build', collections.OrderedDict([
             ('full', build_full),
             ('build', build_build),
-            ('continue', build_build_plus),
+            ('continue', build_continue),
             ('pack', build_pack),
             ('complete', build_complete),
             ('site', collections.OrderedDict([
@@ -61,7 +62,6 @@ def building_site_apply_info(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
-    pkg_info = adds['package_info']
 
     dirname = '.'
     file = None
@@ -74,20 +74,27 @@ def building_site_apply_info(command_name, opts, args, adds):
 
     # TODO: add check for dirname correctness
 
-    host, build, target, paths = \
+    pkg_info = wayround_org.aipsetup.build.read_package_info(
+        dirname,
+        None
+        )
+
+    host, build, target, paths, target_host_root = \
         wayround_org.aipsetup.build.constitution_configurer(
             config,
             pkg_info,
             opts.get('--host', None),
             opts.get('--build', None),
-            opts.get('--target', None)
+            opts.get('--target', None),
+            opts.get('--thr', None)
             )
 
     const = wayround_org.aipsetup.build.Constitution(
         host,
         build,
         target,
-        paths
+        paths,
+        target_host_root
         )
 
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
@@ -107,7 +114,6 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
-    pkg_info = adds['package_info']
 
     dirname = '.'
     package_name = None
@@ -126,19 +132,27 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
         logging.error("Must be 1 or 2 parameters")
         ret = 1
 
-    host, build, target, paths = wayround_org.aipsetup.build.constitution_configurer(
-        config,
-        pkg_info,
-        opts.get('--host', None),
-        opts.get('--build', None),
-        opts.get('--target', None)
+    pkg_info = wayround_org.aipsetup.build.read_package_info(
+        dirname,
+        None
         )
+
+    host, build, target, paths, target_host_root = \
+        wayround_org.aipsetup.build.constitution_configurer(
+            config,
+            pkg_info,
+            opts.get('--host', None),
+            opts.get('--build', None),
+            opts.get('--target', None),
+            opts.get('--thr', None)
+            )
 
     const = wayround_org.aipsetup.build.Constitution(
         host,
         build,
         target,
-        paths
+        paths,
+        target_host_root
         )
 
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
@@ -148,7 +162,7 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
     return ret
 
 
-def build_build_plus(command_name, opts, args, adds):
+def build_continue(command_name, opts, args, adds):
     """
     Starts named action from script applied to current building site
 
@@ -194,9 +208,10 @@ def _build_complete_subroutine(
         build,
         target,
         paths,
+        target_host_root,
         dirname,
-        file,
-        r_bds
+        main_src_file,
+        remove_buildingsite_after_success
         ):
 
     import wayround_org.aipsetup.controllers
@@ -207,7 +222,8 @@ def _build_complete_subroutine(
         host,
         build,
         target,
-        paths
+        paths,
+        target_host_root
         )
 
     if const is None:
@@ -230,8 +246,8 @@ def _build_complete_subroutine(
             pack_ctl,
             build_script_ctl,
             pkg_client,
-            main_src_file=file,
-            remove_buildingsite_after_success=r_bds,
+            main_src_file=main_src_file,
+            remove_buildingsite_after_success=remove_buildingsite_after_success,
             const=const
             )
 
@@ -271,23 +287,29 @@ def build_complete(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
-    pkg_info = adds['package_info']
 
     ret = 0
 
     r_bds = '-d' in opts
 
-    host, build, target, paths = wayround_org.aipsetup.build.constitution_configurer(
-        config,
-        pkg_info,
-        opts.get('--host', None),
-        opts.get('--build', None),
-        opts.get('--target', None),
-        )
-
     args_l = len(args)
 
     if args_l == 0:
+
+        pkg_info = wayround_org.aipsetup.build.read_package_info(
+            '.',
+            None
+            )
+
+        host, build, target, paths, target_host_root = \
+            wayround_org.aipsetup.build.constitution_configurer(
+                config,
+                pkg_info,
+                opts.get('--host', None),
+                opts.get('--build', None),
+                opts.get('--target', None),
+                opts.get('--thr', None)
+                )
 
         ret = _build_complete_subroutine(
             config,
@@ -295,6 +317,7 @@ def build_complete(command_name, opts, args, adds):
             build,
             target,
             paths,
+            target_host_root,
             '.',
             None,
             r_bds
@@ -302,12 +325,28 @@ def build_complete(command_name, opts, args, adds):
 
     elif args_l == 1 and os.path.isfile(args[0]):
 
+        pkg_info = wayround_org.aipsetup.build.read_package_info(
+            '.',
+            None
+            )
+
+        host, build, target, paths, target_host_root = \
+            wayround_org.aipsetup.build.constitution_configurer(
+                config,
+                pkg_info,
+                opts.get('--host', None),
+                opts.get('--build', None),
+                opts.get('--target', None),
+                opts.get('--thr', None)
+                )
+
         ret = _build_complete_subroutine(
             config,
             host,
             build,
             target,
             paths,
+            target_host_root,
             '.',
             args[0],
             r_bds
@@ -315,12 +354,28 @@ def build_complete(command_name, opts, args, adds):
 
     elif args_l == 2 and os.path.isdir(args[0]) and os.path.isfile(args[1]):
 
+        pkg_info = wayround_org.aipsetup.build.read_package_info(
+            args[0],
+            None
+            )
+
+        host, build, target, paths, target_host_root = \
+            wayround_org.aipsetup.build.constitution_configurer(
+                config,
+                pkg_info,
+                opts.get('--host', None),
+                opts.get('--build', None),
+                opts.get('--target', None),
+                opts.get('--thr', None)
+                )
+
         ret = _build_complete_subroutine(
             config,
             host,
             build,
             target,
             paths,
+            target_host_root,
             args[0],
             args[1],
             r_bds
@@ -332,12 +387,28 @@ def build_complete(command_name, opts, args, adds):
 
         for i in args:
 
+            pkg_info = wayround_org.aipsetup.build.read_package_info(
+                i,
+                None
+                )
+
+            host, build, target, paths, target_host_root = \
+                wayround_org.aipsetup.build.constitution_configurer(
+                    config,
+                    pkg_info,
+                    opts.get('--host', None),
+                    opts.get('--build', None),
+                    opts.get('--target', None),
+                    opts.get('--thr', None)
+                    )
+
             if _build_complete_subroutine(
                     config,
                     host,
                     build,
                     target,
                     paths,
+                    target_host_root,
                     i,
                     None,
                     r_bds
@@ -372,7 +443,6 @@ def build_full(command_name, opts, args, adds):
     import wayround_org.aipsetup.controllers
 
     config = adds['config']
-    pkg_info = adds['package_info']
 
     r_bds = '-d' in opts
 
@@ -382,15 +452,7 @@ def build_full(command_name, opts, args, adds):
 
     ret = 0
 
-    building_site_dir = config['local_build']['building_scripts_dir']
-
-    host, build, target, paths = wayround_org.aipsetup.build.constitution_configurer(
-        config,
-        pkg_info,
-        opts.get('--host', None),
-        opts.get('--build', None),
-        opts.get('--target', None)
-        )
+    building_site_dir = config['local_build']['building_sites_dir']
 
     if len(args) > 0:
         sources = args
@@ -406,43 +468,33 @@ def build_full(command_name, opts, args, adds):
 
         logging.info("Applying constitution")
 
-        const = wayround_org.aipsetup.build.Constitution(
-            host,
-            build,
-            target,
-            paths
-            )
+        if multiple_packages:
+            sources.sort()
+            rets = 0
+            logging.info("Passing packages `{}' to build".format(sources))
+            for i in sources:
 
-        if not isinstance(const, wayround_org.aipsetup.build.Constitution):
-            ret = 1
-        else:
-
-            if multiple_packages:
-                sources.sort()
-                rets = 0
-                logging.info("Passing packages `{}' to build".format(sources))
-                for i in sources:
-                    if wayround_org.aipsetup.build.build(
-                            config,
-                            [i],
-                            remove_buildingsite_after_success=r_bds,
-                            buildingsites_dir=building_site_dir,
-                            const=const
-                            ) != 0:
-                        rets += 1
-                if rets == 0:
-                    ret = 0
-                else:
-                    ret = 1
+                if build_sub_01(
+                        command_name, opts, args, adds,
+                        config,
+                        [i],
+                        building_site_dir,
+                        remove_buildingsite_after_success=r_bds
+                        ) != 0:
+                    rets += 1
+            if rets == 0:
+                ret = 0
             else:
-                logging.info("Passing package `{}' to build".format(sources))
-                ret = wayround_org.aipsetup.build.build(
-                    config,
-                    sources,
-                    remove_buildingsite_after_success=r_bds,
-                    buildingsites_dir=building_site_dir,
-                    const=const
-                    )
+                ret = 1
+        else:
+            logging.info("Passing package `{}' to build".format(sources))
+            ret = build_sub_01(
+                command_name, opts, args, adds,
+                config,
+                sources,
+                building_site_dir,
+                remove_buildingsite_after_success=r_bds
+                )
 
     return ret
 
@@ -512,5 +564,172 @@ def build_build(command_name, opts, args, adds):
             wayround_org.aipsetup.controllers.bscript_ctl_by_config(config)
 
         ret = build_ctl.complete(buildscript_ctl)
+
+    return ret
+
+
+def build_sub_01(
+        command_name, opts, args, adds,
+        config,
+        source_files,
+        buildingsites_dir,
+        remove_buildingsite_after_success=False,
+        ):
+    """
+    Gathering function for all package building process
+
+    Uses :func:`wayround_org.aipsetup.buildingsite.init` to create building
+    site. Farther process controlled by :func:`complete`.
+
+    :param source_files: tarball name or list of them.
+    """
+
+    # NOTE: this is moved from build module
+    # TODO: remove config parameter or move this function to commands modules
+    # NOTE: (for TODO above) can't decide where to put this function: it's not
+    #       a command nor it's a basic build mechanizm. let's leave it here
+
+    ret = 0
+
+    par_res = wayround_org.utils.tarball.parse_tarball_name(
+        source_files[0],
+        mute=True
+        )
+
+    if not isinstance(par_res, dict):
+        logging.error("Can't parse source file name")
+        ret = 1
+    else:
+
+        if not os.path.isdir(buildingsites_dir):
+            try:
+                os.makedirs(buildingsites_dir)
+            except:
+                logging.error(
+                    "Can't create directory: {}".format(buildingsites_dir)
+                    )
+
+        if not os.path.isdir(buildingsites_dir):
+            logging.error("Directory not exists: {}".format(buildingsites_dir))
+            ret = 7
+
+        else:
+
+            pkg_client = \
+                wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+
+            pkg_name = pkg_client.name_by_name(source_files[0])
+
+            if pkg_name is None:
+                logging.error(
+                    "Can't determine package name."
+                    " Is server running?".format(
+                        source_files[0],
+                        pkg_name
+                        )
+                    )
+                ret = 10
+
+            if ret == 0:
+                if len(pkg_name) != 1:
+                    logging.error("""\
+Can't select between those package names (for {})
+(please, fix package names to not make collisions):
+   {}
+""".format(
+                        source_files[0],
+                        pkg_name
+                        )
+                        )
+                    ret = 4
+                else:
+                    pkg_name = pkg_name[0]
+
+            if ret == 0:
+
+                package_info = pkg_client.info(pkg_name)
+
+                if not package_info:
+                    logging.error(
+                        "Can't get package "
+                        "information for tarball `{}'".format(
+                            source_files[0]
+                            )
+                        )
+                    ret = 2
+                else:
+
+                    # tmp_dir_prefix = \
+                    #     "{name}-{version}-{status}-{timestamp}-".format_map(
+                    #         {
+                    #             'name': package_info['name'],
+                    #             'version': par_res['groups']['version'],
+                    #             'status': par_res['groups']['status'],
+                    #             'timestamp':
+                    #                 wayround_org.utils.time.currenttime_stamp()
+                    #             }
+                    #         )
+
+                    _ts = wayround_org.utils.time.currenttime_stamp()
+                    while '.' in _ts:
+                        _ts = _ts.replace('.', '')
+
+                    tmp_dir_prefix = "{}-{}-{}-".format(
+                        package_info['name'],
+                        par_res['groups']['version'],
+                        _ts
+                        )
+
+                    build_site_dir = tempfile.mkdtemp(
+                        prefix=tmp_dir_prefix,
+                        dir=buildingsites_dir
+                        )
+
+                    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(
+                        build_site_dir
+                        )
+
+                    if bs.init(source_files) != 0:
+                        logging.error("Error initiating temporary dir")
+                        ret = 3
+                    else:
+
+                        pkg_info = wayround_org.aipsetup.build.read_package_info(
+                            build_site_dir,
+                            None
+                            )
+
+                        host, build, target, paths, target_host_root = \
+                            wayround_org.aipsetup.build.constitution_configurer(
+                                config,
+                                pkg_info,
+                                opts.get('--host', None),
+                                opts.get('--build', None),
+                                opts.get('--target', None),
+                                opts.get('--thr', None)
+                                )
+
+                        ret = _build_complete_subroutine(
+                            config,
+                            host,
+                            build,
+                            target,
+                            paths,
+                            target_host_root,
+                            build_site_dir,
+                            source_files[0],
+                            remove_buildingsite_after_success
+                            )
+
+                        if ret != 0:
+
+                            logging.error("Package building failed")
+                            ret = 5
+
+                        else:
+                            logging.info(
+                                "Complete package building ended with no error"
+                                )
+                            ret = 0
 
     return ret

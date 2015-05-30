@@ -50,13 +50,37 @@ class Builder:
         self.source_configure_reldir = '.'
 
         self.is_crossbuild = (
+            self.package_info['constitution']['build']
+            != self.package_info['constitution']['host']
+            )
+
+        self.is_crossbuilder = (
             self.package_info['constitution']['target']
             != self.package_info['constitution']['host']
             )
 
+        try:
+            self.target_host_root = \
+                self.package_info['constitution']['target_host_root']
+        except:
+            self.target_host_root = '/'
+
         self.custom_data = self.define_custom_data()
 
         self.action_dict = self.define_actions()
+
+        if self.is_crossbuild:
+            logging.info(
+                "Target Host Root is considered to be: {}".format(
+                    self.target_host_root
+                    )
+                )
+
+            if self.target_host_root is None:
+                raise Exception("You need to define --thr")
+
+            if not os.path.isdir(self.target_host_root):
+                raise Exception("Target host root not exists")
 
         return
 
@@ -212,7 +236,7 @@ class Builder:
         return ret
 
     def builder_action_configure_define_options(self, log):
-        return [
+        ret = [
             '--prefix=' +
             self.package_info['constitution']['paths']['usr'],
             '--mandir=' +
@@ -223,6 +247,34 @@ class Builder:
             self.package_info['constitution']['paths']['var'],
             '--enable-shared'
             ] + autotools.calc_conf_hbt_options(self)
+
+        if self.is_crossbuild:
+            log.info(
+                "Target Host Root is considered to be: {}".format(
+                    self.target_host_root
+                    )
+                )
+
+            if self.target_host_root is None:
+                raise Exception("You need to define --thr")
+
+            if not os.path.isdir(self.target_host_root):
+                raise Exception("Target host root not exists")
+
+            ret += [
+                'LDFLAGS=-L{}'.format(
+                    os.path.join(self.target_host_root, 'usr', 'lib'),
+                    os.path.join(self.target_host_root, 'usr', 'lib64')
+                    ),
+                'CFLAGS=-I{}'.format(
+                    os.path.join(self.target_host_root, 'usr', 'include')
+                    ),
+                'CXXFLAGS=-I{}'.format(
+                    os.path.join(self.target_host_root, 'usr', 'include')
+                    )
+                ]
+
+        return ret
 
     def builder_action_configure_define_script_name(self, log):
         return 'configure'
