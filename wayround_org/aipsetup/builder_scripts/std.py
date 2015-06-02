@@ -262,9 +262,9 @@ class Builder:
                 raise Exception("Target host root not exists")
 
             ret += [
-                'LDFLAGS=-L{}'.format(
+                'LDFLAGS=-L{} '.format(
                     os.path.join(self.target_host_root, 'usr', 'lib'),
-                    os.path.join(self.target_host_root, 'usr', 'lib64')
+                    #os.path.join(self.target_host_root, 'usr', 'lib64')
                     ),
                 'CFLAGS=-I{}'.format(
                     os.path.join(self.target_host_root, 'usr', 'include')
@@ -287,6 +287,9 @@ class Builder:
 
     def builder_action_configure_define_environment(self, log):
         return {}
+
+    def builder_action_make_define_environment(self, log):
+        return self.builder_action_configure_define_environment(log)
 
     def builder_action_configure(self, log):
 
@@ -317,7 +320,7 @@ class Builder:
             log=log,
             options=[],
             arguments=[],
-            environment={},
+            environment=self.builder_action_make_define_environment(log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -333,7 +336,7 @@ class Builder:
                 'install',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment={},
+            environment=self.builder_action_make_define_environment(log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

@@ -1215,9 +1215,11 @@ class PackCtl:
 
         return ret
 
+
 def read_package_info(path, ret_on_error=None):
     bs = BuildingSiteCtl(path)
     return bs.read_package_info(ret_on_error)
+
 
 class BuildingSiteCtl:
 
@@ -1425,7 +1427,7 @@ class BuildingSiteCtl:
 
         r = self.read_package_info({})
 
-        r['pkg_tarball'] = dict(name=filename)
+        r['pkg_nameinfo'] = dict(name=filename)
 
         self.write_package_info(r)
 
@@ -1436,12 +1438,12 @@ class BuildingSiteCtl:
         Get main package tarball in case there are many of them.
         """
 
-        ret = ''
-
         r = self.read_package_info({})
 
-        if 'pkg_tarball' in r and 'name' in r['pkg_tarball']:
-            ret = r['pkg_tarball']['name']
+        try:
+            ret = r['pkg_nameinfo']['name']
+        except:
+            ret = ''
 
         return ret
 
@@ -1615,14 +1617,16 @@ class BuildingSiteCtl:
 
         tar_dir = self.getDIR_TARBALL()
 
-        if not isinstance(src_file_name, str):
-            tar_files = os.listdir(tar_dir)
+        if self.get_pkg_main_tarball() == '':
+            if not isinstance(src_file_name, str):
+                tar_files = os.listdir(tar_dir)
 
-            if len(tar_files) != 1:
-                logging.error("Can't decide which tarball to use")
-                ret = 15
-            else:
-                src_file_name = tar_files[0]
+                if len(tar_files) != 1:
+                    logging.error("Can't decide which tarball to use")
+                    ret = 15
+                else:
+                    src_file_name = tar_files[0]
+                    self.set_pkg_main_tarball(src_file_name)
 
         if ret == 0:
 
@@ -1637,12 +1641,18 @@ class BuildingSiteCtl:
 
                 self.write_package_info({})
 
-            if self.apply_pkg_nameinfo_on_buildingsite(src_file_name) != 0:
-                ret = 1
-            elif self.apply_constitution_on_buildingsite(const) != 0:
-                ret = 2
-            elif self.apply_pkg_info_on_buildingsite(pkg_client) != 0:
-                ret = 3
+            if self.get_pkg_main_tarball() == '':
+                if self.apply_pkg_nameinfo_on_buildingsite(src_file_name) != 0:
+                    ret = 1
+
+            if ret == 0:
+                if self.apply_constitution_on_buildingsite(const) != 0:
+                    ret = 2
+
+            if ret == 0:
+                if self.apply_pkg_info_on_buildingsite(pkg_client) != 0:
+                    ret = 3
+
             else:
                 # no error
                 pass
@@ -2069,18 +2079,9 @@ def run_builder_action(
         else:
             actions = [actions[actions.index(action)]]
 
-    longest_logname = 0
-    for i in list(actions_container_object.keys()):
-        if len(i) > longest_logname:
-            longest_logname = len(i)
-
     for i in actions:
 
-        log = wayround_org.utils.log.Log(
-            log_output_directory,
-            i,
-            longest_logname=longest_logname
-            )
+        log = wayround_org.utils.log.Log(log_output_directory, i)
 
         log.info(
             "=>------[Starting '{}' action".format(i)

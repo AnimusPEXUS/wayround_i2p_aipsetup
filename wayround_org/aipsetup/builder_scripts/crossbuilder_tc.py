@@ -20,7 +20,7 @@ import wayround_org.aipsetup.builder_scripts.gcc
 import wayround_org.aipsetup.builder_scripts.binutils
 import wayround_org.aipsetup.builder_scripts.linux
 import wayround_org.aipsetup.builder_scripts.glibc
-import wayround_org.aipsetup.builder_scripts.crossbuilder_binutils01
+#import wayround_org.aipsetup.builder_scripts.crossbuilder_binutils01
 
 
 def calculate_prefix(dst_dir, target):
@@ -77,7 +77,7 @@ class LinuxHeadersBuilder(wayround_org.aipsetup.builder_scripts.linux.Builder):
 
 
 class BinutilsBuilder(
-        wayround_org.aipsetup.builder_scripts.std.Builder
+        wayround_org.aipsetup.builder_scripts.binutils.Builder
         ):
 
     def define_custom_data(self):
@@ -96,6 +96,7 @@ class BinutilsBuilder(
             ('distribute', self.builder_action_distribute)
             ])
 
+    """
     def builder_action_extract(self, log):
         ret = autotools.extract_high(
             self.buildingsite,
@@ -105,6 +106,8 @@ class BinutilsBuilder(
             rename_dir='binutils'
             )
         return ret
+    """
+
 
     def builder_action_configure(self, log):
 

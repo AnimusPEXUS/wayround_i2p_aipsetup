@@ -1,0 +1,17 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "sqlcipher",
+  "version_tool": "",
+  "basename": "sqlcipher",
+  "filters": "",
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
+}

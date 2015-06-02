@@ -1,8 +1,10 @@
 
+
 import logging
 import os.path
 import collections
 
+import wayround_org.utils.path
 import wayround_org.aipsetup.builder_scripts.std
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
@@ -31,6 +33,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
     """
+
+    def builder_action_configure_define_options(self, log):
+        copts = []
+        if self.is_crossbuild:
+            copts +=[
+                #'--with-sysroot={}'.format(
+                #    wayround_org.utils.path.join(
+                #        self.target_host_root,
+                #        '/usr'
+                #        )
+                #    )
+                ]
+        return super().builder_action_configure_define_options(log) + copts
 
     def builder_action_configure(self, log):
         log.info(

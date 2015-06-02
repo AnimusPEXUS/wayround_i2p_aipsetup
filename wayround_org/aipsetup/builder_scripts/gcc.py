@@ -3,6 +3,7 @@ import logging
 import os.path
 import subprocess
 import collections
+import shutil
 
 import wayround_org.utils.file
 import wayround_org.utils.path
@@ -38,12 +39,56 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
+    def builder_action_extract(self, log):
+
+        ret = super().builder_action_extract(
+            log,
+            rename_dir_additional_prefix=rename_dir_additional_prefix
+            )
+
+        if ret == 0:
+
+            for i in ['gmp', 'mpc', 'mpfr', 'cloog',
+                      'isl'
+                      # requires compiler for bootstrap
+                      # 'binutils', 'gdb', 'glibc'
+                      ]:
+
+                if autotools.extract_high(
+                        self.buildingsite,
+                        i,
+                        log=log,
+                        unwrap_dir=False,
+                        rename_dir=i
+                        ) != 0:
+
+                    log.error("Can't extract component: {}".format(i))
+                    ret = 2
+
+        return ret
+
     def builder_action_configure_define_options(self, log):
-        return super().builder_action_configure_define_options(log) + [
+        ''
+
+        """
+            '--with-gmp={}'.format(
+                wayround_org.utils.path.join(
+                    self.target_host_root,
+                    '/usr'
+                    )
+                ),
+            '--with-mpfr={}'.format(
+                wayround_org.utils.path.join(
+                    self.target_host_root,
+                    '/usr'
+                    )
+                ),
+        """
+        ret = super().builder_action_configure_define_options(log)
+
+        ret += [
             # experimental options
             # '--enable-targets=all',
-            '--enable-tls',
-            '--enable-nls',
 
             # '--enable-targets='
             # 'i486-pc-linux-gnu,'
@@ -59,37 +104,94 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--disable-lto',
 
             # normal options
-            '--enable-__cxa_atexit',
 
             # disabled for experiment
             #'--with-arch-32=i486',
             #'--with-tune=generic',
 
             #'--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-            '--enable-languages=c,c++,java,objc,obj-c++,fortran',
+            #'--enable-languages=c,c++,java,objc,obj-c++,fortran',
             #'--enable-languages=ada',
-            '--enable-bootstrap',
-            '--enable-threads=posix',
-            '--enable-multiarch',
-            '--enable-multilib',
-            '--enable-checking=release',
-            '--with-gmp={}'.format(
-                wayround_org.utils.path.join(
-                    self.target_host_root,
-                    '/usr'
-                    )
-                ),
-            '--with-mpfr={}'.format(
-                wayround_org.utils.path.join(
-                    self.target_host_root,
-                    '/usr'
-                    )
-                ),
+            # '--enable-bootstrap',
             # '--with-build-time-tools=
             # /home/agu/_sda3/_UNICORN/b/gnat/
             # gnat-gpl-2014-x86-linux-bin',
-            '--enable-shared'
+            #'--enable-shared'
             ]
+        """
+        if self.is_crossbuild or self.is_crossbuilder:
+            ret += [
+                '--enable-languages=c,c++',
+
+                '--disable-libatomic',
+                '--disable-libgomp',
+                '--disable-libitm',
+                '--disable-libquadmath',
+                '--disable-libsanitizer',
+                '--disable-libssp',
+                '--disable-libvtv',
+                '--disable-libcilkrts',
+                #'--disable-libstdc++-v3',
+                ]
+
+            for i in ['CFLAGS', 'LDFLAGS', 'CXXFLAGS']:
+                for j in range(len(ret) - 1, -1, -1):
+                    if ret[j].startswith(i):
+                        del ret[j]
+        """
+
+        if self.is_crossbuilder:
+            ret += sorted([
+                '--enable-tls',
+                '--enable-nls',
+                '--enable-__cxa_atexit',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+                #'--enable-bootstrap',
+                '--enable-threads=posix',
+                '--enable-multiarch',
+                '--enable-multilib',
+                '--enable-checking=release',
+                '--enable-libada',
+                '--enable-shared'
+                ])
+
+        if self.is_crossbuild:
+            ret += sorted([
+                '--enable-tls',
+                '--enable-nls',
+                '--enable-__cxa_atexit',
+                '--enable-languages=c,c++',
+                #'--enable-bootstrap',
+                '--enable-threads=posix',
+                '--enable-multiarch',
+                '--enable-multilib',
+                '--enable-checking=release',
+                '--enable-libada',
+                '--enable-shared'
+                #'--disable-libstdc++-v3',
+                ])
+
+        if not self.is_crossbuild and not self.is_crossbuilder:
+            ret += sorted([
+                '--enable-tls',
+                '--enable-nls',
+                '--enable-__cxa_atexit',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+                #'--enable-bootstrap',
+                '--enable-threads=posix',
+                '--enable-multiarch',
+                '--enable-multilib',
+                '--enable-checking=release',
+                '--enable-libada',
+                '--enable-shared'
+                ])
+
+        for i in ['CFLAGS', 'LDFLAGS', 'CXXFLAGS']:
+            for j in range(len(ret) - 1, -1, -1):
+                if ret[j].startswith(i):
+                    del ret[j]
+
+        return ret
 
     def builder_action_before_checks(self, log):
         print(

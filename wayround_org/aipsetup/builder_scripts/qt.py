@@ -66,7 +66,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_ROOT=' + dst_dir
+                'INSTALL_ROOT=' + self.dst_dir
                 ],
             environment={},
             environment_mode='copy',
@@ -77,16 +77,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_environments(self, log):
 
+        etc_profile_set_dir = self.custom_data['etc_profile_set_dir']
+        qt_number_str = self.custom_data['qt_number_str']
+
         if not os.path.isdir(etc_profile_set_dir):
             try:
                 os.makedirs(
-                    self.custom_data['etc_profile_set_dir'],
+                    etc_profile_set_dir,
                     exist_ok=True
                     )
             except:
                 logging.error(
                     "Can't create dir: {}".format(
-                        self.custom_data['etc_profile_set_dir']
+                        etc_profile_set_dir
                         )
                     )
                 raise
@@ -94,7 +97,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         f = open(
             wayround_org.utils.path.join(
                 etc_profile_set_dir,
-                '009.qt{}'.format(self.custom_data['qt_number_str'])
+                '009.qt{}'.format(qt_number_str)
                 ),
             'w'
             )
@@ -113,7 +116,7 @@ if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
 fi
 export LD_LIBRARY_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib"
 
-""".format(qtnum=self.custom_data['qt_number_str']))
+""".format(qtnum=qt_number_str))
         f.close()
 
         return 0
