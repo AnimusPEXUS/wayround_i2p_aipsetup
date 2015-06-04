@@ -1671,6 +1671,8 @@ class BuildingSiteCtl:
 
         ret = 0
 
+        self.set_pkg_main_tarball('')
+
         if self.read_package_info(None) is None:
             logging.info(
                 "Applying new package info to dir `{}'".format(

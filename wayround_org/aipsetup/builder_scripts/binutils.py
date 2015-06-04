@@ -18,8 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_extract(self, log, rename_dir_additional_prefix=None):
 
         ret = super().builder_action_extract(
-            log,
-            rename_dir_additional_prefix=rename_dir_additional_prefix
+            log
             )
 
         if ret == 0:

@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.1',
+    version='3.2',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -14,7 +14,8 @@ setup(
     packages=[
         'wayround_org.aipsetup',
         'wayround_org.aipsetup.buildtools',
-        'wayround_org.aipsetup.gui'
+        'wayround_org.aipsetup.gui',
+        'wayround_org.aipsetup.builder_scripts'
         ],
     scripts=['aipsetup3.py'],
     install_requires=[
@@ -31,7 +32,6 @@ setup(
             os.path.join('gui', '*.glade'),
             os.path.join('distro', '*.json'),
             os.path.join('distro', '*.sqlite'),
-            os.path.join('distro', 'pkg_buildscripts', '*.py'),
             os.path.join('distro', 'pkg_info', '*.json'),
             os.path.join('distro', 'pkg_groups', '*'),
             os.path.join('web', 'src_server', 'templates', '*'),

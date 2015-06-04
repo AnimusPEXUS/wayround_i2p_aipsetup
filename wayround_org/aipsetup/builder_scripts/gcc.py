@@ -42,8 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_extract(self, log):
 
         ret = super().builder_action_extract(
-            log,
-            rename_dir_additional_prefix=rename_dir_additional_prefix
+            log
             )
 
         if ret == 0:
@@ -160,7 +159,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++',
+                '--enable-languages=c,c++,java,ada',
                 #'--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
@@ -168,7 +167,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared'
-                #'--disable-libstdc++-v3',
                 ])
 
         if not self.is_crossbuild and not self.is_crossbuilder:

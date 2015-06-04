@@ -32,23 +32,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         crossbuild_arch_params = []
 
-        if self.is_crossbuild:
+        target = self.package_info['constitution']['target']
 
-            target = self.package_info['constitution']['target']
+        st = wayround_org.utils.system_type.SystemType(target)
+        cpu = st.cpu
 
-            st = wayround_org.utils.system_type.SystemType(target)
-            cpu = st.cpu
+        # print("cpu: {}".format(cpu))
+        linux_headers_arch = None
+        if re.match(r'^i[4-6]86$', cpu) or re.match(r'^x86(_32)?$', cpu):
+            linux_headers_arch = 'x86'
+        elif re.match(r'^x86_64$', cpu):
+            linux_headers_arch = 'x86_64'
+        else:
+            logging.error("Don't know which linux ARCH apply")
+            ret = 3
 
-            # print("cpu: {}".format(cpu))
-            linux_headers_arch = None
-            if re.match(r'^i[4-6]86$', cpu) or re.match(r'^x86(_32)?$', cpu):
-                linux_headers_arch = 'x86'
-            elif re.match(r'^x86_64$', cpu):
-                linux_headers_arch = 'x86_64'
-            else:
-                logging.error("Don't know which linux ARCH apply")
-                ret = 3
-
+        if self.is_crossbuild or self.is_crossbuilder:
             crossbuild_arch_params += [
                 'ARCH=' + linux_headers_arch,
                 'CROSS_COMPILE={}-'.format(self.host)

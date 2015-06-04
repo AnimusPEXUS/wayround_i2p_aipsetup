@@ -76,11 +76,13 @@ class Builder:
                     )
                 )
 
+            """
             if self.target_host_root is None:
                 raise Exception("You need to define --thr")
 
             if not os.path.isdir(self.target_host_root):
                 raise Exception("Target host root not exists")
+            """
 
         return
 
@@ -261,6 +263,7 @@ class Builder:
             if not os.path.isdir(self.target_host_root):
                 raise Exception("Target host root not exists")
 
+            """
             ret += [
                 'LDFLAGS=-L{} '.format(
                     os.path.join(self.target_host_root, 'usr', 'lib'),
@@ -273,6 +276,7 @@ class Builder:
                     os.path.join(self.target_host_root, 'usr', 'include')
                     )
                 ]
+            """
 
         return ret
 

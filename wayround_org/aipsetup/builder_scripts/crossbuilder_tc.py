@@ -53,15 +53,17 @@ def calc_path_addition(dst_dir, target):
 class LinuxHeadersBuilder(wayround_org.aipsetup.builder_scripts.linux.Builder):
 
     def define_custom_data(self):
+        ret = super().define_custom_data()
         self.source_configure_reldir = 'linux'
-        return
+        return ret
 
     def define_actions(self):
         return collections.OrderedDict([
             #('src_cleanup', self.builder_action_src_cleanup),
             #('extract', self.builder_action_extract),
 
-            ('distr_headers_normal', self.builder_action_distr_headers_normal)
+            ('distr_headers_normal',
+                self.builder_action_distr_headers_normal)
 
             ])
 
@@ -77,7 +79,7 @@ class LinuxHeadersBuilder(wayround_org.aipsetup.builder_scripts.linux.Builder):
 
 
 class BinutilsBuilder(
-        wayround_org.aipsetup.builder_scripts.binutils.Builder
+        wayround_org.aipsetup.builder_scripts.std.Builder
         ):
 
     def define_custom_data(self):
@@ -96,7 +98,6 @@ class BinutilsBuilder(
             ('distribute', self.builder_action_distribute)
             ])
 
-    """
     def builder_action_extract(self, log):
         ret = autotools.extract_high(
             self.buildingsite,
@@ -106,103 +107,41 @@ class BinutilsBuilder(
             rename_dir='binutils'
             )
         return ret
-    """
 
+    def builder_action_configure_define_options(self, log):
+        return super().builder_action_configure_define_options(log) + [
+            #'--enable-targets=all',
 
-    def builder_action_configure(self, log):
+            # '--with-sysroot' makes problems when building native GCC.
+            # does proplrms arise when building crosscompiler?
+            '--with-sysroot',
 
-        prefix = calculate_prefix(self.dst_dir, self.target)
+            # '--enable-multiarch',
 
-        mandir = os.path.normpath(os.path.join(prefix, 'share', 'man'))
-        sysconfdir = os.path.normpath(os.path.join(prefix, '..', 'etc'))
-        localstatedir = os.path.normpath(os.path.join(prefix, '..', 'var'))
+            #'--enable-multilib',
+            '--disable-multilib',
 
-        ret = autotools.configure_high(
-            self.buildingsite,
-            log=log,
-            options=[
-                #'--enable-targets=all',
+            #                    '--disable-libada',
+            #                    '--enable-bootstrap',
+            #'--enable-64-bit-bfd',
+            '--disable-werror',
+            '--enable-libada',
+            '--enable-libssp',
+            #'--enable-objc-gc',
+            # '--enable-targets='
+            # 'i486-pc-linux-gnu,'
+            # 'i586-pc-linux-gnu,'
+            # 'i686-pc-linux-gnu,'
+            # 'i786-pc-linux-gnu,'
+            # 'ia64-pc-linux-gnu,'
+            # 'x86_64-pc-linux-gnu,'
+            # 'aarch64-linux-gnu',
+            ]
 
-                # '--with-sysroot' makes problems when building native GCC.
-                # does proplrms arise when building crosscompiler?
-                # '--with-sysroot',
-
-                # '--enable-multiarch',
-
-                #'--enable-multilib',
-                '--disable-multilib',
-
-                #                    '--disable-libada',
-                #                    '--enable-bootstrap',
-                #'--enable-64-bit-bfd',
-                '--disable-werror',
-                '--enable-libada',
-                '--enable-libssp',
-                #'--enable-objc-gc',
-                # '--enable-targets='
-                # 'i486-pc-linux-gnu,'
-                # 'i586-pc-linux-gnu,'
-                # 'i686-pc-linux-gnu,'
-                # 'i786-pc-linux-gnu,'
-                # 'ia64-pc-linux-gnu,'
-                # 'x86_64-pc-linux-gnu,'
-                # 'aarch64-linux-gnu',
-
-                '--prefix=' + prefix,
-                '--mandir=' + mandir,
-                '--sysconfdir=' + sysconfdir,
-                '--localstatedir=' + localstatedir,
-
-                '--host=' + self.host,
-                '--build=' + self.build,
-                '--target=' + self.target
-                ],
-            arguments=[],
-            environment={
-                'PATH': calc_path_addition(self.dst_dir, self.target)
-                },
-            environment_mode='copy',
-            source_configure_reldir=self.source_configure_reldir,
-            use_separate_buildding_dir=self.bld_dir,
-            script_name='configure',
-            run_script_not_bash=False,
-            relative_call=False
-            )
-
-        return ret
-
-    def builder_action_build(self, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=['-j2'],
-            arguments=[],
-            environment={
-                'PATH': calc_path_addition(self.dst_dir, self.target)
-                },
-            environment_mode='copy',
-            use_separate_buildding_dir=self.bld_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
-
-    def builder_action_distribute(self, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'DESTDIR=' + self.dst_dir
-                ],
-            environment={
-                'PATH': calc_path_addition(self.dst_dir, self.target)
-                },
-            environment_mode='copy',
-            use_separate_buildding_dir=self.bld_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_configure_define_environment(self, log):
+        return {
+            'PATH': calc_path_addition(self.dst_dir, self.target)
+            }
 
 
 class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -233,47 +172,13 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_configure(self, log):
-        """
-        Configure first GCC building part
-        """
-
-        prefix = calculate_prefix(self.dst_dir, self.target)
-
-        mandir = os.path.normpath(os.path.join(prefix, 'share', 'man'))
-        sysconfdir = os.path.normpath(os.path.join(prefix, '..', 'etc'))
-        localstatedir = os.path.normpath(os.path.join(prefix, '..', 'var'))
-
-        """
-        for i in [
-                'AR',
-                'AS',
-                'DLLTOOL',
-                'LD',
-                #'LIPO',
-                'NM',
-                'OBJCOPY',
-                'OBJDUMP',
-                'RANLIB',
-                'READELF',
-                'STRIP',
-                'WINDRES',
-                'WINDMC'
-                ]:
-            additional_parameters += [
-                '{}_FOR_TARGET='.format(i.upper()) +
-                wayround_org.utils.path.join(
-                    self.dst_dir, 'usr', 'lib',
-                    'unicorn_crossbuilders',
-                    target, 'bin', target + '-{}'.format(i.lower())
-                    )
-                ]
-        """
-
-        ret = autotools.configure_high(
-            self.buildingsite,
-            log=log,
-            options=[
+    def builder_action_configure_define_environment(self, log):
+        return {
+            'PATH': calc_path_addition(self.dst_dir, self.target)
+            }
+            
+    def builder_action_configure_define_options(self, log):
+        return super().builder_action_configure_define_options(log) + [
                 # experimental options
                 # '--enable-targets=all',
                 #'--enable-tls',
@@ -346,35 +251,8 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'--disable-libvtv',
                 #'--disable-libcilkrts',
                 #'--disable-libstdc++-v3',
+            ]
 
-
-                '--prefix=' + prefix,
-                '--mandir=' + mandir,
-                '--sysconfdir=' + sysconfdir,
-                '--localstatedir=' + localstatedir,
-
-                '--host=' + self.host,
-                '--build=' + self.build,
-                '--target=' + self.target
-                ],
-            arguments=[],
-            # environment={
-            # 'CC': '/home/agu/_sda3/_UNICORN/b/gnat/
-            #  gnat-gpl-2014-x86-linux-bin/bin/gcc',
-            # 'CXX': '/home/agu/_sda3/_UNICORN/b/
-            # gnat/gnat-gpl-2014-x86-linux-bin/bin/g++',
-            #    },
-            environment={
-                'PATH': calc_path_addition(self.dst_dir, self.target)
-                },
-            environment_mode='copy',
-            source_configure_reldir=self.source_configure_reldir,
-            use_separate_buildding_dir=self.bld_dir,
-            script_name='configure',
-            run_script_not_bash=False,
-            relative_call=False
-            )
-        return ret
 
     def builder_action_build(self, log):
         ret = autotools.make_high(
@@ -440,30 +318,28 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             )
         return ret
 
-    def builder_action_configure(self, log):
+    def builder_action_configure_define_environment(self, log):
+        return {
+            'PATH': calc_path_addition(self.dst_dir, self.target)
+            }
 
-        prefix = calculate_prefix(self.dst_dir, self.target)
-
-        mandir = os.path.normpath(os.path.join(prefix, 'share', 'man'))
-        sysconfdir = os.path.normpath(os.path.join(prefix, '..', 'etc'))
-        localstatedir = os.path.normpath(os.path.join(prefix, '..', 'var'))
-
+    def builder_action_configure_define_options(self, log):
         headers_path = os.path.join(
             calculate_dst_dir_prefix(self.dst_dir, self.target),
             'include'
             )
 
-        ret = autotools.configure_high(
-            self.buildingsite,
-            log=log,
-            options=[
+        if self.is_crossbuild or self.is_crossbuilder:
+            os.path.normpath(os.path.join(headers_path, '..'))
+
+        return super().builder_action_configure_define_options(log) + [
                 #'--enable-obsolete-rpc',
-                '--enable-kernel=3.19',
+                '--enable-kernel=4.0',
                 #'--enable-tls',
                 '--with-elf',
 
                 #'--enable-multi-arch',
-                '--enable-multiarch',
+                #'--enable-multiarch',
 
                 #'--enable-multilib',
                 #'--disable-multilib',
@@ -483,22 +359,10 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
                 '--host=' + self.target,
                 # host must be same as target this time
                 '--build=' + self.build,
-                '--target=' + self.target
-                ],
-            arguments=[
+                '--target=' + self.target,
                 'libc_cv_forced_unwind=yes'
-                ],
-            environment={
-                'PATH': calc_path_addition(self.dst_dir, self.target)
-                },
-            environment_mode='copy',
-            source_configure_reldir=self.source_configure_reldir,
-            use_separate_buildding_dir=self.bld_dir,
-            script_name='configure',
-            run_script_not_bash=False,
-            relative_call=False
-            )
-        return ret
+            ]
+
 
     def builder_action_distribute_headers1(self, log):
         ret = autotools.make_high(
@@ -730,6 +594,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
+        failed_unpack = []
+
         for i in ['gmp', 'cloog', 'isl', 'mpc', 'mpfr']:
 
             if not os.path.isdir(os.path.join(self.src_dir, i)):
@@ -741,14 +607,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         unwrap_dir=False,
                         rename_dir=i
                         ) != 0:
-
+                    failed_unpack.append(i)
                     ret = 1
+
+        for i in sorted(failed_unpack):
+            log.error("failed unpack: {}".format(i))
 
         return ret
 
     def builder_action_extract_sources(self, log):
 
         ret = 0
+
+        failed_unpack = []
 
         for i in [
                 'binutils',
@@ -767,7 +638,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         rename_dir=i
                         ) != 0:
 
+                    failed_unpack.append(i)
                     ret = 1
+
+        for i in sorted(failed_unpack):
+            log.error("failed unpack: {}".format(i))
 
         return ret
 
