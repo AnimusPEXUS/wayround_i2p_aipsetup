@@ -54,10 +54,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, log):
-        return super().builder_action_configure_define_options(log) + [
+        ret = [
             '--enable-multibyte',
             '--with-curses'
             ]
+
+        if not self.is_crossbuild and not self.is_crossbuilder:
+            ret += [
+                ]
+        else:
+            ret += [
+                '--without-curses',
+                #'--disable-readline'
+                ]
+
+        return super().builder_action_configure_define_options(log) + ret
 
     def builder_action_sh_link(self, log):
         tsl = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin', 'sh')

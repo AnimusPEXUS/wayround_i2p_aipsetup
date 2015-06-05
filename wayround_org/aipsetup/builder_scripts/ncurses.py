@@ -133,7 +133,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, log):
-        return super().builder_action_configure_define_options(log) + [
+        ret = [
             '--enable-shared',
             '--enable-widec',
             '--enable-const',
@@ -144,8 +144,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-ticlib',
             '--with-termlib',
             '--with-pkg-config',
-            #'--without-ada'
             ]
+
+        if not self.is_crossbuild and not self.is_crossbuilder:
+            ret += [
+                ]
+        else:
+            ret += [
+                '--without-ada'
+                ]
+
+        return super().builder_action_configure_define_options(log) + ret
 
     def builder_action_links(self, log):
 

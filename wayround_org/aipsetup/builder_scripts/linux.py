@@ -127,6 +127,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'install',
@@ -140,23 +141,27 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if ret == 0:
 
-            os.rename(
-                wayround_org.utils.path.join(
+            p1 = wayround_org.utils.path.join(
                     self.custom_data['dst_boot_dir'],
                     'vmlinuz'
-                    ),
-                wayround_org.utils.path.join(
+                    )
+            
+            p2 = wayround_org.utils.path.join(
                     self.custom_data['dst_boot_dir'],
                     'vmlinuz-{}'.format(
                         self.package_info['pkg_nameinfo']['groups']['version']
                         )
                     )
-                )
+    
+            log.info("Renaming: `{}' to `{}'".format(p1,p2))
+
+            os.rename(p1                ,p2                               )
         return ret
 
     def builder_action_distr_modules(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'modules_install',
@@ -211,6 +216,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distr_firmware(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'firmware_install',
@@ -338,6 +344,7 @@ Continue with command
     def builder_action_distr_man(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'mandocs'
