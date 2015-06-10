@@ -19,6 +19,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         self.separate_build_dir = True
+        self.forced_target = True
         ret = dict()
         ret['cc_file'] = os.path.join(self.dst_dir, 'usr', 'bin', 'cc')
         ret['libcpp_file'] = os.path.join(self.dst_dir, 'usr', 'lib', 'cpp')
@@ -174,11 +175,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-                #'--enable-bootstrap',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
+                '--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
-                '--enable-multilib',
+
+                # TODO: I don't know why, but I want it enabled
+                '--disable-multilib',
+
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared'

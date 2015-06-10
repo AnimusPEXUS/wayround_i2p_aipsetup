@@ -1,6 +1,5 @@
 {
     "names": [
-        "qemu",
         "sane-backends",
         "libsndfile",
         "x264",
@@ -37,7 +36,7 @@
     
     "FreeImage",
     
-    "sox", "librsvgmm",
+    "sox", "librsvgmm", "librsvg",
 
     "openjpeg1", "openjpeg2", 
 
@@ -69,11 +68,18 @@
 
     "gimp", "gap",
 
-    "gegl",
+    "gegl", "babl",
     
     "gmerlin",
     "gmerlin-avdecoder",
     "gmerlin-effectv",
-    "gmerlin-encoders"
+    "gmerlin-encoders",
+    
+    "libmad", "madplay", "libid3tag",
+    
+    "libwebp", "libvpx",
+    
+    "libexif", "exif"
+    
     ]
 }

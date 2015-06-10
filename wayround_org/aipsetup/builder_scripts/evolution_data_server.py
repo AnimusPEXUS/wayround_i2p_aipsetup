@@ -55,6 +55,7 @@ def main(buildingsite, action=None):
 #                    '--with-nss-libs=/usr',
 #                    '--disable-uoa',
                     '--enable-vala-bindings',
+                    '--disable-uoa',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +

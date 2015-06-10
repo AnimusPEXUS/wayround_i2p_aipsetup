@@ -42,3 +42,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-headers=' + with_headers,
             '--enable-shared'
             ]
+
+    def builder_action_distribute(self, log):
+        
+        ret = super().builder_action_distribute(log)
+
+        if ret == 0:
+
+            try:
+                os.rename(
+		    os.path.join(self.dst_dir, 'etc', 'ld.so.cache'),
+		    os.path.join(self.dst_dir, 'etc', 'ld.so.cache.distr')
+                    )
+            except:
+                log.exception("Can't rename ld.so.cache file")
+
+        return ret

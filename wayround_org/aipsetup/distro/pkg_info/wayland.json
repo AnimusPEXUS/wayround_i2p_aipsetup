@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "wayland",
   "version_tool": "",
   "basename": "wayland",
   "filters": "",

@@ -19,20 +19,22 @@ def all_actions():
 
     if os.getuid() == 0:
 
-        try:
-            os.sync()
-            ldconfig()
-            update_mime_database()
-            gdk_pixbuf_query_loaders()
-            pango_querymodules()
-            glib_compile_schemas()
-            gtk_query_immodules_2_0()
-            gtk_query_immodules_3_0()
-            os.sync()
-
-        except:
-            logging.exception("Updates error")
-            ret = 1
+        for i in [
+                os.sync,
+                ldconfig,
+                update_mime_database,
+                gdk_pixbuf_query_loaders,
+                pango_querymodules,
+                glib_compile_schemas,
+                gtk_query_immodules_2_0,
+                gtk_query_immodules_3_0,
+                os.sync
+                ]:
+            try:
+                i()
+            except:
+                logging.exception("Updates error")
+                ret = 1
 
     return ret
 
@@ -105,6 +107,9 @@ def gdk_pixbuf_query_loaders():
 
 
 def pango_querymodules():
+    if not os.path.exists('/etc/pango'):
+        os.mkdir('/etc/pango')
+        logging.info('Created /etc/pango')
     logging.info('pango-querymodules')
     f = open('/etc/pango/pango.modules', 'wb')
     r = subprocess.Popen(

@@ -1,5 +1,5 @@
 {
-  "description": "write something here, please",
+  "description": "deprecated. for polkit-112 use mozjs17",
   "home_page": "http://mozilla.org",
   "buildscript": "js185",
   "version_tool": "",
@@ -8,7 +8,7 @@
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false,
+  "deprecated": true,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

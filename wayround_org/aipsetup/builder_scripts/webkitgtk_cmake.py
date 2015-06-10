@@ -53,9 +53,9 @@ def main(buildingsite, action=None):
                     '-DCMAKE_INSTALL_PREFIX=' +
                         pkg_info['constitution']['paths']['usr'],
                     '-DPORT=GTK',
-                    '-DCMAKE_EXE_LINKER_FLAGS= -latomic ',
+                    #'-DCMAKE_EXE_LINKER_FLAGS= -latomic ',
                     # '-DCMAKE_STATIC_LINKER_FLAGS= -latomic ',
-                    '-DCMAKE_SHARED_LINKER_FLAGS= -latomic '
+                    #'-DCMAKE_SHARED_LINKER_FLAGS= -latomic '
 #                    '--mandir=' + pkg_info['constitution']['paths']['man'],
 #                    '--sysconfdir=' +
 #                        pkg_info['constitution']['paths']['config'],

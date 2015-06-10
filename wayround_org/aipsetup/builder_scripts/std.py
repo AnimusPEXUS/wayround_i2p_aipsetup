@@ -65,6 +65,8 @@ class Builder:
         except:
             self.target_host_root = '/'
 
+        self.forced_target = False
+
         self.custom_data = self.define_custom_data()
 
         self.action_dict = self.define_actions()
@@ -257,13 +259,15 @@ class Builder:
                     )
                 )
 
+            """
+
             if self.target_host_root is None:
                 raise Exception("You need to define --thr")
 
             if not os.path.isdir(self.target_host_root):
                 raise Exception("Target host root not exists")
 
-            """
+
             ret += [
                 'LDFLAGS=-L{} '.format(
                     os.path.join(self.target_host_root, 'usr', 'lib'),

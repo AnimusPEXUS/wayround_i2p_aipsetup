@@ -1,5 +1,6 @@
 {
     "names" : [
+        "cpio",
         "bridge-utils",
         "boost",
         "apache-ant",
@@ -38,11 +39,33 @@
         "scons",
         "sudo",
         "qrencode",
-        "zint", "zbat",
+        "zint", "zbar",
         "cups", "cups-filters",
         "qpdf",
         "wireless_tools", "wpa_supplicant", "kismet",
         "tree",
-        "libpcap"
+        "libpcap",
+        "pciutils",
+        "usbutils",
+        "xmlto",
+        "cppunit",
+        "libgssapi", "gss", "gssdp", "libgssglue", "librpcsecgss", "libnfsidmap", "shishi",
+        "doxygen",
+        "p7zip",
+        "mtdev",
+        "xterm",
+        "iso-codes",
+        "libnl",
+        "openldap",
+        "libatasmart",
+        "bash-completion",
+        "ModemManager",
+        "graphviz",
+        "qemu",
+        "llvm", "libclc", "cfe", "openmp", "polly",
+        "neon",
+        "tor", "torsocks", "libevent", "asciidoc",
+        "libqwpuality", "cracklib",
+        "krb5"
     ]
 }

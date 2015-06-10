@@ -63,6 +63,10 @@ def commands():
             ('instr', system_replica_instruction),
             ('dir-tree', system_create_directory_tree),
             ('create-bundle', system_create_bundle),
+            ])),
+        ('docbook', collections.OrderedDict([
+            ('instr', docbook_instruction),
+            ('install', docbook_install),
             ]))
         ])
 
@@ -1893,3 +1897,13 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
             )
 
     return ret
+
+def docbook_instruction(command_name, opts, args, adds):
+    import wayround_org.aipsetup.docbook
+    print(wayround_org.aipsetup.docbook.INSTRUCTION)
+    return 0
+
+def docbook_install(command_name, opts, args, adds):
+    import wayround_org.aipsetup.docbook
+    wayround_org.aipsetup.docbook.install()
+    return 0

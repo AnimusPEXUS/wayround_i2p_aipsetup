@@ -470,6 +470,7 @@ class BuildCtl:
                                     self.buildingsite_ctl.getDIR_BUILD_LOGS(),
                                     actions_container,
                                     action=action,
+                                    package_info=package_info
                                     )
                             except KeyboardInterrupt:
                                 raise
@@ -1118,22 +1119,23 @@ class PackCtl:
         """
         Do all specter of pack operations on building site
         """
+        logging.info("Packaging: {}".format(self.path))
 
         ret = 0
 
         for i in [
-                'destdir_verify_paths_correctness',
-                'destdir_set_modes',
-                'destdir_checksum',
-                'destdir_filelist',
-                'destdir_deps_bin',
-                'compress_patches_destdir_and_logs',
-                'compress_files_in_lists_dir',
-                'make_checksums_for_building_site',
-                'pack_buildingsite'
+                self.destdir_verify_paths_correctness,
+                self.destdir_set_modes,
+                self.destdir_checksum,
+                self.destdir_filelist,
+                self.destdir_deps_bin,
+                self.compress_patches_destdir_and_logs,
+                self.compress_files_in_lists_dir,
+                self.make_checksums_for_building_site,
+                self.pack_buildingsite
                 ]:
 
-            if getattr(self, i)() != 0:
+            if i() != 0:
                 logging.error("Error on {}".format(i))
                 ret = 1
                 break
@@ -2061,6 +2063,7 @@ def run_builder_action(
         log_output_directory,
         actions_container_object,
         action=None,
+        package_info=None
         ):
 
     # TODO: add support for list of 2-tuples
@@ -2083,7 +2086,12 @@ def run_builder_action(
 
     for i in actions:
 
-        log = wayround_org.utils.log.Log(log_output_directory, i)
+        log = wayround_org.utils.log.Log(
+            log_output_directory, 
+            '{} {}'.format(
+                package_info['pkg_info']['name'], i
+                )
+            )
 
         log.info(
             "=>------[Starting '{}' action".format(i)

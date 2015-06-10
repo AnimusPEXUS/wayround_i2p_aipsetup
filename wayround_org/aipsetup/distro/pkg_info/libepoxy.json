@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "libepoxy",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "libepoxy",
   "filters": "",

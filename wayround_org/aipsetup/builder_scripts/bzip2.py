@@ -18,7 +18,13 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        thr = {}
+        thr = {
+            'CFLAGS': '',
+            'LDFLAGS': '',
+            'CC': [], 
+            'AR': [],
+            'RANLIB': []
+            }
         if self.is_crossbuild:
             thr['CFLAGS'] = ' -I{}'.format(
                 os.path.join(self.target_host_root, 'usr', 'include')
@@ -26,6 +32,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             thr['LDFLAGS'] = '-L{}'.format(
                 os.path.join(self.target_host_root, 'usr', 'lib')
                 )
+            thr['CC']=['CC={}-gcc'.format(self.host)],
+            thr['AR']=['AR={}-ar'.format(self.host)]
+            thr['RANLIB']=['RANLIB={}-ranlib'.format(self.host)]
         return {
             'thr': thr
             }
@@ -51,9 +60,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'PREFIX=/usr',
-                'CC={}-gcc'.format(self.host),
-                'AR={}-ar'.format(self.host),
-                'RANLIB={}-ranlib'.format(self.host),
                 'CFLAGS=  -fpic -fPIC -Wall -Winline -O2 -g '
                 '-D_FILE_OFFSET_BITS=64 ' +
                 self.custom_data['thr']['CFLAGS'],
@@ -61,7 +67,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'libbz2.a',
                 'bzip2',
                 'bzip2recover'
-                ],
+                ] + self.custom_data['thr']['CC'] + 
+                  self.custom_data['thr']['AR'] + 
+                  self.custom_data['thr']['RANLIB'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,

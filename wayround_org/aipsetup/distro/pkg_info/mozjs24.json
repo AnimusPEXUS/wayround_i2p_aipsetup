@@ -4,7 +4,7 @@
   "buildscript": "mozjs",
   "version_tool": "",
   "basename": "mozjs",
-  "filters": "",
+  "filters": "- version !fm 24.*",
   "removable": true,
   "reducible": true,
   "non_installable": false,

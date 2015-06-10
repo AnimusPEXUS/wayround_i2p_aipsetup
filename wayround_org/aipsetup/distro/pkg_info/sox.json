@@ -4,7 +4,7 @@
   "buildscript": "sox",
   "version_tool": "",
   "basename": "sox",
-  "filters": "",
+  "filters": "- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,

@@ -1,6 +1,8 @@
 {
     "names": [
-	        "talloc",
+        "flex",
+        "make",
+        "talloc",
         "intltool",
         "inetutils",
         "acl",
@@ -104,6 +106,11 @@
         "zip",
         "zlib",
         "itstool", 
-        "xfsdump", "xfsprogs"
+        "xfsdump", "xfsprogs",
+        "expat",
+        "gc", "libatomic_ops", "bison", "procps-ng", "psmisc", "less",
+        "libmicrohttpd",
+        "lzo",
+        "gdbm"
     ]
 }

@@ -13,6 +13,7 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
+        self.forced_target = True
         return None
 
     def builder_action_extract(self, log, rename_dir_additional_prefix=None):

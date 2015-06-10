@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.2',
+    version='3.2.4',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',

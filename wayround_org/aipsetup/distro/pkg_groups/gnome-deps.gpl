@@ -24,10 +24,23 @@
             "proc": "gnome_get"
         },
         "zeitgeist",
-        "graphviz",
 
         "accountsservice",
 
-        "ibus", "ibus-anthy", "ibus-chewing", "ibus-gjs"
+        "ibus", "ibus-anthy", "ibus-chewing", "ibus-gjs",
+
+        "enchant",
+        "libaccounts-glib", "accounts-qt", "libsignon-glib", "libsignoncrypto-qt", "signon", "signon-oauth2",
+
+        "libical", "libsoup", "libsecret",
+
+        "liboauth",
+        
+        "libgphoto2", "gphoto2", "popt",
+        "libIDL",
+        
+        "libwacom",
+        
+        "libxklavier"
     ]
 }

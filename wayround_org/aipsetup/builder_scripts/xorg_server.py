@@ -60,6 +60,8 @@ def main(buildingsite, action=None):
                     '--host=' + pkg_info['constitution']['host'],
                     '--build=' + pkg_info['constitution']['build'],
 #                    '--target=' + pkg_info['constitution']['target']
+                    'CPPFLAGS=-P' 
+                    # TODO: sdksyms.c does not compiles with GCC-5.1.0 without this flag
                     ],
                 arguments=[],
                 environment={},

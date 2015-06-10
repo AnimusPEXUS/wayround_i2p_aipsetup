@@ -21,6 +21,37 @@ import wayround_org.utils.archive
 import wayround_org.utils.path
 
 
+INSTRUCTION = """\
+
+1. Get sources:
+    aipsetup pkg-client-src get-lat docbook-sgml3
+        will get docbk31.zip
+    aipsetup pkg-client-src get-lat docbook-sgml4
+        will get docbook-4.5.zip
+    aipsetup pkg-client-src get-lat docbook-xml4
+        will get docbook-xml-4.5.zip
+    aipsetup pkg-client-src get-lat docbook-xsl
+        will get docbook-xsl-[some version].tar[.some compressor]
+
+    BIG FAT NOTE: YOU DO NOT NEED ALPHAS, BETAS AND RELISE CANDIDATES!!!
+                  DO NOT PLAY WITH VERSIONS SUCH AS:
+                  docbook-4.5b or docbook-4.5CR.
+
+                  IF AIPSETUP DOWNLOADS SUCH FILES DO NOT TRUST IT AND
+                  DOWNLOAD NORMAL FILES MANUALLY!!
+
+2. Build files (root rights not required for this):
+   aipsetup build full -d *
+
+3. Install completed files (root rights required):
+   aipsetup sys install *
+
+4. Use command "aipsetup docbook install" as root
+
+At this point docbook must be installed
+"""
+
+
 def commands():
     """
     Internally used by aipsetup
@@ -86,7 +117,7 @@ def make_directories(base_dir, lst):
         i_ap = wayround_org.utils.path.abspath(i)
         i_ap_fn = wayround_org.utils.path.join(base_dir, i_ap)
 
-        logging.info("   checking: {}".format(i_ap_fn))
+        logging.info("    preparing: {}".format(i_ap_fn))
         try:
             os.makedirs(i_ap_fn)
         except:
@@ -98,6 +129,23 @@ def make_directories(base_dir, lst):
 
     return 0
 
+def prepare_sgml_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
+
+    ret = 0
+
+    for i in [base_dir_etc_xml_catalog, base_dir_etc_xml_docbook]:
+
+        logging.info("Checking for catalog {}".format(i))
+        if not os.path.isfile(i):
+            logging.info("    creating new")
+            ret = subprocess.Popen(
+                ['xmlcatalog', '--sgml', '--noout', '--create', i]
+                ).wait()
+        else:
+            logging.info("    already exists")
+
+    return ret
+
 
 def prepare_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
 
@@ -107,12 +155,12 @@ def prepare_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
 
         logging.info("Checking for catalog {}".format(i))
         if not os.path.isfile(i):
-            logging.info("   creating new")
+            logging.info("    creating new")
             ret = subprocess.Popen(
                 ['xmlcatalog', '--noout', '--create', i]
                 ).wait()
         else:
-            logging.info("   already exists")
+            logging.info("    already exists")
 
     return ret
 
@@ -160,6 +208,8 @@ def import_docbook_xsl_to_catalog(
     super_xml_catalog: [/base_dir]/etc/xml/catalog
     """
 
+    ret = 0
+
     target_xsl_dir = wayround_org.utils.path.abspath(target_xsl_dir)
     base_dir = wayround_org.utils.path.abspath(base_dir)
     super_xml_catalog = wayround_org.utils.path.abspath(super_xml_catalog)
@@ -176,7 +226,7 @@ def import_docbook_xsl_to_catalog(
     version = bn.replace('docbook-xsl-', '')
     logging.info("Importing version: {}".format(version))
 
-    subprocess.Popen(
+    ret = subprocess.Popen(
         [
             'xmlcatalog', '--noout', '--add', 'rewriteSystem',
             'http://docbook.sourceforge.net/release/xsl/' + version,
@@ -185,7 +235,10 @@ def import_docbook_xsl_to_catalog(
             ]
         ).wait()
 
-    subprocess.Popen(
+    if ret != 0:
+        logging.error("error adding rewriteSystem to {}".format(super_xml_catalog_fn))
+
+    ret = subprocess.Popen(
         [
             'xmlcatalog', '--noout', '--add', 'rewriteURI',
             'http://docbook.sourceforge.net/release/xsl/' + version,
@@ -194,8 +247,11 @@ def import_docbook_xsl_to_catalog(
             ]
         ).wait()
 
+    if ret != 0:
+        logging.error("error adding rewriteURI to {}".format(super_xml_catalog_fn))
+
     if current:
-        subprocess.Popen(
+        ret = subprocess.Popen(
             [
                 'xmlcatalog', '--noout', '--add', 'rewriteSystem',
                 'http://docbook.sourceforge.net/release/xsl/current',
@@ -203,8 +259,10 @@ def import_docbook_xsl_to_catalog(
                 super_xml_catalog_fn
                 ]
             ).wait()
+        if ret != 0:
+            logging.error("[current] error adding rewriteURI to {}".format(super_xml_catalog_fn))
 
-        subprocess.Popen(
+        ret = subprocess.Popen(
             [
                 'xmlcatalog', '--noout', '--add', 'rewriteURI',
                 'http://docbook.sourceforge.net/release/xsl/current',
@@ -212,6 +270,8 @@ def import_docbook_xsl_to_catalog(
                 super_xml_catalog_fn
             ]
             ).wait()
+        if ret != 0:
+            logging.error("[current] error adding rewriteURI to {}".format(super_xml_catalog_fn))
 
     return
 
@@ -375,6 +435,7 @@ def make_new_docbook_xml_look_like_old(
         )
 
     logging.info("Adding support for older docbook-xml versions")
+    logging.info("    ({})".format(super_catalog_xml_fn))
 
     for i in ['4.1.2', '4.2', '4.3', '4.4']:
 
@@ -388,7 +449,9 @@ def make_new_docbook_xml_look_like_old(
              super_catalog_xml_fn
              ]
             )
-        p.wait()
+        ret = p.wait()
+        if ret != 0:
+            logging.error("Error adding public {} to {}".format(i, super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
@@ -398,7 +461,9 @@ def make_new_docbook_xml_look_like_old(
              super_catalog_xml_fn
              ]
             )
-        p.wait()
+        ret = p.wait()
+        if ret != 0:
+            logging.error("Error adding rewriteSystem {} to {}".format(i, super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
@@ -408,7 +473,8 @@ def make_new_docbook_xml_look_like_old(
              super_catalog_xml_fn
              ]
             )
-        p.wait()
+        if ret != 0:
+            logging.error("Error adding rewriteURI {} to {}".format(i, super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
@@ -418,7 +484,9 @@ def make_new_docbook_xml_look_like_old(
              super_catalog_xml_fn
              ]
             )
-        p.wait()
+        ret = p.wait()
+        if ret != 0:
+            logging.error("Error adding delegateSystem {} to {}".format(i, super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
@@ -429,7 +497,9 @@ def make_new_docbook_xml_look_like_old(
              ]
             )
 
-        p.wait()
+        ret = p.wait()
+        if ret != 0:
+            logging.error("Error adding relegateURI {} to {}".format(i, super_catalog_xml_fn))
 
     return
 
@@ -470,14 +540,14 @@ def make_new_docbook_4_5_look_like_old(
         logging.info("    {}".format(i))
 
         new_line = \
-            'PUBLIC "-//OASIS//DTD DocBook V{}//EN" "docbook.dtd"'.format(i)
+            'PUBLIC "-//OASIS//DTD DocBook V{}//EN" "docbook.dtd"\n'.format(i)
 
         if not new_line in lines:
             lines.append(new_line)
 
     f = open(catalog_fn, 'w')
 
-    f.write('\n'.join(lines))
+    f.writelines(lines)
 
     f.close()
 
@@ -520,7 +590,7 @@ def make_new_docbook_3_1_look_like_old(
         logging.info("    {}".format(i))
 
         new_line = \
-            'PUBLIC "-//Davenport//DTD DocBook V{}//EN" "docbook.dtd"'.format(
+            'PUBLIC "-//Davenport//DTD DocBook V{}//EN" "docbook.dtd"\n'.format(
                 i
                 )
 
@@ -529,7 +599,7 @@ def make_new_docbook_3_1_look_like_old(
 
     f = open(catalog_fn, 'w')
 
-    f.write('\n'.join(lines))
+    f.writelines(lines)
 
     f.close()
 
@@ -562,6 +632,7 @@ def install(
     make_directories(
         base_dir,
         [
+         '/etc/sgml',
          '/etc/xml',
          '/usr/share/xml/docbook',
          '/usr/share/sgml/docbook'
@@ -585,22 +656,31 @@ def install(
         if not re.match(r'docbook-xsl-(\d+\.?)+', i):
             xsl_dirs.remove(i)
 
+    logging.info("Checking {}".format(sys_sgml_dir_fn))
     if (len(dirs) != 2
         or not 'docbook-3.1' in dirs
         or not 'docbook-4.5' in dirs):
         logging.error(
-            "docbook-[version] dirs must be exacly:"
+            "    docbook-[version] dirs must be exacly:"
             " docbook-3.1 and docbook-4.5"
             )
         ret = 1
+    else:
+        logging.info("    Ok")
 
+    logging.info("Checking XML in {}".format(sys_xml_dir_fn))
     if len(xml_dirs) != 1:
-        logging.error("Exacly one docbook-xml-[version] dir required")
+        logging.error("    Exacly one docbook-xml-[version] dir required")
         ret = 1
+    else:
+        logging.info("    Ok")
 
+    logging.info("Checking XSL in {}".format(sys_xml_dir_fn))
     if len(xsl_dirs) != 1:
-        logging.error("Exacly one docbook-xsl-[version] dir required")
+        logging.error("    Exacly one docbook-xsl-[version] dir required")
         ret = 1
+    else:
+        logging.info("    Ok")
 
     if ret != 0:
         pass

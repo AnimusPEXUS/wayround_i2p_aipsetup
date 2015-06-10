@@ -22,6 +22,17 @@ def calc_conf_hbt_options(builder_obj):
     host = builder_obj.host
     build = builder_obj.build
     target = builder_obj.target
+    forced_target = builder_obj.forced_target
+
+    if (host != None 
+        and (
+            (host == build == target)
+            or
+            ((host == build) and (target == None))
+            )
+        and not forced_target
+        ):
+        target = None
 
     ret = []
 
@@ -325,7 +336,7 @@ def make_high(
         use_separate_buildding_dir,
         source_configure_reldir,
         log=None,
-        make_filename='Makefile'
+        make_filename=None
         ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
@@ -377,12 +388,16 @@ def make_low(
         args,
         env,
         working_dir,
-        make_filename='Makefile'
+        make_filename=None
         ):
 
     ret = 0
 
-    cmd = ['make', '-f', make_filename] + opts + args
+    mfn = []
+    if make_filename is not None:
+        mfn = ['-f', make_filename]
+
+    cmd = ['make'] + mfn + opts + args
 
     log.info("directory: {}".format(working_dir))
     log.info("command:")

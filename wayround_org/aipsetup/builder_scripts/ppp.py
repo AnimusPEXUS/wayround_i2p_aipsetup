@@ -11,7 +11,11 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        thr = {}
+        thr = {
+            'CFLAGS': '',
+            'LDFLAGS': '',
+            'CC': [],
+            }
         if self.is_crossbuild:
             thr['CFLAGS'] = ' -I{}'.format(
                 os.path.join(self.target_host_root, 'usr', 'include')
@@ -19,6 +23,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             thr['LDFLAGS'] = '-L{}'.format(
                 os.path.join(self.target_host_root, 'usr', 'lib')
                 )
+            thr['CC'] = ['CC={}-gcc'.format(self.host)]
         return {
             'thr': thr
             }
@@ -36,10 +41,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'CHAPMS=1', 
                 'USE_CRYPT=1', 
-                'CC={}-gcc'.format(self.host),
                 'INCLUDE_DIRS+= -I../include '+self.custom_data['thr']['CFLAGS'],
                 #'LDFLAGS+= '+self.custom_data['thr']['LDFLAGS']
-                ],
+                ] + self.custom_data['thr']['CC'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,

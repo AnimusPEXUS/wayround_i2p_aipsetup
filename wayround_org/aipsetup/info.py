@@ -760,6 +760,7 @@ class PackageInfoCtl:
 
         logging.info("Totally deleted {} records".format(deleted))
 
+        session.commit() # TODO: found this line absent here. need to check others
         session.close()
 
         return

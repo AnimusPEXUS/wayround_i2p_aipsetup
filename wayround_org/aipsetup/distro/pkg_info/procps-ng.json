@@ -4,7 +4,7 @@
   "buildscript": "std",
   "version_tool": "",
   "basename": "procps-ng",
-  "filters": "",
+  "filters": "- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,

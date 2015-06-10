@@ -49,6 +49,7 @@ def main(buildingsite, action=None):
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
+                    '--disable-video', '--disable-audio', # NOTE: we don't have gstreamer 0.10 anymore
                     '--enable-gtk-doc',
                     '--enable-introspection',
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
@@ -81,7 +82,7 @@ def main(buildingsite, action=None):
         if 'build' in actions and ret == 0:
             ret = autotools.make_high(
                 buildingsite,
-                options=[],
+                options=['-j2'],
 #                options=['CFLAGS+= -march=i486 -mtune=i486 ',
 #                             'CXXFLAGS+= -march=i486 -mtune=i486 ',
 #                             'CPPFLAGS+= -march=i486 -mtune=i486 '],

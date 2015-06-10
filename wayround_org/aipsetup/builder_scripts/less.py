@@ -121,7 +121,7 @@ def main(buildingsite, action=None):
 #!/bin/bash
 export LESS=' -R '
 
-""".format(qtnum=number))
+""")
             f.close()
 
     return ret

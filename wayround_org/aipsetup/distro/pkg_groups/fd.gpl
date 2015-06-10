@@ -1,5 +1,9 @@
 {
     "names": [
+        "xproto",
+        "libXau",
+        "libpthread-stubs",
+        "libpciaccess",
         "cairo",
         "cairomm",
         "pixman",
@@ -96,6 +100,12 @@
         "xcb-util-image",
         "xcb-util-keysyms",
         "xcb-util-renderutil",
-        "xcb-util-wm"
+        "xcb-util-wm",
+
+	"farstream", "farsight", "farsight2", "libjingle",
+
+	"telepathy-glib", "telepathy-inspector", "telepathy-mission-control",
+	"telepathy-farstream","telepathy-gabble","telepathy-haze",
+	"telepathy-idle",  "telepathy-salut"
     ]
 }

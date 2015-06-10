@@ -48,6 +48,8 @@ def main(buildingsite, action=None):
                 options=[
                     '--with-mozilla',
                     '--with-pthreads',
+                    '--enable-ipv6',
+                    '--enable-64bit', # TODO: depends!!!!!!!!!!!
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
                     '--mandir=' + pkg_info['constitution']['paths']['man'],
                     '--sysconfdir=' +
@@ -55,8 +57,8 @@ def main(buildingsite, action=None):
                     '--localstatedir=' +
                         pkg_info['constitution']['paths']['var'],
                     '--enable-shared',
-#                    '--host=' + pkg_info['constitution']['host'],
-#                    '--build=' + pkg_info['constitution']['build']
+                    '--host=' + pkg_info['constitution']['host'],
+                    '--build=' + pkg_info['constitution']['build']
                     ],
                 arguments=[],
                 environment={},

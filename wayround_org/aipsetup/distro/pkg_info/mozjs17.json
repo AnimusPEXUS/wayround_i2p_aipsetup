@@ -1,0 +1,17 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "mozjs",
+  "version_tool": "",
+  "basename": "mozjs",
+  "filters": "- version -fm 17.*",
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
+}

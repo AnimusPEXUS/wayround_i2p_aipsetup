@@ -59,8 +59,8 @@ alias mc=". /usr/share/mc/bin/mc-wrapper.sh"
 
             ftl = (ftl[:ind] + [
                 '\n',
-                '# asc\n',
-                'shell/i/.asc\n'
+                '# asp\n',
+                'shell/i/.asp\n'
                 '\tOpen=%cd %p/utar://\n'
                 '\tView=%view{ascii} /usr/libexec/mc/ext.d/archive.sh view tar\n'
                 ] +

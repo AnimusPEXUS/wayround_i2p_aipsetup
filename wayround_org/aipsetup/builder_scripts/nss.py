@@ -93,6 +93,7 @@ def main(buildingsite, action=None):
                     'BUILD_OPT=1',
                     'NSPR_INCLUDE_DIR=/usr/include/nspr',
                     'USE_SYSTEM_ZLIB=1',
+                    'USE_64=1', # TODO: depends!
                     'ZLIB_LIBS=-lz',
                     'NSS_USE_SYSTEM_SQLITE=1'
                     ],

@@ -1,9 +1,14 @@
 
-import wayround_org.aipsetup.build_scripts.std
+import subprocess
+
+import wayround_org.aipsetup.builder_scripts.std
 
 
-class Builder(wayround_org.aipsetup.build_scripts.std):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
+    
+
+    
     def builder_action_configure_define_options(self, log):
 
         nss_cflags = ''
@@ -26,3 +31,5 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
             'CFLAGS=' + nss_cflags,
             'LDFLAGS=' + nss_libs
             ]
+
+    

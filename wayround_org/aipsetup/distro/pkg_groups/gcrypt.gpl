@@ -13,6 +13,7 @@
         "nettle", "nettle2",
         "npth",
         "opencdk",
-        "scute"
+        "scute",
+        "p11-kit"
         ]
 }

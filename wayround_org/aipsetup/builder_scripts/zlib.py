@@ -44,12 +44,16 @@ def main(buildingsite, action=None):
                 )
 
         if 'configure' in actions and ret == 0:
+            h64 = []
+            if '64' in pkg_info['constitution']['host']:
+                h64 = ['--64']
+
             ret = autotools.configure_high(
                 buildingsite,
                 options=[
                     '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--shared',
-                    ],
+                    '--shared'
+                    ] + h64,
                 arguments=[],
                 environment={},
                 environment_mode='copy',
