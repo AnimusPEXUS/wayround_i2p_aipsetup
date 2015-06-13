@@ -3,7 +3,7 @@
   "home_page": "",
   "buildscript": "std",
   "version_tool": "",
-  "basename": "xf86-video-freedreno",
+  "basename": "libXpresent",
   "filters": "",
   "removable": true,
   "reducible": true,

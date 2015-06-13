@@ -305,13 +305,18 @@ def info_mass_script_apply(command_name, opts, args, adds):
     """
     Mass buildscript applience
 
-    scriptname [-i=subpath] [-f] [tarballs list]
-
-    -f    force (by default new script name will not be applied to
-          records with existing ones)
+    [-s=scriptname] [-i=subpath] [-f] [tarballs list]
 
     -i=subpath
-          create package section in repository under pointed subpath
+        create package section in repository under pointed subpath
+    -s=scriptname
+        define building script name
+    -fs
+        force redefine existing script names
+    -b
+        apply basenames
+    -fb
+        force  redefine existing basenames
     """
 
     import wayround_org.aipsetup.controllers
@@ -323,31 +328,34 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
     sources = []
 
-    force = '-f' in opts
-
     subpath = None
     if '-i' in opts:
         subpath = opts['-i']
 
     script_name = None
+    if '-s' in opts:
+        script_name = opts['-s']
 
-    if len(args) > 0:
-        script_name = args[0]
+    force = '-fs' in opts
 
-    if len(args) > 1:
-        sources = args[1:]
+    redefine_basenames = '-b' in opts
+    force_redefine_basenames = '-fb' in opts
+
+    sources = args[:]
 
     if script_name is None:
         logging.error("Script name required")
         ret = 3
 
     if len(sources) == 0:
-        logging.error("No source files named")
+        logging.error("No source files defined")
         ret = 2
 
     if ret == 0:
 
         info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+        pkg_repo_ctl = \
+            wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
         known_names = set()
         exts = \
@@ -355,104 +363,169 @@ def info_mass_script_apply(command_name, opts, args, adds):
 
         sources.sort()
 
-        # TODO: rework next
-        for i in sources:
+        for i in range(len(sources) - 1, -1, -1):
 
-            cont = True
+            ends = False
             for j in exts:
-                if i.endswith(j):
-                    cont = False
+                if sources[i].endswith(j):
+                    ends = True
                     break
 
-            if cont:
-                continue
+            if not ends:
+                del sources[i]
+
+        # TODO: rework next
+
+        for i in sources:
 
             pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
+
             parsed_name = wayround_org.utils.tarball.\
                 parse_tarball_name(i, mute=True)
 
             if not parsed_name:
                 logging.error("Error parsing tarball name `{}'".format(i))
+                continue
 
             parsed_name = parsed_name['groups']['name']
+
             if parsed_name.isspace() or len(parsed_name) == 0:
                 logging.error("Empty package names are not allowed")
                 continue
 
+            # to not work with same names
             if parsed_name in known_names:
                 continue
 
             known_names.add(parsed_name)
 
-            if len(pkg_name) != 1:
-                name = pkg_name[0]
+            len_pkg_name = len(pkg_name)
+
+            if len_pkg_name > 1:
                 logging.error(
-                    "Could not determine package name for base `{}'".format(i)
+                    "More than one determined named for `{}':\n{}".format(
+                        i,
+                        pkg_name
+                        )
                     )
-                if not subpath:
-                    ret = 4
-                else:
-                    logging.info(
-                        "Adding `{}' to repository".format(parsed_name)
-                        )
-                    total_pkg_path = wayround_org.utils.path.join(
-                        config['pkg_server']['repository_dir'],
-                        subpath,
-                        parsed_name
-                        )
-                    try:
-                        os.makedirs(total_pkg_path)
-                    except:
-                        pass
-
-                    f = open(
-                        wayround_org.utils.path.join(
-                            total_pkg_path, '.package'
-                            ),
-                        'w'
-                        )
-                    f.write('')
-                    f.close()
-
-                    try:
-                        os.makedirs(
-                            wayround_org.utils.path.join(
-                                total_pkg_path, 'pack'
-                                )
-                            )
-                    except:
-                        pass
-
             else:
+                pkg_act_mode = None
+                if len_pkg_name == 0:
+                    logging.error("Package not exists yet")
+                    if subpath is not None:
+                        logging.error(
+                            "   but subpath is defined, "
+                            "so package will be created"
+                            )
+                        pkg_act_mode = 'create'
 
-                info_dir = config['pkg_server']['info_json_dir']
+                if len_pkg_name == 1:
+                    logging.info("Package already exists")
+                    if subpath is not None:
+                        logging.error(
+                            "   but subpath is defined, "
+                            "so package will be moved"
+                            )
+                        pkg_act_mode = 'move'
 
-                p1 = wayround_org.utils.path.join(
-                    info_dir,
-                    parsed_name + '.json'
-                    )
+                if pkg_act_mode is not None:
 
-                info = wayround_org.aipsetup.info.read_info_file(p1)
+                    if pkg_act_mode == 'move':
 
-                if not isinstance(info, dict):
-                    logging.error("Wrong info {}".format(p1))
-                    ret = 5
-                else:
-
-                    if force or info['buildscript'] == '':
-                        info['buildscript'] = script_name
-
-                        wayround_org.aipsetup.info.write_info_file(p1, info)
-
-                        logging.info("Applied to {}".format(parsed_name))
-                    else:
-                        logging.warning(
-                            "{} already have defined script".format(
-                                parsed_name
-                                )
+                        pkg_repo_ctl.package_reposition(
+                            pkg_name[0],
+                            subpath
                             )
 
-        pkg_repo_index_and_update(command_name, opts, args, adds)
+                    if pkg_act_mode == 'create':
+
+                        logging.info(
+                            "Adding `{}' to repository".format(parsed_name)
+                            )
+                        total_pkg_path = wayround_org.utils.path.join(
+                            config['pkg_server']['repository_dir'],
+                            subpath,
+                            parsed_name
+                            )
+                        try:
+                            os.makedirs(total_pkg_path)
+                        except:
+                            pass
+
+                        f = open(
+                            wayround_org.utils.path.join(
+                                total_pkg_path, '.package'
+                                ),
+                            'w'
+                            )
+                        f.write('')
+                        f.close()
+
+                        try:
+                            os.makedirs(
+                                wayround_org.utils.path.join(
+                                    total_pkg_path, 'pack'
+                                    )
+                                )
+                        except:
+                            pass
+
+                if len_pkg_name == 1 or pkg_act_mode == 'create':
+
+                    info_dir = config['pkg_server']['info_json_dir']
+
+                    p1 = wayround_org.utils.path.join(
+                        info_dir,
+                        parsed_name + '.json'
+                        )
+
+                    info = wayround_org.aipsetup.info.read_info_file(p1)
+
+                    if not isinstance(info, dict):
+                        logging.error("Wrong info {}. rewriting".format(p1))
+
+                        info = copy.copy(
+                            wayround_org.aipsetup.info.
+                            SAMPLE_PACKAGE_INFO_STRUCTURE
+                            )
+
+                    if script_name is not None:
+
+                        if force or info['buildscript'] == '':
+                            info['buildscript'] = script_name
+
+                            logging.info(
+                                "Applied new build script name to {}".format(
+                                    parsed_name
+                                    )
+                                )
+                        else:
+                            logging.warning(
+                                "{} already have defined script".format(
+                                    parsed_name
+                                    )
+                                )
+
+                    if redefine_basenames:
+
+                        if force_redefine_basenames or info['basename'] == '':
+                            info['basename'] = parsed_name
+
+                            logging.info(
+                                "Applied new basename to {}".format(
+                                    parsed_name
+                                    )
+                                )
+                        else:
+                            logging.warning(
+                                "{} already have defined basename".format(
+                                    parsed_name
+                                    )
+                                )
+
+                    wayround_org.aipsetup.info.write_info_file(p1, info)
+
+        pkg_repo_index_and_update(command_name, {}, [], adds)
 
     return ret
 

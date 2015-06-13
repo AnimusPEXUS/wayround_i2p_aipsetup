@@ -321,10 +321,23 @@ class PackageRepoCtl:
 
         ret = None
 
-        q = session.query(index_db.Package).filter_by(name=name).first()
+        q = session.query(index_db.Package).filter_by(name=name).all()
 
-        if q is not None:
-            ret = q.pid
+        len_q = len(q)
+
+        if len_q > 1:
+            logging.error(
+                "More than one package with name `{}' found".format(name)
+                )
+
+            ret = None
+        elif len_q == 0:
+            logging.error(
+                "Not found any packages with name `{}'".format(name)
+                )
+            ret = None
+        else:
+            ret = q[0].pid
 
         session.close()
 
@@ -434,6 +447,92 @@ class PackageRepoCtl:
         session.close()
 
         return dic
+
+    def package_reposition(self, pkg_name, new_subpath):
+
+        ret = 0
+
+        pps = self.get_package_path_string(pkg_name)
+
+        if pps is not None:
+
+            cur_pkg_path = os.path.abspath(
+                wayround_org.utils.path.join(
+                    self._repository_dir,
+                    pps
+                    )
+                )
+
+            new_pkg_path = os.path.abspath(
+                wayround_org.utils.path.join(
+                    self._repository_dir,
+                    new_subpath
+                    )
+                )
+        else:
+            logging.error(
+                "Invalid package name to move: {}".format(pkg_name)
+                )
+            ret = 3
+
+        if ret == 0:
+            if not wayround_org.utils.path.is_subpath_real(
+                    new_pkg_path,
+                    self._repository_dir
+                    ):
+                logging.error("Supplied subpath not under repository")
+                ret = 1
+
+        if ret == 0:
+            if cur_pkg_path == os.path.join(new_pkg_path, pkg_name):
+                logging.error(
+                    "Supplyed same subpath as currently is"
+                    )
+                ret = 2
+
+        if ret == 0:
+
+            npps = new_pkg_path.split('/')
+            for i in range(len(npps)):
+
+                npjap = wayround_org.utils.path.join(
+                    '/', npps[:i + 1], '.package'
+                    )
+
+                if os.path.isfile(npjap):
+                    logging.error(
+                        "Discovered what there is a package under ne path:\n"
+                        "{}\n"
+                        "One package can not be placed under another package"
+                        "".format(
+                            npjap
+                            )
+                        )
+                    ret = 5
+
+        if ret == 0:
+            try:
+                os.makedirs(new_pkg_path, exist_ok=True)
+            except:
+                logging.exception("Some error")
+                ret = 6
+
+        if ret == 0:
+            try:
+                os.rename(
+                    cur_pkg_path,
+                    os.path.join(new_pkg_path, pkg_name)
+                    )
+            except:
+                logging.exception(
+                    "Can't rename\n    `{}'\n    to\n    {}".format(
+                        cur_pkg_path,
+                        os.path.join(new_pkg_path, pkg_name)
+                        )
+                    )
+                ret = 7
+
+        return ret
 
     def get_category_name_list(self, parent_cid=0):
 
@@ -1398,7 +1497,7 @@ class SourceRepoCtl:
 
                     if parsed_src_filename:
                         additions_memory.append(
-                            (i,[parsed_src_filename['groups']['name']])
+                            (i, [parsed_src_filename['groups']['name']])
                             )
                         wayround_org.utils.terminal.progress_write(
                             "    adding: {}\n".format(
