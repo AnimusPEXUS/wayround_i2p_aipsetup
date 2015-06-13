@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "",
+  "basename": "grub",
   "filters": "",
   "removable": true,
   "reducible": true,

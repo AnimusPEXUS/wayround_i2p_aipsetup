@@ -1,0 +1,17 @@
+{
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
+  "version_tool": "",
+  "basename": "mail",
+  "filters": "",
+  "removable": true,
+  "reducible": true,
+  "non_installable": false,
+  "deprecated": false,
+  "tags": [],
+  "source_path_prefixes": [],
+  "build_deps": [],
+  "so_deps": [],
+  "runtime_deps": []
+}

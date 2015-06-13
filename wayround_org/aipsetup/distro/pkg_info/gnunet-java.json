@@ -3,7 +3,7 @@
   "home_page": "http://www.gnunet.org",
   "buildscript": "std",
   "version_tool": "",
-  "basename": "",
+  "basename": "gnunet-java",
   "filters": "",
   "removable": true,
   "reducible": true,

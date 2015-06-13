@@ -22,7 +22,8 @@ def commands():
             ('update', info_update_outdated_pkg_info_records),
             ('delete', info_delete_pkg_info_records),
             ('editor', info_editor),
-            ('mass-apply', info_mass_script_apply),
+            ('mass-cat', info_mass_cat),
+            ('mass-cat-by-path', info_mass_cat_by_path),
             ('triangulate-dependencies', info_triangulate_dependencies)
             ])),
         ('pkg-server-repo', collections.OrderedDict([
@@ -301,7 +302,50 @@ def info_editor(command_name, opts, args, adds):
     return ret
 
 
-def info_mass_script_apply(command_name, opts, args, adds):
+def info_mass_cat_by_path(command_name, opts, args, adds):
+    """
+    Same as mass-cat, but expects not file names, but dir path so it searches
+    tarballs manually
+
+    [-s=scriptname] [-i=subpath] [-f] [path]
+
+    Supply path or current dir will be used
+
+    -i=subpath
+        create package section in repository under pointed subpath
+    -s=scriptname
+        define building script name
+    -fs
+        force redefine existing script names
+    -b
+        apply basenames
+    -fb
+        force  redefine existing basenames
+    """
+
+    config = adds['config']
+
+    path = '.'
+    if len(args) != 0:
+        path = args[0]
+
+    path = os.path.abspath(path)
+
+    source_index = wayround_org.utils.file.files_recurcive_list(
+        dirname=path,
+        relative_to=None,
+        mute=True,
+        acceptable_endings=config['general'][
+            'acceptable_src_file_extensions'].split(),
+        sort=True,
+        print_found=False,
+        list_symlincs=False
+        )
+
+    return info_mass_cat(command_name, opts, source_index, adds)
+
+
+def info_mass_cat(command_name, opts, args, adds):
     """
     Mass buildscript applience
 
@@ -397,6 +441,8 @@ def info_mass_script_apply(command_name, opts, args, adds):
             if parsed_name in known_names:
                 continue
 
+            logging.info("Next subject is: {}".format(parsed_name))
+
             known_names.add(parsed_name)
 
             len_pkg_name = len(pkg_name)
@@ -411,9 +457,9 @@ def info_mass_script_apply(command_name, opts, args, adds):
             else:
                 pkg_act_mode = None
                 if len_pkg_name == 0:
-                    logging.error("Package not exists yet")
+                    logging.info("Package not exists yet")
                     if subpath is not None:
-                        logging.error(
+                        logging.info(
                             "   but subpath is defined, "
                             "so package will be created"
                             )
@@ -422,7 +468,7 @@ def info_mass_script_apply(command_name, opts, args, adds):
                 if len_pkg_name == 1:
                     logging.info("Package already exists")
                     if subpath is not None:
-                        logging.error(
+                        logging.info(
                             "   but subpath is defined, "
                             "so package will be moved"
                             )
