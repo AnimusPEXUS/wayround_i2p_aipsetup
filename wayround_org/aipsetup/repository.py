@@ -1374,6 +1374,8 @@ class SourceRepoCtl:
             logging.info("Loading DB to save new data")
             src_tag_objects = set(self.src_db.get_objects())
 
+            additions_memory = []
+
             for i in source_index:
                 index += 1
 
@@ -1395,12 +1397,11 @@ class SourceRepoCtl:
                         )
 
                     if parsed_src_filename:
-                        self.src_db.set_object_tags(
-                            i,
-                            [parsed_src_filename['groups']['name']]
+                        additions_memory.append(
+                            (i,[parsed_src_filename['groups']['name']])
                             )
                         wayround_org.utils.terminal.progress_write(
-                            "    added: {}\n".format(
+                            "    adding: {}\n".format(
                                 os.path.basename(i)
                                 )
                             )
@@ -1415,7 +1416,7 @@ class SourceRepoCtl:
 
                 wayround_org.utils.terminal.progress_write(
                     "    {} out of {} "
-                    "({:.2f}%, added {}, failed {}, skipped {})".format(
+                    "({:.2f}%, adding {}, failed {}, skipped {})".format(
                         index,
                         found_count,
                         (100.0 / (found_count / index)),
@@ -1428,6 +1429,13 @@ class SourceRepoCtl:
             wayround_org.utils.terminal.progress_write_finish()
 
             del source_index
+
+        logging.info("Committing additions..")
+        self.src_db.set_many_objects_tags(
+            additions_memory
+            )
+
+        del additions_memory
 
         logging.info("Searching non existing index items")
 
