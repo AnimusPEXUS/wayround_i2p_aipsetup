@@ -26,9 +26,8 @@ import wayround_org.aipsetup.builder_scripts.glibc
 def calculate_prefix(dst_dir, target):
 
     return wayround_org.utils.path.join(
-        '/', 'usr', 'lib', 'unicorn_crossbuilders',
-        target,
-        'usr'
+        '/', 'usr', 'crossbuilders', target
+        #, 'usr'
         )
 
 
@@ -61,10 +60,8 @@ class LinuxHeadersBuilder(wayround_org.aipsetup.builder_scripts.linux.Builder):
         return collections.OrderedDict([
             #('src_cleanup', self.builder_action_src_cleanup),
             #('extract', self.builder_action_extract),
-
-            ('distr_headers_normal',
-                self.builder_action_distr_headers_normal)
-
+            ('distr_headers_all',
+                self.builder_action_distr_headers_all)
             ])
 
     def builder_action_extract(self, log):
@@ -176,83 +173,82 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return {
             'PATH': calc_path_addition(self.dst_dir, self.target)
             }
-            
+
     def builder_action_configure_define_options(self, log):
         return super().builder_action_configure_define_options(log) + [
-                # experimental options
-                # '--enable-targets=all',
-                #'--enable-tls',
-                #'--enable-nls',
-                #'--disable-nls',
+            # experimental options
+            # '--enable-targets=all',
+            #'--enable-tls',
+            #'--enable-nls',
+            #'--disable-nls',
 
-                # '--enable-targets='
-                # 'i486-pc-linux-gnu,'
-                # 'i586-pc-linux-gnu,'
-                # 'i686-pc-linux-gnu,'
-                # 'i786-pc-linux-gnu,'
-                # 'ia64-pc-linux-gnu,'
-                # 'x86_64-pc-linux-gnu,'
-                # 'aarch64-linux-gnu',
+            # '--enable-targets='
+            # 'i486-pc-linux-gnu,'
+            # 'i586-pc-linux-gnu,'
+            # 'i686-pc-linux-gnu,'
+            # 'i786-pc-linux-gnu,'
+            # 'ia64-pc-linux-gnu,'
+            # 'x86_64-pc-linux-gnu,'
+            # 'aarch64-linux-gnu',
 
-                # then lto enabled it causes problems to systemd.
-                # some time has passed since then - trying to enable lto
-                # '--disable-lto',
+            # then lto enabled it causes problems to systemd.
+            # some time has passed since then - trying to enable lto
+            # '--disable-lto',
 
-                # normal options
-                #'--enable-__cxa_atexit',
+            # normal options
+            #'--enable-__cxa_atexit',
 
-                # disabled for experiment
-                #'--with-arch-32=i486',
-                #'--with-tune=generic',
+            # disabled for experiment
+            #'--with-arch-32=i486',
+            #'--with-tune=generic',
 
-                #'--enable-languages=c,c++,java,objc,obj-c++,ada,fortran',
-                #'--enable-languages=c,c++,ada',
-                '--enable-languages=c,c++',
+            #'--enable-languages=c,c++,java,objc,obj-c++,ada,fortran',
+            #'--enable-languages=c,c++,ada',
+            '--enable-languages=c,c++',
 
-                # '--enable-bootstrap',
+            # '--enable-bootstrap',
 
-                #'--enable-threads=posix',
-                '--disable-threads',
+            #'--enable-threads=posix',
+            '--disable-threads',
 
-                #'--enable-multiarch',
-                '--disable-multiarch',
+            #'--enable-multiarch',
+            '--disable-multiarch',
 
-                #'--enable-multilib',
-                '--disable-multilib',
+            #'--enable-multilib',
+            '--disable-multilib',
 
-                #'--enable-checking=release',
+            #'--enable-checking=release',
 
-                #'--with-gmp=/usr',
-                #'--with-mpfr=/usr',
+            #'--with-gmp=/usr',
+            #'--with-mpfr=/usr',
 
-                # '--with-build-time-tools=
-                # /home/agu/_sda3/_UNICORN/b/gnat/
-                # gnat-gpl-2014-x86-linux-bin',
+            # '--with-build-time-tools=
+            # /home/agu/_sda3/_UNICORN/b/gnat/
+            # gnat-gpl-2014-x86-linux-bin',
 
-                #'--enable-shared',
-                #'--disable-shared',
+            #'--enable-shared',
+            #'--disable-shared',
 
-                #'--with-sysroot=' + os.path.normpath(
-                #    os.path.join(prefix, '..')
-                #    ),
-                #'--without-headers',
-                #'--with-newlib',
+            #'--with-sysroot=' + os.path.normpath(
+            #    os.path.join(prefix, '..')
+            #    ),
+            #'--without-headers',
+            #'--with-newlib',
 
 
-                # from lfs - to avoid using make all-gcc
-                #'--disable-decimal-float',
-                '--disable-threads',
-                #'--disable-libatomic',
-                #'--disable-libgomp',
-                #'--disable-libitm',
-                #'--disable-libquadmath',
-                #'--disable-libsanitizer',
-                # '--disable-libssp',
-                #'--disable-libvtv',
-                #'--disable-libcilkrts',
-                #'--disable-libstdc++-v3',
+            # from lfs - to avoid using make all-gcc
+            #'--disable-decimal-float',
+            '--disable-threads',
+            #'--disable-libatomic',
+            #'--disable-libgomp',
+            #'--disable-libitm',
+            #'--disable-libquadmath',
+            #'--disable-libsanitizer',
+            # '--disable-libssp',
+            #'--disable-libvtv',
+            #'--disable-libcilkrts',
+            #'--disable-libstdc++-v3',
             ]
-
 
     def builder_action_build(self, log):
         ret = autotools.make_high(
@@ -333,36 +329,35 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             os.path.normpath(os.path.join(headers_path, '..'))
 
         return super().builder_action_configure_define_options(log) + [
-                #'--enable-obsolete-rpc',
-                '--enable-kernel=4.0',
-                #'--enable-tls',
-                '--with-elf',
+            #'--enable-obsolete-rpc',
+            '--enable-kernel=4.0',
+            #'--enable-tls',
+            '--with-elf',
 
-                #'--enable-multi-arch',
-                #'--enable-multiarch',
+            #'--enable-multi-arch',
+            #'--enable-multiarch',
 
-                #'--enable-multilib',
-                #'--disable-multilib',
+            #'--enable-multilib',
+            #'--disable-multilib',
 
-                # this is from configure --help. configure looking for
-                # linux/version.h file
+            # this is from configure --help. configure looking for
+            # linux/version.h file
 
-                '--with-headers=' + headers_path,
+            '--with-headers=' + headers_path,
 
-                #'--enable-shared',
+            #'--enable-shared',
 
-                '--prefix=' + prefix,
-                '--mandir=' + mandir,
-                '--sysconfdir=' + sysconfdir,
-                '--localstatedir=' + localstatedir,
+            '--prefix=' + prefix,
+            '--mandir=' + mandir,
+            '--sysconfdir=' + sysconfdir,
+            '--localstatedir=' + localstatedir,
 
-                '--host=' + self.target,
-                # host must be same as target this time
-                '--build=' + self.build,
-                '--target=' + self.target,
-                'libc_cv_forced_unwind=yes'
+            '--host=' + self.target,
+            # host must be same as target this time
+            '--build=' + self.build,
+            '--target=' + self.target,
+            'libc_cv_forced_unwind=yes'
             ]
-
 
     def builder_action_distribute_headers1(self, log):
         ret = autotools.make_high(
@@ -542,18 +537,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
+        linux_builder = LinuxHeadersBuilder(self.buildingsite)
+        binutils_builder = BinutilsBuilder(self.buildingsite)
+        gcc01_builder = GCC01Builder(self.buildingsite)
+        glibc01_builder = Glibc01Builder(self.buildingsite)
+        gcc02_builder = GCC02Builder(self.buildingsite)
+        glibc02_builder = Glibc02Builder(self.buildingsite)
+
         ret = {
-            'linux_builder': LinuxHeadersBuilder(self.buildingsite),
-
-            'binutils_builder': BinutilsBuilder(self.buildingsite),
-
-            'gcc01_builder': GCC01Builder(self.buildingsite),
-
-            'glibc01_builder': Glibc01Builder(self.buildingsite),
-
-            'gcc02_builder': GCC02Builder(self.buildingsite),
-
-            'glibc02_builder': Glibc02Builder(self.buildingsite)
+            'linux_builder': linux_builder,
+            'binutils_builder': binutils_builder,
+            'gcc01_builder': gcc01_builder,
+            'glibc01_builder': glibc01_builder,
+            'gcc02_builder': gcc02_builder,
+            'glibc02_builder': glibc02_builder
             }
 
         return ret

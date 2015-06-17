@@ -49,7 +49,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '-confirm-license',
                 '-prefix', '/usr/lib/qt{}_w_toolkit'.format(
                     self.custom_data['qt_number_str']
-                    )
+                    ),
+                '-pulseaudio',
+                '-no-alsa'
                 ],
             stdin=subprocess.PIPE,
             cwd=self.src_dir

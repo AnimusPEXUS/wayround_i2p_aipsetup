@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "crossbuilder_binutils",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "",
+  "basename": "clang",
   "filters": "",
   "removable": true,
   "reducible": true,

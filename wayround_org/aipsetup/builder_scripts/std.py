@@ -17,47 +17,13 @@ class Builder:
 
     def __init__(self, buildingsite):
 
-        self.buildingsite = buildingsite
-
         bs = wayround_org.aipsetup.build.BuildingSiteCtl(buildingsite)
 
-        self.package_info = bs.read_package_info()
-
-        self.src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(
-            buildingsite
-            )
-
-        self.bld_dir = wayround_org.aipsetup.build.getDIR_BUILDING(
-            buildingsite
-            )
-
-        self.patches_dir = wayround_org.aipsetup.build.getDIR_PATCHES(
-            buildingsite
-            )
-
-        self.dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(
-            buildingsite
-            )
-
-        self.log_dir = wayround_org.aipsetup.build.getDIR_BUILD_LOGS(
-            buildingsite
-            )
-
-        self.tar_dir = wayround_org.aipsetup.build.getDIR_TARBALL(buildingsite)
+        self.control = bs
 
         self.separate_build_dir = False
 
         self.source_configure_reldir = '.'
-
-        self.is_crossbuild = (
-            self.package_info['constitution']['build']
-            != self.package_info['constitution']['host']
-            )
-
-        self.is_crossbuilder = (
-            self.package_info['constitution']['target']
-            != self.package_info['constitution']['host']
-            )
 
         try:
             self.target_host_root = \
@@ -87,6 +53,48 @@ class Builder:
             """
 
         return
+
+    @property
+    def buildingsite(self):
+        return self.control.path
+
+    @property
+    def package_info(self):
+        return self.control.read_package_info()
+
+    @property
+    def src_dir(self):
+        return self.control.getDIR_SOURCE()
+
+    @property
+    def bld_dir(self):
+        return self.control.getDIR_BUILDING()
+
+    @property
+    def patches_dir(self):
+        return self.control.getDIR_PATCHES()
+
+    @property
+    def dst_dir(self):
+        return self.control.getDIR_DESTDIR()
+
+    @property
+    def log_dir(self):
+        return self.control.getDIR_BUILD_LOGS()
+
+    @property
+    def tar_dir(self):
+        return self.control.getDIR_TARBALL()
+
+    @property
+    def is_crossbuild(self):
+        return (self.package_info['constitution']['build']
+                != self.package_info['constitution']['host'])
+
+    @property
+    def is_crossbuilder(self):
+        return (self.package_info['constitution']['target']
+                != self.package_info['constitution']['host'])
 
     @property
     def target(self):
@@ -240,6 +248,7 @@ class Builder:
         return ret
 
     def builder_action_configure_define_options(self, log):
+
         ret = [
             '--prefix=' +
             self.package_info['constitution']['paths']['usr'],
@@ -251,36 +260,6 @@ class Builder:
             self.package_info['constitution']['paths']['var'],
             '--enable-shared'
             ] + autotools.calc_conf_hbt_options(self)
-
-        if self.is_crossbuild:
-            log.info(
-                "Target Host Root is considered to be: {}".format(
-                    self.target_host_root
-                    )
-                )
-
-            """
-
-            if self.target_host_root is None:
-                raise Exception("You need to define --thr")
-
-            if not os.path.isdir(self.target_host_root):
-                raise Exception("Target host root not exists")
-
-
-            ret += [
-                'LDFLAGS=-L{} '.format(
-                    os.path.join(self.target_host_root, 'usr', 'lib'),
-                    #os.path.join(self.target_host_root, 'usr', 'lib64')
-                    ),
-                'CFLAGS=-I{}'.format(
-                    os.path.join(self.target_host_root, 'usr', 'include')
-                    ),
-                'CXXFLAGS=-I{}'.format(
-                    os.path.join(self.target_host_root, 'usr', 'include')
-                    )
-                ]
-            """
 
         return ret
 

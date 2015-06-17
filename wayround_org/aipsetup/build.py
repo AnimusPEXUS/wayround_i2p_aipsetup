@@ -1427,13 +1427,23 @@ class BuildingSiteCtl:
         Set main package tarball in case there are many of them.
         """
 
-        r = self.read_package_info({})
+        base = os.path.basename(filename)
 
-        r['pkg_nameinfo'] = dict(name=filename)
+        package_info = self.read_package_info({})
 
-        self.write_package_info(r)
+        parse_result = wayround_org.utils.tarball.parse_tarball_name(base)
 
-        return 0
+        if not isinstance(parse_result, dict):
+            logging.error("Can't correctly parse file name")
+            package_info['pkg_nameinfo'] = {}
+            ret = 1
+        else:
+            package_info['pkg_nameinfo'] = parse_result
+            ret = 0
+
+        self.write_package_info(package_info)
+
+        return ret
 
     def get_pkg_main_tarball(self):
         """
@@ -1456,24 +1466,38 @@ class BuildingSiteCtl:
 
         ret = 0
 
-        package_info = self.read_package_info(ret_on_error={})
+        if filename is None:
+            logging.info(
+                "You didn't supplyed tarball name, so trying to find out.."
+                )
+            nameinfo_name = self.get_pkg_main_tarball()
 
-        package_info['pkg_nameinfo'] = None
+            if nameinfo_name != '':
+                filename = nameinfo_name
+            else:
+                logging.info(
+                    "package_info.json has no main tarball name,"
+                    " so looking in 00.TARBALLS dir"
+                    )
 
-        base = os.path.basename(filename)
+                tar_dir = self.getDIR_TARBALL()
 
-        parse_result = \
-            wayround_org.utils.tarball.parse_tarball_name(base)
+                tar_files = os.listdir(tar_dir)
 
-        if not isinstance(parse_result, dict):
-            logging.error("Can't correctly parse file name")
-            ret = 1
-        else:
-            package_info['pkg_nameinfo'] = parse_result
+                if len(tar_files) != 1:
 
-            self.write_package_info(package_info)
+                    logging.error(
+                        "Can't decide which tarball to use. "
+                        "File in 00.TARBALLS is not single"
+                        )
+                    ret = 1
 
-            ret = 0
+                else:
+                    filename = tar_files[0]
+
+        if ret == 0:
+            logging.info("main tarball is recognized as: {}".format(filename))
+            ret = self.set_pkg_main_tarball(filename)
 
         return ret
 
@@ -1511,10 +1535,13 @@ class BuildingSiteCtl:
         """
         Applies package information on building site package info
 
-        if package_name is None, it will be asked from info server to parse
-        tarball name and determine package info name. If more than one
-        returned - this is error.
+        if package_name is None and can't be taken from package_info.json
+        file - it will be asked from info server to parse
+        tarball name and determine package info name. If returned not one -
+        this is error.
         """
+
+        ret = 0
 
         if not isinstance(
                 pkg_client,
@@ -1527,31 +1554,36 @@ class BuildingSiteCtl:
 
         package_info = self.read_package_info(ret_on_error={})
 
-        ret = 0
+        if package_name is None:
+            try:
+                package_name = package_info['pkg_info']['name']
+            except:
+                logging.exception(
+                    "Can't get package_info['pkg_info']['name']. "
+                    "Asking server.."
+                    )
+                package_name = None
 
         if package_name is None:
 
-            if (
-                    not isinstance(package_info, dict)
-                    or 'pkg_nameinfo' not in package_info
-                    or not isinstance(package_info['pkg_nameinfo'], dict)
-                    or 'groups' not in package_info['pkg_nameinfo']
-                    or not isinstance(package_info['pkg_nameinfo']['groups'], dict)
-                    or 'name' not in package_info['pkg_nameinfo']['groups']
-                    or not isinstance(
-                        package_info['pkg_nameinfo']['groups']['name'], str
-                        )
-                    ):
+            ret = 6
 
-                logging.error(
-                    "package_info['pkg_nameinfo']['groups'] undetermined"
+            try:
+                isinstance(package_info['pkg_nameinfo']['name'], str)
+            except:
+                logging.exception(
+                    "package_info['pkg_nameinfo']['name'] undetermined"
                     )
                 package_info['pkg_info'] = {}
                 ret = 1
 
             else:
 
-                logging.debug("Getting info from index DB")
+                logging.info(
+                    "Getting info from index DB for: {}".format(
+                        package_info['pkg_nameinfo']['name']
+                        )
+                    )
 
                 n_b_n = pkg_client.name_by_name(
                     package_info['pkg_nameinfo']['name']
@@ -1559,29 +1591,42 @@ class BuildingSiteCtl:
 
                 if len(n_b_n) != 1:
                     logging.error(
-                        "Can't select between package names: {}".format(n_b_n))
+                        "Can't select between package names:\n    {}".format(
+                            n_b_n
+                            )
+                        )
                     ret = 5
 
                 else:
 
                     package_name = n_b_n[0]
+                    logging.info(
+                        "Package name determined by server: {}".format(
+                            package_name
+                            )
+                        )
+                    ret = 0
 
-        if ret == 0:
+            if ret == 0:
 
-            info = pkg_client.info(package_name)
+                logging.info(
+                    "Getting full package info for name: {}".format(
+                        package_name
+                        )
+                    )
+                info = pkg_client.info(package_name)
 
-            if not isinstance(info, dict):
-                logging.error("Can't read info from DB")
-                package_info['pkg_info'] = {}
-                ret = 4
+                if not isinstance(info, dict):
+                    logging.error("Can't read info from DB")
+                    package_info['pkg_info'] = {}
+                    ret = 4
 
-            else:
+                else:
 
-                package_info['pkg_info'] = info
+                    package_info['pkg_info'] = info
+                    self.write_package_info(package_info)
 
-                ret = 0
-
-                self.write_package_info(package_info)
+                    ret = 0
 
         return ret
 
@@ -1643,9 +1688,8 @@ class BuildingSiteCtl:
 
                 self.write_package_info({})
 
-            if self.get_pkg_main_tarball() == '':
-                if self.apply_pkg_nameinfo_on_buildingsite(src_file_name) != 0:
-                    ret = 1
+            if self.apply_pkg_nameinfo_on_buildingsite(src_file_name) != 0:
+                ret = 1
 
             if ret == 0:
                 if self.apply_constitution_on_buildingsite(const) != 0:
@@ -2087,7 +2131,7 @@ def run_builder_action(
     for i in actions:
 
         log = wayround_org.utils.log.Log(
-            log_output_directory, 
+            log_output_directory,
             '{} {}'.format(
                 package_info['pkg_info']['name'], i
                 )

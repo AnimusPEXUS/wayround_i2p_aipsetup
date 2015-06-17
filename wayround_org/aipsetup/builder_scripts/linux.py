@@ -19,6 +19,11 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
+    
+        self.usr_list_item = ['usr']
+        if self.is_crossbuilder:
+            del self.usr_list_item[0]
+    
         ret = dict()
         ret['src_arch_dir'] = wayround_org.utils.path.join(
             self.src_dir, 'arch'
@@ -27,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             self.dst_dir, 'boot'
             )
         ret['dst_man_dir'] = wayround_org.utils.path.join(
-            self.dst_dir, 'usr', 'share', 'man', 'man9'
+            self.dst_dir, self.usr_list_item[0], 'share', 'man', 'man9'
             )
 
         crossbuild_arch_params = []
@@ -71,8 +76,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # ('distr_headers_internal',
             #       self.builder_action_distr_headers_internal),
 
-            ('distr_headers_normal', self.builder_action_distr_headers_normal),
-            # ('distr_headers_all', self.builder_action_distr_headers_all),
+            #('distr_headers_normal', self.builder_action_distr_headers_normal),
+            ('distr_headers_all', self.builder_action_distr_headers_all),
 
             # ('distr_headers_internal_repeat',
             #       self.builder_action_distr_headers_internal_repeat),
@@ -142,20 +147,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if ret == 0:
 
             p1 = wayround_org.utils.path.join(
-                    self.custom_data['dst_boot_dir'],
-                    'vmlinuz'
-                    )
-            
-            p2 = wayround_org.utils.path.join(
-                    self.custom_data['dst_boot_dir'],
-                    'vmlinuz-{}'.format(
-                        self.package_info['pkg_nameinfo']['groups']['version']
-                        )
-                    )
-    
-            log.info("Renaming: `{}' to `{}'".format(p1,p2))
+                self.custom_data['dst_boot_dir'],
+                'vmlinuz'
+                )
 
-            os.rename(p1                ,p2                               )
+            p2 = wayround_org.utils.path.join(
+                self.custom_data['dst_boot_dir'],
+                'vmlinuz-{}'.format(
+                    self.package_info['pkg_nameinfo']['groups']['version']
+                    )
+                )
+
+            log.info("Renaming: `{}' to `{}'".format(p1, p2))
+
+            os.rename(p1, p2)
         return ret
 
     def builder_action_distr_modules(self, log):
@@ -201,7 +206,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                     os.symlink(
                         wayround_org.utils.path.join(
-                            os.path.sep + 'usr',
+                            os.path.sep + self.usr_list_item[0],
                             'src',
                             'linux-{}'.format(
                                 self.package_info['pkg_nameinfo'][
@@ -239,20 +244,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distr_headers_normal(self, log):
+    def _builder_action_distr_headers_001(self, log, h_all=False)
 
         ret = 0
-        arch_params = []
+
+        command = 'headers_install'
+        if h_all:
+            command = 'headers_install_all'
+
         install_hdr_path = wayround_org.utils.path.join(self.dst_dir, 'usr')
 
-        """
-        if self.is_crossbuild:
+        if self.is_crossbuilder:
 
             install_hdr_path = wayround_org.utils.path.join(
-                self.dst_dir, 'usr', 'lib', 'unicorn_crossbuilders',
-                self.target, 'usr'
+                self.dst_dir, self.usr_list_item[0], 'crossbuilders',
+                self.target
+                #, usr
                 )
-        """
 
         if ret == 0:
 
@@ -260,17 +268,28 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.buildingsite,
                 log=log,
                 options=[],
-                arguments=[
-                    'headers_install',
-                    # 'headers_install_all',
-                    'INSTALL_HDR_PATH=' + install_hdr_path
-                    ] + self.custom_data['crossbuild_arch_params'],
+                arguments=[command] +
+                ['INSTALL_HDR_PATH=' + install_hdr_path] +
+                self.custom_data['crossbuild_arch_params'],
                 environment={},
                 environment_mode='copy',
                 use_separate_buildding_dir=self.separate_build_dir,
                 source_configure_reldir=self.source_configure_reldir
                 )
+
+        if h_all:
+            raise Exception(
+                "Now You need to create asm symlink in include dir\n"
+                "and continue with 'distr_man+' action"
+                )
+
         return ret
+
+    def builder_action_distr_headers_normal(self, log):
+        return self._builder_action_distr_headers_001(log, h_all=False)
+
+    def builder_action_distr_headers_all(self, log):
+        return self._builder_action_distr_headers_001(log, h_all=True)
 
     def builder_action_distr_headers_internal_repeat(self, log):
 
@@ -305,7 +324,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 wayround_org.utils.file.copytree(
                     fp,
                     wayround_org.utils.path.join(
-                        self.dst_dir, 'usr', 'include', 'asm-{}'.format(i)
+                        self.dst_dir, 
+                        self.usr_list_item[0], 
+                        'include', 
+                        'asm-{}'.format(i)
                         ),
                     overwrite_files=False,
                     clear_before_copy=False,
@@ -388,7 +410,7 @@ Continue with command
                 self.src_dir,
                 wayround_org.utils.path.join(
                     self.dst_dir,
-                    'usr',
+                    self.usr_list_item[0],
                     'src',
                     'linux-{}'.format(
                         self.package_info['pkg_nameinfo']['groups']['version']
@@ -406,7 +428,7 @@ Continue with command
                 try:
                     new_link = wayround_org.utils.path.join(
                         self.dst_dir,
-                        'usr',
+                        self.usr_list_item[0],
                         'src',
                         'linux'
                         )

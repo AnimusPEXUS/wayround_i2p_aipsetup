@@ -26,18 +26,36 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def define_actions(self):
-        ret = collections.OrderedDict([
-            ('dst_cleanup', self.builder_action_dst_cleanup),
-            ('src_cleanup', self.builder_action_src_cleanup),
-            ('bld_cleanup', self.builder_action_bld_cleanup),
-            ('extract', self.builder_action_extract),
-            ('configure', self.builder_action_configure),
-            ('build', self.builder_action_build),
-            #('before_checks', self.builder_action_before_checks),
-            #('checks', self.builder_action_checks),
-            ('distribute', self.builder_action_distribute),
-            ('after_distribute', self.builder_action_after_distribute)
-            ])
+        ret = super().define_actions()
+        if self.is_crossbuilder:
+            ret['edit_package_info'] = self.builder_action_edit_package_info
+            ret.move_to_end('edit_package_info', False)
+
+        if not self.is_crossbuilder:
+            ret['after_distribute'] = self.builder_action_after_distribute
+
+        return ret
+
+    def builder_action_edit_package_info(self, log):
+
+        ret = 0
+
+        try:
+            name = self.package_info['pkg_info']['name']
+        except:
+            name = None
+
+        if name in ['gcc', None]:
+
+            self.package_info['pkg_info']['name'] = \
+                'cb-gcc-{target}'.format(
+                    target=self.target
+                    )
+
+            bs = self.control
+
+            bs.write_package_info(self.package_info)
+
         return ret
 
     def builder_action_extract(self, log):
@@ -48,8 +66,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if ret == 0:
 
-            for i in ['gmp', 'mpc', 'mpfr', 'cloog',
-                      'isl'
+            for i in ['mpc', 'mpfr', 'cloog',
+                      'isl',
+                      # 'gmp', # NOTE: sometimes gcc could not compile like
+                      #                this.
+                      #                so use system gmp
                       # requires compiler for bootstrap
                       # 'binutils', 'gdb', 'glibc'
                       ]:
@@ -84,7 +105,24 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     )
                 ),
         """
+
         ret = super().builder_action_configure_define_options(log)
+
+        if self.is_crossbuilder:
+            prefix = os.path.join(
+                '/', 'usr', 'crossbuilders', self.target
+                )
+
+            ret = [
+                '--prefix=' + prefix
+
+                #'--mandir=' + os.path.join(prefix, 'share', 'man'),
+                #'--sysconfdir=' +
+                # self.package_info['constitution']['paths']['config'],
+                #'--localstatedir=' +
+                # self.package_info['constitution']['paths']['var'],
+                #'--enable-shared'
+                ] + autotools.calc_conf_hbt_options(self)
 
         ret += [
             # experimental options
@@ -145,11 +183,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
                 #'--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
-                '--enable-multilib',
+                # '--enable-multilib',
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared'
@@ -176,16 +214,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-nls',
                 '--enable-__cxa_atexit',
                 '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
-                '--enable-bootstrap',
+
+                '--disable-bootstrap',
+
                 '--enable-threads=posix',
                 '--enable-multiarch',
 
                 # TODO: I don't know why, but I want it enabled
-                '--disable-multilib',
+                '--enable-multilib',
 
                 '--enable-checking=release',
                 '--enable-libada',
-                '--enable-shared'
+                '--enable-shared',
+                #'--enable-targets='
+                #'i686-pc-linux-gnu,'
+                #'x86_64-pc-linux-gnu'
                 ])
 
         for i in ['CFLAGS', 'LDFLAGS', 'CXXFLAGS']:
@@ -207,7 +250,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_checks(self, log):
         ret = autotools.make_high(
             self.buildingsite,
-            options=['-k'],
+            options=[],
             arguments=['check'],
             environment={},
             environment_mode='copy',

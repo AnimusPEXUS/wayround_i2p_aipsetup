@@ -3,7 +3,7 @@
   "home_page": "",
   "buildscript": "std",
   "version_tool": "",
-  "basename": "polly",
+  "basename": "rp-l2tp",
   "filters": "",
   "removable": true,
   "reducible": true,

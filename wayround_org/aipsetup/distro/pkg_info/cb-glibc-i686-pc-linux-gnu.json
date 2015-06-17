@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "",
   "version_tool": "",
-  "basename": "polly",
+  "basename": "",
   "filters": "",
   "removable": true,
   "reducible": true,

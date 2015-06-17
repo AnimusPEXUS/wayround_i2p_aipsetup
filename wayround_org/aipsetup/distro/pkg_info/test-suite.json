@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "crossbuilder_linux_headers",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "",
+  "basename": "test-suite",
   "filters": "",
   "removable": true,
   "reducible": true,

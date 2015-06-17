@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "linux_headers",
   "version_tool": "",
-  "basename": "polly",
+  "basename": "",
   "filters": "",
   "removable": true,
   "reducible": true,

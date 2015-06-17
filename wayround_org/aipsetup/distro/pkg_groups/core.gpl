@@ -65,7 +65,7 @@
         "llvm", "libclc", "cfe", "openmp", "polly",
         "neon",
         "tor", "torsocks", "libevent", "asciidoc",
-        "libqwpuality", "cracklib",
+        "libpwquality", "cracklib",
         "krb5"
     ]
 }

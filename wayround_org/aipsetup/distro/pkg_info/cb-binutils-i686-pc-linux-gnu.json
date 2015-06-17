@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "crossbuilder_gcc",
+  "buildscript": "",
   "version_tool": "",
   "basename": "",
   "filters": "",
