@@ -19,11 +19,11 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-    
+
         self.usr_list_item = ['usr']
         if self.is_crossbuilder:
-            del self.usr_list_item[0]
-    
+            self.usr_list_item[0] = ''
+
         ret = dict()
         ret['src_arch_dir'] = wayround_org.utils.path.join(
             self.src_dir, 'arch'
@@ -63,7 +63,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def define_actions(self):
-        return collections.OrderedDict([
+
+        ret = collections.OrderedDict([
             ('src_cleanup', self.builder_action_src_cleanup),
             ('dst_cleanup', self.builder_action_dst_cleanup),
             ('extract', self.builder_action_extract),
@@ -89,6 +90,52 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distr_man', self.builder_action_distr_man),
             ('copy_source', self.builder_action_copy_source)
             ])
+
+        if self.is_crossbuilder:
+
+            logging.info(
+                "Crosscompiler building detected. only headers will be built"
+                )
+
+            ret['edit_package_info'] = self.builder_action_edit_package_info
+            ret.move_to_end('edit_package_info', False)
+
+            for i in ret.keys():
+                if i in [
+                        'configure',
+                        'build',
+                        'distr_kernel',
+                        'distr_modules',
+                        'distr_firmware',
+                        # 'distr_headers_all',
+                        'distr_man',
+                        'copy_source',
+                        ]:
+                    del ret[i]
+
+        return ret
+
+    def builder_action_edit_package_info(self, log):
+
+        ret = 0
+
+        try:
+            name = self.package_info['pkg_info']['name']
+        except:
+            name = None
+
+        if name in ['linux-headers', None]:
+            pi = self.package_info
+
+            pi['pkg_info']['name'] = 'cb-linux-headers-{target}'.format(
+                target=self.target
+                )
+
+            bs = self.control
+
+            bs.write_package_info(pi)
+
+        return ret
 
     def builder_action_dst_cleanup(self, log):
         """
@@ -244,7 +291,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def _builder_action_distr_headers_001(self, log, h_all=False)
+    def _builder_action_distr_headers_001(self, log, h_all=False):
 
         ret = 0
 
@@ -257,7 +304,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if self.is_crossbuilder:
 
             install_hdr_path = wayround_org.utils.path.join(
-                self.dst_dir, self.usr_list_item[0], 'crossbuilders',
+                self.dst_dir, 'usr', 'crossbuilders',
                 self.target
                 #, usr
                 )
@@ -278,10 +325,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
 
         if h_all:
-            raise Exception(
-                "Now You need to create asm symlink in include dir\n"
-                "and continue with 'distr_man+' action"
-                )
+            print('-----------------')
+            print("Now You need to create asm symlink in include dir")
+            if self.is_crossbuilder:
+                print("and pack this building site")
+            if not self.is_crossbuilder and not self.is_crossbuild:
+                print("and continue with 'distr_man+' action")
+            print('-----------------')
+            ret = 1
 
         return ret
 
@@ -324,9 +375,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 wayround_org.utils.file.copytree(
                     fp,
                     wayround_org.utils.path.join(
-                        self.dst_dir, 
-                        self.usr_list_item[0], 
-                        'include', 
+                        self.dst_dir,
+                        self.usr_list_item[0],
+                        'include',
                         'asm-{}'.format(i)
                         ),
                     overwrite_files=False,

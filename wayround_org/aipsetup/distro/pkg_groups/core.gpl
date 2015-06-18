@@ -66,6 +66,7 @@
         "neon",
         "tor", "torsocks", "libevent", "asciidoc",
         "libpwquality", "cracklib",
-        "krb5"
+        "krb5",
+        "subversion"
     ]
 }

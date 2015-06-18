@@ -28,8 +28,31 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_actions(self):
         ret = super().define_actions()
         if self.is_crossbuilder:
+
+            logging.info(
+                "Crosscompiler building detected. splitting process on two parts"
+                )
+
             ret['edit_package_info'] = self.builder_action_edit_package_info
             ret.move_to_end('edit_package_info', False)
+
+            ret['build_01'] = self.builder_action_build_01
+            ret['distribute_01'] = self.builder_action_distribute_01
+
+            ret['intermediate_instruction_1'] = \
+                self.builder_action_intermediate_instruction_1
+
+            ret['build_02'] = self.builder_action_build_02
+            ret['distribute_02'] = self.builder_action_distribute_02
+
+            ret['intermediate_instruction_2'] = \
+                self.builder_action_intermediate_instruction_2
+
+            ret['build_03'] = self.builder_action_build_03
+            ret['distribute_03'] = self.builder_action_distribute_03
+
+            del ret['build']
+            del ret['distribute']
 
         if not self.is_crossbuilder:
             ret['after_distribute'] = self.builder_action_after_distribute
@@ -46,15 +69,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             name = None
 
         if name in ['gcc', None]:
+            pi = self.package_info
 
-            self.package_info['pkg_info']['name'] = \
-                'cb-gcc-{target}'.format(
-                    target=self.target
-                    )
+            pi['pkg_info']['name'] = 'cb-gcc-{target}'.format(
+                target=self.target
+                )
 
             bs = self.control
 
-            bs.write_package_info(self.package_info)
+            bs.write_package_info(pi)
 
         return ret
 
@@ -89,22 +112,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, log):
-        ''
-
-        """
-            '--with-gmp={}'.format(
-                wayround_org.utils.path.join(
-                    self.target_host_root,
-                    '/usr'
-                    )
-                ),
-            '--with-mpfr={}'.format(
-                wayround_org.utils.path.join(
-                    self.target_host_root,
-                    '/usr'
-                    )
-                ),
-        """
 
         ret = super().builder_action_configure_define_options(log)
 
@@ -116,67 +123,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ret = [
                 '--prefix=' + prefix
 
-                #'--mandir=' + os.path.join(prefix, 'share', 'man'),
-                #'--sysconfdir=' +
-                # self.package_info['constitution']['paths']['config'],
-                #'--localstatedir=' +
-                # self.package_info['constitution']['paths']['var'],
-                #'--enable-shared'
                 ] + autotools.calc_conf_hbt_options(self)
 
-        ret += [
-            # experimental options
-            # '--enable-targets=all',
-
-            # '--enable-targets='
-            # 'i486-pc-linux-gnu,'
-            # 'i586-pc-linux-gnu,'
-            # 'i686-pc-linux-gnu,'
-            # 'i786-pc-linux-gnu,'
-            # 'ia64-pc-linux-gnu,'
-            # 'x86_64-pc-linux-gnu,'
-            # 'aarch64-linux-gnu',
-
-            # then lto enabled it causes problems to systemd.
-            # some time has passed since then - trying to enable lto
-            #'--disable-lto',
-
-            # normal options
-
-            # disabled for experiment
-            #'--with-arch-32=i486',
-            #'--with-tune=generic',
-
-            #'--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-            #'--enable-languages=c,c++,java,objc,obj-c++,fortran',
-            #'--enable-languages=ada',
-            # '--enable-bootstrap',
-            # '--with-build-time-tools=
-            # /home/agu/_sda3/_UNICORN/b/gnat/
-            # gnat-gpl-2014-x86-linux-bin',
-            #'--enable-shared'
-            ]
-        """
-        if self.is_crossbuild or self.is_crossbuilder:
-            ret += [
-                '--enable-languages=c,c++',
-
-                '--disable-libatomic',
-                '--disable-libgomp',
-                '--disable-libitm',
-                '--disable-libquadmath',
-                '--disable-libsanitizer',
-                '--disable-libssp',
-                '--disable-libvtv',
-                '--disable-libcilkrts',
-                #'--disable-libstdc++-v3',
-                ]
-
-            for i in ['CFLAGS', 'LDFLAGS', 'CXXFLAGS']:
-                for j in range(len(ret) - 1, -1, -1):
-                    if ret[j].startswith(i):
-                        del ret[j]
-        """
 
         if self.is_crossbuilder:
             ret += sorted([
@@ -190,7 +138,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 # '--enable-multilib',
                 '--enable-checking=release',
                 '--enable-libada',
-                '--enable-shared'
+                '--enable-shared',
+
+                '--without-headers',
+                '--with-sysroot=/usr/crossbuilders/{}'.format(self.target)
                 ])
 
         if self.is_crossbuild:
@@ -198,7 +149,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++,java,ada',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
                 #'--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
@@ -226,15 +177,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
-                #'--enable-targets='
-                #'i686-pc-linux-gnu,'
-                #'x86_64-pc-linux-gnu'
                 ])
-
-        for i in ['CFLAGS', 'LDFLAGS', 'CXXFLAGS']:
-            for j in range(len(ret) - 1, -1, -1):
-                if ret[j].startswith(i):
-                    del ret[j]
 
         return ret
 
@@ -250,6 +193,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_checks(self, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=['check'],
             environment={},
@@ -269,3 +213,110 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             os.symlink('../bin/cpp', self.custom_data['libcpp_file'])
 
         return 0
+
+    def builder_action_build_01(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=['all-gcc'],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute_01(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install-gcc',
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_intermediate_instruction_1(self, log):
+        print("""\
+---------------
+Now You need to pack and install this gcc build.
+Then install linux-hraders and glibc (headers and, maybe, some other parts).
+After what - continue building from 'build_02+' action
+---------------
+""")
+        return 1
+
+    def builder_action_build_02(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=['all-target-libgcc'],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute_02(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install-target-libgcc',
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_intermediate_instruction_2(self, log):
+        print("""\
+---------------
+Now You need to pack and install this gcc build and then complete 
+glibc build (and install it too).
+After what - continue building this gcc from 'build_03+' action
+---------------
+""")
+        return 1
+
+    def builder_action_build_03(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute_03(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install',
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret

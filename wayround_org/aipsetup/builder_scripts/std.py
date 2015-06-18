@@ -19,6 +19,10 @@ class Builder:
 
         bs = wayround_org.aipsetup.build.BuildingSiteCtl(buildingsite)
 
+        # this is for glibc case, when package_info `host' should stay same
+        # as `build', but ./configure --host must be different
+        self.internal_host_redefinition = None
+
         self.control = bs
 
         self.separate_build_dir = False
@@ -60,6 +64,7 @@ class Builder:
 
     @property
     def package_info(self):
+        # TODO: make cache
         return self.control.read_package_info()
 
     @property
@@ -93,8 +98,12 @@ class Builder:
 
     @property
     def is_crossbuilder(self):
-        return (self.package_info['constitution']['target']
-                != self.package_info['constitution']['host'])
+        return (
+            self.package_info['constitution']['target']
+            != self.package_info['constitution']['host']
+            or self.package_info['constitution']['target']
+            != self.package_info['constitution']['build']
+            )
 
     @property
     def target(self):
@@ -102,7 +111,10 @@ class Builder:
 
     @property
     def host(self):
-        return self.package_info['constitution']['host']
+        ret = self.package_info['constitution']['host']
+        if self.internal_host_redefinition is not None:
+            ret = self.internal_host_redefinition
+        return ret
 
     @property
     def build(self):
@@ -110,6 +122,8 @@ class Builder:
 
     def print_help(self):
         txt = ''
+        print("building script: {}".format(self))
+        print('{:40}    {}'.format('[command]', '[comment]'))
         for i in self.action_dict.keys():
             txt += '{:40}    {}\n'.format(
                 i,

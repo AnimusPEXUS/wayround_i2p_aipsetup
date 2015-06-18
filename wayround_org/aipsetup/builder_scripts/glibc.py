@@ -3,6 +3,9 @@ import logging
 import os.path
 import time
 import collections
+import glob
+import shutil
+import subprocess
 
 import wayround_org.utils.file
 import wayround_org.utils.path
@@ -20,13 +23,44 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
         self.separate_build_dir = True
         self.forced_target = True
+
+        if (self.package_info['constitution']['host'] !=
+                self.package_info['constitution']['target'] and
+                self.package_info['constitution']['host'] ==
+                self.package_info['constitution']['build']
+            ):
+            self.internal_host_redefinition =\
+                self.package_info['constitution']['target']
+
         return None
 
     def define_actions(self):
+
         ret = super().define_actions()
         if self.is_crossbuilder:
+
+            logging.info(
+                "Crosscompiler building detected. splitting process on two parts"
+                )
+
             ret['edit_package_info'] = self.builder_action_edit_package_info
             ret.move_to_end('edit_package_info', False)
+
+            # ret['build_01'] = self.builder_action_build_01
+            ret['distribute_01'] = self.builder_action_distribute_01
+            ret['distribute_01_2'] = self.builder_action_distribute_01_2
+            ret['distribute_01_3'] = self.builder_action_distribute_01_3
+            ret['distribute_01_4'] = self.builder_action_distribute_01_4
+            ret['distribute_01_5'] = self.builder_action_distribute_01_5
+
+            ret['intermediate_instruction'] = \
+                self.builder_action_intermediate_instruction
+
+            ret['build_02'] = self.builder_action_build_02
+            ret['distribute_02'] = self.builder_action_distribute_02
+
+            del ret['build']
+            del ret['distribute']
         return ret
 
     def builder_action_edit_package_info(self, log):
@@ -40,21 +74,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if name in ['glibc', None]:
 
-            self.package_info['pkg_info']['name'] = \
-                'cb-glibc-{target}'.format(
-                    target=self.target
-                    )
+            pi = self.package_info
+
+            pi['pkg_info']['name'] = 'cb-glibc-{target}'.format(
+                target=self.target
+                )
 
             bs = self.control
 
-            bs.write_package_info(self.package_info)
+            bs.write_package_info(pi)
 
         return ret
 
     def builder_action_configure_define_options(self, log):
 
         with_headers = '/usr/include'
-        
+
         """
         if self.is_crossbuilder:
             with_headers = '/usr_all/include'
@@ -62,22 +97,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = super().builder_action_configure_define_options(log)
 
-        """
         if self.is_crossbuilder:
             prefix = os.path.join(
                 '/', 'usr', 'crossbuilders', self.target
                 )
 
+            with_headers = os.path.join(
+                prefix,
+                'include'
+                )
+
             ret = [
                 '--prefix=' + prefix,
-                '--mandir=' + os.path.join(prefix, 'share', 'man'),
+                #'--mandir=' + os.path.join(prefix, 'share', 'man'),
                 #'--sysconfdir=' +
-                #self.package_info['constitution']['paths']['config'],
+                # self.package_info['constitution']['paths']['config'],
                 #'--localstatedir=' +
-                #self.package_info['constitution']['paths']['var'],
+                # self.package_info['constitution']['paths']['var'],
                 '--enable-shared'
                 ] + autotools.calc_conf_hbt_options(self)
-        """
 
         ret += [
             '--enable-obsolete-rpc',
@@ -92,6 +130,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-headers=' + with_headers,
             '--enable-shared'
             ]
+
+        if self.is_crossbuilder:
+            ret += [
+                'libc_cv_forced_unwind=yes',
+
+                # TODO: gcc may be required to be built without
+                #       --without-headers option to avoit this glibc parameter
+                'libc_cv_ssp=no'
+                ]
 
         return ret
 
@@ -109,4 +156,160 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             except:
                 log.exception("Can't rename ld.so.cache file")
 
+        return ret
+
+    """
+    def builder_action_build_01(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=['all-gcc'],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+    """
+
+    def builder_action_distribute_01(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install-bootstrap-headers=yes',
+                'install-headers',
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute_01_2(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'csu/subdir_lib'
+                ],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.bld_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute_01_3(self, log):
+
+        gres = glob.glob(os.path.join(self.bld_dir, 'csu', '*crt*.o'))
+
+        dest_lib_dir = wayround_org.utils.path.join(
+            self.dst_dir,
+            'usr',
+            'crossbuilders',
+            self.target,
+            'lib'
+            )
+
+        os.makedirs(dest_lib_dir, exist_ok=True)
+
+        for i in gres:
+            from_ = i
+            to = dest_lib_dir
+            log.info("Copying `{}' to `{}'".format(from_, to))
+            shutil.copy2(from_, to)
+
+        return 0
+
+    def builder_action_distribute_01_4(self, log):
+
+        cwd = wayround_org.utils.path.join(
+            self.dst_dir,
+            'usr',
+            'crossbuilders',
+            self.target,
+            'lib'
+            )
+
+        cmd = [
+            self.target + '-gcc',
+            '-nostdlib',
+            '-nostartfiles',
+            '-shared',
+            '-x',
+            'c',
+            '/dev/null',
+            '-o',
+            'libc.so'
+            ]
+
+        log.info("directory: {}".format(cwd))
+        log.info("cmd: {}".format(' '.join(cmd)))
+        p = subprocess.Popen(cmd, cwd=cwd)
+        ret = p.wait()
+        return ret
+
+    def builder_action_distribute_01_5(self, log):
+
+        cwd = wayround_org.utils.path.join(
+            self.dst_dir,
+            'usr',
+            'crossbuilders',
+            self.target,
+            'include',
+            'gnu'
+            )
+
+        cwdf = wayround_org.utils.path.join(cwd, 'stubs.h')
+
+        os.makedirs(cwd, exist_ok=True)
+
+        if not os.path.isfile(cwdf):
+            with open(cwdf, 'w') as f:
+                pass
+
+        return 0
+
+    def builder_action_intermediate_instruction(self, log):
+        print("""\
+---------------
+pack and install this glibc build.
+then continue with gcc build_02+
+---------------
+""")
+        return 1
+
+    def builder_action_build_02(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute_02(self, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install',
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment=self.builder_action_make_define_environment(log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
         return ret

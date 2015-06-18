@@ -37,15 +37,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             name = None
 
         if name in ['binutils', None]:
+            pi = self.package_info
 
-            self.package_info['pkg_info']['name'] = \
-                'cb-binutils-{target}'.format(
-                    target=self.target
-                    )
+            pi['pkg_info']['name'] = 'cb-binutils-{target}'.format(
+                target=self.target
+                )
 
             bs = self.control
 
-            bs.write_package_info(self.package_info)
+            bs.write_package_info(pi)
 
         return ret
 
