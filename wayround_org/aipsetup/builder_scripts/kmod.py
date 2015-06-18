@@ -12,7 +12,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             '--with-xz',
             '--with-zlib',
@@ -23,7 +23,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['make_links'] = self.builder_action_make_links
         return ret
 
-    def builder_action_make_links(self, log):
+    def builder_action_make_links(self, called_as, log):
 
         os.makedirs(
             os.path.join(self.dst_dir, 'usr', 'sbin'),

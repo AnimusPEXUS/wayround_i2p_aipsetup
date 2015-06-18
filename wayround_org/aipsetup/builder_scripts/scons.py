@@ -24,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_bootstrap(self, log):
+    def builder_action_bootstrap(self, called_as, log):
         p = subprocess.Popen(
             [
                 'python2',
@@ -38,7 +38,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             [python,
              'setup.py',

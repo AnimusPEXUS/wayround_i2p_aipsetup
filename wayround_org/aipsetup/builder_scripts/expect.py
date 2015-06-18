@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
         return {}
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         files = os.listdir(self.tar_dir)
 
         tcl_found = False
@@ -58,7 +58,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ret = super().builder_action_extract(log)
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         ''
         """
                     '--with-tcl={}'.format(

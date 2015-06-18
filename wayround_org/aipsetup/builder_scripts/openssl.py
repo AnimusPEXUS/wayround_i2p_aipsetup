@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['build']
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         # super().builder_action_configure_define_options(log) +
         ret = [
             '--prefix=/usr',
@@ -38,10 +38,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         """
         return ret
 
-    def builder_action_configure_define_script_name(self, log):
+    def builder_action_configure_define_script_name(self, called_as, log):
         return 'config'
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,

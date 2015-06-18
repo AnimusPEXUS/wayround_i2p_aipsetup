@@ -21,7 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['links'] = self.builder_action_links
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = super().builder_action_distribute(log)
 
         if ret == 0:
@@ -39,7 +39,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
         return ret
 
-    def builder_action_links(self, log):
+    def builder_action_links(self, called_as, log):
         ret = 0
 
         pkg_name = self.package_info['pkg_info']['name']

@@ -33,7 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('sendmail_link', self.builder_action_sendmail_link)
             ])
 
-    def builder_action_fix_exim_install(self, log):
+    def builder_action_fix_exim_install(self, called_as, log):
 
         exim_install = os.path.join(self.src_dir, 'scripts', 'exim_install')
 
@@ -55,7 +55,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return 0
 
-    def builder_action_config_exim(self, log):
+    def builder_action_config_exim(self, called_as, log):
 
         ret = 0
 
@@ -167,7 +167,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ret = 0
         return ret
 
-    def builder_action_config_eximon(self, log):
+    def builder_action_config_eximon(self, called_as, log):
         editme_mon = os.path.join(self.src_dir, 'exim_monitor', 'EDITME')
         editme_makefile_mon = \
             os.path.join(self.src_dir, 'Local', 'eximon.conf')
@@ -175,7 +175,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         shutil.copy(editme_mon, editme_makefile_mon)
         return 0
 
-    def builder_action_rename_configs(self, log):
+    def builder_action_rename_configs(self, called_as, log):
         for i in [
                 os.path.join(self.dst_dir, 'etc', 'exim', 'configure'),
                 os.path.join(self.dst_dir, 'etc', 'aliases')
@@ -186,7 +186,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 shutil.move(i, i + '.example')
         return 0
 
-    def builder_action_sendmail_link(self, log):
+    def builder_action_sendmail_link(self, called_as, log):
         lnk = os.path.join(self.dst_dir, 'usr', 'bin', 'sendmail')
 
         if os.path.exists(lnk) or os.path.islink(lnk):

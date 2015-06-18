@@ -8,7 +8,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
 
         cb_opts = []
         if self.is_crossbuild:
@@ -35,7 +35,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return super().builder_action_configure_define_options(log) + [
             ] + cb_opts
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
 
         # ret = {}
         # if self.is_crossbuild:

@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['autogen']
         return ret
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
 
         src_dir_p_sep = self.custom_data['src_dir_p_sep']
 
@@ -70,7 +70,7 @@ CFLAGS += -I/usr/include/libnl3
         f.close()
         return 0
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -87,7 +87,7 @@ CFLAGS += -I/usr/include/libnl3
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -106,7 +106,7 @@ CFLAGS += -I/usr/include/libnl3
             )
         return ret
 
-    def builder_action_copy_manpages(self, log):
+    def builder_action_copy_manpages(self, called_as, log):
         log.info("Copying manuals")
 
         src_dir_p_sep = self.custom_data['src_dir_p_sep']

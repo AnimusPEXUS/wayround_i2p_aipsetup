@@ -151,7 +151,7 @@ class Builder:
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_src_cleanup(self, log):
+    def builder_action_src_cleanup(self, called_as, log):
         """
         Standard sources cleanup
         """
@@ -162,7 +162,7 @@ class Builder:
 
         return 0
 
-    def builder_action_bld_cleanup(self, log):
+    def builder_action_bld_cleanup(self, called_as, log):
         """
         Standard building dir cleanup
         """
@@ -173,7 +173,7 @@ class Builder:
 
         return 0
 
-    def builder_action_dst_cleanup(self, log):
+    def builder_action_dst_cleanup(self, called_as, log):
         """
         Standard destdir cleanup
         """
@@ -184,7 +184,7 @@ class Builder:
 
         return 0
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         """
         Standard sources extraction actions
         """
@@ -199,10 +199,10 @@ class Builder:
 
         return ret
 
-    def builder_action_patch(self, log):
+    def builder_action_patch(self, called_as, log):
         return 0
 
-    def builder_action_autogen(self, log):
+    def builder_action_autogen(self, called_as, log):
         cfg_script_name = self.builder_action_configure_define_script_name(log)
         ret = 0
         if os.path.isfile(
@@ -261,7 +261,7 @@ class Builder:
                 ret = 2
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
 
         ret = [
             '--prefix=' +
@@ -277,22 +277,22 @@ class Builder:
 
         return ret
 
-    def builder_action_configure_define_script_name(self, log):
+    def builder_action_configure_define_script_name(self, called_as, log):
         return 'configure'
 
-    def builder_action_configure_define_run_script_not_bash(self, log):
+    def builder_action_configure_define_run_script_not_bash(self, called_as, log):
         return False
 
-    def builder_action_configure_define_relative_call(self, log):
+    def builder_action_configure_define_relative_call(self, called_as, log):
         return False
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
         return {}
 
-    def builder_action_make_define_environment(self, log):
+    def builder_action_make_define_environment(self, called_as, log):
         return self.builder_action_configure_define_environment(log)
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
 
         defined_options = self.builder_action_configure_define_options(log)
         defined_script_name = self.builder_action_configure_define_script_name(
@@ -315,7 +315,7 @@ class Builder:
             )
         return ret
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -328,7 +328,7 @@ class Builder:
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,

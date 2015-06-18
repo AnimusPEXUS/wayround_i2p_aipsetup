@@ -64,7 +64,7 @@ class LinuxHeadersBuilder(wayround_org.aipsetup.builder_scripts.linux.Builder):
                 self.builder_action_distr_headers_all)
             ])
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         ret = autotools.extract_high(
             self.buildingsite,
             'linux',
@@ -95,7 +95,7 @@ class BinutilsBuilder(
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         ret = autotools.extract_high(
             self.buildingsite,
             'binutils',
@@ -105,7 +105,7 @@ class BinutilsBuilder(
             )
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             #'--enable-targets=all',
 
@@ -135,7 +135,7 @@ class BinutilsBuilder(
             # 'aarch64-linux-gnu',
             ]
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
         return {
             'PATH': calc_path_addition(self.dst_dir, self.target)
             }
@@ -159,7 +159,7 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         ret = autotools.extract_high(
             self.buildingsite,
             'gcc',
@@ -169,12 +169,12 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
         return {
             'PATH': calc_path_addition(self.dst_dir, self.target)
             }
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             # experimental options
             # '--enable-targets=all',
@@ -250,7 +250,7 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--disable-libstdc++-v3',
             ]
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -265,7 +265,7 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -304,7 +304,7 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             ('create_dummy_libc', self.builder_action_create_dummy_libc)
             ])
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         ret = autotools.extract_high(
             self.buildingsite,
             'glibc',
@@ -314,12 +314,12 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             )
         return ret
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
         return {
             'PATH': calc_path_addition(self.dst_dir, self.target)
             }
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         headers_path = os.path.join(
             calculate_dst_dir_prefix(self.dst_dir, self.target),
             'include'
@@ -359,7 +359,7 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             'libc_cv_forced_unwind=yes'
             ]
 
-    def builder_action_distribute_headers1(self, log):
+    def builder_action_distribute_headers1(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -379,7 +379,7 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             )
         return ret
 
-    def builder_action_distribute_headers2(self, log):
+    def builder_action_distribute_headers2(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -396,7 +396,7 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
             )
         return ret
 
-    def builder_action_copy_crt_objects(self, log):
+    def builder_action_copy_crt_objects(self, called_as, log):
 
         gres = glob.glob(os.path.join(self.bld_dir, 'csu', '*crt*.o'))
 
@@ -415,7 +415,7 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
 
         return 0
 
-    def builder_action_create_dummy_libc(self, log):
+    def builder_action_create_dummy_libc(self, called_as, log):
         cwd = os.path.join(
             calculate_dst_dir_prefix(self.dst_dir, self.target),
             'lib'
@@ -453,7 +453,7 @@ class GCC02Builder(GCC01Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -468,7 +468,7 @@ class GCC02Builder(GCC01Builder):
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -499,7 +499,7 @@ class Glibc02Builder(Glibc01Builder):
             ('distribute', self.builder_action_distribute),
             ])
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -514,7 +514,7 @@ class Glibc02Builder(Glibc01Builder):
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -587,7 +587,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return collections.OrderedDict(action_list)
 
-    def builder_action_extract_libs(self, log):
+    def builder_action_extract_libs(self, called_as, log):
 
         ret = 0
 
@@ -612,7 +612,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_extract_sources(self, log):
+    def builder_action_extract_sources(self, called_as, log):
 
         ret = 0
 
@@ -643,7 +643,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_copy_libs_into_sources(self, log):
+    def builder_action_copy_libs_into_sources(self, called_as, log):
 
         for i in ['gmp', 'cloog', 'isl', 'mpc', 'mpfr']:
 
@@ -661,7 +661,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return 0
 
-    def builder_action_make_build_dirs(self, log):
+    def builder_action_make_build_dirs(self, called_as, log):
 
         ret = 0
 
@@ -684,7 +684,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_clean_build_dirs(self, log):
+    def builder_action_clean_build_dirs(self, called_as, log):
 
         ret = 0
 
@@ -710,7 +710,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_edit_package_info(self, log):
+    def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
 
@@ -728,7 +728,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             bs.apply_pkg_nameinfo_on_buildingsite(tar)
         return ret
 
-    def builder_action_create_etc_files(self, log):
+    def builder_action_create_etc_files(self, called_as, log):
 
         etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
         etc_dir_file = os.path.join(

@@ -63,7 +63,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             del ret['distribute']
         return ret
 
-    def builder_action_edit_package_info(self, log):
+    def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
 
@@ -86,7 +86,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
 
         with_headers = '/usr/include'
 
@@ -142,7 +142,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
 
         ret = super().builder_action_distribute(log)
 
@@ -159,7 +159,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     """
-    def builder_action_build_01(self, log):
+    def builder_action_build_01(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -173,7 +173,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
     """
 
-    def builder_action_distribute_01(self, log):
+    def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -190,7 +190,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute_01_2(self, log):
+    def builder_action_distribute_01_2(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -205,7 +205,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute_01_3(self, log):
+    def builder_action_distribute_01_3(self, called_as, log):
 
         gres = glob.glob(os.path.join(self.bld_dir, 'csu', '*crt*.o'))
 
@@ -227,7 +227,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return 0
 
-    def builder_action_distribute_01_4(self, log):
+    def builder_action_distribute_01_4(self, called_as, log):
 
         cwd = wayround_org.utils.path.join(
             self.dst_dir,
@@ -255,7 +255,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
         return ret
 
-    def builder_action_distribute_01_5(self, log):
+    def builder_action_distribute_01_5(self, called_as, log):
 
         cwd = wayround_org.utils.path.join(
             self.dst_dir,
@@ -276,7 +276,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return 0
 
-    def builder_action_intermediate_instruction(self, log):
+    def builder_action_intermediate_instruction(self, called_as, log):
         print("""\
 ---------------
 pack and install this glibc build.
@@ -285,7 +285,7 @@ then continue with gcc build_02+
 """)
         return 1
 
-    def builder_action_build_02(self, log):
+    def builder_action_build_02(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -298,7 +298,7 @@ then continue with gcc build_02+
             )
         return ret
 
-    def builder_action_distribute_02(self, log):
+    def builder_action_distribute_02(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,

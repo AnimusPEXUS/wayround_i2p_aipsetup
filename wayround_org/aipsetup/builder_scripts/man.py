@@ -6,7 +6,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return ['-d']
 
     def define_actions(self):
@@ -14,7 +14,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['fix_config'] = self.builder_action_fix_config
         return ret
 
-    def builder_action_fix_config(self, log):
+    def builder_action_fix_config(self, called_as, log):
 
         cfg_file = os.path.join(
             self.dst_dir, 'usr', 'share', 'misc', 'man.conf'

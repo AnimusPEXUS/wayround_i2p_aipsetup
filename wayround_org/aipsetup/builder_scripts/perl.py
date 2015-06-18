@@ -9,11 +9,11 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         ret = [
             '--prefix=' + self.package_info['constitution']['paths']['usr']
             ]
         return ret
 
-    def builder_action_configure_define_script_name(self, log):
+    def builder_action_configure_define_script_name(self, called_as, log):
         return 'configure.gnu'

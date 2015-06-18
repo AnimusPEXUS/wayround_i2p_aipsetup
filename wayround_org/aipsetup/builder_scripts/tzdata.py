@@ -31,7 +31,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
-    def builder_action_verify_tarball(self, log):
+    def builder_action_verify_tarball(self, called_as, log):
         files = os.listdir(self.tar_dir)
         tzdata = None
         ret = 0
@@ -49,7 +49,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
 
         ret = autotools.extract_high(
             self.buildingsite,
@@ -62,7 +62,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
         ret = 0
 
         try:
@@ -86,7 +86,7 @@ printtdata:
 
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = 0
 
         os.makedirs(self.custom_data['zoneinfo'])

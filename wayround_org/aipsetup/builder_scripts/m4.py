@@ -12,7 +12,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_patch(self, log):
+    def builder_action_patch(self, called_as, log):
 
         # disabled patching for experiment
         return 0

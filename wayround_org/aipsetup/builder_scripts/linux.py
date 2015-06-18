@@ -115,7 +115,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_edit_package_info(self, log):
+    def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
 
@@ -137,7 +137,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_dst_cleanup(self, log):
+    def builder_action_dst_cleanup(self, called_as, log):
         """
         Standard destdir cleanup
         """
@@ -154,13 +154,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return 0
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
         logging.info("You now need to configure kernel by your needs and")
         logging.info("continue building procedure with command")
         logging.info("'aipsetup build continue build+'")
         return 1
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -173,7 +173,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distr_kernel(self, log):
+    def builder_action_distr_kernel(self, called_as, log):
         if not os.path.exists(self.custom_data['dst_boot_dir']):
             os.makedirs(self.custom_data['dst_boot_dir'])
 
@@ -210,7 +210,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             os.rename(p1, p2)
         return ret
 
-    def builder_action_distr_modules(self, log):
+    def builder_action_distr_modules(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -265,7 +265,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distr_firmware(self, log):
+    def builder_action_distr_firmware(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -281,7 +281,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distr_headers_internal(self, log):
+    def builder_action_distr_headers_internal(self, called_as, log):
         wayround_org.utils.file.copytree(
             wayround_org.utils.path.join(self.src_dir, 'include'),
             wayround_org.utils.path.join(self.dst_dir, 'usr', 'include'),
@@ -336,13 +336,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distr_headers_normal(self, log):
+    def builder_action_distr_headers_normal(self, called_as, log):
         return self._builder_action_distr_headers_001(log, h_all=False)
 
-    def builder_action_distr_headers_all(self, log):
+    def builder_action_distr_headers_all(self, called_as, log):
         return self._builder_action_distr_headers_001(log, h_all=True)
 
-    def builder_action_distr_headers_internal_repeat(self, log):
+    def builder_action_distr_headers_internal_repeat(self, called_as, log):
 
         wayround_org.utils.file.copytree(
             wayround_org.utils.path.join(self.src_dir, 'include'),
@@ -354,7 +354,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distr_arch_headers_internal(self, log):
+    def builder_action_distr_arch_headers_internal(self, called_as, log):
         archs = os.listdir(self.custom_data['src_arch_dir'])
         archs.sort()
         for i in archs[:]:
@@ -395,7 +395,7 @@ Continue with command
         ret = 1
         return ret
 
-    def builder_action_remove_install_files_from_includes(self, log):
+    def builder_action_remove_install_files_from_includes(self, called_as, log):
         p = subprocess.Popen(
             ['find',
              '(', '-name', '.install',
@@ -414,7 +414,7 @@ Continue with command
         p.wait()
         return ret
 
-    def builder_action_distr_man(self, log):
+    def builder_action_distr_man(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -455,7 +455,7 @@ Continue with command
                     )
         return ret
 
-    def builder_action_copy_source(self, log):
+    def builder_action_copy_source(self, called_as, log):
         try:
             ret = wayround_org.utils.file.copytree(
                 self.src_dir,

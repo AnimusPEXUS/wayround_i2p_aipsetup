@@ -13,7 +13,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_patch(self, log):
+    def builder_action_patch(self, called_as, log):
 
         ret = 0
 
@@ -82,7 +82,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             '--disable-werror'
             ]

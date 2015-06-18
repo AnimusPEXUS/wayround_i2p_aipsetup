@@ -31,13 +31,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             #'--enable-win64'
             
             ]
 
-    def builder_action_build_depend(self, log):
+    def builder_action_build_depend(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,

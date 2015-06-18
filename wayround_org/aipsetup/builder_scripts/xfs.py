@@ -34,7 +34,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
     """
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         copts = []
         if self.is_crossbuild:
             copts +=[
@@ -47,7 +47,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ]
         return super().builder_action_configure_define_options(log) + copts
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
         log.info(
             "Detected (and accepted) basename is: [{}]".format(
                 self.package_info['pkg_info']['basename']
@@ -55,7 +55,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return super().builder_action_configure(log)
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
 
         opt_args = []
 

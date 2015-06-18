@@ -20,7 +20,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['sh_link'] = self.builder_action_sh_link
         return ret
 
-    def builder_action_patch(self, log):
+    def builder_action_patch(self, called_as, log):
         ret = 0
         patches = os.listdir(self.patches_dir)
 
@@ -53,7 +53,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     ret = 1
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         ret = [
             '--enable-multibyte',
             '--with-curses'
@@ -70,7 +70,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return super().builder_action_configure_define_options(log) + ret
 
-    def builder_action_sh_link(self, log):
+    def builder_action_sh_link(self, called_as, log):
         tsl = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin', 'sh')
 
         if os.path.exists(tsl) or os.path.islink(tsl):

@@ -12,7 +12,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class BuilderForPy2(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
         return {'PYTHON': 'python2'}
 
     def define_actions(self):
@@ -30,7 +30,7 @@ class BuilderForPy2(wayround_org.aipsetup.builder_scripts.std.Builder):
 
 class BuilderForPy3(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_environment(self, log):
+    def builder_action_configure_define_environment(self, called_as, log):
         return {'PYTHON': 'python3'}
 
     def define_actions(self):

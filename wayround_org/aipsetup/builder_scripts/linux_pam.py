@@ -6,7 +6,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             # '--disable-nis',
             '--enable-db=ndbm',
@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--enable-securedir=/pam_modules'
             ]
     """
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret= super().builder_action_distribute(log)
 
         if ret == 0:

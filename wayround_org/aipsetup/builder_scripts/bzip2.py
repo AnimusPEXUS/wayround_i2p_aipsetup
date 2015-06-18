@@ -52,7 +52,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('fix_links', self.builder_action_fix_links),
             ])
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
 
         ret = autotools.make_high(
             self.buildingsite,
@@ -78,7 +78,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
 
         ret = autotools.make_high(
             self.buildingsite,
@@ -96,7 +96,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_so(self, log):
+    def builder_action_so(self, called_as, log):
 
         ret = autotools.make_high(
             self.buildingsite,
@@ -120,7 +120,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_copy_so(self, log):
+    def builder_action_copy_so(self, called_as, log):
 
         ret = 0
 
@@ -154,7 +154,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_fix_links(self, log):
+    def builder_action_fix_links(self, called_as, log):
 
         ret = 0
 

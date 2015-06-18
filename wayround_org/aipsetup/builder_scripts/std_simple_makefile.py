@@ -19,7 +19,7 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_prepare_destdir(self, log):
+    def builder_action_prepare_destdir(self, called_as, log):
         ret = 0
 
         target_path = os.path.join(self.dst_dir, 'usr')
@@ -36,7 +36,7 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
 
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             options=[],

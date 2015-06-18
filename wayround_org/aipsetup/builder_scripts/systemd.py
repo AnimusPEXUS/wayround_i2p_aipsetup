@@ -6,7 +6,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     # NOTE: configure time  'CFLAGS': '-fno-lto' environment may be required
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         pamlibdir=[]
         if '64' in self.host:
             pamlibdir+=['--with-pamlibdir=/usr/lib64/security']

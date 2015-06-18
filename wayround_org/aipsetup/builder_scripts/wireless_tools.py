@@ -17,7 +17,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['build']
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             ['make',
              'PREFIX={}/usr'.format(self.dst_dir),

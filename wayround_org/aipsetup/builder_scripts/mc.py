@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['asc_support'] = self.builder_action_asc_support
         return ret
 
-    def builder_action_wrapper(self, log):
+    def builder_action_wrapper(self, called_as, log):
 
         set_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
@@ -42,7 +42,7 @@ alias mc=". /usr/share/mc/bin/mc-wrapper.sh"
 
         return 0
 
-    def builder_action_asc_support(self, log):
+    def builder_action_asc_support(self, called_as, log):
         exts_file = os.path.join(self.dst_dir, 'etc', 'mc', 'mc.ext')
 
         f = open(exts_file)

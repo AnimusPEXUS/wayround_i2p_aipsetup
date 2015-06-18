@@ -30,7 +30,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_bootstrap(self, log):
+    def builder_action_bootstrap(self, called_as, log):
         p = subprocess.Popen(
             [
                 'bash',
@@ -46,7 +46,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
         return ret
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             [
                 os.path.join(self.src_dir, 'bjam'),
@@ -66,7 +66,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             [
                 os.path.join(self.src_dir, 'bjam'),

@@ -40,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('environments', self.builder_action_environments)
             ])
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
 
         p = subprocess.Popen(
             ['./configure'] +
@@ -61,7 +61,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -77,7 +77,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_environments(self, log):
+    def builder_action_environments(self, called_as, log):
 
         etc_profile_set_dir = self.custom_data['etc_profile_set_dir']
         qt_number_str = self.custom_data['qt_number_str']

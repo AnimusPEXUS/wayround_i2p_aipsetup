@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # ret['delete_share'] = self.builder_action_delete_share
         return ret
 
-    def builder_action_edit_package_info(self, log):
+    def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
 
@@ -49,7 +49,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
 
         ret = super().builder_action_extract(
             log
@@ -72,7 +72,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
 
         ret = super().builder_action_configure_define_options(log)
 
@@ -126,7 +126,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_after_distribute(self, log):
+    def builder_action_after_distribute(self, called_as, log):
 
         etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
         etc_dir_file = os.path.join(
@@ -153,7 +153,7 @@ export PATH=$PATH:/usr/crossbuilders/{target}/bin:\
 
         return 0
 
-    def builder_action_delete_share(self, log):
+    def builder_action_delete_share(self, called_as, log):
 
         share = os.path.join(self.dst_dir, 'usr', 'share')
 

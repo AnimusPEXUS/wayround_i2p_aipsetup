@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return [
             '-DCMAKE_INSTALL_PREFIX=' +
             self.package_info['constitution']['paths']['usr'],
@@ -43,7 +43,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #    '--target=' + pkg_info['constitution']['target']
             ] + cmake.calc_conf_hbt_options(self)
 
-    def builder_action_configure(self, log):
+    def builder_action_configure(self, called_as, log):
 
         defined_options = self.builder_action_configure_define_options(log)
 

@@ -59,7 +59,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_edit_package_info(self, log):
+    def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
 
@@ -81,7 +81,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
 
         ret = super().builder_action_extract(
             log
@@ -111,7 +111,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
 
         ret = super().builder_action_configure_define_options(log)
 
@@ -181,7 +181,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_before_checks(self, log):
+    def builder_action_before_checks(self, called_as, log):
         print(
             "stop: checks! If You want them (it's good if You do)\n"
             "then continue build with command: aipsetup build continue checks+\n"
@@ -190,7 +190,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 1
         return ret
 
-    def builder_action_checks(self, log):
+    def builder_action_checks(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -203,7 +203,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_after_distribute(self, log):
+    def builder_action_after_distribute(self, called_as, log):
 
         if not os.path.exists(self.custom_data['cc_file']):
             os.symlink('gcc', self.custom_data['cc_file'])
@@ -214,7 +214,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return 0
 
-    def builder_action_build_01(self, log):
+    def builder_action_build_01(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -227,7 +227,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute_01(self, log):
+    def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -243,7 +243,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_intermediate_instruction_1(self, log):
+    def builder_action_intermediate_instruction_1(self, called_as, log):
         print("""\
 ---------------
 Now You need to pack and install this gcc build.
@@ -253,7 +253,7 @@ After what - continue building from 'build_02+' action
 """)
         return 1
 
-    def builder_action_build_02(self, log):
+    def builder_action_build_02(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -266,7 +266,7 @@ After what - continue building from 'build_02+' action
             )
         return ret
 
-    def builder_action_distribute_02(self, log):
+    def builder_action_distribute_02(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -282,7 +282,7 @@ After what - continue building from 'build_02+' action
             )
         return ret
 
-    def builder_action_intermediate_instruction_2(self, log):
+    def builder_action_intermediate_instruction_2(self, called_as, log):
         print("""\
 ---------------
 Now You need to pack and install this gcc build and then complete 
@@ -292,7 +292,7 @@ After what - continue building this gcc from 'build_03+' action
 """)
         return 1
 
-    def builder_action_build_03(self, log):
+    def builder_action_build_03(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -305,7 +305,7 @@ After what - continue building this gcc from 'build_03+' action
             )
         return ret
 
-    def builder_action_distribute_03(self, log):
+    def builder_action_distribute_03(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,

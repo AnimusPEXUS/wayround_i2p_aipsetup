@@ -19,7 +19,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_extract(self, log):
+    def builder_action_extract(self, called_as, log):
         ret = autotools.extract_high(
             self.buildingsite,
             self.package_info['pkg_info']['basename'],
@@ -30,7 +30,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
 
         man_dir = os.path.join(self.dst_dir, 'usr', 'share', 'man')
 

@@ -20,10 +20,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del(ret['autogen'])
         return ret
 
-    def builder_action_configure_define_relative_call(self, log):
+    def builder_action_configure_define_relative_call(self, called_as, log):
         return True
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             '--enable-sql',
             '--enable-compat185',
@@ -32,10 +32,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-tcl=/usr/lib',
             ]
 
-    def builder_action_configure_define_script_name(self, log):
+    def builder_action_configure_define_script_name(self, called_as, log):
         return os.path.join('..', 'dist', 'configure')
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
 
         doc_dir = os.path.join(self.dst_dir, 'usr', 'share', 'doc', 'db')
 

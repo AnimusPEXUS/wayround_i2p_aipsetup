@@ -29,7 +29,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['pc'] = self.builder_action_pc
         return ret
 
-    def builder_action_patch(self, log):
+    def builder_action_patch(self, called_as, log):
 
         ret = 0
 
@@ -132,7 +132,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     p.wait()
         return ret
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         ret = [
             '--enable-shared',
             '--enable-widec',
@@ -156,7 +156,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return super().builder_action_configure_define_options(log) + ret
 
-    def builder_action_links(self, log):
+    def builder_action_links(self, called_as, log):
 
         ret = 0
 
@@ -199,7 +199,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 os.symlink(r_name, flp)
         return ret
 
-    def builder_action_pc(self, log):
+    def builder_action_pc(self, called_as, log):
         ret = 0
 
         dst_pc_lib_dir = self.custom_data['dst_pc_lib_dir']

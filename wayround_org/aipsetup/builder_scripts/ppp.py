@@ -28,12 +28,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'thr': thr
             }
 
-    def builder_action_configure_define_options(self, log):
+    def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(log) + [
             '--with-pydebug'
             ]
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -51,7 +51,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,

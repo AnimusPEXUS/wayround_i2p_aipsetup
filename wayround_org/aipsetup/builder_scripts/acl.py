@@ -26,7 +26,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('fix_la_file', self.builder_action_fix_la_file)
             ])
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -42,7 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_fix_symlinks(self, log):
+    def builder_action_fix_symlinks(self, called_as, log):
         subset = self.custom_data['subset']
 
         ret = 0
@@ -68,7 +68,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ret = 1
         return ret
 
-    def builder_action_fix_la_file(self, log):
+    def builder_action_fix_la_file(self, called_as, log):
         subset = self.custom_data['subset']
 
         ret = 0

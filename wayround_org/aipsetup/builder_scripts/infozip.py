@@ -17,7 +17,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['configure']
         return ret
 
-    def builder_action_build(self, log):
+    def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             ['make',
              '-f', 'unix/Makefile',
@@ -31,7 +31,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
         return ret
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             ['make',
              '-f', 'unix/Makefile',

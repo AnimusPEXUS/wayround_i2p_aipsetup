@@ -10,7 +10,7 @@ import wayround_org.utils.file
 
 class Builder(wayround_org.aipsetup.build_scripts.std_simple_makefile):
 
-    def builder_action_distribute(self, log):
+    def builder_action_distribute(self, called_as, log):
 
         for i in ['bin', 'include', 'lib']:
             if ret != 0:
