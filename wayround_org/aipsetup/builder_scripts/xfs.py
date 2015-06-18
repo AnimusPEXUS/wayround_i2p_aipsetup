@@ -45,7 +45,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #        )
                 #    )
                 ]
-        return super().builder_action_configure_define_options(log) + copts
+        return super().builder_action_configure_define_options(called_as, log) + copts
 
     def builder_action_configure(self, called_as, log):
         log.info(
@@ -53,7 +53,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.package_info['pkg_info']['basename']
                 )
             )
-        return super().builder_action_configure(log)
+        return super().builder_action_configure(called_as, log)
 
     def builder_action_distribute(self, called_as, log):
 

@@ -45,7 +45,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
 
-        defined_options = self.builder_action_configure_define_options(log)
+        defined_options = self.builder_action_configure_define_options(called_as, log)
 
         ret = cmake.cmake_high(
             self.buildingsite,

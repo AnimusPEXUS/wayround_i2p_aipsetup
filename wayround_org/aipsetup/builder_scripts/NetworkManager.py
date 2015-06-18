@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pr = p.communicate()
         nss_libs = str(pr[0], 'utf-8').strip()
 
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             'CFLAGS=' + nss_cflags,
             'LDFLAGS=' + nss_libs
             ]

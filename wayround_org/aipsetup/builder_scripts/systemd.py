@@ -10,7 +10,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pamlibdir=[]
         if '64' in self.host:
             pamlibdir+=['--with-pamlibdir=/usr/lib64/security']
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             # '--disable-silent-rules',
             '--enable-gudev',
             '--enable-gtk-doc=auto',

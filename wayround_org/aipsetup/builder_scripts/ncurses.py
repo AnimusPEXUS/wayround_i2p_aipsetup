@@ -154,7 +154,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--without-ada'
                 ]
 
-        return super().builder_action_configure_define_options(log) + ret
+        return super().builder_action_configure_define_options(called_as, log) + ret
 
     def builder_action_links(self, called_as, log):
 

@@ -32,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # f.write('ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n')
         # f.close()
 
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             ] + cb_opts
 
     def builder_action_configure_define_environment(self, called_as, log):

@@ -55,7 +55,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 log=log
                 )
 
-            ret = super().builder_action_extract(log)
+            ret = super().builder_action_extract(called_as, log)
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
@@ -75,7 +75,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
         """
 
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             '--enable-threads',
             '--enable-64bit',
             '--enable-64bit-vis',

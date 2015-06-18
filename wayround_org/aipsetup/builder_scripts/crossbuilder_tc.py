@@ -106,7 +106,7 @@ class BinutilsBuilder(
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             #'--enable-targets=all',
 
             # '--with-sysroot' makes problems when building native GCC.
@@ -175,7 +175,7 @@ class GCC01Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             }
 
     def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             # experimental options
             # '--enable-targets=all',
             #'--enable-tls',
@@ -328,7 +328,7 @@ class Glibc01Builder(wayround_org.aipsetup.builder_scripts.glibc.Builder):
         if self.is_crossbuild or self.is_crossbuilder:
             os.path.normpath(os.path.join(headers_path, '..'))
 
-        return super().builder_action_configure_define_options(log) + [
+        return super().builder_action_configure_define_options(called_as, log) + [
             #'--enable-obsolete-rpc',
             '--enable-kernel=4.0',
             #'--enable-tls',

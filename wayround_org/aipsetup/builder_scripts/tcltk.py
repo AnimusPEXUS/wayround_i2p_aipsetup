@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_distribute(self, called_as, log):
-        ret = super().builder_action_distribute(log)
+        ret = super().builder_action_distribute(called_as, log)
 
         if ret == 0:
             ret = autotools.make_high(

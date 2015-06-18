@@ -68,7 +68,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'--disable-readline'
                 ]
 
-        return super().builder_action_configure_define_options(log) + ret
+        return super().builder_action_configure_define_options(called_as, log) + ret
 
     def builder_action_sh_link(self, called_as, log):
         tsl = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin', 'sh')

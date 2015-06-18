@@ -18,4 +18,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--without-systemd'
                 ]
 
-        return super().builder_action_configure_define_options(log) + ret
+        return super().builder_action_configure_define_options(called_as, log) + ret
