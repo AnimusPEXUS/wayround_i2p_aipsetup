@@ -203,7 +203,9 @@ class Builder:
         return 0
 
     def builder_action_autogen(self, called_as, log):
-        cfg_script_name = self.builder_action_configure_define_script_name(called_as, log)
+        cfg_script_name = self.builder_action_configure_define_script_name(
+            called_as,
+            log)
         ret = 0
         if os.path.isfile(
                 wayround_org.utils.path.join(
@@ -280,7 +282,8 @@ class Builder:
     def builder_action_configure_define_script_name(self, called_as, log):
         return 'configure'
 
-    def builder_action_configure_define_run_script_not_bash(self, called_as, log):
+    def builder_action_configure_define_run_script_not_bash(
+            self, called_as, log):
         return False
 
     def builder_action_configure_define_relative_call(self, called_as, log):
@@ -294,24 +297,33 @@ class Builder:
 
     def builder_action_configure(self, called_as, log):
 
-        defined_options = self.builder_action_configure_define_options(called_as, log)
-        defined_script_name = self.builder_action_configure_define_script_name(
-            log)
+        defined_options = \
+            self.builder_action_configure_define_options(called_as, log)
+        defined_script_name = \
+            self.builder_action_configure_define_script_name(called_as, log)
 
         ret = autotools.configure_high(
             self.buildingsite,
             log=log,
             options=defined_options,
             arguments=[],
-            environment=self.builder_action_configure_define_environment(called_as, log),
+            environment=self.builder_action_configure_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             source_configure_reldir=self.source_configure_reldir,
             use_separate_buildding_dir=self.separate_build_dir,
             script_name=defined_script_name,
-            run_script_not_bash=self.builder_action_configure_define_run_script_not_bash(
-                log),
-            relative_call=self.builder_action_configure_define_relative_call(
-                log)
+            run_script_not_bash=
+                self.builder_action_configure_define_run_script_not_bash(
+                    called_as,
+                    log
+                    ),
+            relative_call=
+                self.builder_action_configure_define_relative_call(
+                    called_as,
+                    log
+                    )
             )
         return ret
 
@@ -321,7 +333,9 @@ class Builder:
             log=log,
             options=[],
             arguments=[],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -337,7 +351,9 @@ class Builder:
                 'install',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

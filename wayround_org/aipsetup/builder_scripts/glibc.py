@@ -37,14 +37,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_actions(self):
 
         ret = super().define_actions()
+
+        ret['edit_package_info'] = self.builder_action_edit_package_info
+        ret.move_to_end('edit_package_info', False)
+
         if self.is_crossbuilder:
 
             logging.info(
                 "Crosscompiler building detected. splitting process on two parts"
                 )
-
-            ret['edit_package_info'] = self.builder_action_edit_package_info
-            ret.move_to_end('edit_package_info', False)
 
             # ret['build_01'] = self.builder_action_build_01
             ret['distribute_01'] = self.builder_action_distribute_01
@@ -72,19 +73,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         except:
             name = None
 
-        if name in ['glibc', None]:
+        pi = self.package_info
 
-            pi = self.package_info
+        if self.is_crossbuilder:
+            pi['pkg_info']['name'] = 'cb-glibc-{}'.format(self.target)
+        else:
+            pi['pkg_info']['name'] = 'glibc'
 
-            pi['pkg_info']['name'] = 'cb-glibc-{target}'.format(
-                target=self.target
-                )
-
-            bs = self.control
-
-            bs.write_package_info(pi)
+        bs = self.control
+        bs.write_package_info(pi)
 
         return ret
+
 
     def builder_action_configure_define_options(self, called_as, log):
 
@@ -123,6 +123,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-tls',
             '--with-elf',
             '--enable-multi-arch',
+            '--enable-multiarch',
             '--enable-multilib',
             # this is from configure --help. configure looking for
             # linux/version.h file

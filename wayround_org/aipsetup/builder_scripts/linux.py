@@ -91,14 +91,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('copy_source', self.builder_action_copy_source)
             ])
 
+        ret['edit_package_info'] = self.builder_action_edit_package_info
+        ret.move_to_end('edit_package_info', False)
+
         if self.is_crossbuilder:
 
             logging.info(
                 "Crosscompiler building detected. only headers will be built"
                 )
-
-            ret['edit_package_info'] = self.builder_action_edit_package_info
-            ret.move_to_end('edit_package_info', False)
 
             for i in ret.keys():
                 if i in [
@@ -124,16 +124,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         except:
             name = None
 
-        if name in ['linux-headers', None]:
-            pi = self.package_info
+        pi = self.package_info
 
-            pi['pkg_info']['name'] = 'cb-linux-headers-{target}'.format(
-                target=self.target
-                )
+        if self.is_crossbuilder:
+            pi['pkg_info']['name'] = 'cb-linux-headers-{}'.format(self.target)
+        else:
+            pi['pkg_info']['name'] = 'linux'
 
-            bs = self.control
-
-            bs.write_package_info(pi)
+        bs = self.control
+        bs.write_package_info(pi)
 
         return ret
 
@@ -395,7 +394,8 @@ Continue with command
         ret = 1
         return ret
 
-    def builder_action_remove_install_files_from_includes(self, called_as, log):
+    def builder_action_remove_install_files_from_includes(
+            self, called_as, log):
         p = subprocess.Popen(
             ['find',
              '(', '-name', '.install',

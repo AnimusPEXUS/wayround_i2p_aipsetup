@@ -2141,7 +2141,7 @@ def run_builder_action(
             "=>------[Starting '{}' action".format(i)
             )
         try:
-            ret = actions_container_object[i](log)
+            ret = actions_container_object[i](i, log)
         except KeyboardInterrupt:
             raise
         except:

@@ -27,14 +27,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = super().define_actions()
+
+        ret['edit_package_info'] = self.builder_action_edit_package_info
+        ret.move_to_end('edit_package_info', False)
+
         if self.is_crossbuilder:
 
             logging.info(
                 "Crosscompiler building detected. splitting process on two parts"
                 )
-
-            ret['edit_package_info'] = self.builder_action_edit_package_info
-            ret.move_to_end('edit_package_info', False)
 
             ret['build_01'] = self.builder_action_build_01
             ret['distribute_01'] = self.builder_action_distribute_01
@@ -68,24 +69,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         except:
             name = None
 
-        if name in ['gcc', None]:
-            pi = self.package_info
+        pi = self.package_info
 
-            pi['pkg_info']['name'] = 'cb-gcc-{target}'.format(
-                target=self.target
-                )
+        if self.is_crossbuilder:
+            pi['pkg_info']['name'] = 'cb-gcc-{}'.format(self.target)
+        else:
+            pi['pkg_info']['name'] = 'gcc'
 
-            bs = self.control
-
-            bs.write_package_info(pi)
+        bs = self.control
+        bs.write_package_info(pi)
 
         return ret
 
     def builder_action_extract(self, called_as, log):
 
-        ret = super().builder_action_extract(
-            log
-            )
+        ret = super().builder_action_extract(called_as, log)
 
         if ret == 0:
 
@@ -125,13 +123,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 ] + autotools.calc_conf_hbt_options(self)
 
-
         if self.is_crossbuilder:
             ret += sorted([
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
                 #'--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
@@ -149,7 +146,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
                 #'--enable-bootstrap',
                 '--enable-threads=posix',
                 '--enable-multiarch',
@@ -164,21 +161,27 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
 
                 '--disable-bootstrap',
 
                 '--enable-threads=posix',
                 '--enable-multiarch',
 
-                # TODO: I don't know why, but I want it enabled
                 '--enable-multilib',
 
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
+                '--enable-targets=x86_64-pc-linux-gnu,i686-pc-linux-gnu'
                 ])
 
+            """
+            for i in ret:
+                if i.startswith('--target='):
+                    ret.remove(i)
+                    break
+            """
         return ret
 
     def builder_action_before_checks(self, called_as, log):
@@ -220,7 +223,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=['all-gcc'],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -236,7 +241,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install-gcc',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -259,7 +266,9 @@ After what - continue building from 'build_02+' action
             log=log,
             options=[],
             arguments=['all-target-libgcc'],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -275,7 +284,9 @@ After what - continue building from 'build_02+' action
                 'install-target-libgcc',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -285,7 +296,7 @@ After what - continue building from 'build_02+' action
     def builder_action_intermediate_instruction_2(self, called_as, log):
         print("""\
 ---------------
-Now You need to pack and install this gcc build and then complete 
+Now You need to pack and install this gcc build and then complete
 glibc build (and install it too).
 After what - continue building this gcc from 'build_03+' action
 ---------------
@@ -298,7 +309,9 @@ After what - continue building this gcc from 'build_03+' action
             log=log,
             options=[],
             arguments=[],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -314,7 +327,9 @@ After what - continue building this gcc from 'build_03+' action
                 'install',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

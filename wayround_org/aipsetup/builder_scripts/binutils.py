@@ -19,12 +19,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = super().define_actions()
-        if self.is_crossbuilder:
-            ret['edit_package_info'] = self.builder_action_edit_package_info
-            ret.move_to_end('edit_package_info', False)
 
+        ret['edit_package_info'] = self.builder_action_edit_package_info
+        ret.move_to_end('edit_package_info', False)
+
+        if self.is_crossbuilder:
             ret['after_distribute'] = self.builder_action_after_distribute
             # ret['delete_share'] = self.builder_action_delete_share
+
         return ret
 
     def builder_action_edit_package_info(self, called_as, log):
@@ -36,24 +38,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         except:
             name = None
 
-        if name in ['binutils', None]:
-            pi = self.package_info
+        pi = self.package_info
 
-            pi['pkg_info']['name'] = 'cb-binutils-{target}'.format(
-                target=self.target
-                )
+        if self.is_crossbuilder:
+            pi['pkg_info']['name'] = 'cb-binutils-{}'.format(self.target)
+        else:
+            pi['pkg_info']['name'] = 'binutils'
 
-            bs = self.control
-
-            bs.write_package_info(pi)
+        bs = self.control
+        bs.write_package_info(pi)
 
         return ret
 
     def builder_action_extract(self, called_as, log):
 
-        ret = super().builder_action_extract(
-            log
-            )
+        ret = super().builder_action_extract(called_as, log)
 
         if ret == 0:
 
