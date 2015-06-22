@@ -532,6 +532,7 @@ class PackCtl:
 
         self.buildingsite_ctl = buildingsite_ctl
         self.path = wayround_org.utils.path.abspath(buildingsite_ctl.path)
+        return
 
     def destdir_verify_paths_correctness(self):
         """
@@ -542,24 +543,28 @@ class PackCtl:
         is special cases, when this function is avoided.
         """
 
+        logging.info("Checking DESTDIR paths correctness")
+
         ret = 0
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
-        try:
-            os.makedirs(destdir + os.path.sep + 'usr')
-        except:
-            pass
+        os.makedirs(
+            os.path.join(destdir, 'usr'),
+            exist_ok=True
+            )
 
         for i in INVALID_MOVABLE_DESTDIR_ROOT_LINKS:
 
-            p1 = destdir + os.path.sep + i
+            p1 = wayround_org.utils.path(destdir, i)
 
             if os.path.islink(p1) or os.path.exists(p1):
 
+                logging.info("    copying: {}".format(p1))
+
                 wayround_org.utils.file.copytree(
                     p1,
-                    destdir + os.path.sep + 'usr' + os.path.sep + i,
+                    wayround_org.utils.path(destdir, 'usr', i),
                     dst_must_be_empty=False
                     )
                 #shutil.copytree(p1, destdir + os.path.sep + 'usr')
@@ -567,7 +572,7 @@ class PackCtl:
 
         for i in INVALID_DESTDIR_ROOT_LINKS:
 
-            p1 = destdir + os.path.sep + i
+            p1 = wayround_org.utils.path(destdir, i)
 
             if os.path.islink(p1) or os.path.exists(p1):
                 logging.error(
@@ -576,6 +581,82 @@ class PackCtl:
                         )
                     )
                 ret = 1
+
+        return ret
+
+    def relocate_multiarch_files(self):
+
+        ret = 0
+
+        logging.info("Moving files to multiarch location")
+
+        source_arch_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'usr'
+            )
+
+        if not os.path.exists(source_arch_dir):
+            ret = 0
+
+        else:
+
+            package_info = self.buildingsite_ctl.read_package_info()
+
+            host = package_info['constitution']['host']
+
+            target_arch_dir = wayround_org.utils.path.join(
+                self.buildingsite_ctl.getDIR_DESTDIR(),
+                'multiarch',
+                host
+                )
+
+            os.makedirs(target_arch_dir, exist_ok=True)
+
+            files = os.listdir(source_arch_dir)
+
+            for i in files:
+
+                logging.info("    {}".format(i))
+
+                joined_src = wayround_org.utils.path.join(
+                    source_arch_dir,
+                    i
+                    )
+
+                joined_dst = wayround_org.utils.path.join(
+                    target_arch_dir,
+                    i
+                    )
+
+                if os.path.exists(joined_dst) or os.path.islink(joined_dst):
+                    wayround_org.utils.file.remove_if_exists(
+                        joined_dst
+                        )
+
+                try:
+                    os.rename(joined_src, joined_dst)
+                except:
+                    logging.exception(
+                        "Can't rename file:\n    {}\n    to\n    {}".format(
+                            joined_src,
+                            joined_dst
+                            )
+                        )
+                    ret = 2
+
+        if ret == 0:
+            if len(os.listdir(source_arch_dir)) != 0:
+                logging.error("usr dir must be empty by now, but it's not")
+                ret = 3
+
+            else:
+                try:
+                    os.rmdir(source_arch_dir)
+                except:
+                    logging.exception(
+                        "Can't remove dir: {}".format(source_arch_dir)
+                        )
+                    ret = 4
 
         return ret
 
@@ -589,6 +670,11 @@ class PackCtl:
 
         .. TODO: link to info about post_install.py
         """
+
+        logging.info("Resetting files and dirs modes")
+
+        # NOTE: dirs and files all must have 0700 modes!
+        #       do not remove execution bit from files!
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
@@ -1125,6 +1211,7 @@ class PackCtl:
 
         for i in [
                 self.destdir_verify_paths_correctness,
+                self.relocate_multiarch_files,
                 self.destdir_set_modes,
                 self.destdir_checksum,
                 self.destdir_filelist,
@@ -2129,6 +2216,8 @@ def run_builder_action(
             actions = [actions[actions.index(action)]]
 
     for i in actions:
+
+        # TODO: make package_info reloaded on each etiration
 
         log = wayround_org.utils.log.Log(
             log_output_directory,

@@ -97,7 +97,7 @@ def package_name_parse(filename):
 
         re_res = ASP_NAME_REGEXPS_COMPILED[i].match(filename)
 
-        if re_res != None:
+        if re_res is not None:
             ret = {
                 're': i,
                 'name': filename,
@@ -113,10 +113,10 @@ def package_name_parse(filename):
                 ret['groups']['status'] = re_res.group('status')
 
             if (
-                not 'status' in ret['groups']
-                or ret['groups']['status'] == None
-                or ret['groups']['status'] == 'None'
-                ):
+                    not 'status' in ret['groups']
+                    or ret['groups']['status'] == None
+                    or ret['groups']['status'] == 'None'
+                    ):
                 ret['groups']['status'] = ''
 
             ret['groups']['version_list_dirty'] = (
@@ -138,7 +138,7 @@ def package_name_parse(filename):
 
             wayround_org.utils.list.remove_all_values(
                 ret['groups']['version_list'],
-               ALL_DELIMITERS
+                ALL_DELIMITERS
                 )
 
             ret['groups']['status_list_dirty'] = (

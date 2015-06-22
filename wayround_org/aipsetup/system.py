@@ -73,8 +73,11 @@ class SystemCtl:
                 "wayround_org.aipsetup.client_pkg.PackageServerClient"
                 )
 
-        if wayround_org.utils.system_type.parse_triplet(host) is None:
-            raise ValueError("Invalid host triplet")
+        # if wayround_org.utils.system_type.parse_triplet(host) is None:
+        #     raise ValueError("Invalid host triplet")
+
+        if host is None:
+            host = self.determine_primary_host()
 
         self.basedir = wayround_org.utils.path.abspath(basedir)
 
@@ -89,7 +92,36 @@ class SystemCtl:
 
         return
 
-    def remove_package(self, name, force=False, mute=False):
+    @property
+    def host(self):
+        return self._host
+
+    def get_primary_host_link(self):
+        host_link = wayround_org.utils.path.join(
+            self.basedir,
+            'multiarch',
+            '_primary'
+            )
+        ret = None
+        if os.path.islink(host_link):
+            ret = host_link
+        return ret
+
+    def determine_primary_host(self):
+        ret = None
+        host_link = self.get_primary_host_link()
+        if host_link is not None:
+            link_value = os.readlink(host_link)
+            ret = os.path.basename(link_value)
+        return ret
+
+    def remove_package(
+            self,
+            name,
+            force=False,
+            mute=False,
+            host=None
+            ):
         """
         Remove named package (all it's installed asps) from system.
 
@@ -108,6 +140,9 @@ class SystemCtl:
 
         ret = 0
 
+        if host is None:
+            host = self.host
+
         info = self._pkg_client.info(name)
 
         if not isinstance(info, dict) and not force:
@@ -120,6 +155,7 @@ class SystemCtl:
         else:
             if (not force
                     and (isinstance(info, dict) and not info['removable'])):
+
                 logging.error("Package `{}' is not removable".format(name))
 
                 ret = 2
@@ -127,7 +163,8 @@ class SystemCtl:
             else:
 
                 lst = self.list_installed_package_s_asps(
-                    name
+                    name,
+                    host=host
                     )
 
                 lst.sort(
@@ -145,17 +182,25 @@ class SystemCtl:
 
                 for i in lst:
 
-                    name = wayround_org.aipsetup.package_name_parser.\
+                    name = \
+                        wayround_org.aipsetup.package_name_parser.\
                         rm_ext_from_pkg_name(i)
 
                     if not mute:
                         logging.info("Removing package `{}'".format(name))
-                    self.remove_asp(name)
+
+                    self.remove_asp(
+                        name,
+                        host=host
+                        )
 
         return ret
 
     def install_package(
-            self, name, force=False, force_host=None
+            self,
+            name,
+            force=False,
+            host=None
             ):
         """
         Install package
@@ -174,18 +219,12 @@ class SystemCtl:
 
                 #. check whatever package is reducible, and if it is — reduce
                    older asps from system using :func:`reduce_asps`
-
         """
 
-        host = self._host
-
-        if force_host is not None:
-            host = force_host
-
-        if wayround_org.utils.system_type.parse_triplet(host) is None:
-            raise ValueError("Invalid host triplet")
-
         ret = 0
+
+        if host is None:
+            host = self.host
 
         if os.path.isfile(name):
 
@@ -203,11 +242,12 @@ class SystemCtl:
             if not force and not isinstance(name_parsed, dict):
                 logging.error("Can't parse `{}' as package name".format(name))
                 ret = 1
-            else:
 
+            if ret == 0:
                 info = None
                 if isinstance(name_parsed, dict):
-                    # FIXME get package info from package it self
+                    # FIXME: get package info from package it self
+                    #        (or maybe not :-/ can't decide)
                     try:
                         info = self._pkg_client.info(
                             name_parsed['groups']['name']
@@ -221,51 +261,55 @@ class SystemCtl:
                             name_parsed['groups']['name'], name)
                         )
                     ret = 2
+
+            if ret == 0:
+
+                if (not force
+                        and (info['deprecated'] or info['non_installable'])):
+                    logging.error(
+                        "Package is deprecated({}) or"
+                        " non-installable({})".format(
+                            info['deprecated'],
+                            info['non_installable']
+                        )
+                    )
+                    ret = 3
+
+            if ret == 0:
+                asps = self.list_installed_package_s_asps(
+                    name_parsed['groups']['name'],
+                    host=host
+                    )
+
+                ret = self.install_asp(name)
+
+                if len(asps) == 0:
+                    if ret == 0:
+                        logging.info("New ASP installation finished")
+                    else:
+                        logging.error("Some ASP installation errors")
+
                 else:
 
-                    if (not force
-                            and (info['deprecated'] or info['non_installable'])):
+                    if ret != 0:
                         logging.error(
-                            "Package is deprecated({}) or"
-                            " non-installable({})".format(
-                                info['deprecated'],
-                                info['non_installable']
+                            "Some ASP installation errors encountered,"
+                            " so no updation following"
                             )
-                        )
-                        ret = 3
                     else:
-
-                        asps = self.list_installed_package_s_asps(
-                            name_parsed['groups']['name']
-                            )
-
-                        ret = self.install_asp(name)
-
-                        if len(asps) == 0:
-                            if ret == 0:
-                                logging.info("New ASP installation finished")
-                            else:
-                                logging.error("Some ASP installation errors")
-                        else:
-                            if ret != 0:
-                                logging.error(
-                                    "Some ASP installation errors encountered,"
-                                    " so no updation following"
+                        if isinstance(info, dict):
+                            if info['reducible']:
+                                logging.info(
+                                    "Reducing `{}' ASPs".format(
+                                        name_parsed['groups']['name']
+                                        )
                                     )
-                            else:
-                                if isinstance(info, dict):
-                                    if info['reducible']:
-                                        logging.info(
-                                            "Reducing `{}' ASPs".format(
-                                                name_parsed['groups']['name']
-                                                )
-                                            )
-                                        self.reduce_asps(name, asps)
-                                        logging.info(
-                                            "Reduced `{}' ASPs".format(
-                                                name_parsed['groups']['name']
-                                                )
-                                            )
+                                self.reduce_asps(name, asps)
+                                logging.info(
+                                    "Reduced `{}' ASPs".format(
+                                        name_parsed['groups']['name']
+                                        )
+                                    )
 
         else:
             info = self._pkg_client.info(name)
@@ -273,7 +317,8 @@ class SystemCtl:
             if not isinstance(info, dict):
                 logging.error("Don't know about package")
                 ret = 2
-            else:
+
+            if ret == 0:
 
                 if info['deprecated'] or info['non_installable']:
                     logging.error(
@@ -284,38 +329,47 @@ class SystemCtl:
                             )
                     )
                     ret = 3
-                else:
 
-                    latest_full_path = self._pkg_client.get_latest_asp(
-                        name,
-                        host,
-                        out_dir=self._pkg_client.downloads_dir,
-                        out_to_temp=True
-                        )
+            if ret == 0:
 
-                    if not isinstance(latest_full_path, str):
-                        logging.error("Can't get latest asp from pkg_server")
-                        ret = 3
-                    else:
+                latest_full_path = self._pkg_client.get_latest_asp(
+                    name,
+                    host,
+                    out_dir=self._pkg_client.downloads_dir,
+                    out_to_temp=True
+                    )
 
-                        latest_full_path = wayround_org.utils.path.abspath(
+                if not isinstance(latest_full_path, str):
+                    logging.error("Can't get latest asp from pkg_server")
+                    ret = 3
+
+            if ret == 0:
+
+                latest_full_path = wayround_org.utils.path.abspath(
+                    latest_full_path
+                    )
+
+                ret = self.install_package(
+                    latest_full_path,
+                    force=False,
+                    host=host
+                    )
+
+                try:
+                    os.unlink(latest_full_path)
+                except:
+                    logging.exception(
+                        "Can't remove temporary file `{}'".format(
                             latest_full_path
                             )
-
-                        ret = self.install_package(latest_full_path, False)
-
-                        try:
-                            os.unlink(latest_full_path)
-                        except:
-                            logging.exception(
-                                "Can't remove temporary file `{}'".format(
-                                    latest_full_path
-                                    )
-                                )
+                        )
 
         return ret
 
-    def install_asp(self, asp_package):
+    def install_asp(
+            self,
+            asp_package
+            ):
         """
         Install asp package pointed by ``asp_name`` path.
 
@@ -324,251 +378,273 @@ class SystemCtl:
 
         ret = 0
 
-        asp = wayround_org.aipsetup.package.ASPackage(asp_package)
+        # TODO: exceptions and sanity checks required
 
-        logging.info("Performing package checks before it's installation")
-        if asp.check_package() != 0:
-            logging.error("Package defective - installation failed")
-            ret = 1
-        else:
+        tarf = None
+
+        try:
+
+            asp = wayround_org.aipsetup.package.ASPackage(asp_package)
+            host = asp.host()
+
+        except:
+            logging.exception("Some error")
+            ret = 5
+
+        if ret == 0:
+
+            logging.info("Performing package checks before it's installation")
+            if asp.check_package() != 0:
+                logging.error("Package defective - installation failed")
+                ret = 1
+
+        if ret == 0:
+
             try:
                 tarf = tarfile.open(asp.filename, mode='r')
             except:
                 logging.exception("Can't open file `{}'".format(asp.filename))
+                tarf = None
                 ret = 1
-            else:
 
-                package_name = os.path.basename(asp.filename)
-                if wayround_org.aipsetup.\
-                    package_name_parser.package_name_parse(
-                        package_name
-                        ) is None:
+        if ret == 0:
+
+            package_name = os.path.basename(asp.filename)
+
+            if wayround_org.aipsetup.package_name_parser.package_name_parse(
+                    package_name
+                    ) is None:
+
+                logging.error(
+                    "Can't parse package name `{}'".format(package_name)
+                    )
+                ret = 2
+
+        if ret == 0:
+
+            package_name = package_name[:-4]
+            for i in [
+                    (
+                        './06.LISTS/DESTDIR.lst.xz',
+                        self._installed_pkg_dir,
+                        "package's file list"
+                        ),
+                    (
+                        './06.LISTS/DESTDIR.sha512.xz',
+                        self._installed_pkg_dir_sums,
+                        "package's check sums"
+                        ),
+                    (
+                        './05.BUILD_LOGS.tar.xz',
+                        self._installed_pkg_dir_buildlogs,
+                        "package's buildlogs"
+                        ),
+                    (
+                        './06.LISTS/DESTDIR.dep_c.xz',
+                        self._installed_pkg_dir_deps,
+                        "package's dependencies listing"
+                        )
+                    ]:
+
+                logs_path = i[1]
+
+                if logs_path.startswith(os.path.sep):
+                    logs_path = logs_path[1:]
+
+                out_filename = (
+                    wayround_org.utils.path.abspath(
+                        os.path.join(
+                            self.basedir,
+                            logs_path,
+                            package_name + '.xz'
+                            )
+                        )
+                    )
+
+                out_filename_dir = os.path.dirname(out_filename)
+
+                if not os.path.exists(out_filename_dir):
+                    os.makedirs(out_filename_dir)
+
+                logging.info(
+                    "Installing {} as {}".format(
+                        i[2],
+                        out_filename
+                        )
+                    )
+
+                if wayround_org.utils.archive.tar_member_get_extract_file_to(
+                        tarf,
+                        i[0],
+                        out_filename
+                        ) != 0:
 
                     logging.error(
-                        "Can't parse package name `{}'".format(package_name)
+                        "Can't install asp {} as {}".format(
+                            i[2], out_filename
+                            )
                         )
+
                     ret = 2
+                    break
 
-                else:
-                    package_name = package_name[:-4]
-                    for i in [
-                            (
-                                './06.LISTS/DESTDIR.lst.xz',
-                                self._installed_pkg_dir,
-                                "package's file list"
-                                ),
-                            (
-                                './06.LISTS/DESTDIR.sha512.xz',
-                                self._installed_pkg_dir_sums,
-                                "package's check sums"
-                                ),
-                            (
-                                './05.BUILD_LOGS.tar.xz',
-                                self._installed_pkg_dir_buildlogs,
-                                "package's buildlogs"
-                                ),
-                            (
-                                './06.LISTS/DESTDIR.dep_c.xz',
-                                self._installed_pkg_dir_deps,
-                                "package's dependencies listing"
-                                )
-                            ]:
+        if ret == 0:
+            logging.info("Installing package's destdir")
 
-                        logs_path = i[1]
-
-                        if logs_path.startswith(os.path.sep):
-                            logs_path = logs_path[1:]
-
-                        out_filename = (
-                            wayround_org.utils.path.abspath(
-                                os.path.join(
-                                    self.basedir,
-                                    logs_path,
-                                    package_name + '.xz'
-                                    )
-                                )
+            dd_fobj = wayround_org.utils.archive.tar_member_get_extract_file(
+                tarf,
+                './{}.tar.xz'.format(
+                    wayround_org.aipsetup.build.DIR_DESTDIR
+                    )
+                )
+            if not isinstance(dd_fobj, tarfile.ExFileObject):
+                logging.error("Can't get package's destdir")
+                ret = 4
+            else:
+                try:
+                    tec = \
+                        wayround_org.utils.archive.extract_tar_canonical_fobj(
+                            dd_fobj,
+                            self.basedir,
+                            'xz',
+                            verbose_tar=True,
+                            verbose_compressor=True,
+                            add_tar_options=[
+                                '--no-same-owner',
+                                '--no-same-permissions'
+                                ]
                             )
-
-                        out_filename_dir = os.path.dirname(out_filename)
-
-                        if not os.path.exists(out_filename_dir):
-                            os.makedirs(out_filename_dir)
-
+                    if tec != 0:
+                        logging.error(
+                            "Package destdir decompression error."
+                            " tar exit code: {}".format(
+                                tec
+                            )
+                        )
+                        ret = 5
+                    else:
+                        ret = 0
                         logging.info(
-                            "Installing {} as {}".format(
-                                i[2],
-                                out_filename
+                            "Installed `{}'".format(package_name)
+                            )
+                finally:
+                    dd_fobj.close()
+
+        if ret == 0:
+            logging.info(
+                "Post installation file ownerships and modes fix"
+                )
+
+            files = []
+            dirs = []
+
+            installed_file_list = \
+                wayround_org.utils.archive.tar_member_get_extract_file(
+                    tarf,
+                    './06.LISTS/DESTDIR.lst.xz'
+                    )
+
+            if not isinstance(
+                    installed_file_list,
+                    tarfile.ExFileObject
+                    ):
+
+                logging.error("Can't get package's file list")
+                ret = 10
+            else:
+                try:
+                    text_lst = wayround_org.utils.archive.xzcat(
+                        installed_file_list,
+                        convert_to_str='utf-8'
+                        )
+
+                    files = text_lst.split('\n')
+
+                    files = sorted(
+                        wayround_org.utils.list.
+                        filelist_strip_remove_empty_remove_duplicated_lines(
+                            files
+                            )
+                        )
+
+                    dirs = set()
+                    for i in files:
+                        dirs.add(os.path.dirname(i))
+                    dirs = sorted(dirs)
+
+                    for i in dirs:
+                        f_d_p = wayround_org.utils.path.abspath(
+                            wayround_org.utils.path.join(
+                                self.basedir,
+                                i
                                 )
                             )
 
-                        if wayround_org.utils.archive.\
-                            tar_member_get_extract_file_to(
-                                tarf,
-                                i[0],
-                                out_filename
-                                ) != 0:
+                        if not os.path.islink(f_d_p):
+                            if os.getuid() == 0:
+                                os.chown(f_d_p, 0, 0)
+                            os.chmod(f_d_p, 0o755)
+
+                    for i in files:
+                        f_f_p = wayround_org.utils.path.abspath(
+                            wayround_org.utils.path.join(
+                                self.basedir,
+                                i
+                                )
+                            )
+
+                        if not os.path.islink(f_f_p):
+                            if os.getuid() == 0:
+                                os.chown(f_f_p, 0, 0)
+                            os.chmod(f_f_p, 0o755)
+                finally:
+                    installed_file_list.close()
+
+        if ret == 0:
+            logging.info("Searching post installation script")
+
+            script_obj = \
+                wayround_org.utils.archive.tar_member_get_extract_file(
+                    tarf,
+                    './post_install.py'
+                    )
+
+            if not isinstance(script_obj, tarfile.ExFileObject):
+                logging.info(
+                    "Can't get package's post installation script"
+                    )
+
+            else:
+                try:
+                    script_txt = script_obj.read()
+
+                    g = {}
+                    l = g
+                    try:
+                        exec(
+                            script_txt,
+                            g,
+                            l
+                            )
+                    except:
+                        logging.exception(
+                            "Can't load package's post installation script"
+                            )
+                        ret = 7
+
+                    else:
+                        if l['main'](self.basedir) != 0:
                             logging.error(
-                                "Can't install asp {} as {}".format(
-                                    i[2], out_filename
-                                    )
+                                "Post installation script main "
+                                "function returned error"
                                 )
-                            ret = 2
-                            break
+                            ret = 8
+                finally:
+                    script_obj.close()
 
-                    if ret == 0:
-                        logging.info("Installing package's destdir")
-
-                        dd_fobj = wayround_org.utils.archive.\
-                            tar_member_get_extract_file(
-                                tarf,
-                                './{}.tar.xz'.format(
-                                    wayround_org.aipsetup.build.DIR_DESTDIR
-                                    )
-                                )
-                        if not isinstance(dd_fobj, tarfile.ExFileObject):
-                            logging.error("Can't get package's destdir")
-                            ret = 4
-                        else:
-                            try:
-                                tec = wayround_org.utils.archive.\
-                                    extract_tar_canonical_fobj(
-                                        dd_fobj,
-                                        self.basedir,
-                                        'xz',
-                                        verbose_tar=True,
-                                        verbose_compressor=True,
-                                        add_tar_options=[
-                                            '--no-same-owner',
-                                            '--no-same-permissions'
-                                            ]
-                                        )
-                                if tec != 0:
-                                    logging.error(
-                                        "Package destdir decompression error."
-                                        " tar exit code: {}".format(
-                                            tec
-                                        )
-                                    )
-                                    ret = 5
-                                else:
-                                    ret = 0
-                                    logging.info(
-                                        "Installed `{}'".format(package_name)
-                                        )
-                            finally:
-                                dd_fobj.close()
-
-                    if ret == 0:
-                        logging.info(
-                            "Post installation file ownerships and modes fix"
-                            )
-
-                        files = []
-                        dirs = []
-
-                        installed_file_list = \
-                            wayround_org.utils.archive.\
-                            tar_member_get_extract_file(
-                                tarf,
-                                './06.LISTS/DESTDIR.lst.xz'
-                            )
-
-                        if not isinstance(
-                                installed_file_list,
-                                tarfile.ExFileObject
-                                ):
-
-                            logging.error("Can't get package's file list")
-                            ret = 10
-                        else:
-                            try:
-                                text_lst = wayround_org.utils.archive.xzcat(
-                                    installed_file_list, convert_to_str='utf-8'
-                                    )
-
-                                files = text_lst.split('\n')
-
-                                files = \
-                                    sorted(wayround_org.utils.list.
-                                           filelist_strip_remove_empty_remove_duplicated_lines(
-                                               files))
-
-                                dirs = set()
-                                for i in files:
-                                    dirs.add(os.path.dirname(i))
-                                dirs = sorted(dirs)
-
-                                for i in dirs:
-                                    f_d_p = wayround_org.utils.path.abspath(
-                                        wayround_org.utils.path.join(
-                                            self.basedir,
-                                            i
-                                            )
-                                        )
-
-                                    if not os.path.islink(f_d_p):
-                                        if os.getuid() == 0:
-                                            os.chown(f_d_p, 0, 0)
-                                        os.chmod(f_d_p, 0o755)
-
-                                for i in files:
-                                    f_f_p = wayround_org.utils.path.abspath(
-                                        wayround_org.utils.path.join(
-                                            self.basedir,
-                                            i
-                                            )
-                                        )
-
-                                    if not os.path.islink(f_f_p):
-                                        if os.getuid() == 0:
-                                            os.chown(f_f_p, 0, 0)
-                                        os.chmod(f_f_p, 0o755)
-                            finally:
-                                installed_file_list.close()
-
-                    if ret == 0:
-                        logging.info("Searching post installation script")
-
-                        script_obj = \
-                            wayround_org.utils.archive.\
-                            tar_member_get_extract_file(
-                                tarf,
-                                './post_install.py'
-                            )
-
-                        if not isinstance(script_obj, tarfile.ExFileObject):
-                            logging.info(
-                                "Can't get package's post installation script"
-                                )
-
-                        else:
-                            try:
-                                script_txt = script_obj.read()
-
-                                g = {}
-                                l = g
-                                try:
-                                    exec(
-                                        script_txt,
-                                        g,
-                                        l
-                                        )
-                                except:
-                                    logging.exception(
-                                        "Can't load package's post installation script"
-                                        )
-                                    ret = 7
-
-                                else:
-                                    if l['main'](self.basedir) != 0:
-                                        logging.error(
-                                            "Post installation script main function returned error"
-                                            )
-                                        ret = 8
-                            finally:
-                                script_obj.close()
-
-                tarf.close()
+        if tarf is not None:
+            tarf.close()
+            tarf = None
 
         return ret
 
@@ -577,7 +653,8 @@ class SystemCtl:
             asp_name,
             only_remove_package_registration=False,
             exclude=None,
-            mute=False
+            mute=False,
+            host=None
             ):
         """
         Removes named asp from destdir system.
@@ -589,14 +666,20 @@ class SystemCtl:
             from system, only remove it's registration
         """
 
-        exclude = copy.copy(exclude)
-
         ret = 0
+
+        if host is None:
+            host = self.host
+
+        exclude = copy.copy(exclude)
 
         # ensure destdir correctness
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
-        lines = self.list_files_installed_by_asp(asp_name, mute)
+        lines = self.list_files_installed_by_asp(
+            asp_name,
+            mute=muse
+            )
 
         if not isinstance(lines, list):
             logging.error(
@@ -681,7 +764,9 @@ class SystemCtl:
                             os.path.isfile(rm_file_name)
                             or
                             (os.path.isdir(rm_file_name)
-                             and wayround_org.utils.file.is_dir_empty(rm_file_name)
+                             and wayround_org.utils.file.is_dir_empty(
+                                rm_file_name
+                                )
                              )
                             ):
                         if not mute:
@@ -766,13 +851,25 @@ class SystemCtl:
 
         return ret
 
-    def reduce_asps(self, reduce_to, reduce_what=None, mute=False):
+    def reduce_asps(
+            self,
+            reduce_to,
+            reduce_what=None,
+            mute=False,
+            host=None
+            ):
         """
         Reduces(removes) packages listed in ``reduce_what`` list, remaining all
         files belonging to package named in ``reduce_to`` string parameter
         """
 
+        # TODO: make non-primary asps unable uninstall global files
+        #       (i.e. /etc, /var ...)
+
         ret = 0
+
+        if host is None:
+            host = self.host
 
         if not isinstance(reduce_what, list):
             raise ValueError("reduce_what must be a list of strings")
@@ -800,7 +897,10 @@ class SystemCtl:
             if not mute:
                 logging.info("Destdir: {}".format(self.basedir))
 
-        fiba = self.list_files_installed_by_asp(reduce_to)
+        fiba = self.list_files_installed_by_asp(
+            reduce_to,
+            mute=True
+            )
 
         if not isinstance(fiba, list):
             logging.error(
@@ -814,15 +914,23 @@ class SystemCtl:
             for i in reduce_what:
                 self.remove_asp(
                     i,
-                    exclude=fiba
+                    exclude=fiba,
+                    host=host
                     )
 
         return ret
 
-    def list_installed_asps(self, mute=False):
+    def list_installed_asps(
+            self,
+            mute=False,
+            host=None
+            ):
         """
         on success returns list. on error - not list
         """
+
+        if host is None:
+            host = self.host
 
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
@@ -854,11 +962,22 @@ class SystemCtl:
 
         return ret
 
-    def list_installed_packages(self, mask='*', mute=False):
+    def list_installed_packages(
+            self,
+            mask='*',
+            mute=False,
+            host=None
+            ):
 
         ret = None
 
-        asps = self.list_installed_asps(True)
+        if host is None:
+            host = self.host
+
+        asps = self.list_installed_asps(
+            mute=True,
+            host=host
+            )
 
         if not isinstance(asps, list):
             logging.error("Error getting list of installed ASPs")
@@ -884,9 +1003,16 @@ class SystemCtl:
 
         return ret
 
-    def list_installed_package_s_asps(self, name_or_list):
+    def list_installed_package_s_asps(
+            self,
+            name_or_list,
+            host=None
+            ):
 
         ret = {}
+
+        if host is None:
+            host = self.host
 
         return_single = False
 
@@ -894,7 +1020,11 @@ class SystemCtl:
             return_single = True
             name_or_list = [name_or_list]
 
-        asps_list = self.list_installed_asps(mute=True)
+        asps_list = self.list_installed_asps(
+            mute=True,
+            host=host
+            )
+
         if not isinstance(asps_list, list):
             logging.error("Can't get list of installed asps")
         else:
@@ -924,7 +1054,9 @@ class SystemCtl:
         return ret
 
     def list_files_installed_by_asp(
-            self, asp_name, mute=True
+            self,
+            asp_name,
+            mute=True
             ):
         """
         Reads list of files installed by named asp.
@@ -963,19 +1095,22 @@ class SystemCtl:
             f.close()
 
             pkg_file_list = pkg_file_list.splitlines()
-            pkg_file_list = sorted((
+            pkg_file_list = \
                 wayround_org.utils.list.
                 filelist_strip_remove_empty_remove_duplicated_lines(
                     pkg_file_list
                     )
-                ))
+
+            pkg_file_list.sort()
 
             ret = pkg_file_list
 
         return ret
 
     def list_file_sums_installed_by_asp(
-            self, asp_name, mute=True
+            self,
+            asp_name,
+            mute=True
             ):
         """
         Reads list of file checksums installed by named asp.
@@ -1023,24 +1158,40 @@ class SystemCtl:
 
         return ret
 
-    def list_installed_packages_and_asps(self):
+    def list_installed_packages_and_asps(self, host=None):
 
-        packages = self.list_installed_packages(mute=True)
+        if host is None:
+            host = self.host
 
-        ret = self.list_installed_package_s_asps(packages)
+        packages = self.list_installed_packages(
+            mute=True,
+            host=host
+            )
+
+        ret = self.list_installed_package_s_asps(
+            packages,
+            host=host
+            )
 
         return ret
 
-    def list_installed_asps_and_their_files(self, mute=True):
+    def list_installed_asps_and_their_files(self, mute=True, host=None):
         """
         Returns dict with asp names as keys and list of files whey installs as
         contents
         """
 
-        lst = self.list_installed_asps(mute)
-        lst_c = len(lst)
-
         ret = dict()
+
+        if host is None:
+            host = self.host
+
+        lst = self.list_installed_asps(
+            mute=mute,
+            host=host
+            )
+
+        lst_c = len(lst)
 
         lst_i = 0
 
@@ -1048,7 +1199,10 @@ class SystemCtl:
             logging.info("Loading file lists of all ASPs")
 
         for i in lst:
-            ret[i] = self.list_files_installed_by_asp(i, mute)
+            ret[i] = self.list_files_installed_by_asp(
+                i,
+                mute=mute
+                )
 
             lst_i += 1
 
@@ -1060,20 +1214,29 @@ class SystemCtl:
                         100.0 / (lst_c / lst_i)
                         )
                     )
-        print()
+
+        if not mute:
+            wayround_org.utils.terminal.progress_write_finish()
 
         return ret
 
-    def list_installed_asps_and_their_sums(self, mute=True):
+    def list_installed_asps_and_their_sums(self, mute=True, host=None):
         """
         Returns dict with asp names as keys and list of files whey installs as
         contents
         """
 
-        lst = self.list_installed_asps(mute)
-        lst_c = len(lst)
-
         ret = dict()
+
+        if host is None:
+            host = self.host
+
+        lst = self.list_installed_asps(
+            mute=mute,
+            host=host
+            )
+
+        lst_c = len(lst)
 
         lst_i = 0
 
@@ -1094,17 +1257,26 @@ class SystemCtl:
                         100.0 / (lst_c / lst_i)
                         )
                     )
-        print()
+
+        if not mute:
+            wayround_org.utils.terminal.progress_write_finish()
 
         return ret
 
-    def latest_installed_package_s_asp(self, name):
+    def latest_installed_package_s_asp(self, name, host=None):
 
         # TODO: attention to this function is required
 
-        lst = self.list_installed_package_s_asps(name)
-
         ret = None
+
+        if host is None:
+            host = self.host
+
+        lst = self.list_installed_package_s_asps(
+            name,
+            host=host
+            )
+
         if len(lst) > 0:
             latest = max(
                 lst,
@@ -1123,7 +1295,8 @@ class SystemCtl:
             mode=None,
             mute=False,
             sub_mute=True,
-            predefined_asp_tree=None
+            predefined_asp_tree=None,
+            host=None
             ):
         """
         instr can be a single query or list of queries.
@@ -1136,16 +1309,22 @@ class SystemCtl:
             list_installed_asps_and_their_files()
         """
 
+        ret = dict()
+
+        if host is None:
+            host = self.host
+
         if predefined_asp_tree is None:
             predefined_asp_tree = \
-                self.list_installed_asps_and_their_files(mute)
+                self.list_installed_asps_and_their_files(
+                    mute=mute,
+                    host=host
+                    )
         else:
             if not isinstance(predefined_asp_tree, dict):
                 raise ValueError("`predefined_asp_tree' must be dict or None")
 
         lst = sorted(predefined_asp_tree.keys())
-
-        ret_dict = dict()
 
         lst_l = len(lst)
         lst_i = 0
@@ -1167,7 +1346,7 @@ class SystemCtl:
                 )
 
             if len(found) != 0:
-                ret_dict[pkgname] = found
+                ret[pkgname] = found
 
             if not mute:
 
@@ -1190,12 +1369,15 @@ class SystemCtl:
         if not mute:
             wayround_org.utils.terminal.progress_write_finish()
 
-        ret = ret_dict
-
         return ret
 
     def find_file_in_files_installed_by_asp(
-            self, pkgname, instr, mode=None, mute=False, predefined_file_list=None
+            self,
+            pkgname,
+            instr,
+            mode=None,
+            mute=False,
+            predefined_file_list=None
             ):
         """
         instr can be a single query or list of queries.
@@ -1294,7 +1476,10 @@ class SystemCtl:
 
         returns ``0`` if all okay
         """
-
+        # TODO: is it deprecated method?
+        # NOTE: added exception. if it not causes problems for long - remove
+        #       this method (22 jun 2015)
+        raise Exception("deprecated")
         ret = None
 
         destdir = wayround_org.utils.path.abspath(self.basedir)
@@ -1376,6 +1561,7 @@ class SystemCtl:
                 raise
             else:
                 try:
+                    # TODO: eval usage is incorrect
                     ret = eval(txt, {}, {})
                 except:
                     ret = None
@@ -1385,13 +1571,19 @@ class SystemCtl:
 
         return ret
 
-    def find_old_packages(self, age=2592000, mute=True):
+    def find_old_packages(self, age=2592000, mute=True, host=None):
 
         # 2592000 = (60 * 60 * 24 * 30)  # 30 days
 
         ret = []
 
-        asps = self.list_installed_asps(mute=mute)
+        if host is None:
+            host = self.host
+
+        asps = self.list_installed_asps(
+            mute=mute,
+            host=host
+            )
 
         for i in asps:
 
@@ -1425,17 +1617,28 @@ class SystemCtl:
 
         return ret
 
-    def check_list_of_installed_packages_and_asps_auto(self):
+    def check_list_of_installed_packages_and_asps_auto(self, host=None):
 
-        content = self.list_installed_packages_and_asps()
+        if host is None:
+            host = self.host
 
-        ret = self.check_list_of_installed_packages_and_asps(content)
+        content = self.list_installed_packages_and_asps(
+            host=host
+            )
+
+        ret = self.check_list_of_installed_packages_and_asps(
+            content,
+            host=host
+            )
 
         return ret
 
-    def check_list_of_installed_packages_and_asps(self, in_dict):
+    def check_list_of_installed_packages_and_asps(self, in_dict, host=None):
 
         ret = 0
+
+        if host is None:
+            host = self.host
 
         keys = sorted(in_dict.keys())
 
@@ -1463,7 +1666,10 @@ class SystemCtl:
 
         return ret
 
-    def check_elfs_readiness(self, mute=False):
+    def check_elfs_readiness(self, mute=False, host=None):
+
+        if host is None:
+            host = self.host
 
         paths = self.elf_paths()
         elfs = find_all_elf_files(paths, verbose=True)
@@ -1487,7 +1693,7 @@ class SystemCtl:
 
         return 0
 
-    def load_asp_deps_all(self, mute=True):
+    def load_asp_deps_all(self, mute=True, host=None):
         """
         Returns dict: keys - asp names; values - dicts returned by
                       load_asp_deps()
@@ -1495,8 +1701,12 @@ class SystemCtl:
 
         ret = {}
 
+        if host is None:
+            host = self.host
+
         installed_asp_names = self.list_installed_asps(
-            mute=mute
+            mute=mute,
+            host=host
             )
 
         for i in installed_asp_names:
@@ -1505,7 +1715,10 @@ class SystemCtl:
             if asp_name.endswith('.asp'):
                 asp_name = asp_name[':-4']
 
-            res = self.load_asp_deps(asp_name=asp_name, mute=mute)
+            res = self.load_asp_deps(
+                asp_name=asp_name,
+                mute=mute
+                )
 
             if isinstance(res, dict):
                 ret[asp_name] = res
@@ -1516,7 +1729,11 @@ class SystemCtl:
 
         return ret
 
-    def get_asps_depending_on_asp(self, asp_name, mute=False):
+    def get_asps_depending_on_asp(
+            self,
+            asp_name,
+            mute=False
+            ):
 
         ret = 0
 
@@ -1757,7 +1974,11 @@ class SystemCtl:
 
         return ret
 
-    def get_asps_asp_depends_on(self, asp_name, mute=False):
+    def get_asps_asp_depends_on(
+            self,
+            asp_name,
+            mute=False
+            ):
 
         # TODO: optimizations required
         """
@@ -1947,7 +2168,11 @@ class SystemCtl:
         return ret
 
     def find_system_garbage(
-            self, prepared_all_files=None, mute=True, only_lib=False
+            self,
+            prepared_all_files=None,
+            mute=True,
+            only_lib=False,
+            host=None
             ):
         """
         Searches files not installed by any of ASPs in system
@@ -1960,6 +2185,9 @@ class SystemCtl:
 
         only_lib - search only for library garbage (/usr/lib)
         """
+
+        if host is None:
+            host = self.host
 
         if not mute:
             if self.basedir != '/':
@@ -2060,10 +2288,13 @@ class SystemCtl:
 
         return ret
 
-    def find_so_problems_in_system(self, verbose=False):
+    def find_so_problems_in_system(self, verbose=False, host=None):
         """
         Look for dependency problems in current system
         """
+
+        if host is None:
+            host = self.host
 
         so_files, elf_files = self.find_system_so_and_elf_files(verbose)
 
@@ -2073,7 +2304,7 @@ class SystemCtl:
 
         return reqs
 
-    def build_dependency_tree(self, verbose=False):
+    def build_dependency_tree(self, verbose=False, host=None):
         """
         Look for dependency problems in current system
         """
@@ -2088,9 +2319,12 @@ class SystemCtl:
 
         return reqs
 
-    def library_paths(self):
+    def library_paths(self, host=None):
 
         ret = []
+
+        if host is None:
+            host = self.host
 
         ret.append('/lib')
         ret.append('/usr/lib')
@@ -2101,9 +2335,12 @@ class SystemCtl:
 
         return ret
 
-    def elf_paths(self):
+    def elf_paths(self, host=None):
 
         ret = []
+
+        if host is None:
+            host = self.host
 
         ret.append('/bin')
         ret.append('/sbin')
@@ -2118,22 +2355,29 @@ class SystemCtl:
 
         return ret
 
-    def find_system_so_and_elf_files(self, verbose=False):
+    def find_system_so_and_elf_files(self, verbose=False, host=None):
         """
         Find All system Shared Object Files and all ELF files real paths.
         """
+
+        if host is None:
+            host = self.host
 
         so_files = self.find_system_so_files(verbose=verbose)
         elf_files = self.find_system_elf_files(verbose=verbose)
         return (so_files, elf_files)
 
-    def find_system_so_files(self, verbose=False):
+    def find_system_so_files(self, verbose=False, host=None):
+        if host is None:
+            host = self.host
         paths = self.library_paths()
         if verbose:
             logging.info("Searching so files in paths: {}".format(paths))
         return find_all_so_files(paths, verbose=verbose)
 
-    def find_system_elf_files(self, verbose=False):
+    def find_system_elf_files(self, verbose=False, host=None):
+        if host is None:
+            host = self.host
         paths = self.elf_paths()
         if verbose:
             logging.info("Searching elf files in paths: {}".format(paths))
@@ -2150,6 +2394,7 @@ class SystemCtl:
                 '/etc',
                 '/home',
                 '/media',
+                '/multiarch',
                 '/mnt',
                 '/opt',
                 '/proc',
@@ -2157,9 +2402,6 @@ class SystemCtl:
                 '/run',
                 '/sys',
                 '/tmp',
-                '/usr/bin',
-                '/usr/sbin',
-                '/usr/lib',
                 '/var/mail'
                 ]:
 
@@ -2175,7 +2417,7 @@ class SystemCtl:
                     ret = 1
 
         for i in [
-                'bin', 'sbin', 'lib'
+                'bin', 'sbin', 'lib', 'lib64'
                 ]:
 
             joined = wayround_org.utils.path.join(self.basedir, i)
@@ -2190,11 +2432,21 @@ class SystemCtl:
                         )
                     ret = 1
 
+        if not os.path.exists('/usr') and not os.path.islink('/usr'):
+            try:
+                os.symlink('multihost/_primary', '/usr')
+            except:
+                logging.exception("Can't create link /usr -- continuing")
+                ret = 1
+
         return ret
 
-    def gen_locale(self):
+    def gen_locale(self, host=None):
 
         ret = 0
+
+        if host is None:
+            host = self.host
 
         target_dir = wayround_org.utils.path.join(
             self.basedir,
@@ -2233,10 +2485,14 @@ class SystemCtl:
 
         return ret
 
-    def find_asps_requireing_sos_not_installed_by_asps(self, mute=True):
+    def find_asps_requireing_sos_not_installed_by_asps(
+            self, mute=True, host=None):
         """
         Return: dict. keys - asp names; values - lists of tuples
         """
+
+        if host is None:
+            host = self.host
 
         all_deps = self.load_asp_deps_all(mute=mute)
 
@@ -2317,10 +2573,20 @@ class SystemCtl:
 
         return ret
 
-    def find_libtool_la_with_problems(self, mute=True):
+    def find_libtool_la_with_problems(self, mute=True, host=None):
+
+        # FIXME: attention to paths required
+
+        la_with_problems = dict()
+
+        if host is None:
+            host = self.host
 
         mask = wayround_org.utils.path.join(
-            self.basedir, 'usr', 'lib', '*.la'
+            self.basedir,
+            'usr',
+            'lib',
+            '*.la'
             )
 
         if not mute:
@@ -2331,8 +2597,6 @@ class SystemCtl:
 
         if not mute:
             logging.info("    found {} file(s)".format(la_files_len))
-
-        la_with_problems = dict()
 
         if not mute:
             logging.info("Analising..")
@@ -2378,12 +2642,12 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith('/usr/lib')
-                                    or not os.path.isdir(
-                                    wayround_org.utils.path.join(
+                            or not os.path.isdir(
+                            wayround_org.utils.path.join(
                                         self.basedir,
                                         wj)
-                                    )
-                                ):
+                            )
+                            ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

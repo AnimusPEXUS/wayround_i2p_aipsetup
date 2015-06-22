@@ -138,7 +138,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 # TODO: gcc may be required to be built without
                 #       --without-headers option to avoit this glibc parameter
-                'libc_cv_ssp=no'
+                #'libc_cv_ssp=no'
                 ]
 
         return ret
