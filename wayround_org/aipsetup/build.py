@@ -584,11 +584,11 @@ class PackCtl:
 
         return ret
 
-    def relocate_multiarch_files(self):
+    def relocate_usr_multiarch_files(self):
 
         ret = 0
 
-        logging.info("Moving files to multiarch location")
+        logging.info("Moving usr files to multiarch location")
 
         source_arch_dir = wayround_org.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
@@ -647,6 +647,83 @@ class PackCtl:
         if ret == 0:
             if len(os.listdir(source_arch_dir)) != 0:
                 logging.error("usr dir must be empty by now, but it's not")
+                ret = 3
+
+            else:
+                try:
+                    os.rmdir(source_arch_dir)
+                except:
+                    logging.exception(
+                        "Can't remove dir: {}".format(source_arch_dir)
+                        )
+                    ret = 4
+
+        return ret
+
+    def relocate_etc_multiarch_files(self):
+
+        ret = 0
+
+        logging.info("Moving etc files to multiarch location")
+
+        source_arch_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'etc'
+            )
+
+        if not os.path.exists(source_arch_dir):
+            ret = 0
+
+        else:
+
+            package_info = self.buildingsite_ctl.read_package_info()
+
+            host = package_info['constitution']['host']
+
+            target_arch_dir = wayround_org.utils.path.join(
+                self.buildingsite_ctl.getDIR_DESTDIR(),
+                'multiarch',
+                host,
+                'etc'
+                )
+
+            os.makedirs(target_arch_dir, exist_ok=True)
+
+            files = os.listdir(source_arch_dir)
+
+            for i in files:
+
+                logging.info("    {}".format(i))
+
+                joined_src = wayround_org.utils.path.join(
+                    source_arch_dir,
+                    i
+                    )
+
+                joined_dst = wayround_org.utils.path.join(
+                    target_arch_dir,
+                    i
+                    )
+
+                if os.path.exists(joined_dst) or os.path.islink(joined_dst):
+                    wayround_org.utils.file.remove_if_exists(
+                        joined_dst
+                        )
+
+                try:
+                    os.rename(joined_src, joined_dst)
+                except:
+                    logging.exception(
+                        "Can't rename file:\n    {}\n    to\n    {}".format(
+                            joined_src,
+                            joined_dst
+                            )
+                        )
+                    ret = 2
+
+        if ret == 0:
+            if len(os.listdir(source_arch_dir)) != 0:
+                logging.error("etc dir must be empty by now, but it's not")
                 ret = 3
 
             else:
@@ -1211,7 +1288,8 @@ class PackCtl:
 
         for i in [
                 self.destdir_verify_paths_correctness,
-                self.relocate_multiarch_files,
+                self.relocate_usr_multiarch_files,
+                self.relocate_etc_multiarch_files,
                 self.destdir_set_modes,
                 self.destdir_checksum,
                 self.destdir_filelist,

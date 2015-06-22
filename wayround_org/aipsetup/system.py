@@ -61,6 +61,15 @@ class SystemCtl:
         """
         :param basedir: path to root directory of target system
             (absoluted internally)
+        :param host:
+
+        following paramaters has default values only as extramesure and like
+            host should always be taken from config!!!
+
+        :param installed_pkg_dir: '/var/log/packages'
+        :param installed_pkg_dir_buildlogs: '/var/log/packages/buildlogs'
+        :param installed_pkg_dir_sums: '/var/log/packages/sums'
+        :param installed_pkg_dir_deps: '/var/log/packages/deps'
         """
 
         if not isinstance(
@@ -73,20 +82,38 @@ class SystemCtl:
                 "wayround_org.aipsetup.client_pkg.PackageServerClient"
                 )
 
-        # if wayround_org.utils.system_type.parse_triplet(host) is None:
-        #     raise ValueError("Invalid host triplet")
+        if wayround_org.utils.system_type.parse_triplet(host) is None:
+            raise ValueError("Invalid host triplet")
 
-        if host is None:
-            host = self.determine_primary_host()
+        # if host != self.determine_fs_tree_primary_host():
+        #    raise ValueError("File tree")
 
         self.basedir = wayround_org.utils.path.abspath(basedir)
 
         self._pkg_client = pkg_client
 
-        self._installed_pkg_dir = installed_pkg_dir
-        self._installed_pkg_dir_buildlogs = installed_pkg_dir_buildlogs
-        self._installed_pkg_dir_sums = installed_pkg_dir_sums
-        self._installed_pkg_dir_deps = installed_pkg_dir_deps
+        self._primary_host_link = wayround_org.utils.path.join(
+            self.basedir,
+            'multiarch',
+            '_primary'
+            )
+
+        self._installed_pkg_dir = wayround_org.utils.path.join(
+            self.basedir,
+            installed_pkg_dir
+            )
+        self._installed_pkg_dir_buildlogs = wayround_org.utils.path.join(
+            self.basedir,
+            installed_pkg_dir_buildlogs
+            )
+        self._installed_pkg_dir_sums = wayround_org.utils.path.join(
+            self.basedir,
+            installed_pkg_dir_sums
+            )
+        self._installed_pkg_dir_deps = wayround_org.utils.path.join(
+            self.basedir,
+            installed_pkg_dir_deps
+            )
 
         self._host = host
 
@@ -97,17 +124,13 @@ class SystemCtl:
         return self._host
 
     def get_primary_host_link(self):
-        host_link = wayround_org.utils.path.join(
-            self.basedir,
-            'multiarch',
-            '_primary'
-            )
+        host_link = self._primary_host_link
         ret = None
         if os.path.islink(host_link):
             ret = host_link
         return ret
 
-    def determine_primary_host(self):
+    def determine_fs_tree_primary_host(self):
         ret = None
         host_link = self.get_primary_host_link()
         if host_link is not None:
@@ -304,7 +327,12 @@ class SystemCtl:
                                         name_parsed['groups']['name']
                                         )
                                     )
-                                self.reduce_asps(name, asps)
+                                self.reduce_asps(
+                                    name,
+                                    reduce_what=asps,
+                                    mute=False,
+                                    host=host
+                                    )
                                 logging.info(
                                     "Reduced `{}' ASPs".format(
                                         name_parsed['groups']['name']
@@ -453,8 +481,7 @@ class SystemCtl:
 
                 out_filename = (
                     wayround_org.utils.path.abspath(
-                        os.path.join(
-                            self.basedir,
+                        wayround_org.utils.path.join(
                             logs_path,
                             package_name + '.xz'
                             )
@@ -481,7 +508,8 @@ class SystemCtl:
 
                     logging.error(
                         "Can't install asp {} as {}".format(
-                            i[2], out_filename
+                            i[2],
+                            out_filename
                             )
                         )
 
@@ -678,7 +706,7 @@ class SystemCtl:
 
         lines = self.list_files_installed_by_asp(
             asp_name,
-            mute=muse
+            mute=mute
             )
 
         if not isinstance(lines, list):
@@ -839,7 +867,6 @@ class SystemCtl:
 
                 rm_file_name = wayround_org.utils.path.abspath(
                     wayround_org.utils.path.join(
-                        destdir,
                         i,
                         asp_name + '.xz'
                         )
@@ -935,10 +962,7 @@ class SystemCtl:
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
         listdir = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
-                destdir,
-                self._installed_pkg_dir
-                )
+            self._installed_pkg_dir
             )
 
         filelist = glob.glob(os.path.join(listdir, '*.xz'))
@@ -957,6 +981,11 @@ class SystemCtl:
             for i in ['sums', 'buildlogs', '.', '..']:
                 if i in bases:
                     bases.remove(i)
+
+            for i in range(len(filelist) - 1, -1, -1):
+                asp = wayround_org.auipsetup.package.ASPackage(filelist[i])
+                if host != asp.host:
+                    del filelist[i]
 
             ret = bases
 
@@ -1068,10 +1097,7 @@ class SystemCtl:
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
         list_dir = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
-                destdir,
-                self._installed_pkg_dir
-                )
+            self._installed_pkg_dir
             )
 
         pkg_list_file = os.path.join(list_dir, asp_name)
@@ -1089,14 +1115,15 @@ class SystemCtl:
         else:
 
             pkg_file_list = wayround_org.utils.archive.xzcat(
-                f, convert_to_str=True
+                f,
+                convert_to_str=True
                 )
 
             f.close()
 
             pkg_file_list = pkg_file_list.splitlines()
             pkg_file_list = \
-                wayround_org.utils.list.
+                wayround_org.utils.list.\
                 filelist_strip_remove_empty_remove_duplicated_lines(
                     pkg_file_list
                     )
@@ -1123,10 +1150,7 @@ class SystemCtl:
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
         list_dir = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
-                destdir,
-                self._installed_pkg_dir_sums
-                )
+            self._installed_pkg_dir_sums
             )
 
         pkg_list_file = os.path.join(list_dir, asp_name)
@@ -1486,10 +1510,7 @@ class SystemCtl:
 
         deps = self.get_asp_dependencies(asp_name, mute)
 
-        deps_dir = wayround_org.utils.path.join(
-            destdir,
-            self._installed_pkg_dir_deps
-            )
+        deps_dir = self._installed_pkg_dir_deps
 
         file_name = wayround_org.utils.path.join(
             deps_dir, asp_name
@@ -1537,10 +1558,7 @@ class SystemCtl:
 
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
-        dire = wayround_org.utils.path.join(
-            destdir,
-            self._installed_pkg_dir_deps
-            )
+        dire = self._installed_pkg_dir_deps
 
         file_name = wayround_org.utils.path.join(
             dire, asp_name
@@ -1671,8 +1689,8 @@ class SystemCtl:
         if host is None:
             host = self.host
 
-        paths = self.elf_paths()
-        elfs = find_all_elf_files(paths, verbose=True)
+        paths = self.elf_paths(host=host)
+        elfs = find_all_elf_files(paths, verbose=True, host=host)
 
         elfs = sorted(wayround_org.utils.path.realpaths(elfs))
 
@@ -1875,7 +1893,8 @@ class SystemCtl:
                 logging.info("Getting list of all asps installed in system")
 
             installed_asp_names = self.list_installed_asps(
-                mute=mute
+                mute=mute,
+                host=host
                 )
 
             deps_list = dict()
@@ -1977,15 +1996,18 @@ class SystemCtl:
     def get_asps_asp_depends_on(
             self,
             asp_name,
-            mute=False
+            mute=False,
+            host=host
             ):
-
-        # TODO: optimizations required
         """
         Returns list on success
         """
+        # TODO: optimizations required
 
         ret = 0
+
+        if host is None:
+            host = self.host
 
         elfs_installed_by_asp_name_deps = self.get_asp_dependencies(
             asp_name, mute=mute
@@ -2015,7 +2037,8 @@ class SystemCtl:
 
             all_asps_and_files = (
                 self.list_installed_asps_and_their_files(
-                    mute=mute
+                    mute=mute,
+                    host=host
                     )
                 )
 
@@ -2183,7 +2206,7 @@ class SystemCtl:
         Dirs excluded from search are:
         /boot, /etc, /var, /run, /proc, /sys, /home, /root, /tmp
 
-        only_lib - search only for library garbage (/usr/lib)
+        only_lib - search only for library garbage (/multiarch/*/lib*)
         """
 
         if host is None:
@@ -2195,7 +2218,8 @@ class SystemCtl:
 
         if prepared_all_files is None:
             prepared_all_files = self.list_installed_asps_and_their_files(
-                mute=mute
+                mute=mute,
+                host=host
                 )
 
         lst = []
@@ -2214,16 +2238,33 @@ class SystemCtl:
             # TODO: /usr/lib must be calculated, - not constant
 
             lst = wayround_org.utils.file.files_recurcive_list(
-                wayround_org.utils.path.join(self.basedir, 'usr', 'lib'),
+                wayround_org.utils.path.join(
+                    self.basedir, 'multiarch', host, 'lib'
+                    ),
                 mute=mute,
                 sort=True,
                 maxdepth=1
                 )
 
-        lst = sorted(wayround_org.utils.path.unprepend_path(
-            lst,
-            self.basedir
-            ))
+            lst2 = wayround_org.utils.file.files_recurcive_list(
+                wayround_org.utils.path.join(
+                    self.basedir, 'multiarch', host, 'lib64'
+                    ),
+                mute=mute,
+                sort=True,
+                maxdepth=1
+                )
+
+            if isinstance(lst2, list):
+                lst += lst2
+            del lst2
+
+        lst = sorted(
+            wayround_org.utils.path.unprepend_path(
+                lst,
+                self.basedir
+                )
+            )
 
         result = []
 
@@ -2296,10 +2337,15 @@ class SystemCtl:
         if host is None:
             host = self.host
 
-        so_files, elf_files = self.find_system_so_and_elf_files(verbose)
+        so_files, elf_files = self.find_system_so_and_elf_files(
+            verbose,
+            host=host
+            )
 
         reqs = find_so_problems_by_given_so_and_elfs(
-            so_files, elf_files, verbose
+            so_files,
+            elf_files,
+            verbose
             )
 
         return reqs
@@ -2311,10 +2357,17 @@ class SystemCtl:
 
         # TODO: rework to help text required
 
-        elf_files = self.find_system_elf_files(verbose=verbose)
+        if host is None:
+            host = self.host
+
+        elf_files = self.find_system_elf_files(
+            verbose=verbose,
+            host=host
+            )
 
         reqs = build_binary_dependency_tree_for_given_elf_files(
-            elf_files, verbose
+            elf_files,
+            verbose
             )
 
         return reqs
@@ -2326,8 +2379,8 @@ class SystemCtl:
         if host is None:
             host = self.host
 
-        ret.append('/lib')
-        ret.append('/usr/lib')
+        ret.append(wayround_org.utils.path.join('/multiarch', host, 'lib'))
+        ret.append(wayround_org.utils.path.join('/multiarch', host, 'lib64'))
 
         ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
         ret = wayround_org.utils.path.realpaths(ret)
@@ -2342,12 +2395,10 @@ class SystemCtl:
         if host is None:
             host = self.host
 
-        ret.append('/bin')
-        ret.append('/sbin')
-        ret.append('/usr/bin')
-        ret.append('/usr/sbin')
+        ret.append(wayround_org.utils.path.join('/multiarch', host, 'bin'))
+        ret.append(wayround_org.utils.path.join('/multiarch', host, 'sbin'))
 
-        ret += self.library_paths()
+        ret += self.library_paths(host=host)
 
         ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
         ret = wayround_org.utils.path.realpaths(ret)
@@ -2363,22 +2414,26 @@ class SystemCtl:
         if host is None:
             host = self.host
 
-        so_files = self.find_system_so_files(verbose=verbose)
-        elf_files = self.find_system_elf_files(verbose=verbose)
+        so_files = self.find_system_so_files(verbose=verbose, host=host)
+        elf_files = self.find_system_elf_files(verbose=verbose, host=host)
         return (so_files, elf_files)
 
     def find_system_so_files(self, verbose=False, host=None):
+
         if host is None:
             host = self.host
-        paths = self.library_paths()
+
+        paths = self.library_paths(host=host)
         if verbose:
             logging.info("Searching so files in paths: {}".format(paths))
         return find_all_so_files(paths, verbose=verbose)
 
     def find_system_elf_files(self, verbose=False, host=None):
+
         if host is None:
             host = self.host
-        paths = self.elf_paths()
+
+        paths = self.elf_paths(host=host)
         if verbose:
             logging.info("Searching elf files in paths: {}".format(paths))
         return find_all_elf_files(paths, verbose=verbose)
@@ -2450,7 +2505,10 @@ class SystemCtl:
 
         target_dir = wayround_org.utils.path.join(
             self.basedir,
-            'usr', 'lib', 'locale'
+            'multiarch',
+            host,
+            'lib',
+            'locale'
             )
 
         if not os.path.isdir(target_dir):
@@ -2494,10 +2552,15 @@ class SystemCtl:
         if host is None:
             host = self.host
 
-        all_deps = self.load_asp_deps_all(mute=mute)
+        all_deps = self.load_asp_deps_all(
+            mute=mute,
+            host=host
+            )
 
-        all_installed_files = \
-            self.list_installed_asps_and_their_files(mute=mute)
+        all_installed_files = self.list_installed_asps_and_their_files(
+            mute=mute,
+            host=host
+            )
 
         logging.info("Compacting for greater performance..")
         all_installed_files2 = dict()
@@ -2584,8 +2647,9 @@ class SystemCtl:
 
         mask = wayround_org.utils.path.join(
             self.basedir,
-            'usr',
-            'lib',
+            'multiarch',
+            host,
+            'lib*',
             '*.la'
             )
 
@@ -2631,7 +2695,16 @@ class SystemCtl:
 
                 sp_res = shlex.split(res)
 
-                search_dirs = set(['/usr/lib'])
+                search_dirs = set(
+                    [
+                        wayround_org.utils.path.join(
+                            '/multiarch', host, 'lib'
+                            ),
+                        wayround_org.utils.path.join(
+                            '/multiarch', host, 'lib64'
+                            ),
+                        ]
+                    )
 
                 for j in sp_res:
 
@@ -2641,13 +2714,17 @@ class SystemCtl:
 
                         wj = j[2:]
 
-                        if (not wj.startswith('/usr/lib')
-                            or not os.path.isdir(
-                            wayround_org.utils.path.join(
-                                        self.basedir,
-                                        wj)
-                            )
-                            ):
+                        if (not wj.startswith(
+                                wayround_org.utils.path.join(
+                                    '/multiarch', host, 'lib'
+                                    )
+                                )
+                                or not os.path.isdir(
+                                wayround_org.utils.path.join(
+                                    self.basedir,
+                                    wj)
+                                )
+                                ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.
