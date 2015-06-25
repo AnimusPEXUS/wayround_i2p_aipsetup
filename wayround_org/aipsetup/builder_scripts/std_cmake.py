@@ -29,9 +29,31 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
 
     def builder_action_configure_define_options(self, called_as, log):
-        return [
+
+        dl = wayround_org.aipsetup.build.find_dl(
+            os.path.join(
+                '/',
+                'multiarch',
+                self.host
+                )
+            )
+
+        rpath = os.path.join(
+            '/',
+            'multiarch',
+            self.host,
+            'lib'
+            )
+
+        exe_linker_flags = '-Wl,--dynamic-linker=' + \
+            dl + \
+            ' -Wl,-rpath={}'.format(rpath) + \
+            ' -Wl,-rpath-link={}'.format(rpath)
+
+        ret = [
             '-DCMAKE_INSTALL_PREFIX=' +
             self.package_info['constitution']['paths']['usr'],
+            '-DCMAKE_EXE_LINKER_FLAGS=' + exe_linker_flags,
             #    '--mandir=' + pkg_info['constitution']['paths']['man'],
             #    '--sysconfdir=' +
             #    pkg_info['constitution']['paths']['config'],
@@ -41,11 +63,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #    '--host=' + pkg_info['constitution']['host'],
             #    '--build=' + pkg_info['constitution']['build'],
             #    '--target=' + pkg_info['constitution']['target']
-            ] + cmake.calc_conf_hbt_options(self)
+            ]
+
+        return ret + cmake.calc_conf_hbt_options(self)
 
     def builder_action_configure(self, called_as, log):
 
-        defined_options = self.builder_action_configure_define_options(called_as, log)
+        defined_options = self.builder_action_configure_define_options(
+            called_as,
+            log)
 
         ret = cmake.cmake_high(
             self.buildingsite,

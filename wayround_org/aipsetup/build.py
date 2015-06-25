@@ -19,6 +19,7 @@ import importlib
 import types
 import collections
 import re
+import glob
 
 import wayround_org.aipsetup.client_pkg
 import wayround_org.aipsetup.controllers
@@ -556,7 +557,7 @@ class PackCtl:
 
         for i in INVALID_MOVABLE_DESTDIR_ROOT_LINKS:
 
-            p1 = wayround_org.utils.path(destdir, i)
+            p1 = wayround_org.utils.path.join(destdir, i)
 
             if os.path.islink(p1) or os.path.exists(p1):
 
@@ -564,7 +565,7 @@ class PackCtl:
 
                 wayround_org.utils.file.copytree(
                     p1,
-                    wayround_org.utils.path(destdir, 'usr', i),
+                    wayround_org.utils.path.join(destdir, 'usr', i),
                     dst_must_be_empty=False
                     )
                 #shutil.copytree(p1, destdir + os.path.sep + 'usr')
@@ -572,7 +573,7 @@ class PackCtl:
 
         for i in INVALID_DESTDIR_ROOT_LINKS:
 
-            p1 = wayround_org.utils.path(destdir, i)
+            p1 = wayround_org.utils.path.join(destdir, i)
 
             if os.path.islink(p1) or os.path.exists(p1):
                 logging.error(
@@ -645,18 +646,19 @@ class PackCtl:
                     ret = 2
 
         if ret == 0:
-            if len(os.listdir(source_arch_dir)) != 0:
-                logging.error("usr dir must be empty by now, but it's not")
-                ret = 3
+            if os.path.isdir(source_arch_dir):
+                if len(os.listdir(source_arch_dir)) != 0:
+                    logging.error("usr dir must be empty by now, but it's not")
+                    ret = 3
 
-            else:
-                try:
-                    os.rmdir(source_arch_dir)
-                except:
-                    logging.exception(
-                        "Can't remove dir: {}".format(source_arch_dir)
-                        )
-                    ret = 4
+                else:
+                    try:
+                        os.rmdir(source_arch_dir)
+                    except:
+                        logging.exception(
+                            "Can't remove dir: {}".format(source_arch_dir)
+                            )
+                        ret = 4
 
         return ret
 
@@ -722,18 +724,77 @@ class PackCtl:
                     ret = 2
 
         if ret == 0:
-            if len(os.listdir(source_arch_dir)) != 0:
-                logging.error("etc dir must be empty by now, but it's not")
-                ret = 3
+            if os.path.isdir(source_arch_dir):
+                if len(os.listdir(source_arch_dir)) != 0:
+                    logging.error("etc dir must be empty by now, but it's not")
+                    ret = 3
 
-            else:
-                try:
-                    os.rmdir(source_arch_dir)
-                except:
-                    logging.exception(
-                        "Can't remove dir: {}".format(source_arch_dir)
+                else:
+                    try:
+                        os.rmdir(source_arch_dir)
+                    except:
+                        logging.exception(
+                            "Can't remove dir: {}".format(source_arch_dir)
+                            )
+                        ret = 4
+
+        return ret
+
+    def relocate_libx_dir_files_into_lib_dir(self):
+
+        ret = 0
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        host = package_info['constitution']['host']
+
+        arch_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multiarch',
+            host
+            )
+
+        lib_dir = wayround_org.utils.path.join(arch_dir, 'lib')
+
+        os.makedirs(lib_dir, exist_ok=True)
+
+        all_files = os.listdir(arch_dir)
+
+        libx_dirs = []
+
+        for i in all_files:
+            if i in ['lib64', 'lib32', 'libx32']:
+                logging.info("{} contents selected for moving".format(i))
+                libx_dirs.append(
+                    wayround_org.utils.path.join(
+                        arch_dir,
+                        i
                         )
-                    ret = 4
+                    )
+
+        copy_errors = 0
+        for j in libx_dirs:
+
+            j_files = os.listdir(j)
+
+            for i in j_files:
+                if wayround_org.utils.file.copy_file_or_directory(
+                        wayround_org.utils.path.join(j, i),
+                        wayround_org.utils.path.join(lib_dir, i),
+                        overwrite_files=False,
+                        clear_before_copy=False,
+                        dst_must_be_empty=True,
+                        verbose=True
+                        ) != 0:
+                    copy_errors += 1
+
+        if copy_errors != 0:
+            logging.error("Some copying error")
+            ret = 2
+
+        if ret == 0:
+            for i in libx_dirs:
+                shutil.rmtree(i)
 
         return ret
 
@@ -1290,6 +1351,7 @@ class PackCtl:
                 self.destdir_verify_paths_correctness,
                 self.relocate_usr_multiarch_files,
                 self.relocate_etc_multiarch_files,
+                self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_set_modes,
                 self.destdir_checksum,
                 self.destdir_filelist,
@@ -2327,5 +2389,21 @@ def run_builder_action(
 
         if ret != 0:
             break
+
+    return ret
+
+
+def find_dl(root_dir_path):
+
+    root_dir_path = os.path.abspath(root_dir_path)
+
+    gr = glob.glob(os.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
+
+    ret = None
+
+    if len(gr) == 1:
+        ret = gr[0]
+    else:
+        raise Exception("found ld lib count != 1: {}".format(gr))
 
     return ret

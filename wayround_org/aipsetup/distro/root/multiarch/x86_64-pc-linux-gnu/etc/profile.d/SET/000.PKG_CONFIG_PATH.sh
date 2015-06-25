@@ -1,0 +1,1 @@
+export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/share/pkgconfig:/usr/lib64/pkgconfig

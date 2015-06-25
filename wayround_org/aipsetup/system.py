@@ -413,7 +413,7 @@ class SystemCtl:
         try:
 
             asp = wayround_org.aipsetup.package.ASPackage(asp_package)
-            host = asp.host()
+            host = asp.host
 
         except:
             logging.exception("Some error")
@@ -450,6 +450,8 @@ class SystemCtl:
 
         if ret == 0:
 
+            logging.info("Installing lists")
+
             package_name = package_name[:-4]
             for i in [
                     (
@@ -474,19 +476,31 @@ class SystemCtl:
                         )
                     ]:
 
+                logging.info(i[1])
+
                 logs_path = i[1]
 
                 if logs_path.startswith(os.path.sep):
                     logs_path = logs_path[1:]
 
-                out_filename = (
-                    wayround_org.utils.path.abspath(
-                        wayround_org.utils.path.join(
-                            logs_path,
-                            package_name + '.xz'
+                if i[0] == './05.BUILD_LOGS.tar.xz':
+                    out_filename = (
+                        wayround_org.utils.path.abspath(
+                            wayround_org.utils.path.join(
+                                i[1],
+                                package_name + '.tar.xz'
+                                )
                             )
                         )
-                    )
+                else:
+                    out_filename = (
+                        wayround_org.utils.path.abspath(
+                            wayround_org.utils.path.join(
+                                i[1],
+                                package_name + '.xz'
+                                )
+                            )
+                        )
 
                 out_filename_dir = os.path.dirname(out_filename)
 
@@ -865,12 +879,20 @@ class SystemCtl:
                     self._installed_pkg_dir
                     ]:
 
-                rm_file_name = wayround_org.utils.path.abspath(
-                    wayround_org.utils.path.join(
-                        i,
-                        asp_name + '.xz'
+                if i == self._installed_pkg_dir_buildlogs:
+                    rm_file_name = wayround_org.utils.path.abspath(
+                        wayround_org.utils.path.join(
+                            i,
+                            asp_name + '.tar.xz'
+                            )
                         )
-                    )
+                else:
+                    rm_file_name = wayround_org.utils.path.abspath(
+                        wayround_org.utils.path.join(
+                            i,
+                            asp_name + '.xz'
+                            )
+                        )
 
                 if os.path.isfile(rm_file_name):
                     logging.info("   removing: {}".format(rm_file_name))
@@ -983,7 +1005,7 @@ class SystemCtl:
                     bases.remove(i)
 
             for i in range(len(filelist) - 1, -1, -1):
-                asp = wayround_org.auipsetup.package.ASPackage(filelist[i])
+                asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
                 if host != asp.host:
                     del filelist[i]
 

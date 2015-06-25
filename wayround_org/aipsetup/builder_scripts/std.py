@@ -265,16 +265,50 @@ class Builder:
 
     def builder_action_configure_define_options(self, called_as, log):
 
+        dl = wayround_org.aipsetup.build.find_dl(
+            os.path.join(
+                '/',
+                'multiarch',
+                self.host
+                )
+            )
+
+        rpath = os.path.join(
+            '/',
+            'multiarch',
+            self.host,
+            'lib'
+            )
+
         ret = [
-            '--prefix=' +
-            self.package_info['constitution']['paths']['usr'],
-            '--mandir=' +
-            self.package_info['constitution']['paths']['man'],
-            '--sysconfdir=' +
-            self.package_info['constitution']['paths']['config'],
-            '--localstatedir=' +
-            self.package_info['constitution']['paths']['var'],
-            '--enable-shared'
+            '--prefix=' + os.path.join('/', 'multiarch', self.host),
+            '--includedir=' +
+            os.path.join(
+                '/',
+                'multiarch',
+                self.host,
+                'include'
+                ),
+            '--libdir=' + os.path.join('/', 'multiarch', self.host, 'lib'),
+            '--mandir=' + os.path.join(
+                '/',
+                'multiarch',
+                self.host,
+                'share',
+                'man'
+                ),
+            '--sysconfdir=' + os.path.join(
+                '/',
+                'multiarch',
+                self.host,
+                'etc'
+                ),
+            '--localstatedir=/var',
+            '--enable-shared',
+            'LDFLAGS=-Wl,--dynamic-linker=' + \
+                dl + \
+                ' -Wl,-rpath={}'.format(rpath) + \
+                ' -Wl,-rpath-link={}'.format(rpath)
             ] + autotools.calc_conf_hbt_options(self)
 
         return ret
@@ -314,16 +348,14 @@ class Builder:
             source_configure_reldir=self.source_configure_reldir,
             use_separate_buildding_dir=self.separate_build_dir,
             script_name=defined_script_name,
-            run_script_not_bash=
-                self.builder_action_configure_define_run_script_not_bash(
-                    called_as,
-                    log
-                    ),
-            relative_call=
-                self.builder_action_configure_define_relative_call(
-                    called_as,
-                    log
-                    )
+            run_script_not_bash=self.builder_action_configure_define_run_script_not_bash(
+                called_as,
+                log
+                ),
+            relative_call=self.builder_action_configure_define_relative_call(
+                called_as,
+                log
+                )
             )
         return ret
 

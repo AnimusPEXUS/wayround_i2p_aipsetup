@@ -108,6 +108,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             #                    '--disable-libada',
             #                    '--enable-bootstrap',
+            # Note: is building gcc with #'--with-sysroot={} it ends with error
+            #       The directory that should contain system headers does not 
+            #       exist:
+            #       /multiarch/x86_64-pc-linux-gnu/usr/include
+ 
+            #'--with-sysroot={}'.format(
+            #    os.path.join('/', 'multiarch', self.host)
+            #    ),
             '--enable-64-bit-bfd',
             '--disable-werror',
             '--enable-libada',
@@ -115,7 +123,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-objc-gc',
 
             '--enable-lto',
-            '--enable-ld'
+            '--enable-ld',
+            #'-Wl,--rpath={}'.format(
+            #    os.path.join('/', 'multiarch', self.host, 'lib')
+            #    ),
+            #'LDFLAGS=-Wl,--dynamic-linker={}'.format(
+            #    os.path.join('/', 'multiarch', self.host,
+            #    'lib', 'ld-linux-x86-64.so.2')
+            #    )
             ]
 
         if self.is_crossbuilder:

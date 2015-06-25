@@ -88,7 +88,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
 
-        with_headers = '/usr/include'
+        with_headers = '/multiarch/{}/include'.format(self.host)
 
         """
         if self.is_crossbuilder:
@@ -151,8 +151,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             try:
                 os.rename(
-                    os.path.join(self.dst_dir, 'etc', 'ld.so.cache'),
-                    os.path.join(self.dst_dir, 'etc', 'ld.so.cache.distr')
+                    os.path.join(self.dst_dir, 'multiarch', self.host, 'etc', 'ld.so.cache'),
+                    os.path.join(self.dst_dir, 'multiarch', self.host, 'etc', 'ld.so.cache.distr')
                     )
             except:
                 log.exception("Can't rename ld.so.cache file")

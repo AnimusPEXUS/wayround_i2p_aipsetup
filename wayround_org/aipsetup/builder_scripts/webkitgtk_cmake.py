@@ -13,11 +13,11 @@ def main(buildingsite, action=None):
     ret = 0
 
     r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'cmake', 'build', 'distribute'],
-            action,
-            "help"
-            )
+        buildingsite,
+        ['extract', 'cmake', 'build', 'distribute'],
+        action,
+        "help"
+        )
 
     if not isinstance(r, tuple):
         logging.error("Error")
@@ -51,20 +51,20 @@ def main(buildingsite, action=None):
                 buildingsite,
                 options=[
                     '-DCMAKE_INSTALL_PREFIX=' +
-                        pkg_info['constitution']['paths']['usr'],
+                    pkg_info['constitution']['paths']['usr'],
                     '-DPORT=GTK',
                     #'-DCMAKE_EXE_LINKER_FLAGS= -latomic ',
                     # '-DCMAKE_STATIC_LINKER_FLAGS= -latomic ',
                     #'-DCMAKE_SHARED_LINKER_FLAGS= -latomic '
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' +
-#                        pkg_info['constitution']['paths']['var'],
-#                    '--enable-shared',
-#                    '--host=' + pkg_info['constitution']['host'],
-#                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
+                    #                    '--mandir=' + pkg_info['constitution']['paths']['man'],
+                    #                    '--sysconfdir=' +
+                    #                        pkg_info['constitution']['paths']['config'],
+                    #                    '--localstatedir=' +
+                    #                        pkg_info['constitution']['paths']['var'],
+                    #                    '--enable-shared',
+                    #                    '--host=' + pkg_info['constitution']['host'],
+                    #                    '--build=' + pkg_info['constitution']['build'],
+                    #                    '--target=' + pkg_info['constitution']['target']
                     ],
                 arguments=[],
                 environment={},

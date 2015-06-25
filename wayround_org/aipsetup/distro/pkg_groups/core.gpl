@@ -67,6 +67,7 @@
         "tor", "torsocks", "libevent", "asciidoc",
         "libpwquality", "cracklib",
         "krb5",
-        "subversion"
+        "subversion",
+        "hamcrest-java"
     ]
 }

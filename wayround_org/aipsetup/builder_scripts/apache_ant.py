@@ -24,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
-        apacheant009 = os.path.join(etc_dir, '009.apache-ant')
+        apacheant009 = os.path.join(etc_dir, '009.apache-ant.sh')
 
         return {
             'src_ant_dir': src_ant_dir,
@@ -46,18 +46,29 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             [
-                'ant',
-                '-Dversion={}'.format(
-                    self.package_info['pkg_nameinfo']['groups']['version']
-                    ),
-                # '-lib', '/usr/lib/java/classpath',
-                'dist'
-                ],
+                './bootstrap.sh',
+            ],
             cwd=self.src_dir,
             stdout=log.stdout,
             stderr=log.stderr
             )
         ret = p.wait()
+        
+        if ret == 0:
+            p = subprocess.Popen(
+                [
+                    'bootstrap/bin/ant',
+                    #'-Dversion={}'.format(
+                    #    self.package_info['pkg_nameinfo']['groups']['version']
+                    #    ),
+                    # '-lib', '/usr/lib/java/classpath',
+                    #'dist'
+                    ],
+                cwd=self.src_dir,
+                stdout=log.stdout,
+                stderr=log.stderr
+                )
+            ret = p.wait()
         return ret
 
     def builder_action_distribute(self, called_as, log):
@@ -67,8 +78,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         wayround_org.utils.file.copytree(
-            src_ant_dir,
-            dst_ant_dir,
+             self.custom_data['src_ant_dir'],
+             self.custom_data['dst_ant_dir'],
             overwrite_files=True,
             clear_before_copy=True,
             dst_must_be_empty=True
@@ -93,4 +104,4 @@ export PATH="$PATH:$ANT_HOME/bin"
             )
 
         fi.close()
-        return ret
+        return 0

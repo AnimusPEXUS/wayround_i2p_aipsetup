@@ -21,8 +21,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.separate_build_dir = True
         self.forced_target = True
         ret = dict()
-        ret['cc_file'] = os.path.join(self.dst_dir, 'usr', 'bin', 'cc')
-        ret['libcpp_file'] = os.path.join(self.dst_dir, 'usr', 'lib', 'cpp')
+        ret['cc_file'] = os.path.join(
+            self.dst_dir, 'multiarch', self.host, 'bin', 'cc'
+            )
+        ret['libcpp_file'] = os.path.join(
+            self.dst_dir, 'multiarch', self.host, 'lib', 'cpp'
+            )
         return ret
 
     def define_actions(self):
@@ -158,6 +162,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if not self.is_crossbuild and not self.is_crossbuilder:
             ret += sorted([
+                #'--with-sysroot={}'.format(
+                #    os.path.join('/', 'multiarch', self.host)
+                #    ),
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
@@ -166,14 +173,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--disable-bootstrap',
 
                 '--enable-threads=posix',
-                '--enable-multiarch',
 
-                '--enable-multilib',
+                #'--enable-multiarch',
+                #'--enable-multilib',
+                '--disable-multilib',
+                '--disable-multiarch',
 
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
-                '--enable-targets=x86_64-pc-linux-gnu,i686-pc-linux-gnu'
+                #'--enable-targets=x86_64-pc-linux-gnu,i686-pc-linux-gnu'
+                #'-Wl,--rpath={}'.format(
+                #    os.path.join('/', 'multiarch', self.host, 'lib')
+                #    ),
                 ])
 
             """

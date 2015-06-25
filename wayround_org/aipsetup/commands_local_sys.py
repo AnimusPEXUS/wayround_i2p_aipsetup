@@ -1659,7 +1659,7 @@ def clean_install_etc(command_name, opts, args, adds):
         # TODO: do over config, not constant
 
         src_etc_dir = wayround_org.utils.path.join(
-            os.path.dirname(__file__), 'distro', 'unicorn-etc.tar.xz'
+            os.path.dirname(__file__), 'distro', 'etc.tar.xz'
             )
 
         ret = wayround_org.utils.archive.extract_tar_canonical(
