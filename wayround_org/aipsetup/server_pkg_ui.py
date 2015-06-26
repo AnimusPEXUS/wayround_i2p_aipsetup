@@ -85,7 +85,6 @@ class UI:
             )
 
     def asps(self, name, asp_list):
-
         return self.templates['asps'].render(
             name=name,
             asp_list=asp_list
@@ -99,20 +98,18 @@ class UI:
             )
 
     def tarballs(self, name, files_list):
-
         return self.templates['tarballs'].render(
             name=name,
             files_list=files_list
             )
 
-    def bundles_file_list(self, files):
-        return self.templates['bundles_file_list'].render(
+    def snapshot_file_list(self, files):
+        return self.templates['snapshot_file_list'].render(
             files=files
             )
 
-    def bundles(self, files_list):
-
-        return self.templates['bundles'].render(
+    def snapshots(self, files_list):
+        return self.templates['snapshots'].render(
             files_list=files_list
             )
 

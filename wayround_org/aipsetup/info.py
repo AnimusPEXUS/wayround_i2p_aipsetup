@@ -922,11 +922,11 @@ class RuntimeDepsRepo(wayround_org.utils.tag.TagEngine):
     pass
 
 
-class BundlesCtl:
+class SnapshotCtl:
 
     def __init__(self, dir_path):
-
         self._path = dir_path
+        return
 
     def list(self):
         lst = []

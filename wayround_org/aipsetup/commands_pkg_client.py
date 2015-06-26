@@ -15,12 +15,12 @@ def commands():
             ('ls', ls),
             ('print', print_info),
             ('asp-list', asp_list),
-            ('bundle-list', bundle_list),
+            ('snapshot-list', snapshot_list),
             ('get', get_asp),
             ('get-lat', get_asp_latest),
             ('get-lat-cat', get_asp_lat_cat),
             ('get-by-list', get_asp_by_list),
-            ('get-by-bundle', get_by_bundle),
+            ('get-by-snapshot', get_by_snapshot),
             ])),
         ('pkg-client-src', collections.OrderedDict([
             ('search', tar_list),
@@ -41,7 +41,6 @@ def list_(command_name, opts, args, adds):
         --searchmode=NAME    must be 'filemask' or 'regexp'
         -n                   non case sensitive
     """
-
 
     import wayround_org.aipsetup.client_pkg
     config = adds['config']
@@ -87,7 +86,6 @@ def list_cat(command_name, opts, args, adds):
     """
     List all packages in category and sub categories
     """
-
 
     import wayround_org.aipsetup.client_pkg
     config = adds['config']
@@ -664,7 +662,7 @@ def get_tar_by_list(*args, **kwargs):
 get_tar_by_list.__doc__ = get_x_by_list.__doc__
 
 
-def bundle_list(command_name, opts, args, adds):
+def snapshot_list(command_name, opts, args, adds):
 
     import wayround_org.aipsetup.client_pkg
 
@@ -672,7 +670,7 @@ def bundle_list(command_name, opts, args, adds):
 
     url = config['pkg_client']['server_url']
 
-    res = wayround_org.aipsetup.client_pkg.bundles(url)
+    res = wayround_org.aipsetup.client_pkg.snapshot_list(url)
 
     if res is None:
         ret = 2
@@ -693,7 +691,26 @@ def bundle_list(command_name, opts, args, adds):
     return ret
 
 
-def get_by_bundle(command_name, opts, args, adds):
+def snapshot_get(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.client_pkg
+
+    config = adds['config']
+
+    url = config['pkg_client']['server_url']
+
+    res = wayround_org.aipsetup.client_pkg.snapshot_get(url, name)
+
+    if res is None:
+        ret = 2
+    else:
+
+        ret = 0
+
+    return ret
+
+
+def get_by_snapshot(command_name, opts, args, adds):
 
     import wayround_org.aipsetup.client_pkg
 
@@ -712,7 +729,7 @@ def get_by_bundle(command_name, opts, args, adds):
 
         name = args[0]
 
-        res = wayround_org.aipsetup.client_pkg.bundle_get(url, name)
+        res = wayround_org.aipsetup.client_pkg.snapshot_get(url, name)
 
         if res is None:
             ret = 2
@@ -720,9 +737,14 @@ def get_by_bundle(command_name, opts, args, adds):
 
             errors = False
 
-            for i in res['list']:
+            for i in res['asps']:
+                asp_obj = wayround_org.aipsetup.package.ASPackage(i)
                 if not isinstance(
-                        wayround_org.aipsetup.client_pkg.get_asp(url, i),
+                        wayround_org.aipsetup.client_pkg.get_asp(
+                            url,
+                            asp_obj.host,
+                            i + '.asp'
+                            ),
                         str
                         ):
                     errors = True

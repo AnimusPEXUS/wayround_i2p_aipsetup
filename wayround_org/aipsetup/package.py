@@ -15,7 +15,6 @@ import wayround_org.aipsetup.package_name_parser
 
 
 class ASPackage:
-
     """
     Not installed package file actions
     """
@@ -68,7 +67,7 @@ class ASPackage:
     def timestamp_datetime(self):
         ret = None
         ts = self.timestamp
-        if ts != None:
+        if ts is not None:
             ret = wayround_org.aipsetup.package_name_parser.parse_timestamp(
                 ts
                 )

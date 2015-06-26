@@ -13,6 +13,7 @@
         "dovecot",
         "e2fsprogs",
         "exim",
+        "cyrus-sasl",
         "elfutils",
         "file",
         "openjdk8",

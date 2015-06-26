@@ -29,8 +29,12 @@ def commands():
         ('pkg-server-repo', collections.OrderedDict([
             ('index', pkg_repo_index_and_update),
             ('put', pkg_repo_put_file),
-            ('put-bundle', pkg_repo_put_bundle),
             ('clean', pkg_repo_cleanup)
+            ])),
+        ('pkg-server-snap', collections.OrderedDict([
+            ('list', pkg_snap_list),
+            ('put', pkg_snap_put),
+            ('get', pkg_snap_get)
             ]))
         ])
 
@@ -689,7 +693,17 @@ def pkg_repo_put_file(command_name, opts, args, adds):
     return ret
 
 
-def pkg_repo_put_bundle(command_name, opts, args, adds):
+def pkg_snap_list(command_name, opts, args, adds):
+    import wayround_org.aipsetup.controllers
+
+    config = adds['config']
+    snapshot_ctl = \
+        wayround_org.aipsetup.controllers.snapshot_ctl_by_config(config)
+    print(repr(snapshot_ctl.list()))
+    return 0
+
+
+def pkg_snap_put(command_name, opts, args, adds):
     """
     Set bundle to package server
     """
@@ -709,17 +723,18 @@ def pkg_repo_put_bundle(command_name, opts, args, adds):
         ret = 2
     else:
 
-        bundles_ctl = \
-            wayround_org.aipsetup.controllers.bundles_ctl_by_config(config)
+        snapshot_ctl = \
+            wayround_org.aipsetup.controllers.snapshot_ctl_by_config(config)
 
         for i in args:
 
             bn = os.path.basename(i)
 
-            f = open(i)
-            t = f.read()
-            f.close()
-
-            bundles_ctl.set(bn, t)
+            with open(i) as f:
+                snapshot_ctl.set(bn, f.read())
 
     return ret
+
+
+def pkg_snap_get(command_name, opts, args, adds):
+    return 0

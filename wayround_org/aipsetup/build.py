@@ -613,7 +613,7 @@ class PackCtl:
 
             os.makedirs(target_arch_dir, exist_ok=True)
 
-            files = os.listdir(source_arch_dir)
+            files = sorted(os.listdir(source_arch_dir))
 
             for i in files:
 
@@ -644,6 +644,8 @@ class PackCtl:
                             )
                         )
                     ret = 2
+
+        logging.info("    [ok]")
 
         if ret == 0:
             if os.path.isdir(source_arch_dir):
@@ -691,7 +693,7 @@ class PackCtl:
 
             os.makedirs(target_arch_dir, exist_ok=True)
 
-            files = os.listdir(source_arch_dir)
+            files = sorted(os.listdir(source_arch_dir))
 
             for i in files:
 
@@ -722,6 +724,8 @@ class PackCtl:
                             )
                         )
                     ret = 2
+
+        logging.info("    [ok]")
 
         if ret == 0:
             if os.path.isdir(source_arch_dir):

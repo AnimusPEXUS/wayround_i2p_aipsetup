@@ -4,6 +4,7 @@
             "name": "gtk-sharp",
             "proc": "gnome_get"
         },
+        "libgudev",
         "gdl",
         "gtkspell",
         "gtkspell3",

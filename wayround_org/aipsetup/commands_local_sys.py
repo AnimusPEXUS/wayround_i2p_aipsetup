@@ -62,12 +62,14 @@ def commands():
         ('sys-replica', collections.OrderedDict([
             ('instr', system_replica_instruction),
             ('dir-tree', system_create_directory_tree),
-            ('create-bundle', system_create_bundle),
             ])),
         ('docbook', collections.OrderedDict([
             ('instr', docbook_instruction),
             ('install', docbook_install),
-            ]))
+            ])),
+        ('sys-snap', collections.OrderedDict([
+            ('create', system_snapshot_create),
+            ])),
         ])
 
 
@@ -579,69 +581,6 @@ def system_create_directory_tree(command_name, opts, args, adds):
         ret = system.create_directory_tree()
 
     return ret
-
-
-def system_create_bundle(command_name, opts, args, adds):
-
-    import wayround_org.aipsetup.controllers
-
-    config = adds['config']
-
-    pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
-            config
-            )
-
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
-        config,
-        pkg_client,
-        '/'
-        )
-
-    res = system.list_installed_asps()
-    res2 = []
-
-    for i in res:
-
-        x = i
-
-        if x.endswith('.xz'):
-            x = x[:-3]
-
-        if not x.endswith('.asp'):
-            x = x + '.asp'
-
-        res2.append(x)
-
-    res = sorted(res2)
-
-    dto = datetime.datetime.utcnow()
-
-    dt = wayround_org.utils.datetime_iso8601.datetime_to_str(
-        dto,
-        ['-', 'year', 'day', 'month', 'hour', 'min', 'sec', 'utc', ':']
-        )
-
-    bundle = collections.OrderedDict(
-        [
-            ('info', collections.OrderedDict(
-             [('date', dt)])),
-
-            ('list', res),
-            ]
-        )
-
-    bundle_text = json.dumps(bundle, indent=2)
-
-    filename = '{}.json'.format(wayround_org.utils.time.time_stamp(dto))
-
-    f = open(filename, 'w')
-    f.write(bundle_text)
-    f.close()
-
-    logging.info("Saved to {}".format(filename))
-
-    return 0
 
 
 def clean_packages_with_broken_files(command_name, opts, args, adds):
@@ -1898,12 +1837,59 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
 
     return ret
 
+
 def docbook_instruction(command_name, opts, args, adds):
     import wayround_org.aipsetup.docbook
     print(wayround_org.aipsetup.docbook.INSTRUCTION)
     return 0
 
+
 def docbook_install(command_name, opts, args, adds):
     import wayround_org.aipsetup.docbook
     wayround_org.aipsetup.docbook.install()
     return 0
+
+
+def system_snapshot_create(command_name, opts, args, adds):
+
+    import wayround_org.aipsetup.controllers
+
+    ret = 0
+
+    config = adds['config']
+
+    pkg_client = \
+        wayround_org.aipsetup.controllers.pkg_client_by_config(
+            config
+            )
+
+    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        config,
+        pkg_client,
+        '/'
+        )
+
+    snapshot_struct = collections.OrderedDict([
+        ('info', {
+            'timestamp': None
+            }),
+        ('asps', [])
+        ])
+
+    res = system.list_installed_asps(host=False, remove_extensions=True)
+
+    if res is None:
+        ret = 1
+    else:
+        snapshot_struct['asps'] = res
+        snapshot_struct['info']['timestamp'] = \
+            wayround_org.utils.time.currenttime_stamp()
+
+        filename = '{}.json'.format(snapshot_struct['info']['timestamp'])
+
+        with open(filename, 'w') as f:
+            f.write(json.dumps(snapshot_struct, indent=2))
+
+        logging.info("Saved to {}".format(filename))
+
+    return ret

@@ -71,7 +71,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return super().builder_action_configure_define_options(called_as, log) + ret
 
     def builder_action_sh_link(self, called_as, log):
-        tsl = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin', 'sh')
+        tsl = wayround_org.utils.path.join(
+            self.dst_dir, 'multiarch', self.host, 'bin', 'sh')
 
         if os.path.exists(tsl) or os.path.islink(tsl):
             os.unlink(tsl)

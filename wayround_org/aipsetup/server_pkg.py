@@ -35,13 +35,13 @@ def server_start_host(command_name, opts, args, adds):
     info_ctl = \
         wayround_org.aipsetup.controllers.info_ctl_by_config(config)
 
-    bundles_ctl = \
-        wayround_org.aipsetup.controllers.bundles_ctl_by_config(config)
+    snapshot_ctl = \
+        wayround_org.aipsetup.controllers.snapshot_ctl_by_config(config)
 
     app = ASPServer(
         pkg_repo_ctl,
         info_ctl,
-        bundles_ctl,
+        snapshot_ctl,
         config['pkg_server']['host'],
         int(config['pkg_server']['port']),
         config['src_client']['server_url'],
@@ -61,7 +61,7 @@ class ASPServer:
             self,
             pkg_repo_ctl,
             info_ctl,
-            bundles_ctl,
+            snapshot_ctl,
             host='localhost',
             port=8081,
             src_page_url='https://localhost:8080/',
@@ -88,7 +88,7 @@ class ASPServer:
 
         self.pkg_repo_ctl = pkg_repo_ctl
         self.info_ctl = info_ctl
-        self.bundles_ctl = bundles_ctl
+        self.snapshot_ctl = snapshot_ctl
 
         self.acceptable_source_name_extensions = \
             acceptable_source_name_extensions
@@ -109,6 +109,10 @@ class ASPServer:
         self.app.route('/package/<name>', 'GET', self.package)
         self.app.route('/package/<name>/hosts', 'GET', self.hosts)
         self.app.route('/package/<name>/asps/<host>', 'GET', self.asps)
+        self.app.route('/package/<name>/asps/<host>/<name2>', 'GET', 
+            self.asp_get
+            )
+
 #        self.app.route('/package/<name>/asps_latest', 'GET', self.asps_latest)
         self.app.route('/package/<name>/tarballs', 'GET', self.tarballs)
 #        self.app.route(
@@ -117,14 +121,10 @@ class ASPServer:
 
         self.app.route('/search', 'GET', self.search)
 
-        self.app.route(
-            '/package/<name>/asps/<host>/<name2>', 'GET', self.download_pkg
-            )
-
         self.app.route('/name_by_name', 'GET', self.name_by_name)
 
-        self.app.route('/bundles', 'GET', self.bundles)
-        self.app.route('/bundles/<name>', 'GET', self.download_bundle)
+        self.app.route('/snapshots', 'GET', self.snapshots)
+        self.app.route('/snapshots/<name>', 'GET', self.snapshot_get)
 
         return
 
@@ -148,7 +148,7 @@ class ASPServer:
     def js(self, filename):
         return bottle.static_file(filename, root=self.js_dir)
 
-    def download_pkg(self, name, host, name2):
+    def asp_get(self, name, host, name2):
 
         base = os.path.basename(name2)
 
@@ -159,7 +159,11 @@ class ASPServer:
 
         filename = wayround_org.utils.path.abspath(
             wayround_org.utils.path.join(
-                self.pkg_repo_ctl.get_repository_dir(), path, 'pack', host, base
+                self.pkg_repo_ctl.get_repository_dir(), 
+                path, 
+                'pack', 
+                host, 
+                base
                 )
             )
 
@@ -167,6 +171,8 @@ class ASPServer:
                 self.pkg_repo_ctl.get_repository_dir() + os.path.sep
                 ):
             raise bottle.HTTPError(404, "Wrong package name `{}'".format(name))
+
+        logging.info("trying to find file: {}".format(filename))
 
         if not os.path.isfile(filename):
             raise bottle.HTTPError(404, "File `{}' not found".format(base))
@@ -709,7 +715,7 @@ class ASPServer:
 
         return ret
 
-    def bundles(self):
+    def snapshots(self):
 
         decoded_params = bottle.request.params.decode('utf-8')
 
@@ -721,19 +727,19 @@ class ASPServer:
 
         resultmode = decoded_params['resultmode']
 
-        filesl = self.bundles_ctl.list()
+        filesl = self.snapshot_ctl.list()
         filesl.sort(reverse=True)
 
         if resultmode == 'html':
 
-            bundle_files = self.ui.bundles_file_list(filesl)
+            snapshot_files = self.ui.snapshot_file_list(filesl)
 
-            txt = self.ui.bundles(
+            txt = self.ui.snapshots(
                 bundle_files
                 )
 
             ret = self.ui.html(
-                title="Available bundles",
+                title="Available snapshots",
                 body=txt
                 )
 
@@ -744,11 +750,26 @@ class ASPServer:
 
         return ret
 
-    def download_bundle(self, name):
+    def snapshot_get(self, name):
 
         name = os.path.basename(name)
 
-        ret = self.bundles_ctl.get(name)
+        ret = self.snapshot_ctl.get(name)
+
+        if ret is None:
+            raise bottle.HTTPError(404, "Not Found")
+        else:
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
+
+        return ret
+
+    def snapshot_put(self, name, data=None):
+        # TODO: need to be implemented with our new http server
+        raise Excpetion("Not implemented")
+
+        name = os.path.basename(name)
+
+        ret = self.snapshot_ctl.get(name)
 
         if ret is None:
             raise bottle.HTTPError(404, "Not Found")

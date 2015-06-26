@@ -66,11 +66,11 @@ class PackageServerClient:
     def name_by_name(self, tarball):
         return name_by_name(self._url, tarball)
 
-    def bundles(self):
-        return bundles(self._url)
+    def snapshot_list(self):
+        return snapshot_list(self._url)
 
-    def bundle_get(self, name):
-        return bundle_get(self._url, name)
+    def snapshot_get(self, name):
+        return snapshot_get(self._url, name)
 
 
 def walk(url, path):
@@ -563,7 +563,7 @@ def name_by_name(url, tarball):
     return ret
 
 
-def bundles(url):
+def snapshot_list(url):
 
     ret = None
 
@@ -577,7 +577,7 @@ def bundles(url):
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}bundles?{}'.format(url, data)
+            '{}snapshots?{}'.format(url, data)
         )
     except:
         pass
@@ -588,15 +588,15 @@ def bundles(url):
     return ret
 
 
-def bundle_get(url, name):
+def snapshot_get(url, name):
 
     ret = None
 
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}bundles/{}'.format(url, name)
-        )
+            '{}snapshots/{}'.format(url, name)
+            )
     except:
         pass
 

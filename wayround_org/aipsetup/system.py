@@ -972,11 +972,16 @@ class SystemCtl:
     def list_installed_asps(
             self,
             mute=False,
-            host=None
+            host=None,
+            remove_extensions=False
             ):
         """
         on success returns list. on error - not list
+
+        if host is False - return all asps
         """
+
+        # TODO: this method need to return names without .xz extensions
 
         if host is None:
             host = self.host
@@ -1004,12 +1009,18 @@ class SystemCtl:
                 if i in bases:
                     bases.remove(i)
 
-            for i in range(len(filelist) - 1, -1, -1):
-                asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
-                if host != asp.host:
-                    del filelist[i]
+            if host != False:
+                for i in range(len(filelist) - 1, -1, -1):
+                    asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
+                    if host != asp.host:
+                        del filelist[i]
 
             ret = bases
+
+        if remove_extensions and isinstance(ret, list):
+            for i in range(len(ret)):
+                if ret[i].endswith('.xz'):
+                    ret[i] = ret[i][:-3]
 
         return ret
 
@@ -1407,7 +1418,7 @@ class SystemCtl:
                 wayround_org.utils.terminal.progress_write(
                     "    {:6.2f}% (found {} packages) ({})".format(
                         perc,
-                        len(ret_dict.keys()),
+                        len(ret.keys()),
                         pkgname
                         )
                     )

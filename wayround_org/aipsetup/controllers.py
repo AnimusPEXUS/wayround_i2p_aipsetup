@@ -177,12 +177,12 @@ def bscript_ctl_new():
     return ret
 
 
-def bundles_ctl_by_config(config):
-    return bundles_ctl_new(config['pkg_server']['bundles_dir'])
+def snapshot_ctl_by_config(config):
+    return snapshot_ctl_new(config['pkg_server']['snapshot_dir'])
 
 
-def bundles_ctl_new(dir_path):
-    return wayround_org.aipsetup.info.BundlesCtl(dir_path)
+def snapshot_ctl_new(dir_path):
+    return wayround_org.aipsetup.info.SnapshotCtl(dir_path)
 
 
 def constitution_by_config(config, host, target, build):

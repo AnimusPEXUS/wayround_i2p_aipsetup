@@ -254,6 +254,40 @@ class Builder:
                     stderr=log.stderr
                     )
                 ret = p.wait()
+            elif os.path.isfile(
+                    wayround_org.utils.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir,
+                        'configure.ac'
+                        )
+                    ):
+                p = subprocess.Popen(
+                    ['autoconf'],
+                    cwd=os.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir
+                        ),
+                    stdout=log.stdout,
+                    stderr=log.stderr
+                    )
+                ret = p.wait()
+            elif os.path.isfile(
+                    wayround_org.utils.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir,
+                        'configure.in'
+                        )
+                    ):
+                p = subprocess.Popen(
+                    ['autoconf'],
+                    cwd=os.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir
+                        ),
+                    stdout=log.stdout,
+                    stderr=log.stderr
+                    )
+                ret = p.wait()
             else:
                 log.error(
                     "./{} not found and no generators found".format(

@@ -30,6 +30,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             exist_ok=True
             )
 
+        os.makedirs(
+            os.path.join(self.dst_dir, 'usr', 'bin'),
+            exist_ok=True
+            )
+
         for i in ['depmod', 'insmod', 'modinfo', 'modprobe', 'rmmod']:
 
             ffn = os.path.join(self.dst_dir, 'usr', 'sbin', i)
