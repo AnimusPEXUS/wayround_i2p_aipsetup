@@ -25,8 +25,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = super().define_actions()
-        ret['links'] = self.builder_action_links
-        ret['pc'] = self.builder_action_pc
+        #ret['links'] = self.builder_action_links
+        #ret['pc'] = self.builder_action_pc
         return ret
 
     def builder_action_patch(self, called_as, log):

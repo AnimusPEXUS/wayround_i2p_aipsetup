@@ -1,0 +1,9 @@
+{
+    "names" : [
+        "cpio",
+        "bridge-utils",
+        "boost",
+        "autogen",
+        "bash"
+    ]
+}

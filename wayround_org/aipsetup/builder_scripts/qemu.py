@@ -52,7 +52,8 @@ def main(buildingsite, action=None):
                     #                    '--target-list=i386-linux-user,i386-softmmu',
                     '--with-gtkabi=3.0',
                     #'--cpu=x86_64',
-                    '--audio-drv-list=alsa,oss,sdl',
+                    '--audio-drv-list=pulse',
+                    '--enable-sdl'
                     '--enable-kvm',
                     '--enable-system',
                     '--enable-user',

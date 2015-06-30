@@ -94,6 +94,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
     ('pkg_server', collections.OrderedDict([
         ('host', 'localhost'),
         ('port', '8081'),
+        ('source_server_url', 'http://localhost:8080/'),
         ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
         ('snapshot_dir', '${working_dir}/pkg_snapshots'),
         ('repository_dir', '${working_dir}/pkg_repository'),

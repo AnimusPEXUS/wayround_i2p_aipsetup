@@ -29,7 +29,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ])
 
     def builder_action_configure_define_options(self, called_as, log):
-
+        
+        """
         dl = wayround_org.aipsetup.build.find_dl(
             os.path.join(
                 '/',
@@ -49,11 +50,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             dl + \
             ' -Wl,-rpath={}'.format(rpath) + \
             ' -Wl,-rpath-link={}'.format(rpath)
+        """
 
         ret = [
             '-DCMAKE_INSTALL_PREFIX=' +
             self.package_info['constitution']['paths']['usr'],
-            '-DCMAKE_EXE_LINKER_FLAGS=' + exe_linker_flags,
+            # '-DCMAKE_EXE_LINKER_FLAGS=' + exe_linker_flags,
             #    '--mandir=' + pkg_info['constitution']['paths']['man'],
             #    '--sysconfdir=' +
             #    pkg_info['constitution']['paths']['config'],

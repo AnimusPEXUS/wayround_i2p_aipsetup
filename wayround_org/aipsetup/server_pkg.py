@@ -44,7 +44,7 @@ def server_start_host(command_name, opts, args, adds):
         snapshot_ctl,
         config['pkg_server']['host'],
         int(config['pkg_server']['port']),
-        config['src_client']['server_url'],
+        config['pkg_server']['source_server_url'],
         acceptable_source_name_extensions=(
             config['src_client']['acceptable_src_file_extensions']
             )

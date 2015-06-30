@@ -30,8 +30,10 @@ chmod g+r /etc/shadow
 chown root:root /etc/polkit-1/localauthority
 chmod 0700 /etc/polkit-1/localauthority
 
-chown root:root /var/lib/polkit-1
-chmod 0700 /var/lib/polkit-1
+#chown root:root /var/lib/polkit-1
+#chmod 0700 /var/lib/polkit-1
+chown root:root /etc/pam.d/polkit-1
+chmod 0700 /etc/pam.d/polkit-1
 
 # systemd service files
 

@@ -98,7 +98,7 @@ INVALID_MOVABLE_DESTDIR_ROOT_LINKS = [
     ]
 
 INVALID_DESTDIR_ROOT_LINKS = [
-    'mnt'
+    'mnt',
     ] + INVALID_MOVABLE_DESTDIR_ROOT_LINKS
 
 
@@ -629,21 +629,19 @@ class PackCtl:
                     i
                     )
 
-                if os.path.exists(joined_dst) or os.path.islink(joined_dst):
+                if wayround_org.utils.file.copy_file_or_directory(
+                        joined_src,
+                        joined_dst,
+                        overwrite_files=True,
+                        clear_before_copy=False,
+                        dst_must_be_empty=False,
+                        verbose=False
+                        ) != 0:
+                    ret = 1
+                else:
                     wayround_org.utils.file.remove_if_exists(
-                        joined_dst
+                        joined_src
                         )
-
-                try:
-                    os.rename(joined_src, joined_dst)
-                except:
-                    logging.exception(
-                        "Can't rename file:\n    {}\n    to\n    {}".format(
-                            joined_src,
-                            joined_dst
-                            )
-                        )
-                    ret = 2
 
         logging.info("    [ok]")
 
@@ -651,86 +649,6 @@ class PackCtl:
             if os.path.isdir(source_arch_dir):
                 if len(os.listdir(source_arch_dir)) != 0:
                     logging.error("usr dir must be empty by now, but it's not")
-                    ret = 3
-
-                else:
-                    try:
-                        os.rmdir(source_arch_dir)
-                    except:
-                        logging.exception(
-                            "Can't remove dir: {}".format(source_arch_dir)
-                            )
-                        ret = 4
-
-        return ret
-
-    def relocate_etc_multiarch_files(self):
-
-        ret = 0
-
-        logging.info("Moving etc files to multiarch location")
-
-        source_arch_dir = wayround_org.utils.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(),
-            'etc'
-            )
-
-        if not os.path.exists(source_arch_dir):
-            ret = 0
-
-        else:
-
-            package_info = self.buildingsite_ctl.read_package_info()
-
-            host = package_info['constitution']['host']
-
-            target_arch_dir = wayround_org.utils.path.join(
-                self.buildingsite_ctl.getDIR_DESTDIR(),
-                'multiarch',
-                host,
-                'etc'
-                )
-
-            os.makedirs(target_arch_dir, exist_ok=True)
-
-            files = sorted(os.listdir(source_arch_dir))
-
-            for i in files:
-
-                logging.info("    {}".format(i))
-
-                joined_src = wayround_org.utils.path.join(
-                    source_arch_dir,
-                    i
-                    )
-
-                joined_dst = wayround_org.utils.path.join(
-                    target_arch_dir,
-                    i
-                    )
-
-                if os.path.exists(joined_dst) or os.path.islink(joined_dst):
-                    wayround_org.utils.file.remove_if_exists(
-                        joined_dst
-                        )
-
-                try:
-                    os.rename(joined_src, joined_dst)
-                except:
-                    logging.exception(
-                        "Can't rename file:\n    {}\n    to\n    {}".format(
-                            joined_src,
-                            joined_dst
-                            )
-                        )
-                    ret = 2
-
-        logging.info("    [ok]")
-
-        if ret == 0:
-            if os.path.isdir(source_arch_dir):
-                if len(os.listdir(source_arch_dir)) != 0:
-                    logging.error("etc dir must be empty by now, but it's not")
                     ret = 3
 
                 else:
@@ -943,12 +861,183 @@ class PackCtl:
 
         return ret
 
+    def destdir_edit_executable_elfs(self):
+
+        ret = 0
+
+        logging.info(
+            "Looking for executable ELFs to edit theyr linker and rpath"
+            )
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        host = package_info['constitution']['host']
+
+        dl = wayround_org.aipsetup.build.find_dl(
+            os.path.join(
+                '/',
+                'multiarch',
+                host
+                )
+            )
+
+        '''
+        rpath = os.path.join(
+            '/',
+            'multiarch',
+            host,
+            'lib'
+            )
+        '''
+
+        logging.info(
+            "New values to apply:\n"
+            "        linker: {}"
+            "".format(
+                dl
+                )
+            )
+
+        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
+
+        lists_file = wayround_org.utils.path.abspath(
+            os.path.join(
+                lists_dir,
+                'DESTDIR.lst'
+                )
+            )
+
+        try:
+            f = open(lists_file, 'r')
+        except:
+            logging.exception("Can't open file list")
+        else:
+            try:
+                file_list_txt = f.read()
+                file_list = file_list_txt.splitlines()
+                del(file_list_txt)
+
+                exec_elfs_list = []
+                elfs = 0
+                n_elfs = 0
+                file_list_i = 0
+                file_list_l = len(file_list)
+                for i in file_list:
+                    filename = wayround_org.utils.path.abspath(
+                        wayround_org.utils.path.join(destdir, i)
+                        )
+
+                    if os.path.isfile(filename) and os.path.exists(filename):
+
+                        try:
+                            elf = wayround_org.utils.format.elf.ELF(filename)
+                        except:
+                            logging.exception(
+                                "Error parsing file: `{}'".format(filename)
+                                )
+                            n_elfs += 1
+                        else:
+
+                            if elf.is_elf:
+
+                                elfs += 1
+
+                                if (elf.elf_type_name == 'ET_EXEC'
+                                        and elf.dynamic_section is not None):
+
+                                    exec_elfs_list.append(
+                                        filename
+                                        )
+
+                            else:
+                                n_elfs += 1
+                    else:
+                        n_elfs += 1
+
+                    file_list_i += 1
+
+                    wayround_org.utils.terminal.progress_write(
+                        "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".
+                        format_map(
+                            {
+                                'perc':
+                                (100 /
+                                 (float(file_list_l) / file_list_i)),
+                                    'elfs': elfs,
+                                    'n_elfs': n_elfs
+                                }
+                            )
+                        )
+
+                wayround_org.utils.terminal.progress_write_finish()
+
+                logging.info(
+                    "    found executable elfs: {}".format(
+                        len(exec_elfs_list)
+                        )
+                    )
+
+                logging.info(
+                    "    going to \"patchelf\" found files"
+                    )
+
+                for i in exec_elfs_list:
+                    elf = wayround_org.utils.format.elf.ELF(filename)
+                    logging.info(
+                        "        patching: {}".format(
+                            os.path.relpath(
+                                i,
+                                destdir
+                                )
+                            )
+                        )
+                    """
+                    runpath_values = elf.runpath_values
+                    logging.info(
+                        "            original rpath: {}".format(
+                            runpath_values
+                            )
+                        )
+                    """
+                    if True:  # if runpath_values is None
+                        p = subprocess.Popen(
+                            ['patchelf', '--set-interpreter', dl, i]
+                            )
+                        if p.wait() != 0:
+                            logging.error(
+                                "Couldn't change interpreter for: {}".format(i)
+                                )
+                            ret = 5
+                            break
+
+                        """
+                        p = subprocess.Popen(
+                            ['patchelf', '--set-rpath', rpath, i]
+                            )
+                        if p.wait() != 0:
+                            logging.error(
+                                "Couldn't change interpreter for: {}".format(i)
+                                )
+                            ret = 5
+                            break
+                        """
+                    else:
+                        raise Exception("Unsupported runpath value")
+
+            finally:
+                f.close()
+
+        return ret
+
     def destdir_deps_bin(self):
         """
         Create dependency tree listing for ELFs in DESTDIR
         """
 
         ret = 0
+
         logging.info("Generating C deps lists")
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
@@ -1354,11 +1443,11 @@ class PackCtl:
         for i in [
                 self.destdir_verify_paths_correctness,
                 self.relocate_usr_multiarch_files,
-                self.relocate_etc_multiarch_files,
                 self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_set_modes,
                 self.destdir_checksum,
                 self.destdir_filelist,
+                self.destdir_edit_executable_elfs,
                 self.destdir_deps_bin,
                 self.compress_patches_destdir_and_logs,
                 self.compress_files_in_lists_dir,

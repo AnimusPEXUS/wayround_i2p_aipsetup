@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.2.4',
+    version='3.2.7',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -41,5 +41,8 @@ setup(
             os.path.join('web', 'pkg_server', 'js', '*'),
             os.path.join('web', 'pkg_server', 'css', '*'),
             ],
+        },
+    entry_points={
+        'console_scripts': 'aipsetup = wayround_org.aipsetup.main'
         }
     )

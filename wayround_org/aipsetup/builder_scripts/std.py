@@ -299,6 +299,10 @@ class Builder:
 
     def builder_action_configure_define_options(self, called_as, log):
 
+        """
+        """
+        
+        """
         dl = wayround_org.aipsetup.build.find_dl(
             os.path.join(
                 '/',
@@ -313,6 +317,7 @@ class Builder:
             self.host,
             'lib'
             )
+        """
 
         ret = [
             '--prefix=' + os.path.join('/', 'multiarch', self.host),
@@ -331,18 +336,19 @@ class Builder:
                 'share',
                 'man'
                 ),
-            '--sysconfdir=' + os.path.join(
-                '/',
-                'multiarch',
-                self.host,
-                'etc'
-                ),
+            '--sysconfdir=/etc',
+            # '--sysconfdir=' + os.path.join(
+            #     '/',
+            #     'multiarch',
+            #     self.host,
+            #     'etc'
+            #     ),
             '--localstatedir=/var',
             '--enable-shared',
-            'LDFLAGS=-Wl,--dynamic-linker=' + \
-                dl + \
-                ' -Wl,-rpath={}'.format(rpath) + \
-                ' -Wl,-rpath-link={}'.format(rpath)
+            #'LDFLAGS=-Wl,--dynamic-linker=' + \
+            #    dl + \
+            #    ' -Wl,-rpath={}'.format(rpath) + \
+            #    ' -Wl,-rpath-link={}'.format(rpath)
             ] + autotools.calc_conf_hbt_options(self)
 
         return ret

@@ -454,6 +454,22 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
 
                 ret.remove(i)
 
+        ael = acceptable_extensions_order_list
+        if isinstance(ael, str):
+            ael = ael.split()
+
+        right_ext = None
+
+        for i in ael:
+            for j in ret:
+                if j.endswith(i):
+                    right_ext = j
+                    break
+            if right_ext is not None:
+                break
+
+        ret = [right_ext]
+
     return ret
 
 

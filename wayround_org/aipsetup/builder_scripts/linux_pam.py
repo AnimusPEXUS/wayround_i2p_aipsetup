@@ -23,13 +23,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             os.makedirs(
                 os.path.join(
                     self.dst_dir, 'usr', 'lib'
-                    ), 
+                    ),
                 exist_ok=True
                 )
             os.makedirs(
                 os.path.join(
                     self.dst_dir, 'usr', 'lib64'
-                    ), 
+                    ),
                 exist_ok=True
                 )
 

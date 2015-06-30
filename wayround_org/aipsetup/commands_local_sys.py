@@ -1826,13 +1826,14 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
         res = wayround_org.aipsetup.system.convert_certdata_txt_for_system(
             filename
             )
-        f = open('ca-bundle.crt.tmp', 'wb')
+        f = open('cert.pem.tmp', 'wb')
         f.write(res)
         f.close()
 
         print(
-            "'ca-bundle.crt.tmp' written."
-            " copy it into /etc/ssl and rename as 'ca-bundle.crt'"
+            "'cert.pem.tmp' written."
+            " copy it into /etc/ssl and rename as 'cert.pem'\n"
+            " (NOTE: some sources tells it should be named 'ca-bundle.crt')"
             )
 
     return ret
