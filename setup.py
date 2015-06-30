@@ -19,7 +19,7 @@ setup(
         ],
     scripts=['aipsetup3.py'],
     install_requires=[
-        'wayround_org_utils',
+        'wayround_org_utils>=1.8.0',
         'certdata',
         'sqlalchemy',
         'bottle',
