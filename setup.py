@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.2.7',
+    version='3.2.8',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -17,7 +17,7 @@ setup(
         'wayround_org.aipsetup.gui',
         'wayround_org.aipsetup.builder_scripts'
         ],
-    scripts=['aipsetup3.py'],
+    # scripts=['aipsetup3.py'],
     install_requires=[
         'wayround_org_utils>=1.8.0',
         'certdata',
