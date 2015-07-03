@@ -1,89 +1,62 @@
 
-import logging
-import os.path
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.aipsetup.builder_scripts.std
 import wayround_org.utils.file
 
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-def main(buildingsite, action=None):
-
-    ret = 0
-
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--prefix', '/usr', '--shared'
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+    def builder_action_configure_define_options(self, called_as, log):
+        prefix = '/multiarch/{}'.format(self.host)
+        return [
+            '--prefix='+prefix,
+            '--python={}'.format(
+                wayround_org.utils.file.which(
+                    'python',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--python={}'.format(
+                wayround_org.utils.file.which(
+                    'python',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--perl={}'.format(
+                wayround_org.utils.file.which(
+                    'perl',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--flex={}'.format(
+                wayround_org.utils.file.which(
+                    'flex',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--bison={}'.format(
+                wayround_org.utils.file.which(
+                    'bison',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--make={}'.format(
+                wayround_org.utils.file.which(
+                    'make',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--dot={}'.format(
+                wayround_org.utils.file.which(
+                    'dot',
+                    under=prefix,
+                    exception_if_not_found=True
+                    )
+                ),
+            '--shared'
+            ]

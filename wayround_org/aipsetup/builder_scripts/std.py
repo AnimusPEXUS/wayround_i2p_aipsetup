@@ -29,32 +29,11 @@ class Builder:
 
         self.source_configure_reldir = '.'
 
-        try:
-            self.target_host_root = \
-                self.package_info['constitution']['target_host_root']
-        except:
-            self.target_host_root = '/'
-
         self.forced_target = False
 
         self.custom_data = self.define_custom_data()
 
         self.action_dict = self.define_actions()
-
-        if self.is_crossbuild:
-            logging.info(
-                "Target Host Root is considered to be: {}".format(
-                    self.target_host_root
-                    )
-                )
-
-            """
-            if self.target_host_root is None:
-                raise Exception("You need to define --thr")
-
-            if not os.path.isdir(self.target_host_root):
-                raise Exception("Target host root not exists")
-            """
 
         return
 
@@ -101,8 +80,10 @@ class Builder:
         return (
             self.package_info['constitution']['target']
             != self.package_info['constitution']['host']
-            or self.package_info['constitution']['target']
-            != self.package_info['constitution']['build']
+            # if not commented - crossbuild considered as crossbuilder by
+            # autotools configure script
+            # or self.package_info['constitution']['target']
+            # != self.package_info['constitution']['build']
             )
 
     @property
@@ -115,6 +96,10 @@ class Builder:
         if self.internal_host_redefinition is not None:
             ret = self.internal_host_redefinition
         return ret
+
+    @property
+    def host_strong(self):
+        return self.package_info['constitution']['host']
 
     @property
     def build(self):
@@ -298,11 +283,9 @@ class Builder:
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
+        """
+        """
 
-        """
-        """
-        
-        """
         dl = wayround_org.aipsetup.build.find_dl(
             os.path.join(
                 '/',
@@ -311,6 +294,7 @@ class Builder:
                 )
             )
 
+        """
         rpath = os.path.join(
             '/',
             'multiarch',
@@ -345,6 +329,11 @@ class Builder:
             #     ),
             '--localstatedir=/var',
             '--enable-shared',
+            
+            # TODO: find way to modify binutils+gcc+glibc chane so it
+            #       uses needed interpreter without this f*ckin parameter...
+            'LDFLAGS=-Wl,--dynamic-linker=' + dl
+            
             #'LDFLAGS=-Wl,--dynamic-linker=' + \
             #    dl + \
             #    ' -Wl,-rpath={}'.format(rpath) + \

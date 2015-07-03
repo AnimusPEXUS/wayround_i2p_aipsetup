@@ -7,6 +7,7 @@ import shutil
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
+import wayround_org.utils.path
 
 import wayround_org.aipsetup.builder_scripts.std
 
@@ -23,9 +24,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['edit_package_info'] = self.builder_action_edit_package_info
         ret.move_to_end('edit_package_info', False)
 
-        if self.is_crossbuilder:
-            ret['after_distribute'] = self.builder_action_after_distribute
-            # ret['delete_share'] = self.builder_action_delete_share
+        # if self.is_crossbuilder:
+        # ret['after_distribute'] = self.builder_action_after_distribute
+        # ret['delete_share'] = self.builder_action_delete_share
 
         return ret
 
@@ -76,46 +77,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_options(called_as, log)
 
         if self.is_crossbuilder:
-            prefix = os.path.join(
-                '/', 'usr', 'crossbuilders', self.target
+            prefix = wayround_org.utils.path.join(
+                '/', 'multiarch', self.host, 'crossbuilders', self.target
                 )
 
             ret = [
                 '--prefix=' + prefix,
                 '--mandir=' + os.path.join(prefix, 'share', 'man'),
-                '--sysconfdir=' +
-                self.package_info['constitution']['paths']['config'],
-                '--localstatedir=' +
-                self.package_info['constitution']['paths']['var'],
+                '--sysconfdir=/etc',
+                '--localstatedir=/var',
                 '--enable-shared'
                 ] + autotools.calc_conf_hbt_options(self)
 
         ret += [
-            #'--enable-targets='
-            #'i486-pc-linux-gnu,'
-            # 'i586-pc-linux-gnu,'
-            # 'i686-pc-linux-gnu,'
-            # 'i786-pc-linux-gnu,'
-            # 'ia64-pc-linux-gnu,'
-            #'x86_64-pc-linux-gnu,'
-            #'aarch64-linux-gnu',
-
             '--enable-targets=all',
 
-            # WARNING: enabling this will cause problem on building native
-            #          GCC
-            #'--with-sysroot',
-
-            #                    '--disable-libada',
-            #                    '--enable-bootstrap',
-            # Note: is building gcc with #'--with-sysroot={} it ends with error
-            #       The directory that should contain system headers does not 
-            #       exist:
-            #       /multiarch/x86_64-pc-linux-gnu/usr/include
- 
-            #'--with-sysroot={}'.format(
-            #    os.path.join('/', 'multiarch', self.host)
-            #    ),
             '--enable-64-bit-bfd',
             '--disable-werror',
             '--enable-libada',
@@ -124,19 +100,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             '--enable-lto',
             '--enable-ld',
-            #'-Wl,--rpath={}'.format(
-            #    os.path.join('/', 'multiarch', self.host, 'lib')
-            #    ),
-            #'LDFLAGS=-Wl,--dynamic-linker={}'.format(
-            #    os.path.join('/', 'multiarch', self.host,
-            #    'lib', 'ld-linux-x86-64.so.2')
-            #    )
             ]
 
         if self.is_crossbuilder:
-            # NOTE: under question
             ret += ['--with-sysroot']
-            # pass
 
         return ret
 

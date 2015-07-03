@@ -3,10 +3,11 @@
 Update system bindings and such
 """
 
-import os
+import os.path
 import subprocess
 import logging
 import wayround_org.utils.checksum
+import wayround_org.utils.path
 
 
 def sysupdates_all_actions(opts, args):
@@ -39,6 +40,23 @@ def all_actions():
     return ret
 
 
+def list_arch_roots(basedir='/'):
+
+    ret = []
+
+    march_dir = wayround_org.utils.path.join(basedir, 'multiarch')
+
+    march_dir_files = os.listdir(march_dir)
+
+    for i in march_dir_files:
+        joined = wayround_org.utils.path.join(march_dir, i)
+
+        if os.path.isdir(joined) and not os.path.islink(joined):
+            ret.append(joined)
+
+    return sorted(ret)
+
+
 def ldconfig():
     logging.info('ldconfig')
     return subprocess.Popen(['ldconfig']).wait()
@@ -48,23 +66,50 @@ def _update_mime_database_check():
     """
     return: 0 - passed, not 0 - not passed
     """
-    wayround_org.utils.checksum.make_dir_checksums(
-        '/usr/share/mime',
-        '/usr/share/mime/sha512sums.tmp',
-        rel_to='/',
-        exclude=[
-            '/usr/share/mime/sha512sums',
-            '/usr/share/mime/sha512sums.tmp'
-            ]
-        )
-    summ1 = wayround_org.utils.checksum.make_file_checksum(
-        '/usr/share/mime/sha512sums'
-        )
-    summ2 = wayround_org.utils.checksum.make_file_checksum(
-        '/usr/share/mime/sha512sums.tmp'
-        )
-    os.unlink('/usr/share/mime/sha512sums.tmp')
-    ret = int(summ1 != summ2)
+    ret = 0
+
+    errors = 0
+
+    for i in list_arch_roots():
+
+        mime_dir = wayround_org.utils.path.join(i, 'share', 'mime')
+
+        try:
+
+            os.makedirs(mime_dir, exist_ok=True)
+
+            mime_dir_sha512sums = wayround_org.utils.path.join(
+                mime_dir,
+                'sha512sums'
+                )
+
+            mime_dir_sha512sums_tmp = mime_dir_sha512sums + '.tmp'
+
+            wayround_org.utils.checksum.make_dir_checksums(
+                mime_dir,
+                mime_dir_sha512sums_tmp,
+                rel_to='/',
+                exclude=[
+                    mime_dir_sha512sums,
+                    mime_dir_sha512sums_tmp
+                    ]
+                )
+            summ1 = wayround_org.utils.checksum.make_file_checksum(
+                mime_dir_sha512sums
+                )
+            summ2 = wayround_org.utils.checksum.make_file_checksum(
+                mime_dir_sha512sums_tmp
+                )
+            os.unlink(mime_dir_sha512sums_tmp)
+
+            errors += int(summ1 != summ2)
+
+        except:
+            logging.exception('error')
+            errors += 1
+
+    ret = int(errors != 0)
+
     return ret
 
 

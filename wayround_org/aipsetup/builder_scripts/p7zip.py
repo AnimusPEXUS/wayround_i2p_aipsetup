@@ -50,7 +50,10 @@ def main(buildingsite, action=None):
                 )
 
         if 'build' in actions and ret == 0:
-            p = subprocess.Popen(['make', 'all3'], cwd=src_dir)
+            p = subprocess.Popen(
+                ['make', 'all3'], 
+                cwd=src_dir,
+                )
             ret = p.wait()
 
         if 'distribute' in actions and ret == 0:

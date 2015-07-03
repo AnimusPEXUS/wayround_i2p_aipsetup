@@ -251,6 +251,8 @@ class SystemCtl:
 
         if os.path.isfile(name):
 
+            host = None
+
             logging.info(
                 "Trying to install file (package) `{}'".format(
                     wayround_org.utils.path.abspath(name)
@@ -286,7 +288,13 @@ class SystemCtl:
                     ret = 2
 
             if ret == 0:
+                try:
+                    host = name_parsed['groups']['host']
+                except:
+                    logging.exception("error")
+                    ret = 6
 
+            if ret == 0:
                 if (not force
                         and (info['deprecated'] or info['non_installable'])):
                     logging.error(
@@ -299,6 +307,7 @@ class SystemCtl:
                     ret = 3
 
             if ret == 0:
+
                 asps = self.list_installed_package_s_asps(
                     name_parsed['groups']['name'],
                     host=host
@@ -369,7 +378,7 @@ class SystemCtl:
 
                 if not isinstance(latest_full_path, str):
                     logging.error("Can't get latest asp from pkg_server")
-                    ret = 3
+                    ret = 4
 
             if ret == 0:
 
@@ -1015,7 +1024,7 @@ class SystemCtl:
                     if host != asp.host:
                         del filelist[i]
 
-            ret = bases
+            ret = filelist
 
         if remove_extensions and isinstance(ret, list):
             for i in range(len(ret)):
@@ -2748,15 +2757,15 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                                wayround_org.utils.path.join(
-                                    '/multiarch', host, 'lib'
+                                    wayround_org.utils.path.join(
+                                        '/multiarch', host, 'lib'
+                                        )
                                     )
-                                )
-                                or not os.path.isdir(
-                                wayround_org.utils.path.join(
-                                    self.basedir,
-                                    wj)
-                                )
+                                    or not os.path.isdir(
+                                    wayround_org.utils.path.join(
+                                        self.basedir,
+                                        wj)
+                                    )
                                 ):
 
                             # TODO: do we need it?

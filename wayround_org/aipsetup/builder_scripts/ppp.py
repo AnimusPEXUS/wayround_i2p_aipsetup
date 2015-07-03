@@ -18,10 +18,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             }
         if self.is_crossbuild:
             thr['CFLAGS'] = ' -I{}'.format(
-                os.path.join(self.target_host_root, 'usr', 'include')
+                os.path.join('/multiarch', self.host, 'include')
                 )
             thr['LDFLAGS'] = '-L{}'.format(
-                os.path.join(self.target_host_root, 'usr', 'lib')
+                os.path.join('/multiarch', self.host, 'lib')
                 )
             thr['CC'] = ['CC={}-gcc'.format(self.host)]
         return {
@@ -39,9 +39,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'CHAPMS=1', 
-                'USE_CRYPT=1', 
-                'INCLUDE_DIRS+= -I../include '+self.custom_data['thr']['CFLAGS'],
+                'CHAPMS=1',
+                'USE_CRYPT=1',
+                'INCLUDE_DIRS+= -I../include ' +
+                self.custom_data['thr']['CFLAGS'],
                 #'LDFLAGS+= '+self.custom_data['thr']['LDFLAGS']
                 ] + self.custom_data['thr']['CC'],
             environment={},

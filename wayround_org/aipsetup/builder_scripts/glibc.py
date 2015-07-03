@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.package_info['constitution']['target'] and
                 self.package_info['constitution']['host'] ==
                 self.package_info['constitution']['build']
-            ):
+                ):
             self.internal_host_redefinition =\
                 self.package_info['constitution']['target']
 
@@ -85,21 +85,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-
     def builder_action_configure_define_options(self, called_as, log):
 
-        with_headers = '/multiarch/{}/include'.format(self.host)
-
-        """
-        if self.is_crossbuilder:
-            with_headers = '/usr_all/include'
-        """
+        with_headers = '/multiarch/{}/include'.format(self.host_strong)
 
         ret = super().builder_action_configure_define_options(called_as, log)
 
         if self.is_crossbuilder:
             prefix = os.path.join(
-                '/', 'usr', 'crossbuilders', self.target
+                '/',
+                'multiarch',
+                self.host_strong,
+                'crossbuilders',
+                self.target
                 )
 
             with_headers = os.path.join(
@@ -109,11 +107,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             ret = [
                 '--prefix=' + prefix,
-                #'--mandir=' + os.path.join(prefix, 'share', 'man'),
-                #'--sysconfdir=' +
-                # self.package_info['constitution']['paths']['config'],
-                #'--localstatedir=' +
-                # self.package_info['constitution']['paths']['var'],
+                '--mandir=' + os.path.join(prefix, 'share', 'man'),
+                '--sysconfdir=/etc',
+                '--localstatedir=/var',
                 '--enable-shared'
                 ] + autotools.calc_conf_hbt_options(self)
 
@@ -122,9 +118,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-kernel=3.19',
             '--enable-tls',
             '--with-elf',
-            '--enable-multi-arch',
-            '--enable-multiarch',
-            '--enable-multilib',
+            
+            # disabled those 3 items on 2 jul 2015
+            '--disable-multi-arch', 
+            '--disable-multiarch',
+            '--disable-multilib',
+            
             # this is from configure --help. configure looking for
             # linux/version.h file
             #'--with-headers=/usr/src/linux/include',
@@ -134,11 +133,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if self.is_crossbuilder:
             ret += [
-                'libc_cv_forced_unwind=yes',
+                # this can be commented whan gcc fulli built and installed
+                #'libc_cv_forced_unwind=yes',
 
-                # TODO: gcc may be required to be built without
-                #       --without-headers option to avoit this glibc parameter
-                #'libc_cv_ssp=no'
+                # this parameter is required to build `build_02+' stage.
+                # comment and completle rebuild this glibc after rebuilding
+                # gcc without --without-headers and with 
+                # --with-sysroot parameter.
+                #
+                # 'libc_cv_ssp=no'
+                #
+                # else You will see errors like this:
+                #     gethnamaddr.c:185: undefined reference to 
+                #     `__stack_chk_guard'
                 ]
 
         return ret
@@ -184,7 +191,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install-headers',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -199,7 +208,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'csu/subdir_lib'
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.bld_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -212,7 +223,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         dest_lib_dir = wayround_org.utils.path.join(
             self.dst_dir,
-            'usr',
+            'multiarch',
+            self.host_strong,
             'crossbuilders',
             self.target,
             'lib'
@@ -232,7 +244,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         cwd = wayround_org.utils.path.join(
             self.dst_dir,
-            'usr',
+            'multiarch',
+            self.host_strong,
             'crossbuilders',
             self.target,
             'lib'
@@ -260,7 +273,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         cwd = wayround_org.utils.path.join(
             self.dst_dir,
-            'usr',
+            'multiarch',
+            self.host_strong,
             'crossbuilders',
             self.target,
             'include',
@@ -278,7 +292,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
 
     def builder_action_intermediate_instruction(self, called_as, log):
-        print("""\
+        log.info("""
 ---------------
 pack and install this glibc build.
 then continue with gcc build_02+
@@ -292,7 +306,9 @@ then continue with gcc build_02+
             log=log,
             options=[],
             arguments=[],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -308,7 +324,9 @@ then continue with gcc build_02+
                 'install',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

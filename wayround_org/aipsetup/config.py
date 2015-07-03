@@ -13,24 +13,25 @@ import wayround_org.utils.path
 
 CUR_DIR = wayround_org.utils.path.abspath(os.path.dirname(__file__))
 EMBEDDED_DISTRO_DIR = wayround_org.utils.path.join(
-        CUR_DIR, 'distro'
-        )
+    CUR_DIR, 'distro'
+    )
 
 
-DEFAULT_CONFIG = collections.OrderedDict(
-    [
-     ('general', collections.OrderedDict([
+DEFAULT_CONFIG = collections.OrderedDict([
+
+    ('general', collections.OrderedDict([
         ('editor', 'emacs'),
         ('acceptable_src_file_extensions',
             '.tar.xz .tar.lzma .tar.bz2 .tar.gz '
             '.txz .tlzma .tbz2 .tgz .7z .zip .jar .tar'),
-        ('distro_buildout_dir', EMBEDDED_DISTRO_DIR)
+        ('distro_buildout_dir', EMBEDDED_DISTRO_DIR),
+        ('working_dir', None),
         ])
-      ),
+     ),
 
     ('system_settings', collections.OrderedDict([
-        ('system_title', 'UNICORN'),
-        ('system_version', '3.0'),
+        ('system_title', 'LAILALO'),
+        ('system_version', '4.0'),
 
         ('installed_pkg_dir', '/var/log/packages'),
 
@@ -38,9 +39,9 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('installed_pkg_dir_sums', '${installed_pkg_dir}/sums'),
         ('installed_pkg_dir_deps', '${installed_pkg_dir}/deps'),
 
-        ('host', 'i486-pc-linux-gnu'),
-        ('build', 'i486-pc-linux-gnu'),
-        ('target', 'i486-pc-linux-gnu')
+        ('host', 'x86_64-pc-linux-gnu'),
+        ('build', 'x86_64-pc-linux-gnu'),
+        ('target', 'x86_64-pc-linux-gnu')
         ])
      ),
 
@@ -70,7 +71,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
     ('src_server', collections.OrderedDict([
         ('host', 'localhost'),
         ('port', '8080'),
-        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('working_dir', '${general:working_dir}'),
         ('tarball_repository_root', '${working_dir}/pkg_source'),
         ('src_index_db_config', 'sqlite:///${working_dir}/src_index.sqlite'),
         #('src_paths_index_db_config',
@@ -95,7 +96,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
         ('host', 'localhost'),
         ('port', '8081'),
         ('source_server_url', 'http://localhost:8080/'),
-        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('working_dir', '${general:working_dir}'),
         ('snapshot_dir', '${working_dir}/pkg_snapshots'),
         ('repository_dir', '${working_dir}/pkg_repository'),
         ('repository_dir_index_db_config',
@@ -115,7 +116,7 @@ DEFAULT_CONFIG = collections.OrderedDict(
 
     ('pkg_client', collections.OrderedDict([
         ('server_url', 'http://localhost:8081/'),
-        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
+        ('working_dir', '${general:working_dir}'),
         ('downloads_dir', '${working_dir}/downloads'),
         ('acceptable_src_file_extensions',
             '${general:acceptable_src_file_extensions}')
@@ -123,68 +124,13 @@ DEFAULT_CONFIG = collections.OrderedDict(
      ),
 
     ('local_build', collections.OrderedDict([
-        ('working_dir', '/mnt/sda3/home/agu/_UNICORN'),
-        ('building_sites_dir', '${working_dir}/b')
+        ('working_dir', '${general:working_dir}'),
+        ('building_sites_dir', '${working_dir}/b'),
+        ('multiple_arch_build', '${system_settings:host}'),
         ])
      ),
 
-#    ('server_package_repo', collections.OrderedDict([
-#        ('base_dir', '${general:distro_buildout_dir}'),
-#        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
-#        ('dir', '${base_dir}/pkg_repository'),
-#        ('snapshots_dir', '${base_dir}/snapshots'),
-#        ('garbage_dir', '${base_dir}/garbage')
-#        ])
-#     ),
-#
-#    ('designer_settings', collections.OrderedDict([
-#        ('base_dir', '${general:distro_buildout_dir}'),
-#        ('index_db_config', 'sqlite:///${base_dir}/pkgindex.sqlite'),
-#        ('dir', '${base_dir}/pkg_repository'),
-#        ('snapshots_dir', '${base_dir}/snapshots'),
-#        ('garbage_dir', '${base_dir}/garbage')
-#        ])
-#     ),
-#
-#    ('server_sources_repo', collections.OrderedDict([
-#        ('base_dir', '${general:distro_buildout_dir}'),
-#        ('index_db_config', 'sqlite:///${base_dir}/sources.sqlite'),
-#        ('dir', '${base_dir}/pkg_source')
-#        ])
-#     ),
-#
-#    ('info_repo', collections.OrderedDict([
-#        ('base_dir', '${general:distro_buildout_dir}'),
-#        ])
-#     ),
-#
-#    ('latest_repo', collections.OrderedDict([
-#        ('base_dir', '${general:distro_buildout_dir}'),
-#        ('index_db_config', 'sqlite:///${base_dir}/pkglatest.sqlite')
-#        ])
-#     ),
-#
-#    ('builder_repo', collections.OrderedDict([
-#        ('base_dir', '${general:distro_buildout_dir}'),
-#        ('building_scripts_dir', '${base_dir}/pkg_buildscripts'),
-#        ('building_sites_dir', '${base_dir}/b')
-#        ])
-#     ),
-#
-#    ('web_server_config', collections.OrderedDict([
-#        ('ip'          , '127.0.0.1'),
-#        ('port'        , '8005'),
-#        ('path_prefix' , '/')
-#        ])
-#     ),
-#
-#    ('web_client_config', collections.OrderedDict([
-#        ('server_url'  , 'http://127.0.0.1:8005/')
-#        ])
-#     )
-
-    ]
-    )
+    ])
 
 
 def load_config(filename):

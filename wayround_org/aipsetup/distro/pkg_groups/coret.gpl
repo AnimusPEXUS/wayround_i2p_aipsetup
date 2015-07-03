@@ -112,6 +112,7 @@
         "gc", "libatomic_ops", "bison", "procps-ng", "psmisc", "less",
         "libmicrohttpd",
         "lzo",
-        "gdbm"
+        "gdbm",
+        "wget"
     ]
 }

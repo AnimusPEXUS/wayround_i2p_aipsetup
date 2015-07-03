@@ -8,8 +8,10 @@ chmod 1777 /tmp
 usermod -G httpd,ejabberd,ssl httpd
 usermod -G ejabberd,ssl ejabberd
 usermod -G jabberd2,ssl jabberd2
+
 usermod -G dovecot,ssl,mail dovecot
 usermod -G exim,ssl,mail exim
+
 usermod -G adch,ssl adch
 
 chmod 750 /daemons/ejabberd
@@ -25,6 +27,12 @@ chmod 1777 /var/mail
 chgrp exim /etc/shadow
 chmod g+r /etc/shadow
 
+
+chown -R root:mail /var/spool/exim
+chmod -R 770 /var/spool/exim
+
+chown -R root:mail /var/log/dovecot
+chmod -R 770 /var/log/dovecot
 
 # polkit settings
 chown root:root /etc/polkit-1/localauthority

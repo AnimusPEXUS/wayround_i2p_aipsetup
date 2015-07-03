@@ -77,7 +77,7 @@ def system_install_package(command_name, opts, args, adds):
     """
     Install package(s)
 
-    [-b=DIRNAME] [--force] NAMES
+    [-b=DIRNAME] [--force] [-h=host-triplet] NAMES
 
     If -b is given - it is used as destination root
     """
@@ -89,8 +89,12 @@ def system_install_package(command_name, opts, args, adds):
 
     ret = wayround_org.utils.getopt.check_options(
         opts,
-        ['-b', '--force']
+        ['-b', '--force', '-h']
         )
+
+    host = None
+    if '-h' in opts:
+        host = opts['-h']
 
     if ret == 0:
 
@@ -121,7 +125,9 @@ def system_install_package(command_name, opts, args, adds):
 
             for name in names:
                 ret = syst.install_package(
-                    name, force,
+                    name,
+                    force,
+                    host=host
                     )
                 if ret != 0:
                     logging.error(

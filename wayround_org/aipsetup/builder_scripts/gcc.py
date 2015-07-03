@@ -60,7 +60,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             del ret['distribute']
 
         if not self.is_crossbuilder:
-            ret['after_distribute'] = self.builder_action_after_distribute
+            pass
+            # ret['after_distribute'] = self.builder_action_after_distribute
 
         return ret
 
@@ -93,9 +94,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             for i in ['mpc', 'mpfr', 'cloog',
                       'isl',
-                      # 'gmp', # NOTE: sometimes gcc could not compile like
-                      #                this.
-                      #                so use system gmp
+                      'gmp', 
+                      # NOTE: sometimes gcc could not compile with gmp.
+                      #       so use system gmp
                       # requires compiler for bootstrap
                       # 'binutils', 'gdb', 'glibc'
                       ]:
@@ -119,55 +120,74 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if self.is_crossbuilder:
             prefix = os.path.join(
-                '/', 'usr', 'crossbuilders', self.target
+                '/', 'multiarch', self.host, 'crossbuilders', self.target
                 )
 
             ret = [
-                '--prefix=' + prefix
-
+                '--prefix=' + prefix,
+                '--mandir=' + os.path.join(prefix, 'share', 'man'),
+                '--sysconfdir=/etc',
+                '--localstatedir=/var',
+                '--enable-shared'
                 ] + autotools.calc_conf_hbt_options(self)
 
         if self.is_crossbuilder:
-            ret += sorted([
+            ret += [
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
                 '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-                #'--enable-bootstrap',
+                '--disable-bootstrap',
                 '--enable-threads=posix',
-                '--enable-multiarch',
-                # '--enable-multilib',
+
+                '--disable-multiarch',
+                '--disable-multilib',
+
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
 
-                #'--without-headers',
-                '--with-sysroot=/usr/crossbuilders/{}'.format(self.target)
-                ])
+                # use it when you haven't built glibc basic parts yet
+                # '--without-headers',
+
+                # use it when you already have glibc headers and basic parts 
+                # installed
+                # using this parameter may reqire creating hacky symlink 
+                # pointing to /multiarch dir - you'll see error what file not
+                # found.
+                # so after gcc and glibc built and installed - rebuild gcc both 
+                # without --with-sysroot= and without --without-headers options
+                '--with-sysroot=/multiarch/{}/crossbuilders/{}'.format(
+                    self.host,
+                    self.target
+                    )
+                # TODO: need to try building without --with-sysroot if possible
+                ]
 
         if self.is_crossbuild:
-            ret += sorted([
+            ret += [
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
                 '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-                #'--enable-bootstrap',
+                '--disable-bootstrap',
                 '--enable-threads=posix',
-                '--enable-multiarch',
-                '--enable-multilib',
+
+                '--disable-multiarch',
+                '--disable-multilib',
+
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared'
-                ])
+                ]
 
         if not self.is_crossbuild and not self.is_crossbuilder:
-            ret += sorted([
-                #'--with-sysroot={}'.format(
-                #    os.path.join('/', 'multiarch', self.host)
-                #    ),
+            ret += [
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
+
+                # NOTE: no 'go' language in Lailalo system
                 '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
 
                 '--disable-bootstrap',
@@ -182,22 +202,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
-                #'--enable-targets=x86_64-pc-linux-gnu,i686-pc-linux-gnu'
-                #'-Wl,--rpath={}'.format(
-                #    os.path.join('/', 'multiarch', self.host, 'lib')
-                #    ),
-                ])
+                ]
 
-            """
-            for i in ret:
-                if i.startswith('--target='):
-                    ret.remove(i)
-                    break
-            """
         return ret
 
     def builder_action_before_checks(self, called_as, log):
-        print(
+        log.info(
             "stop: checks! If You want them (it's good if You do)\n"
             "then continue build with command: aipsetup build continue checks+\n"
             "else continue build with command: aipsetup build continue distribute+\n"
@@ -263,10 +273,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_intermediate_instruction_1(self, called_as, log):
-        print("""\
+        log.info("""
 ---------------
 Now You need to pack and install this gcc build.
-Then install linux-hraders and glibc (headers and, maybe, some other parts).
+Then install linux-headers and glibc (headers and, maybe, some other parts).
 After what - continue building from 'build_02+' action
 ---------------
 """)
@@ -306,7 +316,7 @@ After what - continue building from 'build_02+' action
         return ret
 
     def builder_action_intermediate_instruction_2(self, called_as, log):
-        print("""\
+        log.info("""
 ---------------
 Now You need to pack and install this gcc build and then complete
 glibc build (and install it too).

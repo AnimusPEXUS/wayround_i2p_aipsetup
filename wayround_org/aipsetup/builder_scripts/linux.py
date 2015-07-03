@@ -74,25 +74,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distr_modules', self.builder_action_distr_modules),
             ('distr_firmware', self.builder_action_distr_firmware),
 
-            # ('distr_headers_internal',
-            #       self.builder_action_distr_headers_internal),
-
-            #('distr_headers_normal', self.builder_action_distr_headers_normal),
             ('distr_headers_all', self.builder_action_distr_headers_all),
-
-            # ('distr_headers_internal_repeat',
-            #       self.builder_action_distr_headers_internal_repeat),
-            # ('distr_arch_headers_internal',
-            #       self.builder_action_distr_arch_headers_internal),
-            # ('remove_install_files_from_includes',
-            #       self.builder_action_remove_install_files_from_includes),
 
             ('distr_man', self.builder_action_distr_man),
             ('copy_source', self.builder_action_copy_source)
             ])
-
-        ret['edit_package_info'] = self.builder_action_edit_package_info
-        ret.move_to_end('edit_package_info', False)
 
         if self.is_crossbuilder:
 
@@ -100,18 +86,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 "Crosscompiler building detected. only headers will be built"
                 )
 
-            for i in ret.keys():
-                if i in [
-                        'configure',
-                        'build',
-                        'distr_kernel',
-                        'distr_modules',
-                        'distr_firmware',
-                        # 'distr_headers_all',
-                        'distr_man',
-                        'copy_source',
-                        ]:
-                    del ret[i]
+            ret = collections.OrderedDict([
+                ('src_cleanup', self.builder_action_src_cleanup),
+                ('dst_cleanup', self.builder_action_dst_cleanup),
+                ('extract', self.builder_action_extract),
+
+                ('distr_headers_all', self.builder_action_distr_headers_all),
+                ])
+
+        ret['edit_package_info'] = self.builder_action_edit_package_info
+        ret.move_to_end('edit_package_info', False)
 
         return ret
 
@@ -131,8 +115,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         else:
             pi['pkg_info']['name'] = 'linux'
 
-        bs = self.control
-        bs.write_package_info(pi)
+        # pi['pkg_info']['skip_interpreter_editing'] = True
+
+        self.control.write_package_info(pi)
 
         return ret
 
@@ -154,9 +139,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
 
     def builder_action_configure(self, called_as, log):
-        logging.info("You now need to configure kernel by your needs and")
-        logging.info("continue building procedure with command")
-        logging.info("'aipsetup build continue build+'")
+        log.info("""
+You now need to configure kernel by your needs and
+continue building procedure with command
+'aipsetup build continue build+'
+""")
         return 1
 
     def builder_action_build(self, called_as, log):
@@ -199,8 +186,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             p2 = wayround_org.utils.path.join(
                 self.custom_data['dst_boot_dir'],
-                'vmlinuz-{}'.format(
-                    self.package_info['pkg_nameinfo']['groups']['version']
+                'vmlinuz-{}-{}'.format(
+                    self.package_info['pkg_nameinfo']['groups']['version'],
+                    self.host
                     )
                 )
 
@@ -280,17 +268,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         return ret
 
-    def builder_action_distr_headers_internal(self, called_as, log):
-        wayround_org.utils.file.copytree(
-            wayround_org.utils.path.join(self.src_dir, 'include'),
-            wayround_org.utils.path.join(self.dst_dir, 'usr', 'include'),
-            overwrite_files=False,
-            clear_before_copy=False,
-            dst_must_be_empty=False
-            )
-        return ret
-
-    def _builder_action_distr_headers_001(self, log, h_all=False):
+    def _builder_action_distr_headers_001(self, called_as, log, h_all=False):
 
         ret = 0
 
@@ -298,7 +276,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if h_all:
             command = 'headers_install_all'
 
-        install_hdr_path = wayround_org.utils.path.join(self.dst_dir, 'usr')
+        install_hdr_path = wayround_org.utils.path.join(
+            self.dst_dir, 'usr'
+            )
 
         if self.is_crossbuilder:
 
@@ -336,83 +316,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_distr_headers_normal(self, called_as, log):
-        return self._builder_action_distr_headers_001(log, h_all=False)
+        return self._builder_action_distr_headers_001(
+            called_as,
+            log,
+            h_all=False
+            )
 
     def builder_action_distr_headers_all(self, called_as, log):
-        return self._builder_action_distr_headers_001(log, h_all=True)
-
-    def builder_action_distr_headers_internal_repeat(self, called_as, log):
-
-        wayround_org.utils.file.copytree(
-            wayround_org.utils.path.join(self.src_dir, 'include'),
-            wayround_org.utils.path.join(self.dst_dir, 'usr', 'include'),
-            overwrite_files=False,
-            clear_before_copy=False,
-            dst_must_be_empty=False
+        return self._builder_action_distr_headers_001(
+            called_as,
+            log,
+            h_all=True
             )
-
-        return ret
-
-    def builder_action_distr_arch_headers_internal(self, called_as, log):
-        archs = os.listdir(self.custom_data['src_arch_dir'])
-        archs.sort()
-        for i in archs[:]:
-            fp = wayround_org.utils.path.join(
-                self.custom_data['src_arch_dir'],
-                i
-                )
-            if not os.path.isdir(fp) or os.path.islink(fp):
-                archs.remove(i)
-
-        for i in archs:
-            fp = wayround_org.utils.path.join(
-                self.custom_data['src_arch_dir'], i, 'include', 'asm'
-                )
-
-            if os.path.isdir(fp):
-
-                wayround_org.utils.file.copytree(
-                    fp,
-                    wayround_org.utils.path.join(
-                        self.dst_dir,
-                        self.usr_list_item[0],
-                        'include',
-                        'asm-{}'.format(i)
-                        ),
-                    overwrite_files=False,
-                    clear_before_copy=False,
-                    dst_must_be_empty=False
-                    )
-
-        log.info("""
-Please make correct 04.DESTDIR/usr/include/asm by 'ln -s' manually.
-
-Continue with command
-'aipsetup3 build continue remove_install_files_from_includes+'
-""")
-
-        ret = 1
-        return ret
-
-    def builder_action_remove_install_files_from_includes(
-            self, called_as, log):
-        p = subprocess.Popen(
-            ['find',
-             '(', '-name', '.install',
-             '-o', '-name', '..install.cmd',
-             '-o', '-name', '.check',
-             '-o', '-name', '..check.cmd',
-             '-o', '-name', 'Kbuild',
-             ')',
-             '-delete'],
-            cwd=wayround_org.utils.path.join(
-                self.dst_dir,
-                'usr',
-                'include'
-                )
-            )
-        p.wait()
-        return ret
 
     def builder_action_distr_man(self, called_as, log):
         ret = autotools.make_high(

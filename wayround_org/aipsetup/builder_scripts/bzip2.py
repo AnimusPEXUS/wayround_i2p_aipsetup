@@ -27,12 +27,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             }
         if self.is_crossbuild:
             thr['CFLAGS'] = ' -I{}'.format(
-                os.path.join(self.target_host_root, 'usr', 'include')
+                os.path.join('/multiarch', self.host, 'include')
                 )
             thr['LDFLAGS'] = '-L{}'.format(
-                os.path.join(self.target_host_root, 'usr', 'lib')
+                os.path.join('/multiarch', self.host, 'lib')
                 )
-            thr['CC']=['CC={}-gcc'.format(self.host)],
+            thr['CC']=['CC={}-gcc'.format(self.host)]
             thr['AR']=['AR={}-ar'.format(self.host)]
             thr['RANLIB']=['RANLIB={}-ranlib'.format(self.host)]
         return {
@@ -59,7 +59,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'PREFIX=/usr',
+                'PREFIX={}'.format('/multiarch', self.host),
                 'CFLAGS=  -fpic -fPIC -Wall -Winline -O2 -g '
                 '-D_FILE_OFFSET_BITS=64 ' +
                 self.custom_data['thr']['CFLAGS'],
@@ -86,7 +86,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'PREFIX=' + os.path.join(self.dst_dir, 'usr')
+                'PREFIX=' + os.path.join(self.dst_dir, 'multiarch', self.host)
                 ],
             environment={},
             environment_mode='copy',
@@ -110,6 +110,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '-D_FILE_OFFSET_BITS=64 ' +
                 self.custom_data['thr']['CFLAGS'],
                 'LDFLAGS= ' + self.custom_data['thr']['LDFLAGS'],
+                'PREFIX=' + os.path.join(self.dst_dir, 'multiarch', self.host)
                 ],
             environment={},
             environment_mode='copy',
@@ -124,7 +125,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        di = os.path.join(self.dst_dir, 'usr', 'lib')
+        di = os.path.join(self.dst_dir, 'multiarch', self.host, 'lib')
 
         os.makedirs(di, exist_ok=True)
 
@@ -158,7 +159,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        bin_dir = os.path.join(self.dst_dir, 'usr', 'bin')
+        bin_dir = os.path.join(self.dst_dir, 'multiarch', self.host, 'bin')
         files = os.listdir(bin_dir)
 
         try:
