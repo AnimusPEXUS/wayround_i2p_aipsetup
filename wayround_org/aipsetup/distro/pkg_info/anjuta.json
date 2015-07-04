@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://gnome.org/",
-  "buildscript": "anjuta",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "anjuta",
   "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]",

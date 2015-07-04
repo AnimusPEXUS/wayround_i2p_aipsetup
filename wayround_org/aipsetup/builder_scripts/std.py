@@ -105,6 +105,22 @@ class Builder:
     def build(self):
         return self.package_info['constitution']['build']
 
+    def calculate_default_linker_program(self):
+        ret = wayround_org.aipsetup.build.find_dl(
+            os.path.join(
+                '/',
+                'multiarch',
+                self.host
+                )
+            )
+        return ret
+
+    def calculate_default_linker_program_ld_parameter(self):
+        return '--dynamic-linker=' + self.calculate_default_linker_program()
+
+    def calculate_default_linker_program_gcc_parameter(self):
+        return '-Wl,' + self.calculate_default_linker_program_ld_parameter()
+
     def print_help(self):
         txt = ''
         print("building script: {}".format(self))
@@ -286,14 +302,6 @@ class Builder:
         """
         """
 
-        dl = wayround_org.aipsetup.build.find_dl(
-            os.path.join(
-                '/',
-                'multiarch',
-                self.host
-                )
-            )
-
         """
         rpath = os.path.join(
             '/',
@@ -329,11 +337,11 @@ class Builder:
             #     ),
             '--localstatedir=/var',
             '--enable-shared',
-            
+
             # TODO: find way to modify binutils+gcc+glibc chane so it
             #       uses needed interpreter without this f*ckin parameter...
-            'LDFLAGS=-Wl,--dynamic-linker=' + dl
-            
+            'LDFLAGS=' + self.calculate_default_linker_program_gcc_parameter()
+
             #'LDFLAGS=-Wl,--dynamic-linker=' + \
             #    dl + \
             #    ' -Wl,-rpath={}'.format(rpath) + \

@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.gnu.org",
-  "buildscript": "cpio",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "cpio",
   "filters": "",

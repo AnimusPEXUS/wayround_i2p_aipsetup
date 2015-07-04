@@ -4,7 +4,7 @@
   "buildscript": "botan",
   "version_tool": "",
   "basename": "Botan",
-  "filters": "",
+  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]",
   "removable": true,
   "reducible": true,
   "non_installable": false,

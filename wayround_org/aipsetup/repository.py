@@ -1385,16 +1385,29 @@ class SourceRepoCtl:
         if not isinstance(acceptable_src_file_extensions, str):
             raise TypeError("`acceptable_src_file_extensions' must be str")
 
-        ret = self._index_sources_directory(
-            wayround_org.utils.path.realpath(self.sources_dir),
-            wayround_org.utils.path.realpath(
-                subdir_name
-                ),
-            acceptable_endings=acceptable_src_file_extensions.split(' '),
-            force_reindex=force_reindex,
-            first_delete_found=first_delete_found,
-            clean_only=clean_only
-            )
+        src_dir = wayround_org.utils.path.abspath(self.sources_dir)
+        sub_src_dir = wayround_org.utils.path.abspath(subdir_name)
+
+        ret = 0
+
+        if (
+                not (sub_src_dir + '/').startswith(src_dir + '/')
+                or not os.path.isdir(
+                    wayround_org.utils.path.abspath(subdir_name)
+                    )):
+            logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
+            ret = 1
+
+        if ret == 0:
+
+            ret = self._index_sources_directory(
+                src_dir,
+                sub_src_dir,
+                acceptable_endings=acceptable_src_file_extensions.split(' '),
+                force_reindex=force_reindex,
+                first_delete_found=first_delete_found,
+                clean_only=clean_only
+                )
 
         return ret
 
@@ -1407,13 +1420,15 @@ class SourceRepoCtl:
             first_delete_found=False,
             clean_only=False
             ):
+        ''
 
-        # TODO: this method should be rewriten again because of addition
-        #        performance reasons
-
+        '''
         root_dir_name = wayround_org.utils.path.realpath(root_dir_name)
-
         sub_dir_name = wayround_org.utils.path.realpath(sub_dir_name)
+        '''
+
+        root_dir_name = wayround_org.utils.path.abspath(root_dir_name)
+        sub_dir_name = wayround_org.utils.path.abspath(sub_dir_name)
 
         rel_path = wayround_org.utils.path.relpath(sub_dir_name, root_dir_name)
         rel_path = os.path.sep + rel_path + os.path.sep
@@ -1563,10 +1578,16 @@ class SourceRepoCtl:
                     )
 
                 if os.path.islink(rp) or not os.path.isfile(
-                        wayround_org.utils.path.realpath(
+                        wayround_org.utils.path.abspath(
                             rp
                             )
                         ):
+                    '''
+                    wayround_org.utils.path.realpath(
+                        rp
+                        )
+                    ):
+                    '''
                     to_deletion.append(i)
                     deleted_count += 1
 

@@ -1,33 +1,17 @@
 
-import logging
+
 import os.path
 import subprocess
 
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
-
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        num = pkg_info['pkg_info']['name'][-1]
+    def define_custom_data(self):
+        num = self.package_info['pkg_info']['name'][-1]
 
         if num == '4':
             num = '2'
@@ -38,27 +22,28 @@ def main(buildingsite, action=None):
 
         python = 'python{}'.format(num)
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        ret = {
+            'python': python
+            }
+        return ret
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+    def define_actions(self):
+        ret = super().define_actions()
+        for i in ['configure', 'build', 'autogen']:
+            del ret[i]
+        return ret
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ddd = wayround_org.utils.path.join(dst_dir)
-            p = subprocess.Popen(
-                [python, './install.py', '-i', ddd],
-                cwd=src_dir
-                )
-            ret = p.wait()
-
-    return ret
+    def builder_action_distribute(self, called_as, log):
+        p = subprocess.Popen(
+            [
+                self.custom_data['python'],
+                './install.py',
+                '-i',
+                self.dst_dir
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret

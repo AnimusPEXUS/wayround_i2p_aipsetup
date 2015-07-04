@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://www.antigrain.com",
-  "buildscript": "agg",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "agg",
   "filters": "",

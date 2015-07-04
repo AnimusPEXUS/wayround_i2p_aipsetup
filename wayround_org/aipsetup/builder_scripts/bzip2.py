@@ -12,8 +12,6 @@ import wayround_org.utils.file
 
 import wayround_org.aipsetup.builder_scripts.std
 
-# FIXME: host/build/target fix required
-
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
