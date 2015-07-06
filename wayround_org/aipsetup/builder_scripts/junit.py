@@ -1,90 +1,72 @@
 
-import logging
+
 import os.path
 import subprocess
-import shutil
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
+
 import wayround_org.utils.path
-import wayround_org.utils.file
+import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['configure'])
+        del(ret['autogen'])
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'build', 'distribute'],
-        action,
-        "help"
-        )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+    def define_custom_data(self):
 
         src_junit_dir = wayround_org.utils.path.join(
-            src_dir,
+            self.src_dir,
             'junit{}'.format(
-                pkg_info['pkg_nameinfo']['groups']['version']
+                self.package_info['pkg_nameinfo']['groups']['version']
                 )
             )
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
         dst_classpath_dir = wayround_org.utils.path.join(
-            dst_dir, 'usr', 'lib', 'java', 'classpath'
+            self.dst_dir,
+            'multiarch',
+            self.host,
+            'lib',
+            'java',
+            'classpath'
             )
 
-        separate_build_dir = False
+        ret = {
+            'src_junit_dir': src_junit_dir,
+            'dst_classpath_dir': dst_classpath_dir
+            }
 
-        source_configure_reldir = '.'
+        return ret
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'build' in actions and ret == 0:
-            p = subprocess.Popen(
-                [
-                    'ant',
-                    '-Dversion={}'.format(
-                        pkg_info['pkg_nameinfo']['groups']['version']
-                        ),
-                    'dist'
-                    ],
-                cwd=src_dir
-                )
-            ret = p.wait()
-
-        if 'distribute' in actions and ret == 0:
-            try:
-                os.makedirs(dst_classpath_dir)
-            except:
-                pass
-
-            shutil.copy(
-                wayround_org.utils.path.join(
-                    src_junit_dir, 'junit-{}.jar'.format(
-                        pkg_info['pkg_nameinfo']['groups']['version']
-                        )
+    def builder_action_build(self, called_as, log):
+        p = subprocess.Popen(
+            [
+                'ant',
+                '-Dversion={}'.format(
+                    self.package_info['pkg_nameinfo']['groups']['version']
                     ),
-                dst_classpath_dir
-                )
+                'dist'
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
 
-    return ret
+    def builder_action_distribute(self, called_as, log):
+        os.makedirs(dst_classpath_dir, exist_ok=True)
+
+        shutil.copy(
+            wayround_org.utils.path.join(
+                src_junit_dir, 'junit-{}.jar'.format(
+                    pkg_info['pkg_nameinfo']['groups']['version']
+                    )
+                ),
+            dst_classpath_dir
+            )
+        return 0

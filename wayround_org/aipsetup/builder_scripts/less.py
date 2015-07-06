@@ -1,127 +1,45 @@
 
-import logging
 import os.path
-
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        ret['after_distribute'] = self.builder_action_after_distribute
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute', 'SET'],
-        action,
-        "help"
-        )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
+    def define_custom_data(self):
         etc_profile_set_dir = wayround_org.utils.path.join(
-            dst_dir, 'etc', 'profile.d', 'SET'
+            self.dst_dir, 'etc', 'profile.d', 'SET'
             )
 
-        separate_build_dir = False
+        ret = {
+            'etc_profile_set_dir': etc_profile_set_dir
+            }
 
-        source_configure_reldir = '.'
+        return ret
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+    def builder_action_after_distribute(self, called_as, log):
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-                    '--sysconfdir=' +
-                        pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
+        os.makedirs(self.custom_data['etc_profile_set_dir'], exist_ok=True)
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        f = open(
+            wayround_org.utils.path.join(
+                self.custom_data['etc_profile_set_dir'],
+                '009.LESS.sh'
+                ),
+            'w'
+            )
 
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'SET' in actions and ret == 0:
-            if not os.path.isdir(etc_profile_set_dir):
-                try:
-                    os.makedirs(etc_profile_set_dir)
-                except:
-                    logging.error(
-                        "Can't create dir: {}".format(etc_profile_set_dir)
-                        )
-                    raise
-
-            f = open(
-                wayround_org.utils.path.join(
-                    etc_profile_set_dir,
-                    '009.less'
-                    ),
-                'w'
-                )
-
-            f.write("""\
+        f.write("""\
 #!/bin/bash
 export LESS=' -R '
 
 """)
-            f.close()
+        f.close()
 
-    return ret
+        return 0

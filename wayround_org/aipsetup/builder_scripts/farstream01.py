@@ -10,14 +10,5 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(called_as, log) + [
-            '--disable-kparts3',
-            '--disable-kparts4',
-            '--disable-docbook',
-            '--enable-media=ffmpeg',
-            '--with-npapi-incl=/multiarch/{}/include/mozilla'.format(
-                self.host
-                ),
-            '--with-npapi-plugindir=/multiarch/{}/lib/mozilla/plugins'.format(
-                self.host
-                )
+            '--disable-python',
             ]

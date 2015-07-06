@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://freedesktop.org/",
-  "buildscript": "exempi",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "exempi",
   "filters": "",

@@ -7,121 +7,42 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 
-def main(buildingsite, action=None):
+import wayround_org.aipsetup.builder_scripts.std
 
-    ret = 0
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+    def define_custom_data(self):
+        ret = {
+            'apr_1_config': wayround_org.utils.file.which(
+                'apr-1-config',
+                '/multiarch/{}'.format(self.host)
                 )
+            }
+        if ret['apr_1_config'] is None:
+            raise Exception("`apr-1-config' not installed on system")
+        return ret
 
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    #'--prefix=/daemons/httpd',
-                    '--prefix=/usr/share/httpd',
-                    '--libdir=/usr/lib',
-                    '--bindir=/usr/bin',
-                    '--sbindir=/usr/sbin',
-                    '--mandir=/usr/share/man',
-                    '--includedir=/usr/include',
-                    '--oldincludedir=/usr/include',
-                    '--datarootdir=/usr/share',
-                    '--sysconfdir=/daemons/httpd/etc',
-                    '--sharedstatedir=/daemons/httpd/com',
-                    '--localstatedir=/daemons/httpd/var',
+    def builder_action_configure_define_options(self, called_as, log):
+        return super().builder_action_configure_define_options(
+            called_as,
+            log) + [
+                '--with-apr=' + self.custom_data['apr_1_config'],
 
-                    '--with-apr=/usr/bin/apr-1-config',
-                    '--enable-shared',
-                    '--enable-modules=all',
-                    '--enable-mods-shared=all',
-                    '--enable-so',
-                    '--enable-cgi',
-                    '--enable-ssl',
-                    '--enable-http',
-                    '--enable-info',
-                    '--enable-proxy',
-                    '--enable-proxy-connect',
-                    '--enable-proxy-ftp',
-                    '--enable-proxy-http',
-                    '--enable-proxy-scgi',
-                    '--enable-proxy-ajp',
-                    '--enable-proxy-balancer',
-#                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' +
-#                        pkg_info['constitution']['paths']['var'],
-                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
 
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+            '--enable-shared',
+            '--enable-modules=all',
+            '--enable-mods-shared=all',
+            '--enable-so',
+            '--enable-cgi',
+            '--enable-ssl',
+            '--enable-http',
+            '--enable-info',
+            '--enable-proxy',
+            '--enable-proxy-connect',
+            '--enable-proxy-ftp',
+            '--enable-proxy-http',
+            '--enable-proxy-scgi',
+            '--enable-proxy-ajp',
+            '--enable-proxy-balancer',
+                ]

@@ -1,9 +1,9 @@
 {
   "description": "",
-  "home_page": "http://dvdnav.mplayerhq.hu/releases/",
-  "buildscript": "std",
+  "home_page": "",
+  "buildscript": "std_cmake",
   "version_tool": "",
-  "basename": "libdvdread",
+  "basename": "opencv",
   "filters": "",
   "removable": true,
   "reducible": true,
