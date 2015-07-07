@@ -1,118 +1,138 @@
 
-import logging
+
 import os.path
 import shutil
 import subprocess
 
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_custom_data(self):
+        return {}
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['autogen'])
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def builder_action_extract(self, called_as, log):
 
-    else:
+        ret = autotools.extract_high(
+            self.buildingsite,
+            self.package_info['pkg_info']['basename'],
+            log=log,
+            unwrap_dir=True,
+            rename_dir=False
+            )
 
-        pkg_info, actions = r
+        tar = None
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        for i in os.listdir(self.src_dir):
+            if i.endswith('.tar'):
+                tar = i
+                break
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+        if tar is None:
+            log.error(".tar not found in 00.SOURCE")
+            ret = 1
+        else:
 
-        tar_dir = None
-        lsof_file = None
-        lsof_man_file = None
+            tar_dir = tar[:-len('.tar')]
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+            log.info("Unpacking {}".format(tar))
+            p = subprocess.Popen(
+                ['tar', '-xf', tar],
+                cwd=self.src_dir,
+                stdout=log.stdout,
+                stderr=log.stderr
                 )
 
-            tar = None
+            p_r = p.wait()
 
-            for i in os.listdir(src_dir):
-                if i.endswith('.tar'):
-                    tar = i
-                    break
+            if p_r != 0:
+                log.error("Error `{}' while untarring".format(p_r))
+                ret = 2
+            else:
+                if not tar_dir in os.listdir(self.src_dir):
+                    log.error("wrong tarball")
+                    ret = 3
+                else:
+                    tar_dir = os.path.join(self.src_dir, tar_dir)
+                    lsof_file = os.path.join(tar_dir, 'lsof')
+                    lsof_man_file = os.path.join(tar_dir, 'lsof.8')
 
-            if tar == None:
-                logging.error(".tar not found in 00.SOURCE")
+                    self.custom_data['tar_dir'] = tar_dir
+                    self.custom_data['lsof_file'] = lsof_file
+                    self.custom_data['lsof_man_file'] = lsof_man_file
+
+        return ret
+
+    def builder_action_configure(self, called_as, log):
+        # TODO: additional host oriented configuration required as you can see
+        p = subprocess.Popen(
+            ['./Configure', '-n', 'linux'],
+            cwd=self.custom_data['tar_dir'],
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
+
+    def builder_action_build(self, called_as, log):
+        p = subprocess.Popen(
+            ['make'],
+            cwd=self.custom_data['tar_dir'],
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
+
+    def builder_action_distribute(self, called_as, log):
+
+        ret = 0
+
+        lsof_file = self.custom_data['lsof_file']
+        lsof_man_file = self.custom_data['lsof_man_file']
+
+        if not os.path.isfile(lsof_file):
+            log.error("Can't find lsof executable")
+            ret = 1
+        else:
+
+            if not os.path.isfile(lsof_man_file):
+                log.error("Can't find lsof.8 man file")
                 ret = 1
             else:
+                dst_bin_dir = os.path.join(
+                    self.dst_dir,
+                    'multiarch',
+                    self.host,
+                    'bin'
+                    )
 
-                tar_dir = tar[:-len('.tar')]
+                os.makedirs(dst_bin_dir, exist_ok=True)
 
-                logging.info("Unpacking {}".format(tar))
-                p = subprocess.Popen(['tar', '-xf', tar], cwd=src_dir)
+                shutil.copy(lsof_file, os.path.join(dst_bin_dir, 'lsof'))
 
-                p_r = p.wait()
+                dst_man_dir = os.path.join(
+                    self.dst_dir,
+                    'multiarch',
+                    self.host,
+                    'share',
+                    'man',
+                    'man8'
+                    )
 
-                if p_r != 0:
-                    logging.error("Error `{}' while untarring".format(p_r))
-                    ret = 1
-                else:
-                    if not tar_dir in os.listdir(src_dir):
-                        logging.error("wrong tarball")
-                        ret = 1
-                    else:
-                        tar_dir = os.path.join(src_dir, tar_dir)
-                        lsof_file = os.path.join(tar_dir, 'lsof')
-                        lsof_man_file = os.path.join(tar_dir, 'lsof.8')
+                os.makedirs(dst_man_dir, exist_ok=True)
 
-        if 'configure' in actions and ret == 0:
-            p = subprocess.Popen(['./Configure', '-n', 'linux'], cwd=tar_dir)
-            ret = p.wait()
+                shutil.copy(
+                    lsof_man_file,
+                    os.path.join(dst_man_dir, 'lsof.8')
+                    )
 
-        if 'build' in actions and ret == 0:
-            p = subprocess.Popen(['make'], cwd=tar_dir)
-            ret = p.wait()
-
-        if 'distribute' in actions and ret == 0:
-
-            if not os.path.isfile(lsof_file):
-                logging.error("Can't find lsof executable")
-                ret = 1
-            else:
-
-                if not os.path.isfile(lsof_man_file):
-                    logging.error("Can't find lsof.8 man file")
-                    ret = 1
-                else:
-                    dst_bin_dir = os.path.join(dst_dir, 'usr', 'bin')
-
-                    if not os.path.isdir(dst_bin_dir):
-                        os.makedirs(dst_bin_dir)
-
-                    shutil.copy(lsof_file, os.path.join(dst_bin_dir, 'lsof'))
-
-                    dst_man_dir = os.path.join(
-                        dst_dir, 'usr', 'share', 'man', 'man8'
-                        )
-
-                    if not os.path.isdir(dst_man_dir):
-                        os.makedirs(dst_man_dir)
-
-                    shutil.copy(
-                        lsof_man_file, os.path.join(dst_man_dir, 'lsof.8')
-                        )
-
-    return ret
+        return ret

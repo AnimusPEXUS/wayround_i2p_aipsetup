@@ -1,130 +1,122 @@
 
-import logging
+
 import os.path
-
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['configure'])
+        del(ret['autogen'])
+        del(ret['build'])
+        del(ret['distribute'])
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        [
-            'extract', 'patch',
-            'build_a', 'distribute_a',
-            'build_so', 'distribute_so'
-            ],
-        action,
-        "help"
-        )
+        ret['build_a'] = self.builder_action_build_a
+        ret['distribute_a'] = self.builder_action_distribute_a
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+        ret['build_so'] = self.builder_action_build_so
+        ret['distribute_so'] = self.builder_action_distribute_so
 
-    else:
+        return ret
 
-        pkg_info, actions = r
+    def builder_action_patch(self, called_as, log):
+        f = open(os.path.join(self.src_dir, 'makefile'))
+        lines = f.read().split('\n')
+        f.close()
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+        for i in range(len(lines)):
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
+            if lines[i] == '\tldconfig':
+                lines[i] = '#\tldconfig'
 
-        separate_build_dir = False
+            if lines[
+                    i] == '\tcp -rv $(srcdir)/Dependencies/ $(include_path)/$(libname_hdr)/$(srcdir)':
+                lines[
+                    i] = '\tcp -rv $(srcdir)/../Dependencies/ $(include_path)/$(libname_hdr)/$(srcdir)'
 
-        source_configure_reldir = '.'
+        f = open(os.path.join(self.src_dir, 'makefile'), 'w')
+        f.write('\n'.join(lines))
+        f.close()
+        return 0
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+    def builder_action_build_a(self, called_as, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'CXX={}-g++'.format(self.host),
+                'LDFLAGS=' +
+                self.calculate_default_linker_program_gcc_parameter()
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
 
-        if 'patch' in actions and ret == 0:
-            f = open(os.path.join(src_dir, 'makefile'))
-            lines = f.read().split('\n')
-            f.close()
+    def builder_action_distribute_a(self, called_as, log):
 
-            for i in range(len(lines)):
-            
-                if lines[i] == '\tldconfig':
-                    lines[i] = '#\tldconfig'
-                    
-                if lines[i] == '\tcp -rv $(srcdir)/Dependencies/ $(include_path)/$(libname_hdr)/$(srcdir)':
-                    lines[i] = '\tcp -rv $(srcdir)/../Dependencies/ $(include_path)/$(libname_hdr)/$(srcdir)'
+        os.makedirs(
+            os.path.join(self.dst_dir, 'multiarch', self.host, 'lib'),
+            exist_ok=True
+            )
 
-            f = open(os.path.join(src_dir, 'makefile'), 'w')
-            f.write('\n'.join(lines))
-            f.close()
+        ret = autotools.make_high(
+            self.buildingsite,
+            options=[],
+            arguments=[
+                'install',
+                'prefix=' + os.path.join(self.dst_dir, 'multiarch', self.host)
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
 
-        if 'build_a' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+    def builder_action_build_so(self, called_as, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'CXX={}-g++'.format(self.host),
+                'LDFLAGS=' +
+                self.calculate_default_linker_program_gcc_parameter(),
+                'SHARED=1'
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
 
-        if 'distribute_a' in actions and ret == 0:
-            try:
-                os.makedirs(os.path.join(dst_dir, 'usr', 'lib'))
-            except:
-                pass
+    def builder_action_distribute_so(self, called_as, log):
 
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'prefix=' + os.path.join(dst_dir, 'usr')
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        os.makedirs(
+            os.path.join(self.dst_dir, 'multiarch', self.host, 'lib'),
+            exist_ok=True
+            )
 
-        if 'build_so' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=['SHARED=1'],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute_so' in actions and ret == 0:
-            try:
-                os.makedirs(os.path.join(dst_dir, 'usr', 'lib'))
-            except:
-                pass
-
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'prefix=' + os.path.join(dst_dir, 'usr'),
-                    'SHARED=1'
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+        ret = autotools.make_high(
+            self.buildingsite,
+            options=[],
+            arguments=[
+                'install',
+                'prefix=' + os.path.join(self.dst_dir, 'multiarch', self.host),
+                'SHARED=1'
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret

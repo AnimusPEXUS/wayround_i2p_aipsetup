@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "libircclient",
+  "buildscript": "std",
   "version_tool": "",
   "basename": "libircclient",
   "filters": "",

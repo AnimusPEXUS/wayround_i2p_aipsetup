@@ -114,7 +114,9 @@ USERS = {
     104: 'systemd-journal',
     105: 'systemd-journal-gateway',
     106: 'systemd-journal-remote',
-    107: 'systemd-journal-upload'
+    107: 'systemd-journal-upload',
+    
+    200: 'tor'
     }
 
 
