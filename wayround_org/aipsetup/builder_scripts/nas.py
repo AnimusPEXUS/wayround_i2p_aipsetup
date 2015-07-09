@@ -1,95 +1,54 @@
 
-import logging
+
 import os.path
 import subprocess
 
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        for i in [
+                'autogen',
+                ]:
+            del(ret[i])
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            ['extract', 'xmkmf', 'build', 'distribute', 'distribute_man'],
-            action,
-            "help"
+    def builder_action_configure(self, called_as, log):
+        ret = subprocess.Popen(
+            ['bash', '-c', 'xmkmf'],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            ).wait()
+        return ret
+
+    def builder_action_build(self, called_as, log):
+        ret = subprocess.Popen(
+            ['make', 'World'],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
+            ).wait()
+        return ret
+
+    def builder_action_distribute(self, called_as, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'install',
+                'install.man',
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
             )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'xmkmf' in actions and ret == 0:
-            ret = subprocess.Popen(
-                ['bash', '-c', 'xmkmf'],
-                cwd=src_dir
-                ).wait()
-
-        if 'build' in actions and ret == 0:
-            ret = subprocess.Popen(
-                ['make', 'World'],
-                cwd=src_dir
-                ).wait()
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + (
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute_man' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install.man',
-                    'DESTDIR=' + (
-                        wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-                        )
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-    return ret
+        return ret

@@ -1,74 +1,45 @@
 
-import logging
-import os.path
 import re
+import os.path
 import shutil
 import subprocess
 
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['autogen'])
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'make_gen', 'build', 'distribute'],
-        action,
-        "help"
-        )
+    def builder_action_configure(self, called_as, log):
+        new_make_filename = wayround_org.utils.path.join(
+            self.src_dir,
+            'pdftk',
+            'Makefile.Lailalo'
+            )
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+        file_list = os.listdir('/usr/share/java')
 
-    else:
+        ver = None
+        for i in file_list:
+            res = re.match(r'^libgcj-((\d+\.?)+).jar$', i)
+            if res:
+                ver = res.group(1)
+                log.info("Found jcg version {}".format(ver))
 
-        pkg_info, actions = r
+        if not ver:
+            ret = 3
+        else:
+            gcj_version = ver
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+            new_make_filename_f = open(new_make_filename, 'w')
 
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'make_gen' in actions and ret == 0:
-
-            new_make_filename = wayround_org.utils.path.join(
-                src_dir,
-                'pdftk',
-                'Makefile.Lailalo'
-                )
-
-            file_list = os.listdir('/usr/share/java')
-
-            ver = None
-            for i in file_list:
-                res = re.match(r'^libgcj-((\d+\.?)+).jar$', i)
-                if res:
-                    ver = res.group(1)
-                    logging.info("Found jcg version {}".format(ver))
-
-            if not ver:
-                ret = 3
-            else:
-                gcj_version = ver
-
-                new_make_filename_f = open(new_make_filename, 'w')
-
-                new_make_filename_f.write("""\
+            new_make_filename_f.write("""\
 # -*- Mode: Makefile -*-
 # Makefile.Lailalo
 # Copyright (c) 2013 WayRound.org
@@ -107,47 +78,48 @@ export LDLIBS= -lgcj
 
 include Makefile.Base
 """.format(gcj_version=gcj_version)
-                    )
-                new_make_filename_f.close()
-
-        if 'build' in actions and ret == 0:
-            p = subprocess.Popen(
-                ['make', '-f', 'Makefile.Lailalo'],
-                cwd=wayround_org.utils.path.join(src_dir, 'pdftk')
                 )
-            ret = p.wait()
+            new_make_filename_f.close()
+        return 0
 
-        if 'distribute' in actions and ret == 0:
-            sbin = wayround_org.utils.path.join(src_dir, 'pdftk', 'pdftk')
-            bin_dir = wayround_org.utils.path.join(dst_dir, 'usr', 'bin')
+    def builder_action_build(self, called_as, log):
+        p = subprocess.Popen(
+            ['make', '-f', 'Makefile.Lailalo'],
+            cwd=wayround_org.utils.path.join(self.src_dir, 'pdftk'),
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
 
-            try:
-                os.makedirs(bin_dir)
-            except:
-                pass
+    def builder_action_distribute(self, called_as, log):
 
-            if not os.path.isdir(bin_dir):
-                logging.error("Can't create dir: `{}'".format(bin_dir))
-                ret = 22
-            else:
-                shutil.copy(
-                    sbin, wayround_org.utils.path.join(bin_dir, 'pdftk')
-                    )
+        ret = 0
 
-            sman = wayround_org.utils.path.join(src_dir, 'pdftk.1')
-            man = wayround_org.utils.path.join(
-                dst_dir, 'usr', 'share', 'man', 'man1'
+        sbin = wayround_org.utils.path.join(self.src_dir, 'pdftk', 'pdftk')
+        bin_dir = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin')
+
+        os.makedirs(bin_dir, exist_ok=True)
+
+        if not os.path.isdir(bin_dir):
+            log.error("Can't create dir: `{}'".format(bin_dir))
+            ret = 22
+        else:
+            shutil.copy(
+                sbin,
+                wayround_org.utils.path.join(bin_dir, 'pdftk')
                 )
 
-            try:
-                os.makedirs(man)
-            except:
-                pass
+        sman = wayround_org.utils.path.join(self.src_dir, 'pdftk.1')
+        man = wayround_org.utils.path.join(
+            self.dst_dir, 'usr', 'share', 'man', 'man1'
+            )
 
-            if not os.path.isdir(man):
-                logging.error("Can't create dir: `{}'".format(man))
-                ret = 23
-            else:
-                shutil.copy(sman, wayround_org.utils.path.join(man, 'pdftk.1'))
+        os.makedirs(man, exist_ok=True)
 
-    return ret
+        if not os.path.isdir(man):
+            log.error("Can't create dir: `{}'".format(man))
+            ret = 23
+        else:
+            shutil.copy(sman, wayround_org.utils.path.join(man, 'pdftk.1'))
+        return ret

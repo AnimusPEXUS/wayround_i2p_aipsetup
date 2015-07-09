@@ -11,259 +11,242 @@ import wayround_org.utils.file
 import wayround_org.utils.path
 
 
-def main(buildingsite, action=None):
+import os.path
+import subprocess
 
-    ret = 0
+import wayround_org.utils.path
+import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.aipsetup.builder_scripts.std
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-            buildingsite,
-            [   
-                'extract',
-                'configure',
-                'build',
-                'distribute'
-                ],
-            action,
-            "help"
+# TODO: host oriented configuration required
+
+
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    def define_custom_data(self):
+        self.source_configure_reldir = 'nss'
+        return None
+
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['autogen'])
+        return ret
+
+    def builder_action_configure(self, called_as, log):
+        #            nss_build_all: build_coreconf build_nspr build_dbm all
+
+        makefile = wayround_org.utils.path.join(
+            self.src_dir,
+            self.source_configure_reldir,
+            'Makefile'
             )
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+        f = open(makefile, 'r')
+        lines = f.read().splitlines()
+        f.close()
 
-    else:
+        for i in range(len(lines)):
 
-        pkg_info, actions = r
+            if lines[i].startswith('nss_build_all:'):
+                line = lines[i].split(' ')
 
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
+                while 'build_nspr' in line:
+                    line.remove('build_nspr')
 
-        separate_build_dir = False
-        source_configure_reldir = 'nss'
+                lines[i] = ' '.join(line)
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+            if lines[i].startswith('nss_clean_all:'):
+                line = lines[i].split(' ')
+
+                while 'clobber_nspr' in line:
+                    line.remove('clobber_nspr')
+
+                lines[i] = ' '.join(line)
+
+        f = open(makefile, 'w')
+        f.write('\n'.join(lines))
+        f.close()
+        return 0
+
+    def builder_action_build(self, called_as, log):
+
+        opts64 = []
+        if self.host == 'x86_64-pc-linux-gnu':
+            opts64 = ['USE_64=1']
+
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'nss_build_all',
+                'BUILD_OPT=1',
+                'NSPR_INCLUDE_DIR=/usr/include/nspr',
+                'USE_SYSTEM_ZLIB=1',
+
+                'ZLIB_LIBS=-lz',
+                'NSS_USE_SYSTEM_SQLITE=1'
+                ] + opts64,
+            environment={
+                'BUILD_OPT': '1'
+                },
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
+
+    def builder_action_distribute(self, called_as, log):
+
+        dest_dir = self.dst_dir
+
+        dist_dir = wayround_org.utils.path.join(
+            self.src_dir,
+            'dist'
+            )
+
+        OBJ_dir = glob.glob(wayround_org.utils.path.join(dist_dir, '*.OBJ'))
+
+        if len(OBJ_dir) != 1:
+            logging.error("single `dist/Linux*' dir not found")
+            ret = 10
+        else:
+            OBJ_dir = wayround_org.utils.path.join(
+                dist_dir,
+                os.path.basename(OBJ_dir[0])
                 )
 
-        if 'configure' in actions and ret == 0:
-#            nss_build_all: build_coreconf build_nspr build_dbm all
-
-            makefile = wayround_org.utils.path.join(
-                src_dir, source_configure_reldir, 'Makefile'
-                )
-
-            f = open(makefile, 'r')
-            lines = f.read().splitlines()
-            f.close()
-
-            for i in range(len(lines)):
-
-                if lines[i].startswith('nss_build_all:'):
-                    line = lines[i].split(' ')
-
-                    while 'build_nspr' in line:
-                        line.remove('build_nspr')
-
-                    lines[i] = ' '.join(line)
-
-                if lines[i].startswith('nss_clean_all:'):
-                    line = lines[i].split(' ')
-
-                    while 'clobber_nspr' in line:
-                        line.remove('clobber_nspr')
-
-                    lines[i] = ' '.join(line)
-
-            f = open(makefile, 'w')
-            f.write('\n'.join(lines))
-            f.close()
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'nss_build_all',
-                    'BUILD_OPT=1',
-                    'NSPR_INCLUDE_DIR=/usr/include/nspr',
-                    'USE_SYSTEM_ZLIB=1',
-                    'USE_64=1', # TODO: depends!
-                    'ZLIB_LIBS=-lz',
-                    'NSS_USE_SYSTEM_SQLITE=1'
-                    ],
-                environment={
-                    'BUILD_OPT': '1'
-                    },
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-
-            dest_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(
-                            buildingsite
-                            )
-
-            dist_dir = wayround_org.utils.path.join(
-                src_dir, 'dist'
-                )
-
-            OBJ_dir = \
-                glob.glob(wayround_org.utils.path.join(dist_dir, '*.OBJ'))
-
-            if len(OBJ_dir) != 1:
-                logging.error("single `dist/Linux*' dir not found")
-                ret = 10
-            else:
-                OBJ_dir = wayround_org.utils.path.join(
-                    dist_dir, os.path.basename(OBJ_dir[0])
-                    )
-
-                logging.info(
-                    "Dereferencing links in {}".format(
-                        wayround_org.utils.path.relpath(
-                            OBJ_dir,
-                            src_dir
-                            )
+            logging.info(
+                "Dereferencing links in {}".format(
+                    wayround_org.utils.path.relpath(
+                        OBJ_dir,
+                        self.src_dir
                         )
                     )
+                )
 
-                files = os.listdir(
-                    wayround_org.utils.path.join(OBJ_dir, 'bin')
-                    )
+            files = os.listdir(
+                wayround_org.utils.path.join(OBJ_dir, 'bin')
+                )
 
-                # comment this 'for' if want more files
-                for i in files:
-                    if not i in ['certutil', 'nss-config', 'pk12util']:
-                        os.unlink(
-                            wayround_org.utils.path.join(OBJ_dir, 'bin', i)
-                            )
+            # comment this 'for' if want more files
+            for i in files:
+                if not i in ['certutil', 'nss-config', 'pk12util']:
+                    os.unlink(
+                        wayround_org.utils.path.join(OBJ_dir, 'bin', i)
+                        )
 
-                if wayround_org.utils.file.dereference_files_in_dir(
+            if wayround_org.utils.file.dereference_files_in_dir(
                     OBJ_dir
                     ) != 0:
-                    logging.error(
-                        "Some errors while dereferencing symlinks. see above."
+                logging.error(
+                    "Some errors while dereferencing symlinks. see above."
+                    )
+                ret = 11
+            else:
+
+                logging.info("Preparing distribution dir tree")
+
+                os.makedirs(
+                    wayround_org.utils.path.join(OBJ_dir, 'include'),
+                    exist_ok=True
+                    )
+
+                os.makedirs(
+                    wayround_org.utils.path.join(OBJ_dir, 'usr'),
+                    exist_ok=True
+                    )
+
+                shutil.move(
+                    wayround_org.utils.path.join(OBJ_dir, 'bin'),
+                    wayround_org.utils.path.join(OBJ_dir, 'usr')
+                    )
+
+                shutil.move(
+                    wayround_org.utils.path.join(OBJ_dir, 'lib'),
+                    wayround_org.utils.path.join(OBJ_dir, 'usr')
+                    )
+
+                shutil.move(
+                    wayround_org.utils.path.join(OBJ_dir, 'include'),
+                    wayround_org.utils.path.join(OBJ_dir, 'usr')
+                    )
+
+                libs = os.listdir(
+                    wayround_org.utils.path.join(OBJ_dir, 'usr', 'lib')
+                    )
+
+                libs2 = []
+                for i in libs:
+                    re_res = re.match(r'lib(.*?).so', i)
+                    if re_res:
+                        libs2.append(re_res.group(1))
+
+                libs = libs2
+
+                del libs2
+
+                libs.sort()
+
+                for i in range(len(libs)):
+                    libs[i] = '-l{}'.format(libs[i])
+
+                libs = ' '.join(libs)
+
+                os.makedirs(
+                    wayround_org.utils.path.join(
+                        OBJ_dir, 'usr', 'include', 'nss'
+                        ),
+                    exist_ok=True
+                    )
+                # os.symlink(
+                #    'nspr',
+                #    OBJ_dir + os.path.sep + 'usr' +
+                #    os.path.sep + 'include' + os.path.sep + 'nss'
+                #    )
+
+                for i in ['private', 'public']:
+                    wayround_org.utils.file.files_by_mask_copy_to_dir(
+                        wayround_org.utils.path.join(dist_dir, i, 'nss'),
+                        wayround_org.utils.path.join(
+                            OBJ_dir, 'usr', 'include', 'nss'
+                            ),
+                        mask='*'
                         )
-                    ret = 11
-                else:
 
-                    logging.info("Preparing distribution dir tree")
+                logging.info("Writing package config files")
 
-                    try:
-                        os.mkdir(
-                            wayround_org.utils.path.join(OBJ_dir, 'include'),
-                            mode=0o755
-                            )
-                    except:
-                        pass
+                nss_major_version = 0
+                nss_minor_version = 0
+                nss_patch_version = 0
 
-                    try:
-                        os.mkdir(
-                            wayround_org.utils.path.join(OBJ_dir, 'usr'),
-                            mode=0o755
-                            )
-                    except:
-                        pass
-
-                    shutil.move(
-                        wayround_org.utils.path.join(OBJ_dir, 'bin'),
-                        wayround_org.utils.path.join(OBJ_dir, 'usr')
-                        )
-
-                    shutil.move(
-                        wayround_org.utils.path.join(OBJ_dir, 'lib'),
-                        wayround_org.utils.path.join(OBJ_dir, 'usr')
-                        )
-
-                    shutil.move(
-                        wayround_org.utils.path.join(OBJ_dir, 'include'),
-                        wayround_org.utils.path.join(OBJ_dir, 'usr')
-                        )
-
-                    libs = os.listdir(
-                        wayround_org.utils.path.join(OBJ_dir, 'usr', 'lib')
-                        )
-
-                    libs2 = []
-                    for i in libs:
-                        re_res = re.match(r'lib(.*?).so', i)
-                        if re_res:
-                            libs2.append(re_res.group(1))
-
-                    libs = libs2
-
-                    del libs2
-
-                    libs.sort()
-
-                    for i in range(len(libs)):
-                        libs[i] = '-l{}'.format(libs[i])
-
-                    libs = ' '.join(libs)
-
-                    try:
-                        os.mkdir(
-                            wayround_org.utils.path.join(
-                                OBJ_dir, 'usr', 'include', 'nss'
-                                ),
-                            mode=0o755
-                            )
-                    except:
-                        pass
-
-#                    os.symlink(
-#                        'nspr',
-#                        OBJ_dir + os.path.sep + 'usr' +
-#                        os.path.sep + 'include' + os.path.sep + 'nss'
-#                        )
-
-                    for i in ['private', 'public']:
-                        wayround_org.utils.file.files_by_mask_copy_to_dir(
-                            wayround_org.utils.path.join(dist_dir, i, 'nss'),
-                            wayround_org.utils.path.join(
-                                OBJ_dir, 'usr', 'include', 'nss'
-                                ),
-                            mask='*'
-                            )
-
-                    logging.info("Writing package config files")
-
-                    nss_major_version = 0
-                    nss_minor_version = 0
-                    nss_patch_version = 0
-
-                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                if (len(self.package_info['pkg_nameinfo']['groups']['version_list'])
                         > 0):
-                        nss_major_version = \
-                        pkg_info['pkg_nameinfo']['groups']['version_list'][0]
+                    nss_major_version = \
+                        self.package_info['pkg_nameinfo'][
+                            'groups']['version_list'][0]
 
-                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                if (len(self.package_info['pkg_nameinfo']['groups']['version_list'])
                         > 1):
-                        nss_minor_version = \
-                        pkg_info['pkg_nameinfo']['groups']['version_list'][1]
+                    nss_minor_version = \
+                        self.package_info['pkg_nameinfo'][
+                            'groups']['version_list'][1]
 
-                    if (len(pkg_info['pkg_nameinfo']['groups']['version_list'])
+                if (len(self.package_info['pkg_nameinfo']['groups']['version_list'])
                         > 2):
-                        nss_patch_version = \
-                        pkg_info['pkg_nameinfo']['groups']['version_list'][2]
+                    nss_patch_version = \
+                        self.package_info['pkg_nameinfo'][
+                            'groups']['version_list'][2]
 
-                    logging.info(
-                        "Applying version {}.{}.{}".format(
-                            nss_major_version,
-                            nss_minor_version,
-                            nss_patch_version
-                            )
+                logging.info(
+                    "Applying version {}.{}.{}".format(
+                        nss_major_version,
+                        nss_minor_version,
+                        nss_patch_version
                         )
+                    )
 
-                    pkg_config = """
+                pkg_config = """
 prefix={prefix}
 exec_prefix=${{prefix}}
 libdir=${{exec_prefix}}/lib
@@ -275,37 +258,37 @@ Version: {nss_major_version}.{nss_minor_version}.{nss_patch_version}
 Libs: -L${{libdir}} {libs}
 Cflags: -I${{includedir}}
 """.format(
-                        prefix='/usr',
-                        nss_major_version=nss_major_version,
-                        nss_minor_version=nss_minor_version,
-                        nss_patch_version=nss_patch_version,
-                        libs=libs
-                        )
+                    prefix='/usr',
+                    nss_major_version=nss_major_version,
+                    nss_minor_version=nss_minor_version,
+                    nss_patch_version=nss_patch_version,
+                    libs=libs
+                    )
 # -lnss{nss_major_version} -lnssutil{nss_major_version}
 # -lsmime{nss_major_version} -lssl{nss_major_version}
 # -lsoftokn{nss_major_version}
 
-                    try:
-                        os.mkdir(
-                            wayround_org.utils.path.join(
-                                OBJ_dir, 'usr', 'lib', 'pkgconfig'
-                                ),
-                            mode=0o755
-                            )
-                    except:
-                        pass
-
-                    f = open(
-                            wayround_org.utils.path.join(
-                                OBJ_dir, 'usr', 'lib', 'pkgconfig', 'nss.pc'
-                                ),
-                            'w'
+                try:
+                    os.mkdir(
+                        wayround_org.utils.path.join(
+                            OBJ_dir, 'usr', 'lib', 'pkgconfig'
+                            ),
+                        mode=0o755
                         )
+                except:
+                    pass
 
-                    f.write(pkg_config)
-                    f.close()
+                f = open(
+                    wayround_org.utils.path.join(
+                        OBJ_dir, 'usr', 'lib', 'pkgconfig', 'nss.pc'
+                        ),
+                    'w'
+                    )
 
-                    nss_config = """\
+                f.write(pkg_config)
+                f.close()
+
+                nss_config = """\
 #!/bin/sh
 
 prefix={prefix}
@@ -460,42 +443,41 @@ if test "$echo_libs" = "yes"; then
       echo $libdirs
 fi
 """.format(
-                        prefix='/usr',
-                        nss_major_version=nss_major_version,
-                        nss_minor_version=nss_minor_version,
-                        nss_patch_version=nss_patch_version
+                    prefix='/usr',
+                    nss_major_version=nss_major_version,
+                    nss_minor_version=nss_minor_version,
+                    nss_patch_version=nss_patch_version
+                    )
+
+                f = open(
+                    wayround_org.utils.path.join(
+                        OBJ_dir, 'usr', 'bin', 'nss-config'
+                        ),
+                    'w'
+                    )
+
+                f.write(nss_config)
+                f.close()
+
+                files = os.listdir(
+                    wayround_org.utils.path.join(
+                        OBJ_dir, 'usr', 'bin'
                         )
 
-                    f = open(
+                    )
+
+                for i in files:
+                    os.chmod(
                         wayround_org.utils.path.join(
-                            OBJ_dir, 'usr', 'bin', 'nss-config'
+                            OBJ_dir, 'usr', 'bin', i
                             ),
-                        'w'
+                        mode=0o755
                         )
 
-                    f.write(nss_config)
-                    f.close()
-
-                    files = os.listdir(
-                        wayround_org.utils.path.join(
-                            OBJ_dir, 'usr', 'bin'
-                            )
-
-                        )
-
-                    for i in files:
-                        os.chmod(
-                            wayround_org.utils.path.join(
-                                OBJ_dir, 'usr', 'bin', i
-                                ),
-                            mode=0o755
-                            )
-
-                    logging.info("Moving files to distribution dir")
-                    shutil.move(
-                        wayround_org.utils.path.join(OBJ_dir, 'usr'),
-                        dest_dir
-                        )
-                    logging.info("Files moved")
-
-    return ret
+                log.info("Moving files to distribution dir")
+                shutil.move(
+                    wayround_org.utils.path.join(OBJ_dir, 'usr'),
+                    dest_dir
+                    )
+                log.info("Files moved")
+        return

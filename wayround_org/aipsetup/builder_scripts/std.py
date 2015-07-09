@@ -201,6 +201,7 @@ class Builder:
         return ret
 
     def builder_action_patch(self, called_as, log):
+        # TODO: add some default patch handler
         return 0
 
     def builder_action_autogen(self, called_as, log):
@@ -221,74 +222,44 @@ class Builder:
                     )
                 )
         else:
-            if os.path.isfile(
-                    wayround_org.utils.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir,
-                        'autogen.sh'
+
+            log.info(
+                "configuration script not found. trying to find and use"
+                " generator mesures"
+                )
+
+            for i in [
+                    ('autogen.sh', ['./autogen.sh']),
+                    ('configure.ac', ['autoconf']),
+                    ('configure.in', ['autoconf']),
+                    ('bootstrap.sh', ['./bootstrap.sh']),
+                    ('bootstrap', ['./bootstrap'])
+                    ]:
+
+                log.info(
+                    "found `{}'. trying to execute: {]".format(
+                        i[0],
+                        ' '.join(i[1])
                         )
-                    ):
-                p = subprocess.Popen(
-                    ['./autogen.sh'],
-                    cwd=os.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir
-                        ),
-                    stdout=log.stdout,
-                    stderr=log.stderr
                     )
-                ret = p.wait()
-            elif os.path.isfile(
-                    wayround_org.utils.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir,
-                        'bootstrap'
+
+                if os.path.isfile(
+                        wayround_org.utils.path.join(
+                            self.src_dir,
+                            self.source_configure_reldir,
+                            i[0]
+                            )
+                        ):
+                    p = subprocess.Popen(
+                        i[1],
+                        cwd=wayround_org.utils.path.join(
+                            self.src_dir,
+                            self.source_configure_reldir
+                            ),
+                        stdout=log.stdout,
+                        stderr=log.stderr
                         )
-                    ):
-                p = subprocess.Popen(
-                    ['./bootstrap'],
-                    cwd=os.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir
-                        ),
-                    stdout=log.stdout,
-                    stderr=log.stderr
-                    )
-                ret = p.wait()
-            elif os.path.isfile(
-                    wayround_org.utils.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir,
-                        'configure.ac'
-                        )
-                    ):
-                p = subprocess.Popen(
-                    ['autoconf'],
-                    cwd=os.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir
-                        ),
-                    stdout=log.stdout,
-                    stderr=log.stderr
-                    )
-                ret = p.wait()
-            elif os.path.isfile(
-                    wayround_org.utils.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir,
-                        'configure.in'
-                        )
-                    ):
-                p = subprocess.Popen(
-                    ['autoconf'],
-                    cwd=os.path.join(
-                        self.src_dir,
-                        self.source_configure_reldir
-                        ),
-                    stdout=log.stdout,
-                    stderr=log.stderr
-                    )
-                ret = p.wait()
+                    ret = p.wait()
             else:
                 log.error(
                     "./{} not found and no generators found".format(
