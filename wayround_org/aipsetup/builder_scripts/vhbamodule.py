@@ -1,47 +1,24 @@
 
+
 import os.path
-import logging
-import subprocess
-
-import wayround_org.utils.file
-
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
-
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'patch', 'build', 'distribute', 'afterdist'],
-        action,
-        "help"
-        )
-
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
-
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        p = subprocess.Popen(['uname', '-r'], stdout=subprocess.PIPE)
+    def define_custom_data(self):
+        p = subprocess.Popen(
+            ['uname', '-r'],
+            stdout=subprocess.PIPE
+            )
         text = p.communicate()
         p.wait()
+
         kern_rel = str(text[0].splitlines()[0], encoding='utf-8')
 
-        logging.info("`uname -r' returned: {}".format(repr(kern_rel)))
+        logging.info("`uname -r' returned: {}".format(kern_rel))
 
         kdir = os.path.join(
             dst_dir,
@@ -49,86 +26,76 @@ def main(buildingsite, action=None):
             'modules',
             kern_rel
             )
-#
-#        try:
-#            os.makedirs(kdir, mode=0o700)
-#        except:
-#            logging.error("Can't create dir {}".format(kdir))
 
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
+        ret = {
+            'kdir': kdir,
+            'kern_rel': kern_rel
+            }
+        return ret
 
-        if 'patch' in actions and ret == 0:
+    def define_actions(self):
+        ret = super().define_actions()
+        del ret['autogen']
+        del ret['configure']
+        del ret['build']
+        ret['after_distribute'] = self.builder_action_after_distribute
+        return ret
 
-            try:
-                makefile = open(src_dir + os.path.sep + 'Makefile', 'r')
+    def builder_action_patch(self, called_as, log):
+        makefile_name = os.path.join(self.src_dir, 'Makefile')
+
+        ret = 0
+
+        try:
+            with open(makefile_name, 'r') as makefile:
                 lines = makefile.readlines()
-                makefile.close()
 
-                for each in range(len(lines)):
-                    if lines[each] == '\t$(MAKE) -C $(KDIR) M=$(PWD) $@\n':
-                        lines[each] = '\t$(MAKE) -C $(KDIR) M=$(PWD) INSTALL_MOD_PATH=$(DESTDIR) $@\n'
+            for each in range(len(lines)):
+                if lines[each] == '\t$(MAKE) -C $(KDIR) M=$(PWD) $@\n':
+                    lines[each] = \
+                        '\t$(MAKE) -C $(KDIR) M=$(PWD) INSTALL_MOD_PATH=$(DESTDIR) $@\n'
 
-                makefile = open(src_dir + os.path.sep + 'Makefile', 'w')
+            with open(makefile_name, 'w') as makefile:
                 makefile.writelines(lines)
-                makefile.close()
-            except:
-                logging.exception("Error. See exception message")
-                ret = 10
 
-        if 'build' in actions and ret == 0:
-            logging.info("Working in `{}'".format(src_dir))
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'PWD=' + src_dir,
-                    'KERNELRELEASE=' + kern_rel,
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+        except:
+            logging.exception("Error. See exception message")
+            ret = 10
+        return ret
 
-        if 'distribute' in actions and ret == 0:
-            logging.info("Working in `{}'".format(src_dir))
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'PWD=' + src_dir,
-                    'KERNELRELEASE=' + kern_rel,
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
+    def builder_action_after_distribute(self, called_as, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'all',
+                'install',
+                'PWD=' + self.src_dir,
+                'KERNELRELEASE=' + self.custom_data['kern_rel'],
+                'DESTDIR=' + self.dst_dir
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
+        return ret
 
-        if 'afterdist' in actions and ret == 0:
+    def builder_action_after_distribute(self, called_as, log):
 
-            try:
-                files = os.listdir(kdir)
+        kdir = self.custom_data['kdir']
 
-                for i in files:
-                    fname = os.path.join(kdir, i)
-                    if os.path.isfile(fname):
-                        os.unlink(fname)
+        try:
+            files = os.listdir(kdir)
 
-            except:
-                logging.exception("Error. See exception message")
-                ret = 11
+            for i in files:
+                fname = os.path.join(kdir, i)
+                if os.path.isfile(fname):
+                    os.unlink(fname)
 
-    return ret
+        except:
+            logging.exception("Error. See exception message")
+            ret = 11
+
+        return ret

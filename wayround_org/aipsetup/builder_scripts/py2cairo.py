@@ -1,125 +1,57 @@
 
-import logging
+
 import os.path
-
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.waf as waf
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['autogen'])
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute'],
-        action,
-        "help"
-        )
+    def builder_action_configure(self, called_as, log):
+        ret = waf.waf(
+            self.src_dir,
+            options=[
+                '--prefix=' +
+                self.package_info['constitution']['paths']['usr'],
+                ],
+            arguments=['configure'],
+            environment={'PYTHON': '/usr/bin/python2'},
+            environment_mode='copy',
+            log=log
+            )
+        return ret
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def builder_action_build(self, called_as, log):
+        ret = waf.waf(
+            self.src_dir,
+            options=[
+                '--prefix=' +
+                self.package_info['constitution']['paths']['usr'],
+                ],
+            arguments=['build'],
+            environment={'PYTHON': '/usr/bin/python2'},
+            environment_mode='copy',
+            log=log
+            )
+        return ret
 
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        source_configure_reldir = '.'
-
-        cwd = os.path.join(src_dir, source_configure_reldir)
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
-                )
-
-        if 'configure' in actions and ret == 0:
-
-            log = wayround_org.utils.log.Log(
-                wayround_org.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
-                'waf_configure'
-                )
-
-            ret = waf.waf(
-                cwd,
-                options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' +
-#                        pkg_info['constitution']['paths']['var'],
-                    ],
-                arguments=['configure'],
-                environment={'PYTHON': '/usr/bin/python2'},
-                environment_mode='copy',
-                log=log
-                )
-
-            log.stop()
-
-        if 'build' in actions and ret == 0:
-            log = wayround_org.utils.log.Log(
-                wayround_org.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
-                'waf_configure'
-                )
-
-            ret = waf.waf(
-                cwd,
-                options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' +
-#                        pkg_info['constitution']['paths']['var'],
-                    ],
-                arguments=['build'],
-                environment={'PYTHON': '/usr/bin/python2'},
-                environment_mode='copy',
-                log=log
-                )
-
-            log.stop()
-
-        if 'distribute' in actions and ret == 0:
-            log = wayround_org.utils.log.Log(
-                wayround_org.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
-                'waf_configure'
-                )
-
-            ret = waf.waf(
-                cwd,
-                options=[
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-#                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-#                    '--localstatedir=' +
-#                        pkg_info['constitution']['paths']['var'],
-                    '--destdir=' + dst_dir
-                    ],
-                arguments=[
-                    'install'
-                    ],
-                environment={'PYTHON': '/usr/bin/python2'},
-                environment_mode='copy',
-                log=log
-                )
-
-            log.stop()
-
-    return ret
+    def builder_action_distribute(self, called_as, log):
+        ret = waf.waf(
+            self.src_dir,
+            options=[
+                '--prefix=' +
+                self.package_info['constitution']['paths']['usr'],
+                '--destdir=' + self.dst_dir
+                ],
+            arguments=['install'],
+            environment={'PYTHON': '/usr/bin/python2'},
+            environment_mode='copy',
+            log=log
+            )
+        return ret

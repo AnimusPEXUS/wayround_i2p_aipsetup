@@ -1,62 +1,33 @@
 
-import logging
+
 import os.path
-
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        del(ret['autogen'])
+        del(ret['configure'])
+        del(ret['build'])
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'distribute'],
-        action,
-        "help"
-        )
+    def builder_action_distribute(self, called_as, log):
+        os.makedirs(os.path.join(self.dst_dir, 'usr', 'include', 'rpc'))
+        os.makedirs(os.path.join(self.dst_dir, 'usr', 'include', 'rpcsvc'))
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+        wayround_org.utils.file.copytree(
+            os.path.join(self.src_dir, 'rpc'),
+            os.path.join(self.dst_dir, 'usr', 'include', 'rpc'),
+            dst_must_be_empty=False
+            )
 
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=False,
-                rename_dir=False,
-                more_when_one_extracted_ok=True
-                )
-
-        if 'distribute' in actions and ret == 0:
-
-            os.makedirs(os.path.join(dst_dir, 'usr', 'include', 'rpc'))
-            os.makedirs(os.path.join(dst_dir, 'usr', 'include', 'rpcsvc'))
-
-            wayround_org.utils.file.copytree(
-                os.path.join(src_dir, 'rpc'),
-                os.path.join(dst_dir, 'usr', 'include', 'rpc'),
-                dst_must_be_empty=False
-                )
-
-            wayround_org.utils.file.copytree(
-                os.path.join(src_dir, 'rpcsvc'),
-                os.path.join(dst_dir, 'usr', 'include', 'rpcsvc'),
-                dst_must_be_empty=False
-                )
-
-    return ret
+        wayround_org.utils.file.copytree(
+            os.path.join(self.src_dir, 'rpcsvc'),
+            os.path.join(self.dst_dir, 'usr', 'include', 'rpcsvc'),
+            dst_must_be_empty=False
+            )
+        return ret

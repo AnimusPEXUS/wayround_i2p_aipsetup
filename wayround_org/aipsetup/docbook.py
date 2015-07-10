@@ -748,3 +748,26 @@ def install(
         import_docbook_to_catalog(xml_catalog_fn)
 
     return
+
+
+##### some unknown sgml subroutine taken from sgml_common.py builder srcipt
+
+
+def main1111111111(basedir):
+
+    subprocess.Popen(
+        ['install-catalog',
+         '--add',
+         '/etc/sgml/sgml-ent.cat',
+         '/usr/share/sgml/sgml-iso-entities-8879.1986/catalog'
+        ]
+        ).wait()
+
+    subprocess.Popen(
+        ['install-catalog',
+         '--add',
+         '/etc/sgml/sgml-docbook.cat',
+         '/etc/sgml/sgml-ent.cat'
+        ]
+        ).wait()
+

@@ -1,123 +1,42 @@
 
-import logging
+
 import os.path
-
-import wayround_org.aipsetup.build
+import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
+import wayround_org.aipsetup.builder_scripts.std
 
 
-def main(buildingsite, action=None):
+class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    ret = 0
+    def define_actions(self):
+        ret = super().define_actions()
+        ret['afetr_distribute'] = self.builder_action_afetr_distribute
+        return ret
 
-    r = wayround_org.aipsetup.build.build_script_wrap(
-        buildingsite,
-        ['extract', 'configure', 'build', 'distribute', 'copy_examples'],
-        action,
-        "help"
-        )
+    def builder_action_configure_define_options(self, called_as, log):
+        return super().builder_action_configure_define_options(called_as, log) + [
+            '--with-pam',
+            '--with-pam_smbpass',
+            '--enable-fhs',
+            '--with-systemd',
+            #                    '--with-swatdir=/usr/share/samba/swat',
+            '--sysconfdir=/etc/samba',
+            #                    '--libexecdir=/usr/libexec',
+            '--libdir=/usr/lib',
+            '--with-configdir=/etc/samba',
+            '--with-privatedir=/etc/samba/private',
+            #                    '--includedir=/usr/include',
+            #                    '--datarootdir=/usr/share',
+            ]
 
-    if not isinstance(r, tuple):
-        logging.error("Error")
-        ret = r
+    def builder_action_afetr_distribute(self, called_as, log):
+        for i in ['examples', 'docs']:
 
-    else:
-
-        pkg_info, actions = r
-
-        src_dir = wayround_org.aipsetup.build.getDIR_SOURCE(buildingsite)
-
-        dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
-
-        separate_build_dir = False
-
-        source_configure_reldir = '.'
-
-        if 'extract' in actions:
-            if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(src_dir)
-            ret = autotools.extract_high(
-                buildingsite,
-                pkg_info['pkg_info']['basename'],
-                unwrap_dir=True,
-                rename_dir=False
+            wayround_org.utils.file.copytree(
+                os.path.join(self.src_dir, i),
+                os.path.join(self.dst_dir, 'usr', 'share', 'samba', i),
+                overwrite_files=True,
+                clear_before_copy=False,
+                dst_must_be_empty=False
                 )
-
-        if 'configure' in actions and ret == 0:
-            ret = autotools.configure_high(
-                buildingsite,
-                options=[
-                    '--with-pam',
-                    '--with-pam_smbpass',
-                    '--enable-fhs',
-                    '--with-systemd',
-#                    '--with-swatdir=/usr/share/samba/swat',
-                    '--sysconfdir=/etc/samba',
-#                    '--libexecdir=/usr/libexec',
-                    '--libdir=/usr/lib',
-                    '--with-configdir=/etc/samba',
-                    '--with-privatedir=/etc/samba/private',
-#                    '--includedir=/usr/include',
-#                    '--datarootdir=/usr/share',
-
-                    '--prefix=' + pkg_info['constitution']['paths']['usr'],
-                    '--mandir=' + pkg_info['constitution']['paths']['man'],
-#                    '--sysconfdir=' +
-#                        pkg_info['constitution']['paths']['config'],
-                    '--localstatedir=' +
-                        pkg_info['constitution']['paths']['var'],
-#                    '--enable-shared',
-                    '--host=' + pkg_info['constitution']['host'],
-                    '--build=' + pkg_info['constitution']['build'],
-#                    '--target=' + pkg_info['constitution']['target']
-                    ],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                source_configure_reldir=source_configure_reldir,
-                use_separate_buildding_dir=separate_build_dir,
-                script_name='configure',
-                run_script_not_bash=False,
-                relative_call=False
-                )
-
-        if 'build' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'distribute' in actions and ret == 0:
-            ret = autotools.make_high(
-                buildingsite,
-                options=[],
-                arguments=[
-                    'install',
-                    'DESTDIR=' + dst_dir
-                    ],
-                environment={},
-                environment_mode='copy',
-                use_separate_buildding_dir=separate_build_dir,
-                source_configure_reldir=source_configure_reldir
-                )
-
-        if 'copy_examples' in actions and ret == 0:
-
-            for i in ['examples', 'docs']:
-
-                wayround_org.utils.file.copytree(
-                    os.path.join(src_dir, i),
-                    os.path.join(dst_dir, 'usr', 'share', 'samba', i),
-                    overwrite_files=True,
-                    clear_before_copy=False,
-                    dst_must_be_empty=False
-                    )
-
-    return ret
+        return 0
