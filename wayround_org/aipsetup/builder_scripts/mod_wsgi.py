@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-apxs={}'.format(
                 wayround_org.utils.file.which(
                     'apxs',
-                    '/multiarch/{}'.format(self.host)
+                    self.host_multiarch_dir
                     )
                 )
             ]

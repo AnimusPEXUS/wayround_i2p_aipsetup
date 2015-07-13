@@ -10,7 +10,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
         ret = [
-            '--prefix=/usr',
+            '--prefix={}'.format(self.host_multiarch_dir),
             '--shared'
             ]
 
@@ -25,7 +25,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'prefix=' + os.path.join(self.dst_dir, 'usr')
+                'prefix={}'.format(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -41,7 +41,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix=' + os.path.join(self.dst_dir, 'usr')
+                'prefix={}'.format(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',

@@ -20,7 +20,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         set_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
-        bin_dir = os.path.join(self.dst_dir, 'usr', 'share', 'mc', 'bin')
+        bin_dir = os.path.join(
+            self.dst_host_multiarch_dir, 'share', 'mc', 'bin'
+            )
 
         os.makedirs(set_dir, exist_ok=True)
 
@@ -31,6 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         for i in files:
             shutil.copy(i, bin_dir)
 
+        # TODO: I don't like this part
         f = open(os.path.join(set_dir, '009.mc'), 'w')
         f.write(
             """\

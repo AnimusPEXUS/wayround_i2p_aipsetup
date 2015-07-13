@@ -9,10 +9,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     # NOTE: configure time  'CFLAGS': '-fno-lto' environment may be required
 
     def builder_action_configure_define_options(self, called_as, log):
-        pamlibdir=['--with-pamlibdir='+os.path.join('/usr','lib','security')]
-        #if '64' in self.host:
-        #    pamlibdir+=['--with-pamlibdir=/usr/lib64/security']
-        return super().builder_action_configure_define_options(called_as, log) + [
+        ret = super().builder_action_configure_define_options(called_as, log)
+        ret += [
             # '--disable-silent-rules',
             '--enable-gudev',
             '--enable-gtk-doc=auto',
@@ -24,4 +22,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--disable-coverage',
             '--enable-shared',
             '--enable-compat-libs',
-            ] + pamlibdir
+            ]
+        ret += [
+            '--with-pamlibdir={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'lib',
+                    'security'
+                    )
+                )
+            ]
+        return ret

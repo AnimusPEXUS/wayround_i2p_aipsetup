@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--wine-path={}'.format(
                 wayround_org.utils.file.which(
                     'wine',
-                    '/multiarch/{}'.format(self.host)
+                    self._host_multiarch_dir
                     )
                 )
             ]

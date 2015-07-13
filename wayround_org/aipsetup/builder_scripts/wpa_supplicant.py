@@ -26,6 +26,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().define_actions()
         ret['copy_manpages'] = self.builder_action_copy_manpages
         del ret['autogen']
+        del ret['build']
         return ret
 
     def builder_action_configure(self, called_as, log):
@@ -65,27 +66,11 @@ CONFIG_PKCS12=y
 CONFIG_READLINE=y
 CONFIG_SMARTCARD=y
 CONFIG_WPS=y
-CFLAGS += -I/usr/include/libnl3
-""")
+CFLAGS += -I{hmd}/include/libnl3
+""".format(hmd=self.host_multiarch_dir)
+            )
         f.close()
         return 0
-
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[
-                'LIBDIR=/usr/lib',
-                'BINDIR=/usr/bin',
-                'PN531_PATH=/usr/src/nfc'
-                ],
-            arguments=[],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
@@ -93,11 +78,18 @@ CFLAGS += -I/usr/include/libnl3
             log=log,
             options=[],
             arguments=[
+                'all',
                 'install',
-                'LIBDIR=/usr/lib',
-                'BINDIR=/usr/bin',
-                'PN531_PATH=/usr/src/nfc',
-                'DESTDIR=' + self.dst_dir
+                'LIBDIR={}'.format(
+                    os.path.join(self.host_multiarch_dir, 'lib')
+                    ),
+                'BINDIR={}'.format(
+                    os.path.join(self.host_multiarch_dir, 'bin')
+                    ),
+                'PN531_PATH={}'.format(
+                    os.path.join(self.host_multiarch_dir, 'src', 'nfc')
+                    ),
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -111,8 +103,8 @@ CFLAGS += -I/usr/include/libnl3
 
         src_dir_p_sep = self.custom_data['src_dir_p_sep']
 
-        os.makedirs(os.path.join(self.dst_dir, 'usr', 'man', 'man8'))
-        os.makedirs(os.path.join(self.dst_dir, 'usr', 'man', 'man5'))
+        os.makedirs(os.path.join(self.dst_host_multiarch_dir, 'man', 'man8'))
+        os.makedirs(os.path.join(self.dst_host_multiarch_dir, 'man', 'man5'))
 
         m8 = glob.glob(
             os.path.join(src_dir_p_sep, 'doc', 'docbook', '*.8')
@@ -125,7 +117,7 @@ CFLAGS += -I/usr/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                os.path.join(self.dst_dir, 'usr', 'man', 'man8', bn)
+                os.path.join(self.dst_host_multiarch_dir, 'man', 'man8', bn)
                 )
             log.info("    {}".format(i))
 
@@ -133,7 +125,7 @@ CFLAGS += -I/usr/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                os.path.join(self.dst_dir, 'usr', 'man', 'man5', bn)
+                os.path.join(self.dst_host_multiarch_dir, 'man', 'man5', bn)
                 )
             log.info("    {}".format(i))
         return 0

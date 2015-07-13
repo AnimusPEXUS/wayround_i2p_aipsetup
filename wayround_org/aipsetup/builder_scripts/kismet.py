@@ -16,10 +16,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + self.dst_dir,
-                'INSTUSR=' + str(os.getuid()),
-                'INSTGRP=' + str(os.getgid()),
-                'MANGRP=' + str(os.getgid())
+                'DESTDIR={}'.format(self.dst_dir),
+                'INSTUSR={}'.format(str(os.getuid())),
+                'INSTGRP={}'.format(str(os.getgid())),
+                'MANGRP={}'.format(str(os.getgid()))
                 ],
             environment={},
             environment_mode='copy',

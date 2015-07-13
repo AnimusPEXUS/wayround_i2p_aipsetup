@@ -14,10 +14,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--disable-kparts4',
             '--disable-docbook',
             '--enable-media=ffmpeg',
-            '--with-npapi-incl=/multiarch/{}/include/mozilla'.format(
-                self.host
+            '--with-npapi-incl={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'include',
+                    'mozilla'
+                    )
                 ),
-            '--with-npapi-plugindir=/multiarch/{}/lib/mozilla/plugins'.format(
-                self.host
+            '--with-npapi-plugindir={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'lib',
+                    'mozilla',
+                    'plugins'
+                    )
                 )
             ]

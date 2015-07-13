@@ -85,10 +85,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'USE_SYSTEM_ZLIB=1',
 
                 'ZLIB_LIBS=-lz',
-                'NSS_USE_SYSTEM_SQLITE=1'
+                'NSS_USE_SYSTEM_SQLITE=1',
+                'CC={}-gcc'.format(self.host_strong),
+                'CXX={}-g++'.format(self.host_strong),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ] + opts64,
             environment={
-                'BUILD_OPT': '1'
+                # 'BUILD_OPT': '1'
                 },
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -246,6 +251,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         )
                     )
 
+                # TODO: paths fix required
                 pkg_config = """
 prefix={prefix}
 exec_prefix=${{prefix}}

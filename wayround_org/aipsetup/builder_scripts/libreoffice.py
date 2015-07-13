@@ -48,11 +48,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         gid = glob.glob(wayround_org.utils.path.join(self.dst_dir, 'gid*'))
 
         lbo_dir = wayround_org.utils.path.join(
-            self.dst_dir, 'multiarch', self.host, 'lib', 'libreoffice'
+            self.dst_host_multiarch_dir, 'lib', 'libreoffice'
             )
         gid_dir = wayround_org.utils.path.join(lbo_dir, 'gid')
         lbo_lnk = wayround_org.utils.path.join(
-            self.dst_dir, 'multiarch', self.host, 'bin', 'soffice'
+            self.dst_host_multiarch_dir, 'bin', 'soffice'
             )
 
         try:
@@ -79,7 +79,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             logging.info("Creating link")
             os.makedirs(
                 wayround_org.utils.path.join(
-                    self.dst_dir, 'multiarch', self.host, 'bin'
+                    self.dst_host_multiarch_dir, 'bin'
                     )
                 )
 

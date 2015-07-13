@@ -27,10 +27,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if ret == 0:
             ret = autotools.make_high(
                 self.buildingsite,
+                log=log,
                 options=[],
                 arguments=[
                     'install-private-headers',
-                    'DESTDIR=' + self.dst_dir
+                    'DESTDIR={}'.format(self.dst_dir)
                     ],
                 environment={},
                 environment_mode='copy',
@@ -44,7 +45,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         pkg_name = self.package_info['pkg_info']['name']
 
-        bin_dir = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin')
+        bin_dir = wayround_org.utils.path.join(
+            self.dst_host_multiarch_dir,
+            'bin'
+            )
 
         bin_files = os.listdir(bin_dir)
 
@@ -53,7 +57,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if i.startswith('tclsh') and i != 'tclsh':
 
                     target_name = wayround_org.utils.path.join(
-                        bin_dir, 'tclsh'
+                        bin_dir,
+                        'tclsh'
                         )
 
                     if (os.path.exists(target_name)
@@ -70,7 +75,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if i.startswith('wish') and i != 'wish':
 
                     target_name = wayround_org.utils.path.join(
-                        bin_dir, 'wish'
+                        bin_dir,
+                        'wish'
                         )
 
                     if (os.path.exists(target_name)

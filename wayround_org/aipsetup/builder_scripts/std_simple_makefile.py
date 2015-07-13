@@ -39,11 +39,12 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
+            log=log,
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + self.dst_dir,
-                'prefix=' + os.path.join(self.dst_dir, 'usr')
+                'DESTDIR={}'.format(self.dst_dir),
+                'prefix={}'.format(os.path.join(self.dst_host_multiarh_dir)
                 ],
             environment={},
             environment_mode='copy',

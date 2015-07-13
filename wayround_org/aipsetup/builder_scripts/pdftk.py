@@ -23,7 +23,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'Makefile.Lailalo'
             )
 
-        file_list = os.listdir('/usr/share/java')
+        file_list = os.listdir(
+            '{}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'share',
+                    'java'
+                    )
+                )
+            )
 
         ver = None
         for i in file_list:
@@ -97,7 +105,9 @@ include Makefile.Base
         ret = 0
 
         sbin = wayround_org.utils.path.join(self.src_dir, 'pdftk', 'pdftk')
-        bin_dir = wayround_org.utils.path.join(self.dst_dir, 'usr', 'bin')
+        bin_dir = wayround_org.utils.path.join(
+            self.dst_host_multiarch_dir, 'bin'
+            )
 
         os.makedirs(bin_dir, exist_ok=True)
 
@@ -112,7 +122,7 @@ include Makefile.Base
 
         sman = wayround_org.utils.path.join(self.src_dir, 'pdftk.1')
         man = wayround_org.utils.path.join(
-            self.dst_dir, 'usr', 'share', 'man', 'man1'
+            self.dst_host_multiarch_dir, 'share', 'man', 'man1'
             )
 
         os.makedirs(man, exist_ok=True)

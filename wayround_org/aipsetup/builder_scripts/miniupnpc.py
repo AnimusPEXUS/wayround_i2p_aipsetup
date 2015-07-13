@@ -20,13 +20,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
         hs = glob.glob(
             wayround_org.utils.path.join(
                 self.src_dir,
-                '*.h')
+                '*.h'
+                )
             )
 
         incl_dir = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host,
+            self.dst_host_multiarch_dir,
             'include',
             'miniupnpc'
             )

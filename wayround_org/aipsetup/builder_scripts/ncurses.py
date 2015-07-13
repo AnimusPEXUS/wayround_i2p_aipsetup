@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['pth_dir'] = \
             wayround_org.aipsetup.build.getDIR_PATCHES(self.buildingsite)
         ret['dst_lib_dir'] = \
-            wayround_org.utils.path.join(self.dst_dir, 'usr', 'lib')
+            wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib')
         ret['dst_pc_lib_dir'] = \
             wayround_org.utils.path.join(ret['dst_lib_dir'], 'pkgconfig')
         return ret
@@ -67,7 +67,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     )
 
                 p = subprocess.Popen(
-                    [compressor, '-kfd', rolling], cwd=pth_dir
+                    [compressor, '-kfd', rolling],
+                    cwd=pth_dir
                     )
                 if p.wait() != 0:
 

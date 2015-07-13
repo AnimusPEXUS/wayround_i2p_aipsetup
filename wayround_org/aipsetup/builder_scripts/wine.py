@@ -32,10 +32,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(called_as, log) + [
-            #'--enable-win64'
-            
-            ]
+        ret = super().builder_action_configure_define_options(called_as, log)
+        if self.host_strong.startswith('x86_64'):
+            ret += ['--enable-win64']
+        return ret
 
     def builder_action_build_depend(self, called_as, log):
         ret = autotools.make_high(

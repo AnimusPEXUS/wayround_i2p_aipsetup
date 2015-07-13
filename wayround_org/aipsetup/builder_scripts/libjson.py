@@ -50,8 +50,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'CXX={}-g++'.format(self.host),
-                'LDFLAGS=' +
-                self.calculate_default_linker_program_gcc_parameter()
+                'CC={}-gcc'.format(self.host),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             environment={},
             environment_mode='copy',
@@ -72,7 +74,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix=' + os.path.join(self.dst_dir, 'multiarch', self.host)
+                'prefix={}'.format(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -88,8 +90,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'CXX={}-g++'.format(self.host),
-                'LDFLAGS=' +
-                self.calculate_default_linker_program_gcc_parameter(),
+                'CC={}-gcc'.format(self.host),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    ),
                 'SHARED=1'
                 ],
             environment={},
@@ -111,7 +115,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix=' + os.path.join(self.dst_dir, 'multiarch', self.host),
+                'prefix={}'.format(self.dst_host_multiarch_dir),
                 'SHARED=1'
                 ],
             environment={},

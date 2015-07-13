@@ -71,9 +71,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'all',
                 'install',
-                'PWD=' + self.src_dir,
-                'KERNELRELEASE=' + self.custom_data['kern_rel'],
-                'DESTDIR=' + self.dst_dir
+                'PWD={}'.format(self.src_dir),
+                'KERNELRELEASE={}'.format(self.custom_data['kern_rel']),
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

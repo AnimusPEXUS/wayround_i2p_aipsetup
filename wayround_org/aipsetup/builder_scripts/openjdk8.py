@@ -20,6 +20,7 @@ import wayround_org.utils.file
 
 import wayround_org.aipsetup.builder_scripts.std
 
+# TODO: paths fixes
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -85,7 +86,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-alsa',
             # '--with-freetype',
             '--with-x',
-            '--with-boot-jdk=/home/agu/_local/_LAILALO/b/javaboot/jdk1.8.0_45'
+            # '--with-boot-jdk=/home/agu/_local/_LAILALO/b/javaboot/jdk1.8.0_45'
             ]
         if '--enable-shared' in ret:
             ret.remove('--enable-shared')
@@ -98,7 +99,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_PREFIX=' + self.dst_dir
+                'INSTALL_PREFIX={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

@@ -40,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_ROOT=' + self.dst_dir
+                'INSTALL_ROOT={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

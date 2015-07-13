@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         p = subprocess.Popen(
-            ['qmake', 'PREFIX=/usr'],
+            ['qmake', 'PREFIX={}'.format(self.host_multiarch_dir)],
             cwd=src_dir,
             stdout=log.stdout,
             stderr=log.stderr
@@ -30,7 +30,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_ROOT=' + self.dst_dir
+                'INSTALL_ROOT={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

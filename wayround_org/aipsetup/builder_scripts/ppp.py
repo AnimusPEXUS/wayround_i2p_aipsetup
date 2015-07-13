@@ -18,12 +18,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             }
         if self.is_crossbuild:
             thr['CFLAGS'] = ' -I{}'.format(
-                os.path.join('/multiarch', self.host, 'include')
+                os.path.join(self.host_multiarch_dir, 'include')
                 )
             thr['LDFLAGS'] = '-L{}'.format(
-                os.path.join('/multiarch', self.host, 'lib')
+                os.path.join(self.host_multiarch_dir, 'lib')
                 )
-            thr['CC'] = ['CC={}-gcc'.format(self.host)]
+            #thr['CC'] = ['CC={}-gcc'.format(self.host_strong)]
         return {
             'thr': thr
             }
@@ -44,7 +44,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'INCLUDE_DIRS+= -I../include ' +
                 self.custom_data['thr']['CFLAGS'],
                 #'LDFLAGS+= '+self.custom_data['thr']['LDFLAGS']
-                ] + self.custom_data['thr']['CC'],
+                ]# + self.custom_data['thr']['CC'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -59,7 +59,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTROOT=' + self.dst_dir
+                'INSTROOT={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

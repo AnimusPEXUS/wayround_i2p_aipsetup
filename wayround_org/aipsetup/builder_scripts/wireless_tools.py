@@ -20,7 +20,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             ['make',
-             'PREFIX={}/usr'.format(self.dst_dir),
+             'PREFIX={}'.format(self.dst_host_multiarch_dir),
              'all',
              'install'
              ],

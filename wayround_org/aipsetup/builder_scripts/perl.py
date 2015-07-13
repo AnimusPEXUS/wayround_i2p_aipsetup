@@ -11,7 +11,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
         ret = [
-            '--prefix=' + self.package_info['constitution']['paths']['usr']
+            '--prefix={}'.format(self.host_multiarch_dir)
             ]
         return ret
 

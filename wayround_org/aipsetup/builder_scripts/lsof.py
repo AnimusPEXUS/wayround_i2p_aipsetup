@@ -109,9 +109,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ret = 1
             else:
                 dst_bin_dir = os.path.join(
-                    self.dst_dir,
-                    'multiarch',
-                    self.host,
+                    self.dst_host_multiarch_dir,
                     'bin'
                     )
 
@@ -120,9 +118,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 shutil.copy(lsof_file, os.path.join(dst_bin_dir, 'lsof'))
 
                 dst_man_dir = os.path.join(
-                    self.dst_dir,
-                    'multiarch',
-                    self.host,
+                    self.dst_host_multiarch_dir,
                     'share',
                     'man',
                     'man8'

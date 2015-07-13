@@ -22,7 +22,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ['make',
              '-f', 'unix/Makefile',
              'generic',
-             'CFLAGS=" -march=i486 -mtune=i486 "'
+             # 'CFLAGS= -march=i486 -mtune=i486 ',
+             'CC={}-gcc'.format(self.host),
+             'LDFLAGS={}'.format(
+                 self.calculate_default_linker_program_gcc_parameter()
+                 )
              ],
             cwd=self.src_dir,
             stdout=log.stdout,
@@ -36,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ['make',
              '-f', 'unix/Makefile',
              'install',
-             'prefix={}/usr'.format(self.dst_dir)
+             'prefix={}'.format(self.dst_host_multiarch_dir)
              ],
             cwd=self.src_dir,
             stdout=log.stdout,

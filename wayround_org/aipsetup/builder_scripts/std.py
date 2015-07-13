@@ -253,10 +253,10 @@ class Builder:
 
             for i in [
                     ('autogen.sh', ['./autogen.sh']),
+                    ('bootstrap.sh', ['./bootstrap.sh']),
+                    ('bootstrap', ['./bootstrap']),
                     ('configure.ac', ['autoconf']),
                     ('configure.in', ['autoconf']),
-                    ('bootstrap.sh', ['./bootstrap.sh']),
-                    ('bootstrap', ['./bootstrap'])
                     ]:
 
                 log.info(
@@ -273,12 +273,25 @@ class Builder:
                             i[0]
                             )
                         ):
+                    wd = wayround_org.utils.path.join(
+                        self.src_dir,
+                        self.source_configure_reldir
+                        )
+                    if '/' in i[1][0]:
+                        tgt_file = os.path.join(wd, i[1][0])
+                        log.info("changing mode (+x) for: {}".format(tgt_file))
+                        chmod_p = subprocess.Popen(
+                            ['chmod', '+x', tgt_file],
+                            cwd=wd
+                            )
+                        chmod_p.wait()
+
+                    if i[1][0].endswith('.sh'):
+                        i[1].insert(0, 'bash')
+
                     p = subprocess.Popen(
                         i[1],
-                        cwd=wayround_org.utils.path.join(
-                            self.src_dir,
-                            self.source_configure_reldir
-                            ),
+                        cwd=wd,
                         stdout=log.stdout,
                         stderr=log.stderr
                         )

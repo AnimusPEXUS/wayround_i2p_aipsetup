@@ -10,5 +10,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(called_as, log) + [
-            '--with-jdk-home=/multiarch/{}/lib/java/jdk'.format(self.host),
+            '--with-jdk-home={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'lib',
+                    'java',
+                    'jdk'
+                    )
+                ),
             ]

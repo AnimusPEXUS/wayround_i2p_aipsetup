@@ -15,12 +15,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del(ret['build'])
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(called_as, log) + [
-            '--with-system-nspr',
-            '--enable-threadsafe',
-            ]
-
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
@@ -30,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install',
                 'install-lib',
                 'DESTDIR={}'.format(self.dst_dir),
-                'PREFIX=/multiarch/{}'.format(self.host),
+                'PREFIX={}'.format(self.host_multiarch_dir),
                 'SHARED=yes',
                 ],
             environment={},

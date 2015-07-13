@@ -2,11 +2,21 @@
 
 import os.path
 import wayround_org.utils.path
+import wayround_org.utils.file
 import wayround_org.aipsetup.buildtools.waf as waf
 import wayround_org.aipsetup.builder_scripts.std
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    def define_custom_data(self):
+        ret = {
+            'PYTHON': wayround_org.utils.file.which(
+                'python3',
+                self.host_multiarch_dir
+                )
+            }
+        return ret
 
     def define_actions(self):
         ret = super().define_actions()
@@ -17,11 +27,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.src_dir,
             options=[
-                '--prefix=/multiarch/{}'.format(self.host),
+                '--prefix={}'.format(self.host_multiarch_dir),
                 ],
             arguments=['configure'],
             environment={
-                'PYTHON': '/multiarch/{}/bin/python3'.format(self.host)
+                'PYTHON': self.custom_data['PYTHON']
                 },
             environment_mode='copy',
             log=log
@@ -32,11 +42,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.src_dir,
             options=[
-                '--prefix=/multiarch/{}'.format(self.host),
+                '--prefix={}'.format(self.host_multiarch_dir),
                 ],
             arguments=['build'],
             environment={
-                'PYTHON': '/multiarch/{}/bin/python3'.format(self.host)
+                'PYTHON': self.custom_data['PYTHON']
                 },
             environment_mode='copy',
             log=log
@@ -44,22 +54,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_distribute(self, called_as, log):
-        log = wayround_org.utils.log.Log(
-            wayround_org.aipsetup.build.getDIR_BUILD_LOGS(buildingsite),
-            'waf_configure'
-            )
-
         ret = waf.waf(
             self.src_dir,
             options=[
-                '--prefix=/multiarch/{}'.format(self.host),
-                '--destdir=' + self.dst_dir
+                '--prefix={}'.format(self.host_multiarch_dir),
+                '--destdir={}'.format(self.dst_dir)
                 ],
             arguments=[
                 'install'
                 ],
             environment={
-                'PYTHON': '/multiarch/{}/bin/python3'.format(self.host)
+                'PYTHON': self.custom_data['PYTHON']
                 },
             environment_mode='copy',
             log=log

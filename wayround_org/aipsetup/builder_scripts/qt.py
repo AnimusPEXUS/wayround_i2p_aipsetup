@@ -47,8 +47,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [
                 '-opensource',
                 '-confirm-license',
-                '-prefix', '/usr/lib/qt{}_w_toolkit'.format(
-                    self.custom_data['qt_number_str']
+                '-prefix', os.path.join(
+                    self.host_multiarch_dir,
+                    'lib',
+                    'qt{}_w_toolkit'.format(
+                        self.custom_data['qt_number_str']
+                        )
                     ),
                 '-pulseaudio',
                 '-no-alsa'
@@ -68,7 +72,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_ROOT=' + self.dst_dir
+                'INSTALL_ROOT={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -104,6 +108,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'w'
             )
 
+        # TODO: separate this :-/
         f.write("""\
 #!/bin/bash
 export PATH=$PATH:/usr/lib/qt{qtnum}_w_toolkit/bin

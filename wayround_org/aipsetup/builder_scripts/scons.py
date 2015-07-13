@@ -43,7 +43,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [python,
              'setup.py',
              'install',
-             '--prefix=' + os.path.join(self.dst_dir, 'usr')
+             '--prefix={}'.format(self.dst_host_multiarch_dir)
              ],
             cwd=os.path.join(self.src_dir, 'build', 'scons'),
             stdout=log.stdout,

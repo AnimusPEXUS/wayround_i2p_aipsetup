@@ -26,7 +26,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'bios', 'efi32', 'efi64',
                 'installer',
                 'install',
-                'INSTALLROOT=' + self.dst_dir
+                'INSTALLROOT={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

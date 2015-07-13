@@ -33,6 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # f.close()
 
         return super().builder_action_configure_define_options(called_as, log) + [
+            # '--with-pydebug' # NOTE: enabling may cause problems to Cython
             ] + cb_opts
 
     def builder_action_configure_define_environment(self, called_as, log):

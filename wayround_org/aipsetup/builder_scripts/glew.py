@@ -20,7 +20,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install.all',
-                'GLEW_DEST=' + os.path.join(self.dst_dir, 'usr')
+                'GLEW_DEST=' + os.path.join(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',

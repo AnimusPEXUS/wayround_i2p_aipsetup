@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.package_info['constitution']['target'] and
                 self.package_info['constitution']['host'] ==
                 self.package_info['constitution']['build']
-                ):
+            ):
             self.internal_host_redefinition =\
                 self.package_info['constitution']['target']
 
@@ -87,16 +87,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
 
-        with_headers = '/multiarch/{}/include'.format(self.host_strong)
+        with_headers = os.path.join(self.host_multiarch_dir, 'include')
 
         ret = super().builder_action_configure_define_options(called_as, log)
 
         if self.is_crossbuilder:
             prefix = os.path.join(
-                '/',
-                'multiarch',
-                self.host_strong,
-                'crossbuilders',
+                self.host_crossbuilders_dir,
                 self.target
                 )
 
@@ -106,8 +103,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
 
             ret = [
-                '--prefix=' + prefix,
-                '--mandir=' + os.path.join(prefix, 'share', 'man'),
+                '--prefix={}'.format(prefix),
+                '--mandir={}'.format(os.path.join(prefix, 'share', 'man')),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared'
@@ -118,16 +115,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-kernel=3.19',
             '--enable-tls',
             '--with-elf',
-            
+
             # disabled those 3 items on 2 jul 2015
-            '--disable-multi-arch', 
+            '--disable-multi-arch',
             '--disable-multiarch',
             '--disable-multilib',
-            
+
             # this is from configure --help. configure looking for
             # linux/version.h file
             #'--with-headers=/usr/src/linux/include',
-            '--with-headers=' + with_headers,
+            '--with-headers={}'.format(with_headers),
             '--enable-shared'
             ]
 
@@ -138,13 +135,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 # this parameter is required to build `build_02+' stage.
                 # comment and completle rebuild this glibc after rebuilding
-                # gcc without --without-headers and with 
+                # gcc without --without-headers and with
                 # --with-sysroot parameter.
                 #
                 # 'libc_cv_ssp=no'
                 #
                 # else You will see errors like this:
-                #     gethnamaddr.c:185: undefined reference to 
+                #     gethnamaddr.c:185: undefined reference to
                 #     `__stack_chk_guard'
                 ]
 
@@ -206,7 +203,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'csu/subdir_lib'
+                os.path.join('csu', 'subdir_lib')
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,
@@ -222,10 +219,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         gres = glob.glob(os.path.join(self.bld_dir, 'csu', '*crt*.o'))
 
         dest_lib_dir = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host_strong,
-            'crossbuilders',
+            self.dst_host_crossbuilders_dir,
             self.target,
             'lib'
             )
@@ -243,10 +237,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_01_4(self, called_as, log):
 
         cwd = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host_strong,
-            'crossbuilders',
+            self.dst_host_crossbuilders_dir,
             self.target,
             'lib'
             )
@@ -272,10 +263,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_01_5(self, called_as, log):
 
         cwd = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host_strong,
-            'crossbuilders',
+            self.dst_host_crossbuilders_dir,
             self.target,
             'include',
             'gnu'
@@ -308,7 +296,8 @@ then continue with gcc build_02+
             arguments=[],
             environment=self.builder_action_make_define_environment(
                 called_as,
-                log),
+                log
+                ),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -322,11 +311,12 @@ then continue with gcc build_02+
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,
-                log),
+                log
+                ),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

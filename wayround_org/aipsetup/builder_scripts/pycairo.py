@@ -5,8 +5,19 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.waf as waf
 import wayround_org.aipsetup.builder_scripts.std
 
+# TODO: host oriented configuration required
+
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    def define_custom_data(self):
+        ret = {
+            'PYTHON': wayround_org.utils.file.which(
+                'python3',
+                self.host_multiarch_dir
+                )
+            }
+        return ret
 
     def define_actions(self):
         ret = super().define_actions()
@@ -17,11 +28,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.src_dir,
             options=[
-                '--prefix=' +
-                self.package_info['constitution']['paths']['usr'],
+                '--prefix={}'.format(self.host_multiarch_dir),
                 ],
             arguments=['configure'],
-            environment={'PYTHON': '/usr/bin/python3'},
+            environment={'PYTHON': self.custom_data['PYTHON']},
             environment_mode='copy',
             log=log
             )
@@ -31,11 +41,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.src_dir,
             options=[
-                '--prefix=' +
-                self.package_info['constitution']['paths']['usr'],
+                '--prefix={}'.format(self.host_multiarch_dir),
                 ],
             arguments=['build'],
-            environment={'PYTHON': '/usr/bin/python3'},
+            environment={'PYTHON': self.custom_data['PYTHON']},
             environment_mode='copy',
             log=log
             )
@@ -45,12 +54,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.src_dir,
             options=[
-                '--prefix=' +
-                self.package_info['constitution']['paths']['usr'],
-                '--destdir=' + self.dst_dir
+                '--prefix={}'.format(self.host_multiarch_dir),
+                '--destdir={}'.format(self.dst_dir)
                 ],
             arguments=['install'],
-            environment={'PYTHON': '/usr/bin/python3'},
+            environment={'PYTHON': self.custom_data['PYTHON']},
             environment_mode='copy',
             log=log
             )

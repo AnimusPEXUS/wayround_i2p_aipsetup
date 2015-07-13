@@ -8,6 +8,9 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
 
 
+# TODO: fix paths or let do this 'buld pack'
+
+
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):

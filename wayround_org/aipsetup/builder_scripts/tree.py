@@ -38,14 +38,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix=' + os.path.join(self.dst_dir, 'usr'),
-                'BINDIR=' + os.path.join(self.dst_dir, 'usr', 'bin'),
-                'MANDIR=' + os.path.join(
-                    self.dst_dir,
-                    'usr',
-                    'share',
-                    'man',
-                    'man1'
+                'prefix={}'.format(self._dst_host_multiarch_dir),
+                'BINDIR={}'.format(
+                    os.path.join(self._dst_host_multiarch_dir, 'bin')
+                    ),
+                'MANDIR={}'.format(
+                    os.path.join(
+                        self._dst_host_multiarch_dir,
+                        'share',
+                        'man',
+                        'man1'
+                        )
                     )
                 ],
             environment={},

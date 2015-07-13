@@ -1,10 +1,14 @@
 
 
 import os.path
+import subprocess
+import glob
+import shutil
 
 import wayround_org.aipsetup.buildtools.autotools as autotools
 
 import wayround_org.aipsetup.builder_scripts.std
+import wayround_org.utils.file
 
 # FIXME: host/build/target fix required
 
@@ -15,6 +19,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().define_actions()
         del ret['configure']
         del ret['autogen']
+        del ret['build']
         ret['after_distribute'] = self.builder_action_after_distribute
         return ret
 
@@ -24,14 +29,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
+                'all',
                 'install',
-                'prefix=' + os.path.join('/usr'),
-                'exec_prefix='+ os.path.join('/usr'),
-                'lib_prefix='+ os.path.join('/usr'),
-                'inc_prefix=' + os.path.join('/usr'),
-                'man_prefix=' + os.path.join('/usr'),
-                'DESTDIR=' + self.dst_dir,
-                'RAISE_SETFCAP=no'
+                'prefix={}'.format(self.host_multiarch_dir),
+                'exec_prefix={}'.format(self.host_multiarch_dir),
+                'lib_prefix={}'.format(self.host_multiarch_dir),
+                'inc_prefix={}'.format(self.host_multiarch_dir),
+                'man_prefix={}'.format(self.host_multiarch_dir),
+                'DESTDIR={}'.format(self.dst_dir),
+                'RAISE_SETFCAP=no',
+                'CC={}-gcc'.format(self.host_strong),
+                'CXX={}-g++'.format(self.host_strong),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             environment={},
             environment_mode='copy',
@@ -41,18 +52,24 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_after_distribute(self, called_as, log):
-        
-        os.rename(
+
+        wayround_org.utils.file.copytree(
             os.path.join(
-                self.dst_dir,
-                'usr',
+                self.dst_host_multiarch_dir,
                 'multiarch'
                 ),
             os.path.join(
-                self.dst_dir,
-                'usr',
+                self.dst_host_multiarch_dir,
                 'lib'
-                )
+                ),
+            overwrite_files=True,
+            clear_before_copy=False,
+            dst_must_be_empty=True,
             )
-        
+
+        shutil.rmtree(os.path.join(
+            self.dst_host_multiarch_dir,
+            'multiarch'
+            ))
+
         return 0

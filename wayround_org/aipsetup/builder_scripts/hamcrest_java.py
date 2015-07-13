@@ -10,9 +10,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         dst_classpath_dir = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host,
+            self.dst_host_multiarch_dir,
             'lib',
             'java',
             'classpath'

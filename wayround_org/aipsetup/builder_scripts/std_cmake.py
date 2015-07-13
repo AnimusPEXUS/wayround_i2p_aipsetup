@@ -30,47 +30,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
 
-        dl = wayround_org.aipsetup.build.find_dl(
-            os.path.join(
-                '/',
-                'multiarch',
-                self.host
-                )
-            )
-
-        rpath = os.path.join(
-            '/',
-            'multiarch',
-            self.host,
-            'lib'
-            )
-
-        exe_linker_flags = '-Wl,--dynamic-linker=' + dl
-
-        """
-        exe_linker_flags = '-Wl,--dynamic-linker=' + \
-            dl + \
-            ' -Wl,-rpath={}'.format(rpath) + \
-            ' -Wl,-rpath-link={}'.format(rpath)
-        """
-
         ret = [
-            #'-DCMAKE_INSTALL_PREFIX=/usr',
             '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
             '-DSYSCONFDIR=/etc',
             '-DLOCALSTATEDIR=/var',
-            '-DCMAKE_EXE_LINKER_FLAGS=' + exe_linker_flags,
+            '-DCMAKE_EXE_LINKER_FLAGS={}'.format(
+                self.calculate_default_linker_program_gcc_parameter()
+                ),
             '-DCMAKE_C_COMPILER={}-gcc'.format(self.host_strong),
             '-DCMAKE_CXX_COMPILER={}-g++'.format(self.host_strong),
-            #    '--mandir=' + pkg_info['constitution']['paths']['man'],
-            #    '--sysconfdir=' +
-            #    pkg_info['constitution']['paths']['config'],
-            #    '--localstatedir=' +
-            #    pkg_info['constitution']['paths']['var'],
-            #    '--enable-shared',
-            #    '--host=' + pkg_info['constitution']['host'],
-            #    '--build=' + pkg_info['constitution']['build'],
-            #    '--target=' + pkg_info['constitution']['target']
             ]
 
         return ret + cmake.calc_conf_hbt_options(self)

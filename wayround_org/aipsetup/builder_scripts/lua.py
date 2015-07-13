@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'linux',
-                'INSTALL_TOP=/multiarch/{}'.format(self.host)
+                'INSTALL_TOP={}'.format(self.host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -43,11 +43,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_TOP=' + os.path.join(
-                    self.dst_dir,
-                    'multiarch',
-                    self.host
-                    )
+                'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -59,9 +55,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_pc(self, called_as, log):
 
         pc_file_name_dir = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host,
+            self.dst_host_multiarch_dir,
             'lib',
             'pkgconfig'
             )
@@ -83,11 +77,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             ['make',
              'pc',
-                'INSTALL_TOP=' + os.path.join(
-                    self.dst_dir,
-                    'multiarch',
-                    self.host
-                    )
+             'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir)
              ],
             stdout=subprocess.PIPE,
             cwd=src_dir
@@ -127,7 +117,7 @@ Cflags: -I${{includedir}}
 """.format(
             V='.'.join(version[:2]),
             R='.'.join(version),
-            arch_path='/multiarch/{}'.format(self.host)
+            arch_path='{}'.format(self.host_multiarch_dir)
             )
 
         pc_file.write(tpl)

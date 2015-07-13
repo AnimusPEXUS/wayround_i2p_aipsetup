@@ -20,7 +20,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-mozilla',
             '--with-pthreads',
             '--enable-ipv6',
-            # TODO: depends!!!!!!!!!!!
             ]
 
         if self.host == 'x86_64-pc-linux-gnu':

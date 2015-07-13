@@ -19,7 +19,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             self.buildingsite,
             log=log,
             options=[
-                'CC={}-gcc'.format(self.host)
+                'CC={}-gcc'.format(self.host_strong),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             arguments=[],
             environment={},

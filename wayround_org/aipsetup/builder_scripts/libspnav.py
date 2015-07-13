@@ -9,11 +9,7 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
-        arch_dir = wayround_org.utils.path.join(
-            self.dst_dir,
-            'multiarch',
-            self.host
-            )
+        arch_dir = self.dst_host_multiarch_dir
         for i in [
                 wayround_org.utils.path.join(arch_dir, 'lib'),
                 wayround_org.utils.path.join(arch_dir, 'include')
@@ -26,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'PREFIX=' + arch_dir
+                'PREFIX={}'.format(arch_dir)
                 ],
             environment={},
             environment_mode='copy',

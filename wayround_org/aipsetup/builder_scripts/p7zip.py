@@ -26,25 +26,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         else:
             raise Exception("Can't configure")
 
-        dl = wayround_org.aipsetup.build.find_dl(
-            os.path.join(
-                '/',
-                'multiarch',
-                self.host
-                )
-            )
+        dl = wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
 
-        CXX = '{}-g++'.format(self.host)
-        CC = '{}-gcc'.format(self.host)
-        LOCAL_FLAGS = '-Wl,--dynamic-linker=' + dl
+        CXX = '{}-g++'.format(self.host_strong)
+        CC = '{}-gcc'.format(self.host_strong)
+        LOCAL_FLAGS = self.calculate_default_linker_program_gcc_parameter()
 
         ret = {
             'CXX': CXX,
             'CC': CC,
             'LOCAL_FLAGS': LOCAL_FLAGS,
-            'PREFIX': wayround_org.utils.path.join(
-                '/multiarch', self.host
-                ),
+            'PREFIX': self.host_multiarch_dir,
             'makefile_suffix': makefile_suffix
             }
 
