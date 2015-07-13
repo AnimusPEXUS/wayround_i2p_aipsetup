@@ -14,7 +14,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'BUILDROOT=' + self.dst_dir
+                'BUILDROOT={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

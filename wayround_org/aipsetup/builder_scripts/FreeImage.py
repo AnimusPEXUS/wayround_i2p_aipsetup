@@ -8,8 +8,10 @@ import collections
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
 import wayround_org.aipsetup.builder_scripts.std
+
+import wayround_org.utils.file
+import wayround_org.utils.path
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -27,8 +29,27 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
-            ['make'],
-            cwd=self.src_dir
+            [
+                'make',
+                'CC={}-gcc'.format(self.host),
+                'CXX={}-g++'.format(self.host),
+                'DESTDIR={}'.format(self.host_multiarch_dir),
+                'INCDIR={}'.format(
+                    wayround_org.utils.path.join(
+                        self.host_multiarch_dir,
+                        'include'
+                        )
+                    ),
+                'INSTALLDIR={}'.format(
+                    wayround_org.utils.path.join(
+                        self.host_multiarch_dir,
+                        'lib'
+                        )
+                    )
+                ],
+            cwd=self.src_dir,
+            stdout=log.stdout,
+            stderr=log.stderr
             )
         ret = p.wait()
         return ret
@@ -36,23 +57,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
         ret = 0
 
-        try:
-            os.makedirs(
-                os.path.join(self.dst_dir, 'usr', 'include'),
-                exist_ok=True
-                )
-        except:
-            log.exception("Can't create dir")
-            ret = 2
+        os.makedirs(
+            os.path.join(self.dst_host_multiarch_dir, 'include'),
+            exist_ok=True
+            )
 
-        try:
-            os.makedirs(
-                os.path.join(self.dst_dir, 'usr', 'lib'),
-                exist_ok=True
-                )
-        except:
-            log.exception("Can't create dir")
-            ret = 2
+        os.makedirs(
+            os.path.join(self.dst_host_multiarch_dir, 'lib'),
+            exist_ok=True
+            )
 
         if ret == 0:
 
@@ -65,14 +78,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 i = os.path.basename(i)
                 shutil.copy(
                     os.path.join(self.src_dir, 'Dist', i),
-                    os.path.join(self.dst_dir, 'usr', 'lib', i)
+                    os.path.join(self.dst_host_multiarch_dir, 'lib', i)
                     )
 
             for i in headers:
                 i = os.path.basename(i)
                 shutil.copy(
                     os.path.join(self.src_dir, 'Dist', i),
-                    os.path.join(self.dst_dir, 'usr', 'include', i)
+                    os.path.join(self.dst_host_multiarch_dir, 'include', i)
                     )
 
         return

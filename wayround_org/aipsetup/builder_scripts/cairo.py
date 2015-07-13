@@ -49,5 +49,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-xml=yes',
 
             '--with-x',
-
             ]

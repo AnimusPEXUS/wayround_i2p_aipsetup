@@ -6,7 +6,7 @@ import wayround_org.utils.file
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
-        prefix = '/multiarch/{}'.format(self.host)
+        prefix = self.host_multiarch_dir
         return [
             '--prefix='+prefix,
             '--python={}'.format(

@@ -55,10 +55,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         """
 
         ret = [
-            '-DCMAKE_INSTALL_PREFIX=/usr',
-            #'-DCMAKE_INSTALL_PREFIX=/multiarch/{}'.format(self.host),
-
+            #'-DCMAKE_INSTALL_PREFIX=/usr',
+            '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
+            '-DSYSCONFDIR=/etc',
+            '-DLOCALSTATEDIR=/var',
             '-DCMAKE_EXE_LINKER_FLAGS=' + exe_linker_flags,
+            '-DCMAKE_C_COMPILER={}-gcc'.format(self.host_strong),
+            '-DCMAKE_CXX_COMPILER={}-g++'.format(self.host_strong),
             #    '--mandir=' + pkg_info['constitution']['paths']['man'],
             #    '--sysconfdir=' +
             #    pkg_info['constitution']['paths']['config'],

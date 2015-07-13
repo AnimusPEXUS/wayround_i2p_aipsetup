@@ -33,7 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install', 'install-dev', 'install-lib',
-                'DESTDIR=' + dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -48,16 +48,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         try:
-            for i in ['lib' + subset + '.a', 'lib' + subset + '.la']:
-                ffn = os.path.join(self.dst_dir, 'usr', 'lib', i)
+            for i in ['lib{}.a'.format(subset), 'lib{}.la'.format(subset)]:
+                ffn = os.path.join(self.dst_host_multiarch_dir, 'lib', i)
 
                 if os.path.exists(ffn):
                     os.unlink(ffn)
 
                 os.symlink(os.path.join('..', 'libexec', i), ffn)
 
-            for i in ['lib' + subset + '.so']:
-                ffn = os.path.join(self.dst_dir, 'usr', 'libexec', i)
+            for i in ['lib{}.so'.format(subset)]:
+                ffn = os.path.join(self.dst_host_multiarch_dir, 'libexec', i)
 
                 if os.path.exists(ffn):
                     os.unlink(ffn)
@@ -74,10 +74,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         la_file_name = os.path.join(
-            self.dst_dir, 'usr', 'lib', 'lib' + subset + '.la'
+            self.dst_host_multiarch_dir,
+            'lib',
+            'lib{}.la'.format(subset)
             )
 
-        #print("la_file_name == {}".format(la_file_name))
+        # print("la_file_name == {}".format(la_file_name))
 
         la_file = open(la_file_name)
         lines = la_file.read().splitlines()

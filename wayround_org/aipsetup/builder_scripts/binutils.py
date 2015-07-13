@@ -24,6 +24,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['edit_package_info'] = self.builder_action_edit_package_info
         ret.move_to_end('edit_package_info', False)
 
+        # NOTE: following actions is meaningless for Lalilalo multiarch
+        #       approach
         # if self.is_crossbuilder:
         # ret['after_distribute'] = self.builder_action_after_distribute
         # ret['delete_share'] = self.builder_action_delete_share
@@ -78,7 +80,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if self.is_crossbuilder:
             prefix = wayround_org.utils.path.join(
-                '/', 'multiarch', self.host, 'crossbuilders', self.target
+                self.host_crossbuilders_dir, self.target
                 )
 
             ret = [
@@ -107,6 +109,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
+    '''
     def builder_action_after_distribute(self, called_as, log):
 
         etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
@@ -133,7 +136,9 @@ export PATH=$PATH:/usr/crossbuilders/{target}/bin:\
         fi.close()
 
         return 0
+    '''
 
+    '''
     def builder_action_delete_share(self, called_as, log):
 
         share = os.path.join(self.dst_dir, 'usr', 'share')
@@ -142,3 +147,4 @@ export PATH=$PATH:/usr/crossbuilders/{target}/bin:\
             shutil.rmtree(share)
 
         return 0
+    '''

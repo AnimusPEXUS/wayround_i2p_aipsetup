@@ -12,6 +12,7 @@ def commands():
     return collections.OrderedDict([
         ('build', collections.OrderedDict([
             ('full', build_full),
+            ('full_m', build_full_multi),
             ('build', build_build),
             ('continue', build_continue),
             ('pack', build_pack),
@@ -436,6 +437,86 @@ def build_full(command_name, opts, args, adds):
     --host=TRIPLET
     --build=TRIPLET
     --target=TRIPLET
+    ================ ====================================
+    """
+
+    import wayround_org.aipsetup.build
+    import wayround_org.aipsetup.controllers
+
+    ret = 0
+
+    config = adds['config']
+
+    r_bds = '-d' in opts
+
+    sources = []
+
+    multiple_packages = not '-o' in opts
+
+
+    if ret == 0:
+
+        building_site_dir = config['local_build']['building_sites_dir']
+
+        if len(args) > 0:
+            sources = args
+            building_site_dir = wayround_org.utils.path.abspath(
+                os.path.dirname(sources[0])
+                )
+
+        if len(sources) == 0:
+            logging.error("No source files supplied")
+            ret = 2
+
+        archs_list = [config['system_settings']['host']]
+
+    if ret == 0:
+
+        for arch in archs_list:
+
+            if multiple_packages:
+                sources.sort()
+                rets = 0
+                logging.info("Passing packages `{}' to build".format(sources))
+                for i in sources:
+
+                    if build_sub_01(
+                            command_name, opts, args, adds,
+                            config,
+                            [i],
+                            building_site_dir,
+                            remove_buildingsite_after_success=r_bds
+                            ) != 0:
+                        rets += 1
+                if rets == 0:
+                    ret = 0
+                else:
+                    ret = 1
+            else:
+                logging.info("Passing package `{}' to build".format(sources))
+                ret = build_sub_01(
+                    command_name, opts, args, adds,
+                    config,
+                    sources,
+                    building_site_dir,
+                    remove_buildingsite_after_success=r_bds
+                    )
+
+    return ret
+
+def build_full_multi(command_name, opts, args, adds):
+    """
+    Place named source files in new building site and build new package from
+    them
+
+    [-d] [-o] TARBALL[, TARBALL[, TARBALL[,
+                                                                TARBALL...]]]
+
+    ================ ====================================
+    options          meaning
+    ================ ====================================
+    -d               remove building site on success
+    -o               treat all tarballs as for one build
     -m               build for multiple archs pointed by
                          multiple_arch_build in config
     ================ ====================================
@@ -453,18 +534,7 @@ def build_full(command_name, opts, args, adds):
     sources = []
 
     multiple_packages = not '-o' in opts
-    multiarch_build = '-m' in opts
-
-    if multiarch_build and (
-            '--host' in opts
-            or '--target'in opts
-            or '--build' in opts
-            ):
-        logging.error(
-            "-m can not be specified along with "
-            "--host or --target or --build"
-            )
-        ret = 3
+    multiarch_build = True
 
     if ret == 0:
 
@@ -480,15 +550,12 @@ def build_full(command_name, opts, args, adds):
             logging.error("No source files supplied")
             ret = 2
 
-        archs_list = [config['system_settings']['host']]
-        if multiarch_build:
-            archs_list = config['local_build']['multiple_arch_build'].split()
+        archs_list = config['local_build']['multiple_arch_build'].split()
 
     if ret == 0:
 
         for arch in archs_list:
 
-            hosts_options = []
             if multiarch_build:
                 hosts_options = {
                     '--host': arch,
@@ -497,7 +564,6 @@ def build_full(command_name, opts, args, adds):
                     }
 
                 opts.update(hosts_options)
-                # print("opts: {}".format(opts))
 
             if multiple_packages:
                 sources.sort()

@@ -1,4 +1,5 @@
 
+import os.path
 
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
@@ -10,40 +11,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().define_actions()
         del(ret['autogen'])
         del(ret['configure'])
-        return ret
-
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'LDPATH=-L/multiarch/{}/lib'.format(self.host),
-                'RUNPATH=-R$(INS_BASE)/lib -R/multiarch/{}/lib'.format(
-                    self.host
-                    ),
-                'INS_BASE=/multiarch/{}'.format(self.host)
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
+        del(ret['build'])
         return ret
 
     def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
+        ret=autotools.make_high(
             self.buildingsite,
             log=log,
             options=[],
             arguments=[
+                'all',
                 'install',
-                'LDPATH=-L/multiarch/{}/lib'.format(self.host),
-                'RUNPATH=-R$(INS_BASE)/lib -R/multiarch/{}/lib'.format(
-                    self.host
+                'LDPATH=-L{}'.format(
+                    os.path.join(self.host_multiarch_dir, 'lib')
                     ),
-                'INS_BASE=/multiarch/{}'.format(self.host),
-                'DESTDIR=' + self.dst_dir
+                'RUNPATH=-R$(INS_BASE)/lib -R{}'.format(
+                    os.path.join(self.host_multiarch_dir, 'lib')
+                    ),
+                'INS_BASE={}'.format(os.path.join(self.host_multiarch_dir)),
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

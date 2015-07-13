@@ -24,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'install',
                 'install-libs',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment={},
             environment_mode='copy',

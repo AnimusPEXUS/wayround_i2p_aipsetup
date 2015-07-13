@@ -13,24 +13,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del(ret['configure'])
         return ret
 
-    def define_custom_data(self):
-        ret = {
-            'dst_usr_dir': wayround_org.utils.path.join(
-                self.dst_dir,
-                'multiarch',
-                self.host
-                ),
-            'CC': '{}-gcc'.format(self.host)
-            }
-        return ret
-
     def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
             options=[],
             arguments=[
-                'CC=' + self.custom_data['CC']
+                'CC={}-gcc'.format(self.host)
                 ],
             environment={},
             environment_mode='copy',
@@ -47,8 +36,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'install',
                 'PREFIX=',
-                'DESTDIR=' + self.custom_data['dst_usr_dir'],
-                'DIST=' + self.custom_data['dst_usr_dir'],
+                'DESTDIR={}'.format(self.dst_host_multiarch_dir),
+                'DIST={}'.format(self.dst_host_multiarch_dir),
                 'BINDIR=/bin',
                 'LIBDIR=/lib/bcc',
                 'INCLDIR=/lib/bcc',

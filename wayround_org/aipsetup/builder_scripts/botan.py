@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         p = subprocess.Popen(
             ['./configure.py',
-             '--prefix=/multiarch/{}'.format(self.host)],
+             '--prefix={}'.format(self.host_multiarch_dir)],
             cwd=self.src_dir,
             stdout=log.stdout,
             stderr=log.stderr
@@ -35,11 +35,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + wayround_org.utils.path.join(
-                    self.dst_dir,
-                    'multiarch',
-                    self.host
-                    ),
+                'DESTDIR={}'.format(self.dst_host_multiarch_dir),
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,

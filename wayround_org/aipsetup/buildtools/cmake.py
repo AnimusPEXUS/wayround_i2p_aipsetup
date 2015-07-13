@@ -22,9 +22,9 @@ def calc_conf_hbt_options(builder_obj):
 
     ret = []
 
-    if host is not None:
-        ret.append('-DCMAKE_C_COMPILER={}-gcc'.format(host))
-        ret.append('-DCMAKE_CXX_COMPILER={}-g++'.format(host))
+    #if host is not None:
+    #    ret.append('-DCMAKE_C_COMPILER={}-gcc'.format(host))
+    #    ret.append('-DCMAKE_CXX_COMPILER={}-g++'.format(host))
 
     # TODO: provide equivalent for --target and --build options
 

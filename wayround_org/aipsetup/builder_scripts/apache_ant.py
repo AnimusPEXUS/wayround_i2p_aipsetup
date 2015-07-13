@@ -19,7 +19,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         dst_ant_dir = wayround_org.utils.path.join(
-            self.dst_dir, 'usr', 'lib', 'java', 'apache-ant'
+            self.dst_host_multiarch_dir, 'lib', 'java', 'apache-ant'
             )
 
         etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
@@ -46,29 +46,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             [
-                './bootstrap.sh',
-            ],
+                'bootstrap/bin/ant',
+                #'-Dversion={}'.format(
+                #    self.package_info['pkg_nameinfo']['groups']['version']
+                #    ),
+                # '-lib', '/usr/lib/java/classpath',
+                #'dist'
+                ],
             cwd=self.src_dir,
             stdout=log.stdout,
             stderr=log.stderr
             )
         ret = p.wait()
-        
-        if ret == 0:
-            p = subprocess.Popen(
-                [
-                    'bootstrap/bin/ant',
-                    #'-Dversion={}'.format(
-                    #    self.package_info['pkg_nameinfo']['groups']['version']
-                    #    ),
-                    # '-lib', '/usr/lib/java/classpath',
-                    #'dist'
-                    ],
-                cwd=self.src_dir,
-                stdout=log.stdout,
-                stderr=log.stderr
-                )
-            ret = p.wait()
         return ret
 
     def builder_action_distribute(self, called_as, log):
@@ -94,7 +83,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             self.custom_data['apacheant009'], 
             'w'
             )
-
+        
+        # TODO: may be all such PATH creators better to move away from
+        #       builder scripts, so creators don't be deleted with package
+        #       removes
         fi.write(
             """\
 #!/bin/bash

@@ -60,19 +60,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ]
 
         if not self.is_crossbuild and not self.is_crossbuilder:
-            ret += [
-                ]
+            pass
         else:
             ret += [
                 '--without-curses',
-                #'--disable-readline'
+                # '--disable-readline' # NOTE: this maybe required for new
+                #                              build
                 ]
 
-        return super().builder_action_configure_define_options(called_as, log) + ret
+        return super().builder_action_configure_define_options(
+            called_as, log) + ret
 
     def builder_action_sh_link(self, called_as, log):
         tsl = wayround_org.utils.path.join(
-            self.dst_dir, 'multiarch', self.host, 'bin', 'sh')
+            self.dst_host_multiarch_dir, 'bin', 'sh'
+            )
 
         if os.path.exists(tsl) or os.path.islink(tsl):
             os.unlink(tsl)

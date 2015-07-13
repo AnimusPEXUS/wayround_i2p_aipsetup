@@ -41,14 +41,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 wayround_org.utils.file.cleanup_dir(self.src_dir)
             """
 
-            logging.info("Extracting Tcl")
+            log.info("Extracting Tcl")
             wayround_org.utils.archive.extract(
                 os.path.join(self.tar_dir, tcl_found),
                 self.buildingsite,
                 log=log,
                 )
 
-            logging.info("Extracting Tk")
+            log.info("Extracting Tk")
             wayround_org.utils.archive.extract(
                 os.path.join(self.tar_dir, tk_found),
                 self.buildingsite,
@@ -80,5 +80,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-64bit',
             '--enable-64bit-vis',
             '--enable-wince',
-
             ]

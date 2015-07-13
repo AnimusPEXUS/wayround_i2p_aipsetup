@@ -6,9 +6,6 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    
-
-    
     def builder_action_configure_define_options(self, called_as, log):
 
         nss_cflags = ''
@@ -31,5 +28,3 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'CFLAGS=' + nss_cflags,
             'LDFLAGS=' + nss_libs
             ]
-
-    

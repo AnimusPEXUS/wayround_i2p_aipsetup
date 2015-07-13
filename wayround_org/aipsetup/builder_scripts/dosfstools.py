@@ -38,7 +38,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'PREFIX=' + os.path.join(self.dst_dir, 'multiarch', self.host)
+                'PREFIX={}'.format(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',

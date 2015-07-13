@@ -8,6 +8,7 @@ import time
 
 import wayround_org.utils.file
 import wayround_org.utils.log
+import wayround_org.utils.path
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
@@ -102,18 +103,40 @@ class Builder:
         return self.package_info['constitution']['host']
 
     @property
+    def host_multiarch_dir(self):
+        return wayround_org.utils.path.join(
+            os.path.sep,
+            'multiarch',
+            self.host_strong
+            )
+
+    @property
+    def dst_host_multiarch_dir(self):
+        return wayround_org.utils.path.join(
+            self.dst_dir,
+            self.host_multiarch_dir
+            )
+
+    @property
+    def host_crossbuilders_dir(self):
+        return wayround_org.utils.path.join(
+            self.host_multiarch_dir,
+            'crossbuilders'
+            )
+
+    @property
+    def dst_host_crossbuilders_dir(self):
+        return wayround_org.utils.path.join(
+            self.dst_dir,
+            self.host_crossbuilders_dir
+            )
+
+    @property
     def build(self):
         return self.package_info['constitution']['build']
 
     def calculate_default_linker_program(self):
-        ret = wayround_org.aipsetup.build.find_dl(
-            os.path.join(
-                '/',
-                'multiarch',
-                self.host
-                )
-            )
-        return ret
+        return wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
 
     def calculate_default_linker_program_ld_parameter(self):
         return '--dynamic-linker=' + self.calculate_default_linker_program()
@@ -237,7 +260,7 @@ class Builder:
                     ]:
 
                 log.info(
-                    "found `{}'. trying to execute: {]".format(
+                    "found `{}'. trying to execute: {}".format(
                         i[0],
                         ' '.join(i[1])
                         )
@@ -260,6 +283,7 @@ class Builder:
                         stderr=log.stderr
                         )
                     ret = p.wait()
+                    break
             else:
                 log.error(
                     "./{} not found and no generators found".format(
@@ -311,8 +335,9 @@ class Builder:
 
             # TODO: find way to modify binutils+gcc+glibc chane so it
             #       uses needed interpreter without this f*ckin parameter...
-            'LDFLAGS=' + self.calculate_default_linker_program_gcc_parameter()
-
+            'LDFLAGS=' + self.calculate_default_linker_program_gcc_parameter(),
+            'CC={}-gcc'.format(self.host_strong),
+            'CXX={}-g++'.format(self.host_strong),
             #'LDFLAGS=-Wl,--dynamic-linker=' + \
             #    dl + \
             #    ' -Wl,-rpath={}'.format(rpath) + \
@@ -389,7 +414,7 @@ class Builder:
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,

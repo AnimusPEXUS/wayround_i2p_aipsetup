@@ -29,7 +29,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-compat185',
             '--enable-cxx',
             '--enable-tcl',
-            '--with-tcl=/usr/lib',
+            '--with-tcl={}'.format(
+                os.path.join(self.host_multiarch_dir, 'lib')
+                ),
             ]
 
     def builder_action_configure_define_script_name(self, called_as, log):
@@ -37,7 +39,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
 
-        doc_dir = os.path.join(self.dst_dir, 'usr', 'share', 'doc', 'db')
+        doc_dir = os.path.join(self.dst_host_multiarch_dir, 'share', 'doc', 'db')
 
         os.makedirs(
             doc_dir,
@@ -51,8 +53,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + self.dst_dir,
-                'docdir=' + os.path.join('/usr', 'share', 'doc', 'db')
+                'DESTDIR={}'.format(self.dst_dir),
+                'docdir={}'.format(
+                    os.path.join(
+                        self.host_multiarch_dir, 'share', 'doc', 'db'
+                        )
+                    )
                 # it's not a mistake docdir
                 # must be eq to /usr/share/doc/db
                 # with leading slash

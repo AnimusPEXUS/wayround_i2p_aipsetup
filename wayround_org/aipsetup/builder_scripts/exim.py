@@ -187,7 +187,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
 
     def builder_action_sendmail_link(self, called_as, log):
-        lnk = os.path.join(self.dst_dir, 'usr', 'bin', 'sendmail')
+        lnk = os.path.join(self.dst_host_multiarch_dir, 'bin', 'sendmail')
 
         if os.path.exists(lnk) or os.path.islink(lnk):
             os.unlink(lnk)

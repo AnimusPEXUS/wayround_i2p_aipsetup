@@ -22,10 +22,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.forced_target = True
         ret = dict()
         ret['cc_file'] = os.path.join(
-            self.dst_dir, 'multiarch', self.host, 'bin', 'cc'
+            self.dst_host_multiarch_dir, 'bin', 'cc'
             )
         ret['libcpp_file'] = os.path.join(
-            self.dst_dir, 'multiarch', self.host, 'lib', 'cpp'
+            self.dst_host_multiarch_dir, 'lib', 'cpp'
             )
         return ret
 
@@ -94,7 +94,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             for i in ['mpc', 'mpfr', 'cloog',
                       'isl',
-                      'gmp', 
+                      'gmp',
                       # NOTE: sometimes gcc could not compile with gmp.
                       #       so use system gmp
                       # requires compiler for bootstrap
@@ -120,7 +120,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if self.is_crossbuilder:
             prefix = os.path.join(
-                '/', 'multiarch', self.host, 'crossbuilders', self.target
+                self.host_crossbuilders_dir,
+                self.target
                 )
 
             ret = [
@@ -150,16 +151,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 # use it when you haven't built glibc basic parts yet
                 # '--without-headers',
 
-                # use it when you already have glibc headers and basic parts 
+                # use it when you already have glibc headers and basic parts
                 # installed
-                # using this parameter may reqire creating hacky symlink 
+                # using this parameter may reqire creating hacky symlink
                 # pointing to /multiarch dir - you'll see error what file not
                 # found.
-                # so after gcc and glibc built and installed - rebuild gcc both 
+                # so after gcc and glibc built and installed - rebuild gcc both
                 # without --with-sysroot= and without --without-headers options
-                '--with-sysroot=/multiarch/{}/crossbuilders/{}'.format(
-                    self.host,
-                    self.target
+                '--with-sysroot={}'.format(
+                    os.path.join(
+                        self.host_crossbuilders_dir,
+                        self.target
+                        )
                     )
                 # TODO: need to try building without --with-sysroot if possible
                 ]
@@ -261,7 +264,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install-gcc',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,
@@ -304,7 +307,7 @@ After what - continue building from 'build_02+' action
             options=[],
             arguments=[
                 'install-target-libgcc',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,
@@ -347,7 +350,7 @@ After what - continue building this gcc from 'build_03+' action
             options=[],
             arguments=[
                 'install',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR={}'.format(self.dst_dir)
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,

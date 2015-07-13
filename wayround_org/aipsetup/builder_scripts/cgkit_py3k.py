@@ -15,8 +15,8 @@ def main(buildingsite, action=None):
     r = wayround_org.aipsetup.build.build_script_wrap(
         buildingsite,
         [
-         'extract', 'scons', 'distribute'
-         ],
+            'extract', 'scons', 'distribute'
+            ],
         action,
         "help"
         )
@@ -54,7 +54,7 @@ def main(buildingsite, action=None):
         if 'distribute' in actions and ret == 0:
             ret = subprocess.Popen(
                 ['python3', 'setup.py', 'install',
-                 '--root=' + os.path.join(dst_dir)],
+                 '--root={}'.format(os.path.join(dst_dir))],
                 cwd=src_dir
                 ).wait()
 

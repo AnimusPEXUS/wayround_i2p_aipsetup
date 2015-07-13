@@ -801,88 +801,6 @@ class PackCtl:
 
         return ret
 
-    def destdir_set_modes(self):
-        """
-        Ensure all files (and dirs) in DESTDIR have ``0o755`` mode.
-
-        If You interested in defferent modes for files after package
-        installation, read about post_install.py (script, which need to be
-        placed in package and will be executed after package installation)
-
-        .. TODO: link to info about post_install.py
-        """
-
-        logging.info("Resetting files and dirs modes")
-
-        # NOTE: dirs and files all must have 0700 modes!
-        #       do not remove execution bit from files!
-
-        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
-
-        ret = 0
-
-        try:
-            for dirpath, dirnames, filenames in os.walk(destdir):
-                filenames.sort()
-                dirnames.sort()
-                dirpath = wayround_org.utils.path.abspath(dirpath)
-
-                for i in dirnames:
-                    f = wayround_org.utils.path.join(dirpath, i)
-                    if not os.path.islink(f):
-                        os.chmod(f, mode=0o755)
-
-                for i in filenames:
-                    f = wayround_org.utils.path.join(dirpath, i)
-                    if not os.path.islink(f):
-                        os.chmod(f, mode=0o755)
-
-        except:
-            logging.exception("Modes change exception")
-            ret = 1
-
-        return ret
-
-    def destdir_checksum(self):
-        """
-        Create checksums for DESTDIR contents
-        """
-
-        ret = 0
-
-        logging.info("Creating checksums")
-
-        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
-
-        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
-
-        output_file = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
-                lists_dir,
-                'DESTDIR.sha512'
-                )
-            )
-
-        try:
-            os.makedirs(lists_dir)
-        except:
-            pass
-
-        if not os.path.isdir(destdir):
-            logging.error("DESTDIR not found")
-            ret = 1
-        elif not os.path.isdir(lists_dir):
-            logging.error("LIST dir can't be used")
-            ret = 2
-        else:
-            ret = wayround_org.utils.checksum.make_dir_checksums(
-                destdir,
-                output_file,
-                destdir
-                )
-
-        return ret
-
     def destdir_filelist(self):
         """
         Create file list for DESTDIR contents
@@ -942,6 +860,48 @@ class PackCtl:
 
         return ret
 
+    def destdir_set_modes(self):
+        """
+        Ensure all files (and dirs) in DESTDIR have ``0o755`` mode.
+
+        If You interested in defferent modes for files after package
+        installation, read about post_install.py (script, which need to be
+        placed in package and will be executed after package installation)
+
+        .. TODO: link to info about post_install.py
+        """
+
+        logging.info("Resetting files and dirs modes")
+
+        # NOTE: dirs and files all must have 0700 modes!
+        #       do not remove execution bit from files!
+
+        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        ret = 0
+
+        try:
+            for dirpath, dirnames, filenames in os.walk(destdir):
+                filenames.sort()
+                dirnames.sort()
+                dirpath = wayround_org.utils.path.abspath(dirpath)
+
+                for i in dirnames:
+                    f = wayround_org.utils.path.join(dirpath, i)
+                    if not os.path.islink(f):
+                        os.chmod(f, mode=0o755)
+
+                for i in filenames:
+                    f = wayround_org.utils.path.join(dirpath, i)
+                    if not os.path.islink(f):
+                        os.chmod(f, mode=0o755)
+
+        except:
+            logging.exception("Modes change exception")
+            ret = 1
+
+        return ret
+
     def destdir_edit_executable_elfs(self):
 
         ret = 0
@@ -964,9 +924,9 @@ class PackCtl:
 
         if dl is None:
             if package_info['pkg_info']['name'] in [
-                'linux', 
-                #'binutils', 
-                'glibc', 
+                'linux',
+                #'binutils',
+                'glibc',
                 #'gcc'
                 ] and (
                     package_info['constitution']['build'] !=
@@ -1136,6 +1096,46 @@ class PackCtl:
 
                 finally:
                     f.close()
+        return ret
+
+    def destdir_checksum(self):
+        """
+        Create checksums for DESTDIR contents
+        """
+
+        ret = 0
+
+        logging.info("Creating checksums")
+
+        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
+
+        output_file = wayround_org.utils.path.abspath(
+            wayround_org.utils.path.join(
+                lists_dir,
+                'DESTDIR.sha512'
+                )
+            )
+
+        try:
+            os.makedirs(lists_dir)
+        except:
+            pass
+
+        if not os.path.isdir(destdir):
+            logging.error("DESTDIR not found")
+            ret = 1
+        elif not os.path.isdir(lists_dir):
+            logging.error("LIST dir can't be used")
+            ret = 2
+        else:
+            ret = wayround_org.utils.checksum.make_dir_checksums(
+                destdir,
+                output_file,
+                destdir
+                )
+
         return ret
 
     def destdir_deps_bin(self):
@@ -1552,10 +1552,10 @@ class PackCtl:
                 self.relocate_usr_multiarch_files,
                 self.relocate_wrong_usr_under_multiarch_dir,
                 self.relocate_libx_dir_files_into_lib_dir,
-                self.destdir_set_modes,
-                self.destdir_checksum,
                 self.destdir_filelist,
+                self.destdir_set_modes,
                 self.destdir_edit_executable_elfs,
+                self.destdir_checksum,
                 self.destdir_deps_bin,
                 self.compress_patches_destdir_and_logs,
                 self.compress_files_in_lists_dir,

@@ -12,6 +12,8 @@ class Builder(wayround_org.aipsetup.build_scripts.std_simple_makefile):
 
     def builder_action_distribute(self, called_as, log):
 
+        ret = 0
+
         for i in ['bin', 'include', 'lib']:
             if ret != 0:
                 break
