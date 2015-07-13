@@ -86,6 +86,10 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
                 #                    '--build-type=complete',
                 #                    '--layout=versioned',
                 #'--build-dir={}'.format(self.bld_dir),
+
+                # NOTE: boost configurer and it's docs is crappy shit..
+                #       thanks to Sergey Popov from Gentoo for pointing
+                #       on --user-config= option
                 '--user-config={}'.format(self.custom_data['user_config']),
                 'threading=multi',
                 'link=shared',
