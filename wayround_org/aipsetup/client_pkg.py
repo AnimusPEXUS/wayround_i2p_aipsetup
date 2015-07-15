@@ -488,7 +488,9 @@ def get_tarball(
     """
 
     if not isinstance(full_url, str):
-        raise TypeError("`full_url' must be str")
+        raise TypeError(
+            "`full_url' must be str, not `{}'".format(type(full_url))
+            )
 
     ret = 1
 

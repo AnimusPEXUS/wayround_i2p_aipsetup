@@ -5,8 +5,6 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.waf as waf
 import wayround_org.aipsetup.builder_scripts.std
 
-# TODO: host oriented configuration required
-
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 

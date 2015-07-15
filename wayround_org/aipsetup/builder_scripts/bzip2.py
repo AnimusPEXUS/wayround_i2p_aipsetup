@@ -1,6 +1,5 @@
 
 import glob
-import logging
 import os.path
 import shutil
 import subprocess
@@ -19,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         thr = {
             'CFLAGS': '',
             'LDFLAGS': '',
-            'CC': [], 
+            'CC': [],
             'AR': [],
             'RANLIB': []
             }
@@ -30,9 +29,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             thr['LDFLAGS'] = '-L{}'.format(
                 os.path.join(self.host_multiarch_dir, 'lib')
                 )
-            thr['CC']=['CC={}-gcc'.format(self.host)]
-            thr['AR']=['AR={}-ar'.format(self.host)]
-            thr['RANLIB']=['RANLIB={}-ranlib'.format(self.host)]
+            thr['CC'] = ['CC={}-gcc'.format(self.host_strong)]
+            thr['AR'] = ['AR={}-ar'.format(self.host_strong)]
+            thr['RANLIB'] = ['RANLIB={}-ranlib'.format(self.host_strong)]
         return {
             'thr': thr
             }
@@ -59,15 +58,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'PREFIX={}'.format(self.host_multiarch_dir),
                 'CFLAGS=  -fpic -fPIC -Wall -Winline -O2 -g '
-                '-D_FILE_OFFSET_BITS=64 ' +
-                self.custom_data['thr']['CFLAGS'],
-                'LDFLAGS=' + self.custom_data['thr']['LDFLAGS'],
+                '-D_FILE_OFFSET_BITS=64 {}'.format(
+                    self.custom_data['thr']['CFLAGS']
+                    ),
+                'LDFLAGS={}'.format(self.custom_data['thr']['LDFLAGS']),
                 'libbz2.a',
                 'bzip2',
                 'bzip2recover'
-                ] + self.custom_data['thr']['CC'] + 
-                  self.custom_data['thr']['AR'] + 
-                  self.custom_data['thr']['RANLIB'],
+                ] + self.custom_data['thr']['CC'] +
+            self.custom_data['thr']['AR'] +
+            self.custom_data['thr']['RANLIB'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -84,7 +84,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'PREFIX={}'.format(os.path.join(self.dst_host_multiarch_dir))
+                'PREFIX={}'.format(self.dst_host_multiarch_dir)
                 ],
             environment={},
             environment_mode='copy',
@@ -101,15 +101,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'CC={}-gcc'.format(self.host),
-                'AR={}-ar'.format(self.host),
-                'RANLIB={}-ranlib'.format(self.host),
                 'CFLAGS= -fpic -fPIC -Wall -Winline -O2 -g '
-                '-D_FILE_OFFSET_BITS=64 ' +
-                self.custom_data['thr']['CFLAGS'],
-                'LDFLAGS= ' + self.custom_data['thr']['LDFLAGS'],
-                'PREFIX=' + os.path.join(self.dst_dir, 'multiarch', self.host)
-                ],
+                '-D_FILE_OFFSET_BITS=64 {}'.format(
+                    self.custom_data['thr']['CFLAGS']
+                    ),
+                'LDFLAGS={}'.format(self.custom_data['thr']['LDFLAGS']),
+                'PREFIX={}'.format(self.dst_host_multiarch_dir)
+                ] + self.custom_data['thr']['CC'] +
+            self.custom_data['thr']['AR'] +
+            self.custom_data['thr']['RANLIB'],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,

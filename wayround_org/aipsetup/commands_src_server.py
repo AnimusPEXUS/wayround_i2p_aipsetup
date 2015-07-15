@@ -48,14 +48,6 @@ def src_repo_index(command_name, opts, args, adds):
     forced_reindex = '-f' in opts
     clean_only = '-c' in opts
 
-    '''
-    subdir_name = wayround_org.utils.path.realpath(
-        wayround_org.utils.path.abspath(
-            config['src_server']['tarball_repository_root']
-            )
-        )
-    '''
-
     subdir_name = wayround_org.utils.path.abspath(
         config['src_server']['tarball_repository_root']
         )
@@ -69,48 +61,6 @@ def src_repo_index(command_name, opts, args, adds):
             subdir_name = args[0]
             subdir_name = wayround_org.utils.path.abspath(subdir_name)
 
-        '''
-        if len(args) > 0:
-            subdir_name = args[0]
-            subdir_name = wayround_org.utils.path.realpath(
-                wayround_org.utils.path.abspath(subdir_name)
-                )
-        if (
-                not (
-                    wayround_org.utils.path.realpath(
-                        wayround_org.utils.path.abspath(subdir_name)
-                        ) + '/'
-                    ).startswith(
-                    wayround_org.utils.path.realpath(
-                        wayround_org.utils.path.abspath(
-                            config['src_server']['tarball_repository_root']
-                            )
-                        ) + '/'
-                    )
-                or not os.path.isdir(wayround_org.utils.path.abspath(subdir_name))
-                ):
-            logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
-            logging.debug(
-                """\
-passed: {}
-config: {}
-exists: {}
-""".format(
-                    wayround_org.utils.path.realpath(
-                        wayround_org.utils.path.abspath(subdir_name)
-                        ),
-                    wayround_org.utils.path.realpath(
-                        wayround_org.utils.path.abspath(
-                            config['src_server']['tarball_repository_root']
-                            )
-                        ),
-                    os.path.isdir(subdir_name)
-                    )
-                )
-            ret = 2
-            pass
-        '''
-
         if True:
             # else:
 
@@ -121,7 +71,7 @@ exists: {}
             ret = src_ctl.index_sources(
                 wayround_org.utils.path.abspath(subdir_name),
                 acceptable_src_file_extensions=(
-                    config['src_server']['acceptable_src_file_extensions']
+                    config['src_server']['acceptable_src_file_extensions'].split()
                     ),
                 force_reindex=forced_reindex,
                 clean_only=clean_only

@@ -213,7 +213,7 @@ def pkg_client_by_config(config):
     return pkg_client_new(
         config['pkg_client']['server_url'],
         config['pkg_client']['downloads_dir'],
-        config['pkg_client']['acceptable_src_file_extensions']
+        config['pkg_client']['acceptable_src_file_extensions'].split()
         )
 
 

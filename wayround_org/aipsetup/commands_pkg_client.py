@@ -488,7 +488,7 @@ def _get_tarballs_latest(url, name, config, out_dir=None, mute=True):
 
     ret = 1
 
-    exts = config['pkg_client']['acceptable_src_file_extensions'].split(' ')
+    exts = config['pkg_client']['acceptable_src_file_extensions'].split()
 
     res = wayround_org.aipsetup.client_pkg.tarballs_latest(
         url, name, exts
@@ -636,7 +636,7 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
         acceptable_extensions_order_list = []
         if mode == 'tar':
             acceptable_extensions_order_list = \
-                config['pkg_client']['acceptable_src_file_extensions']
+                config['pkg_client']['acceptable_src_file_extensions'].split()
 
         ret = wayround_org.aipsetup.get_list_procs.get_by_glp(
             mode,

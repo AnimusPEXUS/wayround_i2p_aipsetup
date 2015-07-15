@@ -1,5 +1,4 @@
 
-import logging
 import os.path
 
 import wayround_org.aipsetup.build
@@ -34,12 +33,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
             ret = 20
         else:
-
-            """
-            if os.path.isdir(self.src_dir):
-                logging.info("cleaningup source dir")
-                wayround_org.utils.file.cleanup_dir(self.src_dir)
-            """
 
             log.info("Extracting Tcl")
             wayround_org.utils.archive.extract(

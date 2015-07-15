@@ -1,6 +1,5 @@
 
 import glob
-import logging
 import os.path
 import shutil
 import subprocess
@@ -31,8 +30,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             [
                 'make',
-                'CC={}-gcc'.format(self.host),
-                'CXX={}-g++'.format(self.host),
+                'CC={}-gcc'.format(self.host_strong),
+                'CXX={}-g++'.format(self.host_strong),
                 'DESTDIR={}'.format(self.host_multiarch_dir),
                 'INCDIR={}'.format(
                     wayround_org.utils.path.join(

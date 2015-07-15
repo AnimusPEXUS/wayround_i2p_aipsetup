@@ -1,9 +1,9 @@
 
 import glob
-import logging
 import os.path
 import re
 import shutil
+import subprocess
 
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
@@ -11,14 +11,7 @@ import wayround_org.utils.file
 import wayround_org.utils.path
 
 
-import os.path
-import subprocess
-
-import wayround_org.utils.path
-import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
-
-# TODO: host oriented configuration required
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -113,7 +106,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         OBJ_dir = glob.glob(wayround_org.utils.path.join(dist_dir, '*.OBJ'))
 
         if len(OBJ_dir) != 1:
-            logging.error("single `dist/Linux*' dir not found")
+            log.error("single `dist/Linux*' dir not found")
             ret = 10
         else:
             OBJ_dir = wayround_org.utils.path.join(
@@ -121,7 +114,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 os.path.basename(OBJ_dir[0])
                 )
 
-            logging.info(
+            log.info(
                 "Dereferencing links in {}".format(
                     wayround_org.utils.path.relpath(
                         OBJ_dir,
@@ -144,13 +137,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             if wayround_org.utils.file.dereference_files_in_dir(
                     OBJ_dir
                     ) != 0:
-                logging.error(
+                log.error(
                     "Some errors while dereferencing symlinks. see above."
                     )
                 ret = 11
             else:
 
-                logging.info("Preparing distribution dir tree")
+                log.info("Preparing distribution dir tree")
 
                 os.makedirs(
                     wayround_org.utils.path.join(OBJ_dir, 'include'),
@@ -219,7 +212,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         mask='*'
                         )
 
-                logging.info("Writing package config files")
+                log.info("Writing package config files")
 
                 nss_major_version = 0
                 nss_minor_version = 0
@@ -243,7 +236,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         self.package_info['pkg_nameinfo'][
                             'groups']['version_list'][2]
 
-                logging.info(
+                log.info(
                     "Applying version {}.{}.{}".format(
                         nss_major_version,
                         nss_minor_version,

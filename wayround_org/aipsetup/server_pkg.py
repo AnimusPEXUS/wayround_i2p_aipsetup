@@ -46,7 +46,7 @@ def server_start_host(command_name, opts, args, adds):
         int(config['pkg_server']['port']),
         config['pkg_server']['source_server_url'],
         acceptable_source_name_extensions=(
-            config['src_client']['acceptable_src_file_extensions']
+            config['src_client']['acceptable_src_file_extensions'].split()
             )
         )
 

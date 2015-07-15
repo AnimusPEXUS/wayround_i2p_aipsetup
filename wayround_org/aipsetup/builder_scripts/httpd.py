@@ -1,5 +1,4 @@
 
-import logging
 import os.path
 
 import wayround_org.aipsetup.build
@@ -24,11 +23,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(
+        ret = super().builder_action_configure_define_options(
             called_as,
-            log) + [
-                '--with-apr=' + self.custom_data['apr_1_config'],
-
+            log)
+        ret += [
+            '--with-apr={}'.format(self.custom_data['apr_1_config']),
 
             '--enable-shared',
             '--enable-modules=all',
@@ -45,4 +44,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-proxy-scgi',
             '--enable-proxy-ajp',
             '--enable-proxy-balancer',
-                ]
+            ]
+
+        return ret

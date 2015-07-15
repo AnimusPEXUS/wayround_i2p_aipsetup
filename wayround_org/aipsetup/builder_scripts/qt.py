@@ -1,4 +1,5 @@
 
+import copy
 import logging
 import os.path
 import subprocess
@@ -9,6 +10,8 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 
 import wayround_org.aipsetup.builder_scripts.std
+
+# TODO: disable alsa, enable pulseaudio
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -54,15 +57,70 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         self.custom_data['qt_number_str']
                         )
                     ),
-                '-pulseaudio',
-                '-no-alsa'
+                #'-pulseaudio',
+                #'-no-alsa'
                 ],
+            env=copy.copy(os.environ).update({
+                'CC': '{}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'CXX': '{}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-g++'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'LDFLAGS': '{}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
+                }),
             stdin=subprocess.PIPE,
+            stdout=log.stdout,
+            stderr=log.stderr,
             cwd=self.src_dir
             )
         # p.communicate(input=b'yes\n')
         ret = p.wait()
 
+        return ret
+
+    def builder_action_build(self, called_as, log):
+        ''
+
+        '''
+            arguments=[
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'CXX={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-g++'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
+                ],
+        '''
+
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                ],
+            environment={},
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
         return ret
 
     def builder_action_distribute(self, called_as, log):
@@ -103,7 +161,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         f = open(
             wayround_org.utils.path.join(
                 etc_profile_set_dir,
-                '009.qt{}'.format(qt_number_str)
+                '009.qt{}.{}.sh'.format(qt_number_str, self.host_strong)
                 ),
             'w'
             )

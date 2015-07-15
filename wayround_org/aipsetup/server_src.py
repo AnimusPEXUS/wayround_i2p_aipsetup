@@ -49,7 +49,7 @@ def src_server_start(command_name, opts, args, adds):
         host=host,
         port=int(port),
         acceptable_source_name_extensions=(
-            config['src_server']['acceptable_src_file_extensions']
+            config['src_server']['acceptable_src_file_extensions'].split()
             )
         )
 
@@ -76,7 +76,7 @@ def src_server_reindex(command_name, opts, args, adds):
 
     ctl.index_sources(
         config['src_server']['tarball_repository_root'],
-        config['src_server']['acceptable_src_file_extensions'],
+        config['src_server']['acceptable_src_file_extensions'].split(),
         '--force' in opts,
         '--first-delete-found' in opts,
         '--clean-only' in opts

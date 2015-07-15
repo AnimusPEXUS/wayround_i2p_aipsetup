@@ -572,7 +572,7 @@ def main(name_to_edit=None, config=None):
     mw = MainWindow(
         info_ctl, src_client, pkg_client,
         acceptable_source_name_extensions=(
-            config['src_client']['acceptable_src_file_extensions']
+            config['src_client']['acceptable_src_file_extensions'].split()
             )
         )
 

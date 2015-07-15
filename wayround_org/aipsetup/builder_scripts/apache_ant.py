@@ -47,10 +47,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             [
                 'bootstrap/bin/ant',
-                #'-Dversion={}'.format(
-                #    self.package_info['pkg_nameinfo']['groups']['version']
-                #    ),
-                # '-lib', '/usr/lib/java/classpath',
                 #'dist'
                 ],
             cwd=self.src_dir,
@@ -67,33 +63,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         wayround_org.utils.file.copytree(
-             self.custom_data['src_ant_dir'],
-             self.custom_data['dst_ant_dir'],
+            self.custom_data['src_ant_dir'],
+            self.custom_data['dst_ant_dir'],
             overwrite_files=True,
             clear_before_copy=True,
             dst_must_be_empty=True
             )
 
-        os.makedirs(
-            self.custom_data['etc_dir'], 
-            exist_ok=True
-            )
-
-        fi = open(
-            self.custom_data['apacheant009'], 
-            'w'
-            )
-        
-        # TODO: may be all such PATH creators better to move away from
-        #       builder scripts, so creators don't be deleted with package
-        #       removes
-        fi.write(
-            """\
-#!/bin/bash
-export ANT_HOME='/usr/lib/java/apache-ant'
-export PATH="$PATH:$ANT_HOME/bin"
-"""
-            )
-
-        fi.close()
         return 0

@@ -406,8 +406,7 @@ def info_mass_cat(command_name, opts, args, adds):
             wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
         known_names = set()
-        exts = \
-            config['pkg_server']['acceptable_src_file_extensions'].split(' ')
+        exts = config['pkg_server']['acceptable_src_file_extensions'].split()
 
         sources.sort()
 

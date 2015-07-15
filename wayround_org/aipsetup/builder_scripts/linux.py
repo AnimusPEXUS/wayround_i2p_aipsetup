@@ -52,13 +52,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         elif re.match(r'^x86_64$', cpu):
             linux_headers_arch = 'x86_64'
         else:
-            logging.error("Don't know which linux ARCH apply")
+            logging.error("Don't know which linux ARCH to apply")
             ret = 3
 
         if self.is_crossbuild or self.is_crossbuilder:
             crossbuild_arch_params += [
                 'ARCH=' + linux_headers_arch,
-                'CROSS_COMPILE={}-'.format(self.host)
+                'CROSS_COMPILE={}-'.format(self.host_strong)
                 ]
 
         ret['crossbuild_arch_params'] = crossbuild_arch_params
@@ -129,14 +129,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         Standard destdir cleanup
         """
         if self.is_crossbuild:
-            logging.info(
+            log.info(
                 "Destination directory cleanup skipped doe to "
                 "'crossbuilder_mode'"
                 )
         else:
 
             if os.path.isdir(self.src_dir):
-                logging.info("cleaningup destination dir")
+                log.info("cleaningup destination dir")
                 wayround_org.utils.file.cleanup_dir(self.dst_dir)
 
         return 0
@@ -224,7 +224,7 @@ continue building procedure with command
             files = os.listdir(modules_dir)
 
             if len(files) != 1:
-                logging.error(
+                log.error(
                     "Can't find directory in {}".format(modules_dir)
                     )
                 ret = 1
@@ -359,11 +359,11 @@ continue building procedure with command
 
             man_files.sort()
 
-            logging.info("Copying {} man file(s)".format(len(man_files)))
+            log.info("Copying {} man file(s)".format(len(man_files)))
 
             for i in man_files:
                 base = os.path.basename(i)
-                logging.info("copying {}".format(base))
+                log.info("copying {}".format(base))
                 shutil.copy(
                     wayround_org.utils.path.join(i),
                     wayround_org.utils.path.join(
@@ -390,7 +390,7 @@ continue building procedure with command
                 dst_must_be_empty=False
                 )
         except:
-            logging.exception("Some error")
+            log.exception("Some error")
             ret = 2
         else:
             if ret == 0:
@@ -413,6 +413,6 @@ continue building procedure with command
                         new_link
                         )
                 except:
-                    logging.exception("Some error")
+                    log.exception("Some error")
                     ret = 3
         return ret

@@ -5,40 +5,109 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std_cmake
 
-# TODO: path fixes required
-
 
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
-        usr_share_mysql = '/usr/share/mysql'
+        usr_share_mysql = '{}'.format(
+            os.path.join(self.host_multiarch_dir, 'share', 'mysql')
+            )
         return super().builder_action_configure_define_options(called_as, log) + [
-            '-DCMAKE_INSTALL_PREFIX=/usr',
+            '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
 
-            '-DMYSQL_DATADIR=/usr/share/mysql/data',
-
-            '-DINSTALL_SBINDIR=/usr/bin',
-            '-DINSTALL_LIBDIR=/usr/lib',
-            '-DINSTALL_MANDIR=/usr/share/man',
-
-            '-DINSTALL_DOCREADMEDIR=/usr/share/mysql',
-            '-DINSTALL_INCLUDEDIR=/usr/include/mysql',
-
-            '-DINSTALL_DOCDIR={}/docs'.format(usr_share_mysql),
-            '-DINSTALL_INFODIR={}/docs'.format(usr_share_mysql),
-            '-DINSTALL_MYSQLDATADIR={}/data'.format(usr_share_mysql),
-            '-DINSTALL_MYSQLSHAREDIR={}/share'.format(usr_share_mysql),
-            '-DINSTALL_MYSQLTESTDIR={}/mysql-test'.format(
-                usr_share_mysql
+            '-DMYSQL_DATADIR={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'share',
+                    'mysql',
+                    'data'
+                    )
                 ),
-            '-DINSTALL_PLUGINDIR={}/lib/plugin'.format(
-                usr_share_mysql
+
+            '-DINSTALL_SBINDIR={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'bin'
+                    )
                 ),
-            '-DINSTALL_SCRIPTDIR={}/scripts'.format(usr_share_mysql),
-            '-DINSTALL_SHAREDIR={}/share'.format(usr_share_mysql),
+            '-DINSTALL_LIBDIR={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'lib'
+                    )
+                ),
+            '-DINSTALL_MANDIR={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'share',
+                    'man'
+                    )
+                ),
+
+            '-DINSTALL_DOCREADMEDIR={}'.format(usr_share_mysql),
+            '-DINSTALL_INCLUDEDIR={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'include',
+                    'mysql'
+                    )
+                ),
+
+            '-DINSTALL_DOCDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'docs'
+                    )
+                ),
+            '-DINSTALL_INFODIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'docs'
+                    )
+                ),
+            '-DINSTALL_MYSQLDATADIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'data'
+                    )
+                ),
+            '-DINSTALL_MYSQLSHAREDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'share'
+                    )
+                ),
+            '-DINSTALL_MYSQLTESTDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'mysql-test'
+                    )
+                ),
+            '-DINSTALL_PLUGINDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'lib',
+                    'plugin'
+                    )
+                ),
+            '-DINSTALL_SCRIPTDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'scripts'
+                    )
+                ),
+            '-DINSTALL_SHAREDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    'share'
+                    )
+                ),
             '-DINSTALL_SQLBENCHDIR={}'.format(usr_share_mysql),
-            '-DINSTALL_SUPPORTFILESDIR={}/support-files'.format(
-                usr_share_mysql
+            '-DINSTALL_SUPPORTFILESDIR={}'.format(
+                os.path.join(
+                    usr_share_mysql,
+                    support - files
+                    )
                 ),
 
             '-DWITH_SSL=yes',

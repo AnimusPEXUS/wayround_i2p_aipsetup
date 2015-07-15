@@ -1382,9 +1382,6 @@ class SourceRepoCtl:
             clean_only=False
             ):
 
-        if not isinstance(acceptable_src_file_extensions, str):
-            raise TypeError("`acceptable_src_file_extensions' must be str")
-
         src_dir = wayround_org.utils.path.abspath(self.sources_dir)
         sub_src_dir = wayround_org.utils.path.abspath(subdir_name)
 
@@ -1403,7 +1400,7 @@ class SourceRepoCtl:
             ret = self._index_sources_directory(
                 src_dir,
                 sub_src_dir,
-                acceptable_endings=acceptable_src_file_extensions.split(' '),
+                acceptable_endings=acceptable_src_file_extensions,
                 force_reindex=force_reindex,
                 first_delete_found=first_delete_found,
                 clean_only=clean_only

@@ -49,8 +49,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'CXX={}-g++'.format(self.host),
-                'CC={}-gcc'.format(self.host),
+                'CXX={}-g++'.format(self.host_strong),
+                'CC={}-gcc'.format(self.host_strong),
                 'LDFLAGS={}'.format(
                     self.calculate_default_linker_program_gcc_parameter()
                     )
@@ -65,7 +65,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_a(self, called_as, log):
 
         os.makedirs(
-            os.path.join(self.dst_dir, 'multiarch', self.host, 'lib'),
+            os.path.join(self.dst_host_multiarch_dir, 'lib'),
             exist_ok=True
             )
 
@@ -89,8 +89,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'CXX={}-g++'.format(self.host),
-                'CC={}-gcc'.format(self.host),
+                'CXX={}-g++'.format(self.host_strong),
+                'CC={}-gcc'.format(self.host_strong),
                 'LDFLAGS={}'.format(
                     self.calculate_default_linker_program_gcc_parameter()
                     ),
@@ -106,7 +106,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_so(self, called_as, log):
 
         os.makedirs(
-            os.path.join(self.dst_dir, 'multiarch', self.host, 'lib'),
+            os.path.join(self.dst_host_multiarch_dir, 'lib'),
             exist_ok=True
             )
 

@@ -1,26 +1,18 @@
 
-import logging
-import os.path
-import shutil
 
-import wayround_org.utils.path
-
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.utils.file
-
-import logging
 import os.path
 import collections
 import shutil
 
-import wayround_org.aipsetup.build
-import wayround_org.aipsetup.buildtools.autotools as autotools
+import wayround_org.utils.path
 import wayround_org.utils.file
 
+import wayround_org.aipsetup.build
+import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
 
-# TODO: paths fixes
+# TODO: more work required
+
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -31,27 +23,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().define_actions()
 
         ret['after_distribute'] = self.builder_action_after_distribute
-
-        return ret
-
-    def builder_action_edit_package_info(self, called_as, log):
-
-        ret = 0
-
-        try:
-            name = self.package_info['pkg_info']['name']
-        except:
-            name = None
-
-        pi = self.package_info
-
-        if self.is_crossbuilder:
-            pi['pkg_info']['name'] = 'cb-binutils-{}'.format(self.target)
-        else:
-            pi['pkg_info']['name'] = 'binutils'
-
-        bs = self.control
-        bs.write_package_info(pi)
 
         return ret
 
@@ -81,7 +52,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = super().builder_action_configure_define_options(called_as, log)
         ret += [
-            '--with-jobs=1',
+            # '--with-jobs=1',
             '--with-zlib=system',
             '--with-alsa',
             # '--with-freetype',
@@ -90,6 +61,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ]
         if '--enable-shared' in ret:
             ret.remove('--enable-shared')
+
         return ret
 
     def builder_action_distribute(self, called_as, log):
@@ -111,11 +83,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
         ret = 0
 
-        java_dir = os.path.join(self.dst_dir, 'usr', 'lib', 'java')
-
-        etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
-
-        java009 = os.path.join(etc_dir, '009.java.sh')
+        java_dir = os.path.join(self.dst_host_multiarch_dir, 'lib', 'java')
 
         existing_result_dir = None
 
@@ -133,7 +101,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             files = os.listdir(
                 wayround_org.utils.path.join(
                     self.dst_dir,
-                    'jvm'))
+                    'jvm'
+                    )
+                )
 
             if len(files) != 1:
                 ret = 11
@@ -167,7 +137,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 shutil.rmtree(
                     wayround_org.utils.path.join(
                         self.dst_dir,
-                        'jvm'))
+                        'jvm'
+                        )
+                    )
 
         if ret == 0:
             try:
@@ -184,26 +156,5 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             except:
                 logging.exception("can't create symlinks")
                 ret = 13
-
-        if ret == 0:
-
-            os.makedirs(etc_dir, exist_ok=True)
-
-            fi = open(java009, 'w')
-
-            fi.write(
-                """\
-#!/bin/bash
-export JAVA_HOME=/usr/lib/java/jdk
-export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
-export MANPATH=$MANPATH:$JAVA_HOME/man
-if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
-    LD_LIBRARY_PATH+=":"
-fi
-export LD_LIBRARY_PATH+="$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
-"""
-                )
-
-            fi.close()
 
         return ret

@@ -12,38 +12,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = super().define_actions()
-        ret['wrapper'] = self.builder_action_wrapper
         ret['asc_support'] = self.builder_action_asc_support
         return ret
-
-    def builder_action_wrapper(self, called_as, log):
-
-        set_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
-
-        bin_dir = os.path.join(
-            self.dst_host_multiarch_dir, 'share', 'mc', 'bin'
-            )
-
-        os.makedirs(set_dir, exist_ok=True)
-
-        os.makedirs(bin_dir, exist_ok=True)
-
-        files = glob.glob(os.path.join(self.src_dir, 'contrib', '*.sh'))
-
-        for i in files:
-            shutil.copy(i, bin_dir)
-
-        # TODO: I don't like this part
-        f = open(os.path.join(set_dir, '009.mc'), 'w')
-        f.write(
-            """\
-#!/bin/bash
-alias mc=". /usr/share/mc/bin/mc-wrapper.sh"
-"""
-            )
-        f.close()
-
-        return 0
 
     def builder_action_asc_support(self, called_as, log):
         exts_file = os.path.join(self.dst_dir, 'etc', 'mc', 'mc.ext')
@@ -61,11 +31,12 @@ alias mc=". /usr/share/mc/bin/mc-wrapper.sh"
             ind = ftl.index('\n', ind)
 
             ftl = (ftl[:ind] + [
-                '\n',
-                '# asp\n',
-                'shell/i/.asp\n'
-                '\tOpen=%cd %p/utar://\n'
-                '\tView=%view{ascii} /usr/libexec/mc/ext.d/archive.sh view tar\n'
+                """
+# asp
+shell/i/.asp
+\tOpen=%cd %p/utar://
+\tView=%view{ascii} /multiarch/_primary/libexec/mc/ext.d/archive.sh view tar
+"""
                 ] +
                 ftl[ind:])
 

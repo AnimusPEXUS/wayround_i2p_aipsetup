@@ -121,7 +121,7 @@ def find_gnome_tarball_name(
             if (int(parsed_groups_version_list[0]) == required_v1
                     and
                     int(parsed_groups_version_list[1]) == required_v2
-                ):
+                    ):
 
                 is_nineties = check_nineties(parsed)
 
@@ -162,21 +162,21 @@ def find_gnome_tarball_name(
                     if (is_nineties
                             and nineties_minors_are_acceptable == True
                             and int_parsed_groups_version_list_1 < required_v2
-                        ):
+                            ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
                             and is_development
                             and development_are_acceptable == True
                             and int_parsed_groups_version_list_1 < required_v2
-                        ):
+                            ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
                             and not is_nineties
                             and not is_development
                             and int_parsed_groups_version_list_1 < required_v2
-                        ):
+                            ):
                         next_found_acceptable_tarball = i
 
                 if next_found_acceptable_tarball is not None:
@@ -315,19 +315,26 @@ def normal_get(
             found = None
             for j in acceptable_extensions_order_list:
                 for k in res:
-                    if k.endswith(j):
-                        found = k
-                        break
+                    if not isinstance(k, str):
+                        pass
+                    else:
+                        if k.endswith(j):
+                            found = k
+                            break
                 if found is not None:
                     break
             if found is None:
                 found = res[0]
 
-            if not isinstance(
-                    wayround_org.aipsetup.client_pkg.get_tarball(found),
-                    str
-                    ):
-                ret = 3
+            if found is None:
+                logging.error("Could not get tarball for `{}'".format(pkgname))
+                ret = 4
+            else:
+                if not isinstance(
+                        wayround_org.aipsetup.client_pkg.get_tarball(found),
+                        str
+                        ):
+                    ret = 3
         else:
             ret = 2
 
@@ -441,7 +448,7 @@ def get_by_glp(
 
     if ('ask_version' in conf
             and conf['ask_version'] == True
-            and version == None):
+            and version is None):
 
         logging.error("Version is required")
 
@@ -523,8 +530,6 @@ def get_by_glp(
                     kwargs,
                     mute
                     )
-
-
 
             ret = int(errors > 0)
 

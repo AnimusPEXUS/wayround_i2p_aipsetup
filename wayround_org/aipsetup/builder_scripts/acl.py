@@ -1,5 +1,4 @@
 
-import logging
 import os.path
 
 import wayround_org.aipsetup.build
@@ -64,7 +63,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 os.symlink(os.path.join('..', 'lib', i), ffn)
         except:
-            logging.exception('error')
+            log.exception('error')
             ret = 1
         return ret
 

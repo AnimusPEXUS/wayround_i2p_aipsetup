@@ -1,5 +1,4 @@
 
-import logging
 import os.path
 import subprocess
 
@@ -35,7 +34,7 @@ def main(buildingsite, action=None):
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
-                logging.info("cleaningup source dir")
+                log.info("cleaningup source dir")
                 wayround_org.utils.file.cleanup_dir(src_dir)
             ret = autotools.extract_high(
                 buildingsite,

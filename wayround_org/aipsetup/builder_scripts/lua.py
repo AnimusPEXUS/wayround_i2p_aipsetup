@@ -4,10 +4,9 @@ import os.path
 import subprocess
 
 import wayround_org.utils.path
+import wayround_org.utils.file
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
-
-# TODO: host oriented configuration required
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -16,8 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().define_actions()
         del(ret['autogen'])
         del(ret['configure'])
-        # TODO: workout this 'pc' action
-        # ret['pc'] = self.builder_action_pc
+        ret['pc'] = self.builder_action_pc
         return ret
 
     def builder_action_build(self, called_as, log):
@@ -27,9 +25,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'linux',
-                'INSTALL_TOP={}'.format(self.host_multiarch_dir)
+                'INSTALL_TOP={}'.format(self.host_multiarch_dir),
+                'MYCFLAGS=-std=gnu99',
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'MYLDFLAGS={} -ltinfow'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
-            environment={},
+            environment={
+                },
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -43,7 +52,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir)
+                'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir),
+                'MYCFLAGS=-std=gnu99',
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'MYLDFLAGS={} -ltinfow'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             environment={},
             environment_mode='copy',

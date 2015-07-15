@@ -7,16 +7,18 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
 
-# TODO: host oriented configuration required
-
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+
+    ''
 
     def define_actions(self):
         ret = super().define_actions()
         del(ret['autogen'])
+        del(ret['configure'])
         return ret
 
+    '''
     def builder_action_configure(self, called_as, log):
 
         p = subprocess.Popen(
@@ -36,12 +38,24 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
 
         return ret
+    '''
 
     def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
-            options=['-f', 'Makefile.linux'],
+            options=[
+                '-f', 'Makefile.linux',
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
+                ],
             arguments=[],
             environment={},
             environment_mode='copy',

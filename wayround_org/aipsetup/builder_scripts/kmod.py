@@ -1,5 +1,4 @@
 
-import logging
 import os.path
 
 import wayround_org.aipsetup.build

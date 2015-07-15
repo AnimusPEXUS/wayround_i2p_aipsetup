@@ -139,10 +139,14 @@ class Builder:
         return wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
 
     def calculate_default_linker_program_ld_parameter(self):
-        return '--dynamic-linker=' + self.calculate_default_linker_program()
+        return '--dynamic-linker={}'.format(
+            self.calculate_default_linker_program()
+            )
 
     def calculate_default_linker_program_gcc_parameter(self):
-        return '-Wl,' + self.calculate_default_linker_program_ld_parameter()
+        return '-Wl,{}'.format(
+            self.calculate_default_linker_program_ld_parameter()
+            )
 
     def print_help(self):
         txt = ''
@@ -255,6 +259,7 @@ class Builder:
                     ('autogen.sh', ['./autogen.sh']),
                     ('bootstrap.sh', ['./bootstrap.sh']),
                     ('bootstrap', ['./bootstrap']),
+                    ('genconfig.sh', ['./genconfig.sh']),
                     ('configure.ac', ['autoconf']),
                     ('configure.in', ['autoconf']),
                     ]:
@@ -312,15 +317,13 @@ class Builder:
 
         """
         rpath = os.path.join(
-            '/',
-            'multiarch',
-            self.host,
+            self.host_multiarch_dir,
             'lib'
             )
         """
 
         ret = [
-            '--prefix=' + os.path.join('/', 'multiarch', self.host),
+            '--prefix={}'.format(self.host_multiarch_dir),
             '--includedir=' +
             os.path.join(
                 '/',
@@ -328,19 +331,15 @@ class Builder:
                 self.host,
                 'include'
                 ),
-            '--libdir=' + os.path.join('/', 'multiarch', self.host, 'lib'),
+            '--libdir=' + os.path.join(self.host_multiarch_dir, 'lib'),
             '--mandir=' + os.path.join(
-                '/',
-                'multiarch',
-                self.host,
+                self.host_multiarch_dir,
                 'share',
                 'man'
                 ),
             '--sysconfdir=/etc',
             # '--sysconfdir=' + os.path.join(
-            #     '/',
-            #     'multiarch',
-            #     self.host,
+            #     self.host_multiarch_dir,
             #     'etc'
             #     ),
             '--localstatedir=/var',
@@ -348,7 +347,9 @@ class Builder:
 
             # TODO: find way to modify binutils+gcc+glibc chane so it
             #       uses needed interpreter without this f*ckin parameter...
-            'LDFLAGS=' + self.calculate_default_linker_program_gcc_parameter(),
+            'LDFLAGS={}'.format(
+                self.calculate_default_linker_program_gcc_parameter()
+                ),
             'CC={}-gcc'.format(self.host_strong),
             'CXX={}-g++'.format(self.host_strong),
             #'LDFLAGS=-Wl,--dynamic-linker=' + \
@@ -363,7 +364,8 @@ class Builder:
         return 'configure'
 
     def builder_action_configure_define_run_script_not_bash(
-            self, called_as, log):
+            self, called_as, log
+            ):
         return False
 
     def builder_action_configure_define_relative_call(self, called_as, log):
