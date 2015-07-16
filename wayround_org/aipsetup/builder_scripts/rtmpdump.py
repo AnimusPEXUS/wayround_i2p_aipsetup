@@ -23,7 +23,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'install',
                 'prefix={}'.format(self.host_multiarch_dir),
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.dst_dir),
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             environment={},
             environment_mode='copy',

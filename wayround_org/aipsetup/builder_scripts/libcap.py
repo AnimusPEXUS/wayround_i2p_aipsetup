@@ -67,9 +67,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             dst_must_be_empty=True,
             )
 
-        shutil.rmtree(os.path.join(
-            self.dst_host_multiarch_dir,
-            'multiarch'
-            ))
+        shutil.rmtree(
+            os.path.join(
+                self.dst_host_multiarch_dir,
+                'multiarch'
+                )
+            )
 
         return 0

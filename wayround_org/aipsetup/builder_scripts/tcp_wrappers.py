@@ -1,6 +1,7 @@
 
 
 import os.path
+import copy
 import subprocess
 
 import wayround_org.utils.path
@@ -9,6 +10,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 
 # TODO: fix paths or let do this 'buld pack'
+# FIXME: does not work as all
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -46,8 +48,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
-            ['make', 'linux'],
+            ['make',
+             'linux'
+             ],
             cwd=self.src_dir,
+            env=copy.copy(os.environ).update({
+                'CC': '{}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                    )
+                ),
+                'LDFLAGS': '{}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
+                }),
             stdout=log.stdout,
             stderr=log.stderr
             )

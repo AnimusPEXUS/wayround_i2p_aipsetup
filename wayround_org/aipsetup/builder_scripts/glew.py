@@ -11,6 +11,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().define_actions()
         del(ret['autogen'])
         del(ret['configure'])
+        del(ret['build'])
         return ret
 
     def builder_action_distribute(self, called_as, log):
@@ -19,8 +20,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
+                'all',
                 'install.all',
-                'GLEW_DEST=' + os.path.join(self.dst_host_multiarch_dir)
+                'GLEW_DEST=' + os.path.join(self.dst_host_multiarch_dir),
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             environment={},
             environment_mode='copy',

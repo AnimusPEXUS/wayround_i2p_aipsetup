@@ -26,7 +26,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'bios', 'efi32', 'efi64',
                 'installer',
                 'install',
-                'INSTALLROOT={}'.format(self.dst_dir)
+                'INSTALLROOT={}'.format(self.dst_dir),
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                #'LDFLAGS={}'.format(
+                #    self.calculate_default_linker_program_ld_parameter()
+                #    )
                 ],
             environment={},
             environment_mode='copy',

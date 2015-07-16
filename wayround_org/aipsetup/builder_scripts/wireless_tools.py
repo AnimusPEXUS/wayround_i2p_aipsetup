@@ -20,9 +20,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             ['make',
-             'PREFIX={}'.format(self.dst_host_multiarch_dir),
              'all',
-             'install'
+             'install',
+             'PREFIX={}'.format(self.dst_host_multiarch_dir),
+             'CC={}'.format(
+                 wayround_org.utils.file.which(
+                     '{}-gcc'.format(self.host_strong),
+                     self.host_multiarch_dir
+                     )
+                 ),
+             'LDFLAGS={}'.format(
+                 self.calculate_default_linker_program_gcc_parameter()
+                 )
              ],
             cwd=self.src_dir,
             stdout=log.stdout,

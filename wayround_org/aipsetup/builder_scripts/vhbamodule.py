@@ -1,6 +1,9 @@
 
 
 import os.path
+import logging
+import subprocess
+
 import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
@@ -21,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         logging.info("`uname -r' returned: {}".format(kern_rel))
 
         kdir = os.path.join(
-            dst_dir,
+            self.dst_dir,
             'lib',
             'modules',
             kern_rel
@@ -59,7 +62,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 makefile.writelines(lines)
 
         except:
-            logging.exception("Error. See exception message")
+            log.exception("Error. See exception message")
             ret = 10
         return ret
 
@@ -73,7 +76,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install',
                 'PWD={}'.format(self.src_dir),
                 'KERNELRELEASE={}'.format(self.custom_data['kern_rel']),
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.dst_dir),
+                'CC={}'.format(
+                    wayround_org.utils.file.which(
+                        '{}-gcc'.format(self.host_strong),
+                        self.host_multiarch_dir
+                        )
+                    ),
+                'LDFLAGS={}'.format(
+                    self.calculate_default_linker_program_gcc_parameter()
+                    )
                 ],
             environment={},
             environment_mode='copy',
@@ -83,6 +95,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_after_distribute(self, called_as, log):
+
+        ret = 0
 
         kdir = self.custom_data['kdir']
 
@@ -95,7 +109,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     os.unlink(fname)
 
         except:
-            logging.exception("Error. See exception message")
+            log.exception("Error. See exception message")
             ret = 11
 
         return ret
