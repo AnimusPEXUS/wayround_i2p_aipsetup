@@ -15,5 +15,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ]
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        return {
+            'CC': '{}'.format(
+                wayround_org.utils.file.which(
+                    '{}-gcc'.format(self.host_strong),
+                    self.host_multiarch_dir
+                    )
+                ),
+            'LDFLAGS': '{}'.format(
+                self.calculate_default_linker_program_gcc_parameter()
+                )
+            }
+
     def builder_action_configure_define_script_name(self, called_as, log):
         return 'configure.gnu'

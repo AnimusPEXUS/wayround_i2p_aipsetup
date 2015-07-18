@@ -32,6 +32,10 @@ class Builder:
 
         self.forced_target = False
 
+        self.apply_host_spec_linking_interpreter_option = False
+        self.apply_host_spec_linking_lib_dir_options = False
+        self.apply_host_spec_compilers_options = False
+
         self.custom_data = self.define_custom_data()
 
         self.action_dict = self.define_actions()
@@ -73,19 +77,11 @@ class Builder:
 
     @property
     def is_crossbuild(self):
-        return (self.package_info['constitution']['build']
-                != self.package_info['constitution']['host'])
+        return self.build != self.host_strong
 
     @property
     def is_crossbuilder(self):
-        return (
-            self.package_info['constitution']['target']
-            != self.package_info['constitution']['host']
-            # if not commented - crossbuild considered as crossbuilder by
-            # autotools configure script
-            # or self.package_info['constitution']['target']
-            # != self.package_info['constitution']['build']
-            )
+        return self.target is not None and (self.target != self.host_strong)
 
     @property
     def target(self):
@@ -129,6 +125,15 @@ class Builder:
         return wayround_org.utils.path.join(
             self.dst_dir,
             self.host_crossbuilders_dir
+            )
+
+    @property
+    def host_multiarch_lib_dir(self):
+        return wayround_org.utils.path.join(
+            os.path.sep,
+            'multiarch',
+            self.host_strong,
+            'lib'
             )
 
     @property
@@ -311,16 +316,69 @@ class Builder:
                 ret = 2
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
-        """
-        """
+    def builder_action_configure_define_compilers_options(self, d):
+        if not 'CC' in d:
+            d['CC'] = []
+        d['CC'].append('{}-gcc'.format(self.host_strong))
 
-        """
-        rpath = os.path.join(
-            self.host_multiarch_dir,
-            'lib'
+        if not 'CXX' in d:
+            d['CXX'] = []
+        d['CXX'].append('{}-g++'.format(self.host_strong))
+
+        return
+
+    def builder_action_configure_define_linking_interpreter_option(self, d):
+
+        if not 'LDFLAGS' in d:
+            d['LDFLAGS'] = []
+
+        d['LDFLAGS'].append(
+            self.calculate_default_linker_program_gcc_parameter()
             )
-        """
+
+        return
+
+    def builder_action_configure_define_linking_lib_dir_options(self, d):
+
+        if not 'LDFLAGS' in d:
+            d['LDFLAGS'] = []
+
+        d['LDFLAGS'].append('-L{}'.format(self.host_multiarch_lib_dir))
+
+        return
+
+    def all_automatic_flags_as_dict(self):
+
+        d = {}
+
+        if self.apply_host_spec_linking_interpreter_option:
+            self.builder_action_configure_define_linking_interpreter_option(d)
+
+        if self.apply_host_spec_linking_lib_dir_options:
+            self.builder_action_configure_define_linking_lib_dir_options(d)
+
+        if self.apply_host_spec_compilers_options:
+            self.builder_action_configure_define_compilers_options(d)
+
+        return d
+
+    def all_automatic_flags_as_list(self):
+
+        af = self.all_automatic_flags_as_dict()
+
+        ret = []
+
+        for i in sorted(list(af.keys())):
+            ret.append(
+                '{}={}'.format(
+                    i,
+                    ' '.join(af[i])
+                    )
+                )
+
+        return ret
+
+    def builder_action_configure_define_options(self, called_as, log):
 
         ret = [
             '--prefix={}'.format(self.host_multiarch_dir),
@@ -345,17 +403,6 @@ class Builder:
             '--localstatedir=/var',
             '--enable-shared',
 
-            # TODO: find way to modify binutils+gcc+glibc chane so it
-            #       uses needed interpreter without this f*ckin parameter...
-            'LDFLAGS={}'.format(
-                self.calculate_default_linker_program_gcc_parameter()
-                ),
-            'CC={}-gcc'.format(self.host_strong),
-            'CXX={}-g++'.format(self.host_strong),
-            #'LDFLAGS=-Wl,--dynamic-linker=' + \
-            #    dl + \
-            #    ' -Wl,-rpath={}'.format(rpath) + \
-            #    ' -Wl,-rpath-link={}'.format(rpath)
             ] + autotools.calc_conf_hbt_options(self)
 
         return ret
@@ -379,10 +426,13 @@ class Builder:
 
     def builder_action_configure(self, called_as, log):
 
-        defined_options = \
-            self.builder_action_configure_define_options(called_as, log)
-        defined_script_name = \
-            self.builder_action_configure_define_script_name(called_as, log)
+        defined_options = self.builder_action_configure_define_options(
+            called_as,
+            log
+            ) + self.all_automatic_flags_as_list()
+        defined_script_name = self.builder_action_configure_define_script_name(
+            called_as,
+            log)
 
         ret = autotools.configure_high(
             self.buildingsite,

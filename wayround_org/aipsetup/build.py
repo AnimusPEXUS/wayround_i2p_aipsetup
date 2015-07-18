@@ -907,7 +907,7 @@ class PackCtl:
         ret = 0
 
         logging.info(
-            "Looking for executable ELFs to edit theyr linker and rpath"
+            "Looking for executable ELFs to edit theyr linker"
             )
 
         package_info = self.buildingsite_ctl.read_package_info()
@@ -2596,13 +2596,22 @@ def run_builder_action(
 
 def find_dl(root_dir_path):
 
-    root_dir_path = os.path.abspath(root_dir_path)
-
-    gr = glob.glob(os.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
-
     ret = None
 
-    if len(gr) == 1:
-        ret = gr[0]
+    if root_dir_path =='/multiarch/i686-pc-linux-gnu':
+        ret = '/multiarch/i686-pc-linux-gnu/lib/ld-linux.so.2'
+
+    elif root_dir_path =='/multiarch/x86_64-pc-linux-gnu':
+        ret = '/multiarch/i686-pc-linux-gnu/lib/ld-linux-x86-64.so.2'
+        
+    else:
+
+        root_dir_path = os.path.abspath(root_dir_path)
+
+        gr = glob.glob(os.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
+
+
+        if len(gr) == 1:
+            ret = gr[0]
 
     return ret

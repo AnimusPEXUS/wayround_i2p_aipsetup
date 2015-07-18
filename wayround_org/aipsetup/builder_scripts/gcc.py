@@ -20,6 +20,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
         self.separate_build_dir = True
         self.forced_target = True
+        self.apply_host_spec_linking_options = True
+        self.apply_host_spec_compilers_options = False
+
         ret = dict()
         ret['cc_file'] = os.path.join(
             self.dst_host_multiarch_dir, 'bin', 'cc'

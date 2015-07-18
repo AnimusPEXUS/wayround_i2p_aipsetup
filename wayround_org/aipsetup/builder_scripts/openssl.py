@@ -16,13 +16,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
+        platform = 'linux-generic32'
+        if self.host_strong.startswith('x86_64'):
+            platform = 'linux-x86_64'
         # super().builder_action_configure_define_options(called_as, log) +
         ret = [
             '--prefix={}'.format(self.host_multiarch_dir),
             '--openssldir=/etc/ssl',
             'shared',
-            'zlib-dynamic'
-            ]
+            'zlib-dynamic',
+
+            ] + [platform]
         """
         for i in range(len(ret) - 1, -1, -1):
             for j in [
@@ -38,8 +42,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         """
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        ret = {
+            'CC': '{}'.format(
+                wayround_org.utils.file.which(
+                    '{}-gcc'.format(self.host_strong),
+                    self.host_multiarch_dir
+                    )
+                ),
+            # 'CFLAGS': '-m32',
+            'LDFLAGS': '{}'.format(
+                self.calculate_default_linker_program_gcc_parameter()
+                )
+            }
+        return ret
+
     def builder_action_configure_define_script_name(self, called_as, log):
-        return 'config'
+        return 'Configure'
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(

@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://None",
-  "buildscript": "std",
+  "buildscript": "iproute2",
   "version_tool": "",
   "basename": "iproute2",
   "filters": "",

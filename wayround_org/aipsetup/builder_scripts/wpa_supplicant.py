@@ -67,7 +67,15 @@ CONFIG_READLINE=y
 CONFIG_SMARTCARD=y
 CONFIG_WPS=y
 CFLAGS += -I{hmd}/include/libnl3
-""".format(hmd=self.host_multiarch_dir)
+CC={CC}
+LDFLAGS={LDFLAGS}
+""".format(hmd=self.host_multiarch_dir,
+           CC=wayround_org.utils.file.which(
+               '{}-gcc'.format(self.host_strong),
+               self.host_multiarch_dir
+               ),
+           LDFLAGS=self.calculate_default_linker_program_gcc_parameter()
+           )
             )
         f.close()
         return 0

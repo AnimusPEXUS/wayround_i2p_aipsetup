@@ -15,6 +15,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         self.forced_target = True
+        
+        self.apply_host_spec_linking_options = True
+        self.apply_host_spec_compilers_options = False
+        
         return None
 
     def define_actions(self):
