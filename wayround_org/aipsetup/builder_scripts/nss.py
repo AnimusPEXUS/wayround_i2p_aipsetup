@@ -10,14 +10,18 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
 import wayround_org.utils.path
 
-
 import wayround_org.aipsetup.builder_scripts.std
+
+# TODO: paths :-/
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         self.source_configure_reldir = 'nss'
+        self.apply_host_spec_linking_interpreter_option = False
+        self.apply_host_spec_linking_lib_dir_options = False
+        self.apply_host_spec_compilers_options = True
         return None
 
     def define_actions(self):
@@ -79,12 +83,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 'ZLIB_LIBS=-lz',
                 'NSS_USE_SYSTEM_SQLITE=1',
-                'CC={}-gcc'.format(self.host_strong),
-                'CXX={}-g++'.format(self.host_strong),
-                'LDFLAGS={}'.format(
-                    self.calculate_default_linker_program_gcc_parameter()
-                    )
-                ] + opts64,
+                ] + opts64 + self.all_automatic_flags_as_list(),
             environment={
                 # 'BUILD_OPT': '1'
                 },

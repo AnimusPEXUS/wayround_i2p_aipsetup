@@ -12,6 +12,11 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
+
+        self.apply_host_spec_linking_interpreter_option = False
+        self.apply_host_spec_linking_lib_dir_options = False
+        self.apply_host_spec_compilers_options = True
+
         p = subprocess.Popen(
             ['uname', '-r'],
             stdout=subprocess.PIPE
@@ -77,16 +82,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'PWD={}'.format(self.src_dir),
                 'KERNELRELEASE={}'.format(self.custom_data['kern_rel']),
                 'DESTDIR={}'.format(self.dst_dir),
-                'CC={}'.format(
-                    wayround_org.utils.file.which(
-                        '{}-gcc'.format(self.host_strong),
-                        self.host_multiarch_dir
-                        )
-                    ),
-                'LDFLAGS={}'.format(
-                    self.calculate_default_linker_program_gcc_parameter()
-                    )
-                ],
+                ] + self.all_automatic_flags_as_list(),
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,

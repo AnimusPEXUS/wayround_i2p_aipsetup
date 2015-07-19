@@ -85,6 +85,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         java_dir = os.path.join(self.dst_host_multiarch_dir, 'lib', 'java')
 
+        etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
+
+        java009 = os.path.join(
+            etc_dir,
+            '009.java.{}.sh'.format(self.host_strong)
+            )
+
         existing_result_dir = None
 
         resulted_java_dir_basename = None
@@ -157,4 +164,24 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 logging.exception("can't create symlinks")
                 ret = 13
 
+        if ret == 0:
+
+            os.makedirs(etc_dir, exist_ok=True)
+
+            fi = open(java009, 'w')
+
+            fi.write(
+                """\
+#!/bin/bash
+export JAVA_HOME=/usr/lib/java/jdk
+export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
+export MANPATH=$MANPATH:$JAVA_HOME/man
+if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
+    LD_LIBRARY_PATH+=":"
+fi
+export LD_LIBRARY_PATH+="$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
+"""
+                )
+
+            fi.close()
         return ret

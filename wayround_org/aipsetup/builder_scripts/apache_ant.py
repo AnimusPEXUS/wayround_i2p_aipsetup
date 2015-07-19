@@ -24,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
-        apacheant009 = os.path.join(etc_dir, '009.apache-ant.sh')
+        apacheant009 = os.path.join(etc_dir, '009.apache-ant.{}.sh'.format(self.host_strong))
 
         return {
             'src_ant_dir': src_ant_dir,
@@ -69,5 +69,31 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             clear_before_copy=True,
             dst_must_be_empty=True
             )
+    
+        # NOTE: disabled because I fink it's not needed
+        if False:
+
+            os.makedirs(
+                self.custom_data['etc_dir'], 
+                exist_ok=True
+                )
+
+            fi = open(
+                self.custom_data['apacheant009'], 
+                'w'
+                )
+            
+            # TODO: may be all such PATH creators better to move away from
+            #       builder scripts, so creators don't be deleted with package
+            #       removes
+            fi.write(
+                """\
+    #!/bin/bash
+    export ANT_HOME='/usr/lib/java/apache-ant'
+    export PATH="$PATH:$ANT_HOME/bin"
+    """
+                )
+
+            fi.close()
 
         return 0

@@ -785,8 +785,30 @@ class SystemCtl:
                                     ),
                                 wayround_org.utils.path.join(
                                     self.basedir, 'usr', 'lib64'
-                                    )
-                                ]:
+                                    ),
+                                wayround_org.utils.path.join(
+                                    self.basedir, 'usr', 'lib32'
+                                    ),
+                                wayround_org.utils.path.join(
+                                    self.basedir, 'usr', 'libx32'
+                                    ),
+                                ] + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multiarch', '*', 'lib'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multiarch', '*', 'lib64'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multiarch', '*', 'lib32'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multiarch', '*', 'libx32'
+                                        )
+                                    ):
                             e = wayround_org.utils.format.elf.ELF(i)
                             if e.elf_type_name == 'ET_DYN':
                                 shared_objects.add(i)
@@ -2757,16 +2779,16 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                                    wayround_org.utils.path.join(
+                            wayround_org.utils.path.join(
                                         '/multiarch', host, 'lib'
                                         )
-                                    )
-                                    or not os.path.isdir(
-                                    wayround_org.utils.path.join(
+                            )
+                            or not os.path.isdir(
+                            wayround_org.utils.path.join(
                                         self.basedir,
                                         wj)
-                                    )
-                                ):
+                            )
+                            ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

@@ -467,11 +467,10 @@ class BuildCtl:
                         else:
 
                             try:
-                                ret = run_builder_action(
+                                ret = self.run_builder_action(
                                     self.buildingsite_ctl.getDIR_BUILD_LOGS(),
                                     actions_container,
-                                    action=action,
-                                    package_info=package_info
+                                    action=action
                                     )
                             except KeyboardInterrupt:
                                 raise
@@ -511,6 +510,70 @@ class BuildCtl:
                 else:
                     logging.error("Invalid build script structure")
                     ret = 4
+
+        return ret
+
+    def run_builder_action(
+            self,
+            log_output_directory,
+            actions_container_object,
+            action=None
+            ):
+
+        # TODO: add support for list of 2-tuples
+
+        if not isinstance(
+                actions_container_object,
+                collections.OrderedDict
+                ):
+            raise TypeError("`actions_container_object' must be OrderedDict")
+
+        ret = 0
+
+        actions = list(actions_container_object.keys())
+
+        if action is not None and isinstance(action, str):
+            if action.endswith('+'):
+                actions = actions[actions.index(action[:-1]):]
+            else:
+                actions = [actions[actions.index(action)]]
+
+        for i in actions:
+
+            package_info = self.buildingsite_ctl.read_package_info(
+                ret_on_error=None
+                )
+
+            log = wayround_org.utils.log.Log(
+                log_output_directory,
+                '{} {}'.format(
+                    package_info['pkg_info']['name'], i
+                    )
+                )
+
+            log.info(
+                "=>------[Starting '{}' action".format(i)
+                )
+            try:
+                ret = actions_container_object[i](i, log)
+            except KeyboardInterrupt:
+                raise
+            except:
+                log.exception(
+                    "=>------[Exception on '{}' action".format(i)
+                    )
+                ret = 100
+            else:
+                log.info(
+                    "=>------[Finished '{}' action with code {}".format(
+                        i, ret
+                        )
+                    )
+
+            log.close()
+
+            if ret != 0:
+                break
 
         return ret
 
@@ -2598,18 +2661,19 @@ def find_dl(root_dir_path):
 
     ret = None
 
-    if root_dir_path =='/multiarch/i686-pc-linux-gnu':
+    # TODO: better decigen required.
+
+    if root_dir_path == '/multiarch/i686-pc-linux-gnu':
         ret = '/multiarch/i686-pc-linux-gnu/lib/ld-linux.so.2'
 
-    elif root_dir_path =='/multiarch/x86_64-pc-linux-gnu':
-        ret = '/multiarch/i686-pc-linux-gnu/lib/ld-linux-x86-64.so.2'
-        
+    elif root_dir_path == '/multiarch/x86_64-pc-linux-gnu':
+        ret = '/multiarch/x86_64-pc-linux-gnu/lib/ld-linux-x86-64.so.2'
+
     else:
 
         root_dir_path = os.path.abspath(root_dir_path)
 
         gr = glob.glob(os.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
-
 
         if len(gr) == 1:
             ret = gr[0]

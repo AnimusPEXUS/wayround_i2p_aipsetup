@@ -321,6 +321,10 @@ class Builder:
             d['CC'] = []
         d['CC'].append('{}-gcc'.format(self.host_strong))
 
+        if not 'GCC' in d:
+            d['GCC'] = []
+        d['GCC'].append('{}-gcc'.format(self.host_strong))
+
         if not 'CXX' in d:
             d['CXX'] = []
         d['CXX'].append('{}-g++'.format(self.host_strong))
@@ -349,6 +353,17 @@ class Builder:
 
     def all_automatic_flags_as_dict(self):
 
+        af = self.all_automatic_flags()
+
+        ret = {}
+
+        for i in sorted(list(af.keys())):
+            ret[i] = ' '.join(af[i])
+
+        return ret
+
+    def all_automatic_flags(self):
+
         d = {}
 
         if self.apply_host_spec_linking_interpreter_option:
@@ -360,11 +375,15 @@ class Builder:
         if self.apply_host_spec_compilers_options:
             self.builder_action_configure_define_compilers_options(d)
 
+        print(
+            'd:\n{}'.format(d)
+            )
+
         return d
 
     def all_automatic_flags_as_list(self):
 
-        af = self.all_automatic_flags_as_dict()
+        af = self.all_automatic_flags()
 
         ret = []
 
@@ -403,7 +422,8 @@ class Builder:
             '--localstatedir=/var',
             '--enable-shared',
 
-            ] + autotools.calc_conf_hbt_options(self)
+            ] + autotools.calc_conf_hbt_options(self) + \
+            self.all_automatic_flags_as_list()
 
         return ret
 
@@ -429,10 +449,12 @@ class Builder:
         defined_options = self.builder_action_configure_define_options(
             called_as,
             log
-            ) + self.all_automatic_flags_as_list()
+            )
+
         defined_script_name = self.builder_action_configure_define_script_name(
             called_as,
-            log)
+            log
+            )
 
         ret = autotools.configure_high(
             self.buildingsite,
@@ -441,7 +463,8 @@ class Builder:
             arguments=[],
             environment=self.builder_action_configure_define_environment(
                 called_as,
-                log),
+                log
+                ),
             environment_mode='copy',
             source_configure_reldir=self.source_configure_reldir,
             use_separate_buildding_dir=self.separate_build_dir,

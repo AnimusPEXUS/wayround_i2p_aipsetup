@@ -15,5 +15,3 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     builder_action_configure = \
         wayround_org.aipsetup.builder_scripts.std.Builder.builder_action_configure
-
-    # NOTE: 'LDFLAGS': '-ltinfow' may be required
