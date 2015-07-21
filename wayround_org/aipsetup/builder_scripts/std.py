@@ -153,6 +153,30 @@ class Builder:
             self.calculate_default_linker_program_ld_parameter()
             )
 
+    def calculate_pkgconfig_search_paths(self):
+        return [
+            wayround_org.utils.path.join(
+                self.host_multiarch_dir,
+                'share',
+                'pkgconfig'),
+            wayround_org.utils.path.join(
+                self.host_multiarch_dir,
+                'lib',
+                'pkgconfig'),
+            wayround_org.utils.path.join(
+                self.host_multiarch_dir,
+                'lib32',
+                'pkgconfig'),
+            wayround_org.utils.path.join(
+                self.host_multiarch_dir,
+                'libx32',
+                'pkgconfig'),
+            wayround_org.utils.path.join(
+                self.host_multiarch_dir,
+                'lib64',
+                'pkgconfig'),
+            ]
+
     def print_help(self):
         txt = ''
         print("building script: {}".format(self))
@@ -456,15 +480,23 @@ class Builder:
             log
             )
 
+        envs = self.builder_action_configure_define_environment(
+            called_as,
+            log
+            )
+
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+
+        envs.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            )
+
         ret = autotools.configure_high(
             self.buildingsite,
             log=log,
             options=defined_options,
             arguments=[],
-            environment=self.builder_action_configure_define_environment(
-                called_as,
-                log
-                ),
+            environment=envs,
             environment_mode='copy',
             source_configure_reldir=self.source_configure_reldir,
             use_separate_buildding_dir=self.separate_build_dir,

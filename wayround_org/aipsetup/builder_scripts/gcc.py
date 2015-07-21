@@ -210,6 +210,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
+
+                # experimental option for this place
+                '--with-sysroot={}'.format(self.host_multiarch_dir)
                 ]
 
         return ret

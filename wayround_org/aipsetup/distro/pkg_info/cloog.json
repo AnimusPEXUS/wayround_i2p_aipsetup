@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "cloog",
   "version_tool": "",
   "basename": "cloog",
   "filters": "",

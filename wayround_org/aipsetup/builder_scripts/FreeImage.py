@@ -15,6 +15,12 @@ import wayround_org.utils.path
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
+    def define_custom_data(self):
+        self.apply_host_spec_linking_interpreter_option = False
+        self.apply_host_spec_linking_lib_dir_options = False
+        self.apply_host_spec_compilers_options = True
+        return
+
     def define_actions(self):
         return collections.OrderedDict([
             ('dst_cleanup', self.builder_action_dst_cleanup),
@@ -30,8 +36,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             [
                 'make',
-                'CC={}-gcc'.format(self.host_strong),
-                'CXX={}-g++'.format(self.host_strong),
                 'DESTDIR={}'.format(self.host_multiarch_dir),
                 'INCDIR={}'.format(
                     wayround_org.utils.path.join(
@@ -45,7 +49,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         'lib'
                         )
                     )
-                ],
+                ] + self.all_automatic_flags_as_list(),
             cwd=self.src_dir,
             stdout=log.stdout,
             stderr=log.stderr

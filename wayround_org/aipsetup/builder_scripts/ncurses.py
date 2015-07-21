@@ -145,6 +145,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-ticlib',
             '--with-termlib',
             '--with-pkg-config',
+
+            # NOTE: building with ada fails on new installations
+            # '--without-ada',
+            '--without-ada',
             ]
 
         if not self.is_crossbuild and not self.is_crossbuilder:
@@ -155,7 +159,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--without-ada'
                 ]
 
-        return super().builder_action_configure_define_options(called_as, log) + ret
+        return super().builder_action_configure_define_options(
+            called_as, log) + ret
 
     def builder_action_links(self, called_as, log):
 

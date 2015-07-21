@@ -2594,69 +2594,6 @@ def isWdDirRestricted(path):
     return ret
 
 
-def run_builder_action(
-        log_output_directory,
-        actions_container_object,
-        action=None,
-        package_info=None
-        ):
-
-    # TODO: add support for list of 2-tuples
-
-    if not isinstance(
-            actions_container_object,
-            collections.OrderedDict
-            ):
-        raise TypeError("`actions_container_object' must be OrderedDict")
-
-    ret = 0
-
-    actions = list(actions_container_object.keys())
-
-    if action is not None and isinstance(action, str):
-        if action.endswith('+'):
-            actions = actions[actions.index(action[:-1]):]
-        else:
-            actions = [actions[actions.index(action)]]
-
-    for i in actions:
-
-        # TODO: make package_info reloaded on each etiration
-
-        log = wayround_org.utils.log.Log(
-            log_output_directory,
-            '{} {}'.format(
-                package_info['pkg_info']['name'], i
-                )
-            )
-
-        log.info(
-            "=>------[Starting '{}' action".format(i)
-            )
-        try:
-            ret = actions_container_object[i](i, log)
-        except KeyboardInterrupt:
-            raise
-        except:
-            log.exception(
-                "=>------[Exception on '{}' action".format(i)
-                )
-            ret = 100
-        else:
-            log.info(
-                "=>------[Finished '{}' action with code {}".format(
-                    i, ret
-                    )
-                )
-
-        log.close()
-
-        if ret != 0:
-            break
-
-    return ret
-
-
 def find_dl(root_dir_path):
 
     ret = None

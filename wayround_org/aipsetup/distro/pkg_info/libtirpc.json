@@ -4,7 +4,7 @@
   "buildscript": "libtirpc",
   "version_tool": "",
   "basename": "libtirpc",
-  "filters": "",
+  "filters": "# 0.3.2 breaks PAM\n- version == 0.3.2",
   "removable": true,
   "reducible": true,
   "non_installable": false,

@@ -28,12 +28,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'all',
                 'install',
-                'LDPATH=-L{}'.format(
-                    os.path.join(self.host_multiarch_dir, 'lib')
-                    ),
-                'RUNPATH=-R$(INS_BASE)/lib -R{}'.format(
-                    os.path.join(self.host_multiarch_dir, 'lib')
-                    ),
+                #'LDPATH=-L{}'.format(
+                #    os.path.join(self.host_multiarch_dir, 'lib')
+                #    ),
+                #'RUNPATH=-R$(INS_BASE)/lib -R{}'.format(
+                #    os.path.join(self.host_multiarch_dir, 'lib')
+                #    ),
                 'INS_BASE={}'.format(os.path.join(self.host_multiarch_dir)),
                 'DESTDIR={}'.format(self.dst_dir),
                 ] + self.all_automatic_flags_as_list(),

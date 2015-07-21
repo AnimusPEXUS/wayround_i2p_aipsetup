@@ -106,6 +106,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             '--enable-lto',
             '--enable-ld',
+
+            # experiment:
+            '--with-sysroot={}'.format(self.host_multiarch_dir)
             ]
 
         if self.is_crossbuilder:
