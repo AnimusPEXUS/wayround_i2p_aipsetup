@@ -154,28 +154,36 @@ class Builder:
             )
 
     def calculate_pkgconfig_search_paths(self):
-        return [
-            wayround_org.utils.path.join(
-                self.host_multiarch_dir,
-                'share',
-                'pkgconfig'),
-            wayround_org.utils.path.join(
-                self.host_multiarch_dir,
-                'lib',
-                'pkgconfig'),
-            wayround_org.utils.path.join(
-                self.host_multiarch_dir,
-                'lib32',
-                'pkgconfig'),
-            wayround_org.utils.path.join(
-                self.host_multiarch_dir,
-                'libx32',
-                'pkgconfig'),
-            wayround_org.utils.path.join(
-                self.host_multiarch_dir,
-                'lib64',
-                'pkgconfig'),
-            ]
+
+        ret = []
+
+        for i in [
+                wayround_org.utils.path.join(
+                    self.host_multiarch_dir,
+                    'share',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    self.host_multiarch_dir,
+                    'lib',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    self.host_multiarch_dir,
+                    'lib32',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    self.host_multiarch_dir,
+                    'libx32',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    self.host_multiarch_dir,
+                    'lib64',
+                    'pkgconfig'),
+                ]:
+
+            if os.path.isdir(i):
+                ret.append(i)
+
+        return ret
 
     def print_help(self):
         txt = ''
@@ -293,13 +301,6 @@ class Builder:
                     ('configure.in', ['autoconf']),
                     ]:
 
-                log.info(
-                    "found `{}'. trying to execute: {}".format(
-                        i[0],
-                        ' '.join(i[1])
-                        )
-                    )
-
                 if os.path.isfile(
                         wayround_org.utils.path.join(
                             self.src_dir,
@@ -307,6 +308,14 @@ class Builder:
                             i[0]
                             )
                         ):
+
+                    log.info(
+                        "found `{}'. trying to execute: {}".format(
+                            i[0],
+                            ' '.join(i[1])
+                            )
+                        )
+
                     wd = wayround_org.utils.path.join(
                         self.src_dir,
                         self.source_configure_reldir
@@ -399,10 +408,6 @@ class Builder:
         if self.apply_host_spec_compilers_options:
             self.builder_action_configure_define_compilers_options(d)
 
-        print(
-            'd:\n{}'.format(d)
-            )
-
         return d
 
     def all_automatic_flags_as_list(self):
@@ -445,6 +450,8 @@ class Builder:
             #     ),
             '--localstatedir=/var',
             '--enable-shared',
+
+            '--with-sysroot={}'.format(self.host_multiarch_dir)
 
             ] + autotools.calc_conf_hbt_options(self) + \
             self.all_automatic_flags_as_list()

@@ -179,7 +179,7 @@ def _constitution_configurer_sub01(
                 value_l
                 )
             if re_res is None:
-                #raise Exception("invalid parameter value")
+                # raise Exception("invalid parameter value")
                 pass
 
             else:
@@ -631,7 +631,7 @@ class PackCtl:
                     wayround_org.utils.path.join(destdir, 'usr', i),
                     dst_must_be_empty=False
                     )
-                #shutil.copytree(p1, destdir + os.path.sep + 'usr')
+                # shutil.copytree(p1, destdir + os.path.sep + 'usr')
                 shutil.rmtree(p1)
 
         for i in INVALID_DESTDIR_ROOT_LINKS:
@@ -647,6 +647,65 @@ class PackCtl:
                 ret = 1
 
         return ret
+
+    def rename_configuration_dirs(self):
+        ret = 0
+
+        logging.info("Renaming configuration directories")
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        dst_dir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        host = package_info['constitution']['host']
+
+        files = sorted(os.listdir(dst_dir))
+
+        errors = 0
+
+        for i in ['etc', 'var']:
+
+            i_new_name = '{}.distr.{}'.format(i, host)
+            src_dir_name = os.path.join(dst_dir, i)
+            target_dir_name = os.path.join(dst_dir, i_new_name)
+
+            if i in files:
+
+                if os.path.isdir(src_dir_name):
+                    if not os.path.exists(target_dir_name):
+
+                        logging.info(
+                            "    renaming `{}' to `{}'".format(i, i_new_name)
+                            )
+
+                        os.rename(src_dir_name, target_dir_name)
+
+                    else:
+                        logging.error(
+                            "    `{}' already exists".format(i_new_name)
+                            )
+                        errors += 1
+
+        del(files)
+
+        etc_new_name = '{}.distr.{}'.format('etc', host)
+
+        src_set_dir = os.path.join(dst_dir, etc_new_name, 'profile.d', 'SET')
+        dst_set_dir = os.path.join(dst_dir, 'etc', 'profile.d', 'SET')
+
+        if os.path.isdir(src_set_dir):
+            logging.info("Copying profile.d/SET files")
+            if wayround_org.utils.file.copy_file_or_directory(
+                    src_set_dir,
+                    dst_set_dir,
+                    overwrite_files=True,
+                    clear_before_copy=False,
+                    dst_must_be_empty=False,
+                    verbose=True
+                    ) != 0:
+                errors += 1
+
+        return int(errors != 0)
 
     def relocate_usr_multiarch_files(self):
 
@@ -1612,6 +1671,7 @@ class PackCtl:
 
         for i in [
                 self.destdir_verify_paths_correctness,
+                self.rename_configuration_dirs,
                 self.relocate_usr_multiarch_files,
                 self.relocate_wrong_usr_under_multiarch_dir,
                 self.relocate_libx_dir_files_into_lib_dir,

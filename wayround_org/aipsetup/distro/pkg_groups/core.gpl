@@ -69,6 +69,7 @@
         "libpwquality", "cracklib",
         "krb5",
         "subversion",
-        "hamcrest-java"
+        "hamcrest-java",
+        "rsync"
     ]
 }

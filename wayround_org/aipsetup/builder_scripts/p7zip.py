@@ -30,12 +30,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         CXX = '{}-g++'.format(self.host_strong)
         CC = '{}-gcc'.format(self.host_strong)
-        LOCAL_FLAGS = self.calculate_default_linker_program_gcc_parameter()
+        # LOCAL_FLAGS = self.calculate_default_linker_program_gcc_parameter()
 
         ret = {
             'CXX': CXX,
             'CC': CC,
-            'LOCAL_FLAGS': LOCAL_FLAGS,
+            #'LOCAL_FLAGS': LOCAL_FLAGS,
             'PREFIX': self.host_multiarch_dir,
             'makefile_suffix': makefile_suffix
             }
@@ -62,7 +62,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'7za', '7z',
                 'CC={}'.format(self.custom_data['CC']),
                 'CXX={}'.format(self.custom_data['CXX']),
-                'LOCAL_FLAGS={}'.format(self.custom_data['LOCAL_FLAGS']),
+                # 'LOCAL_FLAGS={}'.format(self.custom_data['LOCAL_FLAGS']),
                 'DEST_HOME={}'.format(self.custom_data['PREFIX']),
                 'DEST_DIR={}'.format(self.dst_dir)
                 ],
@@ -80,7 +80,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install',
                 'CC={}'.format(self.custom_data['CC']),
                 'CXX={}'.format(self.custom_data['CXX']),
-                'LOCAL_FLAGS={}'.format(self.custom_data['LOCAL_FLAGS']),
+                #'LOCAL_FLAGS={}'.format(self.custom_data['LOCAL_FLAGS']),
                 'DEST_HOME={}'.format(self.custom_data['PREFIX']),
                 'DEST_DIR={}'.format(self.dst_dir)
                 ],

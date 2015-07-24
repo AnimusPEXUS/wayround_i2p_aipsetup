@@ -1,5 +1,9 @@
 
+import os.path
+
 import wayround_org.aipsetup.builder_scripts.std
+
+import wayround_org.aipsetup.buildtools.autotools as autotools
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
@@ -12,11 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         ret += [
-            '--with-sysroot={}'.format(self.host_multiarch_dir),
-
-            # TODO: investigate and enable python
-            '--without-python',
-            #'--with-python=3'
+            '--with-python=3'
             ]
 
         if not self.is_crossbuild and not self.is_crossbuilder:
@@ -29,4 +29,27 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--without-systemd',
                 ]
 
+        return ret
+
+    def builder_action_build(self, called_as, log):
+        ret = autotools.make_high(
+            self.buildingsite,
+            log=log,
+            options=[],
+            arguments=[
+                'INCLUDES=-I{}'.format(
+                    os.path.join(
+                        self.host_multiarch_dir,
+                        'include',
+                        'ncursesw'
+                    )
+                )
+                ],
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log),
+            environment_mode='copy',
+            use_separate_buildding_dir=self.separate_build_dir,
+            source_configure_reldir=self.source_configure_reldir
+            )
         return ret

@@ -33,7 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--enable-glx-tls',
 
             '--enable-xorg',
-            '--with-egl-platforms=x11,drm,wayland,fbdev,null',
+            '--with-egl-platforms=x11,drm,wayland,null',
             '--with-gallium-drivers=nouveau,svga,swrast',
             '--with-dri-drivers=nouveau,i915,i965,r200,radeon,swrast',
 

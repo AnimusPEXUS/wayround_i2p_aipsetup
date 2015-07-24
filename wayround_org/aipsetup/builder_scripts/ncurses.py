@@ -19,14 +19,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             wayround_org.aipsetup.build.getDIR_PATCHES(self.buildingsite)
         ret['dst_lib_dir'] = \
             wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib')
-        ret['dst_pc_lib_dir'] = \
-            wayround_org.utils.path.join(ret['dst_lib_dir'], 'pkgconfig')
+        ret['dst_share_dir'] = \
+            wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'share')
+        ret['dst_pc_dir'] = \
+            wayround_org.utils.path.join(ret['dst_share_dir'], 'pkgconfig')
         return ret
 
     def define_actions(self):
         ret = super().define_actions()
-        #ret['links'] = self.builder_action_links
-        #ret['pc'] = self.builder_action_pc
+        ret['links'] = self.builder_action_links
+        ret['pc'] = self.builder_action_pc
         return ret
 
     def builder_action_patch(self, called_as, log):
@@ -208,7 +210,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_pc(self, called_as, log):
         ret = 0
 
-        dst_pc_lib_dir = self.custom_data['dst_pc_lib_dir']
+        dst_pc_lib_dir = self.custom_data['dst_pc_dir']
 
         for s in [
                 ('*w.pc', 'w.pc', '.pc'),

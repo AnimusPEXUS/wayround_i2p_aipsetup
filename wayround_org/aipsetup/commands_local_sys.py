@@ -412,7 +412,7 @@ def system_find_package_files(command_name, opts, args, adds):
         )
 
     ret = system.find_file_in_files_installed_by_asps(
-        lookfor, mode=look_meth
+        lookfor, mode=look_meth, host=False
         )
 
     if isinstance(ret, dict):

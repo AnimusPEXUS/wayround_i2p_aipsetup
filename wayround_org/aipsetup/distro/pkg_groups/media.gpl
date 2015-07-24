@@ -48,8 +48,8 @@
      }
     },
 
-    "mjpegtools", "libjpeg", "jpeg", "jasper",
-
+    "mjpegtools", "jasper",
+    
     "openexr", "ilmbase",
 
     "giflib", "giflib4", "libungif",
@@ -64,7 +64,7 @@
 
     "libpng",
 
-    "frei0r", "frei0r-plugins",
+    "frei0r-plugins",
 
     "gimp", "gap",
 

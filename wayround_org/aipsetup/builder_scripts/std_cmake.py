@@ -28,20 +28,56 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
+    def builder_action_configure_define_compilers_options(self, d):
+        if not 'CMAKE_C_COMPILER' in d:
+            d['CMAKE_C_COMPILER'] = []
+        d['CMAKE_C_COMPILER'].append('{}-gcc'.format(self.host_strong))
+
+        if not 'CMAKE_CXX_COMPILER' in d:
+            d['CMAKE_CXX_COMPILER'] = []
+        d['CMAKE_CXX_COMPILER'].append('{}-g++'.format(self.host_strong))
+
+        return
+
+    def builder_action_configure_define_linking_interpreter_option(self, d):
+
+        if not 'CMAKE_EXE_LINKER_FLAGS' in d:
+            d['CMAKE_EXE_LINKER_FLAGS'] = []
+
+        d['CMAKE_EXE_LINKER_FLAGS'].append(
+            self.calculate_default_linker_program_gcc_parameter()
+            )
+
+        return
+
+    def builder_action_configure_define_linking_lib_dir_options(self, d):
+
+        if not 'LDFLAGS' in d:
+            d['LDFLAGS'] = []
+
+        d['LDFLAGS'].append('-L{}'.format(self.host_multiarch_lib_dir))
+
+        return
+
     def builder_action_configure_define_options(self, called_as, log):
+
+        minus_d_list = ['-D{}'.format(x)
+                        for x in self.all_automatic_flags_as_list()]
 
         ret = [
             '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
+            '-DCMAKE_SYSROOT={}'.format(self.host_multiarch_dir),
             '-DSYSCONFDIR=/etc',
             '-DLOCALSTATEDIR=/var',
-            '-DCMAKE_EXE_LINKER_FLAGS={}'.format(
-                self.calculate_default_linker_program_gcc_parameter()
-                ),
-            '-DCMAKE_C_COMPILER={}-gcc'.format(self.host_strong),
-            '-DCMAKE_CXX_COMPILER={}-g++'.format(self.host_strong),
-            ]
+            ] + cmake.calc_conf_hbt_options(self) + minus_d_list
 
-        return ret + cmake.calc_conf_hbt_options(self)
+        print(
+            'builder_action_configure_define_options: {}'.format(
+                ret
+                )
+            )
+
+        return ret
 
     def builder_action_configure(self, called_as, log):
 
@@ -49,12 +85,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             called_as,
             log)
 
+        envs = self.builder_action_configure_define_environment(
+            called_as,
+            log
+            )
+
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+
+        envs.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            )
+
         ret = cmake.cmake_high(
             self.buildingsite,
             log=log,
             options=defined_options,
             arguments=[],
-            environment={},
+            environment=envs,
             environment_mode='copy',
             source_subdir=self.source_configure_reldir,
             build_in_separate_dir=self.separate_build_dir
