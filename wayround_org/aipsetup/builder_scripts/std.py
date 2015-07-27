@@ -34,7 +34,7 @@ class Builder:
 
         self.apply_host_spec_linking_interpreter_option = False
         self.apply_host_spec_linking_lib_dir_options = False
-        self.apply_host_spec_compilers_options = False
+        self.apply_host_spec_compilers_options = True
 
         self.custom_data = self.define_custom_data()
 
@@ -527,7 +527,8 @@ class Builder:
             arguments=[],
             environment=self.builder_action_make_define_environment(
                 called_as,
-                log),
+                log
+                ),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -545,7 +546,8 @@ class Builder:
                 ],
             environment=self.builder_action_make_define_environment(
                 called_as,
-                log),
+                log
+                ),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

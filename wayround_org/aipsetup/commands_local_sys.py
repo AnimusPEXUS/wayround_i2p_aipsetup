@@ -92,11 +92,11 @@ def system_install_package(command_name, opts, args, adds):
         ['-b', '--force', '-h']
         )
 
-    host = None
-    if '-h' in opts:
-        host = opts['-h']
-
     if ret == 0:
+
+        host = None
+        if '-h' in opts:
+            host = opts['-h']
 
         basedir = '/'
         if '-b' in opts:
@@ -334,6 +334,13 @@ def system_remove_package(command_name, opts, args, adds):
 
     force = '--force' in opts
 
+    host = None
+    if '-h' in opts:
+        host = opts['-h']
+
+    if host == 'false':
+        host = False
+
     name = None
     if len(args) > 0:
         name = args[0]
@@ -359,7 +366,7 @@ def system_remove_package(command_name, opts, args, adds):
             basedir
             )
 
-        ret = system.remove_package(name, force, basedir)
+        ret = system.remove_package(name, force, basedir, host=host)
 
         wayround_org.aipsetup.sysupdates.all_actions()
 

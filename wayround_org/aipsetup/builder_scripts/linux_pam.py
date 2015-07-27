@@ -11,6 +11,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--disable-nis',
             '--enable-db=ndbm',
             '--enable-read-both-confs',
-            '--enable-selinux'
+            '--enable-selinux',
+            '--includedir={}'.format(
+                os.path.join(
+                    self.host_multiarch_dir,
+                    'include',
+                    'security'
+                    )
+                )
             #'--enable-securedir=/pam_modules'
-            ]
+            ]  # + self.all_automatic_flags_as_list()

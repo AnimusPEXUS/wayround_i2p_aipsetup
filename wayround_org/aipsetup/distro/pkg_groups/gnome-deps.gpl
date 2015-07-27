@@ -42,6 +42,26 @@
         
         "libwacom",
         
-        "libxklavier"
+        "libxklavier",
+        
+        "polkit-gnome": {
+    "proc": "normal_get",
+    "args": [],
+    "kwargs": {}
+    },
+    
+
+"rest": {
+    "proc": "normal_get",
+    "args": [],
+    "kwargs": {}
+    },
+        "mm-common": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+
+
     ]
 }

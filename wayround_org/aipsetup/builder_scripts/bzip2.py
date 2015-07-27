@@ -15,18 +15,12 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        thr = {
-            'CC': [],
-            'AR': [],
-            'RANLIB': []
-            }
-        if self.is_crossbuild:
-            thr['CC'] = ['CC={}-gcc'.format(self.host_strong)]
-            thr['AR'] = ['AR={}-ar'.format(self.host_strong)]
-            thr['RANLIB'] = ['RANLIB={}-ranlib'.format(self.host_strong)]
-        return {
-            'thr': thr
-            }
+        thr = {}
+        thr['CC'] = 'CC={}-gcc'.format(self.host_strong)
+        thr['AR'] = 'AR={}-gcc-ar'.format(self.host_strong)
+        thr['RANLIB'] = 'RANLIB={}-gcc-ranlib'.format(self.host_strong)
+        ret = {'thr': thr}
+        return ret
 
     def define_actions(self):
         return collections.OrderedDict([
@@ -54,9 +48,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'libbz2.a',
                 'bzip2',
                 'bzip2recover'
-                ] + self.custom_data['thr']['CC'] +
-            self.custom_data['thr']['AR'] +
-            self.custom_data['thr']['RANLIB'],
+                ] + [self.custom_data['thr']['CC']] +
+            [self.custom_data['thr']['AR']] +
+            [self.custom_data['thr']['RANLIB']],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
@@ -93,9 +87,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'CFLAGS= -fpic -fPIC -Wall -Winline -O2 -g '
                 '-D_FILE_OFFSET_BITS=64',
                 'PREFIX={}'.format(self.dst_host_multiarch_dir)
-                ] + self.custom_data['thr']['CC'] +
-            self.custom_data['thr']['AR'] +
-            self.custom_data['thr']['RANLIB'],
+                ] + [self.custom_data['thr']['CC']] +
+            [self.custom_data['thr']['AR']] +
+            [self.custom_data['thr']['RANLIB']],
             environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,

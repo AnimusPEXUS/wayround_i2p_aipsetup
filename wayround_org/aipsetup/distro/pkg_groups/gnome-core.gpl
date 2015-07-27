@@ -4,16 +4,6 @@
 
     "names" : {
 
-        "gtk-engines": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "2.20",
-                "nmaa": false,
-                "daa": false
-                }
-            },
-
         "adwaita-icon-theme": {
             "proc": "gnome_get",
             "args": [],
@@ -364,36 +354,6 @@
                 "version": "{asked_version}"
                 }
             },
-        "gtk+": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gtkmm": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}",
-                "daa": true,
-                "nmaa": false
-                }
-        },
-        "gtkhtml": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gtksourceview": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
         "gucharmap": {
             "proc": "gnome_get",
             "args": [],
@@ -612,26 +572,6 @@
             "args": [],
             "kwargs": {}
             },
-        "at-spi2-atk": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "at-spi2-core": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "atk": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "atkmm": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "cantarell-fonts": {
             "proc": "normal_get",
             "args": [],
@@ -653,16 +593,6 @@
             "kwargs": {}
             },
         "folks": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gdk-pixbuf": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gmime": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
@@ -703,11 +633,6 @@
             "kwargs": {}
             },
         "gstreamer": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gtk+2": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
@@ -787,17 +712,7 @@
             "args": [],
             "kwargs": {}
             },
-        "librsvg": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "libsecret": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "libsigc++": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
@@ -812,22 +727,7 @@
             "args": [],
             "kwargs": {}
             },
-        "mm-common": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "network-manager-applet": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "pango": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "pangomm": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
@@ -837,16 +737,6 @@
             "args": [],
             "kwargs": {}
             },
-        "source-highlight": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "polkit-gnome": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            }
     }
 
 }

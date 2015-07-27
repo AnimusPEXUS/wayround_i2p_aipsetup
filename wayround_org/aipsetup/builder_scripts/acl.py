@@ -12,20 +12,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return {'subset': 'acl'}
 
     def define_actions(self):
-        return collections.OrderedDict([
-            ('dst_cleanup', self.builder_action_dst_cleanup),
-            ('src_cleanup', self.builder_action_src_cleanup),
-            ('bld_cleanup', self.builder_action_bld_cleanup),
-            ('extract', self.builder_action_extract),
-            ('patch', self.builder_action_patch),
-            ('autogen', self.builder_action_autogen),
-            ('build', self.builder_action_build),
-            ('distribute', self.builder_action_distribute),
-            ('fix_symlinks', self.builder_action_fix_symlinks),
-            ('fix_la_file', self.builder_action_fix_la_file)
-            ])
+        ret = super().define_actions()
+        del ret['configure']
+        ret['fix_symlinks'] = self.builder_action_fix_symlinks
+        ret['fix_la_file'] = self.builder_action_fix_la_file
+        return ret
 
     def builder_action_distribute(self, called_as, log):
+
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
@@ -34,7 +28,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install', 'install-dev', 'install-lib',
                 'DESTDIR={}'.format(self.dst_dir)
                 ],
-            environment={},
+            environment=self.builder_action_make_define_environment(
+                called_as,
+                log
+                ),
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

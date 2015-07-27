@@ -22,6 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--disable-coverage',
             '--enable-shared',
             '--enable-compat-libs',
+            '--with-libgcrypt-prefix={}'.format(self.host_multiarch_dir)
             ]
         ret += [
             '--with-pamlibdir={}'.format(

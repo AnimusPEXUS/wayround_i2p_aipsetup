@@ -88,7 +88,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
              'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir)
              ],
             stdout=subprocess.PIPE,
-            cwd=src_dir
+            cwd=self.src_dir
             )
         p.wait()
         pc_text = p.communicate()[0]
@@ -130,4 +130,4 @@ Cflags: -I${{includedir}}
 
         pc_file.write(tpl)
         pc_file.close()
-        return ret
+        return 0

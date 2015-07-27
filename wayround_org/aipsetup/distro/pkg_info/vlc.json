@@ -1,9 +1,9 @@
 {
   "description": "",
-  "home_page": "http://liba52.sourceforge.net/",
-  "buildscript": "a52dec",
+  "home_page": "https://www.videolan.org/vlc/",
+  "buildscript": "vlc",
   "version_tool": "",
-  "basename": "a52dec",
+  "basename": "vlc",
   "filters": "",
   "removable": true,
   "reducible": true,

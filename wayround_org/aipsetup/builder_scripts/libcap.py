@@ -27,6 +27,41 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['after_distribute'] = self.builder_action_after_distribute
         return ret
 
+    '''
+    def patch_test_c(self):
+        name = os.path.join(self.src_dir, 'pam_cap', 'test.c')
+
+        with open(name) as f:
+            t = f.read()
+
+        t = t.replace('<security/', '<')
+
+        with open(name, 'w') as f:
+            f.write(t)
+
+        return 0
+
+    def patch_pam_cap_c(self):
+        name = os.path.join(self.src_dir, 'pam_cap', 'pam_cap.c')
+
+        with open(name) as f:
+            t = f.read()
+
+        t = t.replace('<security/', '<')
+
+        with open(name, 'w') as f:
+            f.write(t)
+
+        return 0
+
+    def builder_action_patch(self, called_as, log):
+
+        self.patch_test_c()
+        self.patch_pam_cap_c()
+
+        return 0
+    '''
+
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
@@ -42,6 +77,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'man_prefix={}'.format(self.host_multiarch_dir),
                 'DESTDIR={}'.format(self.dst_dir),
                 'RAISE_SETFCAP=no',
+                'PAM_CAP=yes',
+                'SYSTEM_HEADERS={}'.format(
+                    os.path.join(
+                        self.host_multiarch_dir,
+                        'include'
+                        )
+                    ),
+                'CFLAGS=-I{}'.format(
+                    os.path.join(
+                        self.host_multiarch_dir,
+                        'include'
+                        )
+                    )
                 ] + self.all_automatic_flags_as_list(),
             environment={},
             environment_mode='copy',

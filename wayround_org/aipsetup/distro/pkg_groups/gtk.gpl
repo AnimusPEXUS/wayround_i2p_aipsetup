@@ -1,0 +1,108 @@
+{
+    "ask_version": true,
+    "names" : {
+	"source-highlight": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+        "pango": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "pangomm": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "libsigc++": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "librsvg": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+       "atk": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "atkmm": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+         "at-spi2-atk": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "at-spi2-core": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "gdk-pixbuf": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "gmime": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "gtk+2": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+
+        "gtk+": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
+        "gtkmm": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}",
+                "daa": true,
+                "nmaa": false
+                }
+        },
+
+        "gtkhtml": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
+        "gtksourceview": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "{asked_version}"
+                }
+            },
+
+	"gtk-engines": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                "version": "2.20",
+                "nmaa": false,
+                "daa": false
+                }
+            }
+
+    }
+}
