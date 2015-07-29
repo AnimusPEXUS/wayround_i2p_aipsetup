@@ -396,13 +396,6 @@
                 "version": "{asked_version}"
                 }
             },
-        "pygobject": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
         "seed": {
             "proc": "gnome_get",
             "args": [],

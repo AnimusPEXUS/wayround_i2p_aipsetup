@@ -11,7 +11,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_options(self, called_as, log):
         ret = super().builder_action_configure_define_options(called_as, log)
         ret += [
-            '--with-system-nspr',
-            '--enable-threadsafe',
+            '--with-libgpg-error-prefix={}'.format(
+                self.host_multiarch_dir
+                ),
+            '--with-libassuan-prefix={}'.format(
+                self.host_multiarch_dir
+                ),
             ]
         return ret

@@ -4,7 +4,7 @@
   "buildscript": "cups",
   "version_tool": "",
   "basename": "cups",
-  "filters": "",
+  "filters": "- status !re ^source$",
   "removable": true,
   "reducible": true,
   "non_installable": false,

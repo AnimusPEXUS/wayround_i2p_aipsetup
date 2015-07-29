@@ -1,6 +1,11 @@
 {
-    "ask_version": true,
+    "ask_version": false,
     "names" : {
+	"harfbuzz": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
 	"source-highlight": {
 	    "proc": "normal_get",
 	    "args": [],
@@ -66,14 +71,12 @@
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
-                "version": "{asked_version}"
                 }
             },
         "gtkmm": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
-                "version": "{asked_version}",
                 "daa": true,
                 "nmaa": false
                 }
@@ -83,14 +86,12 @@
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
-                "version": "{asked_version}"
                 }
             },
         "gtksourceview": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {
-                "version": "{asked_version}"
                 }
             },
 
@@ -102,7 +103,40 @@
                 "nmaa": false,
                 "daa": false
                 }
-            }
+            },
+
+        "pygobject": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {
+                }
+            },
+
+"cairo": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+"cairomm": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+"pixman": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+"py2cairo": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+"pycairo": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    }
 
     }
 }

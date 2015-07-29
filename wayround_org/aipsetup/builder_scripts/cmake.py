@@ -87,6 +87,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
                     '--enable-shared',
                     '--host=',
                     '--build=',
+                    '--with-sysroot=',
                     'CC=',
                     'GCC=',
                     'CXX=',

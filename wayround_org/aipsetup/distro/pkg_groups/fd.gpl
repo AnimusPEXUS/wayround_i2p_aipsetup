@@ -4,11 +4,6 @@
         "libXau",
         "libpthread-stubs",
         "libpciaccess",
-        "cairo",
-        "cairomm",
-        "pixman",
-        "py2cairo",
-        "pycairo",
 
         "colord",
         "colord-gtk",
@@ -27,7 +22,6 @@
 
         "geoclue",
 
-        "harfbuzz",
 
         "hicolor-icon-theme",
 
@@ -84,14 +78,6 @@
             "kwargs": {"daa": true, "nmaa": true}
         },
 
-        {
-            "name": "pango",
-            "proc": "gnome_get"
-        },
-        {
-            "name": "pangomm",
-            "proc": "gnome_get"
-        },
 
         "libxcb",
         "xcb-proto",
