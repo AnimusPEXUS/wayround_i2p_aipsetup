@@ -16,7 +16,7 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        e = copy.copy(os.environ)
+        e = copy.deepcopy(os.environ)
 
         e['CXX'] = '{}-g++'.format(self.host_strong)
         e['CXXFLAGS'] = self.calculate_default_linker_program_gcc_parameter()

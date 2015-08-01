@@ -53,7 +53,7 @@ def main(buildingsite, action=None):
 
         source_configure_reldir = '.'
 
-        envi = copy.copy(os.environ)
+        envi = copy.deepcopy(os.environ)
         if 'JAVA_HOME' in envi:
             del envi['JAVA_HOME']
 

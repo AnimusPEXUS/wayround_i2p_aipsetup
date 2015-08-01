@@ -56,7 +56,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
              'linux'
              ],
             cwd=self.src_dir,
-            env=copy.copy(os.environ).update(
+            env=copy.deepcopy(os.environ).update(
                 self.all_automatic_flags_as_dict()
                 ),
             stdout=log.stdout,

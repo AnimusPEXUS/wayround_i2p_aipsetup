@@ -64,9 +64,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'-pulseaudio',
                 #'-no-alsa'
                 ],
-            env=copy.copy(
-                os.environ).update(
-                self.all_automatic_flags_as_dict()),
+            env=copy.deepcopy(
+                os.environ
+                ).update(
+                    self.all_automatic_flags_as_dict()
+                    ),
             stdin=subprocess.PIPE,
             stdout=log.stdout,
             stderr=log.stderr,
