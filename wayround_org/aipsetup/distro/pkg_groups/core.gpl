@@ -1,5 +1,11 @@
 {
     "names" : [
+        {
+            "name": "NetworkManager",
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+        },
         "cpio",
         "bridge-utils",
         "boost",

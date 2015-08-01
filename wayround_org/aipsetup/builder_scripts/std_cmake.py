@@ -66,7 +66,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = [
             '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
-            '-DCMAKE_SYSROOT={}'.format(self.host_multiarch_dir),
+            # '-DCMAKE_SYSROOT={}'.format(self.host_multiarch_dir),
             '-DSYSCONFDIR=/etc',
             '-DLOCALSTATEDIR=/var',
             ] + cmake.calc_conf_hbt_options(self) + minus_d_list

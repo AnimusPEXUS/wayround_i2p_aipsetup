@@ -107,6 +107,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-lto',
             '--enable-ld',
 
+            # NOTE: no google software in Lailalo
+            '--disable-gold',
+            '--without-gold',
+
             # experiment:
             '--with-sysroot={}'.format(self.host_multiarch_dir)
             ]

@@ -451,7 +451,7 @@ class Builder:
             '--localstatedir=/var',
             '--enable-shared',
 
-            '--with-sysroot={}'.format(self.host_multiarch_dir)
+            # '--with-sysroot={}'.format(self.host_multiarch_dir)
 
             ] + autotools.calc_conf_hbt_options(self) + \
             self.all_automatic_flags_as_list()
@@ -475,6 +475,28 @@ class Builder:
     def builder_action_make_define_environment(self, called_as, log):
         return self.builder_action_configure_define_environment(called_as, log)
 
+    def builder_action_build_define_add_opts(self, called_as, log):
+        return []
+
+    def builder_action_build_define_add_args(self, called_as, log):
+        return []
+
+    def builder_action_build_define_distribute_opts(self, called_as, log):
+        return []
+
+    def builder_action_build_define_distribute_args(self, called_as, log):
+        return []
+
+    # NOTE: not sure is it usefull
+    def builder_action_configure_define_PATH_dict(self):
+        return {'PATH': ':'.join(
+                [
+                    os.path.join(self.host_multiarch_dir, 'bin'),
+                    os.path.join(self.host_multiarch_dir, 'sbin')
+                    ]
+                )
+                }
+
     def builder_action_configure(self, called_as, log):
 
         defined_options = self.builder_action_configure_define_options(
@@ -495,8 +517,10 @@ class Builder:
         pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
         envs.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)},
             )
+
+        envs.update(self.builder_action_configure_define_PATH_dict())
 
         ret = autotools.configure_high(
             self.buildingsite,
@@ -523,8 +547,14 @@ class Builder:
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
-            options=[],
-            arguments=[],
+            options=[] + self.builder_action_build_define_add_opts(
+                called_as,
+                log
+                ),
+            arguments=[] + self.builder_action_build_define_add_args(
+                called_as,
+                log
+                ),
             environment=self.builder_action_make_define_environment(
                 called_as,
                 log
@@ -539,11 +569,17 @@ class Builder:
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
-            options=[],
+            options=[] + self.builder_action_build_define_distribute_opts(
+                called_as,
+                log
+                ),
             arguments=[
                 'install',
                 'DESTDIR={}'.format(self.dst_dir)
-                ],
+                ] + self.builder_action_build_define_distribute_args(
+                called_as,
+                log
+                ),
             environment=self.builder_action_make_define_environment(
                 called_as,
                 log

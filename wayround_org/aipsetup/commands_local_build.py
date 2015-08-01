@@ -471,35 +471,32 @@ def build_full(command_name, opts, args, adds):
 
     if ret == 0:
 
-        for arch in archs_list:
+        if multiple_packages:
+            sources.sort()
+            rets = 0
+            logging.info("Passing packages `{}' to build".format(sources))
+            for i in sources:
 
-            if multiple_packages:
-                sources.sort()
-                rets = 0
-                logging.info("Passing packages `{}' to build".format(sources))
-                for i in sources:
+                if build_sub_01(
+                        command_name, opts, args, adds,
+                        config,
+                        [i],
+                        building_site_dir,
+                        remove_buildingsite_after_success=r_bds
+                        ) != 0:
+                    rets += 1
 
-                    if build_sub_01(
-                            command_name, opts, args, adds,
-                            config,
-                            [i],
-                            building_site_dir,
-                            remove_buildingsite_after_success=r_bds
-                            ) != 0:
-                        rets += 1
-                if rets == 0:
-                    ret = 0
-                else:
-                    ret = 1
-            else:
-                logging.info("Passing package `{}' to build".format(sources))
-                ret = build_sub_01(
-                    command_name, opts, args, adds,
-                    config,
-                    sources,
-                    building_site_dir,
-                    remove_buildingsite_after_success=r_bds
-                    )
+            ret = int(rets != 0)
+
+        else:
+            logging.info("Passing package `{}' to build".format(sources))
+            ret = build_sub_01(
+                command_name, opts, args, adds,
+                config,
+                sources,
+                building_site_dir,
+                remove_buildingsite_after_success=r_bds
+                )
 
     return ret
 
@@ -509,8 +506,7 @@ def build_full_multi(command_name, opts, args, adds):
     Place named source files in new building site and build new package from
     them
 
-    [-d] [-o] TARBALL[, TARBALL[, TARBALL[,
-                                                                TARBALL...]]]
+    [-d] [-o] TARBALL[, TARBALL[, TARBALL[,TARBALL...]]]
 
     ================ ====================================
     options          meaning
@@ -562,14 +558,11 @@ def build_full_multi(command_name, opts, args, adds):
 
                 for arch in archs_list:
 
-                    if multiarch_build:
-                        hosts_options = {
-                            '--host': arch,
-                            '--target': arch,
-                            '--build': arch,
-                            }
-
-                        opts.update(hosts_options)
+                    opts.update({
+                        '--host': arch,
+                        '--target': arch,
+                        '--build': arch,
+                        })
 
                     if build_sub_01(
                             command_name, opts, args, adds,
@@ -579,19 +572,31 @@ def build_full_multi(command_name, opts, args, adds):
                             remove_buildingsite_after_success=r_bds
                             ) != 0:
                         rets += 1
-            if rets == 0:
-                ret = 0
-            else:
-                ret = 1
+
+            ret = int(rets != 0)
+
         else:
             logging.info("Passing package `{}' to build".format(sources))
-            ret = build_sub_01(
-                command_name, opts, args, adds,
-                config,
-                sources,
-                building_site_dir,
-                remove_buildingsite_after_success=r_bds
-                )
+            rets = 0
+
+            for arch in archs_list:
+
+                opts.update({
+                    '--host': arch,
+                    '--target': arch,
+                    '--build': arch,
+                    })
+
+                if build_sub_01(
+                        command_name, opts, args, adds,
+                        config,
+                        sources,
+                        building_site_dir,
+                        remove_buildingsite_after_success=r_bds
+                        ) != 0:
+                    rets += 1
+
+            ret = int(rets != 0)
 
     return ret
 

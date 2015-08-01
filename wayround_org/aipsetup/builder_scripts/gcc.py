@@ -212,7 +212,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-shared',
 
                 # experimental option for this place
+                # without it gcc tryes to use incompatible /lib/crt*.o files
                 '--with-sysroot={}'.format(self.host_multiarch_dir)
+                # '--with-build-sysroot={}'.format(self.host_multiarch_dir)
                 ]
 
         return ret

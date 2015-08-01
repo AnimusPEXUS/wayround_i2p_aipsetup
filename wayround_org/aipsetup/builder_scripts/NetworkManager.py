@@ -24,7 +24,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pr = p.communicate()
         nss_libs = str(pr[0], 'utf-8').strip()
 
-        return super().builder_action_configure_define_options(called_as, log) + [
+        ret = super().builder_action_configure_define_options(called_as, log)
+        ret += [
             'CFLAGS=' + nss_cflags,
-            'LDFLAGS=' + nss_libs
+            'LDFLAGS=' + nss_libs,
+            '--with-suspend-resume=systemd',
+            '--with-session-tracking=systemd'
             ]
+
+        return ret

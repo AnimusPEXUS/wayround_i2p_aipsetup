@@ -24,8 +24,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
         return super().builder_action_configure_define_options(called_as, log) + [
+            #'--enable-dbm',
+            #'--enable-ndbm',
             '--enable-sql',
             '--enable-compat185',
+            '--enable-static',
+            '--enable-shared',
             '--enable-cxx',
             '--enable-tcl',
             '--with-tcl={}'.format(
@@ -38,7 +42,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
 
-        doc_dir = os.path.join(self.dst_host_multiarch_dir, 'share', 'doc', 'db')
+        doc_dir = os.path.join(
+            self.dst_host_multiarch_dir,
+            'share',
+            'doc',
+            'db')
 
         os.makedirs(
             doc_dir,

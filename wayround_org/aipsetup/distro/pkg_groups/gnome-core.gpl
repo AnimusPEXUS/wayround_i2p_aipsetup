@@ -560,11 +560,6 @@
             "kwargs": {}
             },
 
-        "NetworkManager": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "cantarell-fonts": {
             "proc": "normal_get",
             "args": [],
