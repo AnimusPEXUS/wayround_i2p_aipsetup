@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.apply_host_spec_compilers_options = True
         return
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         ret = [
             '--prefix={}'.format(self.host_multiarch_dir),
             '--shared',

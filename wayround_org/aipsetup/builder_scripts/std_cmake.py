@@ -59,7 +59,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
 
         minus_d_list = ['-D{}'.format(x)
                         for x in self.all_automatic_flags_as_list()]
@@ -71,39 +71,42 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '-DLOCALSTATEDIR=/var',
             ] + cmake.calc_conf_hbt_options(self) + minus_d_list
 
-        print(
-            'builder_action_configure_define_options: {}'.format(
-                ret
-                )
-            )
-
         return ret
 
     def builder_action_configure(self, called_as, log):
 
-        defined_options = self.builder_action_configure_define_options(
-            called_as,
-            log)
+        self.check_deprecated_methods(called_as, log)
 
-        envs = self.builder_action_configure_define_environment(
-            called_as,
-            log
-            )
+        envs = {}
+        if hasattr(self, 'builder_action_configure_define_environment'):
+            envs = self.builder_action_configure_define_environment(
+                called_as,
+                log
+                )
 
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+        opts = []
+        if hasattr(self, 'builder_action_configure_define_opts'):
+            opts = self.builder_action_configure_define_opts(
+                called_as,
+                log
+                )
 
-        envs.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
-            )
+        args = []
+        if hasattr(self, 'builder_action_configure_define_args'):
+            args = self.builder_action_configure_define_args(
+                called_as,
+                log
+                )
 
         ret = cmake.cmake_high(
             self.buildingsite,
             log=log,
-            options=defined_options,
-            arguments=[],
+            options=opts,
+            arguments=args,
             environment=envs,
             environment_mode='copy',
             source_subdir=self.source_configure_reldir,
             build_in_separate_dir=self.separate_build_dir
             )
+
         return ret

@@ -258,17 +258,19 @@ class Builder:
             ('distribute', self.builder_action_distribute)
             ])
 
-    def _check_deprecated_methods(self, called_as, log):
+    def check_deprecated_methods(self, called_as, log):
         for i in [
                 'builder_action_build_define_add_args',
                 'builder_action_build_define_add_opts',
                 'builder_action_build_define_distribute_args',
                 'builder_action_build_define_distribute_opts',
-                'builder_action_configure_define_options',
+                'builder_action_configure_define_opts',
+                'builder_action_configure_define_opts',
+                'builder_action_configure_define_opts',
                 'builder_action_make_define_environment',
                 ]:
             if hasattr(self, i):
-                Exception(
+                raise Exception(
                     "deprecated method `{}' is defined".format(i)
                     )
         return
@@ -514,7 +516,8 @@ class Builder:
 
     def builder_action_configure(self, called_as, log):
 
-        self._check_deprecated_methods(called_as, log)
+        self.check_deprecated_methods(called_as, log)
+
         envs = {}
         if hasattr(self, 'builder_action_configure_define_environment'):
             envs = self.builder_action_configure_define_environment(
@@ -540,7 +543,7 @@ class Builder:
             self.buildingsite,
             log=log,
             options=opts,
-            arguments=[],
+            arguments=args,
             environment=envs,
             environment_mode='copy',
             source_configure_reldir=self.source_configure_reldir,
@@ -672,7 +675,7 @@ class Builder:
 
     def builder_action_build(self, called_as, log):
 
-        self._check_deprecated_methods(called_as, log)
+        self.check_deprecated_methods(called_as, log)
 
         envs = {}
         if hasattr(self, 'builder_action_build_define_environment'):
@@ -713,7 +716,7 @@ class Builder:
 
     def builder_action_distribute(self, called_as, log):
 
-        self._check_deprecated_methods(called_as, log)
+        self.check_deprecated_methods(called_as, log)
 
         envs = {}
         if hasattr(self, 'builder_action_distribute_define_environment'):

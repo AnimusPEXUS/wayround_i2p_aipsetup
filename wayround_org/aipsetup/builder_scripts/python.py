@@ -8,7 +8,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
 
         cb_opts = []
         if self.is_crossbuild:
@@ -32,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # f.write('ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n')
         # f.close()
 
-        return super().builder_action_configure_define_options(called_as, log) + [
+        return super().builder_action_configure_define_opts(called_as, log) + [
             # '--with-pydebug' # NOTE: enabling may cause problems to Cython
             ] + cb_opts
 
