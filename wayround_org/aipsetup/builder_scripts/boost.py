@@ -10,13 +10,20 @@ import wayround_org.utils.file
 
 import wayround_org.aipsetup.builder_scripts.std
 
-# FIXME: host/build/target fix required
-
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
+
         e = copy.deepcopy(os.environ)
+
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+
+        e.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)},
+            )
+
+        e.update(self.builder_action_configure_define_PATH_dict())
 
         e['CXX'] = '{}-g++'.format(self.host_strong)
         e['CXXFLAGS'] = self.calculate_default_linker_program_gcc_parameter()
@@ -24,7 +31,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = {
             'env': e,
             'BOOST_BUILD_PATH': self.src_dir,
-            'user_config': os.path.join(self.src_dir, 'user-config.jam')
+            'user_config': os.path.join(self.src_dir, 'user-config.jam'),
+            'python': wayround_org.utils.file.which(
+                'python2',
+                self.host_multiarch_dir
+                )
             }
 
         return ret
@@ -64,6 +75,7 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
                 'bash',
                 './bootstrap.sh',
                 '--prefix={}'.format(self.host_multiarch_dir),
+                '--with-python={}'.format(self.custom_data['python']),
                 #                 '--with-python-version=3.3'
                 ],
             cwd=self.src_dir,
@@ -90,6 +102,7 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
                 #       thanks to Sergey Popov from Gentoo for pointing
                 #       on --user-config= option
                 '--user-config={}'.format(self.custom_data['user_config']),
+                #'--with-python={}'.format(self.custom_data['python']),
                 'threading=multi',
                 'link=shared',
                 'stage',
@@ -113,6 +126,7 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
                 #                    '--layout=versioned',
                 #'--build-dir={}'.format(self.bld_dir),
                 '--user-config={}'.format(self.custom_data['user_config']),
+                #'--with-python={}'.format(self.custom_data['python']),
                 'threading=multi',
                 'link=shared',
                 'install',

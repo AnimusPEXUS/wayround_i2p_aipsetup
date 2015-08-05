@@ -3,7 +3,7 @@
 import os.path
 import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.waf as waf
-import wayround_org.aipsetup.builder_scripts.std
+import wayround_org.aipsetup.builder_scripts.pycairo
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.pycairo.Builder):

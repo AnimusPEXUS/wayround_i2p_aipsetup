@@ -1,4 +1,7 @@
 
+
+import wayround_org.utils.file
+
 import wayround_org.aipsetup.buildtools.autotools as autotools
 
 import wayround_org.aipsetup.builder_scripts.std
@@ -20,7 +23,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         #    ]
         ret = [
             '--prefix={}'.format(self.host_multiarch_dir),
-            'CC={}-gcc'.format(self.host_strong),
+            'CC={}'.format(
+                wayround_org.utils.file.which(
+                    '{}-gcc'.format(self.host_strong),
+                    self.host_multiarch_dir
+                    )
+                ),
             ]
         return ret
 

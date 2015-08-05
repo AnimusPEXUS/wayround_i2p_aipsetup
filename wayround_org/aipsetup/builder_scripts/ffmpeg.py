@@ -9,7 +9,8 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(called_as, log) + [
+        ret = super().builder_action_configure_define_options(called_as, log)
+        ret += [
             '--enable-shared',
             '--enable-gpl',
             '--enable-libtheora',
@@ -21,3 +22,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-runtime-cpudetect',
             '--enable-doc',
             ]
+
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    '--includedir=',
+                    '--sysconfdir=',
+                    '--localstatedir=',
+                    '--host=',
+                    '--build=',
+                    '--target=',
+                    'CC=',
+                    'GCC=',
+                    'CXX=',
+                    ]:
+                if ret[i].startswith(j):
+                    del ret[i]
+                    break
+
+        return ret

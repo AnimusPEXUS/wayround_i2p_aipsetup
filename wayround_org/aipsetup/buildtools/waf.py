@@ -7,16 +7,17 @@ import wayround_org.utils.error
 import wayround_org.utils.log
 import wayround_org.utils.osutils
 import wayround_org.utils.path
+import wayround_org.utils.file
 
 
 def waf(
-    cwd,
-    options,
-    arguments,
-    environment,
-    environment_mode,
-    log
-    ):
+        cwd,
+        options,
+        arguments,
+        environment,
+        environment_mode,
+        log
+        ):
 
     ret = 0
 
@@ -34,8 +35,22 @@ def waf(
                 )
             )
 
+    if 'PYTHON' in environment:
+        python = environment['PYTHON']
+    else:
+        if 'PATH' in environment:
+            PATH = environment['PATH']
+        else:
+            PATH = os.environ['PATH']
+
+        PATH = PATH.split(':')
+
+        python = wayround_org.utils.file.which('python2', PATH)
+
+        del PATH
+
     cmd = [
-        'python3',
+        python,
         os.path.join(cwd, 'waf')
         ] + options + arguments
 

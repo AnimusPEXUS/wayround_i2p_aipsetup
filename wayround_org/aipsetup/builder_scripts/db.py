@@ -67,7 +67,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         )
                     )
                 # it's not a mistake docdir
-                # must be eq to /usr/share/doc/db
+                # must be eq to self.host_multiarch_dir + /share/doc/db
                 # with leading slash
                 ],
             environment={},

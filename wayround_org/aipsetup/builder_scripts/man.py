@@ -3,6 +3,9 @@ import os.path
 
 import wayround_org.aipsetup.builder_scripts.std
 
+# TODO: configure are not standard so additional attention to host and paths
+#       required
+
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -16,8 +19,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_fix_config(self, called_as, log):
 
+        # cfg_file = os.path.join(
+        #    self.dst_host_multiarch_dir, 'share', 'misc', 'man.conf'
+        #    )
+
         cfg_file = os.path.join(
-            self.dst_host_multiarch_dir, 'share', 'misc', 'man.conf'
+            self.dst_dir, 'usr', 'share', 'misc', 'man.conf'
             )
 
         with open(cfg_file) as f:

@@ -1,6 +1,29 @@
 {
     "ask_version": false,
     "names" : {
+
+        "glib": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "glib-networking": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "glibmm": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "json-glib": {
+            "proc": "normal_get",
+            "args": [],
+            "kwargs": {}
+            },
+    
+    
 	"harfbuzz": {
 	    "proc": "normal_get",
 	    "args": [],
@@ -61,11 +84,17 @@
             "args": [],
             "kwargs": {}
             },
+
         "gtk+2": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
             },
+
+	        "glib": {
+            "proc": "gnome_get"
+        },
+
 
         "gtk+": {
             "proc": "gnome_get",
@@ -111,6 +140,13 @@
             "kwargs": {
                 }
             },
+
+	        "gobject-introspection": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+
 
 "cairo": {
 	    "proc": "normal_get",

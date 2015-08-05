@@ -1,10 +1,10 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "mozjs",
+  "buildscript": "std_cmake",
   "version_tool": "",
-  "basename": "mozjs",
-  "filters": "- version !fm 17.*",
+  "basename": "opencv",
+  "filters": "- version !fm 3.*\n- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,

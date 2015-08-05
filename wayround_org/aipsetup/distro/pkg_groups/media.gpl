@@ -81,6 +81,56 @@
     
     "libexif", "exif",
     
-    "a52dec"
+    "a52dec", 
+    
+    "libgphoto2", "gphoto2", "popt",
+    
+    "libcroco",
+    
+    {
+	    "name": "gst-plugins-base",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+         {
+    	    "name": "gst-plugins-good",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+            {
+    	    "name": "gst-plugins-bad",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+            {
+    	    "name": "gst-plugins-ugly",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+            {
+    	    "name": "gst-plugins-gl",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+            {
+    	    "name": "gst-ffmpeg",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+         {
+    	    "name": "gstreamer",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "libmusicbrainz",
+        "opencv2", "opencv3"
+
     ]
 }

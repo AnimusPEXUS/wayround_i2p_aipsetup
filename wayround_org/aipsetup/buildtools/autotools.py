@@ -6,6 +6,7 @@ autotools tools and specific to it
 import os.path
 import subprocess
 import sys
+import pprint
 import tempfile
 
 import wayround_org.aipsetup.build
@@ -217,8 +218,8 @@ def configure_high(
 
         if len(environment) > 0:
             log.info(
-                "Environment modifications: {}".format(
-                    repr(environment)
+                "Environment modifications:\n{}".format(
+                    pprint.pformat(environment)
                     )
                 )
 
@@ -356,8 +357,8 @@ def make_high(
 
     if len(environment) > 0:
         log.info(
-            "Environment modifications: {}".format(
-                repr(environment)
+            "Environment modifications:\n{}".format(
+                pprint.pformat(environment)
                 )
             )
 

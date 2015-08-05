@@ -9,6 +9,7 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_options(self, called_as, log):
+        raise Exception("work out correct python settings")
         ret = super().builder_action_configure_define_options(called_as, log)
         ret += [
             '--enable-texture-float',
@@ -44,7 +45,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--enable-d3d1x',
             # '--enable-opencl',
 
-            '--with-llvm-prefix={}'.format(self.host_multiarch_dir)
+            '--with-llvm-prefix={}'.format(self.host_multiarch_dir),
+            
+            # 'PYTHON2': self.
             ]
 
         return ret

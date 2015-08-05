@@ -5,6 +5,7 @@ cmake tools and specific to it
 
 import os.path
 import subprocess
+import pprint
 import sys
 
 import wayround_org.aipsetup.build
@@ -106,8 +107,8 @@ def cmake_high(
 
     if len(environment) > 0:
         log.info(
-            "Environment modifications: {}".format(
-                repr(environment)
+            "Environment modifications:\n{}".format(
+                pprint.pformat(environment)
                 )
             )
 

@@ -4,7 +4,7 @@
   "buildscript": "perl",
   "version_tool": "",
   "basename": "perl",
-  "filters": "- status !re ^$\n- version re \\d{4}\n- version !re ^\\d*\\.\\d*[02468][\\.&]",
+  "filters": "- status !re ^$\n- version re \\d{4}\n- version !re ^\\d*\\.\\d*[02468][\\.&]\n- version re 5\\.22\\.?.*",
   "removable": true,
   "reducible": true,
   "non_installable": false,

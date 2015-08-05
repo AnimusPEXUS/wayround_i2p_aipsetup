@@ -62,7 +62,7 @@ def ldconfig():
     return subprocess.Popen(['ldconfig']).wait()
 
 
-def _update_mime_database_check():
+def _update_mime_database_check(path):
     """
     return: 0 - passed, not 0 - not passed
     """
@@ -70,62 +70,60 @@ def _update_mime_database_check():
 
     errors = 0
 
-    for i in list_arch_roots():
+    mime_dir = wayround_org.utils.path.join(path, 'share', 'mime')
 
-        mime_dir = wayround_org.utils.path.join(i, 'share', 'mime')
+    try:
 
-        try:
+        os.makedirs(mime_dir, exist_ok=True)
 
-            os.makedirs(mime_dir, exist_ok=True)
+        mime_dir_sha512sums = wayround_org.utils.path.join(
+            mime_dir,
+            'sha512sums'
+            )
 
-            mime_dir_sha512sums = wayround_org.utils.path.join(
-                mime_dir,
-                'sha512sums'
-                )
+        mime_dir_sha512sums_tmp = mime_dir_sha512sums + '.tmp'
 
-            mime_dir_sha512sums_tmp = mime_dir_sha512sums + '.tmp'
-
-            wayround_org.utils.checksum.make_dir_checksums(
-                mime_dir,
-                mime_dir_sha512sums_tmp,
-                rel_to='/',
-                exclude=[
-                    mime_dir_sha512sums,
-                    mime_dir_sha512sums_tmp
-                    ]
-                )
-            summ1 = wayround_org.utils.checksum.make_file_checksum(
-                mime_dir_sha512sums
-                )
-            summ2 = wayround_org.utils.checksum.make_file_checksum(
+        wayround_org.utils.checksum.make_dir_checksums(
+            mime_dir,
+            mime_dir_sha512sums_tmp,
+            rel_to='/',
+            exclude=[
+                mime_dir_sha512sums,
                 mime_dir_sha512sums_tmp
-                )
-            os.unlink(mime_dir_sha512sums_tmp)
+                ]
+            )
+        summ1 = wayround_org.utils.checksum.make_file_checksum(
+            mime_dir_sha512sums
+            )
+        summ2 = wayround_org.utils.checksum.make_file_checksum(
+            mime_dir_sha512sums_tmp
+            )
+        os.unlink(mime_dir_sha512sums_tmp)
 
-            errors += int(summ1 != summ2)
+        errors += int(summ1 != summ2)
 
-        except:
-            logging.exception('error')
-            errors += 1
+    except:
+        logging.exception('error')
+        errors += 1
 
     ret = int(errors != 0)
 
     return ret
 
 
-def _update_mime_database_recalculate():
+def _update_mime_database_recalculate(path):
     p = subprocess.Popen(
-        ['update-mime-database', '/usr/share/mime']
+        ['{}/bin/update-mime-database'.format(path), '{}/share/mime'.format(path)]
         )
     ret = p.wait()
 
     wayround_org.utils.checksum.make_dir_checksums(
-        '/usr/share/mime',
-        '/usr/share/mime/sha512sums',
+        '{}/share/mime'.format(path),
+        '{}/share/mime/sha512sums'.format(path),
         rel_to='/',
         exclude=[
-            '/usr/share/mime/sha512sums',
-            '/usr/share/mime/sha512sums.tmp'
+            '{}/share/mime/sha512sums'.format(path),
+            '{}/share/mime/sha512sums.tmp'.format(path)
             ]
         )
     return ret
@@ -133,13 +131,19 @@ def _update_mime_database_recalculate():
 
 def update_mime_database():
     logging.info('update-mime-database')
+
     ret = 0
-    if (not os.path.isfile('/usr/share/mime/sha512sums')
-            or _update_mime_database_check() != 0):
-        logging.info("    regeneration required. please wait..")
-        ret = _update_mime_database_recalculate()
-    else:
-        logging.info("    regeneration not required")
+
+    roots = list_arch_roots()
+
+    for i in roots:
+
+        if (not os.path.isfile('{}/share/mime/sha512sums'.format(i))
+                or _update_mime_database_check(i) != 0):
+            logging.info("    regeneration required. please wait..")
+            ret = _update_mime_database_recalculate(i)
+        else:
+            logging.info("    regeneration not required")
 
     return ret
 

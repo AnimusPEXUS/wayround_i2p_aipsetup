@@ -12,7 +12,6 @@
         "libcanberra",
         "libe-book",
         "libndp",
-        "libmusicbrainz",
         "librevenge",
         "libxkbcommon",
         "libzeitgeist",
@@ -37,7 +36,7 @@
 
         "liboauth",
         
-        "libgphoto2", "gphoto2", "popt",
+
         "libIDL",
         
         "libwacom",

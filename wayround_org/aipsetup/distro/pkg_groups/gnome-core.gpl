@@ -107,6 +107,7 @@
                 "version": "{asked_version}"
                 }
             },
+
         "geocode-glib": {
             "proc": "gnome_get",
             "args": [],
@@ -114,6 +115,7 @@
                 "version": "{asked_version}"
                 }
             },
+
         "gnome-backgrounds": {
             "proc": "gnome_get",
             "args": [],
@@ -480,21 +482,6 @@
 
 
 
-        "glib": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "glib-networking": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "glibmm": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
         "vte": {
             "proc": "gnome_get",
             "args": [],
@@ -502,11 +489,6 @@
             },
 
         "gjs": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gobject-introspection": {
             "proc": "gnome_get",
             "args": [],
             "kwargs": {}
@@ -610,32 +592,12 @@
             "args": [],
             "kwargs": {}
             },
-        "gst-plugins-base": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gst-plugins-good": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gstreamer": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "gupnp": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
             },
         "gupnp-igd": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "json-glib": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}

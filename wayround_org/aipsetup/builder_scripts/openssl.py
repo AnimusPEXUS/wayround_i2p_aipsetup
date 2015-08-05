@@ -59,7 +59,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'MANDIR=/usr/share/man',
+                'MANDIR={}/share/man'.format(self.host_multiarch_dir),
                 # 'MANSUFFIX=ssl',
                 'INSTALL_PREFIX=' + self.dst_dir
                 ],

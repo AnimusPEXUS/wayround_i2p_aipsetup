@@ -22,9 +22,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     'CC=',
                     'CXX=',
                     'GCC=',
-                    '--host=',
-                    '--build=',
-                    '--target=',
+                    #'--host=',
+                    #'--build=',
+                    #'--target=',
                     #'--includedir='
                     ]:
                 if ret[i].startswith(j):
@@ -34,8 +34,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # if self.package_info['pkg_info']['name'] == 'mozjs24':
         #    ret += ['LIBRARY_NAME=mozjs-24']
 
-        if self.package_info['pkg_info']['name'] == 'mozjs24':
-            ret += [self.host_strong]
+        # if self.package_info['pkg_info']['name'] == 'mozjs24':
+        #    ret += [self.host_strong]
 
         return ret
 
@@ -43,9 +43,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_make_define_environment(self, called_as, log):
         return self.all_automatic_flags_as_dict()
     '''
+    
+    '''
+    def builder_action_build(self, called_as, log):
+        
+        log.info("performing patch")
+    '''
 
     def builder_action_build_define_add_args(self, called_as, log):
-        ret = []  # self.all_automatic_flags_as_list()
+        ret = self.all_automatic_flags_as_list()
 
         # if self.package_info['pkg_info']['name'] == 'mozjs24':
         #    ret += ['LIBRARY_NAME=mozjs-24']

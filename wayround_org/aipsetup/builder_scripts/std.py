@@ -185,6 +185,48 @@ class Builder:
 
         return ret
 
+    def all_automatic_flags_as_dict(self):
+
+        af = self.all_automatic_flags()
+
+        ret = {}
+
+        for i in sorted(list(af.keys())):
+            ret[i] = ' '.join(af[i])
+
+        return ret
+
+    def all_automatic_flags(self):
+
+        d = {}
+
+        if self.apply_host_spec_linking_interpreter_option:
+            self.builder_action_configure_define_linking_interpreter_option(d)
+
+        if self.apply_host_spec_linking_lib_dir_options:
+            self.builder_action_configure_define_linking_lib_dir_options(d)
+
+        if self.apply_host_spec_compilers_options:
+            self.builder_action_configure_define_compilers_options(d)
+
+        return d
+
+    def all_automatic_flags_as_list(self):
+
+        af = self.all_automatic_flags()
+
+        ret = []
+
+        for i in sorted(list(af.keys())):
+            ret.append(
+                '{}={}'.format(
+                    i,
+                    ' '.join(af[i])
+                    )
+                )
+
+        return ret
+
     def print_help(self):
         txt = ''
         print("building script: {}".format(self))
@@ -215,6 +257,21 @@ class Builder:
             ('build', self.builder_action_build),
             ('distribute', self.builder_action_distribute)
             ])
+
+    def _check_deprecated_methods(self, called_as, log):
+        for i in [
+                'builder_action_build_define_add_args',
+                'builder_action_build_define_add_opts',
+                'builder_action_build_define_distribute_args',
+                'builder_action_build_define_distribute_opts',
+                'builder_action_configure_define_options',
+                'builder_action_make_define_environment',
+                ]:
+            if hasattr(self, i):
+                Exception(
+                    "deprecated method `{}' is defined".format(i)
+                    )
+        return
 
     def builder_action_src_cleanup(self, called_as, log):
         """
@@ -384,49 +441,26 @@ class Builder:
 
         return
 
-    def all_automatic_flags_as_dict(self):
-
-        af = self.all_automatic_flags()
+    def builder_action_configure_define_environment(self, called_as, log):
 
         ret = {}
 
-        for i in sorted(list(af.keys())):
-            ret[i] = ' '.join(af[i])
+        ret = self.builder_action_configure_define_environment(
+            called_as,
+            log
+            )
+
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+
+        ret.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            )
+
+        ret.update(self.builder_action_configure_define_PATH_dict())
 
         return ret
 
-    def all_automatic_flags(self):
-
-        d = {}
-
-        if self.apply_host_spec_linking_interpreter_option:
-            self.builder_action_configure_define_linking_interpreter_option(d)
-
-        if self.apply_host_spec_linking_lib_dir_options:
-            self.builder_action_configure_define_linking_lib_dir_options(d)
-
-        if self.apply_host_spec_compilers_options:
-            self.builder_action_configure_define_compilers_options(d)
-
-        return d
-
-    def all_automatic_flags_as_list(self):
-
-        af = self.all_automatic_flags()
-
-        ret = []
-
-        for i in sorted(list(af.keys())):
-            ret.append(
-                '{}={}'.format(
-                    i,
-                    ' '.join(af[i])
-                    )
-                )
-
-        return ret
-
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
 
         ret = [
             '--prefix={}'.format(self.host_multiarch_dir),
@@ -451,6 +485,9 @@ class Builder:
             '--localstatedir=/var',
             '--enable-shared',
 
+            # WARNING: using --with-sysroot in some cases make
+            #          build processes involving libtool to generate incorrect
+            #          *.la files
             # '--with-sysroot={}'.format(self.host_multiarch_dir)
 
             ] + autotools.calc_conf_hbt_options(self) + \
@@ -462,30 +499,14 @@ class Builder:
         return 'configure'
 
     def builder_action_configure_define_run_script_not_bash(
-            self, called_as, log
+            self,
+            called_as,
+            log
             ):
         return False
 
     def builder_action_configure_define_relative_call(self, called_as, log):
         return False
-
-    def builder_action_configure_define_environment(self, called_as, log):
-        return {}
-
-    def builder_action_make_define_environment(self, called_as, log):
-        return self.builder_action_configure_define_environment(called_as, log)
-
-    def builder_action_build_define_add_opts(self, called_as, log):
-        return []
-
-    def builder_action_build_define_add_args(self, called_as, log):
-        return []
-
-    def builder_action_build_define_distribute_opts(self, called_as, log):
-        return []
-
-    def builder_action_build_define_distribute_args(self, called_as, log):
-        return []
 
     # NOTE: not sure is it usefull
     def builder_action_configure_define_PATH_dict(self):
@@ -499,91 +520,235 @@ class Builder:
 
     def builder_action_configure(self, called_as, log):
 
-        defined_options = self.builder_action_configure_define_options(
-            called_as,
-            log
-            )
+        self._check_deprecated_methods(called_as, log)
 
-        defined_script_name = self.builder_action_configure_define_script_name(
-            called_as,
-            log
-            )
+        envs = {}
+        if hasattr(self, 'builder_action_configure_define_environment'):
+            envs = self.builder_action_configure_define_environment(
+                called_as,
+                log
+                )
 
-        envs = self.builder_action_configure_define_environment(
-            called_as,
-            log
-            )
+        opts = []
+        if hasattr(self, 'builder_action_configure_define_opts'):
+            opts = self.builder_action_configure_define_opts(
+                called_as,
+                log
+                )
 
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
-
-        envs.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)},
-            )
-
-        envs.update(self.builder_action_configure_define_PATH_dict())
+        args = []
+        if hasattr(self, 'builder_action_configure_define_args'):
+            args = self.builder_action_configure_define_args(
+                called_as,
+                log
+                )
 
         ret = autotools.configure_high(
             self.buildingsite,
             log=log,
-            options=defined_options,
+            options=opts,
             arguments=[],
             environment=envs,
             environment_mode='copy',
             source_configure_reldir=self.source_configure_reldir,
             use_separate_buildding_dir=self.separate_build_dir,
-            script_name=defined_script_name,
-            run_script_not_bash=self.builder_action_configure_define_run_script_not_bash(
+            script_name=self.builder_action_configure_define_script_name(
                 called_as,
                 log
                 ),
-            relative_call=self.builder_action_configure_define_relative_call(
-                called_as,
-                log
+            run_script_not_bash=(
+                self.builder_action_configure_define_run_script_not_bash(
+                    called_as,
+                    log
+                    )
+                ),
+            relative_call=(
+                self.builder_action_configure_define_relative_call(
+                    called_as,
+                    log
+                    )
                 )
             )
         return ret
 
+    def builder_action_build_define_cpu_count(self, called_as, log):
+        return os.cpu_count()
+
+    def builder_action_build_collect_options(self, called_as, log):
+        ret = []
+
+        ret += ['-j{}'.format(
+                int(
+                    self.builder_action_build_define_cpu_count(
+                        called_as,
+                        log
+                        )
+                    )
+                )
+                ]
+
+        if hasattr(self, 'builder_action_distribute_define_opts'):
+            ret += self.builder_action_distribute_define_opts(
+                called_as,
+                log
+                )
+        return ret
+
+    def builder_action_build_define_environment(self, called_as, log):
+        ret = self.builder_action_configure_define_environment(called_as, log)
+
+        ret.update(self.all_automatic_flags_as_dict())
+
+        ret.update(self.builder_action_configure_define_PATH_dict())
+
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+
+        ret.update({'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)})
+
+        # ret.update({'PKG_CONFIG_PATH': None})
+
+        LD_LIBRARY_PATH = []
+
+        # NOTE: probably it need to be uncommented
+        # if 'LD_LIBRARY_PATH' in os.environ:
+        #     LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
+
+        # Explanation to all this .libs in LD_LIBRARY_PATH:
+        #     if building to nonstandard prefix, for some reason
+        #     building breaks with errors similar to
+
+        '''
+        [i] [2015-08-05T11:08:26.167109] [pulseaudio build]   CCLD     channelmap-test
+        [e] [2015-08-05T11:08:26.41759 ] [pulseaudio build] /multiarch/i686-pc-linux-gnu/lib/gcc/i686-pc-linux-gnu/5.2.0/../../../../i
+        686-pc-linux-gnu/bin/ld: warning: libpulsecommon-6.0.so, needed by ./.libs/libpulse.so, not found (try using -rpath or -rpath-
+        link)
+        [e] [2015-08-05T11:08:26.417712] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_getu8'
+        [e] [2015-08-05T11:08:26.41777 ] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_put_format_info'
+        [e] [2015-08-05T11:08:26.417815] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_mutex_unlock'
+        [e] [2015-08-05T11:08:26.417853] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_format_info_get_channel_ma
+        p'
+        [e] [2015-08-05T11:08:26.417888] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_init_proplist'
+        [e] [2015-08-05T11:08:26.417922] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_put_boolean'
+        [e] [2015-08-05T11:08:26.417955] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_rtclock_from_wallclock'
+        [e] [2015-08-05T11:08:26.417988] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_timespec_store'
+        [e] [2015-08-05T11:08:26.418022] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_memblockq_get_length'
+        [e] [2015-08-05T11:08:26.418055] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_get_usec'
+        [e] [2015-08-05T11:08:26.418089] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_memblockq_peek'
+        [e] [2015-08-05T11:08:26.418127] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_pdispatch_register_reply'
+        [e] [2015-08-05T11:08:26.418161] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_memblockq_new'
+        [e] [2015-08-05T11:08:26.418199] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_strbuf_tostring_free'
+        [e] [2015-08-05T11:08:26.418243] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_snprintf'
+        [e] [2015-08-05T11:08:26.41828 ] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_strlist_pop'
+        [e] [2015-08-05T11:08:26.418314] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_get_channel_map'
+        [e] [2015-08-05T11:08:26.418347] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_free'
+        [e] [2015-08-05T11:08:26.41838 ] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_hashmap_new_full'
+        [e] [2015-08-05T11:08:26.418412] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_mutex_new'
+        [e] [2015-08-05T11:08:26.418445] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_pstream_set_receive_memblo
+        ck_callback'
+        [e] [2015-08-05T11:08:26.418478] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_smoother_new'
+        '''
+
+        dot_libs = [
+            #'../tag/.libs',
+            '.libs',
+            '../.libs',
+            '../../.libs',
+            '../../../.libs',
+            '../../../../.libs',
+            './.libs',
+            './../.libs',
+            './../../.libs',
+            './../../../.libs',
+            './../../../../.libs',
+            ]
+
+        dot_libs.sort()
+
+        LD_LIBRARY_PATH += dot_libs
+
+        ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
+        # ret.update({'LD_LIBRARY_PATH': None})
+
+        return ret
+
+    def builder_action_build_define_opts(self, called_as, log):
+        return []
+
+    def builder_action_build_define_args(self, called_as, log):
+        return []
+
     def builder_action_build(self, called_as, log):
+
+        self._check_deprecated_methods(called_as, log)
+
+        envs = {}
+        if hasattr(self, 'builder_action_build_define_environment'):
+            envs = self.builder_action_build_define_environment(
+                called_as,
+                log
+                )
+
+        opts = self.builder_action_build_collect_options(called_as, log)
+
+        args = []
+        if hasattr(self, 'builder_action_build_define_args'):
+            args = self.builder_action_build_define_args(
+                called_as,
+                log
+                )
+
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
-            options=[] + self.builder_action_build_define_add_opts(
-                called_as,
-                log
-                ),
-            arguments=[] + self.builder_action_build_define_add_args(
-                called_as,
-                log
-                ),
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log
-                ),
+            options=opts,
+            arguments=args,
+            environment=envs,
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
             )
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        return {}
+
+    def builder_action_distribute_define_opts(self, called_as, log):
+        return []
+
+    def builder_action_distribute_define_args(self, called_as, log):
+        return ['install', 'DESTDIR={}'.format(self.dst_dir)]
+
     def builder_action_distribute(self, called_as, log):
+
+        self._check_deprecated_methods(called_as, log)
+
+        envs = {}
+        if hasattr(self, 'builder_action_distribute_define_environment'):
+            envs = self.builder_action_distribute_define_environment(
+                called_as,
+                log
+                )
+
+        opts = []
+        if hasattr(self, 'builder_action_distribute_define_opts'):
+            opts = self.builder_action_distribute_define_opts(
+                called_as,
+                log
+                )
+
+        args = []
+        if hasattr(self, 'builder_action_distribute_define_args'):
+            args = self.builder_action_distribute_define_args(
+                called_as,
+                log
+                )
+
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
-            options=[] + self.builder_action_build_define_distribute_opts(
-                called_as,
-                log
-                ),
-            arguments=[
-                'install',
-                'DESTDIR={}'.format(self.dst_dir)
-                ] + self.builder_action_build_define_distribute_args(
-                called_as,
-                log
-                ),
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log
-                ),
+            options=opts,
+            arguments=args,
+            environment=envs,
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

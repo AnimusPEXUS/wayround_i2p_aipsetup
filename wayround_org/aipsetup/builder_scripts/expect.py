@@ -52,25 +52,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_options(self, called_as, log):
-        ''
-        """
-                    '--with-tcl={}'.format(
-                wayround_org.utils.path.join(
-                    self.target_host_root,
-                    '/usr', 'lib'
-                    )
-                ),
-            '--with-tk={}'.format(
-                wayround_org.utils.path.join(
-                    self.target_host_root,
-                    '/usr', 'lib'
-                    )
-                )
-        """
 
-        return super().builder_action_configure_define_options(called_as, log) + [
+        ret = super().builder_action_configure_define_options(called_as, log)
+        ret += [
             '--enable-threads',
             '--enable-64bit',
             '--enable-64bit-vis',
             '--enable-wince',
             ]
+
+        return ret

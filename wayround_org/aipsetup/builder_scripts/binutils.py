@@ -28,12 +28,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['edit_package_info'] = self.builder_action_edit_package_info
         ret.move_to_end('edit_package_info', False)
 
-        # NOTE: following actions is meaningless for Lalilalo multiarch
-        #       approach
-        # if self.is_crossbuilder:
-        # ret['after_distribute'] = self.builder_action_after_distribute
-        # ret['delete_share'] = self.builder_action_delete_share
-
         return ret
 
     def builder_action_edit_package_info(self, called_as, log):
@@ -119,43 +113,3 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ret += ['--with-sysroot']
 
         return ret
-
-    '''
-    def builder_action_after_distribute(self, called_as, log):
-
-        etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
-        etc_dir_file = os.path.join(
-            etc_dir,
-            '020.cross_builder.{}.binutils'.format(self.target)
-            )
-
-        os.makedirs(etc_dir, exist_ok=True)
-
-        if not os.path.isdir(etc_dir):
-            raise Exception("Required dir creation error")
-
-        fi = open(etc_dir_file, 'w')
-
-        fi.write(
-            """\
-#!/bin/bash
-export PATH=$PATH:/usr/crossbuilders/{target}/bin:\
-/usr/crossbuilders/{target}/sbin
-""".format(target=self.target)
-            )
-
-        fi.close()
-
-        return 0
-    '''
-
-    '''
-    def builder_action_delete_share(self, called_as, log):
-
-        share = os.path.join(self.dst_dir, 'usr', 'share')
-
-        if os.path.isdir(share):
-            shutil.rmtree(share)
-
-        return 0
-    '''

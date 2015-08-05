@@ -4,7 +4,7 @@
   "buildscript": "std_cmake",
   "version_tool": "",
   "basename": "opencv",
-  "filters": "",
+  "filters": "- version !fm 2.*\n- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,
