@@ -21,18 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = self.all_automatic_flags_as_dict()
         return ret
 
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[
-                ] + self.all_automatic_flags_as_list(),
-            arguments=[],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
+    def builder_action_build_define_opts(self, called_as, log):
+        ret = super().builder_action_build_define_opts()
+        ret += self.all_automatic_flags_as_list()
         return ret

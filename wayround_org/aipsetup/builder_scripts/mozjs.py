@@ -39,27 +39,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    '''
-    def builder_action_make_define_environment(self, called_as, log):
-        return self.all_automatic_flags_as_dict()
-    '''
-    
-    '''
-    def builder_action_build(self, called_as, log):
-        
-        log.info("performing patch")
-    '''
-
-    def builder_action_build_define_add_args(self, called_as, log):
-        ret = self.all_automatic_flags_as_list()
+    def builder_action_build_define_args(self, called_as, log):
+        ret = super().builder_action_build_define_args(called_as, log)
+        ret += self.all_automatic_flags_as_list()
 
         # if self.package_info['pkg_info']['name'] == 'mozjs24':
         #    ret += ['LIBRARY_NAME=mozjs-24']
 
         return ret
 
-    def builder_action_distribute_define_add_args(self, called_as, log):
-        ret = []  # self.all_automatic_flags_as_list()
+    def builder_action_distribute_define_args(self, called_as, log):
+        ret = super().builder_action_distribute_define_args(called_as, log)
+        ret += []  # self.all_automatic_flags_as_list()
 
         # if self.package_info['pkg_info']['name'] == 'mozjs24':
         #    ret += ['LIBRARY_NAME=mozjs-24']

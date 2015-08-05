@@ -167,20 +167,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    """
+    '''
     def builder_action_build_01(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite,
             log=log,
             options=[],
             arguments=['all-gcc'],
-            environment=self.builder_action_make_define_environment(called_as, log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
             )
         return ret
-    """
+    '''
 
     def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
@@ -192,9 +192,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install-headers',
                 'DESTDIR=' + self.dst_dir
                 ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -209,9 +207,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 os.path.join('csu', 'subdir_lib')
                 ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.bld_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -298,10 +294,7 @@ then continue with gcc build_02+
             log=log,
             options=[],
             arguments=[],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log
-                ),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -317,10 +310,7 @@ then continue with gcc build_02+
                 'install',
                 'DESTDIR={}'.format(self.dst_dir)
                 ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log
-                ),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir

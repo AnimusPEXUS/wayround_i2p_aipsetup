@@ -445,11 +445,6 @@ class Builder:
 
         ret = {}
 
-        ret = self.builder_action_configure_define_environment(
-            called_as,
-            log
-            )
-
         pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
         ret.update(
@@ -508,7 +503,6 @@ class Builder:
     def builder_action_configure_define_relative_call(self, called_as, log):
         return False
 
-    # NOTE: not sure is it usefull
     def builder_action_configure_define_PATH_dict(self):
         return {'PATH': ':'.join(
                 [
@@ -516,12 +510,11 @@ class Builder:
                     os.path.join(self.host_multiarch_dir, 'sbin')
                     ]
                 )
-                }
+            }
 
     def builder_action_configure(self, called_as, log):
 
         self._check_deprecated_methods(called_as, log)
-
         envs = {}
         if hasattr(self, 'builder_action_configure_define_environment'):
             envs = self.builder_action_configure_define_environment(
@@ -587,8 +580,8 @@ class Builder:
                 )
                 ]
 
-        if hasattr(self, 'builder_action_distribute_define_opts'):
-            ret += self.builder_action_distribute_define_opts(
+        if hasattr(self, 'builder_action_build_define_opts'):
+            ret += self.builder_action_build_define_opts(
                 called_as,
                 log
                 )
@@ -709,7 +702,7 @@ class Builder:
             )
         return ret
 
-    def builder_action_configure_define_environment(self, called_as, log):
+    def builder_action_distribute_define_environment(self, called_as, log):
         return {}
 
     def builder_action_distribute_define_opts(self, called_as, log):

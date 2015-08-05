@@ -5,6 +5,7 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
 
+# TODO: configuration is quick hack. need to do better
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -13,7 +14,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--enable-nasm',
             '--disable-gtktest',
-            '--enable-decode-layer1',
-            '--enable-decode-layer2',
+            #'--enable-decode-layer1',
+            #'--enable-decode-layer2',
+            '--disable-frontend',
+            
             ]
+
+        if 'i686' in self.host_strong:
+            ret += [
+                'host_cpu=i686',
+                'ac_cv_header_xmmintrin_h=no',
+                #'i686'
+                ]
+
+        #if 'i686' in self.host_strong:
+        #    ret += [
+        #        'CFLAGS=-march=i486 -mtune=i486',
+        #        ]
+        # for i in range(len(ret)):
+        #    if
         return ret

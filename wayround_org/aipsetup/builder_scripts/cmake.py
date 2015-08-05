@@ -142,17 +142,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
     builder_action_configure = \
         wayround_org.aipsetup.builder_scripts.std.Builder.builder_action_configure
 
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=['VERBOSE=1'],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
+    def builder_action_build_define_arguments(self, called_as, log):
+        ret = super().builder_action_build_define_arguments(called_as, log)
+        ret += ['VERBOSE=1']
         return ret

@@ -27,22 +27,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
         return ret
 
-    def builder_action_distribute(self, called_as, log):
-
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'DESTDIR={}'.format(self.dst_host_multiarch_dir),
-                ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log
-                ),
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return ['install',
+                'DESTDIR={}'.format(self.dst_host_multiarch_dir)]

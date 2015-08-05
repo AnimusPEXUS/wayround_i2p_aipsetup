@@ -258,9 +258,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=['all-gcc'],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -276,9 +274,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install-gcc',
                 'DESTDIR={}'.format(self.dst_dir)
                 ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -301,9 +297,7 @@ After what - continue building from 'build_02+' action
             log=log,
             options=[],
             arguments=['all-target-libgcc'],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -319,9 +313,7 @@ After what - continue building from 'build_02+' action
                 'install-target-libgcc',
                 'DESTDIR={}'.format(self.dst_dir)
                 ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -344,9 +336,7 @@ After what - continue building this gcc from 'build_03+' action
             log=log,
             options=[],
             arguments=[],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
@@ -362,9 +352,7 @@ After what - continue building this gcc from 'build_03+' action
                 'install',
                 'DESTDIR={}'.format(self.dst_dir)
                 ],
-            environment=self.builder_action_make_define_environment(
-                called_as,
-                log),
+            environment={},
             environment_mode='copy',
             use_separate_buildding_dir=self.separate_build_dir,
             source_configure_reldir=self.source_configure_reldir
