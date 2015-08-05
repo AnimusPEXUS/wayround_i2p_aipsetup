@@ -22,8 +22,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
-        ret = super().builder_action_configure_define_options(called_as, log)
+    def builder_action_configure_define_opts(self, called_as, log):
+        ret = super().builder_action_configure_define_opts(called_as, log)
         # print('ret: {}'.format(ret))
         for i in [
                 '--includedir=',

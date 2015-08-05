@@ -7,7 +7,7 @@ import wayround_org.utils.file
 
 class Builder_old(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         prefix = self.host_multiarch_dir
         return [
             '--prefix=' + prefix,
@@ -59,9 +59,9 @@ class Builder_old(wayround_org.aipsetup.builder_scripts.std.Builder):
 
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         prefix = self.host_multiarch_dir
-        ret = super().builder_action_configure_define_options(called_as, log)
+        ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
             '-DPYTHON_EXECUTABLE={}'.format(
                 wayround_org.utils.file.which(

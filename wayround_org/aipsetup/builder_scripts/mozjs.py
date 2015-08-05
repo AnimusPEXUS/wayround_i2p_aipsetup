@@ -15,8 +15,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return None
 
-    def builder_action_configure_define_options(self, called_as, log):
-        ret = super().builder_action_configure_define_options(called_as, log)
+    def builder_action_configure_define_opts(self, called_as, log):
+        ret = super().builder_action_configure_define_opts(called_as, log)
         for i in range(len(ret) - 1, -1, -1):
             for j in [
                     'CC=',

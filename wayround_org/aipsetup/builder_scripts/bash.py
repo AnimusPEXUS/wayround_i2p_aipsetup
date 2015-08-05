@@ -52,7 +52,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     ret = 1
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         ret = [
             '--enable-multibyte',
             '--with-curses'
@@ -67,7 +67,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #                              build
                 ]
 
-        return super().builder_action_configure_define_options(
+        return super().builder_action_configure_define_opts(
             called_as, log) + ret
 
     def builder_action_sh_link(self, called_as, log):

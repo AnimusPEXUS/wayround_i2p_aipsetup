@@ -16,8 +16,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['after_distribute'] = self.builder_action_after_distribute
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(called_as, log) + [
+    def builder_action_configure_define_opts(self, called_as, log):
+        return super().builder_action_configure_define_opts(called_as, log) + [
             '--enable-ftp',
             '--with-openssl',
             '--enable-mbstring',

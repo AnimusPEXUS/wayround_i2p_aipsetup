@@ -37,7 +37,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     def builder_action_configure_define_environment(self, called_as, log):
 
-        std_cmake_opts = super().builder_action_configure_define_options(
+        std_cmake_opts = super().builder_action_configure_define_opts(
             called_as,
             log
             )
@@ -69,10 +69,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
 
         std_opts = wayround_org.aipsetup.builder_scripts.std.Builder.\
-            builder_action_configure_define_options(
+            builder_action_configure_define_opts(
                 self,
                 called_as,
                 log
@@ -98,7 +98,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
                     del std_opts[i]
                     break
 
-        std_cmake_opts = super().builder_action_configure_define_options(
+        std_cmake_opts = super().builder_action_configure_define_opts(
             called_as,
             log
             )

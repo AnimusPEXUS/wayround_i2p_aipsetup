@@ -135,7 +135,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     p.wait()
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         ret = [
             '--enable-shared',
             '--enable-widec',
@@ -161,7 +161,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--without-ada'
                 ]
 
-        return super().builder_action_configure_define_options(
+        return super().builder_action_configure_define_opts(
             called_as, log) + ret
 
     def builder_action_links(self, called_as, log):

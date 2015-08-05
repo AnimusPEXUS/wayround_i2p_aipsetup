@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.apply_host_spec_compilers_options = False
         return
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         # ret = [
         #    '-Dprefix={}'.format(self.host_multiarch_dir),
         #    '-Dcc={}-gcc'.format(self.host_strong),

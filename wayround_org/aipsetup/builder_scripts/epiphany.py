@@ -36,8 +36,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             }
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
-        return super().builder_action_configure_define_options(called_as, log) + [
+    def builder_action_configure_define_opts(self, called_as, log):
+        return super().builder_action_configure_define_opts(called_as, log) + [
             'NSS_CFLAGS=' + self.custom_data['NSS_CFLAGS'],
             'NSS_LIBS=' + self.custom_data['NSS_LIBS']
             ]

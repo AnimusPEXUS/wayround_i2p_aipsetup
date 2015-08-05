@@ -18,11 +18,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['build']
         return ret
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         platform = 'linux-generic32'
         if self.host_strong.startswith('x86_64'):
             platform = 'linux-x86_64'
-        # super().builder_action_configure_define_options(called_as, log) +
+        # super().builder_action_configure_define_opts(called_as, log) +
         ret = [
             '--prefix={}'.format(self.host_multiarch_dir),
             '--openssldir=/etc/ssl',

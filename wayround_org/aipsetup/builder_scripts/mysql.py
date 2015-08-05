@@ -8,11 +8,11 @@ import wayround_org.aipsetup.builder_scripts.std_cmake
 
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
-    def builder_action_configure_define_options(self, called_as, log):
+    def builder_action_configure_define_opts(self, called_as, log):
         usr_share_mysql = '{}'.format(
             os.path.join(self.host_multiarch_dir, 'share', 'mysql')
             )
-        return super().builder_action_configure_define_options(called_as, log) + [
+        return super().builder_action_configure_define_opts(called_as, log) + [
             '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
 
             '-DMYSQL_DATADIR={}'.format(
