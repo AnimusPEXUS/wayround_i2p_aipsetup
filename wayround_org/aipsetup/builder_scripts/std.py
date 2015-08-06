@@ -264,9 +264,7 @@ class Builder:
                 'builder_action_build_define_add_opts',
                 'builder_action_build_define_distribute_args',
                 'builder_action_build_define_distribute_opts',
-                'builder_action_configure_define_opts',
-                'builder_action_configure_define_opts',
-                'builder_action_configure_define_opts',
+                'builder_action_configure_define_options',
                 'builder_action_make_define_environment',
                 ]:
             if hasattr(self, i):
