@@ -1215,7 +1215,7 @@ class PackCtl:
                         else:
                             raise Exception("DNA error")
 
-                        if dl_to_use is None
+                        if dl_to_use is None:
                             raise Exception("No appropriate linker found")
 
                         p = subprocess.Popen(
