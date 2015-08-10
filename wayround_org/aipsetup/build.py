@@ -867,6 +867,8 @@ class PackCtl:
 
     def relocate_libx_dir_files_into_lib_dir(self):
 
+        raise Exception("We should avoid using this practice")
+
         ret = 0
 
         package_info = self.buildingsite_ctl.read_package_info()
@@ -1025,6 +1027,11 @@ class PackCtl:
         return ret
 
     def destdir_edit_executable_elfs(self):
+
+        raise Exception(
+            "Don't do this any more."
+            " Better - create symlinks to needed ld-linux files."
+            )
 
         ret = 0
 
@@ -1674,10 +1681,10 @@ class PackCtl:
                 self.rename_configuration_dirs,
                 self.relocate_usr_multiarch_files,
                 self.relocate_wrong_usr_under_multiarch_dir,
-                self.relocate_libx_dir_files_into_lib_dir,
+                # self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_filelist,
                 self.destdir_set_modes,
-                self.destdir_edit_executable_elfs,
+                # self.destdir_edit_executable_elfs,
                 self.destdir_checksum,
                 self.destdir_deps_bin,
                 self.compress_patches_destdir_and_logs,

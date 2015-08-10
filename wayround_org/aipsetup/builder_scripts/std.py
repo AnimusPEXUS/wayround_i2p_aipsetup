@@ -13,18 +13,41 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 
+# TODO: rename host_strong to host
+# TODO: make .host_final attr for calculating host after overrides and
+#       redifinitions
+
 
 class Builder:
 
     def __init__(self, buildingsite):
 
-        bs = wayround_org.aipsetup.build.BuildingSiteCtl(buildingsite)
+        if isinstance(
+                buildingsite,
+                wayround_org.aipsetup.build.BuildingSiteCtl
+                ):
+            self.control = buildingsite
+
+        elif isinstance(buildingsite, str):
+            self.control = wayround_org.aipsetup.build.BuildingSiteCtl(
+                buildingsite
+                )
+
+        else:
+            raise TypeError("`buildingsite' invalid type")
 
         # this is for glibc case, when package_info `host' should stay same
         # as `build', but ./configure --host must be different
         self.internal_host_redefinition = None
 
-        self.control = bs
+        # done whis, but may be it's not needed
+        self.internal_build_redefinition = None  # not used
+        self.internal_target_redefinition = None  # not used
+
+        # override values is package_info.json
+        self.total_host_redefinition = None
+        self.total_build_redefinition = None
+        self.total_target_redefinition = None
 
         self.separate_build_dir = False
 
@@ -85,18 +108,32 @@ class Builder:
 
     @property
     def target(self):
-        return self.package_info['constitution']['target']
+        if self.total_target_redefinition is not None:
+            ret = self.total_target_redefinition
+        else:
+            ret = self.package_info['constitution']['target']
+            if self.internal_target_redefinition is not None:
+                ret = self.internal_target_redefinition
+        return ret
 
     @property
     def host(self):
-        ret = self.package_info['constitution']['host']
-        if self.internal_host_redefinition is not None:
-            ret = self.internal_host_redefinition
+
+        if self.total_host_redefinition is not None:
+            ret = self.total_host_redefinition
+        else:
+            ret = self.package_info['constitution']['host']
+            if self.internal_host_redefinition is not None:
+                ret = self.internal_host_redefinition
         return ret
 
     @property
     def host_strong(self):
-        return self.package_info['constitution']['host']
+        if self.total_host_redefinition is not None:
+            ret = self.total_host_redefinition
+        else:
+            ret = self.package_info['constitution']['host']
+        return ret
 
     @property
     def host_multiarch_dir(self):
@@ -138,7 +175,13 @@ class Builder:
 
     @property
     def build(self):
-        return self.package_info['constitution']['build']
+        if self.total_build_redefinition is not None:
+            ret = self.total_build_redefinition
+        else:
+            ret = self.package_info['constitution']['build']
+            if self.internal_build_redefinition is not None:
+                ret = self.internal_build_redefinition
+        return ret
 
     def calculate_default_linker_program(self):
         return wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
@@ -185,6 +228,41 @@ class Builder:
 
         return ret
 
+    def calculate_linking_interpreter_option(self, d):
+
+        if not 'LDFLAGS' in d:
+            d['LDFLAGS'] = []
+
+        d['LDFLAGS'].append(
+            self.calculate_default_linker_program_gcc_parameter()
+            )
+
+        return
+
+    def calculate_linking_lib_dir_options(self, d):
+
+        if not 'LDFLAGS' in d:
+            d['LDFLAGS'] = []
+
+        d['LDFLAGS'].append('-L{}'.format(self.host_multiarch_lib_dir))
+
+        return
+
+    def calculate_compilers_options(self, d):
+        if not 'CC' in d:
+            d['CC'] = []
+        d['CC'].append('{}-gcc'.format(self.host_strong))
+
+        if not 'GCC' in d:
+            d['GCC'] = []
+        d['GCC'].append('{}-gcc'.format(self.host_strong))
+
+        if not 'CXX' in d:
+            d['CXX'] = []
+        d['CXX'].append('{}-g++'.format(self.host_strong))
+
+        return
+
     def all_automatic_flags_as_dict(self):
 
         af = self.all_automatic_flags()
@@ -201,13 +279,13 @@ class Builder:
         d = {}
 
         if self.apply_host_spec_linking_interpreter_option:
-            self.builder_action_configure_define_linking_interpreter_option(d)
+            self.calculate_linking_interpreter_option(d)
 
         if self.apply_host_spec_linking_lib_dir_options:
-            self.builder_action_configure_define_linking_lib_dir_options(d)
+            self.calculate_linking_lib_dir_options(d)
 
         if self.apply_host_spec_compilers_options:
-            self.builder_action_configure_define_compilers_options(d)
+            self.calculate_compilers_options(d)
 
         return d
 
@@ -406,41 +484,6 @@ class Builder:
                 ret = 2
         return ret
 
-    def builder_action_configure_define_compilers_options(self, d):
-        if not 'CC' in d:
-            d['CC'] = []
-        d['CC'].append('{}-gcc'.format(self.host_strong))
-
-        if not 'GCC' in d:
-            d['GCC'] = []
-        d['GCC'].append('{}-gcc'.format(self.host_strong))
-
-        if not 'CXX' in d:
-            d['CXX'] = []
-        d['CXX'].append('{}-g++'.format(self.host_strong))
-
-        return
-
-    def builder_action_configure_define_linking_interpreter_option(self, d):
-
-        if not 'LDFLAGS' in d:
-            d['LDFLAGS'] = []
-
-        d['LDFLAGS'].append(
-            self.calculate_default_linker_program_gcc_parameter()
-            )
-
-        return
-
-    def builder_action_configure_define_linking_lib_dir_options(self, d):
-
-        if not 'LDFLAGS' in d:
-            d['LDFLAGS'] = []
-
-        d['LDFLAGS'].append('-L{}'.format(self.host_multiarch_lib_dir))
-
-        return
-
     def builder_action_configure_define_environment(self, called_as, log):
 
         ret = {}
@@ -503,14 +546,18 @@ class Builder:
     def builder_action_configure_define_relative_call(self, called_as, log):
         return False
 
+    def builder_action_configure_define_PATH_list(self):
+        ret = [
+            os.path.join(self.host_multiarch_dir, 'bin'),
+            os.path.join(self.host_multiarch_dir, 'sbin')
+            ]
+        return ret
+
     def builder_action_configure_define_PATH_dict(self):
-        return {'PATH': ':'.join(
-                [
-                    os.path.join(self.host_multiarch_dir, 'bin'),
-                    os.path.join(self.host_multiarch_dir, 'sbin')
-                    ]
-                )
+        ret = {
+            'PATH': ':'.join(self.builder_action_configure_define_PATH_list())
             }
+        return ret
 
     def builder_action_configure(self, called_as, log):
 

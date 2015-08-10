@@ -106,7 +106,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--without-gold',
 
             # experiment:
-            '--with-sysroot={}'.format(self.host_multiarch_dir)
+            '--with-sysroot={}'.format(self.host_multiarch_dir),
+
+            # more experiment:
+            '--enable-multiarch',
+            '--enable-multilib',
             ]
 
         if self.is_crossbuilder:

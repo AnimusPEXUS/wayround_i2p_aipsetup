@@ -119,6 +119,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        return {}
+         
     def builder_action_configure_define_opts(self, called_as, log):
 
         ret = super().builder_action_configure_define_opts(called_as, log)
@@ -202,10 +205,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 '--enable-threads=posix',
 
-                #'--enable-multiarch',
+                # wine Wow64 support requires this
+                # ldld: Relocatable linking with relocations from format
+                #       elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
+                #       (aclui.pnv73q.o) is not supported
+                '--enable-multiarch',
                 #'--enable-multilib',
+
                 '--disable-multilib',
-                '--disable-multiarch',
+                #'--disable-multiarch',
 
                 '--enable-checking=release',
                 '--enable-libada',
@@ -217,7 +225,69 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 # '--with-build-sysroot={}'.format(self.host_multiarch_dir)
                 ]
 
+            if self.host_strong.startswith('x86_64'):
+                # TODO: no hardcode
+                # NOTE: this hack is to make gcc use libc from i686 multiarch
+                #       dir, as well as avoid using libstdc++ from i686
+                #       multiarch dir
+
+                '''
+                ret += [
+                    '--with-stage1-ldflags='
+                    + '-L{}'.format(
+                        '/multiarch/x86_64-pc-linux-gnu/lib'
+                        )
+                    + ' '
+                    + '-L{}'.format(
+                        '/multiarch/x86_64-pc-linux-gnu/lib64'
+                        )
+                    + ' '
+                    + '-L{}'.format(
+                        '/multiarch/i686-pc-linux-gnu/lib'
+                        )
+                    ]
+                '''
+
+                '''
+                ret += [
+                    'LDFLAGS='
+                    + '-L{}'.format(
+                        '/multiarch/i686-pc-linux-gnu/lib'
+                        )
+                    + ' '
+                    + '-L{}'.format(
+                        '/multiarch/x86_64-pc-linux-gnu/lib64'
+                        )
+                    + ' '
+                    + '-L{}'.format(
+                        '/multiarch/i686-pc-linux-gnu/lib'
+                        )
+                    ]
+                '''
+
         return ret
+
+    # def builder_action_build_define_environment(self, called_as, log):
+    def builder_action_build_define_environment(self, called_as, log):
+        return {}
+
+    '''
+    def builder_action_build_define_environment(self, called_as, log):
+        ret = super().builder_action_build_define_environment(called_as, log)
+
+        if self.host_strong.startswith('x86_64'):
+
+            for i in ['lib', 'lib64', 'lib32', 'libx32']:
+
+                joined = os.path.join(
+                    '/multiarch', 'i686-pc-linux-gnu', i
+                    )
+
+                if os.path.isdir(joined):
+                    ret['LD_LIBRARY_PATH'] += ':{}'.format(joined)
+
+        return ret
+    '''
 
     def builder_action_before_checks(self, called_as, log):
         log.info(

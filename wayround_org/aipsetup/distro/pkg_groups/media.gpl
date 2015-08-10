@@ -130,7 +130,8 @@
             "kwargs": {}
             },
         "libmusicbrainz",
-        "opencv2", "opencv3"
+        "opencv2", "opencv3",
+        "openal-soft", "freealut"
 
     ]
 }

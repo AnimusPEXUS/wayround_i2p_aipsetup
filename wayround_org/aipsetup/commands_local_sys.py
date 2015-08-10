@@ -244,7 +244,7 @@ def system_package_list_asps(command_name, opts, args, adds):
                 config, pkg_client, basedir
                 )
 
-            lst = system.list_installed_package_s_asps(name)
+            lst = system.list_installed_package_s_asps(name, host=False)
 
             lst.sort(
                 reverse=True,

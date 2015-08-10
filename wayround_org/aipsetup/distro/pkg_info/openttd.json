@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
-  "home_page": "http://None",
-  "buildscript": "",
+  "home_page": "http://www.openttd.org/",
+  "buildscript": "openttd",
   "version_tool": "",
   "basename": "openttd",
   "filters": "",
