@@ -1028,31 +1028,36 @@ class PackCtl:
 
     def destdir_edit_executable_elfs(self):
 
-        raise Exception(
-            "Don't do this any more."
-            " Better - create symlinks to needed ld-linux files."
-            )
+        # NOTE: this editing need to be done because of nature of /multiarch
+        #       dir. In future, Lailalo need to avoid existing of standard
+        #       /usr, /bin, /sbin, /lib, /lib64 etc dirs and
+        #       as much as possible move everythin under /multiarch
+        #       dirs
+
+        # raise Exception(
+        #    "Don't do this any more."
+        #    " Better - create symlinks to needed ld-linux files."
+        #    )
 
         ret = 0
 
         logging.info(
-            "Looking for executable ELFs to edit theyr linker"
+            "Patching executable ELFs' linker path"
             )
 
         package_info = self.buildingsite_ctl.read_package_info()
 
         host = package_info['constitution']['host']
 
-        dl = wayround_org.aipsetup.build.find_dl(
-            os.path.join(
-                '/',
-                'multiarch',
-                host
-                )
-            )
+        if not host in [
+                'i686-pc-linux-gnu',
+                'x86_64-pc-linux-gnu'
+                ]:
+            raise Exception("Trying to package for unsupported host")
 
-        if dl is None:
-            if package_info['pkg_info']['name'] in [
+        skip_patch = False
+
+        if package_info['pkg_info']['name'] in [
                 'linux',
                 #'binutils',
                 'glibc',
@@ -1061,36 +1066,49 @@ class PackCtl:
                     package_info['constitution']['build'] !=
                     package_info['constitution']['host']
                     ):
+            skip_patch = True
 
-                logging.warning(
-                    "    ld interpreter not found. skipping as "
-                    "possible crossbuild of `{}'".format(
-                        package_info['pkg_info']['name']
-                        )
+            logging.warning(
+                "Skipping pathelf'ing this package, as "
+                "possible crossbuild of `{}'".format(
+                    package_info['pkg_info']['name']
                     )
-                ret = 0
-            else:
-                logging.warning("    ld interpreter not found")
-                ret = 1
-
-        else:
-
-            '''
-            rpath = os.path.join(
-                '/',
-                'multiarch',
-                host,
-                'lib'
                 )
-            '''
+            ret = 0
+
+        if not skip_patch:
+
+            dl32 = wayround_org.aipsetup.build.find_dl(
+                os.path.join(
+                    '/',
+                    'multiarch',
+                    'i686-pc-linux-gnu'
+                    )
+                )
+
+            dl64 = wayround_org.aipsetup.build.find_dl(
+                os.path.join(
+                    '/',
+                    'multiarch',
+                    'x86_64-pc-linux-gnu'
+                    )
+                )
 
             logging.info(
                 "New values to apply:\n"
-                "        linker: {}"
+                "        for EM_386   : {}\n"
+                "        for EM_X86_64: {}"
                 "".format(
-                    dl
+                    dl32,
+                    dl64
                     )
                 )
+
+            if dl32 is None or dl64 is None:
+                logging.warning(
+                    "If would find executable ELF for which have no proper"
+                    " linker - error"
+                    )
 
             destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
@@ -1123,8 +1141,8 @@ class PackCtl:
                             wayround_org.utils.path.join(destdir, i)
                             )
 
-                        if os.path.isfile(
-                                filename) and os.path.exists(filename):
+                        if (os.path.isfile(filename)
+                                and os.path.exists(filename)):
 
                             try:
                                 elf = wayround_org.utils.format.elf.ELF(
@@ -1143,9 +1161,7 @@ class PackCtl:
                                     if (elf.elf_type_name == 'ET_EXEC'
                                             and elf.dynamic_section is not None):
 
-                                        exec_elfs_list.append(
-                                            filename
-                                            )
+                                        exec_elfs_list.append(filename)
 
                                 else:
                                     n_elfs += 1
@@ -1180,48 +1196,35 @@ class PackCtl:
                         )
 
                     for i in exec_elfs_list:
-                        elf = wayround_org.utils.format.elf.ELF(filename)
+                        elf = wayround_org.utils.format.elf.ELF(i)
                         logging.info(
-                            "        patching: {}".format(
+                            "        patching: ({:10}) {}".format(
+                                elf.elf_machine_name,
                                 os.path.relpath(
                                     i,
                                     destdir
                                     )
                                 )
                             )
-                        """
-                        runpath_values = elf.runpath_values
-                        logging.info(
-                            "            original rpath: {}".format(
-                                runpath_values
-                                )
-                            )
-                        """
-                        if True:  # if runpath_values is None
-                            p = subprocess.Popen(
-                                ['patchelf', '--set-interpreter', dl, i]
-                                )
-                            if p.wait() != 0:
-                                logging.error(
-                                    "Couldn't change interpreter for: {}".format(
-                                        i)
-                                    )
-                                ret = 5
-                                break
 
-                            """
-                            p = subprocess.Popen(
-                                ['patchelf', '--set-rpath', rpath, i]
-                                )
-                            if p.wait() != 0:
-                                logging.error(
-                                    "Couldn't change interpreter for: {}".format(i)
-                                    )
-                                ret = 5
-                                break
-                            """
+                        dl_to_use = None
+                        if elf.elf_machine_name == 'EM_386':
+                            dl_to_use = dl32
+                        elif elf.elf_machine_name == 'EM_X86_64':
+                            dl_to_use = dl64
                         else:
-                            raise Exception("Unsupported runpath value")
+                            raise Exception("DNA error")
+
+                        p = subprocess.Popen(
+                            ['patchelf', '--set-interpreter', dl_to_use, i]
+                            )
+                        if p.wait() != 0:
+                            logging.error(
+                                "Couldn't change interpreter for: {}".format(
+                                    i)
+                                )
+                            ret = 5
+                            break
 
                 finally:
                     f.close()
@@ -1684,7 +1687,7 @@ class PackCtl:
                 # self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_filelist,
                 self.destdir_set_modes,
-                # self.destdir_edit_executable_elfs,
+                self.destdir_edit_executable_elfs,
                 self.destdir_checksum,
                 self.destdir_deps_bin,
                 self.compress_patches_destdir_and_logs,
@@ -2671,7 +2674,7 @@ def find_dl(root_dir_path):
         ret = '/multiarch/i686-pc-linux-gnu/lib/ld-linux.so.2'
 
     elif root_dir_path == '/multiarch/x86_64-pc-linux-gnu':
-        ret = '/multiarch/x86_64-pc-linux-gnu/lib/ld-linux-x86-64.so.2'
+        ret = '/multiarch/x86_64-pc-linux-gnu/lib64/ld-linux-x86-64.so.2'
 
     else:
 
