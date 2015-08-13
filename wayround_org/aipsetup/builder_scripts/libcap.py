@@ -107,7 +107,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ),
             os.path.join(
                 self.dst_host_multiarch_dir,
-                'lib'
+                self.calculate_main_multiarch_lib_dir_name()
                 ),
             overwrite_files=True,
             clear_before_copy=False,

@@ -24,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-npapi-plugindir={}'.format(
                 os.path.join(
                     self.host_multiarch_dir,
-                    'lib',
+                    self.calculate_main_multiarch_lib_dir_name(),
                     'mozilla',
                     'plugins'
                     )

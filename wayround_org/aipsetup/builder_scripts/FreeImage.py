@@ -46,7 +46,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'INSTALLDIR={}'.format(
                     wayround_org.utils.path.join(
                         self.host_multiarch_dir,
-                        'lib'
+                        self.calculate_main_multiarch_lib_dir_name()
                         )
                     )
                 ] + self.all_automatic_flags_as_list(),
@@ -66,7 +66,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         os.makedirs(
-            os.path.join(self.dst_host_multiarch_dir, 'lib'),
+            os.path.join(
+                self.dst_host_multiarch_dir,
+                self.calculate_main_multiarch_lib_dir_name()
+                ),
             exist_ok=True
             )
 
@@ -81,7 +84,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 i = os.path.basename(i)
                 shutil.copy(
                     os.path.join(self.src_dir, 'Dist', i),
-                    os.path.join(self.dst_host_multiarch_dir, 'lib', i)
+                    os.path.join(
+                        self.dst_host_multiarch_dir,
+                        self.calculate_main_multiarch_lib_dir_name(),
+                        i
+                        )
                     )
 
             for i in headers:

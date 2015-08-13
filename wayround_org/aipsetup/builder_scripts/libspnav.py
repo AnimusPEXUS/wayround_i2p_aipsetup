@@ -11,7 +11,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
         arch_dir = self.dst_host_multiarch_dir
         for i in [
-                wayround_org.utils.path.join(arch_dir, 'lib'),
+                wayround_org.utils.path.join(
+                    arch_dir, self.calculate_main_multiarch_lib_dir_name()
+                    ),
                 wayround_org.utils.path.join(arch_dir, 'include')
                 ]:
             os.makedirs(i, exist_ok=True)

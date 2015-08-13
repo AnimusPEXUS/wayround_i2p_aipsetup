@@ -118,7 +118,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
 
             OBJ_dir_bin = wayround_org.utils.path.join(OBJ_dir, 'bin')
-            OBJ_dir_lib = wayround_org.utils.path.join(OBJ_dir, 'lib')
+            OBJ_dir_lib = wayround_org.utils.path.join(
+                OBJ_dir,
+                self.calculate_main_multiarch_lib_dir_name())
             OBJ_dir_include = wayround_org.utils.path.join(OBJ_dir, 'include')
 
             OBJ_dir_rmarch = wayround_org.utils.path.join(
@@ -132,7 +134,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
 
             OBJ_dir_ma_bin = wayround_org.utils.path.join(OBJ_dir_march, 'bin')
-            OBJ_dir_ma_lib = wayround_org.utils.path.join(OBJ_dir_march, 'lib')
+            OBJ_dir_ma_lib = wayround_org.utils.path.join(
+                OBJ_dir_march,
+                self.calculate_main_multiarch_lib_dir_name())
             OBJ_dir_ma_lib_pkgconfig = wayround_org.utils.path.join(
                 OBJ_dir_ma_lib,
                 'pkgconfig'

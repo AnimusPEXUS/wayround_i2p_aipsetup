@@ -66,7 +66,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_a(self, called_as, log):
 
         os.makedirs(
-            os.path.join(self.dst_host_multiarch_dir, 'lib'),
+            os.path.join(
+                self.dst_host_multiarch_dir,
+                self.calculate_main_multiarch_lib_dir_name()
+                ),
             exist_ok=True
             )
 
@@ -102,7 +105,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_so(self, called_as, log):
 
         os.makedirs(
-            os.path.join(self.dst_host_multiarch_dir, 'lib'),
+            os.path.join(
+                self.dst_host_multiarch_dir,
+                self.calculate_main_multiarch_lib_dir_name()
+                ),
             exist_ok=True
             )
 

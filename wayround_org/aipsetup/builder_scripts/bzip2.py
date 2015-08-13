@@ -105,6 +105,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         di = os.path.join(self.dst_host_multiarch_dir, 'lib')
 
+        if self.host_strong.startswith('x86_64'):
+            di = os.path.join(self.dst_host_multiarch_dir, 'lib64')
+
         os.makedirs(di, exist_ok=True)
 
         try:

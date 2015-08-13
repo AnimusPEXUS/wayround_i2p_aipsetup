@@ -89,7 +89,10 @@ CFLAGS += -I{hmd}/include/libnl3
                 'all',
                 'install',
                 'LIBDIR={}'.format(
-                    os.path.join(self.host_multiarch_dir, 'lib')
+                    os.path.join(
+                        self.host_multiarch_dir 
+                        self.calculate_main_multiarch_lib_dir_name()
+                        )
                     ),
                 'BINDIR={}'.format(
                     os.path.join(self.host_multiarch_dir, 'bin')

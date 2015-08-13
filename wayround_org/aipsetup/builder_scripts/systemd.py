@@ -1,6 +1,8 @@
 
 import os.path
 
+import wayround_org.utils.file
+
 import wayround_org.aipsetup.builder_scripts.std
 
 
@@ -22,14 +24,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--disable-coverage',
             '--enable-shared',
             '--enable-compat-libs',
-            '--with-libgcrypt-prefix={}'.format(self.host_multiarch_dir)
+            '--with-libgcrypt-prefix={}'.format(self.get_host_dir()),
+            '--with-rootprefix={}'.format(self.get_host_dir()),
             ]
         ret += [
             '--with-pamlibdir={}'.format(
                 os.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_dir(),
                     'lib',
                     'security'
+                    )
+                )
+            ]
+        ret += [
+            'PYTHON={}'.format(
+                wayround_org.utils.file.which(
+                    'python',
+                    self.get_host_dir()
                     )
                 )
             ]

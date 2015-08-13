@@ -35,14 +35,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         try:
-            name = self.package_info['pkg_info']['name']
+            name = self.get_package_info()['pkg_info']['name']
         except:
             name = None
 
-        pi = self.package_info
+        pi = self.get_package_info()
 
-        if self.is_crossbuilder:
-            pi['pkg_info']['name'] = 'cb-binutils-{}'.format(self.target)
+        if self.get_is_crossbuilder():
+            pi['pkg_info']['name'] = 'cb-binutils-{}'.format(
+                self.get_target_from_pkgi()
+                )
         else:
             pi['pkg_info']['name'] = 'binutils'
 
@@ -57,10 +59,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if ret == 0:
 
-            for i in ['gmp', 'mpc', 'mpfr', 'isl', 'cloog']:
+            for i in [
+                'gmp', 
+                'mpc', 'mpfr', 'isl', 'cloog']:
 
                 if autotools.extract_high(
-                        self.buildingsite,
+                        self.buildingsite_path,
                         i,
                         log=log,
                         unwrap_dir=False,
@@ -72,11 +76,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        return {}
+
     def builder_action_configure_define_opts(self, called_as, log):
 
         ret = super().builder_action_configure_define_opts(called_as, log)
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
+            raise Exception("redo")
             prefix = wayround_org.utils.path.join(
                 self.host_crossbuilders_dir, self.target
                 )
@@ -106,14 +114,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--without-gold',
 
             # experiment:
-            '--with-sysroot={}'.format(self.host_multiarch_dir),
+            '--with-sysroot={}'.format(self.get_host_dir()),
 
             # more experiment:
             '--enable-multiarch',
             '--enable-multilib',
             ]
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
             ret += ['--with-sysroot']
 
         return ret
+
+    def builder_action_build_define_environment(self, called_as, log):
+        return {}
+
+    #def builder_action_build_define_cpu_count(self, called_as, log):
+    #    return 1

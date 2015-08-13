@@ -134,6 +134,12 @@ APPLY_DESCR = """\
     in  this order by function :func:`apply_info`
 """
 
+ROOT_MULTIHOST_DIRNAME = 'multihost'
+
+MULTIHOST_MULTIARCH_DIRNAME = 'multiarch'
+
+MULTIHOST_CROSSBULDERS_DIRNAME = 'crossbuilders'
+
 
 def _constitution_configurer_sub01(
         value, config, package_info, name,
@@ -215,26 +221,16 @@ def constitution_configurer(
         host_from_param,
         build_from_param,
         target_from_param,
-        target_host_root
+        arch_from_param
         ):
 
     _debug = True
-
-    try:
-        paths = package_info['constitution']['paths']
-    except:
-        paths = dict(config['system_paths'])
 
     if _debug:
         logging.info("in host_from_param: {}".format(host_from_param))
         logging.info("in build_from_param: {}".format(build_from_param))
         logging.info("in target_from_param: {}".format(target_from_param))
-
-    if target_host_root is None:
-        try:
-            target_host_root = package_info['constitution']['target_host_root']
-        except:
-            target_host_root = None
+        logging.info("in arch_from_param: {}".format(arch_from_param))
 
     host_from_param = _constitution_configurer_sub01(
         host_from_param,
@@ -266,13 +262,84 @@ def constitution_configurer(
         target_from_param
         )
 
+    if arch_from_param is None:
+        arch_from_param = host_from_param
+
+    ccp_res = calculate_CC_constitution_parts(
+        host_from_param,
+        build_from_param,
+        target_from_param,
+        arch_from_param
+        )
+
     if _debug:
         logging.info("out host_from_param: {}".format(host_from_param))
         logging.info("out build_from_param: {}".format(build_from_param))
         logging.info("out target_from_param: {}".format(target_from_param))
+        logging.info("out arch_from_param: {}".format(arch_from_param))
+        for i in sorted(list(ccp_res.keys())):
+            logging.info("out {}".format(i))
 
-    return host_from_param, build_from_param, target_from_param, paths, \
-        target_host_root
+    return (host_from_param, build_from_param, target_from_param,
+            arch_from_param, ccp_res)
+
+
+def calculate_CC_constitution_parts(
+        host_str,
+        build_str,
+        target_str,
+        arch_str
+        ):
+
+    # this should result in error in Constitution constructor
+    ret_multilibs = None
+    ret_CC = None
+    ret_CXX = None
+
+    if (
+        host_str == build_str == target_str
+            and (
+                (arch_str is not None and arch_str == arch_str)
+                or
+                (arch_str is None)
+                )
+            and (arch_str == 'x86_64-pc-linux-gnu')
+            ):
+        ret_multilibs = ['m64']
+        ret_CC = 'x86_64-pc-linux-gnu-gcc'
+        ret_CXX = 'x86_64-pc-linux-gnu-g++'
+
+    elif (
+        host_str == build_str == target_str
+            and (arch_str is not None and arch_str == 'i686-pc-linux-gnu')
+            and (arch_str == 'x86_64-pc-linux-gnu')
+            ):
+        ret_multilibs = ['m32']
+        ret_CC = 'x86_64-pc-linux-gnu-gcc'
+        ret_CXX = 'x86_64-pc-linux-gnu-g++'
+
+    else:
+        logging.warning("""\
+Unsupported configuration encountered:
+    host:   {}
+    build:  {}
+    target: {}
+    arch:   {}
+""".format(
+            host_str,
+            build_str,
+            target_str,
+            arch_str
+            )
+            )
+
+    ret = {
+        'multilib_variants': ret_multilibs,
+        'CC': ret_CC,
+        'CXX': ret_CXX
+        }
+
+    return ret
 
 
 class Constitution:
@@ -282,16 +349,25 @@ class Constitution:
             host_str=None,
             build_str=None,
             target_str=None,
-            paths=None,
-            target_host_root=None
+            arch_str=None,
+            multilib_variants=None,
+            CC=None,
+            CXX=None
             ):
 
         self.host = None
         self.build = None
         self.target = None
 
-        if paths is None:
-            paths = {}
+        self.arch = None
+
+        if (not isinstance(multilib_variants, list)
+                or len(multilib_variants) == 0
+                ):
+            raise ValueError("`multilib_variant' must be not empty list")
+
+        if not isinstance(arch_str, str):
+            raise ValueError("`arch_str' must be str")
 
         if host_str is not None:
             self.host = wayround_org.utils.system_type.SystemType(host_str)
@@ -302,20 +378,31 @@ class Constitution:
         if target_str is not None:
             self.target = wayround_org.utils.system_type.SystemType(target_str)
 
-        self.paths = paths
-        self.target_host_root = target_host_root
+        if arch_str is not None:
+            self.arch = \
+                wayround_org.utils.system_type.SystemType(arch_str)
+
+        self.multilib_variants = sorted(multilib_variants)
+
+        self.CC = CC
+        self.CXX = CXX
+
         return
 
     def return_aipsetup3_compliant(self):
-        ret = {
-            'host': None,
-            'build': None,
-            'target': None,
-            'paths': copy.copy(self.paths),
-            'system_title': 'UNICORN',
-            'system_version': '3.0',
-            'target_host_root': self.target_host_root
-            }
+        ret = collections.OrderedDict(
+            [
+                ('system_title', 'LAILALO'),
+                ('system_version', '4.0'),
+                ('host', None),
+                ('build', None),
+                ('target', None),
+                ('arch', None),
+                ('multilib_variants', None),
+                ('CC', None),
+                ('CXX', None),
+                ]
+            )
 
         if self.host is not None:
             ret['host'] = str(self.host)
@@ -331,6 +418,15 @@ class Constitution:
             ret['target'] = str(self.target)
         else:
             ret['target'] = None
+
+        if self.arch is not None:
+            ret['arch'] = str(self.arch)
+        else:
+            ret['arch'] = None
+
+        ret['multilib_variants'] = self.multilib_variants
+        ret['CC'] = self.CC
+        ret['CXX'] = self.CXX
 
         return ret
 
@@ -448,7 +544,7 @@ class BuildCtl:
             else:
 
                 if hasattr(script, 'Builder'):
-                    builder = script.Builder(building_site)
+                    builder = script.Builder(self.buildingsite_ctl)
 
                     if action == 'help':
                         builder.print_help()
@@ -598,6 +694,65 @@ class PackCtl:
         self.path = wayround_org.utils.path.abspath(buildingsite_ctl.path)
         return
 
+    def destdir_filelist(self):
+        """
+        Create file list for DESTDIR contents
+        """
+
+        ret = 0
+
+        logging.info("Creating file lists")
+
+        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
+
+        output_file = wayround_org.utils.path.abspath(
+            os.path.join(
+                lists_dir,
+                'DESTDIR_orig.lst'
+                )
+            )
+
+        if not os.path.isdir(destdir):
+            try:
+                os.makedirs(lists_dir)
+            except:
+                logging.error("Can't create dir: {}".format(destdir))
+
+        if not os.path.isdir(destdir):
+            logging.error("DESTDIR not found")
+            ret = 1
+
+        elif not os.path.isdir(lists_dir):
+            logging.error("LIST dir can't be used")
+            ret = 2
+
+        else:
+            lst = wayround_org.utils.file.files_recurcive_list(destdir)
+
+            lst2 = []
+            for i in lst:
+                lst2.append('/' + wayround_org.utils.path.relpath(i, destdir))
+
+            lst = lst2
+
+            del lst2
+
+            lst.sort()
+
+            try:
+                f = open(output_file, 'w')
+            except:
+                logging.exception("Can't rewrite file {}".format(output_file))
+                ret = 3
+            else:
+
+                f.write('\n'.join(lst) + '\n')
+                f.close()
+
+        return ret
+
     def destdir_verify_paths_correctness(self):
         """
         Check for forbidden files in destdir
@@ -707,7 +862,7 @@ class PackCtl:
 
         return int(errors != 0)
 
-    def relocate_usr_multiarch_files(self):
+    def relocate_usr_multihost_files(self):
 
         ret = 0
 
@@ -729,7 +884,7 @@ class PackCtl:
 
             target_arch_dir = wayround_org.utils.path.join(
                 self.buildingsite_ctl.getDIR_DESTDIR(),
-                'multiarch',
+                'multihost',
                 host
                 )
 
@@ -784,7 +939,7 @@ class PackCtl:
 
         return ret
 
-    def relocate_wrong_usr_under_multiarch_dir(self):
+    def relocate_wrong_usr_under_multihost_dir(self):
 
         ret = 0
 
@@ -794,13 +949,13 @@ class PackCtl:
 
         target_arch_dir = wayround_org.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
-            'multiarch',
+            'multihost',
             host
             )
 
         source_arch_dir = wayround_org.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
-            'multiarch',
+            'multihost',
             host,
             'usr'
             )
@@ -925,7 +1080,7 @@ class PackCtl:
 
         return ret
 
-    def destdir_filelist(self):
+    def destdir_filelist2(self):
         """
         Create file list for DESTDIR contents
         """
@@ -1028,16 +1183,16 @@ class PackCtl:
 
     def destdir_edit_executable_elfs(self):
 
-        # NOTE: this editing need to be done because of nature of /multiarch
-        #       dir. In future, Lailalo need to avoid existing of standard
-        #       /usr, /bin, /sbin, /lib, /lib64 etc dirs and
+        # NOTE: this editing need maybe to be done because of nature of
+        #       /multiarch dir. In future, Lailalo need to avoid existing of
+        #       standard /usr, /bin, /sbin, /lib, /lib64 etc dirs and
         #       as much as possible move everythin under /multiarch
         #       dirs
 
-        # raise Exception(
-        #    "Don't do this any more."
-        #    " Better - create symlinks to needed ld-linux files."
-        #    )
+        raise Exception(
+            "Don't do this any more."
+            " Better - create symlinks to needed ld-linux files."
+            )
 
         ret = 0
 
@@ -1465,7 +1620,8 @@ class PackCtl:
 
         lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
-        for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
+        for i in ['DESTDIR_orig.lst', 'DESTDIR.lst', 'DESTDIR.sha512',
+                  'DESTDIR.dep_c']:
 
             infile = os.path.join(lists_dir, i)
             outfile = infile + '.xz'
@@ -1523,7 +1679,8 @@ class PackCtl:
 
         lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
-        for i in ['DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
+        for i in ['DESTDIR_orig.lst',
+                'DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
             filename = os.path.join(lists_dir, i)
 
@@ -1626,7 +1783,7 @@ class PackCtl:
             pack_file_name = os.path.join(
                 pack_dir,
                 "({pkgname})-({version})-({status})-"
-                "({timestamp})-({hostinfo}).asp".format_map(
+                "({timestamp})-({hostinfo})-({arch}).asp".format_map(
                     {
                         'pkgname': package_info['pkg_info']['name'],
                         'version':
@@ -1636,6 +1793,7 @@ class PackCtl:
                         'timestamp':
                             wayround_org.utils.time.currenttime_stamp(),
                         'hostinfo': package_info['constitution']['host'],
+                        'arch': package_info['constitution']['arch']
                         }
                     )
                 )
@@ -1683,6 +1841,7 @@ class PackCtl:
         ret = 0
 
         for i in [
+                self.destdir_filelist,
                 self.destdir_verify_paths_correctness,
                 self.rename_configuration_dirs,
                 self.relocate_usr_multiarch_files,
@@ -1690,7 +1849,7 @@ class PackCtl:
                 # self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_filelist,
                 self.destdir_set_modes,
-                self.destdir_edit_executable_elfs,
+                # self.destdir_edit_executable_elfs,
                 self.destdir_checksum,
                 self.destdir_deps_bin,
                 self.compress_patches_destdir_and_logs,
@@ -2677,7 +2836,7 @@ def find_dl(root_dir_path):
         ret = '/multiarch/i686-pc-linux-gnu/lib/ld-linux.so.2'
 
     elif root_dir_path == '/multiarch/x86_64-pc-linux-gnu':
-        ret = '/multiarch/x86_64-pc-linux-gnu/lib64/ld-linux-x86-64.so.2'
+        ret = '/multiarch/x86_64-pc-linux-gnu/lib/ld-linux-x86-64.so.2'
 
     else:
 

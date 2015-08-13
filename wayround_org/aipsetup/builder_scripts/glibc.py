@@ -1,4 +1,5 @@
 
+import copy
 import logging
 import os.path
 import time
@@ -15,9 +16,6 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
 
 
-# For history
-# RUN[$j]='echo "CFLAGS += -march=i486 -mtune=native" > configparms
-
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
@@ -28,15 +26,37 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = False
 
-        if (self.package_info['constitution']['host'] !=
-                self.package_info['constitution']['target'] and
-                self.package_info['constitution']['host'] ==
-                self.package_info['constitution']['build']
-            ):
-            self.internal_host_redefinition =\
-                self.package_info['constitution']['target']
+        pkgi = self.get_package_info()
 
-        return None
+        if (pkgi['constitution']['host'] !=
+                    pkgi['constitution']['target'] and
+                    pkgi['constitution']['host'] ==
+                    pkgi['constitution']['build']
+                ):
+            self.internal_host_redefinition =\
+                pkgi['constitution']['target']
+
+        ret = {
+            'Builder_multi_i686': None,
+            }
+
+        if self.get_host_from_pkgi().startswith('x86_64'):
+            if wayround_org.utils.file.which(
+                    'i686-pc-linux-gnu-gcc',
+                    '/multiarch/i686-pc-linux-gnu'
+                    ) != None:
+
+                print("""\
+---------
+configured for x86_64
+but i686 GCC was found too
+so going to build i686 multilib support
+---------
+""")
+
+                ret['Builder_multi_i686'] = Builder_multi_i686(self.control)
+
+        return ret
 
     def define_actions(self):
 
@@ -66,6 +86,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             del ret['build']
             del ret['distribute']
+
+        if not self.is_crossbuilder and not self.is_crossbuild:
+            # '''
+            # NOTE: this block is for multilib building
+            if self.custom_data['Builder_multi_i686']:
+                builder = self.custom_data['Builder_multi_i686']
+                acts = builder.define_actions()
+
+                for i in list(acts.keys()):
+                    ret['{}_multi_i686'.format(i)] = acts[i]
+            # '''
+
+            ret.move_to_end('distribute', True)
+
         return ret
 
     def builder_action_edit_package_info(self, called_as, log):
@@ -96,6 +130,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
 
         if self.is_crossbuilder:
+            raise Exception("redo")
             prefix = os.path.join(
                 self.host_crossbuilders_dir,
                 self.target
@@ -121,16 +156,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-elf',
 
             # disabled those 3 items on 2 jul 2015
-            '--disable-multi-arch',
-            '--disable-multiarch',
-            '--disable-multilib',
+            # reenabled those 3 items on 11 aug 2015: sims I need it
+            '--enable-multi-arch',
+            '--enable-multiarch',
+            '--enable-multilib',
 
             # this is from configure --help. configure looking for
             # linux/version.h file
             #'--with-headers=/usr/src/linux/include',
             '--with-headers={}'.format(with_headers),
-            '--enable-shared'
+            '--enable-shared',
             ]
+
+        '''
+        # NOTE: it's not working
+        if self.host_strong.startswith('x86_64'):
+            ret += ['slibdir=lib64']
+        else:
+            ret += ['slibdir=lib']
+        '''
 
         if self.is_crossbuilder:
             ret += [
@@ -151,21 +195,42 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_distribute(self, called_as, log):
-
-        ret = super().builder_action_distribute(called_as, log)
-
-        if ret == 0:
-
-            try:
-                os.rename(
-                    os.path.join(self.dst_dir, 'etc', 'ld.so.cache'),
-                    os.path.join(self.dst_dir, 'etc', 'ld.so.cache.distr')
+    # '''
+    # NOTE: this block is for multilib building
+    def _t1(self, ret):
+        ret = copy.copy(ret)
+        if self.host.startswith('x86_64'):
+            ret += [
+                'slibdir={}'.format(
+                    os.path.join(
+                        self.host_multiarch_dir,
+                        'lib64'
+                        )
                     )
-            except:
-                log.exception("Can't rename ld.so.cache file")
-
+                ]
+        else:
+            ret += [
+                'slibdir={}'.format(
+                    os.path.join(
+                        self.host_multiarch_dir,
+                        'lib'
+                        )
+                    )
+                ]
         return ret
+
+    # NOTE: this block is for multilib building
+    def builder_action_build_define_args(self, called_as, log):
+        ret = super().builder_action_build_define_args(called_as, log)
+        ret = self._t1(ret)
+        return ret
+
+    # NOTE: this block is for multilib building
+    def builder_action_distribute_define_args(self, called_as, log):
+        ret = super().builder_action_distribute_define_args(called_as, log)
+        ret = self._t1(ret)
+        return ret
+    #'''
 
     '''
     def builder_action_build_01(self, called_as, log):
@@ -221,7 +286,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         dest_lib_dir = wayround_org.utils.path.join(
             self.dst_host_crossbuilders_dir,
             self.target,
-            'lib'
+            self.calculate_main_multiarch_lib_dir_name()
             )
 
         os.makedirs(dest_lib_dir, exist_ok=True)
@@ -239,7 +304,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         cwd = wayround_org.utils.path.join(
             self.dst_host_crossbuilders_dir,
             self.target,
-            'lib'
+            self.calculate_main_multiarch_lib_dir_name()
             )
 
         cmd = [
@@ -316,3 +381,179 @@ then continue with gcc build_02+
             source_configure_reldir=self.source_configure_reldir
             )
         return ret
+
+
+class Builder_multi_i686(Builder):
+
+    # TODO: force x86_64-pc-linux-gnu-gcc (not i686-pc-linux-gnu-gcc) build
+    #       32bit part of glibc
+
+    def define_custom_data(self):
+        self.separate_build_dir = os.path.join(self.src_dir, 'build_i686')
+        ret = {
+            'original_host': self.host_strong
+            }
+        #self.total_host_redefinition = 'i686-pc-linux-gnu'
+        #self.total_build_redefinition = 'i686-pc-linux-gnu'
+        #self.total_build_redefinition = 'x86_64-pc-linux-gnu'
+        #self.total_target_redefinition = 'i686-pc-linux-gnu'
+
+        self.internal_host_redefinition = 'i686-pc-linux-gnu'
+        #self.internal_build_redefinition = 'x86_64-pc-linux-gnu'
+
+        self.force_crossbuilder = False
+        self.force_crossbuild = False
+
+        return ret
+
+    def define_actions(self):
+
+        lst = [
+            #('redefine_host', self.builder_action_redefine_host),
+            ('make_dir', self.builder_action_make_dir),
+            ('configure', self.builder_action_configure),
+            ('build', self.builder_action_build),
+            #('restore_host_definition',
+            #    self.builder_action_restore_host_definition),
+            ('distribute', self.builder_action_distribute),
+            #('raname_arch_dir', self.builder_action_rename_arch_dir)
+            ]
+
+        ret = collections.OrderedDict(lst)
+
+        return ret
+
+    def builder_action_configure_define_environment(self, called_as, log):
+        return {}
+
+    def builder_action_build_define_environment(self, called_as, log):
+        return {}
+
+    def builder_action_configure_define_opts(self, called_as, log):
+        ret = super().builder_action_configure_define_opts(called_as, log)
+
+        '''
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    '--prefix=',
+                    '--includedir=',
+                    '--libdir=',
+                    '--mandir=',
+                    '--with-headers=',
+                    ]:
+                if ret[i].startswith(j):
+                    ret[i] = ret[i].replace(
+                        'i686-pc-linux-gnu',
+                        self.custom_data['original_host']
+                        )
+        '''
+
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    'CC=',
+                    'GCC=',
+                    'CXX='
+                    ]:
+                if ret[i].startswith(j):
+                    del ret[i]
+                    break
+
+        '''
+        ret += [
+            'CC={}'.format(
+                wayround_org.utils.file.which(
+                    '{}-gcc'.format(self.custom_data['original_host'])
+                    )
+                ),
+            'CXX={}'.format(
+                wayround_org.utils.file.which(
+                    '{}-g++'.format(self.custom_data['original_host'])
+                    )
+                ),
+            'GCC={}'.format(
+                wayround_org.utils.file.which(
+                    '{}-gcc'.format(self.custom_data['original_host'])
+                    )
+                ),
+            ]
+        '''
+
+        
+        ret += [
+            'CC={}-gcc -m32'.format(self.custom_data['original_host']),
+            'CXX={}-g++ -m32'.format(self.custom_data['original_host']),
+            #'GCC={}-gcc'.format(self.custom_data['original_host']),
+            ]
+        
+
+        ret += [
+            # 'CFLAGS=-m32'
+            ]
+
+        ret += [
+            # '--disable-werror'
+            ]
+
+        return ret
+
+    # NOTE: this block is for multilib building
+    def _t2(self, ret):
+        ret = copy.copy(ret)
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    'slibdir=',
+                    ]:
+                if ret[i].startswith(j):
+                    ret[i] = ret[i].replace(
+                        'i686-pc-linux-gnu',
+                        self.custom_data['original_host']
+                        )
+        return ret
+
+    # NOTE: this block is for multilib building
+    def builder_action_build_define_args(self, called_as, log):
+        ret = Builder.builder_action_build_define_args(self, called_as, log)
+        # print('ret: {}'.format(ret))
+        ret = self._t2(ret)
+        return ret
+
+    # NOTE: this block is for multilib building
+    def builder_action_distribute_define_args(self, called_as, log):
+        ret = Builder.builder_action_distribute_define_args(
+            self,
+            called_as,
+            log
+            )
+        ret = self._t2(ret)
+        return ret
+
+    def builder_action_make_dir(self, called_as, log):
+        os.makedirs(self.separate_build_dir, exist_ok=True)
+        return 0
+
+    # builder_action_configure = Builder.builder_action_configure
+
+    # builder_action_build = Builder.builder_action_build
+
+    def builder_action_restore_host_definition(self, called_as, log):
+        self.total_host_redefinition = None
+        self.total_build_redefinition = None
+        self.total_target_redefinition = None
+        log.info("Restored host definition to: {}".format(self.host_strong))
+        return 0
+
+    # builder_action_distribute = Builder.builder_action_distribute
+
+    '''
+    def builder_action_rename_arch_dir(self, called_as, log):
+        ret = 0
+
+        dir_name = self.dst_host_multiarch
+
+        self.total_host_redefinition=None
+        self.total_build_redefinition = None
+        self.total_target_redefinition = None
+
+        if os.path.isdir()
+        return ret
+    '''

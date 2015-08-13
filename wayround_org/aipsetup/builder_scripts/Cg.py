@@ -14,19 +14,23 @@ class Builder(wayround_org.aipsetup.build_scripts.std_simple_makefile):
 
         ret = 0
 
-        for i in ['bin', 'include', 'lib']:
+        for i in ['bin', 'include', 'lib', 'lib64', 'libx32']:
             if ret != 0:
                 break
 
-            try:
-                shutil.move(
-                    os.path.join(self.src_dir, i),
-                    os.path.join(self.dst_dir, 'usr')
-                    )
-            except:
-                log.exception(
-                    "Error moving `{}' dir into dest".format(i)
-                    )
-                ret = 5
+            jo = os.path.join(self.src_dir, i)
+
+            if os.path.exists(jo):
+
+                try:
+                    shutil.move(
+                        jo,
+                        os.path.join(self.dst_dir, 'usr')
+                        )
+                except:
+                    log.exception(
+                        "Error moving `{}' dir into dest".format(i)
+                        )
+                    ret = 5
 
         return ret

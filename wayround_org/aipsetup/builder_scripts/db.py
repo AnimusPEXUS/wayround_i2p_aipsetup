@@ -33,7 +33,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-cxx',
             '--enable-tcl',
             '--with-tcl={}'.format(
-                os.path.join(self.host_multiarch_dir, 'lib')
+                # TODO: probably this need to be detected (maybe lib64, not
+                #       lib)
+                os.path.join(
+                    self.host_multiarch_dir,
+                    self.calculate_main_multiarch_lib_dir_name()
+                    )
                 ),
             ]
 

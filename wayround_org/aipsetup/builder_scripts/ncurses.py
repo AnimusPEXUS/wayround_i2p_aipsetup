@@ -18,7 +18,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['pth_dir'] = \
             wayround_org.aipsetup.build.getDIR_PATCHES(self.buildingsite)
         ret['dst_lib_dir'] = \
-            wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib')
+            wayround_org.utils.path.join(
+                self.dst_host_multiarch_dir, 
+                self.calculate_main_multiarch_lib_dir_name()
+                )
         ret['dst_share_dir'] = \
             wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'share')
         ret['dst_pc_dir'] = \

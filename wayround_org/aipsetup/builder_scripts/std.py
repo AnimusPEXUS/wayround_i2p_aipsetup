@@ -13,29 +13,21 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 
-# TODO: rename host_strong to host
-# TODO: make .host_final attr for calculating host after overrides and
-#       redifinitions
-
 
 class Builder:
 
     def __init__(self, buildingsite):
 
-        if isinstance(
+        if not isinstance(
                 buildingsite,
                 wayround_org.aipsetup.build.BuildingSiteCtl
                 ):
-            self.control = buildingsite
-
-        elif isinstance(buildingsite, str):
-            self.control = wayround_org.aipsetup.build.BuildingSiteCtl(
-                buildingsite
-                )
-
-        else:
             raise TypeError("`buildingsite' invalid type")
 
+        self.control = buildingsite
+        self.buildingsite_path = self.control.path
+
+        '''
         # this is for glibc case, when package_info `host' should stay same
         # as `build', but ./configure --host must be different
         self.internal_host_redefinition = None
@@ -48,6 +40,7 @@ class Builder:
         self.total_host_redefinition = None
         self.total_build_redefinition = None
         self.total_target_redefinition = None
+        '''
 
         self.separate_build_dir = False
 
@@ -55,9 +48,14 @@ class Builder:
 
         self.forced_target = False
 
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
+        #self.apply_host_spec_linking_interpreter_option = False
+        #self.apply_host_spec_linking_lib_dir_options = False
+
         self.apply_host_spec_compilers_options = True
+
+        # None - not used, bool - force value
+        self.force_crossbuilder = None
+        self.force_crossbuild = None
 
         self.custom_data = self.define_custom_data()
 
@@ -65,203 +63,293 @@ class Builder:
 
         return
 
-    @property
-    def buildingsite(self):
-        return self.control.path
+    def get_buildingsite_ctl(self):
+        return self.control
 
-    @property
-    def package_info(self):
-        # TODO: make cache
+    def get_package_info(self):
+        # TODO: smart cache definitely needed :-/
         return self.control.read_package_info()
 
-    @property
-    def src_dir(self):
+    def get_src_dir(self):
         return self.control.getDIR_SOURCE()
 
-    @property
-    def bld_dir(self):
+    def get_bld_dir(self):
         return self.control.getDIR_BUILDING()
 
-    @property
-    def patches_dir(self):
+    def get_patches_dir(self):
         return self.control.getDIR_PATCHES()
 
-    @property
-    def dst_dir(self):
+    def get_dst_dir(self):
         return self.control.getDIR_DESTDIR()
 
-    @property
-    def log_dir(self):
+    def get_log_dir(self):
         return self.control.getDIR_BUILD_LOGS()
 
-    @property
-    def tar_dir(self):
+    def get_tar_dir(self):
         return self.control.getDIR_TARBALL()
 
-    @property
-    def is_crossbuild(self):
-        return self.build != self.host_strong
+    def get_is_crossbuild(self):
 
-    @property
-    def is_crossbuilder(self):
-        return self.target is not None and (self.target != self.host_strong)
+        ret = self.force_crossbuild
+        if ret is None:
+            ret = self.get_build_from_pkgi() != self.get_host_from_pkgi()
 
-    @property
-    def target(self):
-        if self.total_target_redefinition is not None:
-            ret = self.total_target_redefinition
-        else:
-            ret = self.package_info['constitution']['target']
-            if self.internal_target_redefinition is not None:
-                ret = self.internal_target_redefinition
         return ret
 
-    @property
-    def host(self):
+    def get_is_crossbuilder(self):
 
-        if self.total_host_redefinition is not None:
-            ret = self.total_host_redefinition
-        else:
-            ret = self.package_info['constitution']['host']
-            if self.internal_host_redefinition is not None:
-                ret = self.internal_host_redefinition
+        ret = self.force_crossbuilder
+        if ret is None:
+            ret = (self.get_target_from_pkgi() is not None
+                   and (self.get_target_from_pkgi()
+                        != self.get_host_from_pkgi())
+                   )
+
         return ret
 
-    @property
-    def host_strong(self):
-        if self.total_host_redefinition is not None:
-            ret = self.total_host_redefinition
-        else:
-            ret = self.package_info['constitution']['host']
-        return ret
+    def get_host_from_pkgi(self):
+        return self.get_package_info()['constitution']['host']
 
-    @property
-    def host_multiarch_dir(self):
+    def get_build_from_pkgi(self):
+        return self.get_package_info()['constitution']['build']
+
+    def get_target_from_pkgi(self):
+        return self.get_package_info()['constitution']['target']
+
+    def get_arch_from_pkgi(self):
+        return self.get_package_info()['constitution']['arch']
+
+    def get_multihost_dir(self):
         return wayround_org.utils.path.join(
             os.path.sep,
-            'multiarch',
-            self.host_strong
+            wayround_org.aipsetup.build.ROOT_MULTIHOST_DIRNAME
             )
 
-    @property
-    def dst_host_multiarch_dir(self):
+    def get_dst_multihost_dir(self):
         return wayround_org.utils.path.join(
-            self.dst_dir,
-            self.host_multiarch_dir
+            self.get_dst_dir(),
+            self.get_multihost_dir()
             )
 
-    @property
-    def host_crossbuilders_dir(self):
+    def get_host_dir(self):
         return wayround_org.utils.path.join(
-            self.host_multiarch_dir,
-            'crossbuilders'
+            self.get_multihost_dir(),
+            self.get_host_from_pkgi()
             )
 
-    @property
-    def dst_host_crossbuilders_dir(self):
+    def get_dst_host_dir(self):
         return wayround_org.utils.path.join(
-            self.dst_dir,
-            self.host_crossbuilders_dir
+            self.get_dst_dir(),
+            self.get_host_dir()
             )
 
-    @property
-    def host_multiarch_lib_dir(self):
+    def get_host_multiarch_dir(self):
         return wayround_org.utils.path.join(
-            os.path.sep,
-            'multiarch',
-            self.host_strong,
-            'lib'
+            self.get_host_dir(),
+            wayround_org.aipsetup.build.MULTIHOST_MULTIARCH_DIRNAME
             )
 
-    @property
-    def build(self):
-        if self.total_build_redefinition is not None:
-            ret = self.total_build_redefinition
+    def get_dst_host_multiarch_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.get_host_multiarch_dir()
+            )
+
+    def get_host_arch_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_host_multiarch_dir(),
+            self.get_arch_from_pkgi()
+            )
+
+    def get_dst_host_arch_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.get_host_arch_dir()
+            )
+
+    def get_host_crossbuilders_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_host_dir(),
+            wayround_org.aipsetup.build.MULTIHOST_CROSSBULDERS_DIRNAME
+            )
+
+    def get_dst_host_crossbuilders_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.get_host_crossbuilders_dir()
+            )
+
+    def get_host_crossbuilder_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_host_crossbuilders_dir(),
+            self.get_target_from_pkgi()
+            )
+
+    def get_dst_host_crossbuilder_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.get_host_crossbuilder_dir()
+            )
+
+    def get_host_lib_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_host_dir(),
+            'lib{}'.format(self.get_multilib_variant_int())
+            )
+
+    def get_host_arch_lib_dir(self):
+        raise Exception("this is invalid methos - don't use it")
+        return wayround_org.utils.path.join(
+            self.get_host_arch_dir(),
+            'lib{}'.format(self.get_multilib_variant_int())
+            )
+
+    def get_host_arch_list(self):
+        ret = []
+
+        lst = os.listdir(self.get_host_multiarch_dir())
+
+        for i in lst:
+            jo = wayround_org.utils.path.join(
+                self.get_host_multiarch_dir(),
+                i
+                )
+            if os.path.isdir(jo) and not os.path.islink(jo):
+                ret.append(i)
+
+        return sorted(ret)
+
+    # def calculate_default_linker_program(self):
+    #    return wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
+
+    # def calculate_default_linker_program_ld_parameter(self):
+    #    return '--dynamic-linker={}'.format(
+    #        self.calculate_default_linker_program()
+    #        )
+
+    # def calculate_default_linker_program_gcc_parameter(self):
+    #    return '-Wl,{}'.format(
+    #        self.calculate_default_linker_program_ld_parameter()
+    #        )
+
+    '''
+    def calculate_main_multiarch_lib_dir_name(self):
+
+        # raise Exception("Acctention required here :-/")
+
+        # \'''
+        if self.host_strong == 'x86_64-pc-linux-gnu':
+            ret = 'lib64'
+        elif self.host_strong == 'i686-pc-linux-gnu':
+            ret = 'lib'
+        elif self.host_strong == 'x86-pc-linux-gnu':
+            ret = 'lib32'
         else:
-            ret = self.package_info['constitution']['build']
-            if self.internal_build_redefinition is not None:
-                ret = self.internal_build_redefinition
+            raise Exception("don't know")
+        # \'''
+
+        # return 'lib'
         return ret
-
-    def calculate_default_linker_program(self):
-        return wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
-
-    def calculate_default_linker_program_ld_parameter(self):
-        return '--dynamic-linker={}'.format(
-            self.calculate_default_linker_program()
-            )
-
-    def calculate_default_linker_program_gcc_parameter(self):
-        return '-Wl,{}'.format(
-            self.calculate_default_linker_program_ld_parameter()
-            )
+    '''
 
     def calculate_pkgconfig_search_paths(self):
 
+        host_archs = self.get_host_arch_list()
+        host_archs += [self.get_host_dir()]
         ret = []
 
-        for i in [
-                wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'share',
-                    'pkgconfig'),
-                wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'lib',
-                    'pkgconfig'),
-                wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'lib32',
-                    'pkgconfig'),
-                wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'libx32',
-                    'pkgconfig'),
-                wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'lib64',
-                    'pkgconfig'),
-                ]:
+        for j in host_archs:
 
-            if os.path.isdir(i):
-                ret.append(i)
+            for i in [
+                    wayround_org.utils.path.join(
+                        j,
+                        'share',
+                        'pkgconfig'),
+                    wayround_org.utils.path.join(
+                        j,
+                        'lib',
+                        'pkgconfig'),
+                    wayround_org.utils.path.join(
+                        j,
+                        'lib32',
+                        'pkgconfig'),
+                    wayround_org.utils.path.join(
+                        j,
+                        'libx32',
+                        'pkgconfig'),
+                    wayround_org.utils.path.join(
+                        j,
+                        'lib64',
+                        'pkgconfig'),
+                    ]:
+
+                if os.path.isdir(i):
+                    ret.append(i)
 
         return ret
 
-    def calculate_linking_interpreter_option(self, d):
+    def get_CC_from_pkgi(self):
+        return self.get_package_info()['constitution']['CC']
 
-        if not 'LDFLAGS' in d:
-            d['LDFLAGS'] = []
+    def get_CXX_from_pkgi(self):
+        return self.get_package_info()['constitution']['CXX']
 
-        d['LDFLAGS'].append(
-            self.calculate_default_linker_program_gcc_parameter()
-            )
+    def calculate_CC(self):
+        # NOTE: here well be some additional stuff to find out CC
+        return self.get_CC_from_pkgi()
 
-        return
+    def calculate_CXX(self):
+        # NOTE: here well be some additional stuff to find out CXX
+        return self.get_CXX_from_pkgi()
 
-    def calculate_linking_lib_dir_options(self, d):
+    def get_multilib_variants_from_pkgi(self):
+        return self.get_package_info()['constitution']['multilib_variants']
 
-        if not 'LDFLAGS' in d:
-            d['LDFLAGS'] = []
+    def calculate_CC_string(self):
+        multilib_variants = self.get_multilib_variants_from_pkgi()
+        return '{} -{}'.format(self.calculate_CC(), multilib_variants[0])
 
-        d['LDFLAGS'].append('-L{}'.format(self.host_multiarch_lib_dir))
+    def calculate_CXX_string(self):
+        multilib_variants = self.get_multilib_variants_from_pkgi()
+        if len(multilib_variants) != 1:
+            raise Exception("len(multilib_variants) != 1")
+        return '{} -{}'.format(self.calculate_CXX(), multilib_variants[0])
 
-        return
+    def get_multilib_variant(self):
+        multilib_variants = self.get_multilib_variants_from_pkgi()
+        if len(multilib_variants) != 1:
+            raise Exception("len(multilib_variants) != 1")
+        return multilib_variants[0]
+
+    def get_multilib_variant_int(self):
+        return int(self.get_multilib_variant()[1:])
 
     def calculate_compilers_options(self, d):
+
         if not 'CC' in d:
             d['CC'] = []
-        d['CC'].append('{}-gcc'.format(self.host_strong))
+        d['CC'].append(self.calculate_CC_string())
 
         if not 'GCC' in d:
             d['GCC'] = []
-        d['GCC'].append('{}-gcc'.format(self.host_strong))
+        # TODO: probably this calculation needs to be replaced by something
+        #       more appropriate
+        d['GCC'].append(self.calculate_CC())
 
         if not 'CXX' in d:
             d['CXX'] = []
-        d['CXX'].append('{}-g++'.format(self.host_strong))
+        d['CXX'].append(self.calculate_CXX_string())
 
         return
+
+    def all_automatic_flags(self):
+
+        d = {}
+
+        if self.apply_host_spec_compilers_options:
+            self.calculate_compilers_options(d)
+
+        return d
 
     def all_automatic_flags_as_dict(self):
 
@@ -273,21 +361,6 @@ class Builder:
             ret[i] = ' '.join(af[i])
 
         return ret
-
-    def all_automatic_flags(self):
-
-        d = {}
-
-        if self.apply_host_spec_linking_interpreter_option:
-            self.calculate_linking_interpreter_option(d)
-
-        if self.apply_host_spec_linking_lib_dir_options:
-            self.calculate_linking_lib_dir_options(d)
-
-        if self.apply_host_spec_compilers_options:
-            self.calculate_compilers_options(d)
-
-        return d
 
     def all_automatic_flags_as_list(self):
 
@@ -307,7 +380,7 @@ class Builder:
 
     def print_help(self):
         txt = ''
-        print("building script: {}".format(self))
+        print("building script: {}".format(__name__))
         print('{:40}    {}'.format('[command]', '[comment]'))
         for i in self.action_dict.keys():
             txt += '{:40}    {}\n'.format(
@@ -356,9 +429,9 @@ class Builder:
         Standard sources cleanup
         """
 
-        if os.path.isdir(self.src_dir):
+        if os.path.isdir(self.get_src_dir()):
             log.info("cleaningup source dir")
-            wayround_org.utils.file.cleanup_dir(self.src_dir)
+            wayround_org.utils.file.cleanup_dir(self.get_src_dir())
 
         return 0
 
@@ -367,9 +440,9 @@ class Builder:
         Standard building dir cleanup
         """
 
-        if os.path.isdir(self.bld_dir):
+        if os.path.isdir(self.get_bld_dir()):
             log.info("cleaningup building dir")
-            wayround_org.utils.file.cleanup_dir(self.bld_dir)
+            wayround_org.utils.file.cleanup_dir(self.get_bld_dir())
 
         return 0
 
@@ -378,9 +451,9 @@ class Builder:
         Standard destdir cleanup
         """
 
-        if os.path.isdir(self.dst_dir):
+        if os.path.isdir(self.get_dst_dir()):
             log.info("cleaningup destination dir")
-            wayround_org.utils.file.cleanup_dir(self.dst_dir)
+            wayround_org.utils.file.cleanup_dir(self.get_dst_dir())
 
         return 0
 
@@ -390,8 +463,8 @@ class Builder:
         """
 
         ret = autotools.extract_high(
-            self.buildingsite,
-            self.package_info['pkg_info']['basename'],
+            self.buildingsite_path,
+            self.get_package_info()['pkg_info']['basename'],
             log=log,
             unwrap_dir=True,
             rename_dir=False
@@ -404,13 +477,17 @@ class Builder:
         return 0
 
     def builder_action_autogen(self, called_as, log):
+
         cfg_script_name = self.builder_action_configure_define_script_name(
             called_as,
-            log)
+            log
+            )
+
         ret = 0
+
         if os.path.isfile(
                 wayround_org.utils.path.join(
-                    self.src_dir,
+                    self.get_src_dir(),
                     self.source_configure_reldir,
                     cfg_script_name
                     )
@@ -438,7 +515,7 @@ class Builder:
 
                 if os.path.isfile(
                         wayround_org.utils.path.join(
-                            self.src_dir,
+                            self.get_src_dir(),
                             self.source_configure_reldir,
                             i[0]
                             )
@@ -452,7 +529,7 @@ class Builder:
                         )
 
                     wd = wayround_org.utils.path.join(
-                        self.src_dir,
+                        self.get_src_dir(),
                         self.source_configure_reldir
                         )
                     if '/' in i[1][0]:
@@ -501,17 +578,58 @@ class Builder:
     def builder_action_configure_define_opts(self, called_as, log):
 
         ret = [
-            '--prefix={}'.format(self.host_multiarch_dir),
+            '--prefix={}'.format(self.get_host_dir()),
+
+            '--bindir=' +
+            os.path.join(
+                self.get_host_arch_dir(),
+                'bin'
+                ),
+
+            '--sbindir=' +
+            os.path.join(
+                self.get_host_arch_dir(),
+                'sbin'
+                ),
+
+            '--libexecdir=' +
+            os.path.join(
+                self.get_host_arch_dir(),
+                'libexec'
+                ),
+
             '--includedir=' +
             os.path.join(
-                '/',
-                'multiarch',
-                self.host,
+                self.get_host_arch_dir(),
                 'include'
                 ),
-            '--libdir=' + os.path.join(self.host_multiarch_dir, 'lib'),
+
+            '--datarootdir=' +
+            os.path.join(
+                self.get_host_arch_dir(),
+                'share'
+                ),
+
+            '--includedir=' +
+            os.path.join(
+                self.get_host_arch_dir(),
+                'include'
+                ),
+
+            # NOTE: removed '--libdir=' because I about to allow
+            #       programs to use lib dir name which they desire.
+            #       possibly self.calculate_main_multiarch_lib_dir_name()
+            #       need to be used here
+
+            #'--libdir=' + os.path.join(self.host_multiarch_dir, 'lib'),
+
+            # NOTE: --libdir= needed at least for glibc to point it using
+            #       valid 'lib' or 'lib64' dir name. else it can put 64-bit
+            #       crt*.ofiles into 32-bit lib dir
+            '--libdir=' + self.get_host_lib_dir(),
+
             '--mandir=' + os.path.join(
-                self.host_multiarch_dir,
+                self.get_host_arch_dir(),
                 'share',
                 'man'
                 ),
@@ -523,7 +641,7 @@ class Builder:
             '--localstatedir=/var',
             '--enable-shared',
 
-            # WARNING: using --with-sysroot in some cases make
+            # WARNING: using --with-sysroot in some cases makes
             #          build processes involving libtool to generate incorrect
             #          *.la files
             # '--with-sysroot={}'.format(self.host_multiarch_dir)
@@ -548,8 +666,8 @@ class Builder:
 
     def builder_action_configure_define_PATH_list(self):
         ret = [
-            os.path.join(self.host_multiarch_dir, 'bin'),
-            os.path.join(self.host_multiarch_dir, 'sbin')
+            os.path.join(self.get_host_arch_dir(), 'bin'),
+            os.path.join(self.get_host_arch_dir(), 'sbin')
             ]
         return ret
 
@@ -585,7 +703,7 @@ class Builder:
                 )
 
         ret = autotools.configure_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=opts,
             arguments=args,
@@ -613,7 +731,7 @@ class Builder:
         return ret
 
     def builder_action_build_define_cpu_count(self, called_as, log):
-        return os.cpu_count()
+        return 1  # os.cpu_count()
 
     def builder_action_build_collect_options(self, called_as, log):
         ret = []
@@ -739,7 +857,7 @@ class Builder:
                 )
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=opts,
             arguments=args,
@@ -757,7 +875,7 @@ class Builder:
         return []
 
     def builder_action_distribute_define_args(self, called_as, log):
-        return ['install', 'DESTDIR={}'.format(self.dst_dir)]
+        return ['install', 'DESTDIR={}'.format(self.get_dst_dir())]
 
     def builder_action_distribute(self, called_as, log):
 
@@ -785,7 +903,7 @@ class Builder:
                 )
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=opts,
             arguments=args,

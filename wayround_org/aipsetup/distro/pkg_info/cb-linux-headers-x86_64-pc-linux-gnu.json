@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "linux_headers",
+  "buildscript": "linux",
   "version_tool": "",
   "basename": "",
   "filters": "",

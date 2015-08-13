@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #                    '--with-swatdir=/usr/share/samba/swat',
             '--sysconfdir=/etc/samba',
             #                    '--libexecdir=/usr/libexec',
-            '--libdir={}'.format(os.path.join(self.host_multiarch_dir, 'lib')),
+            #'--libdir={}'.format(os.path.join(self.host_multiarch_dir, 'lib')),
             '--with-configdir=/etc/samba',
             '--with-privatedir=/etc/samba/private',
             #                    '--includedir=/usr/include',

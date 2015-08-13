@@ -19,9 +19,11 @@ class Builder_wow64(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.separate_build_dir = os.path.join(self.src_dir, 'wine64')
         #self.source_configure_reldir = '..'
 
+        '''
         self.total_host_redefinition = 'x86_64-pc-linux-gnu'
         self.total_build_redefinition = 'x86_64-pc-linux-gnu'
         self.total_target_redefinition = 'x86_64-pc-linux-gnu'
+        '''
 
         return None
 
@@ -52,6 +54,8 @@ class Builder_wow64(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure(called_as, log)
         return ret
 
+    # def builder_action_configure_define_environment
+
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -64,12 +68,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'wow64': False
             }
 
-        if self.host_strong.startswith('i686'):
+        # if self.host_strong.startswith('i686'):
+        if self.host_strong.startswith('x86_64'):
+            ret['Builder_wow64'] = Builder_wow64(self.control)
+
+            '''
             if wayround_org.utils.file.which(
                     'x86_64-pc-linux-gnu-gcc',
                     '/multiarch/x86_64-pc-linux-gnu'
                     ) != None:
-
                 print("""\
 ---------
 configured for i686
@@ -77,9 +84,9 @@ but x86_64 GCC was found too
 so going to build with Wow64 support
 ---------
 """)
-
                 ret['Builder_wow64'] = Builder_wow64(self.control)
                 #ret['wow64'] = True
+            '''
 
         return ret
 
@@ -100,7 +107,8 @@ so going to build with Wow64 support
 
             ret_l += [
                 ('configure_wow64', b64_actions['configure']),
-                ('build_wow64', b64_actions['build'])
+                ('build_wow64', b64_actions['build']),
+                ('distribute_wow64', b64_actions['distribute']),
                 ]
 
         ret_l += [
@@ -118,6 +126,48 @@ so going to build with Wow64 support
         ret = collections.OrderedDict(ret_l)
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        ret = super().builder_action_configure_define_environment(
+            called_as,
+            log)
+        del ret['PATH']
+        return ret
+
+    def calculate_pkgconfig_search_paths(self):
+
+        ret = []
+
+        for i in [
+                wayround_org.utils.path.join(
+                    '/multiarch/i686-pc-linux-gnu',
+                    'share',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    '/multiarch/i686-pc-linux-gnu',
+                    'lib',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    '/multiarch/i686-pc-linux-gnu',
+                    'lib32',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    '/multiarch/i686-pc-linux-gnu',
+                    'libx32',
+                    'pkgconfig'),
+                wayround_org.utils.path.join(
+                    '/multiarch/i686-pc-linux-gnu',
+                    'lib64',
+                    'pkgconfig'),
+                ]:
+
+            if os.path.isdir(i):
+                ret.append(i)
+
+        ret += super().calculate_pkgconfig_search_paths()
+
+        return ret
+
+    '''
     def builder_action_configure_define_PATH_list(self):
         ret = super().builder_action_configure_define_PATH_list()
 
@@ -129,6 +179,7 @@ so going to build with Wow64 support
                 ]
 
         return ret
+    '''
 
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
@@ -145,6 +196,13 @@ so going to build with Wow64 support
                         #'--build=',
                         #'--host=',
                         #'--target=',
+                        ]:
+                    if ret[i].startswith(j):
+                        del ret[i]
+                        break
+
+            for i in range(len(ret) - 1, -1, -1):
+                for j in [
                         #'CC=',
                         #'GCC=',
                         #'CXX=',
@@ -153,6 +211,21 @@ so going to build with Wow64 support
                         del ret[i]
                         break
 
+            ret += [
+                #'LD={}'.format(
+                #    wayround_org.utils.file.which(
+                #        'ld',
+                #        '/multiarch/x86_64-pc-linux-gnu'
+                #        )
+                #    )
+                ]
+
+            ret += [
+                #'CC=x86_64-pc-linux-gnu-gcc',
+                #'GCC=x86_64-pc-linux-gnu-gcc',
+                #'CXX=x86_64-pc-linux-gnu-g++',
+                ]
+
             # TODO: hardcode is bad
             ret += [
                 #'--host=i686-pc-linux-gnu',
@@ -160,7 +233,15 @@ so going to build with Wow64 support
                 ]
 
             ret += [
-                # ''
+                #'LDFLAGS='+
+                #' -L{}'.format('/multiarch/i686-pc-linux-gnu/lib') +
+                #' -L{}'.format('/multiarch/x86_64-pc-linux-gnu/lib') +
+                #' -L{}'.format('/multiarch/x86_64-pc-linux-gnu/lib64') +
+                #' -L{}'.format('/multiarch/i686-pc-linux-gnu/lib/gcc/i686-pc-linux-gnu/5.2.0/')
+                #' --sysroot=/ ' +
+                #' -Wl,--sysroot=/ '
+                #,
+                #'CFLAGS=--sysroot=/'
                 ]
 
         return ret
@@ -174,5 +255,17 @@ so going to build with Wow64 support
     def builder_action_build_define_args(self, called_as, log):
         ret = ['depend', 'all']
         ret += super().builder_action_build_define_args(called_as, log)
+        return ret
+    '''
+
+    def builder_action_build_define_environment(self, called_as, log):
+        return {}
+
+    '''
+    def builder_action_build_define_environment(self, called_as, log):
+        ret = super().builder_action_build_define_environment(called_as, log)
+        #ret['CC'] = 'x86_64-pc-linux-gnu-gcc'
+        #ret['GCC'] = 'x86_64-pc-linux-gnu-gcc'
+        #ret['CXX'] = 'x86_64-pc-linux-gnu-g++'
         return ret
     '''

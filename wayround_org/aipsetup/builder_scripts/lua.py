@@ -64,7 +64,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         pc_file_name_dir = wayround_org.utils.path.join(
             self.dst_host_multiarch_dir,
-            'lib',
+            self.calculate_main_multiarch_lib_dir_name(),
             'pkgconfig'
             )
 

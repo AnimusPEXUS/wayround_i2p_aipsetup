@@ -27,10 +27,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = dict()
         ret['cc_file'] = os.path.join(
-            self.dst_host_multiarch_dir, 'bin', 'cc'
+            self.get_dst_host_arch_dir(), 'bin', 'cc'
             )
         ret['libcpp_file'] = os.path.join(
-            self.dst_host_multiarch_dir, 'lib', 'cpp'
+            self.get_dst_host_arch_dir(),
+            'lib',
+            'cpp'
             )
         return ret
 
@@ -40,7 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['edit_package_info'] = self.builder_action_edit_package_info
         ret.move_to_end('edit_package_info', False)
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
 
             logging.info(
                 "Crosscompiler building detected. splitting process on two parts"
@@ -64,7 +66,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             del ret['build']
             del ret['distribute']
 
-        if not self.is_crossbuilder:
+        if not self.get_is_crossbuilder():
             pass
             # ret['after_distribute'] = self.builder_action_after_distribute
 
@@ -75,14 +77,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         try:
-            name = self.package_info['pkg_info']['name']
+            name = self.get_package_info()['pkg_info']['name']
         except:
             name = None
 
-        pi = self.package_info
+        pi = self.get_package_info()
 
-        if self.is_crossbuilder:
-            pi['pkg_info']['name'] = 'cb-gcc-{}'.format(self.target)
+        if self.get_is_crossbuilder():
+            pi['pkg_info']['name'] = 'cb-gcc-{}'.format(
+                self.get_target_from_pkgi()
+                )
         else:
             pi['pkg_info']['name'] = 'gcc'
 
@@ -99,7 +103,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             for i in ['mpc', 'mpfr', 'cloog',
                       'isl',
-                      'gmp',
+                      #'gmp',
                       # NOTE: sometimes gcc could not compile with gmp.
                       #       so use system gmp
                       # requires compiler for bootstrap
@@ -107,7 +111,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                       ]:
 
                 if autotools.extract_high(
-                        self.buildingsite,
+                        self.buildingsite_path,
                         i,
                         log=log,
                         unwrap_dir=False,
@@ -121,15 +125,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_environment(self, called_as, log):
         return {}
-         
+
     def builder_action_configure_define_opts(self, called_as, log):
 
         ret = super().builder_action_configure_define_opts(called_as, log)
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
+            raise Exception("redo")
             prefix = os.path.join(
-                self.host_crossbuilders_dir,
-                self.target
+                self.get_host_crossbuilders_dir(),
+                self.get_target_from_pkgi()
                 )
 
             ret = [
@@ -137,11 +142,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--mandir=' + os.path.join(prefix, 'share', 'man'),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
-                '--enable-shared'
+                '--enable-shared',
+                '--disable-gold',
                 ] + autotools.calc_conf_hbt_options(self)
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
             ret += [
+                '--disable-gold',
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
@@ -168,14 +175,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 # without --with-sysroot= and without --without-headers options
                 '--with-sysroot={}'.format(
                     os.path.join(
-                        self.host_crossbuilders_dir,
+                        self.get_host_crossbuilders_dir(),
                         self.target
                         )
                     )
                 # TODO: need to try building without --with-sysroot if possible
                 ]
 
-        if self.is_crossbuild:
+        if self.get_is_crossbuild():
             ret += [
                 '--enable-tls',
                 '--enable-nls',
@@ -189,11 +196,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 '--enable-checking=release',
                 '--enable-libada',
-                '--enable-shared'
+                '--enable-shared',
+
+                '--disable-gold',
                 ]
 
-        if not self.is_crossbuild and not self.is_crossbuilder:
+        if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             ret += [
+
+                '--disable-gold',
+
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
@@ -206,14 +218,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-threads=posix',
 
                 # wine Wow64 support requires this
-                # ldld: Relocatable linking with relocations from format
-                #       elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
-                #       (aclui.pnv73q.o) is not supported
+                # ld: Relocatable linking with relocations from format
+                #     elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
+                #     (aclui.pnv73q.o) is not supported
                 '--enable-multiarch',
-                #'--enable-multilib',
+                '--enable-multilib',
 
-                '--disable-multilib',
-                #'--disable-multiarch',
+                # '--disable-multilib',
+                # '--disable-multiarch',
 
                 '--enable-checking=release',
                 '--enable-libada',
@@ -221,15 +233,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 # experimental option for this place
                 # without it gcc tryes to use incompatible /lib/crt*.o files
-                '--with-sysroot={}'.format(self.host_multiarch_dir)
+                '--with-sysroot={}'.format(self.get_host_dir())
                 # '--with-build-sysroot={}'.format(self.host_multiarch_dir)
                 ]
 
-            if self.host_strong.startswith('x86_64'):
+            '''
+            ret += [
+                '--libdir=' + os.path.join(self.get_host_dir(),'lib64'),
+                ]
+            '''
+
+            if self.get_host_from_pkgi().startswith('x86_64'):
                 # TODO: no hardcode
                 # NOTE: this hack is to make gcc use libc from i686 multiarch
                 #       dir, as well as avoid using libstdc++ from i686
                 #       multiarch dir
+
+                ret += [
+                    '--enable-targets=all'
+                    ]
 
                 '''
                 ret += [
@@ -289,6 +311,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
     '''
 
+    # def builder_action_build_define_cpu_count(self, called_as, log):
+    #    return 1
+
     def builder_action_before_checks(self, called_as, log):
         log.info(
             "stop: checks! If You want them (it's good if You do)\n"
@@ -300,7 +325,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_checks(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=['check'],
@@ -324,7 +349,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build_01(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=['all-gcc'],
@@ -337,12 +362,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install-gcc',
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -363,7 +388,7 @@ After what - continue building from 'build_02+' action
 
     def builder_action_build_02(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=['all-target-libgcc'],
@@ -376,12 +401,12 @@ After what - continue building from 'build_02+' action
 
     def builder_action_distribute_02(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install-target-libgcc',
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -402,7 +427,7 @@ After what - continue building this gcc from 'build_03+' action
 
     def builder_action_build_03(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[],
@@ -420,7 +445,7 @@ After what - continue building this gcc from 'build_03+' action
             options=[],
             arguments=[
                 'install',
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',

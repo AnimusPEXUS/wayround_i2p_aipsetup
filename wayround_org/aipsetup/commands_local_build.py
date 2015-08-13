@@ -80,22 +80,25 @@ def building_site_apply_info(command_name, opts, args, adds):
         None
         )
 
-    host, build, target, paths, target_host_root = \
+    host, build, target, arch, ccp_res = \
         wayround_org.aipsetup.build.constitution_configurer(
             config,
             pkg_info,
             opts.get('--host', None),
             opts.get('--build', None),
             opts.get('--target', None),
-            opts.get('--thr', None)
+            opts.get('--arch', None)
             )
 
     const = wayround_org.aipsetup.build.Constitution(
         host,
         build,
         target,
-        paths,
-        target_host_root
+        arch,
+        ccp_res['multilib_variants'],
+        ccp_res['CC'],
+        ccp_res['CXX']
+
         )
 
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
@@ -138,14 +141,14 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
         None
         )
 
-    host, build, target, paths, target_host_root = \
+    host, build, target, arch, ccp_res = \
         wayround_org.aipsetup.build.constitution_configurer(
             config,
             pkg_info,
             opts.get('--host', None),
             opts.get('--build', None),
             opts.get('--target', None),
-            opts.get('--thr', None)
+            opts.get('--arch', None)
             )
 
     const = wayround_org.aipsetup.build.Constitution(
@@ -153,7 +156,10 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
         build,
         target,
         paths,
-        target_host_root
+        arch,
+        ccp_res['multilib_variants'],
+        ccp_res['CC'],
+        ccp_res['CXX']
         )
 
     bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
@@ -208,8 +214,8 @@ def _build_complete_subroutine(
         host,
         build,
         target,
-        paths,
-        target_host_root,
+        arch,
+        ccp_res,
         dirname,
         main_src_file,
         remove_buildingsite_after_success
@@ -223,8 +229,10 @@ def _build_complete_subroutine(
         host,
         build,
         target,
-        paths,
-        target_host_root
+        arch,
+        ccp_res['multilib_variants'],
+        ccp_res['CC'],
+        ccp_res['CXX']
         )
 
     if const is None:
@@ -302,14 +310,14 @@ def build_complete(command_name, opts, args, adds):
             None
             )
 
-        host, build, target, paths, target_host_root = \
+        host, build, target, arch, ccp_res = \
             wayround_org.aipsetup.build.constitution_configurer(
                 config,
                 pkg_info,
                 opts.get('--host', None),
                 opts.get('--build', None),
                 opts.get('--target', None),
-                opts.get('--thr', None)
+                opts.get('--arch', None)
                 )
 
         ret = _build_complete_subroutine(
@@ -317,8 +325,8 @@ def build_complete(command_name, opts, args, adds):
             host,
             build,
             target,
-            paths,
-            target_host_root,
+            arch,
+            ccp_res,
             '.',
             None,
             r_bds
@@ -331,14 +339,14 @@ def build_complete(command_name, opts, args, adds):
             None
             )
 
-        host, build, target, paths, target_host_root = \
+        host, build, target, arch, ccp_res = \
             wayround_org.aipsetup.build.constitution_configurer(
                 config,
                 pkg_info,
                 opts.get('--host', None),
                 opts.get('--build', None),
                 opts.get('--target', None),
-                opts.get('--thr', None)
+                opts.get('--arch', None)
                 )
 
         ret = _build_complete_subroutine(
@@ -346,8 +354,8 @@ def build_complete(command_name, opts, args, adds):
             host,
             build,
             target,
-            paths,
-            target_host_root,
+            arch,
+            ccp_res,
             '.',
             args[0],
             r_bds
@@ -360,14 +368,14 @@ def build_complete(command_name, opts, args, adds):
             None
             )
 
-        host, build, target, paths, target_host_root = \
+        host, build, target, arch, ccp_res = \
             wayround_org.aipsetup.build.constitution_configurer(
                 config,
                 pkg_info,
                 opts.get('--host', None),
                 opts.get('--build', None),
                 opts.get('--target', None),
-                opts.get('--thr', None)
+                opts.get('--arch', None)
                 )
 
         ret = _build_complete_subroutine(
@@ -375,8 +383,8 @@ def build_complete(command_name, opts, args, adds):
             host,
             build,
             target,
-            paths,
-            target_host_root,
+            arch,
+            ccp_res,
             args[0],
             args[1],
             r_bds
@@ -393,14 +401,14 @@ def build_complete(command_name, opts, args, adds):
                 None
                 )
 
-            host, build, target, paths, target_host_root = \
+            host, build, target, arch, ccp_res = \
                 wayround_org.aipsetup.build.constitution_configurer(
                     config,
                     pkg_info,
                     opts.get('--host', None),
                     opts.get('--build', None),
                     opts.get('--target', None),
-                    opts.get('--thr', None)
+                    opts.get('--arch', None)
                     )
 
             if _build_complete_subroutine(
@@ -408,8 +416,8 @@ def build_complete(command_name, opts, args, adds):
                     host,
                     build,
                     target,
-                    paths,
-                    target_host_root,
+                arch,
+                ccp_res,
                     i,
                     None,
                     r_bds
@@ -426,8 +434,9 @@ def build_full(command_name, opts, args, adds):
     Place named source files in new building site and build new package from
     them
 
-    [-d] [-o] [--host=HOST-NAME-TRIPLET] TARBALL[, TARBALL[, TARBALL[,
-                                                                TARBALL...]]]
+    [-d] [-o] [--host=HOST-NAME-TRIPLET]
+    [--weak-host]
+    TARBALL[, TARBALL[, TARBALL[,TARBALL...]]]
 
     ================ ====================================
     options          meaning
@@ -562,6 +571,7 @@ def build_full_multi(command_name, opts, args, adds):
                         '--host': arch,
                         '--target': arch,
                         '--build': arch,
+                        '--arch': arch
                         })
 
                     if build_sub_01(
@@ -585,6 +595,7 @@ def build_full_multi(command_name, opts, args, adds):
                     '--host': arch,
                     '--target': arch,
                     '--build': arch,
+                    '--arch': arch
                     })
 
                 if build_sub_01(
@@ -799,14 +810,14 @@ Can't select between those package names (for {})
                             None
                             )
 
-                        host, build, target, paths, target_host_root = \
+                        host, build, target, arch, ccp_res = \
                             wayround_org.aipsetup.build.constitution_configurer(
                                 config,
                                 pkg_info,
                                 opts.get('--host', None),
                                 opts.get('--build', None),
                                 opts.get('--target', None),
-                                opts.get('--thr', None)
+                                opts.get('--arch', None)
                                 )
 
                         ret = _build_complete_subroutine(
@@ -814,8 +825,8 @@ Can't select between those package names (for {})
                             host,
                             build,
                             target,
-                            paths,
-                            target_host_root,
+                            arch,
+                            ccp_res,
                             build_site_dir,
                             source_files[0],
                             remove_buildingsite_after_success

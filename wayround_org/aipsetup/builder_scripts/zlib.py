@@ -33,33 +33,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'prefix={}'.format(self.dst_host_multiarch_dir),
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_build_define_args(self, called_as, log):
+        return [
+            'prefix={}'.format(self.dst_host_multiarch_dir)
+            ]
 
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'prefix={}'.format(self.dst_host_multiarch_dir)
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'install',
+            'prefix={}'.format(self.dst_host_multiarch_dir)
+            ]
