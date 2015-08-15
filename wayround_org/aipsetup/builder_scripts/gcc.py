@@ -222,9 +222,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #     elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
                 #     (aclui.pnv73q.o) is not supported
                 '--enable-multiarch',
-                '--enable-multilib',
+                #'--enable-multilib',
 
-                # '--disable-multilib',
+                '--disable-multilib',
                 # '--disable-multiarch',
 
                 '--enable-checking=release',
@@ -252,40 +252,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ret += [
                     '--enable-targets=all'
                     ]
-
-                '''
-                ret += [
-                    '--with-stage1-ldflags='
-                    + '-L{}'.format(
-                        '/multiarch/x86_64-pc-linux-gnu/lib'
-                        )
-                    + ' '
-                    + '-L{}'.format(
-                        '/multiarch/x86_64-pc-linux-gnu/lib64'
-                        )
-                    + ' '
-                    + '-L{}'.format(
-                        '/multiarch/i686-pc-linux-gnu/lib'
-                        )
-                    ]
-                '''
-
-                '''
-                ret += [
-                    'LDFLAGS='
-                    + '-L{}'.format(
-                        '/multiarch/i686-pc-linux-gnu/lib'
-                        )
-                    + ' '
-                    + '-L{}'.format(
-                        '/multiarch/x86_64-pc-linux-gnu/lib64'
-                        )
-                    + ' '
-                    + '-L{}'.format(
-                        '/multiarch/i686-pc-linux-gnu/lib'
-                        )
-                    ]
-                '''
 
         return ret
 

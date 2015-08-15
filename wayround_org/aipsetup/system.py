@@ -55,8 +55,7 @@ class SystemCtl:
             installed_pkg_dir='/var/log/packages',
             installed_pkg_dir_buildlogs='/var/log/packages/buildlogs',
             installed_pkg_dir_sums='/var/log/packages/sums',
-            installed_pkg_dir_deps='/var/log/packages/deps',
-            host=None
+            installed_pkg_dir_deps='/var/log/packages/deps'
             ):
         """
         :param basedir: path to root directory of target system
@@ -82,21 +81,9 @@ class SystemCtl:
                 "wayround_org.aipsetup.client_pkg.PackageServerClient"
                 )
 
-        if wayround_org.utils.system_type.parse_triplet(host) is None:
-            raise ValueError("Invalid host triplet")
-
-        # if host != self.determine_fs_tree_primary_host():
-        #    raise ValueError("File tree")
-
         self.basedir = wayround_org.utils.path.abspath(basedir)
 
         self._pkg_client = pkg_client
-
-        self._primary_host_link = wayround_org.utils.path.join(
-            self.basedir,
-            'multiarch',
-            '_primary'
-            )
 
         self._installed_pkg_dir = wayround_org.utils.path.join(
             self.basedir,
@@ -115,35 +102,28 @@ class SystemCtl:
             installed_pkg_dir_deps
             )
 
-        self._host = host
-
         return
 
-    @property
-    def host(self):
-        return self._host
+    def _test_host_arch_parameters(self, host, arch):
 
-    def get_primary_host_link(self):
-        host_link = self._primary_host_link
-        ret = None
-        if os.path.islink(host_link):
-            ret = host_link
-        return ret
+        if host is not None and not isinstance(host, str):
+            raise ValueError("if `host' not None, it must be str")
 
-    def determine_fs_tree_primary_host(self):
-        ret = None
-        host_link = self.get_primary_host_link()
-        if host_link is not None:
-            link_value = os.readlink(host_link)
-            ret = os.path.basename(link_value)
-        return ret
+        if arch is not None and not isinstance(arch, str):
+            raise ValueError("if `arch' not None, it must be str")
+
+        if host is None and arch is not None:
+            raise ValueError("if `host' is None, `arch' must be None too")
+
+        return
 
     def remove_package(
             self,
             name,
             force=False,
             mute=False,
-            host=None
+            host=None,
+            arch=None
             ):
         """
         Remove named package (all it's installed asps) from system.
@@ -163,8 +143,7 @@ class SystemCtl:
 
         ret = 0
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
         info = self._pkg_client.info(name)
 
@@ -187,7 +166,8 @@ class SystemCtl:
 
                 lst = self.list_installed_package_s_asps(
                     name,
-                    host=host
+                    host=host,
+                    arch=arch
                     )
 
                 lst.sort(
@@ -212,10 +192,7 @@ class SystemCtl:
                     if not mute:
                         logging.info("Removing package `{}'".format(name))
 
-                    self.remove_asp(
-                        name,
-                        host=host
-                        )
+                    self.remove_asp(name)
 
         return ret
 
@@ -223,12 +200,13 @@ class SystemCtl:
             self,
             name,
             force=False,
-            host=None
+            host=None,
+            arch=None
             ):
         """
         Install package
 
-        This function works in two modes:
+        This method works in two modes:
 
             One mode, is when name is package name registered with package
             database records. In this case, aipsetup finds latest asp package
@@ -244,10 +222,9 @@ class SystemCtl:
                    older asps from system using :func:`reduce_asps`
         """
 
-        ret = 0
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = 0
 
         if os.path.isfile(name):
 
@@ -290,6 +267,7 @@ class SystemCtl:
             if ret == 0:
                 try:
                     host = name_parsed['groups']['host']
+                    arch = name_parsed['groups']['arch']
                 except:
                     logging.exception("error")
                     ret = 6
@@ -310,7 +288,8 @@ class SystemCtl:
 
                 asps = self.list_installed_package_s_asps(
                     name_parsed['groups']['name'],
-                    host=host
+                    host=host,
+                    arch=arch
                     )
 
                 ret = self.install_asp(name)
@@ -340,7 +319,8 @@ class SystemCtl:
                                     name,
                                     reduce_what=asps,
                                     mute=False,
-                                    host=host
+                                    host=host,
+                                    arch=arch
                                     )
                                 logging.info(
                                     "Reduced `{}' ASPs".format(
@@ -371,7 +351,8 @@ class SystemCtl:
 
                 latest_full_path = self._pkg_client.get_latest_asp(
                     name,
-                    host,
+                    host=host,
+                    arch=arch,
                     out_dir=self._pkg_client.downloads_dir,
                     out_to_temp=True
                     )
@@ -389,7 +370,8 @@ class SystemCtl:
                 ret = self.install_package(
                     latest_full_path,
                     force=False,
-                    host=host
+                    host=host,
+                    arch=arch
                     )
 
                 try:
@@ -423,6 +405,7 @@ class SystemCtl:
 
             asp = wayround_org.aipsetup.package.ASPackage(asp_package)
             host = asp.host
+            arch = asp.arch
 
         except:
             logging.exception("Some error")
@@ -704,8 +687,7 @@ class SystemCtl:
             asp_name,
             only_remove_package_registration=False,
             exclude=None,
-            mute=False,
-            host=None
+            mute=False
             ):
         """
         Removes named asp from destdir system.
@@ -718,9 +700,6 @@ class SystemCtl:
         """
 
         ret = 0
-
-        if host is None:
-            host = self.host
 
         exclude = copy.copy(exclude)
 
@@ -807,6 +786,22 @@ class SystemCtl:
                                     ) + glob.glob(
                                     wayround_org.utils.path.join(
                                         self.basedir, 'multiarch', '*', 'libx32'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multihost', '*', 'lib'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multihost', '*', 'lib64'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multihost', '*', 'lib32'
+                                        )
+                                    ) + glob.glob(
+                                    wayround_org.utils.path.join(
+                                        self.basedir, 'multihost', '*', 'libx32'
                                         )
                                     ):
                             e = wayround_org.utils.format.elf.ELF(i)
@@ -936,7 +931,8 @@ class SystemCtl:
             reduce_to,
             reduce_what=None,
             mute=False,
-            host=None
+            host=None,
+            arch=None
             ):
         """
         Reduces(removes) packages listed in ``reduce_what`` list, remaining all
@@ -946,10 +942,9 @@ class SystemCtl:
         # TODO: make non-primary asps unable uninstall global files
         #       (i.e. /etc, /var ...)
 
-        ret = 0
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = 0
 
         if not isinstance(reduce_what, list):
             raise ValueError("reduce_what must be a list of strings")
@@ -992,11 +987,7 @@ class SystemCtl:
         else:
 
             for i in reduce_what:
-                self.remove_asp(
-                    i,
-                    exclude=fiba,
-                    host=host
-                    )
+                self.remove_asp(i, exclude=fiba)
 
         return ret
 
@@ -1004,18 +995,21 @@ class SystemCtl:
             self,
             mute=False,
             host=None,
+            arch=None,
             remove_extensions=False
             ):
         """
         on success returns list. on error - not list
 
         if host is False - return all asps
+
+        if host is str and arch is str - filter both by host and arch
         """
 
         # TODO: this method need to return names without .xz extensions
+        #       by default
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
         destdir = wayround_org.utils.path.abspath(self.basedir)
 
@@ -1040,10 +1034,16 @@ class SystemCtl:
                 if i in bases:
                     bases.remove(i)
 
-            if host != False:
+            if host is not None:
                 for i in range(len(filelist) - 1, -1, -1):
                     asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
                     if host != asp.host:
+                        del filelist[i]
+
+            if arch is not None:
+                for i in range(len(filelist) - 1, -1, -1):
+                    asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
+                    if arch != asp.arch:
                         del filelist[i]
 
             ret = filelist
@@ -1059,17 +1059,18 @@ class SystemCtl:
             self,
             mask='*',
             mute=False,
-            host=None
+            host=None,
+            arch=None
             ):
+
+        self._test_host_arch_parameters(host, arch)
 
         ret = None
 
-        if host is None:
-            host = self.host
-
         asps = self.list_installed_asps(
             mute=True,
-            host=host
+            host=host,
+            arch=arch
             )
 
         if not isinstance(asps, list):
@@ -1099,13 +1100,13 @@ class SystemCtl:
     def list_installed_package_s_asps(
             self,
             name_or_list,
-            host=None
+            host=None,
+            arch=None
             ):
 
-        ret = {}
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = {}
 
         return_single = False
 
@@ -1115,7 +1116,8 @@ class SystemCtl:
 
         asps_list = self.list_installed_asps(
             mute=True,
-            host=host
+            host=host,
+            arch=arch
             )
 
         if not isinstance(asps_list, list):
@@ -1156,6 +1158,7 @@ class SystemCtl:
 
         Destdir is not prependet to the list's items. Do it yourself if needed.
         """
+
         ret = 0
 
         destdir = wayround_org.utils.path.abspath(self.basedir)
@@ -1246,37 +1249,43 @@ class SystemCtl:
 
         return ret
 
-    def list_installed_packages_and_asps(self, host=None):
+    def list_installed_packages_and_asps(self, host=None, arch=None):
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
         packages = self.list_installed_packages(
             mute=True,
-            host=host
+            host=host,
+            arch=arch
             )
 
         ret = self.list_installed_package_s_asps(
             packages,
-            host=host
+            host=host,
+            arch=arch
             )
 
         return ret
 
-    def list_installed_asps_and_their_files(self, mute=True, host=None):
+    def list_installed_asps_and_their_files(
+            self,
+            mute=True,
+            host=None,
+            arch=None
+            ):
         """
         Returns dict with asp names as keys and list of files whey installs as
         contents
         """
 
-        ret = dict()
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = dict()
 
         lst = self.list_installed_asps(
             mute=mute,
-            host=host
+            host=host,
+            arch=arch
             )
 
         lst_c = len(lst)
@@ -1308,20 +1317,25 @@ class SystemCtl:
 
         return ret
 
-    def list_installed_asps_and_their_sums(self, mute=True, host=None):
+    def list_installed_asps_and_their_sums(
+            self,
+            mute=True,
+            host=None,
+            arch=None
+            ):
         """
         Returns dict with asp names as keys and list of files whey installs as
         contents
         """
 
-        ret = dict()
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = dict()
 
         lst = self.list_installed_asps(
             mute=mute,
-            host=host
+            host=host,
+            arch=arch
             )
 
         lst_c = len(lst)
@@ -1351,9 +1365,16 @@ class SystemCtl:
 
         return ret
 
-    def latest_installed_package_s_asp(self, name, host=None):
+    def latest_installed_package_s_asp(
+            self,
+            name,
+            host=None,
+            arch=None
+            ):
 
         # TODO: attention to this function is required
+
+        self._test_host_arch_parameters(host, arch)
 
         ret = None
 
@@ -1362,7 +1383,8 @@ class SystemCtl:
 
         lst = self.list_installed_package_s_asps(
             name,
-            host=host
+            host=host,
+            arch=arch
             )
 
         if len(lst) > 0:
@@ -1384,7 +1406,8 @@ class SystemCtl:
             mute=False,
             sub_mute=True,
             predefined_asp_tree=None,
-            host=None
+            host=None,
+            arch=None
             ):
         """
         instr can be a single query or list of queries.
@@ -1397,16 +1420,16 @@ class SystemCtl:
             list_installed_asps_and_their_files()
         """
 
-        ret = dict()
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = dict()
 
         if predefined_asp_tree is None:
             predefined_asp_tree = \
                 self.list_installed_asps_and_their_files(
                     mute=mute,
-                    host=host
+                    host=host,
+                    arch=arch
                     )
         else:
             if not isinstance(predefined_asp_tree, dict):
@@ -1653,18 +1676,24 @@ class SystemCtl:
 
         return ret
 
-    def find_old_packages(self, age=2592000, mute=True, host=None):
+    def find_old_packages(
+            self,
+            age=2592000,
+            mute=True,
+            host=None,
+            arch=None
+            ):
 
         # 2592000 = (60 * 60 * 24 * 30)  # 30 days
 
-        ret = []
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = []
 
         asps = self.list_installed_asps(
             mute=mute,
-            host=host
+            host=host,
+            arch=arch
             )
 
         for i in asps:
@@ -1699,28 +1728,37 @@ class SystemCtl:
 
         return ret
 
-    def check_list_of_installed_packages_and_asps_auto(self, host=None):
+    def check_list_of_installed_packages_and_asps_auto(
+            self,
+            host=None,
+            arch=None
+            ):
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
         content = self.list_installed_packages_and_asps(
-            host=host
+            host=host,
+            arch=arch
             )
 
         ret = self.check_list_of_installed_packages_and_asps(
             content,
-            host=host
+            host=host,
+            arch=arch
             )
 
         return ret
 
-    def check_list_of_installed_packages_and_asps(self, in_dict, host=None):
+    def check_list_of_installed_packages_and_asps(
+            self,
+            in_dict,
+            host=None,
+            arch=None
+            ):
+
+        self._test_host_arch_parameters(host, arch)
 
         ret = 0
-
-        if host is None:
-            host = self.host
 
         keys = sorted(in_dict.keys())
 
@@ -1748,13 +1786,20 @@ class SystemCtl:
 
         return ret
 
-    def check_elfs_readiness(self, mute=False, host=None):
+    def check_elfs_readiness(self, mute=False, host=None, arch=None):
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
-        paths = self.elf_paths(host=host)
-        elfs = find_all_elf_files(paths, verbose=True, host=host)
+        paths = self.elf_paths(
+            host=host,
+            arch=arch
+            )
+        elfs = find_all_elf_files(
+            paths,
+            verbose=True,
+            host=host,
+            arch=arch
+            )
 
         elfs = sorted(wayround_org.utils.path.realpaths(elfs))
 
@@ -1775,20 +1820,20 @@ class SystemCtl:
 
         return 0
 
-    def load_asp_deps_all(self, mute=True, host=None):
+    def load_asp_deps_all(self, mute=True, host=None, arch=None):
         """
         Returns dict: keys - asp names; values - dicts returned by
                       load_asp_deps()
         """
 
-        ret = {}
+        self._test_host_arch_parameters(host, arch)
 
-        if host is None:
-            host = self.host
+        ret = {}
 
         installed_asp_names = self.list_installed_asps(
             mute=mute,
-            host=host
+            host=host,
+            arch=arch
             )
 
         for i in installed_asp_names:
@@ -1958,7 +2003,8 @@ class SystemCtl:
 
             installed_asp_names = self.list_installed_asps(
                 mute=mute,
-                host=host
+                host=host,
+                arch=arch
                 )
 
             deps_list = dict()
@@ -1977,12 +2023,14 @@ class SystemCtl:
 
                     files_list = (
                         self.list_files_installed_by_asp(
-                            i, mute=True
+                            i,
+                            mute=True
                             )
                         )
 
                     files_list = wayround_org.utils.path.prepend_path(
-                        files_list, destdir
+                        files_list,
+                        destdir
                         )
 
                     files_list = wayround_org.utils.path.realpaths(
@@ -2061,20 +2109,21 @@ class SystemCtl:
             self,
             asp_name,
             mute=False,
-            host=host
+            host=None,
+            arch=None
             ):
         """
         Returns list on success
         """
         # TODO: optimizations required
 
+        self._test_host_arch_parameters(host, arch)
+
         ret = 0
 
-        if host is None:
-            host = self.host
-
         elfs_installed_by_asp_name_deps = self.get_asp_dependencies(
-            asp_name, mute=mute
+            asp_name,
+            mute=mute
             )
 
         if not isinstance(elfs_installed_by_asp_name_deps, dict):
@@ -2102,7 +2151,8 @@ class SystemCtl:
             all_asps_and_files = (
                 self.list_installed_asps_and_their_files(
                     mute=mute,
-                    host=host
+                    host=host,
+                    arch=arch
                     )
                 )
 
@@ -2165,7 +2215,8 @@ class SystemCtl:
             else:
                 asp_name_files = (
                     self.list_files_installed_by_asp(
-                        asp_name, mute=mute
+                        asp_name,
+                        mute=mute
                         )
                     )
 
@@ -2180,7 +2231,8 @@ class SystemCtl:
                 else:
 
                     asp_name_files = wayround_org.utils.path.prepend_path(
-                        asp_name_files, destdir
+                        asp_name_files,
+                        destdir
                         )
 
                     asp_name_files = wayround_org.utils.path.realpaths(
@@ -2259,7 +2311,8 @@ class SystemCtl:
             prepared_all_files=None,
             mute=True,
             only_lib=False,
-            host=None
+            host=None,
+            arch=None
             ):
         """
         Searches files not installed by any of ASPs in system
@@ -2273,8 +2326,7 @@ class SystemCtl:
         only_lib - search only for library garbage (/multiarch/*/lib*)
         """
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
         if not mute:
             if self.basedir != '/':
@@ -2283,7 +2335,8 @@ class SystemCtl:
         if prepared_all_files is None:
             prepared_all_files = self.list_installed_asps_and_their_files(
                 mute=mute,
-                host=host
+                host=host,
+                arch=arch
                 )
 
         lst = []
@@ -2303,7 +2356,10 @@ class SystemCtl:
 
             lst = wayround_org.utils.file.files_recurcive_list(
                 wayround_org.utils.path.join(
-                    self.basedir, 'multiarch', host, 'lib'
+                    self.basedir,
+                    'multihost',
+                    host,
+                    'lib'
                     ),
                 mute=mute,
                 sort=True,
@@ -2312,7 +2368,10 @@ class SystemCtl:
 
             lst2 = wayround_org.utils.file.files_recurcive_list(
                 wayround_org.utils.path.join(
-                    self.basedir, 'multiarch', host, 'lib64'
+                    self.basedir,
+                    'multihost',
+                    host,
+                    'lib64'
                     ),
                 mute=mute,
                 sort=True,
@@ -2393,17 +2452,26 @@ class SystemCtl:
 
         return ret
 
-    def find_so_problems_in_system(self, verbose=False, host=None):
+    def find_so_problems_in_system(
+            self,
+            verbose=False,
+            host=None,
+            arch=None
+            ):
         """
         Look for dependency problems in current system
         """
 
-        if host is None:
-            host = self.host
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
+
+        if not isinstance(arch, str):
+            raise TypeError("`arch' must be str")
 
         so_files, elf_files = self.find_system_so_and_elf_files(
             verbose,
-            host=host
+            host=host,
+            arch=arch
             )
 
         reqs = find_so_problems_by_given_so_and_elfs(
@@ -2414,19 +2482,23 @@ class SystemCtl:
 
         return reqs
 
-    def build_dependency_tree(self, verbose=False, host=None):
+    def build_dependency_tree(self, verbose=False, host=None, arch=None):
         """
         Look for dependency problems in current system
         """
 
         # TODO: rework to help text required
 
-        if host is None:
-            host = self.host
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
+
+        if not isinstance(arch, str):
+            raise TypeError("`arch' must be str")
 
         elf_files = self.find_system_elf_files(
             verbose=verbose,
-            host=host
+            host=host,
+            arch=arch
             )
 
         reqs = build_binary_dependency_tree_for_given_elf_files(
@@ -2437,14 +2509,20 @@ class SystemCtl:
         return reqs
 
     def library_paths(self, host=None):
+        """
+        arch - parameter currently ignored
+        """
+
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
 
         ret = []
 
-        if host is None:
-            host = self.host
-
-        ret.append(wayround_org.utils.path.join('/multiarch', host, 'lib'))
-        ret.append(wayround_org.utils.path.join('/multiarch', host, 'lib64'))
+        ret.append(
+            wayround_org.utils.path.join('/multihost', host, 'lib')
+            )
+        ret.append(
+            wayround_org.utils.path.join('/multihost', host, 'lib64'))
 
         ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
         ret = wayround_org.utils.path.realpaths(ret)
@@ -2452,15 +2530,35 @@ class SystemCtl:
 
         return ret
 
-    def elf_paths(self, host=None):
+    def elf_paths(self, host=None, arch=None):
+
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
+
+        if not isinstance(arch, str):
+            raise TypeError("`arch' must be str")
 
         ret = []
 
-        if host is None:
-            host = self.host
+        ret.append(
+            wayround_org.utils.path.join(
+                '/multihost',
+                host,
+                'multiarch',
+                arch,
+                'bin'
+                )
+            )
 
-        ret.append(wayround_org.utils.path.join('/multiarch', host, 'bin'))
-        ret.append(wayround_org.utils.path.join('/multiarch', host, 'sbin'))
+        ret.append(
+            wayround_org.utils.path.join(
+                '/multihost',
+                host,
+                'multiarch',
+                arch,
+                'sbin'
+                )
+            )
 
         ret += self.library_paths(host=host)
 
@@ -2470,39 +2568,66 @@ class SystemCtl:
 
         return ret
 
-    def find_system_so_and_elf_files(self, verbose=False, host=None):
+    def find_system_so_and_elf_files(
+            self,
+            verbose=False,
+            host=None,
+            arch=None
+            ):
         """
         Find All system Shared Object Files and all ELF files real paths.
         """
 
-        if host is None:
-            host = self.host
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
 
-        so_files = self.find_system_so_files(verbose=verbose, host=host)
-        elf_files = self.find_system_elf_files(verbose=verbose, host=host)
+        if not isinstance(arch, str):
+            raise TypeError("`arch' must be str")
+
+        so_files = self.find_system_so_files(
+            verbose=verbose,
+            host=host
+            )
+
+        elf_files = self.find_system_elf_files(
+            verbose=verbose,
+            host=host,
+            arch=arch
+            )
+
         return (so_files, elf_files)
 
     def find_system_so_files(self, verbose=False, host=None):
 
-        if host is None:
-            host = self.host
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
 
         paths = self.library_paths(host=host)
         if verbose:
             logging.info("Searching so files in paths: {}".format(paths))
+
         return find_all_so_files(paths, verbose=verbose)
 
-    def find_system_elf_files(self, verbose=False, host=None):
+    def find_system_elf_files(self, verbose=False, host=None, arch=None):
 
-        if host is None:
-            host = self.host
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
 
-        paths = self.elf_paths(host=host)
+        if not isinstance(arch, str):
+            raise TypeError("`arch' must be str")
+
+        paths = self.elf_paths(
+            host=host,
+            arch=arch
+            )
         if verbose:
             logging.info("Searching elf files in paths: {}".format(paths))
+
         return find_all_elf_files(paths, verbose=verbose)
 
     def create_directory_tree(self):
+
+        raise Exception("too old attention required")
 
         ret = 0
 
@@ -2562,59 +2687,71 @@ class SystemCtl:
 
     def gen_locale(self, host=None):
 
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
+
         ret = 0
 
-        if host is None:
-            host = self.host
+        for i in [
+                wayround_org.utils.path.join(
+                    self.basedir,
+                    'multihost',
+                    host,
+                    'lib'
+                    ),
+                wayround_org.utils.path.join(
+                    self.basedir,
+                    'multihost',
+                    host,
+                    'lib64'
+                    ),
+                ]:
 
-        target_dir = wayround_org.utils.path.join(
-            self.basedir,
-            'multiarch',
-            host,
-            'lib',
-            'locale'
-            )
-
-        if not os.path.isdir(target_dir):
-            try:
-                os.makedirs(target_dir)
-            except:
-                pass
-
-        if not os.path.isdir(target_dir):
-            logging.error("Can't create directory `{}'".format(target_dir))
-            ret = 1
-
-        if ret == 0:
-
-            locale_dir = wayround_org.utils.path.join(
-                target_dir, 'en_US.UTF-8'
+            target_dir = wayround_org.utils.path.join(
+                i,
+                'locale'
                 )
 
-            rel_locale_dir = wayround_org.utils.path.relpath(
-                locale_dir, self.basedir
-                )
+            os.makedirs(target_dir, exist_ok=True)
 
-            if os.path.exists(locale_dir):
-                shutil.rmtree(locale_dir)
+            if os.path.isdir(target_dir):
 
-            p = subprocess.Popen(
-                ['chroot', self.basedir,
-                 'localedef', '-f', 'UTF-8', '-i', 'en_US', rel_locale_dir],
-                )
+                locale_dir = wayround_org.utils.path.join(
+                    target_dir, 'en_US.UTF-8'
+                    )
 
-            ret = p.wait()
+                rel_locale_dir = wayround_org.utils.path.relpath(
+                    locale_dir, self.basedir
+                    )
+
+                if os.path.exists(locale_dir):
+                    shutil.rmtree(locale_dir)
+
+                p = subprocess.Popen(
+                    ['chroot', self.basedir,
+
+                     'localedef',
+                     '-f', 'UTF-8',
+                     '-i', 'en_US',
+                     rel_locale_dir
+                     ],
+                    )
+
+                ret = p.wait()
 
         return ret
 
     def find_asps_requireing_sos_not_installed_by_asps(
-            self, mute=True, host=None):
+            self,
+            mute=True,
+            host=None,
+            arch=None
+            ):
         """
         Return: dict. keys - asp names; values - lists of tuples
         """
 
-        if host is None:
-            host = self.host
+        self._test_host_arch_parameters(host, arch)
 
         all_deps = self.load_asp_deps_all(
             mute=mute,
@@ -2700,18 +2837,22 @@ class SystemCtl:
 
         return ret
 
-    def find_libtool_la_with_problems(self, mute=True, host=None):
+    def find_libtool_la_with_problems(
+            self,
+            mute=True,
+            host=None
+            ):
 
         # FIXME: attention to paths required
 
-        la_with_problems = dict()
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
 
-        if host is None:
-            host = self.host
+        la_with_problems = dict()
 
         mask = wayround_org.utils.path.join(
             self.basedir,
-            'multiarch',
+            'multihost',
             host,
             'lib*',
             '*.la'
@@ -2762,10 +2903,10 @@ class SystemCtl:
                 search_dirs = set(
                     [
                         wayround_org.utils.path.join(
-                            '/multiarch', host, 'lib'
+                            '/multihost', host, 'lib'
                             ),
                         wayround_org.utils.path.join(
-                            '/multiarch', host, 'lib64'
+                            '/multihost', host, 'lib64'
                             ),
                         ]
                     )
@@ -2780,7 +2921,7 @@ class SystemCtl:
 
                         if (not wj.startswith(
                             wayround_org.utils.path.join(
-                                        '/multiarch', host, 'lib'
+                                        '/multihost', host, 'lib'
                                         )
                             )
                             or not os.path.isdir(

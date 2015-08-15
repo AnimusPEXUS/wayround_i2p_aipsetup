@@ -45,29 +45,6 @@ DEFAULT_CONFIG = collections.OrderedDict([
         ])
      ),
 
-    ('system_paths', collections.OrderedDict([
-        ('root', '/'),
-        ('usr', '/usr'),
-
-        ('basic_bin', '/bin'),
-        ('basic_sbin', '/sbin'),
-        ('bin', '/usr/bin'),
-        ('sbin', '/usr/sbin'),
-
-        ('basic_lib', '/lib'),
-        ('lib', '/usr/lib'),
-
-        ('man', '/usr/share/man'),
-        ('include', '/usr/include'),
-
-        ('devices', '/dev'),
-        ('config', '/etc'),
-        ('daemons', '/daemons'),
-        ('var', '/var'),
-        ('temp', '/tmp')
-        ])
-     ),
-
     ('src_server', collections.OrderedDict([
         ('host', 'localhost'),
         ('port', '8080'),
@@ -126,6 +103,7 @@ DEFAULT_CONFIG = collections.OrderedDict([
     ('local_build', collections.OrderedDict([
         ('working_dir', '${general:working_dir}'),
         ('building_sites_dir', '${working_dir}/b'),
+        ('multiple_host_build', '${system_settings:host}'),
         ('multiple_arch_build', '${system_settings:host}'),
         ])
      ),

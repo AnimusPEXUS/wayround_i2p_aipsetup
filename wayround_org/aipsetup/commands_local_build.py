@@ -12,7 +12,8 @@ def commands():
     return collections.OrderedDict([
         ('build', collections.OrderedDict([
             ('full', build_full),
-            ('full_m', build_full_multi),
+            ('full_ho', build_full_hosts),
+            ('full_ar', build_full_archs),
             ('build', build_build),
             ('continue', build_continue),
             ('pack', build_pack),
@@ -510,7 +511,7 @@ def build_full(command_name, opts, args, adds):
     return ret
 
 
-def build_full_multi(command_name, opts, args, adds):
+def build_full_hosts(command_name, opts, args, adds):
     """
     Place named source files in new building site and build new package from
     them
@@ -595,6 +596,109 @@ def build_full_multi(command_name, opts, args, adds):
                     '--host': arch,
                     '--target': arch,
                     '--build': arch,
+                    '--arch': arch
+                    })
+
+                if build_sub_01(
+                        command_name, opts, args, adds,
+                        config,
+                        sources,
+                        building_site_dir,
+                        remove_buildingsite_after_success=r_bds
+                        ) != 0:
+                    rets += 1
+
+            ret = int(rets != 0)
+
+    return ret
+
+def build_full_archs(command_name, opts, args, adds):
+    """
+    Place named source files in new building site and build new package from
+    them
+
+    [-d] [-o] TARBALL[, TARBALL[, TARBALL[,TARBALL...]]]
+
+    ================ ====================================
+    options          meaning
+    ================ ====================================
+    -d               remove building site on success
+    -o               treat all tarballs as for one build
+    -m               build for multiple archs pointed by
+                         multiple_arch_build in config
+    ================ ====================================
+    """
+
+    import wayround_org.aipsetup.build
+    import wayround_org.aipsetup.controllers
+
+    ret = 0
+
+    config = adds['config']
+
+    r_bds = '-d' in opts
+
+    sources = []
+
+    multiple_packages = not '-o' in opts
+    multiarch_build = True
+
+    host = config['system_settings']['host']
+
+    if ret == 0:
+
+        building_site_dir = config['local_build']['building_sites_dir']
+
+        if len(args) > 0:
+            sources = args
+            building_site_dir = wayround_org.utils.path.abspath(
+                os.path.dirname(sources[0])
+                )
+
+        if len(sources) == 0:
+            logging.error("No source files supplied")
+            ret = 2
+
+        archs_list = config['local_build']['multiple_arch_build'].split()
+
+    if ret == 0:
+
+        if multiple_packages:
+            sources.sort()
+            rets = 0
+            logging.info("Passing packages `{}' to build".format(sources))
+            for i in sources:
+
+                for arch in archs_list:
+
+                    opts.update({
+                        '--host': host,
+                        '--target': host,
+                        '--build': host,
+                        '--arch': arch
+                        })
+
+                    if build_sub_01(
+                            command_name, opts, args, adds,
+                            config,
+                            [i],
+                            building_site_dir,
+                            remove_buildingsite_after_success=r_bds
+                            ) != 0:
+                        rets += 1
+
+            ret = int(rets != 0)
+
+        else:
+            logging.info("Passing package `{}' to build".format(sources))
+            rets = 0
+
+            for arch in archs_list:
+
+                opts.update({
+                    '--host': host,
+                    '--target': host,
+                    '--build': host,
                     '--arch': arch
                     })
 

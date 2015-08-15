@@ -92,7 +92,13 @@ class Builder:
 
         ret = self.force_crossbuild
         if ret is None:
-            ret = self.get_build_from_pkgi() != self.get_host_from_pkgi()
+            ret = (
+                self.get_build_from_pkgi() != self.get_host_from_pkgi()
+
+                and
+
+                self.get_host_from_pkgi() == self.get_arch_from_pkgi()
+                )
 
         return ret
 
@@ -101,7 +107,11 @@ class Builder:
         ret = self.force_crossbuilder
         if ret is None:
             ret = (self.get_target_from_pkgi() is not None
+
                    and (self.get_target_from_pkgi()
+                        != self.get_host_from_pkgi())
+
+                   and (self.get_arch_from_pkgi()
                         != self.get_host_from_pkgi())
                    )
 
@@ -679,6 +689,13 @@ class Builder:
 
     def builder_action_configure(self, called_as, log):
 
+        log.info(
+            "crossbuild?: {}, crossbuilder?: {}".format(
+                self.get_is_crossbuild(),
+                self.get_is_crossbuilder()
+                )
+            )
+
         self.check_deprecated_methods(called_as, log)
 
         envs = {}
@@ -731,7 +748,7 @@ class Builder:
         return ret
 
     def builder_action_build_define_cpu_count(self, called_as, log):
-        return 1  # os.cpu_count()
+        return os.cpu_count()  # 1
 
     def builder_action_build_collect_options(self, called_as, log):
         ret = []

@@ -98,6 +98,16 @@ def system_install_package(command_name, opts, args, adds):
         if '-h' in opts:
             host = opts['-h']
 
+        arch = None
+        if '-a' in opts:
+            arch = opts['-a']
+            
+        if host is None:
+            host = config['system_settings']['host']
+            
+        if arch is None:
+            arch = host
+
         basedir = '/'
         if '-b' in opts:
             basedir = opts['-b']
@@ -127,7 +137,8 @@ def system_install_package(command_name, opts, args, adds):
                 ret = syst.install_package(
                     name,
                     force,
-                    host=host
+                    host=host,
+                    arch=arch
                     )
                 if ret != 0:
                     logging.error(

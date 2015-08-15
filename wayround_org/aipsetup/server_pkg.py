@@ -108,10 +108,11 @@ class ASPServer:
         self.app.route('/package', 'GET', self.package_redir)
         self.app.route('/package/<name>', 'GET', self.package)
         self.app.route('/package/<name>/hosts', 'GET', self.hosts)
-        self.app.route('/package/<name>/asps/<host>', 'GET', self.asps)
-        self.app.route('/package/<name>/asps/<host>/<name2>', 'GET', 
-            self.asp_get
-            )
+        self.app.route('/package/<name>/archs/<host>', 'GET', self.hosts)
+        self.app.route('/package/<name>/asps/<host>/<arch>', 'GET', self.asps)
+        self.app.route('/package/<name>/asps/<host>/<arch>/<name2>', 'GET',
+                       self.asp_get
+                       )
 
 #        self.app.route('/package/<name>/asps_latest', 'GET', self.asps_latest)
         self.app.route('/package/<name>/tarballs', 'GET', self.tarballs)
@@ -148,21 +149,25 @@ class ASPServer:
     def js(self, filename):
         return bottle.static_file(filename, root=self.js_dir)
 
-    def asp_get(self, name, host, name2):
+    def asp_get(self, name, host, arch, name2):
 
         base = os.path.basename(name2)
 
         if wayround_org.utils.system_type.parse_triplet(host) is None:
             raise bottle.HTTPError(400, "Invalid host triplet")
 
+        if wayround_org.utils.system_type.parse_triplet(arch) is None:
+            raise bottle.HTTPError(400, "Invalid arch triplet")
+
         path = self.pkg_repo_ctl.get_package_path_string(name)
 
         filename = wayround_org.utils.path.abspath(
             wayround_org.utils.path.join(
-                self.pkg_repo_ctl.get_repository_dir(), 
-                path, 
-                'pack', 
-                host, 
+                self.pkg_repo_ctl.get_repository_dir(),
+                path,
+                'pack',
+                host,
+                arch,
                 base
                 )
             )
@@ -177,11 +182,13 @@ class ASPServer:
         if not os.path.isfile(filename):
             raise bottle.HTTPError(404, "File `{}' not found".format(base))
 
-        return bottle.static_file(
+        ret = bottle.static_file(
             filename=base,
             root=os.path.dirname(filename),
             mimetype='application/binary'
             )
+
+        return ret
 
     def category_redirect(self):
         bottle.response.set_header('Location', '/category/')
@@ -429,7 +436,47 @@ class ASPServer:
 
         return ret
 
-    def asps(self, name, host):
+    def archs(self, name, host):
+
+        decoded_params = bottle.request.params.decode('utf-8')
+
+        ret = ''
+
+        resultmode = 'html'
+        if 'resultmode' in decoded_params:
+            resultmode = decoded_params['resultmode']
+
+        if not resultmode in ['html', 'json']:
+            raise bottle.HTTPError(400, "Invalid resultmode")
+
+        filesl = self.pkg_repo_ctl.get_package_hosts(name)
+        if not isinstance(filesl, list):
+            raise bottle.HTTPError(
+                404,
+                "Error getting host list. Is package name correct?"
+                )
+
+        filesl.sort()
+
+        if resultmode == 'html':
+
+            txt = self.ui.hosts(
+                name, filesl
+                )
+
+            ret = self.ui.html(
+                title="Package: '{}'".format(name),
+                body=txt
+                )
+
+        elif resultmode == 'json':
+
+            ret = json.dumps(filesl, sort_keys=True, indent=2)
+            bottle.response.set_header('Content-Type', APPLICATION_JSON)
+
+        return ret
+
+    def asps(self, name, host, arch):
 
         decoded_params = bottle.request.params.decode('utf-8')
 
@@ -445,7 +492,7 @@ class ASPServer:
         if not resultmode in ['html', 'json']:
             raise bottle.HTTPError(400, "Invalid resultmode")
 
-        filesl = self.pkg_repo_ctl.get_package_files(name, host)
+        filesl = self.pkg_repo_ctl.get_package_files(name, host, arch)
         if not isinstance(filesl, list):
             raise bottle.HTTPError(
                 404,

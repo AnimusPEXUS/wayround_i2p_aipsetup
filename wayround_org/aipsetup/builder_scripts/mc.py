@@ -35,8 +35,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 # asp
 shell/i/.asp
 \tOpen=%cd %p/utar://
-\tView=%view{ascii} /multiarch/_primary/libexec/mc/ext.d/archive.sh view tar
-"""
+\tView=%view{{ascii}} /multihost/{}/libexec/mc/ext.d/archive.sh view tar
+""".format(self.get_host_from_pkgi(), self.get_arch_from_pkgi())
                 ] +
                 ftl[ind:])
 

@@ -43,17 +43,20 @@ class PackageServerClient:
     def hosts(self, pkg_name):
         return hosts(self._url, pkg_name)
 
-    def asps(self, pkg_name, host):
-        return asps(self._url, pkg_name, host)
+    def archs(self, pkg_name, host):
+        return archs(self._url, pkg_name, host)
 
-    def asps_latest(self, pkg_name, host):
-        return asps_latest(self._url, pkg_name, host)
+    def asps(self, pkg_name, host, arch):
+        return asps(self._url, pkg_name, host, arch)
 
-    def get_asp(self, host, filename, out_dir=None, out_to_temp=False):
-        return get_asp(self._url, host, filename, out_dir, out_to_temp)
+    def asps_latest(self, pkg_name, host, arch):
+        return asps_latest(self._url, pkg_name, host, arch)
 
-    def get_latest_asp(self, pkg_name, host, out_dir=None, out_to_temp=False):
-        return get_latest_asp(self._url, pkg_name, host, out_dir, out_to_temp)
+    def get_asp(self, host, arch, filename, out_dir=None, out_to_temp=False):
+        return get_asp(self._url, host, arch, filename, out_dir, out_to_temp)
+
+    def get_latest_asp(self, pkg_name, host, arch, out_dir=None, out_to_temp=False):
+        return get_latest_asp(self._url, pkg_name, host, arch, out_dir, out_to_temp)
 
     def tarballs(self, pkg_name):
         return tarballs(self._url, pkg_name)
@@ -208,7 +211,7 @@ def hosts(url, pkg_name):
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/hosts?{}'.format(url, pkg_name, host, data)
+            '{}package/{}/hosts?{}'.format(url, pkg_name, data)
         )
     except:
         pass
@@ -218,11 +221,7 @@ def hosts(url, pkg_name):
 
     return ret
 
-
-def asps(url, pkg_name, host):
-
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
-        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
+def archs(url, pkg_name, host):
 
     ret = None
 
@@ -236,7 +235,7 @@ def asps(url, pkg_name, host):
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/asps/{}?{}'.format(url, pkg_name, host, data)
+            '{}package/{}/archs/{}?{}'.format(url, pkg_name, host, data)
         )
     except:
         pass
@@ -247,10 +246,13 @@ def asps(url, pkg_name, host):
     return ret
 
 
-def asps_latest(url, pkg_name, host):
+def asps(url, pkg_name, host, arch):
 
     if wayround_org.utils.system_type.parse_triplet(host) is None:
-        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
+        raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
+
+    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
 
@@ -264,7 +266,44 @@ def asps_latest(url, pkg_name, host):
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/asps/{}?{}'.format(url, pkg_name, host, data)
+            '{}package/{}/{}/asps/{}?{}'.format(
+                url,
+                pkg_name,
+                host,
+                arch,
+                data
+                )
+        )
+    except:
+        pass
+
+    if isinstance(res, http.client.HTTPResponse) and res.status == 200:
+        ret = json.loads(str(res.read(), 'utf-8'))
+
+    return ret
+
+
+def asps_latest(url, pkg_name, host, arch):
+
+    if wayround_org.utils.system_type.parse_triplet(host) is None:
+        raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
+
+    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
+
+    ret = None
+
+    data = urllib.parse.urlencode(
+        {
+            'resultmode': 'json'
+            },
+        encoding='utf-8'
+        )
+
+    res = None
+    try:
+        res = urllib.request.urlopen(
+            '{}package/{}/asps/{}/{}?{}'.format(url, pkg_name, host, arch, data)
         )
     except:
         pass
@@ -286,7 +325,7 @@ def asps_latest(url, pkg_name, host):
     return ret
 
 
-def get_asp(url, host, filename, out_dir=None, out_to_temp=False):
+def get_asp(url, host, arch, filename, out_dir=None, out_to_temp=False):
     """
     if out_to_temp is True, out_dir is used as a base. Else, if out_dir not
     None, out_dir is used deirectly. if out_dir is None, then out_to_temp
@@ -294,7 +333,10 @@ def get_asp(url, host, filename, out_dir=None, out_to_temp=False):
     """
 
     if wayround_org.utils.system_type.parse_triplet(host) is None:
-        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
+        raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
+
+    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
 
@@ -341,10 +383,11 @@ def get_asp(url, host, filename, out_dir=None, out_to_temp=False):
     p = subprocess.Popen(
         ['wget',
          '--no-check-certificate', '-c', '-O', option_O,
-         '{}package/{}/asps/{}/{}'.format(
+         '{}package/{}/asps/{}/{}/{}'.format(
              url,
              pkg_name,
              host,
+             arch,
              basename
              )
          ]
@@ -360,17 +403,20 @@ def get_asp(url, host, filename, out_dir=None, out_to_temp=False):
     return ret
 
 
-def get_latest_asp(url, pkg_name, host, out_dir=None, out_to_temp=False):
+def get_latest_asp(url, pkg_name, host, arch, out_dir=None, out_to_temp=False):
 
     if wayround_org.utils.system_type.parse_triplet(host) is None:
-        raise ValueError("Invalid host triplet: {}".format(str(host)[20:]))
+        raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
+
+    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
 
-    ltst = asps_latest(url, pkg_name, host)
+    ltst = asps_latest(url, pkg_name, host, arch)
 
     if ltst is not None:
-        ret = get_asp(url, host, ltst, out_dir, out_to_temp)
+        ret = get_asp(url, host, arch, ltst, out_dir, out_to_temp)
 
     return ret
 

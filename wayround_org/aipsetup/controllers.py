@@ -116,8 +116,7 @@ def sys_ctl_by_config(config, pkg_client, basedir='/'):
         config['system_settings']['installed_pkg_dir'],
         config['system_settings']['installed_pkg_dir_buildlogs'],
         config['system_settings']['installed_pkg_dir_sums'],
-        config['system_settings']['installed_pkg_dir_deps'],
-        config['system_settings']['host']
+        config['system_settings']['installed_pkg_dir_deps']
         )
 
     return ret
@@ -129,8 +128,7 @@ def sys_ctl_new(
         installed_pkg_dir='/var/log/packages',
         installed_pkg_dir_buildlogs='/var/log/packages/buildlogs',
         installed_pkg_dir_sums='/var/log/packages/sums',
-        installed_pkg_dir_deps='/var/log/packages/deps',
-        host=None
+        installed_pkg_dir_deps='/var/log/packages/deps'
         ):
 
     ret = wayround_org.aipsetup.system.SystemCtl(
@@ -139,8 +137,7 @@ def sys_ctl_new(
         installed_pkg_dir,
         installed_pkg_dir_buildlogs,
         installed_pkg_dir_sums,
-        installed_pkg_dir_deps,
-        host
+        installed_pkg_dir_deps
         )
 
     return ret

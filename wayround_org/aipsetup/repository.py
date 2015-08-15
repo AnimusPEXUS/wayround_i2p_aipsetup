@@ -188,10 +188,7 @@ class PackageRepoCtl:
 
         return ret
 
-    def get_package_files(self, name, host):
-        """
-        Returns list of indexed package's asps
-        """
+    def get_package_host_archs(self, name, host):
 
         ret = 0
 
@@ -222,6 +219,53 @@ class PackageRepoCtl:
                     ret = []
 
                 else:
+
+                    ret = []
+
+                    files = os.listdir(package_dir)
+                    files.sort()
+
+                    for i in files:
+                        if os.path.isdir(os.path.join(package_dir, i)):
+                            ret.append(i)
+
+        return ret
+
+    def get_package_files(self, name, host, arch):
+        """
+        Returns list of indexed package's asps
+        """
+
+        ret = 0
+
+        pid = self.get_package_id(name)
+        if pid is None:
+            logging.error("Error getting package `{}' ID".format(name))
+            ret = 1
+        else:
+
+            package_path = self.get_package_path_string(pid)
+
+            if not isinstance(package_path, str):
+                logging.error("Can't get path for package `{}'".format(pid))
+                ret = 2
+            else:
+
+                package_dir = wayround_org.utils.path.abspath(
+                    wayround_org.utils.path.join(
+                        self._repository_dir,
+                        package_path,
+                        'pack',
+                        host,
+                        arch
+                        )
+                    )
+
+                if not os.path.isdir(package_dir):
+                    # NOTE: not an error condition: absent dir means no files
+                    ret = []
+
+                else:
                     logging.debug(
                         "Looking for package files in `{}'".format(package_dir)
                         )
@@ -232,10 +276,17 @@ class PackageRepoCtl:
 
                     for i in files:
 
+                        if not os.path.isfile(i):
+                            continue
+
                         parsed = wayround_org.aipsetup.package_name_parser.\
                             package_name_parse(i)
 
-                        if parsed and parsed['groups']['name'] == name:
+                        if (parsed
+                                and parsed['groups']['name'] == name
+                                and parsed['groups']['host'] == host
+                                and parsed['groups']['arch'] == arch
+                            ):
                             needed_files.append(
                                 os.path.sep +
                                 wayround_org.utils.path.relpath(
@@ -863,9 +914,9 @@ class PackageRepoCtl:
 
         session.commit()
 
-        logging.info("DB saved")
-
         session.close()
+
+        logging.info("DB saved")
 
         return ret
 
@@ -918,16 +969,15 @@ class PackageRepoCtl:
 
         repository_path = self._repository_dir
 
-        for file in files:
+        for file1 in files:
 
             full_path = wayround_org.utils.path.abspath(
                 wayround_org.utils.path.join(repository_path, subdir)
                 )
 
-            if not os.path.exists(full_path):
-                os.makedirs(full_path)
+            os.makedirs(full_path, exist_ok=True)
 
-            if os.path.dirname(file) != full_path:
+            if os.path.dirname(file1) != full_path:
 
                 action = 'Copying'
                 if move:
@@ -936,17 +986,17 @@ class PackageRepoCtl:
                 logging.info(
                     "{} {}\n       to {}".format(
                         action,
-                        os.path.basename(file), full_path
+                        os.path.basename(file1), full_path
                         )
                     )
 
-                sfile = full_path + os.path.sep + os.path.basename(file)
+                sfile = full_path + os.path.sep + os.path.basename(file1)
                 if os.path.isfile(sfile):
                     os.unlink(sfile)
                 if move:
-                    shutil.move(file, full_path)
+                    shutil.move(file1, full_path)
                 else:
-                    shutil.copy(file, full_path)
+                    shutil.copy(file1, full_path)
 
         return ret
 
@@ -982,10 +1032,10 @@ class PackageRepoCtl:
                         )
                     ret = 13
                 else:
-                    file = wayround_org.utils.path.abspath(filename)
+                    file1 = wayround_org.utils.path.abspath(filename)
 
                     files = [
-                        file
+                        file1
                         ]
 
                     package_path = self.get_package_path_string(
@@ -1004,7 +1054,8 @@ class PackageRepoCtl:
                         path = wayround_org.utils.path.join(
                             package_path,
                             'pack',
-                            parsed['groups']['host']
+                            parsed['groups']['host'],
+                            parsed['groups']['arch']
                             )
 
                         if not isinstance(path, str):
@@ -1082,16 +1133,17 @@ class PackageRepoCtl:
 
         return ret
 
-    def cleanup_repo_package_pack_host(self, g_path, name, host):
+    def cleanup_repo_package_pack_host_arch(self, g_path, name, host, arch):
 
         path = wayround_org.utils.path.join(
             self._repository_dir,
             self.get_package_path_string(name),
             'pack',
-            host
+            host,
+            arch
             )
 
-        self._ccc1(path)
+        self._ccc1(path, g_path)
 
         files = os.listdir(path)
         files.sort()
@@ -1142,7 +1194,42 @@ class PackageRepoCtl:
 
         return
 
-    def _ccc1(self, path):
+    def cleanup_repo_package_pack_host(self, g_path, name, host):
+
+        path = wayround_org.utils.path.join(
+            self._repository_dir,
+            self.get_package_path_string(name),
+            'pack',
+            host
+            )
+
+        self._ccc1(path, g_path)
+
+        files = os.listdir(path)
+        files.sort()
+
+        for arch in files:
+            if os.path.isdir(os.path.join(path, arch)):
+                self.cleanup_repo_package_pack_host_arch(
+                    g_path,
+                    name,
+                    host,
+                    arch
+                    )
+
+        return
+
+    def _ccc1(self, path, g_path):
+
+        files = os.listdir(path)
+        files.sort()
+
+        for i in files:
+            p1 = wayround_org.utils.path.join(path, i)
+
+            if os.path.islink(p1):
+                logging.warning("Removing {}".format(p1))
+                wayround_org.utils.file.remove_if_exists(p1)
 
         files = os.listdir(path)
         files.sort()
@@ -1151,15 +1238,26 @@ class PackageRepoCtl:
 
             p1 = wayround_org.utils.path.join(path, i)
 
-            if os.path.isfile(p1) and not os.path.islink(p1):
+            if os.path.isfile(p1):
 
                 if self.put_asp_to_index(p1, move=True) != 0:
 
                     logging.warning(
-                        "Can't move file to index. moving to garbage"
+                        "Can't move file `{}' to index."
+                        " moving to garbage".format(p1)
                         )
 
                     shutil.move(p1, wayround_org.utils.path.join(g_path, i))
+
+            '''
+            if os.path.isdir(p1) and remove_dirs:
+
+                logging.warning(
+                    "Can't move file to index. moving to garbage"
+                    )
+
+                shutil.move(p1, wayround_org.utils.path.join(g_path, i))
+            '''
 
         return
 
@@ -1176,24 +1274,11 @@ class PackageRepoCtl:
             'pack'
             )
 
+        self.create_required_dirs_at_package(path)
+
         path = wayround_org.utils.path.abspath(path)
 
-        self.create_required_dirs_at_package(wayround_org.utils.path.join(
-            self._repository_dir,
-            self.get_package_path_string(name)
-            ))
-
-        files = os.listdir(path)
-        files.sort()
-
-        for i in files:
-            p1 = wayround_org.utils.path.join(path, i)
-
-            if os.path.islink(p1):
-                logging.warning("Removing {}".format(p1))
-                wayround_org.utils.file.remove_if_exists(p1)
-
-        self._ccc1(path)
+        self._ccc1(path, g_path)
 
         files = os.listdir(path)
         files.sort()

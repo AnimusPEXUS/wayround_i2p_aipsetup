@@ -125,7 +125,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             OBJ_dir_rmarch = wayround_org.utils.path.join(
                 OBJ_dir,
-                'multiarch'
+                'multihost'
                 )
 
             OBJ_dir_march = wayround_org.utils.path.join(

@@ -22,20 +22,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.separate_build_dir = True
         self.forced_target = True
 
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
-        self.apply_host_spec_compilers_options = False
+        self.apply_host_spec_compilers_options = True
 
         pkgi = self.get_package_info()
 
         if (pkgi['constitution']['host'] !=
-                    pkgi['constitution']['target'] and
-                    pkgi['constitution']['host'] ==
-                    pkgi['constitution']['build']
+                pkgi['constitution']['target'] and
+                pkgi['constitution']['host'] ==
+                pkgi['constitution']['build']
                 ):
             self.internal_host_redefinition =\
                 pkgi['constitution']['target']
 
+        '''
         ret = {
             'Builder_multi_i686': None,
             }
@@ -56,7 +55,9 @@ so going to build i686 multilib support
 
                 ret['Builder_multi_i686'] = Builder_multi_i686(self.control)
 
-        return ret
+        '''
+
+        return
 
     def define_actions(self):
 
@@ -65,7 +66,7 @@ so going to build i686 multilib support
         ret['edit_package_info'] = self.builder_action_edit_package_info
         ret.move_to_end('edit_package_info', False)
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
 
             logging.info(
                 "Crosscompiler building detected. splitting process on two parts"
@@ -87,8 +88,8 @@ so going to build i686 multilib support
             del ret['build']
             del ret['distribute']
 
-        if not self.is_crossbuilder and not self.is_crossbuild:
-            # '''
+        if not self.get_is_crossbuilder() and not self.get_is_crossbuild():
+            '''
             # NOTE: this block is for multilib building
             if self.custom_data['Builder_multi_i686']:
                 builder = self.custom_data['Builder_multi_i686']
@@ -96,7 +97,7 @@ so going to build i686 multilib support
 
                 for i in list(acts.keys()):
                     ret['{}_multi_i686'.format(i)] = acts[i]
-            # '''
+            '''
 
             ret.move_to_end('distribute', True)
 
@@ -107,14 +108,16 @@ so going to build i686 multilib support
         ret = 0
 
         try:
-            name = self.package_info['pkg_info']['name']
+            name = self.get_package_info()['pkg_info']['name']
         except:
             name = None
 
-        pi = self.package_info
+        pi = self.get_package_info()
 
-        if self.is_crossbuilder:
-            pi['pkg_info']['name'] = 'cb-glibc-{}'.format(self.target)
+        if self.get_is_crossbuilder():
+            pi['pkg_info']['name'] = 'cb-glibc-{}'.format(
+                self.get_target_from_pkgi()
+                )
         else:
             pi['pkg_info']['name'] = 'glibc'
 
@@ -123,13 +126,24 @@ so going to build i686 multilib support
 
         return ret
 
+    def builder_action_configure_define_environment(self, called_as, log):
+        return {}
+
+    def builder_action_build_define_environment(self, called_as, log):
+        return {}
+
     def builder_action_configure_define_opts(self, called_as, log):
 
-        with_headers = os.path.join(self.host_multiarch_dir, 'include')
+        with_headers = os.path.join(
+            self.get_host_dir(),
+            'multiarch',
+            self.get_host_from_pkgi(),
+            'include'
+            )
 
         ret = super().builder_action_configure_define_opts(called_as, log)
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
             raise Exception("redo")
             prefix = os.path.join(
                 self.host_crossbuilders_dir,
@@ -166,6 +180,9 @@ so going to build i686 multilib support
             #'--with-headers=/usr/src/linux/include',
             '--with-headers={}'.format(with_headers),
             '--enable-shared',
+
+            # temp
+            #'libc_cv_forced_unwind=yes'
             ]
 
         '''
@@ -176,7 +193,7 @@ so going to build i686 multilib support
             ret += ['slibdir=lib']
         '''
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
             ret += [
                 # this can be commented whan gcc fulli built and installed
                 #'libc_cv_forced_unwind=yes',
@@ -195,28 +212,30 @@ so going to build i686 multilib support
 
         return ret
 
-    # '''
     # NOTE: this block is for multilib building
     def _t1(self, ret):
         ret = copy.copy(ret)
-        if self.host.startswith('x86_64'):
-            ret += [
-                'slibdir={}'.format(
-                    os.path.join(
-                        self.host_multiarch_dir,
-                        'lib64'
+        if self.get_host_from_pkgi() == 'x86_64-pc-linux-gnu':
+            if self.get_arch_from_pkgi().startswith('x86_64'):
+                ret += [
+                    'slibdir={}'.format(
+                        os.path.join(
+                            self.get_host_dir(),
+                            'lib64'
+                            )
                         )
-                    )
-                ]
+                    ]
+            else:
+                ret += [
+                    'slibdir={}'.format(
+                        os.path.join(
+                            self.get_host_dir(),
+                            'lib'
+                            )
+                        )
+                    ]
         else:
-            ret += [
-                'slibdir={}'.format(
-                    os.path.join(
-                        self.host_multiarch_dir,
-                        'lib'
-                        )
-                    )
-                ]
+            raise Exception("To Be Done")
         return ret
 
     # NOTE: this block is for multilib building
@@ -230,7 +249,6 @@ so going to build i686 multilib support
         ret = super().builder_action_distribute_define_args(called_as, log)
         ret = self._t1(ret)
         return ret
-    #'''
 
     '''
     def builder_action_build_01(self, called_as, log):
@@ -478,13 +496,11 @@ class Builder_multi_i686(Builder):
             ]
         '''
 
-        
         ret += [
             'CC={}-gcc -m32'.format(self.custom_data['original_host']),
             'CXX={}-g++ -m32'.format(self.custom_data['original_host']),
             #'GCC={}-gcc'.format(self.custom_data['original_host']),
             ]
-        
 
         ret += [
             # 'CFLAGS=-m32'

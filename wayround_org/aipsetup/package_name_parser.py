@@ -16,7 +16,8 @@ import wayround_org.utils.text
 ASP_NAME_REGEXPS = {
     'aipsetup3':
         r'^\((?P<name>.+?)\)-\((?P<version>(\d+\.??)+)\)-\((?P<status>.*?)\)'
-        r'-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)$',
+        r'-\((?P<timestamp>\d{8}\.\d{6}\.\d{7})\)-\((?P<host>.*)\)'
+        r'-\((?P<arch>.*)\)$',
     'aipsetup2':
         r'^(?P<name>.+?)-(?P<version>(\d+\.??)+)'
         r'-(?P<timestamp>\d{14})-(?P<host>.*)$'
@@ -105,7 +106,8 @@ def package_name_parse(filename):
                     'name': re_res.group('name'),
                     'version': re_res.group('version'),
                     'timestamp': re_res.group('timestamp'),
-                    'host': re_res.group('host')
+                    'host': re_res.group('host'),
+                    'arch': re_res.group('arch')
                     }
                 }
 

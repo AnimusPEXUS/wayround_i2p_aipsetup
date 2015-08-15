@@ -90,17 +90,6 @@ DIR_ALL = [
 DIR_LIST = DIR_ALL
 ':data:`DIR_ALL` copy'
 
-INVALID_MOVABLE_DESTDIR_ROOT_LINKS = [
-    'bin',
-    'sbin',
-    'lib',
-    'lib64'
-    ]
-
-INVALID_DESTDIR_ROOT_LINKS = [
-    'mnt',
-    ] + INVALID_MOVABLE_DESTDIR_ROOT_LINKS
-
 
 # WARNING: this list is suspiciously similar to what in complete
 #          function, but actually they must be separate
@@ -299,11 +288,11 @@ def calculate_CC_constitution_parts(
     if (
         host_str == build_str == target_str
             and (
-                (arch_str is not None and arch_str == arch_str)
+                (arch_str is not None and arch_str == host_str)
                 or
                 (arch_str is None)
                 )
-            and (arch_str == 'x86_64-pc-linux-gnu')
+            and (host_str == 'x86_64-pc-linux-gnu')
             ):
         ret_multilibs = ['m64']
         ret_CC = 'x86_64-pc-linux-gnu-gcc'
@@ -312,7 +301,7 @@ def calculate_CC_constitution_parts(
     elif (
         host_str == build_str == target_str
             and (arch_str is not None and arch_str == 'i686-pc-linux-gnu')
-            and (arch_str == 'x86_64-pc-linux-gnu')
+            and (host_str == 'x86_64-pc-linux-gnu')
             ):
         ret_multilibs = ['m32']
         ret_CC = 'x86_64-pc-linux-gnu-gcc'
@@ -674,6 +663,149 @@ class BuildCtl:
         return ret
 
 
+def _destdir_filelist(name_to_store_in, destdir, lists_dir):
+
+    ret = 0
+
+    logging.info("Creating file lists")
+
+    destdir = destdir
+
+    lists_dir = lists_dir
+
+    output_file = wayround_org.utils.path.abspath(
+        os.path.join(
+            lists_dir,
+            name_to_store_in
+            )
+        )
+
+    os.makedirs(lists_dir, exist_ok=True)
+
+    if not os.path.isdir(destdir):
+        logging.error("DESTDIR not found")
+        ret = 1
+
+    elif not os.path.isdir(lists_dir):
+        logging.error("LIST dir can't be used")
+        ret = 2
+
+    else:
+        lst = wayround_org.utils.file.files_recurcive_list(destdir)
+
+        lst2 = []
+        for i in lst:
+            lst2.append('/' + wayround_org.utils.path.relpath(i, destdir))
+
+        lst = lst2
+
+        del lst2
+
+        lst.sort()
+
+        try:
+            f = open(output_file, 'w')
+        except:
+            logging.exception("Can't rewrite file {}".format(output_file))
+            ret = 3
+        else:
+
+            f.write('\n'.join(lst) + '\n')
+            f.close()
+
+    return ret
+
+
+def _dir_wanisher(
+        what_is_being_wanished,
+        src_dir,
+        dst_dir,
+        list_dirs_which_existance_indicates_disaster,
+        list_dirs_which_can_be_safely_moved,
+        list_dirs_which_are_disaster_unless_pkg_name_is_in_next_list,
+        list_packages_packaging_for_which_is_not_a_disaster,
+        pkg_name
+        ):
+
+    logging.info(
+        "Checking {} paths correctness".format(what_is_being_wanished))
+
+    ret = 0
+
+    package_info = self.buildingsite_ctl.read_package_info()
+
+    os.makedirs(dst_dir, exist_ok=True)
+
+    for i in list_dist_which_existance_indicates_disaster:
+
+        p1 = wayround_org.utils.path.join(src_dir, i)
+
+        if os.path.islink(p1) or os.path.exists(p1):
+            logging.error(
+                "Forbidden file or directory: {}".format(
+                    wayround_org.utils.path.relpath(p1, self.path)
+                    )
+                )
+            ret = 1
+
+    if ret == 0:
+        for i in list_dirs_which_can_be_safely_moved:
+
+            p1 = wayround_org.utils.path.join(src_dir, i)
+
+            if os.path.islink(p1):
+                os.unlink(p1)
+
+            else:
+                if os.path.exists(p1):
+
+                    logging.warning(
+                        "    copying: {}".format(
+                            os.path.relpath(
+                                p1,
+                                src_dir
+                                )
+                            )
+                        )
+
+                    wayround_org.utils.file.copytree(
+                        p1,
+                        wayround_org.utils.path.join(dst_dir, i),
+                        dst_must_be_empty=False,
+                        verbose=False
+                        )
+                    # shutil.copytree(p1, destdir + os.path.sep + 'usr')
+                    shutil.rmtree(p1)
+
+    if ret == 0:
+
+        for i in \
+                list_dirs_which_are_disaster_unless_pkg_name_is_in_next_list:
+
+            p1 = wayround_org.utils.path.join(src_dir, i)
+
+            if os.path.islink(p1) or os.path.exists(p1):
+                if (not pkg_name
+                        in list_packages_packaging_for_which_is_not_a_disaster):
+                    logging.error(
+                        "Forbidden path: {}".format(
+                            wayround_org.utils.path.relpath(p1, self.path)
+                            )
+                        )
+                    ret = 1
+                else:
+                    logging.warning(
+                        "Usually forbidden path: {}".format(
+                            wayround_org.utils.path.relpath(p1, self.path)
+                            )
+                        )
+                    logging.warning(
+                        "    skipped as packaging for `{}'".format(pkg_name)
+                        )
+
+    return ret
+
+
 class PackCtl:
 
     def __init__(
@@ -699,107 +831,164 @@ class PackCtl:
         Create file list for DESTDIR contents
         """
 
-        ret = 0
-
-        logging.info("Creating file lists")
-
-        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
-
-        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
-
-        output_file = wayround_org.utils.path.abspath(
-            os.path.join(
-                lists_dir,
-                'DESTDIR_orig.lst'
-                )
+        ret = _destdir_filelist(
+            'DESTDIR_orig.lst',
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            self.buildingsite_ctl.getDIR_LISTS()
             )
-
-        if not os.path.isdir(destdir):
-            try:
-                os.makedirs(lists_dir)
-            except:
-                logging.error("Can't create dir: {}".format(destdir))
-
-        if not os.path.isdir(destdir):
-            logging.error("DESTDIR not found")
-            ret = 1
-
-        elif not os.path.isdir(lists_dir):
-            logging.error("LIST dir can't be used")
-            ret = 2
-
-        else:
-            lst = wayround_org.utils.file.files_recurcive_list(destdir)
-
-            lst2 = []
-            for i in lst:
-                lst2.append('/' + wayround_org.utils.path.relpath(i, destdir))
-
-            lst = lst2
-
-            del lst2
-
-            lst.sort()
-
-            try:
-                f = open(output_file, 'w')
-            except:
-                logging.exception("Can't rewrite file {}".format(output_file))
-                ret = 3
-            else:
-
-                f.write('\n'.join(lst) + '\n')
-                f.close()
 
         return ret
 
     def destdir_verify_paths_correctness(self):
-        """
-        Check for forbidden files in destdir
-
-        Files ``['bin', 'sbin', 'lib', 'lib64', 'mnt']`` are forbidden to be in
-        DESTDIR root. This is a rule for aipsetup based distributions. Except
-        is special cases, when this function is avoided.
-        """
-
-        logging.info("Checking DESTDIR paths correctness")
 
         ret = 0
 
-        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+        package_info = self.buildingsite_ctl.read_package_info()
+        pkg_name = package_info['pkg_info']['name']
 
-        os.makedirs(
-            os.path.join(destdir, 'usr'),
-            exist_ok=True
+        src_dir = self.buildingsite_ctl.getDIR_DESTDIR()
+        dst_dir = os.path.join(src_dir, 'usr')
+
+        ret = _dir_wanisher(
+            src_dir,
+            dst_dir,
+            '/ -> /usr',
+            ['mnt', 'multiarch'],
+            ['bin', 'sbin', 'lib', 'lib64'],
+            [],
+            [],
+            pkg_name
             )
 
-        for i in INVALID_MOVABLE_DESTDIR_ROOT_LINKS:
+        return ret
 
-            p1 = wayround_org.utils.path.join(destdir, i)
+    def destdir_verify_paths_correctness2(self):
 
-            if os.path.islink(p1) or os.path.exists(p1):
+        ret = 0
 
-                logging.info("    copying: {}".format(p1))
+        package_info = self.buildingsite_ctl.read_package_info()
+        host = package_info['constitution']['host']
 
-                wayround_org.utils.file.copytree(
-                    p1,
-                    wayround_org.utils.path.join(destdir, 'usr', i),
-                    dst_must_be_empty=False
-                    )
-                # shutil.copytree(p1, destdir + os.path.sep + 'usr')
-                shutil.rmtree(p1)
 
-        for i in INVALID_DESTDIR_ROOT_LINKS:
+        src_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'usr'
+            )
 
-            p1 = wayround_org.utils.path.join(destdir, i)
+        dst_dir = os.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(), 
+            'multihost', 
+            host
+            )
 
-            if os.path.islink(p1) or os.path.exists(p1):
-                logging.error(
-                    "Forbidden path: {}".format(
-                        wayround_org.utils.path.relpath(p1, self.path)
-                        )
-                    )
-                ret = 1
+        lst = os.listdir(src_dir)
+
+        ret = _dir_wanisher(
+            src_dir,
+            dst_dir,
+            '/usr -> /multihost/host',
+            ['usr', 'multihost'],
+            lst,
+            [],
+            [],
+            pkg_name
+            )
+
+        return ret
+
+    def destdir_verify_paths_correctness3(self):
+
+        ret = 0
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        host = package_info['constitution']['host']
+
+        src_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'usr'
+            )
+
+        dst_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host
+            )
+
+        lst = os.listdir(src_dir)
+
+        ret = _dir_wanisher(
+            src_dir,
+            dst_dir,
+            '/multihost/host/usr -> /multihost/host',
+            ['usr', 'multihost'],
+            lst,
+            [],
+            [],
+            pkg_name
+            )
+
+        return ret
+
+    def destdir_verify_paths_correctness4(self):
+
+        logging.info("Checking HOST paths correctness")
+
+        ret = 0
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        pkg_name = package_info['pkg_info']['name']
+
+        host = package_info['constitution']['host']
+        arch = package_info['constitution']['arch']
+
+        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        src_dir = os.path.join(destdir, 'multihost', host)
+        dst_dir = os.path.join(destdir, 'multihost', host, 'multiarch', arch)
+
+        ret = _dir_wanisher(
+            src_dir,
+            dst_dir,
+            '/multihost/host -> /multihost/host/multiarch/arch',
+            ['mnt', 'usr'],
+            ['bin', 'sbin', 'man', 'info'],
+            ['share', 'libexec', 'include'],
+            ['gcc'],
+            pkg_name
+            )
+
+        return ret
+
+    def destdir_verify_paths_correctness5(self):
+
+        ret = 0
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        pkg_name = package_info['pkg_info']['name']
+
+        host = package_info['constitution']['host']
+        arch = package_info['constitution']['arch']
+
+        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
+
+        src_dir = os.path.join(destdir, 'multihost', host, 'multiarch', arch)
+        dst_dir = os.path.join(destdir, 'multihost', host)
+
+        ret = _dir_wanisher(
+            src_dir,
+            dst_dir,
+            '/multihost/host/multiarch/arch -> /multihost/host',
+            ['lib', 'lib64', 'libx32', 'lib32'],
+            [],
+            [],
+            [],
+            pkg_name
+            )
 
         return ret
 
@@ -861,164 +1050,6 @@ class PackCtl:
                 errors += 1
 
         return int(errors != 0)
-
-    def relocate_usr_multihost_files(self):
-
-        ret = 0
-
-        logging.info("Moving usr files to multiarch location")
-
-        source_arch_dir = wayround_org.utils.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(),
-            'usr'
-            )
-
-        if not os.path.exists(source_arch_dir):
-            ret = 0
-
-        else:
-
-            package_info = self.buildingsite_ctl.read_package_info()
-
-            host = package_info['constitution']['host']
-
-            target_arch_dir = wayround_org.utils.path.join(
-                self.buildingsite_ctl.getDIR_DESTDIR(),
-                'multihost',
-                host
-                )
-
-            os.makedirs(target_arch_dir, exist_ok=True)
-
-            files = sorted(os.listdir(source_arch_dir))
-
-            for i in files:
-
-                logging.info("    {}".format(i))
-
-                joined_src = wayround_org.utils.path.join(
-                    source_arch_dir,
-                    i
-                    )
-
-                joined_dst = wayround_org.utils.path.join(
-                    target_arch_dir,
-                    i
-                    )
-
-                if wayround_org.utils.file.copy_file_or_directory(
-                        joined_src,
-                        joined_dst,
-                        overwrite_files=True,
-                        clear_before_copy=False,
-                        dst_must_be_empty=False,
-                        verbose=False
-                        ) != 0:
-                    ret = 1
-                else:
-                    wayround_org.utils.file.remove_if_exists(
-                        joined_src
-                        )
-
-        logging.info("    [ok]")
-
-        if ret == 0:
-            if os.path.isdir(source_arch_dir):
-                if len(os.listdir(source_arch_dir)) != 0:
-                    logging.error("usr dir must be empty by now, but it's not")
-                    ret = 3
-
-                else:
-                    try:
-                        os.rmdir(source_arch_dir)
-                    except:
-                        logging.exception(
-                            "Can't remove dir: {}".format(source_arch_dir)
-                            )
-                        ret = 4
-
-        return ret
-
-    def relocate_wrong_usr_under_multihost_dir(self):
-
-        ret = 0
-
-        package_info = self.buildingsite_ctl.read_package_info()
-
-        host = package_info['constitution']['host']
-
-        target_arch_dir = wayround_org.utils.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(),
-            'multihost',
-            host
-            )
-
-        source_arch_dir = wayround_org.utils.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(),
-            'multihost',
-            host,
-            'usr'
-            )
-
-        if not os.path.exists(source_arch_dir):
-            ret = 0
-
-        else:
-
-            logging.warning(
-                "Moving invalid usr files to multiarch location"
-                )
-
-            os.makedirs(target_arch_dir, exist_ok=True)
-
-            files = sorted(os.listdir(source_arch_dir))
-
-            for i in files:
-
-                logging.info("    {}".format(i))
-
-                joined_src = wayround_org.utils.path.join(
-                    source_arch_dir,
-                    i
-                    )
-
-                joined_dst = wayround_org.utils.path.join(
-                    target_arch_dir,
-                    i
-                    )
-
-                if wayround_org.utils.file.copy_file_or_directory(
-                        joined_src,
-                        joined_dst,
-                        overwrite_files=True,
-                        clear_before_copy=False,
-                        dst_must_be_empty=False,
-                        verbose=False
-                        ) != 0:
-                    ret = 1
-                else:
-                    wayround_org.utils.file.remove_if_exists(
-                        joined_src
-                        )
-
-            logging.info("    [ok]")
-
-        if ret == 0:
-            if os.path.isdir(source_arch_dir):
-                if len(os.listdir(source_arch_dir)) != 0:
-                    logging.error("usr dir must be empty by now, but it's not")
-                    ret = 3
-
-                else:
-                    try:
-                        os.rmdir(source_arch_dir)
-                    except:
-                        logging.exception(
-                            "Can't remove dir: {}".format(source_arch_dir)
-                            )
-                        ret = 4
-
-        return ret
 
     def relocate_libx_dir_files_into_lib_dir(self):
 
@@ -1085,57 +1116,11 @@ class PackCtl:
         Create file list for DESTDIR contents
         """
 
-        ret = 0
-
-        logging.info("Creating file lists")
-
-        destdir = self.buildingsite_ctl.getDIR_DESTDIR()
-
-        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
-
-        output_file = wayround_org.utils.path.abspath(
-            os.path.join(
-                lists_dir,
-                'DESTDIR.lst'
-                )
+        ret = _destdir_filelist(
+            'DESTDIR.lst',
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            self.buildingsite_ctl.getDIR_LISTS()
             )
-
-        if not os.path.isdir(destdir):
-            try:
-                os.makedirs(lists_dir)
-            except:
-                logging.error("Can't create dir: {}".format(destdir))
-
-        if not os.path.isdir(destdir):
-            logging.error("DESTDIR not found")
-            ret = 1
-
-        elif not os.path.isdir(lists_dir):
-            logging.error("LIST dir can't be used")
-            ret = 2
-
-        else:
-            lst = wayround_org.utils.file.files_recurcive_list(destdir)
-
-            lst2 = []
-            for i in lst:
-                lst2.append('/' + wayround_org.utils.path.relpath(i, destdir))
-
-            lst = lst2
-
-            del lst2
-
-            lst.sort()
-
-            try:
-                f = open(output_file, 'w')
-            except:
-                logging.exception("Can't rewrite file {}".format(output_file))
-                ret = 3
-            else:
-
-                f.write('\n'.join(lst) + '\n')
-                f.close()
 
         return ret
 
@@ -1680,7 +1665,7 @@ class PackCtl:
         lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
         for i in ['DESTDIR_orig.lst',
-                'DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
+                  'DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
 
             filename = os.path.join(lists_dir, i)
 
@@ -1844,10 +1829,12 @@ class PackCtl:
                 self.destdir_filelist,
                 self.destdir_verify_paths_correctness,
                 self.rename_configuration_dirs,
-                self.relocate_usr_multiarch_files,
-                self.relocate_wrong_usr_under_multiarch_dir,
+                self.relocate_usr_multihost_files,
+                self.relocate_wrong_usr_under_multihost_dir,
+                self.destdir_verify_paths_correctness2,
+                self.destdir_verify_paths_correctness3,
                 # self.relocate_libx_dir_files_into_lib_dir,
-                self.destdir_filelist,
+                self.destdir_filelist2,
                 self.destdir_set_modes,
                 # self.destdir_edit_executable_elfs,
                 self.destdir_checksum,
@@ -2829,6 +2816,8 @@ def isWdDirRestricted(path):
 def find_dl(root_dir_path):
 
     ret = None
+
+    raise Exception("deprecated")
 
     # TODO: better decigen required.
 

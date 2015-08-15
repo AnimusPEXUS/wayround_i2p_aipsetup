@@ -46,6 +46,15 @@ class ASPackage:
         return ret
 
     @property
+    def arch(self):
+        ret = None
+        try:
+            ret = self.parsed_name['groups']['arch']
+        except:
+            ret = None
+        return ret
+
+    @property
     def status(self):
         ret = None
         try:
