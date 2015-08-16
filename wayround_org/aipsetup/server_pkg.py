@@ -449,19 +449,23 @@ class ASPServer:
         if not resultmode in ['html', 'json']:
             raise bottle.HTTPError(400, "Invalid resultmode")
 
-        filesl = self.pkg_repo_ctl.get_package_hosts(name)
+        if wayround_org.utils.system_type.parse_triplet(host) is None:
+            raise bottle.HTTPError(400, "Invalid host triplet")
+
+        filesl = self.pkg_repo_ctl.get_package_host_archs(name, host)
         if not isinstance(filesl, list):
             raise bottle.HTTPError(
                 404,
-                "Error getting host list. Is package name correct?"
+                "Error getting host archs list. "
+                "Is package name and host correct?"
                 )
 
         filesl.sort()
 
         if resultmode == 'html':
 
-            txt = self.ui.hosts(
-                name, filesl
+            txt = self.ui.archs(
+                name, host, filesl
                 )
 
             ret = self.ui.html(
@@ -482,6 +486,9 @@ class ASPServer:
 
         if wayround_org.utils.system_type.parse_triplet(host) is None:
             raise bottle.HTTPError(400, "Invalid host triplet")
+
+        if wayround_org.utils.system_type.parse_triplet(arch) is None:
+            raise bottle.HTTPError(400, "Invalid arch triplet")
 
         ret = ''
 

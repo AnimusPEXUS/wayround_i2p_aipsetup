@@ -115,6 +115,14 @@ class SystemCtl:
         if host is None and arch is not None:
             raise ValueError("if `host' is None, `arch' must be None too")
 
+        if isinstance(host, str):
+            if wayround_org.utils.system_type.parse_triplet(host) is None:
+                raise bottle.HTTPError(400, "Invalid host triplet")
+
+        if isinstance(arch, str):
+            if wayround_org.utils.system_type.parse_triplet(arch) is None:
+                raise bottle.HTTPError(400, "Invalid arch triplet")
+
         return
 
     def remove_package(

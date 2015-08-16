@@ -351,7 +351,7 @@ class Constitution:
         self.arch = None
 
         if (not isinstance(multilib_variants, list)
-                or len(multilib_variants) == 0
+                    or len(multilib_variants) == 0
                 ):
             raise ValueError("`multilib_variant' must be not empty list")
 
@@ -732,11 +732,9 @@ def _dir_wanisher(
 
     ret = 0
 
-    package_info = self.buildingsite_ctl.read_package_info()
-
     os.makedirs(dst_dir, exist_ok=True)
 
-    for i in list_dist_which_existance_indicates_disaster:
+    for i in list_dirs_which_existance_indicates_disaster:
 
         p1 = wayround_org.utils.path.join(src_dir, i)
 
@@ -847,12 +845,12 @@ class PackCtl:
         pkg_name = package_info['pkg_info']['name']
 
         src_dir = self.buildingsite_ctl.getDIR_DESTDIR()
-        dst_dir = os.path.join(src_dir, 'usr')
+        dst_dir = wayround_org.utils.path.join(src_dir, 'usr')
 
         ret = _dir_wanisher(
+            '/ -> /usr',
             src_dir,
             dst_dir,
-            '/ -> /usr',
             ['mnt', 'multiarch'],
             ['bin', 'sbin', 'lib', 'lib64'],
             [],
@@ -867,32 +865,35 @@ class PackCtl:
         ret = 0
 
         package_info = self.buildingsite_ctl.read_package_info()
-        host = package_info['constitution']['host']
 
+        pkg_name = package_info['pkg_info']['name']
+        host = package_info['constitution']['host']
 
         src_dir = wayround_org.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'usr'
             )
 
-        dst_dir = os.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(), 
-            'multihost', 
+        dst_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
             host
             )
 
-        lst = os.listdir(src_dir)
+        if os.path.exists(src_dir) and os.path.isdir(src_dir):
 
-        ret = _dir_wanisher(
-            src_dir,
-            dst_dir,
-            '/usr -> /multihost/host',
-            ['usr', 'multihost'],
-            lst,
-            [],
-            [],
-            pkg_name
-            )
+            lst = os.listdir(src_dir)
+
+            ret = _dir_wanisher(
+                '/usr -> /multihost/host',
+                src_dir,
+                dst_dir,
+                ['usr', 'multihost'],
+                lst,
+                [],
+                [],
+                pkg_name
+                )
 
         return ret
 
@@ -902,6 +903,7 @@ class PackCtl:
 
         package_info = self.buildingsite_ctl.read_package_info()
 
+        pkg_name = package_info['pkg_info']['name']
         host = package_info['constitution']['host']
 
         src_dir = wayround_org.utils.path.join(
@@ -917,18 +919,19 @@ class PackCtl:
             host
             )
 
-        lst = os.listdir(src_dir)
+        if os.path.exists(src_dir) and os.path.isdir(src_dir):
+            lst = os.listdir(src_dir)
 
-        ret = _dir_wanisher(
-            src_dir,
-            dst_dir,
-            '/multihost/host/usr -> /multihost/host',
-            ['usr', 'multihost'],
-            lst,
-            [],
-            [],
-            pkg_name
-            )
+            ret = _dir_wanisher(
+                '/multihost/host/usr -> /multihost/host',
+                src_dir,
+                dst_dir,
+                ['usr', 'multihost'],
+                lst,
+                [],
+                [],
+                pkg_name
+                )
 
         return ret
 
@@ -947,13 +950,19 @@ class PackCtl:
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
-        src_dir = os.path.join(destdir, 'multihost', host)
-        dst_dir = os.path.join(destdir, 'multihost', host, 'multiarch', arch)
+        src_dir = wayround_org.utils.path.join(destdir, 'multihost', host)
+        dst_dir = wayround_org.utils.path.join(
+            destdir,
+            'multihost',
+            host,
+            'multiarch',
+            arch
+            )
 
         ret = _dir_wanisher(
+            '/multihost/host -> /multihost/host/multiarch/arch',
             src_dir,
             dst_dir,
-            '/multihost/host -> /multihost/host/multiarch/arch',
             ['mnt', 'usr'],
             ['bin', 'sbin', 'man', 'info'],
             ['share', 'libexec', 'include'],
@@ -976,8 +985,18 @@ class PackCtl:
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
-        src_dir = os.path.join(destdir, 'multihost', host, 'multiarch', arch)
-        dst_dir = os.path.join(destdir, 'multihost', host)
+        src_dir = wayround_org.utils.path.join(
+            destdir,
+            'multihost',
+            host,
+            'multiarch',
+            arch
+            )
+        dst_dir = wayround_org.utils.path.join(
+            destdir,
+            'multihost',
+            host
+            )
 
         ret = _dir_wanisher(
             src_dir,
@@ -1519,34 +1538,6 @@ class PackCtl:
 
         return ret
 
-    def remove_source_and_build_dirs(self):
-
-        ret = 0
-
-        logging.info(
-            "Removing {} and {}".format(
-                DIR_SOURCE,
-                DIR_BUILDING
-                )
-            )
-
-        for i in [
-                DIR_SOURCE,
-                DIR_BUILDING
-                ]:
-            dirname = wayround_org.utils.path.abspath(
-                os.path.join(
-                    self.path,
-                    i
-                    )
-                )
-            if os.path.isdir(dirname):
-                wayround_org.utils.file.remove_if_exists(dirname)
-            else:
-                logging.warning("Dir not exists: {}".format(dirname))
-
-        return ret
-
     def compress_patches_destdir_and_logs(self):
 
         ret = 0
@@ -1621,62 +1612,6 @@ class PackCtl:
                 logging.error("Error compressing files in lists dir")
                 ret = 1
                 break
-
-        return ret
-
-    def remove_patches_destdir_buildlogs_and_temp_dirs(self):
-
-        ret = 0
-
-        logging.info(
-            "Removing {}, {}, {} and {}".format(
-                DIR_PATCHES,
-                DIR_DESTDIR,
-                DIR_BUILD_LOGS,
-                DIR_TEMP
-                )
-            )
-
-        for i in [
-                DIR_PATCHES,
-                DIR_DESTDIR,
-                DIR_BUILD_LOGS,
-                DIR_TEMP
-                ]:
-            dirname = wayround_org.utils.path.abspath(
-                os.path.join(
-                    self.path,
-                    i
-                    )
-                )
-            if os.path.isdir(dirname):
-                wayround_org.utils.file.remove_if_exists(dirname)
-            else:
-                logging.warning("Dir not exists: {}".format(dirname))
-
-        return ret
-
-    def remove_decompressed_files_from_lists_dir(self):
-
-        ret = 0
-
-        logging.info("Removing garbage from lists dir")
-
-        lists_dir = self.buildingsite_ctl.getDIR_LISTS()
-
-        for i in ['DESTDIR_orig.lst',
-                  'DESTDIR.lst', 'DESTDIR.sha512', 'DESTDIR.dep_c']:
-
-            filename = os.path.join(lists_dir, i)
-
-            if os.path.exists(filename):
-                try:
-                    os.unlink(filename)
-                except:
-                    logging.exception(
-                        "Can't remove file `{}'".format(filename)
-                        )
-                    ret = 1
 
         return ret
 
@@ -1828,11 +1763,11 @@ class PackCtl:
         for i in [
                 self.destdir_filelist,
                 self.destdir_verify_paths_correctness,
-                self.rename_configuration_dirs,
-                self.relocate_usr_multihost_files,
-                self.relocate_wrong_usr_under_multihost_dir,
                 self.destdir_verify_paths_correctness2,
                 self.destdir_verify_paths_correctness3,
+                self.destdir_verify_paths_correctness4,
+                self.destdir_verify_paths_correctness5,
+                self.rename_configuration_dirs,
                 # self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_filelist2,
                 self.destdir_set_modes,

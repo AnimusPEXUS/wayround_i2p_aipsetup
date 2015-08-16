@@ -18,6 +18,7 @@ import wayround_org.utils.datetime_iso8601
 import wayround_org.utils.text
 import wayround_org.utils.log
 
+import wayround_org.utils.system_type
 
 def commands():
     return collections.OrderedDict([
@@ -73,6 +74,73 @@ def commands():
         ])
 
 
+def _process_h_and_a_opts_specific(opts, config):
+
+    host = config['system_settings']['host']
+    if '-h' in opts:
+
+        host = opts['-h']
+
+        if host.lower() == 'all':
+            host = None
+
+    arch = host
+
+    if host is not None:
+
+        if '-a' in opts:
+
+            arch = opts['-a']
+
+            if arch.lower() == 'all':
+                arch = None
+
+    return host, arch
+
+
+def _process_h_and_a_opts_wide(opts, config):
+
+    host = None
+    arch = None
+
+    if '-h' in opts:
+
+        host = opts['-h']
+
+        if host.lower() == 'all':
+            host = None
+
+    if host is not None:
+
+        if '-a' in opts:
+
+            arch = opts['-a']
+
+            if arch.lower() == 'all':
+                arch = None
+
+    return host, arch
+
+
+def _process_h_and_a_opts_strict(opts, config):
+
+    host = None
+    arch = None
+
+    if '-h' in opts:
+        host = opts['-h']
+
+    if '-a' in opts:
+        arch = opts['-a']
+
+    if wayround_org.utils.system_type.parse_triplet(host) is None:
+        raise ValueError("Invalid host triplet")
+
+    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        raise ValueError("Invalid arch triplet")
+
+    return host, arch
+
 def system_install_package(command_name, opts, args, adds):
     """
     Install package(s)
@@ -89,24 +157,12 @@ def system_install_package(command_name, opts, args, adds):
 
     ret = wayround_org.utils.getopt.check_options(
         opts,
-        ['-b', '--force', '-h']
+        ['-b', '--force', '-h', '-a']
         )
 
     if ret == 0:
 
-        host = None
-        if '-h' in opts:
-            host = opts['-h']
-
-        arch = None
-        if '-a' in opts:
-            arch = opts['-a']
-            
-        if host is None:
-            host = config['system_settings']['host']
-            
-        if arch is None:
-            arch = host
+        host, arch = _process_h_and_a_opts_specific(opts, config)
 
         basedir = '/'
         if '-b' in opts:
@@ -182,6 +238,8 @@ def system_package_list(command_name, opts, args, adds):
     if '-b' in opts:
         basedir = opts['-b']
 
+    host, arch = _process_h_and_a_opts_wide(opts, config)
+
     mask = '*'
     if len(args) > 0:
         mask = args[0]
@@ -201,7 +259,11 @@ def system_package_list(command_name, opts, args, adds):
             config, pkg_client, basedir
             )
 
-        lst = sorted(system.list_installed_packages(mask))
+        lst = sorted(
+            system.list_installed_packages(mask),
+            host=host,
+            arch=arch
+            )
 
         wayround_org.utils.text.columned_list_print(
             lst, fd=sys.stdout.fileno()
@@ -230,6 +292,8 @@ def system_package_list_asps(command_name, opts, args, adds):
     if '-b' in opts:
         basedir = opts['-b']
 
+    host, arch = _process_h_and_a_opts_wide(opts, config)
+
     name = None
 
     if len(args) != 1:
@@ -255,7 +319,11 @@ def system_package_list_asps(command_name, opts, args, adds):
                 config, pkg_client, basedir
                 )
 
-            lst = system.list_installed_package_s_asps(name, host=False)
+            lst = system.list_installed_package_s_asps(
+                name, 
+                host=host,
+                arch=arch
+                )
 
             lst.sort(
                 reverse=True,
@@ -314,7 +382,9 @@ def system_list_package_files(command_name, opts, args, adds):
             files = sorted(
                 system.list_files_installed_by_asp(
                     latest,
-                    mute=True))
+                    mute=True
+                    )
+                )
 
             for i in files:
                 print(i)
@@ -345,12 +415,7 @@ def system_remove_package(command_name, opts, args, adds):
 
     force = '--force' in opts
 
-    host = None
-    if '-h' in opts:
-        host = opts['-h']
-
-    if host == 'false':
-        host = False
+    host, arch = _process_h_and_a_opts_specific(opts, config)
 
     name = None
     if len(args) > 0:
@@ -377,7 +442,13 @@ def system_remove_package(command_name, opts, args, adds):
             basedir
             )
 
-        ret = system.remove_package(name, force, basedir, host=host)
+        ret = system.remove_package(
+            name,
+            force,
+            basedir,
+            host=host,
+            arch=arch
+            )
 
         wayround_org.aipsetup.sysupdates.all_actions()
 
@@ -414,6 +485,8 @@ def system_find_package_files(command_name, opts, args, adds):
     if '-m' in opts:
         look_meth = opts['-m']
 
+    host, arch = _process_h_and_a_opts_wide(opts, config)
+
     lookfor = ''
     if len(args) > 0:
         lookfor = args[0]
@@ -430,7 +503,10 @@ def system_find_package_files(command_name, opts, args, adds):
         )
 
     ret = system.find_file_in_files_installed_by_asps(
-        lookfor, mode=look_meth, host=False
+        lookfor, 
+        mode=look_meth, 
+        host=host,
+        arch=arch
         )
 
     if isinstance(ret, dict):
@@ -487,6 +563,8 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
     if '-b' in opts:
         destdir = opts['-b']
 
+    host, arch = _process_h_and_a_opts_strict(opts, config)
+
     if len(args) < 1:
         logging.error("One or more argument required")
         ret = 1
@@ -526,10 +604,17 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
                     )
 
                 asp_name_latest = system.latest_installed_package_s_asp(
-                    package_name
+                    package_name,
+                    host=host,
+                    arch=arch
                     )
 
-                system.reduce_asps(asp_name_latest, [asp_name])
+                system.reduce_asps(
+                    asp_name_latest, 
+                    [asp_name],
+                    host=host,
+                    arch=arch
+                    )
 
     return ret
 
@@ -575,6 +660,8 @@ def system_make_asp_deps(command_name, opts, args, adds):
 
 
 def system_create_directory_tree(command_name, opts, args, adds):
+
+    raise Exception("TODO")
 
     import wayround_org.aipsetup.controllers
 
