@@ -86,7 +86,7 @@ class MainWindow:
 
         ret = 0
 
-        filename = os.path.join(
+        filename = wayround_org.utils.path.join(
             self.info_ctl.get_info_dir(),
             filename
             )
@@ -185,7 +185,7 @@ class MainWindow:
         if not self.currently_opened:
             ret = 1
         else:
-            filename = os.path.join(
+            filename = wayround_org.utils.path.join(
                 self.info_ctl.get_info_dir(),
                 filename
                 )
@@ -304,7 +304,7 @@ class MainWindow:
 
     def load_list(self):
 
-        mask = os.path.join(self.info_ctl.get_info_dir(), '*.json')
+        mask = wayround_org.utils.path.join(self.info_ctl.get_info_dir(), '*.json')
 
         files = glob.glob(mask)
 

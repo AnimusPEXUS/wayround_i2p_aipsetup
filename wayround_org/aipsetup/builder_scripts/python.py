@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
         """
 
-        # f = open(os.path.join(self.src_dir, 'config.site'), 'w')
+        # f = open(wayround_org.utils.path.join(self.src_dir, 'config.site'), 'w')
         # f.write('ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n')
         # f.close()
 

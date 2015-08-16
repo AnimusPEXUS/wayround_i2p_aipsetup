@@ -31,7 +31,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = {
             'env': e,
             'BOOST_BUILD_PATH': self.src_dir,
-            'user_config': os.path.join(self.src_dir, 'user-config.jam'),
+            'user_config': wayround_org.utils.path.join(self.src_dir, 'user-config.jam'),
             'python': wayround_org.utils.file.which(
                 'python2',
                 self.host_multiarch_dir
@@ -90,7 +90,7 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             [
-                os.path.join(self.src_dir, 'b2'),
+                wayround_org.utils.path.join(self.src_dir, 'b2'),
                 # NOTE: this is not an error:
                 #       prefix = self.dst_host_multiarch_dir
                 '--prefix={}'.format(self.dst_host_multiarch_dir),
@@ -120,7 +120,7 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
     def builder_action_distribute(self, called_as, log):
         p = subprocess.Popen(
             [
-                os.path.join(self.src_dir, 'b2'),
+                wayround_org.utils.path.join(self.src_dir, 'b2'),
                 '--prefix={}'.format(self.dst_host_multiarch_dir),
                 #                    '--build-type=complete',
                 #                    '--layout=versioned',

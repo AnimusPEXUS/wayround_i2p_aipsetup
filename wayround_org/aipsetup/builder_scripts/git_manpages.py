@@ -32,14 +32,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
 
-        man_dir = os.path.join(self.dst_host_multiarch_dir, 'share', 'man')
+        man_dir = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'share', 'man')
 
         mans = os.listdir(self.src_dir)
 
         for i in mans:
 
-            m = os.path.join(man_dir, i)
-            sm = os.path.join(self.src_dir, i)
+            m = wayround_org.utils.path.join(man_dir, i)
+            sm = wayround_org.utils.path.join(self.src_dir, i)
 
             os.makedirs(m)
 

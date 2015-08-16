@@ -72,7 +72,7 @@ def set_correct_modes(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = wayround_org.utils.path.abspath(os.path.join(each[0], d))
+            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], d))
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
@@ -80,7 +80,7 @@ def set_correct_modes(directory):
                      stat.S_IROTH | stat.S_IXOTH)
 
         for f in each[2]:
-            fd = wayround_org.utils.path.abspath(os.path.join(each[0], f))
+            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], f))
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
@@ -94,12 +94,12 @@ def set_correct_owners(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = wayround_org.utils.path.abspath(os.path.join(each[0], d))
+            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], d))
             # print fd
             os.chown(fd, 0, 0)
 
         for f in each[2]:
-            fd = wayround_org.utils.path.abspath(os.path.join(each[0], f))
+            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], f))
             # print fd
             os.chown(fd, 0, 0)
 

@@ -8,7 +8,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         return super().builder_action_configure_define_opts(called_as, log) + [
             '--with-tcl={}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     self.calculate_main_multiarch_lib_dir_name()
                     )

@@ -54,7 +54,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [
                 '-opensource',
                 '-confirm-license',
-                '-prefix', os.path.join(
+                '-prefix', wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     'lib',
                     'qt{}_w_toolkit'.format(

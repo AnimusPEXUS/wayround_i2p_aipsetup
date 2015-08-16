@@ -33,7 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_build_define_args(called_as, log)
         ret += [
             'INCLUDES=-I{}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     'include',
                     'ncursesw'

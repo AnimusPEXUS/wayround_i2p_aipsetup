@@ -674,7 +674,7 @@ def _destdir_filelist(name_to_store_in, destdir, lists_dir):
     lists_dir = lists_dir
 
     output_file = wayround_org.utils.path.abspath(
-        os.path.join(
+        wayround_org.utils.path.join(
             lists_dir,
             name_to_store_in
             )
@@ -1029,8 +1029,8 @@ class PackCtl:
         for i in ['etc', 'var']:
 
             i_new_name = '{}.distr.{}'.format(i, host)
-            src_dir_name = os.path.join(dst_dir, i)
-            target_dir_name = os.path.join(dst_dir, i_new_name)
+            src_dir_name = wayround_org.utils.path.join(dst_dir, i)
+            target_dir_name = wayround_org.utils.path.join(dst_dir, i_new_name)
 
             if i in files:
 
@@ -1053,8 +1053,8 @@ class PackCtl:
 
         etc_new_name = '{}.distr.{}'.format('etc', host)
 
-        src_set_dir = os.path.join(dst_dir, etc_new_name, 'profile.d', 'SET')
-        dst_set_dir = os.path.join(dst_dir, 'etc', 'profile.d', 'SET')
+        src_set_dir = wayround_org.utils.path.join(dst_dir, etc_new_name, 'profile.d', 'SET')
+        dst_set_dir = wayround_org.utils.path.join(dst_dir, 'etc', 'profile.d', 'SET')
 
         if os.path.isdir(src_set_dir):
             logging.info("Copying profile.d/SET files")
@@ -1238,7 +1238,7 @@ class PackCtl:
         if not skip_patch:
 
             dl32 = wayround_org.aipsetup.build.find_dl(
-                os.path.join(
+                wayround_org.utils.path.join(
                     '/',
                     'multiarch',
                     'i686-pc-linux-gnu'
@@ -1246,7 +1246,7 @@ class PackCtl:
                 )
 
             dl64 = wayround_org.aipsetup.build.find_dl(
-                os.path.join(
+                wayround_org.utils.path.join(
                     '/',
                     'multiarch',
                     'x86_64-pc-linux-gnu'
@@ -1274,7 +1274,7 @@ class PackCtl:
             lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
             lists_file = wayround_org.utils.path.abspath(
-                os.path.join(
+                wayround_org.utils.path.join(
                     lists_dir,
                     'DESTDIR.lst'
                     )
@@ -1446,14 +1446,14 @@ class PackCtl:
         lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
         lists_file = wayround_org.utils.path.abspath(
-            os.path.join(
+            wayround_org.utils.path.join(
                 lists_dir,
                 'DESTDIR.lst'
                 )
             )
 
         deps_file = wayround_org.utils.path.abspath(
-            os.path.join(
+            wayround_org.utils.path.join(
                 lists_dir,
                 'DESTDIR.dep_c'
                 )
@@ -1556,7 +1556,7 @@ class PackCtl:
                 DIR_BUILD_LOGS
                 ]:
             dirname = wayround_org.utils.path.abspath(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.path,
                     i
                     )
@@ -1599,7 +1599,7 @@ class PackCtl:
         for i in ['DESTDIR_orig.lst', 'DESTDIR.lst', 'DESTDIR.sha512',
                   'DESTDIR.dep_c']:
 
-            infile = os.path.join(lists_dir, i)
+            infile = wayround_org.utils.path.join(lists_dir, i)
             outfile = infile + '.xz'
 
             if wayround_org.utils.exec.process_file(
@@ -1623,7 +1623,7 @@ class PackCtl:
 
         buildingsite = wayround_org.utils.path.abspath(self.path)
 
-        package_checksums = os.path.join(
+        package_checksums = wayround_org.utils.path.join(
             buildingsite,
             'package.sha512'
             )
@@ -1693,14 +1693,14 @@ class PackCtl:
         else:
 
             pack_dir = wayround_org.utils.path.abspath(
-                os.path.join(
+                wayround_org.utils.path.join(
                     buildingsite,
                     '..',
                     'pack'
                     )
                 )
 
-            pack_file_name = os.path.join(
+            pack_file_name = wayround_org.utils.path.join(
                 pack_dir,
                 "({pkgname})-({version})-({status})-"
                 "({timestamp})-({hostinfo})-({arch}).asp".format_map(
@@ -1902,7 +1902,7 @@ class BuildingSiteCtl:
         return isWdDirRestricted(self.path)
 
     def is_building_site(self):
-        return os.path.isfile(os.path.join(self.path, 'package_info.json'))
+        return os.path.isfile(wayround_org.utils.path.join(self.path, 'package_info.json'))
 
     def init(self, files=None):
         """
@@ -1945,7 +1945,7 @@ class BuildingSiteCtl:
 
             logging.info("Creating required subdirs")
             for i in DIR_ALL:
-                a = wayround_org.utils.path.abspath(os.path.join(path, i))
+                a = wayround_org.utils.path.abspath(wayround_org.utils.path.join(path, i))
 
                 if not os.path.exists(a):
                     resh = 'creating'
@@ -2000,7 +2000,7 @@ class BuildingSiteCtl:
 
         ret = ret_on_error
 
-        pi_filename = os.path.join(path, 'package_info.json')
+        pi_filename = wayround_org.utils.path.join(path, 'package_info.json')
 
         if not os.path.isfile(pi_filename):
             logging.error("`{}' not found".format(pi_filename))
@@ -2034,7 +2034,7 @@ class BuildingSiteCtl:
 
         ret = 0
 
-        package_information_filename = os.path.join(path, 'package_info.json')
+        package_information_filename = wayround_org.utils.path.join(path, 'package_info.json')
 
         f = None
 
@@ -2766,7 +2766,7 @@ def find_dl(root_dir_path):
 
         root_dir_path = os.path.abspath(root_dir_path)
 
-        gr = glob.glob(os.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
+        gr = glob.glob(wayround_org.utils.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
 
         if len(gr) == 1:
             ret = gr[0]

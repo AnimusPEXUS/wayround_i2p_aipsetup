@@ -61,12 +61,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         os.makedirs(
-            os.path.join(self.dst_host_multiarch_dir, 'include'),
+            wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'include'),
             exist_ok=True
             )
 
         os.makedirs(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_host_multiarch_dir,
                 self.calculate_main_multiarch_lib_dir_name()
                 ),
@@ -75,16 +75,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if ret == 0:
 
-            libs = glob.glob(os.path.join(self.src_dir, 'Dist', '*.a'))
-            libs += glob.glob(os.path.join(self.src_dir, 'Dist', '*.so'))
+            libs = glob.glob(wayround_org.utils.path.join(self.src_dir, 'Dist', '*.a'))
+            libs += glob.glob(wayround_org.utils.path.join(self.src_dir, 'Dist', '*.so'))
 
-            headers = glob.glob(os.path.join(self.src_dir, 'Dist', '*.h'))
+            headers = glob.glob(wayround_org.utils.path.join(self.src_dir, 'Dist', '*.h'))
 
             for i in libs:
                 i = os.path.basename(i)
                 shutil.copy(
-                    os.path.join(self.src_dir, 'Dist', i),
-                    os.path.join(
+                    wayround_org.utils.path.join(self.src_dir, 'Dist', i),
+                    wayround_org.utils.path.join(
                         self.dst_host_multiarch_dir,
                         self.calculate_main_multiarch_lib_dir_name(),
                         i
@@ -94,8 +94,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             for i in headers:
                 i = os.path.basename(i)
                 shutil.copy(
-                    os.path.join(self.src_dir, 'Dist', i),
-                    os.path.join(self.dst_host_multiarch_dir, 'include', i)
+                    wayround_org.utils.path.join(self.src_dir, 'Dist', i),
+                    wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'include', i)
                     )
 
         return

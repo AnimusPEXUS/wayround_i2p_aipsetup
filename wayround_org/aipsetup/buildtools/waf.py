@@ -51,7 +51,7 @@ def waf(
 
     cmd = [
         python,
-        os.path.join(cwd, 'waf')
+        wayround_org.utils.path.join(cwd, 'waf')
         ] + options + arguments
 
     log.info("directory: {}".format(cwd))

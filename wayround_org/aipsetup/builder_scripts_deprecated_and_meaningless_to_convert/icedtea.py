@@ -37,17 +37,17 @@ def main(buildingsite, action=None):
 
         dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        src_jdk_dir = os.path.join(src_dir, 'openjdk.build', 'j2sdk-image')
+        src_jdk_dir = wayround_org.utils.path.join(src_dir, 'openjdk.build', 'j2sdk-image')
 
-        java_exec = os.path.join(src_jdk_dir, 'bin', 'java')
+        java_exec = wayround_org.utils.path.join(src_jdk_dir, 'bin', 'java')
 
-        java_dir = os.path.join(dst_dir, 'usr', 'lib', 'java')
+        java_dir = wayround_org.utils.path.join(dst_dir, 'usr', 'lib', 'java')
 
-        etc_dir = os.path.join(dst_dir, 'etc', 'profile.d', 'SET')
+        etc_dir = wayround_org.utils.path.join(dst_dir, 'etc', 'profile.d', 'SET')
 
-        java009 = os.path.join(etc_dir, '009.java')
+        java009 = wayround_org.utils.path.join(etc_dir, '009.java')
 
-        classpath000 = os.path.join(etc_dir, '000.classpath')
+        classpath000 = wayround_org.utils.path.join(etc_dir, '000.classpath')
 
         separate_build_dir = False
 
@@ -147,7 +147,7 @@ def main(buildingsite, action=None):
             teaname = 'icedtea-' + ver
             print(teaname)
 
-            jdk_dir = os.path.join(java_dir, teaname)
+            jdk_dir = wayround_org.utils.path.join(java_dir, teaname)
 
             os.makedirs(java_dir, exist_ok=True)
 
@@ -160,9 +160,9 @@ def main(buildingsite, action=None):
                 )
 
             for i in [
-                    os.path.join(java_dir, 'jre'),
-                    os.path.join(java_dir, 'jdk'),
-                    os.path.join(java_dir, 'java')
+                    wayround_org.utils.path.join(java_dir, 'jre'),
+                    wayround_org.utils.path.join(java_dir, 'jdk'),
+                    wayround_org.utils.path.join(java_dir, 'java')
                     ]:
 
                 if os.path.islink(i):

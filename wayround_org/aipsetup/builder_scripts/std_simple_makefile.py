@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
     def builder_action_prepare_destdir(self, called_as, log):
         ret = 0
 
-        target_path = os.path.join(self.dst_dir, 'usr')
+        target_path = wayround_org.utils.path.join(self.dst_dir, 'usr')
 
         try:
             os.makedirs(
@@ -44,7 +44,7 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
             arguments=[
                 'install',
                 'DESTDIR={}'.format(self.dst_dir),
-                'prefix={}'.format(os.path.join(self.dst_host_multiarh_dir)
+                'prefix={}'.format(wayround_org.utils.path.join(self.dst_host_multiarh_dir)
                 ],
             environment={},
             environment_mode='copy',

@@ -30,7 +30,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_patch(self, called_as, log):
-        f = open(os.path.join(self.src_dir, 'makefile'))
+        f = open(wayround_org.utils.path.join(self.src_dir, 'makefile'))
         lines = f.read().split('\n')
         f.close()
 
@@ -44,7 +44,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 lines[
                     i] = '\tcp -rv $(srcdir)/../Dependencies/ $(include_path)/$(libname_hdr)/$(srcdir)'
 
-        f = open(os.path.join(self.src_dir, 'makefile'), 'w')
+        f = open(wayround_org.utils.path.join(self.src_dir, 'makefile'), 'w')
         f.write('\n'.join(lines))
         f.close()
         return 0
@@ -66,7 +66,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_a(self, called_as, log):
 
         os.makedirs(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_host_multiarch_dir,
                 self.calculate_main_multiarch_lib_dir_name()
                 ),
@@ -105,7 +105,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_so(self, called_as, log):
 
         os.makedirs(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_host_multiarch_dir,
                 self.calculate_main_multiarch_lib_dir_name()
                 ),

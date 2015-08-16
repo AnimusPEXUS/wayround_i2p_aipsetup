@@ -14,10 +14,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         ret = dict()
-        ret['makefile'] = os.path.join(self.src_dir, 'Makefile')
-        ret['zoneinfo'] = os.path.join(self.dst_dir, 'usr', 'share', 'zoneinfo')
-        ret['zoneinfop'] = os.path.join(ret['zoneinfo'], 'posix')
-        ret['zoneinfor'] = os.path.join(ret['zoneinfo'], 'right')
+        ret['makefile'] = wayround_org.utils.path.join(self.src_dir, 'Makefile')
+        ret['zoneinfo'] = wayround_org.utils.path.join(self.dst_dir, 'usr', 'share', 'zoneinfo')
+        ret['zoneinfop'] = wayround_org.utils.path.join(ret['zoneinfo'], 'posix')
+        ret['zoneinfor'] = wayround_org.utils.path.join(ret['zoneinfo'], 'right')
         return ret
 
     def define_actions(self):
@@ -151,8 +151,8 @@ printtdata:
             for i in os.listdir(self.src_dir):
                 if i.endswith('.tab'):
                     shutil.copy(
-                        os.path.join(self.src_dir, i),
-                        os.path.join(self.custom_data['zoneinfo'], i)
+                        wayround_org.utils.path.join(self.src_dir, i),
+                        wayround_org.utils.path.join(self.custom_data['zoneinfo'], i)
                         )
 
         return ret

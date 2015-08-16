@@ -25,7 +25,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         file_list = os.listdir(
             '{}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     'share',
                     'java'

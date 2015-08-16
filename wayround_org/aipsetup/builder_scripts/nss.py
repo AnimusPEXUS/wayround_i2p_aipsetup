@@ -77,7 +77,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'nss_build_all',
                 'BUILD_OPT=1',
                 'NSPR_INCLUDE_DIR={}'.format(
-                    os.path.join(self.host_multiarch_dir, 'include', 'nspr')
+                    wayround_org.utils.path.join(self.host_multiarch_dir, 'include', 'nspr')
                     ),
                 'USE_SYSTEM_ZLIB=1',
 

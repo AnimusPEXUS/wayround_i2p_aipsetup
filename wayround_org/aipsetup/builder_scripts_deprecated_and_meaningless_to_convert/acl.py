@@ -45,20 +45,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         try:
             for i in ['lib{}.a'.format(subset), 'lib{}.la'.format(subset)]:
-                ffn = os.path.join(self.dst_host_multiarch_dir, 'lib', i)
+                ffn = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib', i)
 
                 if os.path.exists(ffn):
                     os.unlink(ffn)
 
-                os.symlink(os.path.join('..', 'libexec', i), ffn)
+                os.symlink(wayround_org.utils.path.join('..', 'libexec', i), ffn)
 
             for i in ['lib{}.so'.format(subset)]:
-                ffn = os.path.join(self.dst_host_multiarch_dir, 'libexec', i)
+                ffn = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'libexec', i)
 
                 if os.path.exists(ffn):
                     os.unlink(ffn)
 
-                os.symlink(os.path.join('..', 'lib', i), ffn)
+                os.symlink(wayround_org.utils.path.join('..', 'lib', i), ffn)
         except:
             log.exception('error')
             ret = 1
@@ -69,7 +69,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        la_file_name = os.path.join(
+        la_file_name = wayround_org.utils.path.join(
             self.dst_host_multiarch_dir,
             'lib',
             'lib{}.la'.format(subset)

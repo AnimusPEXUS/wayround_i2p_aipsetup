@@ -61,9 +61,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     log.error("wrong tarball")
                     ret = 3
                 else:
-                    tar_dir = os.path.join(self.src_dir, tar_dir)
-                    lsof_file = os.path.join(tar_dir, 'lsof')
-                    lsof_man_file = os.path.join(tar_dir, 'lsof.8')
+                    tar_dir = wayround_org.utils.path.join(self.src_dir, tar_dir)
+                    lsof_file = wayround_org.utils.path.join(tar_dir, 'lsof')
+                    lsof_man_file = wayround_org.utils.path.join(tar_dir, 'lsof.8')
 
                     self.custom_data['tar_dir'] = tar_dir
                     self.custom_data['lsof_file'] = lsof_file
@@ -108,16 +108,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 log.error("Can't find lsof.8 man file")
                 ret = 1
             else:
-                dst_bin_dir = os.path.join(
+                dst_bin_dir = wayround_org.utils.path.join(
                     self.dst_host_multiarch_dir,
                     'bin'
                     )
 
                 os.makedirs(dst_bin_dir, exist_ok=True)
 
-                shutil.copy(lsof_file, os.path.join(dst_bin_dir, 'lsof'))
+                shutil.copy(lsof_file, wayround_org.utils.path.join(dst_bin_dir, 'lsof'))
 
-                dst_man_dir = os.path.join(
+                dst_man_dir = wayround_org.utils.path.join(
                     self.dst_host_multiarch_dir,
                     'share',
                     'man',
@@ -128,7 +128,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 shutil.copy(
                     lsof_man_file,
-                    os.path.join(dst_man_dir, 'lsof.8')
+                    wayround_org.utils.path.join(dst_man_dir, 'lsof.8')
                     )
 
         return ret

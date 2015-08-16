@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.host_multiarch_dir
                 ),
             #'GPG_ERROR_CONFIG={}'.format(
-            #    os.path.join(
+            #    wayround_org.utils.path.join(
             #        self.host_multiarch_dir,
             #        'bin', 'gpg-error-config'
             #        )

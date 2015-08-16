@@ -543,7 +543,7 @@ class Builder:
                         self.source_configure_reldir
                         )
                     if '/' in i[1][0]:
-                        tgt_file = os.path.join(wd, i[1][0])
+                        tgt_file = wayround_org.utils.path.join(wd, i[1][0])
                         log.info("changing mode (+x) for: {}".format(tgt_file))
                         chmod_p = subprocess.Popen(
                             ['chmod', '+x', tgt_file],
@@ -591,37 +591,37 @@ class Builder:
             '--prefix={}'.format(self.get_host_dir()),
 
             '--bindir=' +
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'bin'
                 ),
 
             '--sbindir=' +
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'sbin'
                 ),
 
             '--libexecdir=' +
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'libexec'
                 ),
 
             '--includedir=' +
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'include'
                 ),
 
             '--datarootdir=' +
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'share'
                 ),
 
             '--includedir=' +
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'include'
                 ),
@@ -631,20 +631,20 @@ class Builder:
             #       possibly self.calculate_main_multiarch_lib_dir_name()
             #       need to be used here
 
-            #'--libdir=' + os.path.join(self.host_multiarch_dir, 'lib'),
+            #'--libdir=' + wayround_org.utils.path.join(self.host_multiarch_dir, 'lib'),
 
             # NOTE: --libdir= needed at least for glibc to point it using
             #       valid 'lib' or 'lib64' dir name. else it can put 64-bit
             #       crt*.ofiles into 32-bit lib dir
             '--libdir=' + self.get_host_lib_dir(),
 
-            '--mandir=' + os.path.join(
+            '--mandir=' + wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'share',
                 'man'
                 ),
             '--sysconfdir=/etc',
-            # '--sysconfdir=' + os.path.join(
+            # '--sysconfdir=' + wayround_org.utils.path.join(
             #     self.host_multiarch_dir,
             #     'etc'
             #     ),
@@ -676,8 +676,8 @@ class Builder:
 
     def builder_action_configure_define_PATH_list(self):
         ret = [
-            os.path.join(self.get_host_arch_dir(), 'bin'),
-            os.path.join(self.get_host_arch_dir(), 'sbin')
+            wayround_org.utils.path.join(self.get_host_arch_dir(), 'bin'),
+            wayround_org.utils.path.join(self.get_host_arch_dir(), 'sbin')
             ]
         return ret
 

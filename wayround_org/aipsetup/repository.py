@@ -142,7 +142,7 @@ class PackageRepoCtl:
 
         return (os.path.isdir(path)
                 and os.path.isfile(
-                os.path.join(path, '.package')
+                wayround_org.utils.path.join(path, '.package')
                 )
                 )
 
@@ -183,7 +183,7 @@ class PackageRepoCtl:
                     files.sort()
 
                     for i in files:
-                        if os.path.isdir(os.path.join(package_dir, i)):
+                        if os.path.isdir(wayround_org.utils.path.join(package_dir, i)):
                             ret.append(i)
 
         return ret
@@ -226,7 +226,7 @@ class PackageRepoCtl:
                     files.sort()
 
                     for i in files:
-                        if os.path.isdir(os.path.join(package_dir, i)):
+                        if os.path.isdir(wayround_org.utils.path.join(package_dir, i)):
                             ret.append(i)
 
         return ret
@@ -270,7 +270,7 @@ class PackageRepoCtl:
                         "Looking for package files in `{}'".format(package_dir)
                         )
 
-                    files = glob.glob(os.path.join(package_dir, '*.asp'))
+                    files = glob.glob(wayround_org.utils.path.join(package_dir, '*.asp'))
 
                     needed_files = []
 
@@ -535,7 +535,7 @@ class PackageRepoCtl:
                 ret = 1
 
         if ret == 0:
-            if cur_pkg_path == os.path.join(new_pkg_path, pkg_name):
+            if cur_pkg_path == wayround_org.utils.path.join(new_pkg_path, pkg_name):
                 logging.error(
                     "Supplyed same subpath as currently is"
                     )
@@ -572,13 +572,13 @@ class PackageRepoCtl:
             try:
                 os.rename(
                     cur_pkg_path,
-                    os.path.join(new_pkg_path, pkg_name)
+                    wayround_org.utils.path.join(new_pkg_path, pkg_name)
                     )
             except:
                 logging.exception(
                     "Can't rename\n    `{}'\n    to\n    {}".format(
                         cur_pkg_path,
-                        os.path.join(new_pkg_path, pkg_name)
+                        wayround_org.utils.path.join(new_pkg_path, pkg_name)
                         )
                     )
                 ret = 7
@@ -1180,7 +1180,7 @@ class PackageRepoCtl:
 
         if len(files) > 5:
             for i in files[5:]:
-                p1 = os.path.join(path, i)
+                p1 = wayround_org.utils.path.join(path, i)
 
                 logging.warning(
                     "Removing outdated package: {}".format(
@@ -1209,7 +1209,7 @@ class PackageRepoCtl:
         files.sort()
 
         for arch in files:
-            if os.path.isdir(os.path.join(path, arch)):
+            if os.path.isdir(wayround_org.utils.path.join(path, arch)):
                 self.cleanup_repo_package_pack_host_arch(
                     g_path,
                     name,
@@ -1284,7 +1284,7 @@ class PackageRepoCtl:
         files.sort()
 
         for host in files:
-            if os.path.isdir(os.path.join(path, host)):
+            if os.path.isdir(wayround_org.utils.path.join(path, host)):
                 self.cleanup_repo_package_pack_host(g_path, name, host)
 
         return

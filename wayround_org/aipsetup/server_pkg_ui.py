@@ -27,7 +27,7 @@ class UI:
             'name_by_name'
             ]:
             self.templates[i] = mako.template.Template(
-                filename=os.path.join(templates_dir, i + '.html'),
+                filename=wayround_org.utils.path.join(templates_dir, i + '.html'),
                 format_exceptions=False
                 )
 

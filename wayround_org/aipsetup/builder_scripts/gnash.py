@@ -15,14 +15,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--disable-docbook',
             '--enable-media=ffmpeg',
             '--with-npapi-incl={}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     'include',
                     'mozilla'
                     )
                 ),
             '--with-npapi-plugindir={}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     self.calculate_main_multiarch_lib_dir_name(),
                     'mozilla',

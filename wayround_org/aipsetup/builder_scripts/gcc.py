@@ -26,10 +26,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         self.apply_host_spec_compilers_options = False
 
         ret = dict()
-        ret['cc_file'] = os.path.join(
+        ret['cc_file'] = wayround_org.utils.path.join(
             self.get_dst_host_arch_dir(), 'bin', 'cc'
             )
-        ret['libcpp_file'] = os.path.join(
+        ret['libcpp_file'] = wayround_org.utils.path.join(
             self.get_dst_host_arch_dir(),
             'lib',
             'cpp'
@@ -132,14 +132,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if self.get_is_crossbuilder():
             raise Exception("redo")
-            prefix = os.path.join(
+            prefix = wayround_org.utils.path.join(
                 self.get_host_crossbuilders_dir(),
                 self.get_target_from_pkgi()
                 )
 
             ret = [
                 '--prefix=' + prefix,
-                '--mandir=' + os.path.join(prefix, 'share', 'man'),
+                '--mandir=' + wayround_org.utils.path.join(prefix, 'share', 'man'),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared',
@@ -174,7 +174,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 # so after gcc and glibc built and installed - rebuild gcc both
                 # without --with-sysroot= and without --without-headers options
                 '--with-sysroot={}'.format(
-                    os.path.join(
+                    wayround_org.utils.path.join(
                         self.get_host_crossbuilders_dir(),
                         self.target
                         )
@@ -239,7 +239,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             '''
             ret += [
-                '--libdir=' + os.path.join(self.get_host_dir(),'lib64'),
+                '--libdir=' + wayround_org.utils.path.join(self.get_host_dir(),'lib64'),
                 ]
             '''
 
@@ -267,7 +267,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             for i in ['lib', 'lib64', 'lib32', 'libx32']:
 
-                joined = os.path.join(
+                joined = wayround_org.utils.path.join(
                     '/multiarch', 'i686-pc-linux-gnu', i
                     )
 

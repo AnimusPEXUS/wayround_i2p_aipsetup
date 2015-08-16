@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'all',
                 'install.all',
-                'GLEW_DEST=' + os.path.join(self.dst_host_multiarch_dir),
+                'GLEW_DEST=' + wayround_org.utils.path.join(self.dst_host_multiarch_dir),
                 ] + self.all_automatic_flags_as_list(),
             environment={},
             environment_mode='copy',

@@ -35,7 +35,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_fix_exim_install(self, called_as, log):
 
-        exim_install = os.path.join(self.src_dir, 'scripts', 'exim_install')
+        exim_install = wayround_org.utils.path.join(self.src_dir, 'scripts', 'exim_install')
 
         f = open(exim_install, 'r')
         ft = f.read()
@@ -59,8 +59,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        editme = os.path.join(self.src_dir, 'src', 'EDITME')
-        editme_makefile = os.path.join(self.src_dir, 'Local', 'Makefile')
+        editme = wayround_org.utils.path.join(self.src_dir, 'src', 'EDITME')
+        editme_makefile = wayround_org.utils.path.join(self.src_dir, 'Local', 'Makefile')
 
         try:
             shutil.copy(editme, editme_makefile)
@@ -169,17 +169,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_config_eximon(self, called_as, log):
-        editme_mon = os.path.join(self.src_dir, 'exim_monitor', 'EDITME')
+        editme_mon = wayround_org.utils.path.join(self.src_dir, 'exim_monitor', 'EDITME')
         editme_makefile_mon = \
-            os.path.join(self.src_dir, 'Local', 'eximon.conf')
+            wayround_org.utils.path.join(self.src_dir, 'Local', 'eximon.conf')
 
         shutil.copy(editme_mon, editme_makefile_mon)
         return 0
 
     def builder_action_rename_configs(self, called_as, log):
         for i in [
-                os.path.join(self.dst_dir, 'etc', 'exim', 'configure'),
-                os.path.join(self.dst_dir, 'etc', 'aliases')
+                wayround_org.utils.path.join(self.dst_dir, 'etc', 'exim', 'configure'),
+                wayround_org.utils.path.join(self.dst_dir, 'etc', 'aliases')
                 ]:
 
             if os.path.exists(i):
@@ -188,7 +188,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
 
     def builder_action_sendmail_link(self, called_as, log):
-        lnk = os.path.join(self.dst_host_multiarch_dir, 'bin', 'sendmail')
+        lnk = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'bin', 'sendmail')
 
         if os.path.exists(lnk) or os.path.islink(lnk):
             os.unlink(lnk)

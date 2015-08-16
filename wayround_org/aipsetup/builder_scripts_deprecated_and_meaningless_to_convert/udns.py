@@ -101,11 +101,11 @@ def main(buildingsite, action=None):
 
         if 'distribute' in actions and ret == 0:
 
-            dst_bin = os.path.join(dst_dir, 'usr', 'bin')
-            dst_lib = os.path.join(dst_dir, 'usr', 'lib')
-            dst_inc = os.path.join(dst_dir, 'usr', 'include')
-            dst_man1 = os.path.join(dst_dir, 'usr', 'share', 'man', 'man1')
-            dst_man3 = os.path.join(dst_dir, 'usr', 'share', 'man', 'man3')
+            dst_bin = wayround_org.utils.path.join(dst_dir, 'usr', 'bin')
+            dst_lib = wayround_org.utils.path.join(dst_dir, 'usr', 'lib')
+            dst_inc = wayround_org.utils.path.join(dst_dir, 'usr', 'include')
+            dst_man1 = wayround_org.utils.path.join(dst_dir, 'usr', 'share', 'man', 'man1')
+            dst_man3 = wayround_org.utils.path.join(dst_dir, 'usr', 'share', 'man', 'man3')
 
             for i in [dst_bin, dst_lib, dst_inc, dst_man1, dst_man3]:
                 if not os.path.isdir(i):
@@ -114,36 +114,36 @@ def main(buildingsite, action=None):
             for i in ['dnsget', 'ex-rdns', 'rblcheck']:
                 for j in ['', '_s']:
                     shutil.copy(
-                        os.path.join(src_dir, '{}{}'.format(i, j)),
+                        wayround_org.utils.path.join(src_dir, '{}{}'.format(i, j)),
                         dst_bin,
                         )
 
             for i in (
-                glob.glob(os.path.join(src_dir, '*.so*')) +
-                glob.glob(os.path.join(src_dir, '*.a'))
+                glob.glob(wayround_org.utils.path.join(src_dir, '*.so*')) +
+                glob.glob(wayround_org.utils.path.join(src_dir, '*.a'))
                 ):
 
                 b = os.path.basename(i)
 
                 shutil.copy(
-                    os.path.join(src_dir, b),
+                    wayround_org.utils.path.join(src_dir, b),
                     dst_lib
                     )
 
             shutil.copy(
-                os.path.join(src_dir, 'udns.h'),
+                wayround_org.utils.path.join(src_dir, 'udns.h'),
                 dst_inc
                 )
 
             for i in ['dnsget.1', 'rblcheck.1']:
                 shutil.copy(
-                    os.path.join(src_dir, i),
+                    wayround_org.utils.path.join(src_dir, i),
                     dst_man1,
                     )
 
             for i in ['udns.3']:
                 shutil.copy(
-                    os.path.join(src_dir, i),
+                    wayround_org.utils.path.join(src_dir, i),
                     dst_man3,
                     )
 

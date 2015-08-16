@@ -33,7 +33,7 @@ def main(buildingsite, action=None):
 
             zip_file = os.listdir(tar_dir)
 
-            xml_dir = os.path.join(dst_dir, 'usr', 'share', 'sgml', 'docbook')
+            xml_dir = wayround_org.utils.path.join(dst_dir, 'usr', 'share', 'sgml', 'docbook')
 
             if not len(zip_file) == 1:
                 ret = 1
@@ -44,8 +44,8 @@ def main(buildingsite, action=None):
                 os.makedirs(xml_dir)
 
                 wayround_org.utils.archive.extract(
-                    os.path.join(tar_dir, zip_file),
-                    os.path.join(
+                    wayround_org.utils.path.join(tar_dir, zip_file),
+                    wayround_org.utils.path.join(
                         xml_dir, 'docbook' + '-' +
                         '.'.join(
                             list(pkg_info['pkg_nameinfo']['groups']['version'])

@@ -83,11 +83,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
         ret = 0
 
-        java_dir = os.path.join(self.dst_host_multiarch_dir, 'lib', 'java')
+        java_dir = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib', 'java')
 
-        etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
+        etc_dir = wayround_org.utils.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
-        java009 = os.path.join(
+        java009 = wayround_org.utils.path.join(
             etc_dir,
             '009.java.{}.sh'.format(self.host_strong)
             )

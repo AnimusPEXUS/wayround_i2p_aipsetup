@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         logging.info("`uname -r' returned: {}".format(kern_rel))
 
-        kdir = os.path.join(
+        kdir = wayround_org.utils.path.join(
             self.dst_dir,
             'lib',
             'modules',
@@ -50,7 +50,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_patch(self, called_as, log):
-        makefile_name = os.path.join(self.src_dir, 'Makefile')
+        makefile_name = wayround_org.utils.path.join(self.src_dir, 'Makefile')
 
         ret = 0
 
@@ -100,7 +100,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             files = os.listdir(kdir)
 
             for i in files:
-                fname = os.path.join(kdir, i)
+                fname = wayround_org.utils.path.join(kdir, i)
                 if os.path.isfile(fname):
                     os.unlink(fname)
 

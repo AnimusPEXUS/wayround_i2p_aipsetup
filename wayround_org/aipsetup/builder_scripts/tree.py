@@ -40,10 +40,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install',
                 'prefix={}'.format(self._dst_host_multiarch_dir),
                 'BINDIR={}'.format(
-                    os.path.join(self._dst_host_multiarch_dir, 'bin')
+                    wayround_org.utils.path.join(self._dst_host_multiarch_dir, 'bin')
                     ),
                 'MANDIR={}'.format(
-                    os.path.join(
+                    wayround_org.utils.path.join(
                         self._dst_host_multiarch_dir,
                         'share',
                         'man',

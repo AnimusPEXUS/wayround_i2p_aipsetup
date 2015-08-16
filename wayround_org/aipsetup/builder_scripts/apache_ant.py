@@ -22,9 +22,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             self.dst_host_multiarch_dir, 'lib', 'java', 'apache-ant'
             )
 
-        etc_dir = os.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
+        etc_dir = wayround_org.utils.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
 
-        apacheant009 = os.path.join(etc_dir, '009.apache-ant.{}.sh'.format(self.host_strong))
+        apacheant009 = wayround_org.utils.path.join(etc_dir, '009.apache-ant.{}.sh'.format(self.host_strong))
 
         return {
             'src_ant_dir': src_ant_dir,

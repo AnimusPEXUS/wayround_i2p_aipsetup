@@ -47,13 +47,13 @@ def main(buildingsite, action=None):
 
             ret = subprocess.Popen(
                 ['scons'],
-                cwd=os.path.join(src_dir, 'supportlib')
+                cwd=wayround_org.utils.path.join(src_dir, 'supportlib')
                 ).wait()
 
         if 'distribute' in actions and ret == 0:
             ret = subprocess.Popen(
                 ['python3', 'setup.py', 'install',
-                 '--root={}'.format(os.path.join(dst_dir))],
+                 '--root={}'.format(wayround_org.utils.path.join(dst_dir))],
                 cwd=src_dir
                 ).wait()
 

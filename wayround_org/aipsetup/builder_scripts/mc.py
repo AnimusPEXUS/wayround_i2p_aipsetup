@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_asc_support(self, called_as, log):
-        exts_file = os.path.join(self.dst_dir, 'etc', 'mc', 'mc.ext')
+        exts_file = wayround_org.utils.path.join(self.dst_dir, 'etc', 'mc', 'mc.ext')
 
         f = open(exts_file)
         ftl = f.readlines()

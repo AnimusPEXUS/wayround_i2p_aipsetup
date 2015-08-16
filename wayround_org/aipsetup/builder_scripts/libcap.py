@@ -29,7 +29,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     '''
     def patch_test_c(self):
-        name = os.path.join(self.src_dir, 'pam_cap', 'test.c')
+        name = wayround_org.utils.path.join(self.src_dir, 'pam_cap', 'test.c')
 
         with open(name) as f:
             t = f.read()
@@ -42,7 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
 
     def patch_pam_cap_c(self):
-        name = os.path.join(self.src_dir, 'pam_cap', 'pam_cap.c')
+        name = wayround_org.utils.path.join(self.src_dir, 'pam_cap', 'pam_cap.c')
 
         with open(name) as f:
             t = f.read()
@@ -79,13 +79,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'RAISE_SETFCAP=no',
                 'PAM_CAP=yes',
                 'SYSTEM_HEADERS={}'.format(
-                    os.path.join(
+                    wayround_org.utils.path.join(
                         self.host_multiarch_dir,
                         'include'
                         )
                     ),
                 'CFLAGS=-I{}'.format(
-                    os.path.join(
+                    wayround_org.utils.path.join(
                         self.host_multiarch_dir,
                         'include'
                         )
@@ -101,11 +101,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
 
         wayround_org.utils.file.copytree(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_host_multiarch_dir,
                 'multiarch'
                 ),
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_host_multiarch_dir,
                 self.calculate_main_multiarch_lib_dir_name()
                 ),
@@ -115,7 +115,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         shutil.rmtree(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_host_multiarch_dir,
                 'multiarch'
                 )

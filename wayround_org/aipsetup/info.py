@@ -520,7 +520,7 @@ class PackageInfoCtl:
 
                 if create_templates:
 
-                    filename = os.path.join(
+                    filename = wayround_org.utils.path.join(
                         self._info_dir,
                         '{}.json'.format(each)
                         )
@@ -583,7 +583,7 @@ class PackageInfoCtl:
 
         for i in obj_lst:
 
-            filename = os.path.join(
+            filename = wayround_org.utils.path.join(
                 self._info_dir,
                 '{}.json'.format(i)
                 )
@@ -658,7 +658,7 @@ class PackageInfoCtl:
         logging.info("Found {} outdated records".format(len(oir)))
 
         for i in range(len(oir)):
-            oir[i] = os.path.join(
+            oir[i] = wayround_org.utils.path.join(
                 self._info_dir,
                 oir[i] + '.json'
                 )
@@ -776,7 +776,7 @@ class PackageInfoCtl:
         for i in obj_lst:
             if fnmatch.fnmatch(i, mask):
 
-                filename = os.path.join(
+                filename = wayround_org.utils.path.join(
                     self._info_dir,
                     '{}.json'.format(i))
 

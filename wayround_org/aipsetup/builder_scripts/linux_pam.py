@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-read-both-confs',
             '--enable-selinux',
             '--includedir={}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     'include',
                     'security'

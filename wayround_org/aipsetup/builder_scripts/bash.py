@@ -44,7 +44,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if subprocess.Popen(
                         ['patch',
                          '-i',
-                         os.path.join(self.patches_dir, i),
+                         wayround_org.utils.path.join(self.patches_dir, i),
                          '-p0'],
                         cwd=self.src_dir
                         ).wait() != 0:

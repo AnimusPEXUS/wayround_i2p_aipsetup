@@ -65,7 +65,7 @@ class MainWindow:
 
         self.currently_opened = None
 
-        ui_file = os.path.join(
+        ui_file = wayround_org.utils.path.join(
             os.path.dirname(__file__), 'gui', 'main_loop.glade'
             )
 

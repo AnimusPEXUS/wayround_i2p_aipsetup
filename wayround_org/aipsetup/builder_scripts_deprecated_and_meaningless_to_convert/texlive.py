@@ -37,9 +37,9 @@ def main(buildingsite, action=None):
 
         dst_dir = wayround_org.aipsetup.build.getDIR_DESTDIR(buildingsite)
 
-        install_tl_dir = os.path.join(buildingsite, 'install-tl')
+        install_tl_dir = wayround_org.utils.path.join(buildingsite, 'install-tl')
 
-        script = os.path.join(install_tl_dir, 'install-tl')
+        script = wayround_org.utils.path.join(install_tl_dir, 'install-tl')
 
         separate_build_dir = True
 
@@ -47,11 +47,11 @@ def main(buildingsite, action=None):
 
         usr = pkg_info['constitution']['paths']['usr']
 
-        tex_live_dir = os.path.join(usr, 'lib', 'texlive')
+        tex_live_dir = wayround_org.utils.path.join(usr, 'lib', 'texlive')
 
-        dst_tex_live_dir = os.path.join(dst_dir, 'usr', 'lib', 'texlive')
+        dst_tex_live_dir = wayround_org.utils.path.join(dst_dir, 'usr', 'lib', 'texlive')
 
-        dst_tex_live_bin = os.path.join(dst_tex_live_dir, 'bin')
+        dst_tex_live_bin = wayround_org.utils.path.join(dst_tex_live_dir, 'bin')
 
         if 'extract' in actions:
             if os.path.isdir(src_dir):
@@ -88,7 +88,7 @@ def main(buildingsite, action=None):
             ret = wayround_org.utils.archive.extract_low(
                 log,
                 tmpdir,
-                os.path.join(tar_dir, tl_install),
+                wayround_org.utils.path.join(tar_dir, tl_install),
                 outdir=install_tl_dir,
                 unwrap_dir=True,
                 rename_dir=False
@@ -147,12 +147,12 @@ def main(buildingsite, action=None):
                 source_configure_reldir=source_configure_reldir
                 )
 
-            p_dir = os.path.join(dst_dir, 'etc', 'profile.d', 'SET')
+            p_dir = wayround_org.utils.path.join(dst_dir, 'etc', 'profile.d', 'SET')
 
             if not os.path.exists(p_dir):
                 os.makedirs(p_dir)
 
-            p_file = os.path.join(p_dir, '009.texlive')
+            p_file = wayround_org.utils.path.join(p_dir, '009.texlive')
             f = open(p_file, 'w')
             f.write(
                 """\

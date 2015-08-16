@@ -134,7 +134,7 @@ so going to build i686 multilib support
 
     def builder_action_configure_define_opts(self, called_as, log):
 
-        with_headers = os.path.join(
+        with_headers = wayround_org.utils.path.join(
             self.get_host_dir(),
             'multiarch',
             self.get_host_from_pkgi(),
@@ -145,19 +145,19 @@ so going to build i686 multilib support
 
         if self.get_is_crossbuilder():
             raise Exception("redo")
-            prefix = os.path.join(
+            prefix = wayround_org.utils.path.join(
                 self.host_crossbuilders_dir,
                 self.target
                 )
 
-            with_headers = os.path.join(
+            with_headers = wayround_org.utils.path.join(
                 prefix,
                 'include'
                 )
 
             ret = [
                 '--prefix={}'.format(prefix),
-                '--mandir={}'.format(os.path.join(prefix, 'share', 'man')),
+                '--mandir={}'.format(wayround_org.utils.path.join(prefix, 'share', 'man')),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared'
@@ -219,7 +219,7 @@ so going to build i686 multilib support
             if self.get_arch_from_pkgi().startswith('x86_64'):
                 ret += [
                     'slibdir={}'.format(
-                        os.path.join(
+                        wayround_org.utils.path.join(
                             self.get_host_dir(),
                             'lib64'
                             )
@@ -228,7 +228,7 @@ so going to build i686 multilib support
             else:
                 ret += [
                     'slibdir={}'.format(
-                        os.path.join(
+                        wayround_org.utils.path.join(
                             self.get_host_dir(),
                             'lib'
                             )
@@ -288,7 +288,7 @@ so going to build i686 multilib support
             log=log,
             options=[],
             arguments=[
-                os.path.join('csu', 'subdir_lib')
+                wayround_org.utils.path.join('csu', 'subdir_lib')
                 ],
             environment={},
             environment_mode='copy',
@@ -299,7 +299,7 @@ so going to build i686 multilib support
 
     def builder_action_distribute_01_3(self, called_as, log):
 
-        gres = glob.glob(os.path.join(self.bld_dir, 'csu', '*crt*.o'))
+        gres = glob.glob(wayround_org.utils.path.join(self.bld_dir, 'csu', '*crt*.o'))
 
         dest_lib_dir = wayround_org.utils.path.join(
             self.dst_host_crossbuilders_dir,
@@ -407,7 +407,7 @@ class Builder_multi_i686(Builder):
     #       32bit part of glibc
 
     def define_custom_data(self):
-        self.separate_build_dir = os.path.join(self.src_dir, 'build_i686')
+        self.separate_build_dir = wayround_org.utils.path.join(self.src_dir, 'build_i686')
         ret = {
             'original_host': self.host_strong
             }

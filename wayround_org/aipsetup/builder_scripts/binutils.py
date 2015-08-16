@@ -91,7 +91,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             ret = [
                 '--prefix=' + prefix,
-                '--mandir=' + os.path.join(prefix, 'share', 'man'),
+                '--mandir=' + wayround_org.utils.path.join(prefix, 'share', 'man'),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared'

@@ -103,22 +103,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        di = os.path.join(self.dst_host_multiarch_dir, 'lib')
+        di = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib')
 
         if self.host_strong.startswith('x86_64'):
-            di = os.path.join(self.dst_host_multiarch_dir, 'lib64')
+            di = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib64')
 
         os.makedirs(di, exist_ok=True)
 
         try:
-            sos = glob.glob(os.path.join(self.src_dir, '*.so.*'))
+            sos = glob.glob(wayround_org.utils.path.join(self.src_dir, '*.so.*'))
 
             for i in sos:
 
                 base = os.path.basename(i)
 
-                j = os.path.join(self.src_dir, base)
-                j2 = os.path.join(di, base)
+                j = wayround_org.utils.path.join(self.src_dir, base)
+                j2 = wayround_org.utils.path.join(di, base)
 
                 if os.path.isfile(j) and not os.path.islink(j):
                     shutil.copy(j, j2)
@@ -140,13 +140,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        bin_dir = os.path.join(self.dst_host_multiarch_dir, 'bin')
+        bin_dir = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'bin')
         files = os.listdir(bin_dir)
 
         try:
             for i in files:
 
-                ff = os.path.join(bin_dir, i)
+                ff = wayround_org.utils.path.join(bin_dir, i)
 
                 if os.path.islink(ff):
 

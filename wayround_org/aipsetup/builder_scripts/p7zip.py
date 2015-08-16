@@ -44,13 +44,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         shutil.copy(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.src_dir,
                 'makefile.{}'.format(
                     self.custom_data['makefile_suffix']
                     )
                 ),
-            os.path.join(self.src_dir, 'makefile.machine')
+            wayround_org.utils.path.join(self.src_dir, 'makefile.machine')
             )
         return 0
 

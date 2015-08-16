@@ -1025,7 +1025,7 @@ class SystemCtl:
             self._installed_pkg_dir
             )
 
-        filelist = glob.glob(os.path.join(listdir, '*.xz'))
+        filelist = glob.glob(wayround_org.utils.path.join(listdir, '*.xz'))
 
         ret = 0
 
@@ -1175,7 +1175,7 @@ class SystemCtl:
             self._installed_pkg_dir
             )
 
-        pkg_list_file = os.path.join(list_dir, asp_name)
+        pkg_list_file = wayround_org.utils.path.join(list_dir, asp_name)
 
         if not pkg_list_file.endswith('.xz'):
             pkg_list_file += '.xz'
@@ -1228,7 +1228,7 @@ class SystemCtl:
             self._installed_pkg_dir_sums
             )
 
-        pkg_list_file = os.path.join(list_dir, asp_name)
+        pkg_list_file = wayround_org.utils.path.join(list_dir, asp_name)
 
         if not pkg_list_file.endswith('.xz'):
             pkg_list_file += '.xz'

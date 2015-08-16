@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         guile_prefix = self.host_multiarch_dir
 
-        guile_config = os.path.join(guile_prefix, 'bin', 'guile-config')
+        guile_config = wayround_org.utils.path.join(guile_prefix, 'bin', 'guile-config')
 
         guile_cflags = str(
             subprocess.check_output([guile_config, 'compile']),
@@ -37,7 +37,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret += [
             '--with-libguile={}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     # 'include', 'guile', '2.0'
                     )
@@ -58,7 +58,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret += [
             '--with-libxml2={}'.format(
-                os.path.join(
+                wayround_org.utils.path.join(
                     self.host_multiarch_dir,
                     )
                 )

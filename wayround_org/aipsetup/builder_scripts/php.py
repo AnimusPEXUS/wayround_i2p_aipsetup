@@ -49,12 +49,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_build(self, called_as, log):
 
         os.makedirs(
-            os.path.join(self.dst_dir, 'daemons', 'httpd', 'etc'),
+            wayround_org.utils.path.join(self.dst_dir, 'daemons', 'httpd', 'etc'),
             exist_ok=True
             )
 
         f = open(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_dir, 'daemons', 'httpd', 'etc', 'httpd.conf'
                 ),
             'w'
@@ -81,19 +81,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_after_distribute(self, called_as, log):
         os.rename(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_dir,
                 'daemons',
                 'httpd',
                 'etc',
                 'httpd.conf'),
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_dir, 'daemons', 'httpd', 'etc', 'httpd.php.conf'
                 )
             )
 
         os.unlink(
-            os.path.join(
+            wayround_org.utils.path.join(
                 self.dst_dir, 'daemons', 'httpd', 'etc',
                 'httpd.conf.bak'
                 )

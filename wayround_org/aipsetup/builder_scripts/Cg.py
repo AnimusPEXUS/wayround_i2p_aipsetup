@@ -18,14 +18,14 @@ class Builder(wayround_org.aipsetup.build_scripts.std_simple_makefile):
             if ret != 0:
                 break
 
-            jo = os.path.join(self.src_dir, i)
+            jo = wayround_org.utils.path.join(self.src_dir, i)
 
             if os.path.exists(jo):
 
                 try:
                     shutil.move(
                         jo,
-                        os.path.join(self.dst_dir, 'usr')
+                        wayround_org.utils.path.join(self.dst_dir, 'usr')
                         )
                 except:
                     log.exception(

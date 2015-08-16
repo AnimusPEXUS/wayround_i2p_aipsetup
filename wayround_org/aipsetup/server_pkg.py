@@ -70,11 +70,11 @@ class ASPServer:
 
         self._src_page_url = src_page_url
 
-        web = os.path.join(os.path.dirname(__file__), 'web', 'pkg_server')
+        web = wayround_org.utils.path.join(os.path.dirname(__file__), 'web', 'pkg_server')
 
-        templates_dir = os.path.join(web, 'templates')
-        css_dir = os.path.join(web, 'css')
-        js_dir = os.path.join(web, 'js')
+        templates_dir = wayround_org.utils.path.join(web, 'templates')
+        css_dir = wayround_org.utils.path.join(web, 'css')
+        js_dir = wayround_org.utils.path.join(web, 'js')
 
         # TODO: extinct self.config
         #        self.config = config

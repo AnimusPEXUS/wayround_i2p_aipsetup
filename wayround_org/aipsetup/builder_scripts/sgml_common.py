@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         try:
-            f = open(os.path.join(self.src_dir, makefile_am))
+            f = open(wayround_org.utils.path.join(self.src_dir, makefile_am))
 
             lines = f.read().splitlines()
 
@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if lines[i] == 'man8_DATA = *.8':
                     lines[i] = ''
 
-            f = open(os.path.join(self.src_dir, makefile_am), 'w')
+            f = open(wayround_org.utils.path.join(self.src_dir, makefile_am), 'w')
 
             f.write('\n'.join(lines))
 

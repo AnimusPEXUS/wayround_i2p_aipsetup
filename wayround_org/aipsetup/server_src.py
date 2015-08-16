@@ -104,7 +104,7 @@ class SRCServer:
         self.host = host
         self.port = port
 
-        self.template_dir = os.path.join(
+        self.template_dir = wayround_org.utils.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'web',
             'src_server',
@@ -128,7 +128,7 @@ class SRCServer:
             'html', 'tag_list', 'file_list', 'search'
             ]:
             self.templates[i] = Template(
-                filename=os.path.join(self.template_dir, '{}.html'.format(i)),
+                filename=wayround_org.utils.path.join(self.template_dir, '{}.html'.format(i)),
                 format_exceptions=False
                 )
 

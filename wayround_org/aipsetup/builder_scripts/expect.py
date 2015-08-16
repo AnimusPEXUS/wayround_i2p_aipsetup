@@ -36,14 +36,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             log.info("Extracting Tcl")
             wayround_org.utils.archive.extract(
-                os.path.join(self.tar_dir, tcl_found),
+                wayround_org.utils.path.join(self.tar_dir, tcl_found),
                 self.buildingsite,
                 log=log,
                 )
 
             log.info("Extracting Tk")
             wayround_org.utils.archive.extract(
-                os.path.join(self.tar_dir, tk_found),
+                wayround_org.utils.path.join(self.tar_dir, tk_found),
                 self.buildingsite,
                 log=log
                 )
