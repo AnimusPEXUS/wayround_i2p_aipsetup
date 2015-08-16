@@ -202,13 +202,18 @@ class Builder:
             )
 
     def get_host_lib_dir(self):
+        lib_dir_name_variant_str = 'lib'
+        # TODO: do it more flexible. but now (17 Aug 2015) quick fix only
+        if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
+            lib_dir_name_variant_str = 'lib64'
         return wayround_org.utils.path.join(
             self.get_host_dir(),
-            'lib{}'.format(self.get_multilib_variant_int())
+            lib_dir_name_variant_str
             )
 
     def get_host_arch_lib_dir(self):
-        raise Exception("this is invalid methos - don't use it")
+        raise Exception("this is invalid method - don't use it")
+        # TODO: to be removed probably
         return wayround_org.utils.path.join(
             self.get_host_arch_dir(),
             'lib{}'.format(self.get_multilib_variant_int())
@@ -588,8 +593,43 @@ class Builder:
     def builder_action_configure_define_opts(self, called_as, log):
 
         ret = [
-            '--prefix={}'.format(self.get_host_dir()),
+            '--prefix={}'.format(self.get_host_arch_dir()),
 
+            #'--localedir=' +  
+            #wayround_org.utils.path.join(
+            #    self.get_host_arch_dir(),
+            #    'share'
+            #    ),
+
+            # NOTE: removed '--libdir=' because I about to allow
+            #       programs to use lib dir name which they desire.
+            #       possibly self.calculate_main_multiarch_lib_dir_name()
+            #       need to be used here
+
+            #'--libdir=' + wayround_org.utils.path.join(self.host_multiarch_dir, 'lib'),
+
+            # NOTE: --libdir= needed at least for glibc to point it using
+            #       valid 'lib' or 'lib64' dir name. else it can put 64-bit
+            #       crt*.ofiles into 32-bit lib dir
+            '--libdir=' + self.get_host_lib_dir(),
+
+            '--sysconfdir=/etc',
+            # '--sysconfdir=' + wayround_org.utils.path.join(
+            #     self.host_multiarch_dir,
+            #     'etc'
+            #     ),
+            '--localstatedir=/var',
+            '--enable-shared',
+
+            # WARNING: using --with-sysroot in some cases makes
+            #          build processes involving libtool to generate incorrect
+            #          *.la files
+            # '--with-sysroot={}'.format(self.host_multiarch_dir)
+
+            ] + autotools.calc_conf_hbt_options(self) + \
+            self.all_automatic_flags_as_list()
+
+        '''
             '--bindir=' +
             wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
@@ -620,44 +660,19 @@ class Builder:
                 'share'
                 ),
 
-            '--includedir=' +
+            '--datadir=' +
             wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
-                'include'
+                'share'
                 ),
-
-            # NOTE: removed '--libdir=' because I about to allow
-            #       programs to use lib dir name which they desire.
-            #       possibly self.calculate_main_multiarch_lib_dir_name()
-            #       need to be used here
-
-            #'--libdir=' + wayround_org.utils.path.join(self.host_multiarch_dir, 'lib'),
-
-            # NOTE: --libdir= needed at least for glibc to point it using
-            #       valid 'lib' or 'lib64' dir name. else it can put 64-bit
-            #       crt*.ofiles into 32-bit lib dir
-            '--libdir=' + self.get_host_lib_dir(),
 
             '--mandir=' + wayround_org.utils.path.join(
                 self.get_host_arch_dir(),
                 'share',
                 'man'
                 ),
-            '--sysconfdir=/etc',
-            # '--sysconfdir=' + wayround_org.utils.path.join(
-            #     self.host_multiarch_dir,
-            #     'etc'
-            #     ),
-            '--localstatedir=/var',
-            '--enable-shared',
 
-            # WARNING: using --with-sysroot in some cases makes
-            #          build processes involving libtool to generate incorrect
-            #          *.la files
-            # '--with-sysroot={}'.format(self.host_multiarch_dir)
-
-            ] + autotools.calc_conf_hbt_options(self) + \
-            self.all_automatic_flags_as_list()
+        '''
 
         return ret
 

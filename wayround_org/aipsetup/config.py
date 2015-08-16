@@ -41,7 +41,8 @@ DEFAULT_CONFIG = collections.OrderedDict([
 
         ('host', 'x86_64-pc-linux-gnu'),
         ('build', 'x86_64-pc-linux-gnu'),
-        ('target', 'x86_64-pc-linux-gnu')
+        ('target', 'x86_64-pc-linux-gnu'),
+        ('arch', 'x86_64-pc-linux-gnu'),
         ])
      ),
 

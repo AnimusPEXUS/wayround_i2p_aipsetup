@@ -222,10 +222,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #     elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
                 #     (aclui.pnv73q.o) is not supported
                 '--enable-multiarch',
-                #'--enable-multilib',
+                '--enable-multilib',
 
-                '--disable-multilib',
-                # '--disable-multiarch',
+                #'--disable-multiarch',
+                #'--disable-multilib',
 
                 '--enable-checking=release',
                 '--enable-libada',

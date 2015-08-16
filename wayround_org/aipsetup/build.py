@@ -135,7 +135,8 @@ def _constitution_configurer_sub01(
 
         host_from_param,
         build_from_param,
-        target_from_param
+        target_from_param,
+        arch_from_param
         ):
 
     if value is None:
@@ -170,7 +171,8 @@ def _constitution_configurer_sub01(
 
         else:
             re_res = re.match(
-                r'^(?P<bht>(b(uild)?)|(h(ost)?)|(t(arget)?))(?P<bht_o>[ps]?)$',
+                r'^(?P<bhta>(b(uild)?)|(h(ost)?)|(t(arget)?)|(a(rch)?))'
+                r'(?P<bhta_o>[ps]?)$',
                 value_l
                 )
             if re_res is None:
@@ -178,28 +180,32 @@ def _constitution_configurer_sub01(
                 pass
 
             else:
-                bht = re_res.group('bht')
-                bht_o = re_res.group('bht_o')
+                bhta = re_res.group('bhta')
+                bhta_o = re_res.group('bhta_o')
 
-                if bht_o == 'p':
+                if bhta_o == 'p':
                     ss = package_info['constitution']
-                elif bht_o == 's':
+                elif bhta_o == 's':
                     ss = config['system_settings']
                 else:
                     ss = {
                         'host': host_from_param,
                         'build': build_from_param,
-                        'target': target_from_param
+                        'target': target_from_param,
+                        'arch': arch_from_param
                         }
 
-                if bht in ['h', 'host']:
+                if bhta in ['h', 'host']:
                     value = ss['host']
 
-                elif bht in ['b', 'build']:
+                elif bhta in ['b', 'build']:
                     value = ss['build']
 
-                elif bht in ['t', 'target']:
+                elif bhta in ['t', 'target']:
                     value = ss['target']
+
+                elif bhta in ['a', 'arch']:
+                    value = ss['arch']
 
     return value
 
@@ -228,7 +234,8 @@ def constitution_configurer(
         'host',
         host_from_param,
         build_from_param,
-        target_from_param
+        target_from_param,
+        arch_from_param
         )
 
     build_from_param = _constitution_configurer_sub01(
@@ -238,7 +245,8 @@ def constitution_configurer(
         'build',
         host_from_param,
         build_from_param,
-        target_from_param
+        target_from_param,
+        arch_from_param
         )
 
     target_from_param = _constitution_configurer_sub01(
@@ -248,11 +256,21 @@ def constitution_configurer(
         'target',
         host_from_param,
         build_from_param,
-        target_from_param
+        target_from_param,
+        arch_from_param
         )
 
-    if arch_from_param is None:
-        arch_from_param = host_from_param
+    arch_from_param = _constitution_configurer_sub01(
+        arch_from_param,
+        config,
+        package_info,
+        'arch',
+        host_from_param,
+        build_from_param,
+        target_from_param,
+        arch_from_param
+        )
+
 
     ccp_res = calculate_CC_constitution_parts(
         host_from_param,
@@ -351,8 +369,8 @@ class Constitution:
         self.arch = None
 
         if (not isinstance(multilib_variants, list)
-                    or len(multilib_variants) == 0
-                ):
+                or len(multilib_variants) == 0
+            ):
             raise ValueError("`multilib_variant' must be not empty list")
 
         if not isinstance(arch_str, str):
@@ -720,87 +738,133 @@ def _dir_wanisher(
         what_is_being_wanished,
         src_dir,
         dst_dir,
-        list_dirs_which_existance_indicates_disaster,
+        list_dirs_disasterous_with_pkg_name_exclusion,
+        list_package_name_exclusions,
+        list_dirs_which_is_disaster,
         list_dirs_which_can_be_safely_moved,
-        list_dirs_which_are_disaster_unless_pkg_name_is_in_next_list,
-        list_packages_packaging_for_which_is_not_a_disaster,
+        list_dirs_which_can_be_moved_unless_in_following_list,
+        list_packages_which_dirs_not_to_move,
         pkg_name
         ):
 
     logging.info(
-        "Checking {} paths correctness".format(what_is_being_wanished))
+        "Checking: {}".format(what_is_being_wanished)
+        )
 
     ret = 0
 
-    os.makedirs(dst_dir, exist_ok=True)
+    if os.path.isdir(src_dir):
 
-    for i in list_dirs_which_existance_indicates_disaster:
+        os.makedirs(dst_dir, exist_ok=True)
 
-        p1 = wayround_org.utils.path.join(src_dir, i)
+        if ret == 0:
 
-        if os.path.islink(p1) or os.path.exists(p1):
-            logging.error(
-                "Forbidden file or directory: {}".format(
-                    wayround_org.utils.path.relpath(p1, self.path)
-                    )
-                )
-            ret = 1
+            for i in list_dirs_disasterous_with_pkg_name_exclusion:
 
-    if ret == 0:
-        for i in list_dirs_which_can_be_safely_moved:
+                p1 = wayround_org.utils.path.join(src_dir, i)
 
-            p1 = wayround_org.utils.path.join(src_dir, i)
-
-            if os.path.islink(p1):
-                os.unlink(p1)
-
-            else:
-                if os.path.exists(p1):
-
-                    logging.warning(
-                        "    copying: {}".format(
-                            os.path.relpath(
-                                p1,
-                                src_dir
+                if os.path.islink(p1) or os.path.exists(p1):
+                    if not pkg_name in list_package_name_exclusions:
+                        logging.error(
+                            "Forbidden path: {}".format(
+                                wayround_org.utils.path.relpath(p1, src_dir)
                                 )
                             )
-                        )
+                        ret = 1
+                    else:
+                        logging.warning(
+                            "Usually forbidden path: {}".format(
+                                wayround_org.utils.path.relpath(p1, src_dir)
+                                )
+                            )
+                        logging.warning(
+                            "    skipped as packaging for `{}'".format(pkg_name)
+                            )
 
-                    wayround_org.utils.file.copytree(
-                        p1,
-                        wayround_org.utils.path.join(dst_dir, i),
-                        dst_must_be_empty=False,
-                        verbose=False
-                        )
-                    # shutil.copytree(p1, destdir + os.path.sep + 'usr')
-                    shutil.rmtree(p1)
+        if ret == 0:
+            for i in list_dirs_which_is_disaster:
 
-    if ret == 0:
+                p1 = wayround_org.utils.path.join(src_dir, i)
 
-        for i in \
-                list_dirs_which_are_disaster_unless_pkg_name_is_in_next_list:
-
-            p1 = wayround_org.utils.path.join(src_dir, i)
-
-            if os.path.islink(p1) or os.path.exists(p1):
-                if (not pkg_name
-                        in list_packages_packaging_for_which_is_not_a_disaster):
+                if os.path.islink(p1) or os.path.exists(p1):
                     logging.error(
-                        "Forbidden path: {}".format(
-                            wayround_org.utils.path.relpath(p1, self.path)
+                        "Forbidden file or directory: {}".format(
+                            wayround_org.utils.path.relpath(p1, src_dir)
                             )
                         )
                     ret = 1
-                else:
-                    logging.warning(
-                        "Usually forbidden path: {}".format(
-                            wayround_org.utils.path.relpath(p1, self.path)
-                            )
-                        )
-                    logging.warning(
-                        "    skipped as packaging for `{}'".format(pkg_name)
-                        )
 
+        if ret == 0:
+            for i in list_dirs_which_can_be_safely_moved:
+
+                p1 = wayround_org.utils.path.join(src_dir, i)
+
+                if os.path.islink(p1):
+                    os.unlink(p1)
+
+                else:
+                    if os.path.exists(p1):
+
+                        logging.warning(
+                            "    moving: {}".format(
+                                os.path.relpath(
+                                    p1,
+                                    src_dir
+                                    )
+                                )
+                            )
+
+                        wayround_org.utils.file.copytree(
+                            p1,
+                            wayround_org.utils.path.join(dst_dir, i),
+                            dst_must_be_empty=False,
+                            verbose=False
+                            )
+                        # shutil.copytree(p1, destdir + os.path.sep + 'usr')
+                        shutil.rmtree(p1)
+
+        if ret == 0:
+            for i in list_dirs_which_can_be_moved_unless_in_following_list:
+
+                p1 = wayround_org.utils.path.join(src_dir, i)
+
+                if os.path.islink(p1):
+                    os.unlink(p1)
+
+                else:
+                    if os.path.exists(p1):
+
+                        if not pkg_name in list_packages_which_dirs_not_to_move:
+
+                            logging.warning(
+                                "    moving: {}".format(
+                                    os.path.relpath(
+                                        p1,
+                                        src_dir
+                                        )
+                                    )
+                                )
+
+                            wayround_org.utils.file.copytree(
+                                p1,
+                                wayround_org.utils.path.join(dst_dir, i),
+                                dst_must_be_empty=False,
+                                verbose=False
+                                )
+                            # shutil.copytree(p1, destdir + os.path.sep + 'usr')
+                            shutil.rmtree(p1)
+
+                        else:
+                            logging.warning(
+                                "Usually moved path: {}".format(
+                                    wayround_org.utils.path.relpath(p1, src_dir)
+                                    )
+                                )
+                            logging.warning(
+                                "    skipped as packaging for `{}'".format(
+                                    pkg_name
+                                    )
+                                )
     return ret
 
 
@@ -841,6 +905,8 @@ class PackCtl:
 
         ret = 0
 
+        logging.info("----------- CHECKS -----------")
+
         package_info = self.buildingsite_ctl.read_package_info()
         pkg_name = package_info['pkg_info']['name']
 
@@ -851,6 +917,8 @@ class PackCtl:
             '/ -> /usr',
             src_dir,
             dst_dir,
+            [],
+            [],
             ['mnt', 'multiarch'],
             ['bin', 'sbin', 'lib', 'lib64'],
             [],
@@ -888,12 +956,16 @@ class PackCtl:
                 '/usr -> /multihost/host',
                 src_dir,
                 dst_dir,
-                ['usr', 'multihost'],
+                [],
+                [],
+                ['usr', 'multihost', 'multiarch'],
+                [],
+                [],
                 lst,
-                [],
-                [],
                 pkg_name
                 )
+
+        wayround_org.utils.file.remove_if_exists(src_dir)
 
         return ret
 
@@ -926,18 +998,20 @@ class PackCtl:
                 '/multihost/host/usr -> /multihost/host',
                 src_dir,
                 dst_dir,
-                ['usr', 'multihost'],
+                [],
+                [],
+                ['usr', 'multihost', 'multiarch'],
+                [],
+                [],
                 lst,
-                [],
-                [],
                 pkg_name
                 )
+
+        wayround_org.utils.file.remove_if_exists(src_dir)
 
         return ret
 
     def destdir_verify_paths_correctness4(self):
-
-        logging.info("Checking HOST paths correctness")
 
         ret = 0
 
@@ -963,9 +1037,11 @@ class PackCtl:
             '/multihost/host -> /multihost/host/multiarch/arch',
             src_dir,
             dst_dir,
-            ['mnt', 'usr'],
+            ['include'],
+            ['gcc', 'gmp'],
+            ['mnt', 'usr', 'share', 'libexec'],
             ['bin', 'sbin', 'man', 'info'],
-            ['share', 'libexec', 'include'],
+            ['include'],
             ['gcc'],
             pkg_name
             )
@@ -999,15 +1075,19 @@ class PackCtl:
             )
 
         ret = _dir_wanisher(
+            '/multihost/host/multiarch/arch -> /multihost/host',
             src_dir,
             dst_dir,
-            '/multihost/host/multiarch/arch -> /multihost/host',
+            [],
+            [],
             ['lib', 'lib64', 'libx32', 'lib32'],
             [],
             [],
             [],
             pkg_name
             )
+
+        logging.info("----------- CHECKS -----------")
 
         return ret
 
@@ -1021,6 +1101,7 @@ class PackCtl:
         dst_dir = self.buildingsite_ctl.getDIR_DESTDIR()
 
         host = package_info['constitution']['host']
+        arch = package_info['constitution']['arch']
 
         files = sorted(os.listdir(dst_dir))
 
@@ -1028,7 +1109,7 @@ class PackCtl:
 
         for i in ['etc', 'var']:
 
-            i_new_name = '{}.distr.{}'.format(i, host)
+            i_new_name = '{}.distr.{}.{}'.format(i, host, arch)
             src_dir_name = wayround_org.utils.path.join(dst_dir, i)
             target_dir_name = wayround_org.utils.path.join(dst_dir, i_new_name)
 
@@ -1051,10 +1132,20 @@ class PackCtl:
 
         del(files)
 
-        etc_new_name = '{}.distr.{}'.format('etc', host)
+        # TODO: do I really need this rest of this method?
 
-        src_set_dir = wayround_org.utils.path.join(dst_dir, etc_new_name, 'profile.d', 'SET')
-        dst_set_dir = wayround_org.utils.path.join(dst_dir, 'etc', 'profile.d', 'SET')
+        etc_new_name = '{}.distr.{}.{}'.format('etc', host, arch)
+
+        src_set_dir = wayround_org.utils.path.join(
+            dst_dir,
+            etc_new_name,
+            'profile.d',
+            'SET')
+        dst_set_dir = wayround_org.utils.path.join(
+            dst_dir,
+            'etc',
+            'profile.d',
+            'SET')
 
         if os.path.isdir(src_set_dir):
             logging.info("Copying profile.d/SET files")
@@ -1902,7 +1993,8 @@ class BuildingSiteCtl:
         return isWdDirRestricted(self.path)
 
     def is_building_site(self):
-        return os.path.isfile(wayround_org.utils.path.join(self.path, 'package_info.json'))
+        return os.path.isfile(
+            wayround_org.utils.path.join(self.path, 'package_info.json'))
 
     def init(self, files=None):
         """
@@ -1945,7 +2037,10 @@ class BuildingSiteCtl:
 
             logging.info("Creating required subdirs")
             for i in DIR_ALL:
-                a = wayround_org.utils.path.abspath(wayround_org.utils.path.join(path, i))
+                a = wayround_org.utils.path.abspath(
+                    wayround_org.utils.path.join(
+                        path,
+                        i))
 
                 if not os.path.exists(a):
                     resh = 'creating'
@@ -2034,7 +2129,9 @@ class BuildingSiteCtl:
 
         ret = 0
 
-        package_information_filename = wayround_org.utils.path.join(path, 'package_info.json')
+        package_information_filename = wayround_org.utils.path.join(
+            path,
+            'package_info.json')
 
         f = None
 
@@ -2766,7 +2863,11 @@ def find_dl(root_dir_path):
 
         root_dir_path = os.path.abspath(root_dir_path)
 
-        gr = glob.glob(wayround_org.utils.path.join(root_dir_path, 'lib', 'ld-linux*.so.2'))
+        gr = glob.glob(
+            wayround_org.utils.path.join(
+                root_dir_path,
+                'lib',
+                'ld-linux*.so.2'))
 
         if len(gr) == 1:
             ret = gr[0]
