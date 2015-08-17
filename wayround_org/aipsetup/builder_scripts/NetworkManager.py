@@ -42,8 +42,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            'CFLAGS=' + nss_cflags,
-            'LDFLAGS=' + nss_libs,
+            'CFLAGS={}'.format(nss_cflags),
+            'LDFLAGS={}'.format(nss_libs),
             '--with-suspend-resume=systemd',
             '--with-session-tracking=systemd'
             ]

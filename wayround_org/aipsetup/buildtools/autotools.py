@@ -20,15 +20,18 @@ import wayround_org.utils.tarball
 
 def calc_conf_hbt_options(builder_obj):
 
-    host = builder_obj.get_arch_from_pkgi()
+    host = builder_obj.get_host_from_pkgi()
     build = builder_obj.get_build_from_pkgi()
     target = builder_obj.get_target_from_pkgi()
+    arch = builder_obj.get_arch_from_pkgi()
 
     forced_target = builder_obj.forced_target
 
-    if (host is not None
+    if (arch is not None
                 and (
                     (host == build == target)
+                    or
+                    (arch == build == target)
                     or
                     ((host == build) and (target is None))
                     )
@@ -38,8 +41,8 @@ def calc_conf_hbt_options(builder_obj):
 
     ret = []
 
-    if host not in [None, 'none']:
-        ret.append('--host={}'.format(host))
+    if arch not in [None, 'none']:
+        ret.append('--host={}'.format(arch))
 
     if build not in [None, 'none']:
         ret.append('--build={}'.format(build))

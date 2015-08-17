@@ -12,29 +12,42 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         src_ant_dir = wayround_org.utils.path.join(
-            self.src_dir,
+            self.get_src_dir(),
             'apache-ant-{}'.format(
-                self.package_info['pkg_nameinfo']['groups']['version']
+                self.get_package_info()['pkg_nameinfo']['groups']['version']
                 )
             )
 
         dst_ant_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir, 'lib', 'java', 'apache-ant'
+            self.get_dst_host_dir(), 'java', 'apache-ant'
             )
 
-        etc_dir = wayround_org.utils.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
+        etc_dir = wayround_org.utils.path.join(
+            self.get_dst_host_dir(), 
+            'etc', 
+            'profile.d', 
+            'SET'
+            )
 
-        apacheant009 = wayround_org.utils.path.join(etc_dir, '009.apache-ant.{}.sh'.format(self.host_strong))
+        apacheant009 = wayround_org.utils.path.join(
+            etc_dir, 
+            '009.apache-ant.{}.{}.sh'.format(
+                self.get_host_from_pkgi(),
+                self.get_arch_from_pkgi()
+                )
+            )
 
-        return {
+        ret = {
             'src_ant_dir': src_ant_dir,
             'dst_ant_dir': dst_ant_dir,
             'etc_dir': etc_dir,
             'apacheant009': apacheant009
             }
 
+        return ret
+
     def define_actions(self):
-        return collections.OrderedDict([
+        ret = collections.OrderedDict([
             ('dst_cleanup', self.builder_action_dst_cleanup),
             ('src_cleanup', self.builder_action_src_cleanup),
             ('bld_cleanup', self.builder_action_bld_cleanup),
@@ -42,6 +55,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('build', self.builder_action_build),
             ('distribute', self.builder_action_distribute)
             ])
+        return ret
 
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(

@@ -16,9 +16,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         #       records in log.. guile related configuration is insane :-/
         #       and --with-libguile= usage is probably incorrect
 
-        guile_prefix = self.host_multiarch_dir
+        guile_prefix = self.get_host_arch_dir()
 
-        guile_config = wayround_org.utils.path.join(guile_prefix, 'bin', 'guile-config')
+        guile_config = wayround_org.utils.path.join(
+            guile_prefix,
+            'bin',
+            'guile-config'
+            )
 
         guile_cflags = str(
             subprocess.check_output([guile_config, 'compile']),
@@ -38,7 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--with-libguile={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     # 'include', 'guile', '2.0'
                     )
                 ),
@@ -59,7 +63,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--with-libxml2={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     )
                 )
             ]

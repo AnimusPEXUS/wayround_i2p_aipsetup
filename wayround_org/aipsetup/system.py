@@ -1175,7 +1175,7 @@ class SystemCtl:
             self._installed_pkg_dir
             )
 
-        pkg_list_file = wayround_org.utils.path.join(list_dir, asp_name)
+        pkg_list_file = wayround_org.utils.path.join(asp_name)
 
         if not pkg_list_file.endswith('.xz'):
             pkg_list_file += '.xz'
@@ -1385,9 +1385,6 @@ class SystemCtl:
         self._test_host_arch_parameters(host, arch)
 
         ret = None
-
-        if host is None:
-            host = self.host
 
         lst = self.list_installed_package_s_asps(
             name,

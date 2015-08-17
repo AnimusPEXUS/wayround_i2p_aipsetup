@@ -202,13 +202,9 @@ class Builder:
             )
 
     def get_host_lib_dir(self):
-        lib_dir_name_variant_str = 'lib'
-        # TODO: do it more flexible. but now (17 Aug 2015) quick fix only
-        if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
-            lib_dir_name_variant_str = 'lib64'
         return wayround_org.utils.path.join(
             self.get_host_dir(),
-            lib_dir_name_variant_str
+            self.calculate_main_multiarch_lib_dir_name()
             )
 
     def get_host_arch_lib_dir(self):
@@ -216,7 +212,7 @@ class Builder:
         # TODO: to be removed probably
         return wayround_org.utils.path.join(
             self.get_host_arch_dir(),
-            'lib{}'.format(self.get_multilib_variant_int())
+            self.calculate_main_multiarch_lib_dir_name()
             )
 
     def get_host_arch_list(self):
@@ -247,59 +243,45 @@ class Builder:
     #        self.calculate_default_linker_program_ld_parameter()
     #        )
 
-    '''
     def calculate_main_multiarch_lib_dir_name(self):
 
-        # raise Exception("Acctention required here :-/")
+        multilib_variant = str(self.get_multilib_variant_int())
 
-        # \'''
-        if self.host_strong == 'x86_64-pc-linux-gnu':
+        ret = 'lib'
+        if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
             ret = 'lib64'
-        elif self.host_strong == 'i686-pc-linux-gnu':
+        elif self.get_arch_from_pkgi() == 'i686-pc-linux-gnu':
             ret = 'lib'
-        elif self.host_strong == 'x86-pc-linux-gnu':
-            ret = 'lib32'
         else:
-            raise Exception("don't know")
-        # \'''
+            raise Exception("Don't know")
 
-        # return 'lib'
         return ret
-    '''
 
     def calculate_pkgconfig_search_paths(self):
 
+        multilib_variant = str(self.get_multilib_variant_int())
+
         host_archs = self.get_host_arch_list()
-        host_archs += [self.get_host_dir()]
+        # host_archs += [self.get_host_dir()]
+
+        where_to_search = [
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share',
+                'pkgconfig'
+                ),
+            wayround_org.utils.path.join(
+                self.get_host_lib_dir(),
+                'pkgconfig'
+                ),
+            ]
+
         ret = []
 
-        for j in host_archs:
+        for i in where_to_search:
 
-            for i in [
-                    wayround_org.utils.path.join(
-                        j,
-                        'share',
-                        'pkgconfig'),
-                    wayround_org.utils.path.join(
-                        j,
-                        'lib',
-                        'pkgconfig'),
-                    wayround_org.utils.path.join(
-                        j,
-                        'lib32',
-                        'pkgconfig'),
-                    wayround_org.utils.path.join(
-                        j,
-                        'libx32',
-                        'pkgconfig'),
-                    wayround_org.utils.path.join(
-                        j,
-                        'lib64',
-                        'pkgconfig'),
-                    ]:
-
-                if os.path.isdir(i):
-                    ret.append(i)
+            if os.path.isdir(i):
+                ret.append(i)
 
         return ret
 
@@ -586,7 +568,7 @@ class Builder:
             {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
             )
 
-        ret.update(self.builder_action_configure_define_PATH_dict())
+        # ret.update(self.builder_action_configure_define_PATH_dict())
 
         return ret
 
@@ -595,8 +577,8 @@ class Builder:
         ret = [
             '--prefix={}'.format(self.get_host_arch_dir()),
 
-            #'--localedir=' +  
-            #wayround_org.utils.path.join(
+            #'--localedir=' +
+            # wayround_org.utils.path.join(
             #    self.get_host_arch_dir(),
             #    'share'
             #    ),
@@ -790,7 +772,7 @@ class Builder:
 
         ret.update(self.all_automatic_flags_as_dict())
 
-        ret.update(self.builder_action_configure_define_PATH_dict())
+        # ret.update(self.builder_action_configure_define_PATH_dict())
 
         pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
@@ -839,6 +821,8 @@ class Builder:
         [e] [2015-08-05T11:08:26.418478] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_smoother_new'
         '''
 
+        '''
+        # TODO: this is needed only by some old packages. move it there
         dot_libs = [
             #'../tag/.libs',
             '.libs',
@@ -856,9 +840,10 @@ class Builder:
         dot_libs.sort()
 
         LD_LIBRARY_PATH += dot_libs
+        '''
 
-        ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
-        # ret.update({'LD_LIBRARY_PATH': None})
+        # ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
+        ret.update({'LD_LIBRARY_PATH': None})
 
         return ret
 

@@ -20,6 +20,7 @@ import wayround_org.utils.log
 
 import wayround_org.utils.system_type
 
+
 def commands():
     return collections.OrderedDict([
         ('sys', collections.OrderedDict([
@@ -130,8 +131,14 @@ def _process_h_and_a_opts_strict(opts, config):
     if '-h' in opts:
         host = opts['-h']
 
+    else:
+        host = config['system_settings']['host']
+
     if '-a' in opts:
         arch = opts['-a']
+
+    else:
+        arch = host
 
     if wayround_org.utils.system_type.parse_triplet(host) is None:
         raise ValueError("Invalid host triplet")
@@ -140,6 +147,7 @@ def _process_h_and_a_opts_strict(opts, config):
         raise ValueError("Invalid arch triplet")
 
     return host, arch
+
 
 def system_install_package(command_name, opts, args, adds):
     """
@@ -320,7 +328,7 @@ def system_package_list_asps(command_name, opts, args, adds):
                 )
 
             lst = system.list_installed_package_s_asps(
-                name, 
+                name,
                 host=host,
                 arch=arch
                 )
@@ -351,6 +359,8 @@ def system_list_package_files(command_name, opts, args, adds):
     if '-b' in opts:
         basedir = opts['-b']
 
+    host, arch = _process_h_and_a_opts_strict(opts, config)
+
     pkg_name = None
 
     if len(args) != 1:
@@ -369,7 +379,14 @@ def system_list_package_files(command_name, opts, args, adds):
             config, pkg_client, basedir
             )
 
-        latest = system.latest_installed_package_s_asp(pkg_name)
+        latest = system.latest_installed_package_s_asp(
+            pkg_name,
+            host=host,
+            arch=arch
+            )
+        
+        print('{}'.format(os.path.basename(latest)))
+        print('------------------------')
 
         if latest is None:
             logging.error(
@@ -503,8 +520,8 @@ def system_find_package_files(command_name, opts, args, adds):
         )
 
     ret = system.find_file_in_files_installed_by_asps(
-        lookfor, 
-        mode=look_meth, 
+        lookfor,
+        mode=look_meth,
         host=host,
         arch=arch
         )
@@ -610,7 +627,7 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
                     )
 
                 system.reduce_asps(
-                    asp_name_latest, 
+                    asp_name_latest,
                     [asp_name],
                     host=host,
                     arch=arch

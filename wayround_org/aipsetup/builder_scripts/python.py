@@ -11,7 +11,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
 
         cb_opts = []
-        if self.is_crossbuild:
+        if self.get_is_crossbuild():
             cb_opts += [
                 '--disable-ipv6',
                 '--without-ensurepip',
@@ -32,14 +32,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # f.write('ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n')
         # f.close()
 
-        return super().builder_action_configure_define_opts(called_as, log) + [
+        ret = super().builder_action_configure_define_opts(called_as, log)
+
+        ret += [
             # '--with-pydebug' # NOTE: enabling may cause problems to Cython
             ] + cb_opts
 
-    def builder_action_configure_define_environment(self, called_as, log):
-
-        # ret = {}
-        # if self.is_crossbuild:
-        #    ret['CONFIG_SITE'] = 'config.site'
-
-        return {}
+        return ret

@@ -11,9 +11,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            # '--with-gmp-prefix={}'.format(self.host_multiarch_dir)
+            # NOTE: --with-gmp-prefix= - required. else cloog
+            #       configurer will use 32bit gmp found in lib dir
+            #       to build for x86_64
+            '--with-gmp-prefix={}'.format(self.get_host_arch_dir()),
+
+            # NOTE: with isl same as with gmp
+            '--with-isl-prefix={}'.format(self.get_host_arch_dir()),
             ]
         return ret
 
-    #def builder_action_build_define_cpu_count(self, called_as, log):
+    # def builder_action_build_define_cpu_count(self, called_as, log):
     #    return 1
