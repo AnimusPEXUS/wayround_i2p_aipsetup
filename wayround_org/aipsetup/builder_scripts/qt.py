@@ -18,11 +18,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
 
-        name = self.package_info['pkg_info']['name']
+        name = self.get_package_info()['pkg_info']['name']
 
         if not name in ['qt4', 'qt5']:
             raise Exception("Invalid package name")
@@ -30,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return {
             'qt_number_str': name[-1],
             'etc_profile_set_dir': wayround_org.utils.path.join(
-                self.dst_dir, 'etc', 'profile.d', 'SET'
+                self.get_dst_dir(), 'etc', 'profile.d', 'SET'
                 )
             }
 
@@ -55,11 +53,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '-opensource',
                 '-confirm-license',
                 '-prefix', wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'lib',
-                    'qt{}_w_toolkit'.format(
-                        self.custom_data['qt_number_str']
-                        )
+                    self.get_host_arch_dir(),
+                    'qt',
+                    self.custom_data['qt_number_str']
                     ),
                 #'-pulseaudio',
                 #'-no-alsa'
@@ -72,7 +68,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             stdin=subprocess.PIPE,
             stdout=log.stdout,
             stderr=log.stderr,
-            cwd=self.src_dir
+            cwd=self.get_src_dir()
             )
         # p.communicate(input=b'yes\n')
         ret = p.wait()
@@ -86,14 +82,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'CC={}'.format(
                     wayround_org.utils.file.which(
-                        '{}-gcc'.format(self.host_strong),
-                        self.host_multiarch_dir
+                        '{}-gcc'.format(self.get_arch_from_pkgi()),
+                        self.get_host_arch_dir()
                         )
                     ),
                 'CXX={}'.format(
                     wayround_org.utils.file.which(
-                        '{}-g++'.format(self.host_strong),
-                        self.host_multiarch_dir
+                        '{}-g++'.format(self.get_arch_from_pkgi()),
+                        self.get_host_arch_dir()
                         )
                     ),
                 'LDFLAGS={}'.format(
@@ -103,7 +99,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         '''
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -117,12 +113,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install',
-                'INSTALL_ROOT={}'.format(self.dst_dir)
+                'INSTALL_ROOT={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -153,7 +149,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         f = open(
             wayround_org.utils.path.join(
                 etc_profile_set_dir,
-                '009.qt{}.{}.sh'.format(qt_number_str, self.host_strong)
+                '009.qt{}.{}.sh'.format(qt_number_str, self.get_arch_from_pkgi())
                 ),
             'w'
             )
@@ -161,19 +157,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # TODO: separate this :-/
         f.write("""\
 #!/bin/bash
-export PATH=$PATH:/usr/lib/qt{qtnum}_w_toolkit/bin
+export PATH=$PATH:{arch_dir}/qt/{qtnum}/bin
 
 if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
     PKG_CONFIG_PATH+=":"
 fi
-export PKG_CONFIG_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib/pkgconfig"
+export PKG_CONFIG_PATH+="{arch_dir}/qt/{qtnum}/lib/pkgconfig"
 
 if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"
 fi
-export LD_LIBRARY_PATH+="/usr/lib/qt{qtnum}_w_toolkit/lib"
+export LD_LIBRARY_PATH+="{arch_dir}/qt/{qtnum}/lib"
 
-""".format(qtnum=qt_number_str))
+""".format(
+                qtnum=qt_number_str,
+                arch_dir=self.get_host_arch_dir()
+                )
+            )
         f.close()
 
         return 0

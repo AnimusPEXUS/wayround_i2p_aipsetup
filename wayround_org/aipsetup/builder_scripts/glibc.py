@@ -133,13 +133,22 @@ so going to build i686 multilib support
         return {}
 
     def builder_action_configure_define_opts(self, called_as, log):
-
+        
+        #'''
         with_headers = wayround_org.utils.path.join(
             self.get_host_dir(),
             'multiarch',
             self.get_host_from_pkgi(),
             'include'
             )
+        #'''
+    
+        '''
+        with_headers = wayround_org.utils.path.join(
+            self.get_host_arch_dir(),
+            'include'
+            )
+        '''
 
         ret = super().builder_action_configure_define_opts(called_as, log)
 
@@ -187,7 +196,7 @@ so going to build i686 multilib support
 
         '''
         # NOTE: it's not working
-        if self.host_strong.startswith('x86_64'):
+        if self.get_arch_from_pkgi().startswith('x86_64'):
             ret += ['slibdir=lib64']
         else:
             ret += ['slibdir=lib']
@@ -212,6 +221,7 @@ so going to build i686 multilib support
 
         return ret
 
+    #'''
     # NOTE: this block is for multilib building
     def _t1(self, ret):
         ret = copy.copy(ret)
@@ -249,11 +259,11 @@ so going to build i686 multilib support
         ret = super().builder_action_distribute_define_args(called_as, log)
         ret = self._t1(ret)
         return ret
-
+    '''
     '''
     def builder_action_build_01(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=['all-gcc'],
@@ -263,17 +273,17 @@ so going to build i686 multilib support
             source_configure_reldir=self.source_configure_reldir
             )
         return ret
-    '''
+    #'''
 
     def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install-bootstrap-headers=yes',
                 'install-headers',
-                'DESTDIR=' + self.dst_dir
+                'DESTDIR=' + self.get_dst_dir()
                 ],
             environment={},
             environment_mode='copy',
@@ -284,7 +294,7 @@ so going to build i686 multilib support
 
     def builder_action_distribute_01_2(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -373,7 +383,7 @@ then continue with gcc build_02+
 
     def builder_action_build_02(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[],
@@ -386,12 +396,12 @@ then continue with gcc build_02+
 
     def builder_action_distribute_02(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install',
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -407,9 +417,9 @@ class Builder_multi_i686(Builder):
     #       32bit part of glibc
 
     def define_custom_data(self):
-        self.separate_build_dir = wayround_org.utils.path.join(self.src_dir, 'build_i686')
+        self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'build_i686')
         ret = {
-            'original_host': self.host_strong
+            'original_host': self.get_arch_from_pkgi()
             }
         #self.total_host_redefinition = 'i686-pc-linux-gnu'
         #self.total_build_redefinition = 'i686-pc-linux-gnu'
@@ -555,7 +565,7 @@ class Builder_multi_i686(Builder):
         self.total_host_redefinition = None
         self.total_build_redefinition = None
         self.total_target_redefinition = None
-        log.info("Restored host definition to: {}".format(self.host_strong))
+        log.info("Restored host definition to: {}".format(self.get_arch_from_pkgi()))
         return 0
 
     # builder_action_distribute = Builder.builder_action_distribute

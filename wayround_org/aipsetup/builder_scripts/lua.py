@@ -12,8 +12,6 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return
 
@@ -24,46 +22,26 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['pc'] = self.builder_action_pc
         return ret
 
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'linux',
-                'INSTALL_TOP={}'.format(self.host_multiarch_dir),
-                'MYCFLAGS=-std=gnu99',
-                'MYLDFLAGS=-ltinfow'
-                ] + self.all_automatic_flags_as_list(),
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_build_define_args(self, called_as, log):
+        return [
+            'linux',
+            'INSTALL_TOP={}'.format(self.get_host_arch_dir()),
+            'MYCFLAGS=-std=gnu99',
+            'MYLDFLAGS=-ltinfow'
+            ] + self.all_automatic_flags_as_list()
 
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir),
-                'MYCFLAGS=-std=gnu99',
-                'MYLDFLAGS=-ltinfow'
-                ] + self.all_automatic_flags_as_list(),
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'install',
+            'INSTALL_TOP={}'.format(self.get_dst_host_arch_dir()),
+            'MYCFLAGS=-std=gnu99',
+            'MYLDFLAGS=-ltinfow'
+            ] + self.all_automatic_flags_as_list(),
 
     def builder_action_pc(self, called_as, log):
 
         pc_file_name_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir,
+            self.get_dst_host_arch_dir(),
             self.calculate_main_multiarch_lib_dir_name(),
             'pkgconfig'
             )
@@ -85,10 +63,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             ['make',
              'pc',
-             'INSTALL_TOP={}'.format(self.dst_host_multiarch_dir)
+             'INSTALL_TOP={}'.format(self.get_dst_host_arch_dir())
              ],
             stdout=subprocess.PIPE,
-            cwd=self.src_dir
+            cwd=self.get_src_dir()
             )
         p.wait()
         pc_text = p.communicate()[0]
@@ -108,12 +86,12 @@ R={R}
 prefix={arch_path}
 INSTALL_BIN=${{prefix}}/bin
 INSTALL_INC=${{prefix}}/include
-INSTALL_LIB=${{prefix}}/lib
+INSTALL_LIB=${{prefix}}/../../{lib_dir_name}
 INSTALL_MAN=${{prefix}}/man/man1
 INSTALL_LMOD=${{prefix}}/share/lua/${{V}}
-INSTALL_CMOD=${{prefix}}/lib/lua/${{V}}
+INSTALL_CMOD=${{prefix}}/../../{lib_dir_name}/lua/${{V}}
 exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/lib
+libdir=${{exec_prefix}}/../../{lib_dir_name}
 includedir=${{prefix}}/include
 
 Name: Lua
@@ -125,7 +103,8 @@ Cflags: -I${{includedir}}
 """.format(
             V='.'.join(version[:2]),
             R='.'.join(version),
-            arch_path='{}'.format(self.host_multiarch_dir)
+            arch_path='{}'.format(self.get_host_arch_dir()),
+            lib_dir_name=self.calculate_main_multiarch_lib_dir_name()
             )
 
         pc_file.write(tpl)

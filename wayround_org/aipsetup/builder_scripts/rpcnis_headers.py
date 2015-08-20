@@ -16,18 +16,42 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_distribute(self, called_as, log):
-        os.makedirs(wayround_org.utils.path.join(self.dst_dir, 'usr', 'include', 'rpc'))
-        os.makedirs(wayround_org.utils.path.join(self.dst_dir, 'usr', 'include', 'rpcsvc'))
+        os.makedirs(wayround_org.utils.path.join(
+            self.self.get_dst_host_arch_dir(),
+            'include',
+            'rpc'
+            )
+            )
+        os.makedirs(
+            wayround_org.utils.path.join(
+                self.get_dst_host_arch_dir(),
+                'include',
+                'rpcsvc'
+                )
+            )
 
         wayround_org.utils.file.copytree(
-            wayround_org.utils.path.join(self.src_dir, 'rpc'),
-            wayround_org.utils.path.join(self.dst_dir, 'usr', 'include', 'rpc'),
+            wayround_org.utils.path.join(
+                self.get_src_dir(),
+                'rpc'
+                ),
+            wayround_org.utils.path.join(
+                self.self.get_dst_host_arch_dir(),
+                'include',
+                'rpc'
+                ),
             dst_must_be_empty=False
             )
 
         wayround_org.utils.file.copytree(
-            wayround_org.utils.path.join(self.src_dir, 'rpcsvc'),
-            wayround_org.utils.path.join(self.dst_dir, 'usr', 'include', 'rpcsvc'),
+            wayround_org.utils.path.join(
+                self.get_src_dir(), 'rpcsvc'
+                ),
+            wayround_org.utils.path.join(
+                self.self.get_dst_host_arch_dir(),
+                'include',
+                'rpcsvc'
+                ),
             dst_must_be_empty=False
             )
         return ret

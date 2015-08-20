@@ -21,7 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_patch(self, called_as, log):
         ret = 0
-        patches = os.listdir(self.patches_dir)
+        patches = os.listdir(self.get_patches_dir())
 
         if len(patches) == 0:
             log.error("provide patches!")
@@ -44,9 +44,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if subprocess.Popen(
                         ['patch',
                          '-i',
-                         wayround_org.utils.path.join(self.patches_dir, i),
+                         wayround_org.utils.path.join(self.get_patches_dir(), i),
                          '-p0'],
-                        cwd=self.src_dir
+                        cwd=self.get_src_dir()
                         ).wait() != 0:
                     log.error("Patch error")
                     ret = 1
@@ -58,7 +58,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-curses'
             ]
 
-        if not self.is_crossbuild and not self.is_crossbuilder:
+        if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             pass
         else:
             ret += [
@@ -72,7 +72,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_sh_link(self, called_as, log):
         tsl = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir, 'bin', 'sh'
+            self.get_dst_host_arch_dir(), 'bin', 'sh'
             )
 
         if os.path.exists(tsl) or os.path.islink(tsl):

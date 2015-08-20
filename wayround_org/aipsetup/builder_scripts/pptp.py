@@ -9,8 +9,6 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return
 
@@ -24,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_patch(self, called_as, log):
         ret = 0
         try:
-            mf = open(wayround_org.utils.path.join(self.src_dir, 'Makefile'))
+            mf = open(wayround_org.utils.path.join(self.get_src_dir(), 'Makefile'))
 
             _l = mf.read().splitlines()
 
@@ -42,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         ):
                     _l[i] = "\tinstall pptpsetup $(BINDIR)"
 
-            mf = open(wayround_org.utils.path.join(self.src_dir, 'Makefile'), 'w')
+            mf = open(wayround_org.utils.path.join(self.get_src_dir(), 'Makefile'), 'w')
             mf.write('\n'.join(_l))
             mf.close()
         except:

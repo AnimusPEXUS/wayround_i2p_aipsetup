@@ -16,14 +16,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
         ret = {}
         ret['pth_dir'] = \
-            wayround_org.aipsetup.build.getDIR_PATCHES(self.buildingsite)
+            wayround_org.aipsetup.build.getDIR_PATCHES(
+                self.buildingsite_path
+                )
         ret['dst_lib_dir'] = \
             wayround_org.utils.path.join(
-                self.dst_host_multiarch_dir, 
-                self.calculate_main_multiarch_lib_dir_name()
+                self.get_dst_host_lib_dir()
                 )
         ret['dst_share_dir'] = \
-            wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'share')
+            wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'share')
         ret['dst_pc_dir'] = \
             wayround_org.utils.path.join(ret['dst_share_dir'], 'pkgconfig')
         return ret
@@ -95,7 +96,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     p = subprocess.Popen(
                         ['bash',
                          wayround_org.utils.path.join(pth_dir, rolling)],
-                        cwd=self.src_dir,
+                        cwd=self.get_src_dir(),
                         stdout=log.stdout,
                         stderr=log.stderr
                         )
@@ -131,7 +132,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     p = subprocess.Popen(
                         ['patch', '-p1', '-i',
                          wayround_org.utils.path.join(pth_dir, i)],
-                        cwd=self.src_dir,
+                        cwd=self.get_src_dir(),
                         stdout=log.stdout,
                         stderr=log.stderr
                         )
@@ -156,7 +157,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--without-ada',
             ]
 
-        if not self.is_crossbuild and not self.is_crossbuilder:
+        if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             ret += [
                 ]
         else:

@@ -45,7 +45,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'CFLAGS={}'.format(nss_cflags),
             'LDFLAGS={}'.format(nss_libs),
             '--with-suspend-resume=systemd',
-            '--with-session-tracking=systemd'
+            '--with-session-tracking=systemd',
+            #'--with-systemdsystemunitdir={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_host_lib_dir(),
+            #        'systemd',
+            #        'system'
+            #        )
+            #    )
             ]
 
         return ret

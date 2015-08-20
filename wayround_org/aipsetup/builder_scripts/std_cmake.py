@@ -28,34 +28,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_configure_define_compilers_options(self, d):
+    def calculate_compilers_options(self, d):
         if not 'CMAKE_C_COMPILER' in d:
             d['CMAKE_C_COMPILER'] = []
-        d['CMAKE_C_COMPILER'].append('{}-gcc'.format(self.host_strong))
+        d['CMAKE_C_COMPILER'].append('{}-gcc'.format(self.calculate_CC))
 
         if not 'CMAKE_CXX_COMPILER' in d:
             d['CMAKE_CXX_COMPILER'] = []
-        d['CMAKE_CXX_COMPILER'].append('{}-g++'.format(self.host_strong))
-
-        return
-
-    def builder_action_configure_define_linking_interpreter_option(self, d):
-
-        if not 'CMAKE_EXE_LINKER_FLAGS' in d:
-            d['CMAKE_EXE_LINKER_FLAGS'] = []
-
-        d['CMAKE_EXE_LINKER_FLAGS'].append(
-            self.calculate_default_linker_program_gcc_parameter()
-            )
-
-        return
-
-    def builder_action_configure_define_linking_lib_dir_options(self, d):
-
-        if not 'LDFLAGS' in d:
-            d['LDFLAGS'] = []
-
-        d['LDFLAGS'].append('-L{}'.format(self.host_multiarch_lib_dir))
+        d['CMAKE_CXX_COMPILER'].append('{}-g++'.format(self.calculate_CXX))
 
         return
 
@@ -65,8 +45,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         for x in self.all_automatic_flags_as_list()]
 
         ret = [
-            '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
-            '-DCMAKE_SYSROOT={}'.format(self.host_multiarch_dir),
+            '-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_arch_dir()),
+            '-DCMAKE_SYSROOT={}'.format(self.get_host_arch_dir()),
             '-DSYSCONFDIR=/etc',
             '-DLOCALSTATEDIR=/var',
             ] + cmake.calc_conf_hbt_options(self) + minus_d_list
@@ -99,7 +79,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
 
         ret = cmake.cmake_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=opts,
             arguments=args,

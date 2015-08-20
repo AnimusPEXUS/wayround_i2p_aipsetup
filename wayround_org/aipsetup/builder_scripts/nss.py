@@ -17,8 +17,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         self.source_configure_reldir = 'nss'
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return None
 
@@ -31,7 +29,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         #            nss_build_all: build_coreconf build_nspr build_dbm all
 
         makefile = wayround_org.utils.path.join(
-            self.src_dir,
+            self.get_src_dir(),
             self.source_configure_reldir,
             'Makefile'
             )
@@ -66,18 +64,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build(self, called_as, log):
 
         opts64 = []
-        if self.host == 'x86_64-pc-linux-gnu':
+        if self.arch == 'x86_64-pc-linux-gnu':
             opts64 = ['USE_64=1']
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'nss_build_all',
                 'BUILD_OPT=1',
                 'NSPR_INCLUDE_DIR={}'.format(
-                    wayround_org.utils.path.join(self.host_multiarch_dir, 'include', 'nspr')
+                    wayround_org.utils.path.join(
+                        self.get_host_arch_dir,
+                        'include',
+                        'nspr'
+                        )
                     ),
                 'USE_SYSTEM_ZLIB=1',
 
@@ -95,10 +97,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        dest_dir = self.dst_dir
+        dest_dir = self.get_dst_dir()
 
         dist_dir = wayround_org.utils.path.join(
-            self.src_dir,
+            self.get_src_dir(),
             'dist'
             )
 
@@ -130,7 +132,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             OBJ_dir_march = wayround_org.utils.path.join(
                 OBJ_dir,
-                self.host_multiarch_dir
+                self.get_host_arch_dir()
                 )
 
             OBJ_dir_ma_bin = wayround_org.utils.path.join(OBJ_dir_march, 'bin')
@@ -158,7 +160,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 "    in `{}'".format(
                     wayround_org.utils.path.relpath(
                         OBJ_dir_bin,
-                        self.src_dir
+                        self.get_src_dir()
                         )
                     )
                 )
@@ -188,7 +190,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 "    in `{}'".format(
                     wayround_org.utils.path.relpath(
                         OBJ_dir_lib,
-                        self.src_dir
+                        self.get_src_dir()
                         )
                     )
                 )
@@ -297,30 +299,30 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             if (
                 len(
-                    self.package_info['pkg_nameinfo'][
+                    self.get_package_info()['pkg_nameinfo'][
                         'groups']['version_list']
                     )
                     > 0):
                 nss_major_version = \
-                    self.package_info['pkg_nameinfo'][
+                    self.get_package_info()['pkg_nameinfo'][
                         'groups']['version_list'][0]
 
             if (
                 len(
-                    self.package_info['pkg_nameinfo'][
+                    self.get_package_info()['pkg_nameinfo'][
                         'groups']['version_list'])
                     > 1):
                 nss_minor_version = \
-                    self.package_info['pkg_nameinfo'][
+                    self.get_package_info()['pkg_nameinfo'][
                         'groups']['version_list'][1]
 
             if (
                 len(
-                    self.package_info['pkg_nameinfo'][
+                    self.get_package_info()['pkg_nameinfo'][
                         'groups']['version_list'])
                     > 2):
                 nss_patch_version = \
-                    self.package_info['pkg_nameinfo'][
+                    self.get_package_info()['pkg_nameinfo'][
                         'groups']['version_list'][2]
 
             log.info(
@@ -343,7 +345,7 @@ Version: {nss_major_version}.{nss_minor_version}.{nss_patch_version}
 Libs: -L${{libdir}} {libs}
 Cflags: -I${{includedir}}
 """.format(
-                prefix=self.host_multiarch_dir,
+                prefix=self.get_host_arch_dir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version,
@@ -530,7 +532,7 @@ if test "$echo_libs" = "yes"; then
     echo $libdirs
 fi
 """.format(
-                prefix=self.host_multiarch_dir,
+                prefix=self.get_host_arch_dir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version

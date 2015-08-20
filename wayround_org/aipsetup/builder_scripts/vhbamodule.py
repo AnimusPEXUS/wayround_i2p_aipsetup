@@ -29,7 +29,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         logging.info("`uname -r' returned: {}".format(kern_rel))
 
         kdir = wayround_org.utils.path.join(
-            self.dst_dir,
+            self.get_dst_dir(),
             'lib',
             'modules',
             kern_rel
@@ -50,7 +50,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_patch(self, called_as, log):
-        makefile_name = wayround_org.utils.path.join(self.src_dir, 'Makefile')
+        makefile_name = wayround_org.utils.path.join(self.get_src_dir(), 'Makefile')
 
         ret = 0
 
@@ -73,15 +73,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_after_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'all',
                 'install',
-                'PWD={}'.format(self.src_dir),
+                'PWD={}'.format(self.get_src_dir()),
                 'KERNELRELEASE={}'.format(self.custom_data['kern_rel']),
-                'DESTDIR={}'.format(self.dst_dir),
+                'DESTDIR={}'.format(self.get_dst_dir()),
                 ] + self.all_automatic_flags_as_list(),
             environment={},
             environment_mode='copy',

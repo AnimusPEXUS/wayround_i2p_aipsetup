@@ -11,5 +11,5 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_environment(self, called_as, log):
         return {'PYTHON': wayround_org.utils.file.which(
-            'python3', self.host_multiarch_dir)
+            'python3', self.get_host_arch_dir())
             }

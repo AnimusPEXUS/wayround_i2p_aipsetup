@@ -14,8 +14,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         ret = dict()
-        ret['makefile'] = wayround_org.utils.path.join(self.src_dir, 'Makefile')
-        ret['zoneinfo'] = wayround_org.utils.path.join(self.dst_dir, 'usr', 'share', 'zoneinfo')
+        ret['makefile'] = wayround_org.utils.path.join(self.get_src_dir(), 'Makefile')
+        ret['zoneinfo'] = wayround_org.utils.path.join(self.get_dst_dir(), 'usr', 'share', 'zoneinfo')
         ret['zoneinfop'] = wayround_org.utils.path.join(ret['zoneinfo'], 'posix')
         ret['zoneinfor'] = wayround_org.utils.path.join(ret['zoneinfo'], 'right')
         return ret
@@ -52,7 +52,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_extract(self, called_as, log):
 
         ret = autotools.extract_high(
-            self.buildingsite,
+            self.buildingsite_path,
             'tzdata',
             log=log,
             unwrap_dir=False,
@@ -97,7 +97,7 @@ printtdata:
 
         p = subprocess.Popen(
             ['make', 'printtdata'],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=subprocess.PIPE,
             stderr=log.stderr
             )
@@ -120,7 +120,7 @@ printtdata:
                      '-L', '/dev/null',
                      '-d', self.custom_data['zoneinfo'],
                      '-y', 'sh yearistype.sh', tz],
-                    cwd=self.src_dir,
+                    cwd=self.get_src_dir(),
                     stdout=log.stdout,
                     stderr=log.stderr
                     )
@@ -131,7 +131,7 @@ printtdata:
                      '-L', '/dev/null',
                      '-d', self.custom_data['zoneinfop'],
                      '-y', 'sh yearistype.sh', tz],
-                    cwd=self.src_dir,
+                    cwd=self.get_src_dir(),
                     stdout=log.stdout,
                     stderr=log.stderr
                     )
@@ -142,16 +142,16 @@ printtdata:
                      '-L', 'leapseconds',
                      '-d', self.custom_data['zoneinfor'],
                      '-y', 'sh yearistype.sh', tz],
-                    cwd=self.src_dir,
+                    cwd=self.get_src_dir(),
                     stdout=log.stdout,
                     stderr=log.stderr
                     )
                 p.wait()
 
-            for i in os.listdir(self.src_dir):
+            for i in os.listdir(self.get_src_dir()):
                 if i.endswith('.tab'):
                     shutil.copy(
-                        wayround_org.utils.path.join(self.src_dir, i),
+                        wayround_org.utils.path.join(self.get_src_dir(), i),
                         wayround_org.utils.path.join(self.custom_data['zoneinfo'], i)
                         )
 

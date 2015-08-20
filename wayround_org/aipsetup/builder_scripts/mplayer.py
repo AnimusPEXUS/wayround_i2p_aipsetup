@@ -34,9 +34,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-xvid-lavc',
             '--enable-x264-lavc',
             '--mandir=' + \
-            self.package_info['constitution']['paths']['man'],
+            self.get_package_info()['constitution']['paths']['man'],
             '--confdir=' + \
-            self.package_info['constitution']['paths']['config']
+            self.get_package_info()['constitution']['paths']['config']
             ]
         for i in range(len(ret) - 1, -1, -1):
             for j in [

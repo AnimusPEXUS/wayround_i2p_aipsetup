@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return {}
 
     def builder_action_extract(self, called_as, log):
-        files = os.listdir(self.tar_dir)
+        files = os.listdir(self.get_tar_dir())
 
         tcl_found = False
         tk_found = False
@@ -36,15 +36,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             log.info("Extracting Tcl")
             wayround_org.utils.archive.extract(
-                wayround_org.utils.path.join(self.tar_dir, tcl_found),
-                self.buildingsite,
+                wayround_org.utils.path.join(self.get_tar_dir(), tcl_found),
+                self.buildingsite_path,
                 log=log,
                 )
 
             log.info("Extracting Tk")
             wayround_org.utils.archive.extract(
-                wayround_org.utils.path.join(self.tar_dir, tk_found),
-                self.buildingsite,
+                wayround_org.utils.path.join(self.get_tar_dir(), tk_found),
+                self.buildingsite_path,
                 log=log
                 )
 
@@ -56,9 +56,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
             '--enable-threads',
-            '--enable-64bit',
-            '--enable-64bit-vis',
             '--enable-wince',
             ]
+
+        if self.get_arch_from_pkgi().startswith('x86_64'):
+            ret += [
+                '--enable-64bit',
+                '--enable-64bit-vis',
+                ]
 
         return ret

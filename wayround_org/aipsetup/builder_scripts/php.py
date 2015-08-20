@@ -41,7 +41,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-apxs={}'.format(
                 wayround_org.utils.file.which(
                     'apxs',
-                    self.host_multiarch_dir
+                    self.get_host_arch_dir()
                     )
                 )
             ]
@@ -49,13 +49,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_build(self, called_as, log):
 
         os.makedirs(
-            wayround_org.utils.path.join(self.dst_dir, 'daemons', 'httpd', 'etc'),
+            wayround_org.utils.path.join(self.get_dst_dir(), 'daemons', 'httpd', 'etc'),
             exist_ok=True
             )
 
         f = open(
             wayround_org.utils.path.join(
-                self.dst_dir, 'daemons', 'httpd', 'etc', 'httpd.conf'
+                self.get_dst_dir(), 'daemons', 'httpd', 'etc', 'httpd.conf'
                 ),
             'w'
             )
@@ -70,7 +70,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'INSTALL_ROOT={}'.format(self.dst_dir)
+                'INSTALL_ROOT={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -82,19 +82,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
         os.rename(
             wayround_org.utils.path.join(
-                self.dst_dir,
+                self.get_dst_dir(),
                 'daemons',
                 'httpd',
                 'etc',
                 'httpd.conf'),
             wayround_org.utils.path.join(
-                self.dst_dir, 'daemons', 'httpd', 'etc', 'httpd.php.conf'
+                self.get_dst_dir(), 'daemons', 'httpd', 'etc', 'httpd.php.conf'
                 )
             )
 
         os.unlink(
             wayround_org.utils.path.join(
-                self.dst_dir, 'daemons', 'httpd', 'etc',
+                self.get_dst_dir(), 'daemons', 'httpd', 'etc',
                 'httpd.conf.bak'
                 )
             )

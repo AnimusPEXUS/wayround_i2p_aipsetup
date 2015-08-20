@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-ipv6',
             ]
 
-        if self.host == 'x86_64-pc-linux-gnu':
+        if self.arch == 'x86_64-pc-linux-gnu':
             ret += ['--enable-64bit']
 
         return ret

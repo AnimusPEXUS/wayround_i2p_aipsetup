@@ -17,7 +17,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret += ['--with-python=3']
 
-        if not self.is_crossbuild and not self.is_crossbuilder:
+        if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             ret += [
                 ]
         else:
@@ -34,7 +34,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             'INCLUDES=-I{}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'include',
                     'ncursesw'
                     )

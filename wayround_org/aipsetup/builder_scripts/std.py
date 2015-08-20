@@ -1,4 +1,5 @@
 
+import copy
 import logging
 import os.path
 import subprocess
@@ -207,12 +208,17 @@ class Builder:
             self.calculate_main_multiarch_lib_dir_name()
             )
 
+    def get_dst_host_lib_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.get_host_lib_dir()
+            )
+
     def get_host_arch_lib_dir(self):
-        raise Exception("this is invalid method - don't use it")
-        # TODO: to be removed probably
+        raise Exception('do not use this')
         return wayround_org.utils.path.join(
             self.get_host_arch_dir(),
-            self.calculate_main_multiarch_lib_dir_name()
+            'lib'
             )
 
     def get_host_arch_list(self):
@@ -231,7 +237,7 @@ class Builder:
         return sorted(ret)
 
     # def calculate_default_linker_program(self):
-    #    return wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
+    #    return wayround_org.aipsetup.build.find_dl(self.get_host_arch_dir())
 
     # def calculate_default_linker_program_ld_parameter(self):
     #    return '--dynamic-linker={}'.format(
@@ -243,6 +249,7 @@ class Builder:
     #        self.calculate_default_linker_program_ld_parameter()
     #        )
 
+   
     def calculate_main_multiarch_lib_dir_name(self):
 
         multilib_variant = str(self.get_multilib_variant_int())
@@ -256,6 +263,7 @@ class Builder:
             raise Exception("Don't know")
 
         return ret
+    
 
     def calculate_pkgconfig_search_paths(self):
 
@@ -272,6 +280,7 @@ class Builder:
                 ),
             wayround_org.utils.path.join(
                 self.get_host_lib_dir(),
+                # self.calculate_main_multiarch_lib_dir_name(),
                 'pkgconfig'
                 ),
             ]
@@ -575,7 +584,55 @@ class Builder:
     def builder_action_configure_define_opts(self, called_as, log):
 
         ret = [
-            '--prefix={}'.format(self.get_host_arch_dir()),
+            '--prefix={}'.format(self.get_host_dir()),
+            '--bindir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'bin'
+                ),
+
+            '--sbindir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'sbin'
+                ),
+
+            #'--libdir=' +
+            #wayround_org.utils.path.join(
+            #    self.get_host_lib_dir(),
+            #    ),
+
+            '--libexecdir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'libexec'
+                ),
+
+            '--datarootdir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share'
+                ),
+
+            '--datadir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share'
+                ),
+
+            '--mandir=' + wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share',
+                'man'
+                ),
+
+            #'--prefix={}'.format(self.get_host_arch_dir()),
+
+            '--includedir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'include'
+                ),
 
             #'--localedir=' +
             # wayround_org.utils.path.join(
@@ -587,17 +644,29 @@ class Builder:
             #       programs to use lib dir name which they desire.
             #       possibly self.calculate_main_multiarch_lib_dir_name()
             #       need to be used here
-
-            #'--libdir=' + wayround_org.utils.path.join(self.host_multiarch_dir, 'lib'),
-
             # NOTE: --libdir= needed at least for glibc to point it using
             #       valid 'lib' or 'lib64' dir name. else it can put 64-bit
-            #       crt*.ofiles into 32-bit lib dir
+            #       crt*.o files into 32-bit lib dir
+            # NOTE: using lib for 32 bit and lib64 for 64 bit libs is failed
+            #       many programs still can't install in lib64 even if I
+            #       trying for force them do. so lib name will be fixed
+            #       'lib' name for ever :E
+            # NOTE: note about crt*.o still in power. can't build gcc with 
+            #       multilib support and rename lib64 to lib and
+            #       place it into another location. so lib and lib64
+            #       need to reamin in one dir
+
+            # '--libdir=' + wayround_org.utils.path.join(
+            #    self.get_host_arch_dir(), 'lib'),
             '--libdir=' + self.get_host_lib_dir(),
+            #'--libdir=' + wayround_org.utils.path.join(
+            #    self.get_host_arch_dir(),
+            #    'lib'
+            #    ),
 
             '--sysconfdir=/etc',
             # '--sysconfdir=' + wayround_org.utils.path.join(
-            #     self.host_multiarch_dir,
+            #     self.get_host_arch_dir(),
             #     'etc'
             #     ),
             '--localstatedir=/var',
@@ -606,7 +675,7 @@ class Builder:
             # WARNING: using --with-sysroot in some cases makes
             #          build processes involving libtool to generate incorrect
             #          *.la files
-            # '--with-sysroot={}'.format(self.host_multiarch_dir)
+            # '--with-sysroot={}'.format(self.get_host_arch_dir())
 
             ] + autotools.calc_conf_hbt_options(self) + \
             self.all_automatic_flags_as_list()
@@ -655,6 +724,72 @@ class Builder:
                 ),
 
         '''
+
+        return ret
+
+    def builder_action_configure_define_opts_alternate_prefix(
+            self,
+            called_as, 
+            log,
+            builder_action_configure_define_opts_result
+            ):
+
+        raise Exception("don't use it")
+
+        ret = copy.deepcopy(builder_action_configure_define_opts_result)
+
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    '--prefix=',
+                    '--libdir=',
+                    ]:
+                if ret[i].startswith(j):
+                    del ret[i]
+                    break
+
+        ret += [
+            '--prefix={}'.format(self.get_host_dir()),
+            '--bindir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'bin'
+                ),
+
+            '--sbindir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'sbin'
+                ),
+
+            '--libdir=' +
+            wayround_org.utils.path.join(
+                self.get_host_lib_dir(),
+                ),
+
+            '--libexecdir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'libexec'
+                ),
+
+            '--datarootdir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share'
+                ),
+
+            '--datadir=' +
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share'
+                ),
+
+            '--mandir=' + wayround_org.utils.path.join(
+                self.get_host_arch_dir(),
+                'share',
+                'man'
+                ),
+            ]
 
         return ret
 
@@ -782,6 +917,10 @@ class Builder:
 
         LD_LIBRARY_PATH = []
 
+        LD_LIBRARY_PATH += [
+            self.get_host_lib_dir()
+            ]
+
         # NOTE: probably it need to be uncommented
         # if 'LD_LIBRARY_PATH' in os.environ:
         #     LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
@@ -842,8 +981,8 @@ class Builder:
         LD_LIBRARY_PATH += dot_libs
         '''
 
-        # ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
-        ret.update({'LD_LIBRARY_PATH': None})
+        ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
+        # ret.update({'LD_LIBRARY_PATH': None})
 
         return ret
 

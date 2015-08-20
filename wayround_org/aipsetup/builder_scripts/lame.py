@@ -20,14 +20,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             
             ]
 
-        if 'i686' in self.host_strong:
+        if 'i686' in self.get_arch_from_pkgi():
             ret += [
                 'host_cpu=i686',
                 'ac_cv_header_xmmintrin_h=no',
                 #'i686'
                 ]
 
-        #if 'i686' in self.host_strong:
+        #if 'i686' in self.get_arch_from_pkgi():
         #    ret += [
         #        'CFLAGS=-march=i486 -mtune=i486',
         #        ]

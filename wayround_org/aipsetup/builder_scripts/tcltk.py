@@ -21,17 +21,44 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['links'] = self.builder_action_links
         return ret
 
+    def builder_action_configure_define_opts(self, called_as, log):
+        ret = super().builder_action_configure_define_opts(called_as, log)
+            
+        '''
+        ret = self.builder_action_configure_define_opts_alternate_prefix(
+            called_as, log,
+            ret
+            )
+        '''
+        for i in range(len(ret) - 1, -1, -1):
+            for j in [
+                    '--datarootdir=',
+                    ]:
+                if ret[i].startswith(j):
+                    del ret[i]
+                    break
+        ret += [
+            '--enable-threads',
+            '--enable-wince',
+            ]
+        if self.get_arch_from_pkgi().startswith('x86_64'):
+            ret += [
+                '--enable-64bit',
+                '--enable-64bit-vis',
+                ]
+        return ret
+
     def builder_action_distribute(self, called_as, log):
         ret = super().builder_action_distribute(called_as, log)
 
         if ret == 0:
             ret = autotools.make_high(
-                self.buildingsite,
+                self.buildingsite_path,
                 log=log,
                 options=[],
                 arguments=[
                     'install-private-headers',
-                    'DESTDIR={}'.format(self.dst_dir)
+                    'DESTDIR={}'.format(self.get_dst_dir())
                     ],
                 environment={},
                 environment_mode='copy',
@@ -43,10 +70,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_links(self, called_as, log):
         ret = 0
 
-        pkg_name = self.package_info['pkg_info']['name']
+        pkg_name = self.get_package_info()['pkg_info']['name']
 
         bin_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir,
+            self.get_dst_host_arch_dir(),
             'bin'
             )
 

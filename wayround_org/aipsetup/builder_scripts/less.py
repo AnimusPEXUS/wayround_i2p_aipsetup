@@ -14,7 +14,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         etc_profile_set_dir = wayround_org.utils.path.join(
-            self.dst_dir, 'etc', 'profile.d', 'SET'
+            self.get_dst_dir(),
+            'etc',
+            'profile.d',
+            'SET'
             )
 
         ret = {

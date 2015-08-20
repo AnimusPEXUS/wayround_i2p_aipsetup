@@ -5,12 +5,10 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
-        ret = [
-            ]
+        ret = []
 
-        if not self.is_crossbuild and not self.is_crossbuilder:
-            ret += [
-                ]
+        if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
+            pass
         else:
             ret += [
                 '--without-guile'

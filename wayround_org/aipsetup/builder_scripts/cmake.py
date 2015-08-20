@@ -16,24 +16,24 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
         self.apply_host_spec_compilers_options = True
         return
 
-    def builder_action_configure_define_compilers_options(self, d):
+    def calculate_compilers_options(self, d):
         if not 'CMAKE_C_COMPILER' in d:
             d['CMAKE_C_COMPILER'] = []
-        d['CMAKE_C_COMPILER'].append('{}-gcc'.format(self.host_strong))
+        d['CMAKE_C_COMPILER'].append(self.calculate_CC())
 
         if not 'CMAKE_CXX_COMPILER' in d:
             d['CMAKE_CXX_COMPILER'] = []
-        d['CMAKE_CXX_COMPILER'].append('{}-g++'.format(self.host_strong))
+        d['CMAKE_CXX_COMPILER'].append(self.calculate_CXX())
 
         if not 'CC' in d:
             d['CC'] = []
-        d['CC'].append('{}-gcc'.format(self.host_strong))
+        d['CC'].append(self.calculate_CC_string())
 
         if not 'CXX' in d:
             d['CXX'] = []
-        d['CXX'].append('{}-g++'.format(self.host_strong))
+        d['CXX'].append(self.calculate_CXX_string())
 
-        return
+        return 
 
     def builder_action_configure_define_environment(self, called_as, log):
 
@@ -54,14 +54,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
         # print("std_env0: {}".format(std_cmake_opts_dict))
 
-        print(
-            "std_env: {}".format(
-                wayround_org.aipsetup.builder_scripts.std.Builder.all_automatic_flags_as_dict(self)))
+        #print(
+        #    "std_env: {}".format(
+        #        wayround_org.aipsetup.builder_scripts.std.Builder.\
+        #        all_automatic_flags_as_dict(self)
+        #        )
+        #    )
 
         ret.update(self.all_automatic_flags_as_dict())
         ret.update(
-            wayround_org.aipsetup.builder_scripts.std.Builder.all_automatic_flags_as_dict(
-                self)
+            wayround_org.aipsetup.builder_scripts.std.Builder.\
+                all_automatic_flags_as_dict(
+                    self
+                    )
             )
         ret.update(std_cmake_opts_dict)
 
@@ -122,13 +127,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
             '--',
             #'-DCURSES_INCLUDE_PATH={}'.format(
             #    wayround_org.utils.path.join(
-            #        self.host_multiarch_dir,
+            #        self.get_host_arch_dir(),
             #        'include'
             #        )
             #    )
             #'-DCURSES_INCLUDE_DIRS={}'.format(
             #    wayround_org.utils.path.join(
-            #        self.host_multiarch_dir,
+            #        self.get_host_arch_dir(),
             #        'include',
             #        'ncursesw'
             #        )
@@ -140,7 +145,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
         return ret
 
     builder_action_configure = \
-        wayround_org.aipsetup.builder_scripts.std.Builder.builder_action_configure
+        wayround_org.aipsetup.builder_scripts.std.Builder.\
+            builder_action_configure
 
     def builder_action_build_define_arguments(self, called_as, log):
         ret = super().builder_action_build_define_arguments(called_as, log)

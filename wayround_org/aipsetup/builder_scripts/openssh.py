@@ -21,11 +21,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_rename_configs(self, called_as, log):
         os.rename(
-            wayround_org.utils.path.join(self.dst_dir, 'etc', 'ssh', 'sshd_config'),
-            wayround_org.utils.path.join(self.dst_dir, 'etc', 'ssh', 'sshd_config.origin')
+            wayround_org.utils.path.join(
+                self.get_dst_dir(), 'etc', 'ssh', 'sshd_config'
+                ),
+            wayround_org.utils.path.join(
+                self.get_dst_dir(), 'etc', 'ssh', 'sshd_config.origin'
+                )
             )
         os.rename(
-            wayround_org.utils.path.join(self.dst_dir, 'etc', 'ssh', 'ssh_config'),
-            wayround_org.utils.path.join(self.dst_dir, 'etc', 'ssh', 'ssh_config.origin')
+            wayround_org.utils.path.join(
+                self.get_dst_dir(), 'etc', 'ssh', 'ssh_config'
+                ),
+            wayround_org.utils.path.join(
+                self.get_dst_dir(), 'etc', 'ssh', 'ssh_config.origin'
+                )
             )
         return 0

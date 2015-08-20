@@ -18,8 +18,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         p = subprocess.Popen(
             ['./configure.py',
-             '--prefix={}'.format(self.host_multiarch_dir)],
-            cwd=self.src_dir,
+             '--prefix={}'.format(self.get_host_arch_dir())],
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )
@@ -29,4 +29,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute_define_args(self, called_as, log):
         return ['install',
-                'DESTDIR={}'.format(self.dst_host_multiarch_dir)]
+                'DESTDIR={}'.format(self.get_dst_host_arch_dir())]

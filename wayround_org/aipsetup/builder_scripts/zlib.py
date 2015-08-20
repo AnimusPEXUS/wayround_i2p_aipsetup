@@ -11,18 +11,16 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return
 
     def builder_action_configure_define_opts(self, called_as, log):
         ret = [
-            '--prefix={}'.format(self.host_multiarch_dir),
+            '--prefix={}'.format(self.get_host_arch_dir()),
             '--shared',
             ]
 
-        if '64' in self.host:
+        if '64' in self.get_arch_from_pkgi():
             ret += ['--64']
 
         return ret
@@ -35,11 +33,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build_define_args(self, called_as, log):
         return [
-            'prefix={}'.format(self.dst_host_multiarch_dir)
+            'prefix={}'.format(self.get_dst_host_arch_dir())
             ]
 
     def builder_action_distribute_define_args(self, called_as, log):
         return [
             'install',
-            'prefix={}'.format(self.dst_host_multiarch_dir)
+            'prefix={}'.format(self.get_dst_host_arch_dir())
             ]

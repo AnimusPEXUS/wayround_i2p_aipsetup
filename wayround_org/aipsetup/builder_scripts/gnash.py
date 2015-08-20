@@ -16,15 +16,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-media=ffmpeg',
             '--with-npapi-incl={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'include',
                     'mozilla'
                     )
                 ),
             '--with-npapi-plugindir={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    self.calculate_main_multiarch_lib_dir_name(),
+                    self.get_host_lib_dir(),
                     'mozilla',
                     'plugins'
                     )

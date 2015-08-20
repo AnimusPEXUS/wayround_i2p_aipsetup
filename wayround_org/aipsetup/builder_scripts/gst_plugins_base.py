@@ -21,7 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--disable-audiotestsrc',
             #'--disable-videotestsrc',
             #'--disable-freetypetest',
-            #'--with-sysroot={}'.format(self.host_multiarch_dir)
+            #'--with-sysroot={}'.format(self.get_host_arch_dir())
             ]
         return ret
 

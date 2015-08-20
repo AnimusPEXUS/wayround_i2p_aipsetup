@@ -271,7 +271,6 @@ def constitution_configurer(
         arch_from_param
         )
 
-
     ccp_res = calculate_CC_constitution_parts(
         host_from_param,
         build_from_param,
@@ -369,8 +368,8 @@ class Constitution:
         self.arch = None
 
         if (not isinstance(multilib_variants, list)
-                or len(multilib_variants) == 0
-            ):
+                    or len(multilib_variants) == 0
+                ):
             raise ValueError("`multilib_variant' must be not empty list")
 
         if not isinstance(arch_str, str):
@@ -539,7 +538,8 @@ class BuildCtl:
                     )
                 )
             ret = 1
-        else:
+
+        if ret == 0:
 
             script = buildscript_ctl.load_buildscript(
                 package_info['pkg_info']['buildscript']
@@ -548,10 +548,21 @@ class BuildCtl:
             if type(script) != types.ModuleType:
                 logging.error("Some error while loading builder module")
                 ret = 2
-            else:
 
-                if hasattr(script, 'Builder'):
+        if ret == 0:
+
+            if hasattr(script, 'Builder'):
+                try:
                     builder = script.Builder(self.buildingsite_ctl)
+                except:
+                    logging.exception(
+                        "Error initiating builder `{}'".format(
+                            script.Builder
+                            )
+                        )
+                    ret = 5
+
+                if ret == 0:
 
                     if action == 'help':
                         builder.print_help()
@@ -561,13 +572,14 @@ class BuildCtl:
                             actions_container = builder.get_defined_actions()
                         except:
                             logging.exception(
-                                "Error getting defined actions from `{}'".format(
+                                "Error getting defined"
+                                " actions from `{}'".format(
                                     script
                                     )
                                 )
                             ret = 4
 
-                        else:
+                        if ret == 0:
 
                             try:
                                 ret = self.run_builder_action(
@@ -593,26 +605,26 @@ class BuildCtl:
                                 )
                             )
 
-                elif hasattr(script, 'main'):
+            elif hasattr(script, 'main'):
 
-                    try:
-                        ret = script.main(building_site, action)
-                    except KeyboardInterrupt:
-                        raise
-                    except:
-                        logging.exception(
-                            "Error starting `main' function in `{}'".format(
-                                package_info['pkg_info']['buildscript']
-                                )
+                try:
+                    ret = script.main(building_site, action)
+                except KeyboardInterrupt:
+                    raise
+                except:
+                    logging.exception(
+                        "Error starting `main' function in `{}'".format(
+                            package_info['pkg_info']['buildscript']
                             )
-                        ret = 3
-
-                    logging.info(
-                        "action `{}' ended with code {}".format(action, ret)
                         )
-                else:
-                    logging.error("Invalid build script structure")
-                    ret = 4
+                    ret = 3
+
+                logging.info(
+                    "action `{}' ended with code {}".format(action, ret)
+                    )
+            else:
+                logging.error("Invalid build script structure")
+                ret = 4
 
         return ret
 
@@ -748,7 +760,7 @@ def _dir_wanisher(
         ):
 
     logging.info(
-        "Checking: {}".format(what_is_being_wanished)
+        "{}".format(what_is_being_wanished)
         )
 
     ret = 0
@@ -778,7 +790,8 @@ def _dir_wanisher(
                                 )
                             )
                         logging.warning(
-                            "    skipped as packaging for `{}'".format(pkg_name)
+                            "    skipped as packaging for `{}'".format(
+                                pkg_name)
                             )
 
         if ret == 0:
@@ -857,7 +870,9 @@ def _dir_wanisher(
                         else:
                             logging.warning(
                                 "Usually moved path: {}".format(
-                                    wayround_org.utils.path.relpath(p1, src_dir)
+                                    wayround_org.utils.path.relpath(
+                                        p1,
+                                        src_dir)
                                     )
                                 )
                             logging.warning(
@@ -1039,16 +1054,203 @@ class PackCtl:
             dst_dir,
             [],
             [],
-            ['mnt', 'usr', 'share', 'libexec'],
-            ['bin', 'sbin', 'man', 'info'],
-            ['include'],
-            ['gcc'],
+            ['mnt', 'usr', 'libexec', 'man', 'info', 'include'],
+            ['bin', 'sbin'],
+            [],
+            [],
             pkg_name
             )
+
+        '''
+        if host == 'x86_64-pc-linux-gnu':
+            if arch == 'x86_64-pc-linux-gnu':
+                if os.path.exists(
+                        wayround_org.utils.path.join(
+                            destdir,
+                            'multihost',
+                            'lib'
+                            )
+                        ):
+                    logging.error("    `lib' dir is not acceptable")
+                    ret = 5
+            elif arch == 'i686-pc-linux-gnu':
+                if os.path.exists(
+                        wayround_org.utils.path.join(
+                            destdir,
+                            'multihost',
+                            'lib64'
+                            )
+                        ):
+                    logging.error("    `lib' dir is not acceptable")
+                    ret = 5
+            else:
+                raise Exception("Whoot?")
+
+        else:
+            raise Exception("Whoot?")
+        '''
 
         return ret
 
     def destdir_verify_paths_correctness5(self):
+
+        ret = 0
+
+        logging.info("host/share")
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        # pkg_name = package_info['pkg_info']['name']
+
+        host = package_info['constitution']['host']
+        arch = package_info['constitution']['arch']
+
+        host_share_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'share',
+            )
+
+        tgt_host_share_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'multiarch',
+            arch,
+            'share'
+            )
+
+        if os.path.isdir(host_share_dir):
+            lst = os.listdir(host_share_dir)
+
+            for i in lst:
+
+                if i in ['man', 'doc', 'docs']:
+
+                    jo = wayround_org.utils.path.join(
+                        host_share_dir,
+                        i
+                        )
+
+                    if os.path.isdir(jo):
+
+                        logging.info("    {}".format(i))
+
+                        jo2 = wayround_org.utils.path.join(
+                            tgt_host_share_dir,
+                            i
+                            )
+
+                        os.makedirs(
+                            jo2,
+                            exist_ok=True
+                            )
+
+                        if wayround_org.utils.file.copytree(
+                                jo,
+                                jo2,
+                                overwrite_files=True,
+                                clear_before_copy=False,
+                                dst_must_be_empty=False,
+                                verbose=False
+                                ) != 0:
+                            ret += 1
+
+                        else:
+
+                            shutil.rmtree(jo)
+
+        if os.path.isdir(host_share_dir):
+            if len(os.listdir(host_share_dir)) == 0:
+                shutil.rmtree(host_share_dir)
+                ret = 0
+            else:
+                logging.error("host/share dir is not empty")
+                ret = 1
+
+        return ret
+
+    def destdir_verify_paths_correctness6(self):
+
+        ret = 0
+
+        logging.info("lib/python*")
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        # pkg_name = package_info['pkg_info']['name']
+
+        host = package_info['constitution']['host']
+        arch = package_info['constitution']['arch']
+
+        python_lib_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'multiarch',
+            arch,
+            'lib'
+            )
+
+        tgt_python_lib_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'lib'
+            )
+
+        if os.path.isdir(python_lib_dir):
+            lst = os.listdir(python_lib_dir)
+
+            for i in lst:
+
+                if i.startswith('python'):
+
+                    jo = wayround_org.utils.path.join(
+                        python_lib_dir,
+                        i
+                        )
+
+                    if os.path.isdir(jo):
+
+                        logging.info("    {}".format(i))
+
+                        jo2 = wayround_org.utils.path.join(
+                            tgt_python_lib_dir,
+                            i
+                            )
+
+                        os.makedirs(
+                            jo2,
+                            exist_ok=True
+                            )
+
+                        if wayround_org.utils.file.copytree(
+                                jo,
+                                jo2,
+                                overwrite_files=True,
+                                clear_before_copy=False,
+                                dst_must_be_empty=False,
+                                verbose=False
+                                ) != 0:
+                            ret += 1
+
+                        else:
+
+                            shutil.rmtree(jo)
+
+        if os.path.isdir(python_lib_dir):
+            if len(os.listdir(python_lib_dir)) == 0:
+                shutil.rmtree(python_lib_dir)
+                ret = 0
+            else:
+                logging.error("arch/lib dir is not empty")
+                ret = 1
+
+        return ret
+
+    def destdir_verify_paths_correctness7(self):
 
         ret = 0
 
@@ -1078,9 +1280,9 @@ class PackCtl:
             '/multihost/host/multiarch/arch -> /multihost/host',
             src_dir,
             dst_dir,
+            ['lib64', 'libx32', 'lib32', 'lib'],
+            ['Python2', 'Python3'],
             [],
-            [],
-            ['lib', 'lib64', 'libx32', 'lib32'],
             [],
             [],
             [],
@@ -1858,6 +2060,8 @@ class PackCtl:
                 self.destdir_verify_paths_correctness3,
                 self.destdir_verify_paths_correctness4,
                 self.destdir_verify_paths_correctness5,
+                self.destdir_verify_paths_correctness6,
+                self.destdir_verify_paths_correctness7,
                 self.rename_configuration_dirs,
                 # self.relocate_libx_dir_files_into_lib_dir,
                 self.destdir_filelist2,
@@ -1871,9 +2075,18 @@ class PackCtl:
                 self.pack_buildingsite
                 ]:
 
-            if i() != 0:
+            try:
+                i_res = i()
+            except:
+                logging.exception("Error")
+                ret = 2
+
+            if ret == 0:
+                if i_res != 0:
+                    ret = 1
+
+            if ret != 0:
                 logging.error("Error on {}".format(i))
-                ret = 1
                 break
 
         return ret

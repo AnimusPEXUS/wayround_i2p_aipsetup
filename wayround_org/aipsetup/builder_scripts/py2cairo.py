@@ -12,7 +12,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.pycairo.Builder):
         ret = {
             'PYTHON': wayround_org.utils.file.which(
                 'python2',
-                self.host_multiarch_dir
+                self.get_host_arch_dir()
                 )
             }
         return ret

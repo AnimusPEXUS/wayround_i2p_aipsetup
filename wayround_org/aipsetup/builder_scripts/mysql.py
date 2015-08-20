@@ -10,14 +10,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
         usr_share_mysql = '{}'.format(
-            wayround_org.utils.path.join(self.host_multiarch_dir, 'share', 'mysql')
+            wayround_org.utils.path.join(
+                self.get_host_arch_dir(), 'share', 'mysql'
+                )
             )
         return super().builder_action_configure_define_opts(called_as, log) + [
-            '-DCMAKE_INSTALL_PREFIX={}'.format(self.host_multiarch_dir),
+            '-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_arch_dir()),
 
             '-DMYSQL_DATADIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'share',
                     'mysql',
                     'data'
@@ -26,19 +28,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
             '-DINSTALL_SBINDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'bin'
                     )
                 ),
             '-DINSTALL_LIBDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
-                    'lib'
+                    self.get_host_lib_dir()
                     )
                 ),
             '-DINSTALL_MANDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'share',
                     'man'
                     )
@@ -47,7 +48,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
             '-DINSTALL_DOCREADMEDIR={}'.format(usr_share_mysql),
             '-DINSTALL_INCLUDEDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'include',
                     'mysql'
                     )

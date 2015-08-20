@@ -11,7 +11,7 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        num = self.package_info['pkg_info']['name'][-1]
+        num = self.get_package_info()['pkg_info']['name'][-1]
 
         if num == '4':
             num = '2'
@@ -39,9 +39,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.custom_data['python'],
                 './install.py',
                 '-i',
-                self.dst_dir
+                self.get_dst_dir()
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )

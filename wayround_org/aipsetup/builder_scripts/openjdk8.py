@@ -36,7 +36,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                       'langtools', 'nashorn']:
 
                 if autotools.extract_high(
-                        self.buildingsite,
+                        self.buildingsite_path,
                         i,
                         log=log,
                         unwrap_dir=False,
@@ -66,12 +66,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install',
-                'INSTALL_PREFIX={}'.format(self.dst_dir)
+                'INSTALL_PREFIX={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -83,23 +83,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
         ret = 0
 
-        java_dir = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'lib', 'java')
+        java_dir = wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'lib', 'java')
 
-        etc_dir = wayround_org.utils.path.join(self.dst_dir, 'etc', 'profile.d', 'SET')
+        etc_dir = wayround_org.utils.path.join(self.get_dst_dir(), 'etc', 'profile.d', 'SET')
 
         java009 = wayround_org.utils.path.join(
             etc_dir,
-            '009.java.{}.sh'.format(self.host_strong)
+            '009.java.{}.sh'.format(self.get_arch_from_pkgi())
             )
 
         existing_result_dir = None
 
         resulted_java_dir_basename = None
 
-        files = os.listdir(self.dst_dir)
+        files = os.listdir(self.get_dst_dir())
 
         if 'bin' in files:
-            shutil.rmtree(wayround_org.utils.path.join(self.dst_dir, 'bin'))
+            shutil.rmtree(wayround_org.utils.path.join(self.get_dst_dir(), 'bin'))
 
         if not 'jvm' in files:
             ret = 10
@@ -107,7 +107,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if ret == 0:
             files = os.listdir(
                 wayround_org.utils.path.join(
-                    self.dst_dir,
+                    self.get_dst_dir(),
                     'jvm'
                     )
                 )
@@ -124,7 +124,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 os.rename(
                     wayround_org.utils.path.join(
-                        self.dst_dir,
+                        self.get_dst_dir(),
                         'jvm',
                         resulted_java_dir_basename
                         ),
@@ -138,12 +138,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ret = 12
 
         if ret == 0:
-            files = os.listdir(self.dst_dir)
+            files = os.listdir(self.get_dst_dir())
 
             if 'jvm' in files:
                 shutil.rmtree(
                     wayround_org.utils.path.join(
-                        self.dst_dir,
+                        self.get_dst_dir(),
                         'jvm'
                         )
                     )

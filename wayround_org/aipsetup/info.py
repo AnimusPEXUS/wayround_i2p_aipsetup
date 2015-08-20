@@ -59,6 +59,11 @@ SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
     # package outdated and need to be removed
     ('deprecated', False),
 
+    # some shitty packages 
+    # (like python2 and python3: see https://bugs.python.org/issue1294959)
+    # can't be forced to be installed in lib64
+    ('only_primary_install', False),
+
     # list of str
     ('tags', []),
 
@@ -189,6 +194,12 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
                 )
 
             deprecated = sqlalchemy.Column(
+                sqlalchemy.Boolean,
+                nullable=False,
+                default=False
+                )
+
+            only_primary_install = sqlalchemy.Column(
                 sqlalchemy.Boolean,
                 nullable=False,
                 default=False
@@ -346,17 +357,16 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
 
 class PackageInfoCtl:
 
-    def __init__(
-            self,
-            info_dir,
-            info_db
-            ):
+    def __init__(self, info_dir, info_db):
 
         if not isinstance(info_dir, str):
             raise TypeError("`info_dir' must be str")
 
         if not isinstance(info_db, PackageInfo):
             raise TypeError("`info_db' must be PackageInfo")
+    
+        #print("info_dir: {}".format(info_dir))
+        #raise Exception('123')
 
         self._info_dir = wayround_org.utils.path.abspath(info_dir)
 

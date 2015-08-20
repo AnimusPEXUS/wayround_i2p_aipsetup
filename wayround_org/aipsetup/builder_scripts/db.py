@@ -36,7 +36,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 # TODO: probably this need to be detected (maybe lib64, not
                 #       lib)
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     self.calculate_main_multiarch_lib_dir_name()
                     )
                 ),
@@ -48,31 +48,31 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
 
         doc_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir,
+            self.get_dst_host_arch_dir(),
             'share',
             'doc',
-            'db')
+            'db'
+            )
 
         os.makedirs(
             doc_dir,
-            mode=0o755,
             exist_ok=True
             )
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install',
-                'DESTDIR={}'.format(self.dst_dir),
+                'DESTDIR={}'.format(self.get_dst_dir()),
                 'docdir={}'.format(
                     wayround_org.utils.path.join(
-                        self.host_multiarch_dir, 'share', 'doc', 'db'
+                        self.get_host_arch_dir(), 'share', 'doc', 'db'
                         )
                     )
                 # it's not a mistake docdir
-                # must be eq to self.host_multiarch_dir + /share/doc/db
+                # must be eq to self.get_host_arch_dir() + /share/doc/db
                 # with leading slash
                 ],
             environment={},

@@ -24,23 +24,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
 
         self.usr_list_item = ['usr']
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
             self.usr_list_item[0] = ''
 
         ret = dict()
         ret['src_arch_dir'] = wayround_org.utils.path.join(
-            self.src_dir, 'arch'
+            self.get_src_dir(), 'arch'
             )
         ret['dst_boot_dir'] = wayround_org.utils.path.join(
-            self.dst_dir, 'boot'
+            self.get_dst_dir(), 'boot'
             )
         ret['dst_man_dir'] = wayround_org.utils.path.join(
-            self.dst_dir, self.usr_list_item[0], 'share', 'man', 'man9'
+            self.get_dst_dir(), self.usr_list_item[0], 'share', 'man', 'man9'
             )
 
         crossbuild_arch_params = []
 
-        target = self.package_info['constitution']['target']
+        target = self.get_package_info()['constitution']['target']
 
         st = wayround_org.utils.system_type.SystemType(target)
         cpu = st.cpu
@@ -55,10 +55,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             logging.error("Don't know which linux ARCH to apply")
             ret = 3
 
-        if self.is_crossbuild or self.is_crossbuilder:
+        if self.get_is_crossbuild() or self.get_is_crossbuilder():
             crossbuild_arch_params += [
                 'ARCH=' + linux_headers_arch,
-                'CROSS_COMPILE={}-'.format(self.host_strong)
+                'CROSS_COMPILE={}-'.format(self.get_arch_from_pkgi())
                 ]
 
         ret['crossbuild_arch_params'] = crossbuild_arch_params
@@ -83,7 +83,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('copy_source', self.builder_action_copy_source)
             ])
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
 
             logging.info(
                 "Crosscompiler building detected. only headers will be built"
@@ -107,13 +107,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         try:
-            name = self.package_info['pkg_info']['name']
+            name = self.get_package_info()['pkg_info']['name']
         except:
             name = None
 
         pi = self.package_info
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
             pi['pkg_info']['name'] = 'cb-linux-headers-{}'.format(self.target)
         else:
             pi['pkg_info']['name'] = 'linux'
@@ -128,16 +128,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         """
         Standard destdir cleanup
         """
-        if self.is_crossbuild:
+        if self.get_is_crossbuild():
             log.info(
                 "Destination directory cleanup skipped doe to "
                 "'crossbuilder_mode'"
                 )
         else:
 
-            if os.path.isdir(self.src_dir):
+            if os.path.isdir(self.get_src_dir()):
                 log.info("cleaningup destination dir")
-                wayround_org.utils.file.cleanup_dir(self.dst_dir)
+                wayround_org.utils.file.cleanup_dir(self.get_dst_dir())
 
         return 0
 
@@ -151,7 +151,7 @@ continue building procedure with command
 
     def builder_action_build(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[] + self.custom_data['crossbuild_arch_params'],
@@ -167,7 +167,7 @@ continue building procedure with command
             os.makedirs(self.custom_data['dst_boot_dir'])
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -190,7 +190,7 @@ continue building procedure with command
             p2 = wayround_org.utils.path.join(
                 self.custom_data['dst_boot_dir'],
                 'vmlinuz-{}-{}'.format(
-                    self.package_info['pkg_nameinfo']['groups']['version'],
+                    self.get_package_info()['pkg_nameinfo']['groups']['version'],
                     self.host
                     )
                 )
@@ -202,12 +202,12 @@ continue building procedure with command
 
     def builder_action_distr_modules(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'modules_install',
-                'INSTALL_MOD_PATH=' + self.dst_dir
+                'INSTALL_MOD_PATH=' + self.get_dst_dir()
                 ] + self.custom_data['crossbuild_arch_params'],
             environment={},
             environment_mode='copy',
@@ -218,7 +218,7 @@ continue building procedure with command
         if ret == 0:
 
             modules_dir = wayround_org.utils.path.join(
-                self.dst_dir, 'lib', 'modules'
+                self.get_dst_dir(), 'lib', 'modules'
                 )
 
             files = os.listdir(modules_dir)
@@ -246,7 +246,7 @@ continue building procedure with command
                             os.path.sep + self.usr_list_item[0],
                             'src',
                             'linux-{}'.format(
-                                self.package_info['pkg_nameinfo'][
+                                self.get_package_info()['pkg_nameinfo'][
                                     'groups']['version']
                                 )
                             ),
@@ -257,12 +257,12 @@ continue building procedure with command
 
     def builder_action_distr_firmware(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'firmware_install',
-                'INSTALL_MOD_PATH=' + self.dst_dir
+                'INSTALL_MOD_PATH=' + self.get_dst_dir()
                 ] + self.custom_data['crossbuild_arch_params'],
             environment={},
             environment_mode='copy',
@@ -280,13 +280,13 @@ continue building procedure with command
             command = 'headers_install_all'
 
         install_hdr_path = wayround_org.utils.path.join(
-            self.dst_dir, 'usr'
+            self.get_dst_dir(), 'usr'
             )
 
-        if self.is_crossbuilder:
+        if self.get_is_crossbuilder():
 
             install_hdr_path = wayround_org.utils.path.join(
-                self.dst_dir, 'usr', 'crossbuilders',
+                self.get_dst_dir(), 'usr', 'crossbuilders',
                 self.target
                 #, usr
                 )
@@ -294,7 +294,7 @@ continue building procedure with command
         if ret == 0:
 
             ret = autotools.make_high(
-                self.buildingsite,
+                self.buildingsite_path,
                 log=log,
                 options=[],
                 arguments=[command] +
@@ -309,9 +309,9 @@ continue building procedure with command
         if h_all:
             print('-----------------')
             print("Now You need to create asm symlink in include dir")
-            if self.is_crossbuilder:
+            if self.get_is_crossbuilder():
                 print("and pack this building site")
-            if not self.is_crossbuilder and not self.is_crossbuild:
+            if not self.get_is_crossbuilder() and not self.get_is_crossbuild():
                 print("and continue with 'distr_man+' action")
             print('-----------------')
             ret = 1
@@ -334,7 +334,7 @@ continue building procedure with command
 
     def builder_action_distr_man(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -353,7 +353,7 @@ continue building procedure with command
 
             man_files = glob.glob(
                 wayround_org.utils.path.join(
-                    self.src_dir, 'Documentation', 'DocBook', 'man', '*.9.gz'
+                    self.get_src_dir(), 'Documentation', 'DocBook', 'man', '*.9.gz'
                     )
                 )
 
@@ -376,13 +376,13 @@ continue building procedure with command
     def builder_action_copy_source(self, called_as, log):
         try:
             ret = wayround_org.utils.file.copytree(
-                self.src_dir,
+                self.get_src_dir(),
                 wayround_org.utils.path.join(
-                    self.dst_dir,
+                    self.get_dst_dir(),
                     self.usr_list_item[0],
                     'src',
                     'linux-{}'.format(
-                        self.package_info['pkg_nameinfo']['groups']['version']
+                        self.get_package_info()['pkg_nameinfo']['groups']['version']
                         )
                     ),
                 overwrite_files=True,
@@ -396,7 +396,7 @@ continue building procedure with command
             if ret == 0:
                 try:
                     new_link = wayround_org.utils.path.join(
-                        self.dst_dir,
+                        self.get_dst_dir(),
                         self.usr_list_item[0],
                         'src',
                         'linux'
@@ -407,7 +407,7 @@ continue building procedure with command
                     os.symlink(
                         '.{}linux-{}'.format(
                             os.path.sep,
-                            self.package_info['pkg_nameinfo'][
+                            self.get_package_info()['pkg_nameinfo'][
                                 'groups']['version']
                             ),
                         new_link

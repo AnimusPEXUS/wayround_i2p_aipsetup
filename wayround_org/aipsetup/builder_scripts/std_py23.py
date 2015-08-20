@@ -19,6 +19,7 @@ class BuilderForPy2(wayround_org.aipsetup.builder_scripts.std.Builder):
         return collections.OrderedDict([
             ('src_cleanup', self.builder_action_src_cleanup),
             ('bld_cleanup', self.builder_action_bld_cleanup),
+            #('dst_cleanup', self.builder_action_dst_cleanup),
             ('extract', self.builder_action_extract),
             ('patch', self.builder_action_patch),
             ('autogen', self.builder_action_autogen),
@@ -37,6 +38,7 @@ class BuilderForPy3(wayround_org.aipsetup.builder_scripts.std.Builder):
         return collections.OrderedDict([
             ('src_cleanup', self.builder_action_src_cleanup),
             ('bld_cleanup', self.builder_action_bld_cleanup),
+            #('dst_cleanup', self.builder_action_dst_cleanup),
             ('extract', self.builder_action_extract),
             ('patch', self.builder_action_patch),
             ('autogen', self.builder_action_autogen),
@@ -50,8 +52,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         return {
-            'py2_builder': BuilderForPy2(self.buildingsite),
-            'py3_builder': BuilderForPy3(self.buildingsite),
+            'py2_builder': BuilderForPy2(self.control),
+            'py3_builder': BuilderForPy3(self.control),
             }
 
     def define_actions(self):

@@ -25,14 +25,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'bios', 'efi32', 'efi64',
                 'installer',
                 'install',
-                'INSTALLROOT={}'.format(self.dst_dir),
+                'INSTALLROOT={}'.format(self.get_dst_dir()),
                 ] + self.all_automatic_flags_as_list(),
             environment={},
             environment_mode='copy',

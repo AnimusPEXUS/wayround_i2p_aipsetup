@@ -47,11 +47,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--enable-d3d1x',
             # '--enable-opencl',
 
-            '--with-llvm-prefix={}'.format(self.host_multiarch_dir),
+            '--with-llvm-prefix={}'.format(self.get_host_arch_dir()),
 
-            'PYTHON2={}'.format(wayround_org.utils.file.which(
+            'PYTHON2={}'.format(
+                wayround_org.utils.file.which(
                     'python2',
-                    self.host_multiarch_dir
+                    self.get_host_arch_dir()
                     )
                 )
             ]

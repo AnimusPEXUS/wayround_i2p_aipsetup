@@ -231,17 +231,35 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-libada',
                 '--enable-shared',
 
+                '--oldincludedir=' +
+                wayround_org.utils.path.join(
+                    self.get_host_arch_dir(),
+                    'include'
+                    ),
+
+                '--with-gxx-include-dir={}'.format(
+                    wayround_org.utils.path.join(
+                        self.get_host_arch_dir(),
+                        'include-c++',
+                        #'c++',
+                        #'5.2.0'
+                        )
+                    ),
+
                 # experimental option for this place
                 # without it gcc tryes to use incompatible /lib/crt*.o files
-                '--with-sysroot={}'.format(self.get_host_dir())
-                # '--with-build-sysroot={}'.format(self.host_multiarch_dir)
+                #'--with-sysroot={}'.format(self.get_host_dir()),
+                # '--with-build-sysroot={}'.format(self.get_host_arch_dir())
+                '--with-native-system-header-dir={}'.format(
+                    wayround_org.utils.path.join(
+                        #'/',
+                        #'multiarch',
+                        #self.get_host_from_pkgi(),
+                        self.get_host_arch_dir(),
+                        'include'
+                        )
+                    )
                 ]
-
-            '''
-            ret += [
-                '--libdir=' + wayround_org.utils.path.join(self.get_host_dir(),'lib64'),
-                ]
-            '''
 
             if self.get_host_from_pkgi().startswith('x86_64'):
                 # TODO: no hardcode
@@ -263,7 +281,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build_define_environment(self, called_as, log):
         ret = super().builder_action_build_define_environment(called_as, log)
 
-        if self.host_strong.startswith('x86_64'):
+        if self.get_arch_from_pkgi().startswith('x86_64'):
 
             for i in ['lib', 'lib64', 'lib32', 'libx32']:
 
@@ -406,7 +424,7 @@ After what - continue building this gcc from 'build_03+' action
 
     def builder_action_distribute_03(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[

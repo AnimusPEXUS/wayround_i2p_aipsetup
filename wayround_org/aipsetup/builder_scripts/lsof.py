@@ -22,8 +22,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_extract(self, called_as, log):
 
         ret = autotools.extract_high(
-            self.buildingsite,
-            self.package_info['pkg_info']['basename'],
+            self.buildingsite_path,
+            self.get_package_info()['pkg_info']['basename'],
             log=log,
             unwrap_dir=True,
             rename_dir=False
@@ -31,7 +31,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         tar = None
 
-        for i in os.listdir(self.src_dir):
+        for i in os.listdir(self.get_src_dir()):
             if i.endswith('.tar'):
                 tar = i
                 break
@@ -46,7 +46,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log.info("Unpacking {}".format(tar))
             p = subprocess.Popen(
                 ['tar', '-xf', tar],
-                cwd=self.src_dir,
+                cwd=self.get_src_dir(),
                 stdout=log.stdout,
                 stderr=log.stderr
                 )
@@ -57,13 +57,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 log.error("Error `{}' while untarring".format(p_r))
                 ret = 2
             else:
-                if not tar_dir in os.listdir(self.src_dir):
+                if not tar_dir in os.listdir(self.get_src_dir()):
                     log.error("wrong tarball")
                     ret = 3
                 else:
-                    tar_dir = wayround_org.utils.path.join(self.src_dir, tar_dir)
-                    lsof_file = wayround_org.utils.path.join(tar_dir, 'lsof')
-                    lsof_man_file = wayround_org.utils.path.join(tar_dir, 'lsof.8')
+                    tar_dir = wayround_org.utils.path.join(
+                        self.get_src_dir(),
+                        tar_dir
+                        )
+                    lsof_file = wayround_org.utils.path.join(
+                        tar_dir,
+                        'lsof'
+                        )
+                    lsof_man_file = wayround_org.utils.path.join(
+                        tar_dir,
+                        'lsof.8'
+                        )
 
                     self.custom_data['tar_dir'] = tar_dir
                     self.custom_data['lsof_file'] = lsof_file
@@ -109,16 +118,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ret = 1
             else:
                 dst_bin_dir = wayround_org.utils.path.join(
-                    self.dst_host_multiarch_dir,
+                    self.get_dst_host_arch_dir(),
                     'bin'
                     )
 
                 os.makedirs(dst_bin_dir, exist_ok=True)
 
-                shutil.copy(lsof_file, wayround_org.utils.path.join(dst_bin_dir, 'lsof'))
+                shutil.copy(
+                    lsof_file,
+                    wayround_org.utils.path.join(
+                        dst_bin_dir,
+                        'lsof'
+                        )
+                    )
 
                 dst_man_dir = wayround_org.utils.path.join(
-                    self.dst_host_multiarch_dir,
+                    self.get_dst_host_arch_dir(),
                     'share',
                     'man',
                     'man8'

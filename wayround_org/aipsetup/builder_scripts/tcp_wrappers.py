@@ -8,6 +8,7 @@ import wayround_org.utils.path
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
 
+# TODO: reworkings required
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -26,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure(self, called_as, log):
-        patches = os.listdir(self.patches_dir)
+        patches = os.listdir(self.get_patches_dir())
         patches.sort()
 
         if len(patches) == 0:
@@ -43,7 +44,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                          i
                          )
                      ],
-                    cwd=self.src_dir,
+                    cwd=self.get_src_dir(),
                     stdout=log.stdout,
                     stderr=log.stderr
                     )
@@ -55,7 +56,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ['make',
              'linux'
              ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             env=copy.deepcopy(os.environ).update(
                 self.all_automatic_flags_as_dict()
                 ),
@@ -75,13 +76,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'usr/share/man',
                 'usr/include',
                 ]:
-            pp = wayround_org.utils.path.join(self.dst_dir, i)
+            pp = wayround_org.utils.path.join(self.get_dst_dir(), i)
             if not os.path.isdir(pp):
                 os.makedirs(pp)
 
         # shared
 
-        shared_dir = wayround_org.utils.path.join(self.src_dir, 'shared')
+        shared_dir = wayround_org.utils.path.join(self.get_src_dir(), 'shared')
 
         shared = os.listdir(shared_dir)
 
@@ -92,7 +93,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         'cp',
                         wayround_org.utils.path.join(shared_dir, i),
                         wayround_org.utils.path.join(
-                            self.dst_dir,
+                            self.get_dst_dir(),
                             'usr/lib'
                         )
                     ]
@@ -102,14 +103,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         # *.a
 
-        for i in os.listdir(self.src_dir):
+        for i in os.listdir(self.get_src_dir()):
             if i.endswith('.a'):
                 p = subprocess.Popen(
                     [
                         'cp',
-                        wayround_org.utils.path.join(self.src_dir, i),
+                        wayround_org.utils.path.join(self.get_src_dir(), i),
                         wayround_org.utils.path.join(
-                            self.dst_dir,
+                            self.get_dst_dir(),
                             'usr/lib'
                         )
                     ]
@@ -119,14 +120,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         # *.h
 
-        for i in os.listdir(self.src_dir):
+        for i in os.listdir(self.get_src_dir()):
             if i.endswith('.h'):
                 p = subprocess.Popen(
                     [
                         'cp',
-                        wayround_org.utils.path.join(self.src_dir, i),
+                        wayround_org.utils.path.join(self.get_src_dir(), i),
                         wayround_org.utils.path.join(
-                            self.dst_dir,
+                            self.get_dst_dir(),
                             'usr/include'
                         )
                     ]
@@ -139,8 +140,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         for i in ['safe_finger', 'tcpd', 'tcpdchk', 'tcpdmatch', 'try-from']:
             p = subprocess.Popen(
                 ['cp',
-                 wayround_org.utils.path.join(self.src_dir, i),
-                 wayround_org.utils.path.join(self.dst_dir, 'usr/bin')
+                 wayround_org.utils.path.join(self.get_src_dir(), i),
+                 wayround_org.utils.path.join(self.get_dst_dir(), 'usr/bin')
                  ]
             )
             if p.wait() != 0:
@@ -150,7 +151,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         for i in range(10):
             dd = wayround_org.utils.path.join(
-                self.dst_dir,
+                self.get_dst_dir(),
                 'usr',
                 'share',
                 'man',
@@ -158,7 +159,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             if not os.path.isdir(dd):
                 os.makedirs(dd)
 
-            b = glob.glob(self.src_dir + '/*.{}'.format(i))
+            b = glob.glob(self.get_src_dir() + '/*.{}'.format(i))
 
             for j in b:
                 p = subprocess.Popen(

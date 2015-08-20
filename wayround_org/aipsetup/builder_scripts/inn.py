@@ -13,6 +13,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-sendmail=' +
             wayround_org.utils.file.which(
                 'sendmail',
-                self.host_multiarch_dir
+                self.get_host_arch_dir()
                 ),
             ]

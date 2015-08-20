@@ -20,11 +20,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_fix_config(self, called_as, log):
 
         # cfg_file = wayround_org.utils.path.join(
-        #    self.dst_host_multiarch_dir, 'share', 'misc', 'man.conf'
+        #    self.get_dst_host_arch_dir(), 'share', 'misc', 'man.conf'
         #    )
 
         cfg_file = wayround_org.utils.path.join(
-            self.dst_dir, 'usr', 'share', 'misc', 'man.conf'
+            self.get_dst_dir(), 'usr', 'share', 'misc', 'man.conf'
             )
 
         with open(cfg_file) as f:

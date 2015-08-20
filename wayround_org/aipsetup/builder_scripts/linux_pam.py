@@ -17,10 +17,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 wayround_org.utils.path.join(
                     self.get_host_arch_dir(),
                     'include',
+                    'security' # it's not a mistake: 'security' dir is here
+                               #                     required by 'polkit'
+                    )
+                ),
+            '--enable-securedir={}'.format(
+                wayround_org.utils.path.join(
+                    self.get_host_dir(),
+                    'lib',
                     'security'
                     )
                 )
-            #'--enable-securedir=/pam_modules'
             ]  # + self.all_automatic_flags_as_list()
 
         return ret

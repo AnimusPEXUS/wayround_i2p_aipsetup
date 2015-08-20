@@ -16,7 +16,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_asc_support(self, called_as, log):
-        exts_file = wayround_org.utils.path.join(self.dst_dir, 'etc', 'mc', 'mc.ext')
+        exts_file = wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            'etc',
+            'mc',
+            'mc.ext'
+            )
 
         f = open(exts_file)
         ftl = f.readlines()
@@ -35,8 +40,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 # asp
 shell/i/.asp
 \tOpen=%cd %p/utar://
-\tView=%view{{ascii}} /multihost/{}/libexec/mc/ext.d/archive.sh view tar
-""".format(self.get_host_from_pkgi(), self.get_arch_from_pkgi())
+\tView=%view{{ascii}} /multihost/{host}/multiarch/{arch}/libexec/mc/ext.d/archive.sh view tar
+""".format(
+                    host=self.get_host_from_pkgi(),
+                    arch=self.get_arch_from_pkgi()
+                    )
                 ] +
                 ftl[ind:])
 

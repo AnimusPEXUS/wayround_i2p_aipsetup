@@ -150,6 +150,10 @@ class MainWindow:
 
                 self.ui.deprecated_cb.set_active(bool(data['deprecated']))
 
+                self.ui.only_primary_install_cb.set_active(
+                    bool(data['only_primary_install'])
+                    )
+
                 self.ui.source_path_prefixes_tw.get_buffer().set_text(
                     '\n'.join(data['source_path_prefixes'])
                     )
@@ -166,15 +170,15 @@ class MainWindow:
                     data['runtime_deps']
                     )
 
-                self.currently_opened = filename
+                self.currently_opened = os.path.basename(filename)
+                
                 self.ui.window.set_title(
                     filename + " - aipsetup v3 .json info file editor"
                     )
 
                 self.scroll_package_list_to_name(os.path.basename(filename))
 
-
-#        self.window.set_sensitive(True)
+        #        self.window.set_sensitive(True)
 
         return ret
 
@@ -185,6 +189,7 @@ class MainWindow:
         if not self.currently_opened:
             ret = 1
         else:
+
             filename = wayround_org.utils.path.join(
                 self.info_ctl.get_info_dir(),
                 filename
@@ -234,6 +239,9 @@ class MainWindow:
             data['non_installable'] = self.ui.non_installable_cb.get_active()
 
             data['deprecated'] = self.ui.deprecated_cb.get_active()
+
+            data['only_primary_install'] = \
+                self.ui.only_primary_install_cb.get_active()
 
             data['source_path_prefixes'] = \
                 self.ui.source_path_prefixes_tw.get_buffer().get_text(
@@ -304,7 +312,9 @@ class MainWindow:
 
     def load_list(self):
 
-        mask = wayround_org.utils.path.join(self.info_ctl.get_info_dir(), '*.json')
+        mask = wayround_org.utils.path.join(
+            self.info_ctl.get_info_dir(),
+            '*.json')
 
         files = glob.glob(mask)
 

@@ -30,8 +30,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--with-pamlibdir={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_dir(),
-                    'lib',
+                    self.get_host_lib_dir(),
+                    # 'lib',
                     'security'
                     )
                 )
@@ -40,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'PYTHON={}'.format(
                 wayround_org.utils.file.which(
                     'python',
-                    self.get_host_dir()
+                    self.get_host_arch_dir()
                     )
                 )
             ]

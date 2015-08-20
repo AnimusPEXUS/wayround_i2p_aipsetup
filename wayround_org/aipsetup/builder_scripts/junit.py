@@ -20,15 +20,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
 
         src_junit_dir = wayround_org.utils.path.join(
-            self.src_dir,
+            self.get_src_dir(),
             'junit{}'.format(
-                self.package_info['pkg_nameinfo']['groups']['version']
+                self.get_package_info()['pkg_nameinfo']['groups']['version']
                 )
             )
 
         dst_classpath_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir,
-            'lib',
+            self.get_dst_host_arch_dir(),
             'java',
             'classpath'
             )
@@ -45,11 +44,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [
                 'ant',
                 '-Dversion={}'.format(
-                    self.package_info['pkg_nameinfo']['groups']['version']
+                    self.get_package_info()['pkg_nameinfo']['groups']['version']
                     ),
                 'dist'
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )

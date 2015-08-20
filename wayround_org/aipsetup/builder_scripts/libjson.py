@@ -9,8 +9,6 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return
 
@@ -30,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_patch(self, called_as, log):
-        f = open(wayround_org.utils.path.join(self.src_dir, 'makefile'))
+        f = open(wayround_org.utils.path.join(self.get_src_dir(), 'makefile'))
         lines = f.read().split('\n')
         f.close()
 
@@ -44,14 +42,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 lines[
                     i] = '\tcp -rv $(srcdir)/../Dependencies/ $(include_path)/$(libname_hdr)/$(srcdir)'
 
-        f = open(wayround_org.utils.path.join(self.src_dir, 'makefile'), 'w')
+        f = open(wayround_org.utils.path.join(self.get_src_dir(), 'makefile'), 'w')
         f.write('\n'.join(lines))
         f.close()
         return 0
 
     def builder_action_build_a(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -67,18 +65,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         os.makedirs(
             wayround_org.utils.path.join(
-                self.dst_host_multiarch_dir,
-                self.calculate_main_multiarch_lib_dir_name()
+                self.get_dst_host_lib_dir()
                 ),
             exist_ok=True
             )
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             options=[],
             arguments=[
                 'install',
-                'prefix={}'.format(self.dst_host_multiarch_dir)
+                'prefix={}'.format(self.get_dst_host_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -89,7 +86,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build_so(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -106,18 +103,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         os.makedirs(
             wayround_org.utils.path.join(
-                self.dst_host_multiarch_dir,
-                self.calculate_main_multiarch_lib_dir_name()
+                self.get_dst_host_lib_dir()
                 ),
             exist_ok=True
             )
 
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             options=[],
             arguments=[
                 'install',
-                'prefix={}'.format(self.dst_host_multiarch_dir),
+                'prefix={}'.format(self.get_dst_host_dir()),
                 'SHARED=1'
                 ],
             environment={},

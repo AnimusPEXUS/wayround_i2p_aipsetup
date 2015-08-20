@@ -14,8 +14,6 @@ import wayround_org.utils.file
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return
 
@@ -29,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     '''
     def patch_test_c(self):
-        name = wayround_org.utils.path.join(self.src_dir, 'pam_cap', 'test.c')
+        name = wayround_org.utils.path.join(self.get_src_dir(), 'pam_cap', 'test.c')
 
         with open(name) as f:
             t = f.read()
@@ -42,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
 
     def patch_pam_cap_c(self):
-        name = wayround_org.utils.path.join(self.src_dir, 'pam_cap', 'pam_cap.c')
+        name = wayround_org.utils.path.join(self.get_src_dir(), 'pam_cap', 'pam_cap.c')
 
         with open(name) as f:
             t = f.read()
@@ -62,51 +60,41 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return 0
     '''
 
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'all',
-                'install',
-                'prefix={}'.format(self.host_multiarch_dir),
-                'exec_prefix={}'.format(self.host_multiarch_dir),
-                'lib_prefix={}'.format(self.host_multiarch_dir),
-                'inc_prefix={}'.format(self.host_multiarch_dir),
-                'man_prefix={}'.format(self.host_multiarch_dir),
-                'DESTDIR={}'.format(self.dst_dir),
-                'RAISE_SETFCAP=no',
-                'PAM_CAP=yes',
-                'SYSTEM_HEADERS={}'.format(
-                    wayround_org.utils.path.join(
-                        self.host_multiarch_dir,
-                        'include'
-                        )
-                    ),
-                'CFLAGS=-I{}'.format(
-                    wayround_org.utils.path.join(
-                        self.host_multiarch_dir,
-                        'include'
-                        )
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'all',
+            'install',
+            'prefix={}'.format(self.get_host_arch_dir()),
+            'exec_prefix={}'.format(self.get_host_arch_dir()),
+            'lib_prefix={}'.format(self.get_host_dir()),
+            'inc_prefix={}'.format(self.get_host_arch_dir()),
+            'man_prefix={}'.format(self.get_host_arch_dir()),
+            'DESTDIR={}'.format(self.get_dst_dir()),
+            'RAISE_SETFCAP=no',
+            'PAM_CAP=yes',
+            'SYSTEM_HEADERS={}'.format(
+                wayround_org.utils.path.join(
+                    self.get_host_arch_dir(),
+                    'include'
                     )
-                ] + self.all_automatic_flags_as_list(),
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+                ),
+            'CFLAGS=-I{}'.format(
+                wayround_org.utils.path.join(
+                    self.get_host_arch_dir(),
+                    'include'
+                    )
+                )
+            ] + self.all_automatic_flags_as_list()
 
     def builder_action_after_distribute(self, called_as, log):
 
         wayround_org.utils.file.copytree(
             wayround_org.utils.path.join(
-                self.dst_host_multiarch_dir,
+                self.get_dst_host_arch_dir(),
                 'multiarch'
                 ),
             wayround_org.utils.path.join(
-                self.dst_host_multiarch_dir,
+                self.get_dst_host_arch_dir(),
                 self.calculate_main_multiarch_lib_dir_name()
                 ),
             overwrite_files=True,
@@ -116,7 +104,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         shutil.rmtree(
             wayround_org.utils.path.join(
-                self.dst_host_multiarch_dir,
+                self.get_dst_host_arch_dir(),
                 'multiarch'
                 )
             )

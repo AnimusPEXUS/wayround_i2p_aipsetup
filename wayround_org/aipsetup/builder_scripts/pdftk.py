@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         new_make_filename = wayround_org.utils.path.join(
-            self.src_dir,
+            self.get_src_dir(),
             'pdftk',
             'Makefile.Lailalo'
             )
@@ -26,7 +26,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         file_list = os.listdir(
             '{}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'share',
                     'java'
                     )
@@ -93,7 +93,7 @@ include Makefile.Base
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             ['make', '-f', 'Makefile.Lailalo'],
-            cwd=wayround_org.utils.path.join(self.src_dir, 'pdftk'),
+            cwd=wayround_org.utils.path.join(self.get_src_dir(), 'pdftk'),
             stdout=log.stdout,
             stderr=log.stderr
             )
@@ -104,9 +104,9 @@ include Makefile.Base
 
         ret = 0
 
-        sbin = wayround_org.utils.path.join(self.src_dir, 'pdftk', 'pdftk')
+        sbin = wayround_org.utils.path.join(self.get_src_dir(), 'pdftk', 'pdftk')
         bin_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir, 'bin'
+            self.get_dst_host_arch_dir(), 'bin'
             )
 
         os.makedirs(bin_dir, exist_ok=True)
@@ -120,9 +120,9 @@ include Makefile.Base
                 wayround_org.utils.path.join(bin_dir, 'pdftk')
                 )
 
-        sman = wayround_org.utils.path.join(self.src_dir, 'pdftk.1')
+        sman = wayround_org.utils.path.join(self.get_src_dir(), 'pdftk.1')
         man = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir, 'share', 'man', 'man1'
+            self.get_dst_host_arch_dir(), 'share', 'man', 'man1'
             )
 
         os.makedirs(man, exist_ok=True)

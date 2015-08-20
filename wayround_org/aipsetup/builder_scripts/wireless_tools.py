@@ -26,9 +26,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ['make',
              'all',
              'install',
-             'PREFIX={}'.format(self.dst_host_multiarch_dir),
+             'PREFIX={}'.format(self.get_dst_host_arch_dir()),
              ] + self.all_automatic_flags_as_list(),
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )

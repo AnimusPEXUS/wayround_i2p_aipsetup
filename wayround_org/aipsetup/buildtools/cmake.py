@@ -17,9 +17,9 @@ import wayround_org.utils.path
 
 def calc_conf_hbt_options(builder_obj):
 
-    host = builder_obj.host
-    build = builder_obj.build
-    target = builder_obj.target
+    #host = builder_obj.host
+    #build = builder_obj.build
+    #target = builder_obj.target
 
     ret = []
 

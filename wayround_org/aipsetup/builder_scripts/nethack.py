@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure(self, called_as, log):
         p = subprocess.Popen(
             ['bash', 'setup.sh'],
-            cwd=wayround_org.utils.path.join(self.src_dir, 'sys', 'unix'),
+            cwd=wayround_org.utils.path.join(self.get_src_dir(), 'sys', 'unix'),
             stdout=log.stdout,
             stderr=log.stderr
             )

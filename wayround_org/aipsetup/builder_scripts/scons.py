@@ -29,9 +29,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [
                 'python2',
                 'bootstrap.py',
-                wayround_org.utils.path.join(self.src_dir, 'build', 'scons')
+                wayround_org.utils.path.join(self.get_src_dir(), 'build', 'scons')
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )
@@ -43,9 +43,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [python,
              'setup.py',
              'install',
-             '--prefix={}'.format(self.dst_host_multiarch_dir)
+             '--prefix={}'.format(self.get_dst_host_arch_dir())
              ],
-            cwd=wayround_org.utils.path.join(self.src_dir, 'build', 'scons'),
+            cwd=wayround_org.utils.path.join(self.get_src_dir(), 'build', 'scons'),
             stdout=log.stdout,
             stderr=log.stderr
             )

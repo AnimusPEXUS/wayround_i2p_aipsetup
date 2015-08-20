@@ -8,12 +8,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install',
-                'DESTDIR={}'.format(self.dst_dir),
+                'DESTDIR={}'.format(self.get_dst_dir()),
 
                 # NOTE: it's not an error INSTALL_OWNER must be empty
                 'INSTALL_OWNER='

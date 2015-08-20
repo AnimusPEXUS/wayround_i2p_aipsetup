@@ -37,31 +37,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-install-cups',
             ]
 
-    def builder_action_build2(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=['so'],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_build_define_args(self, called_as, log):
+        return ['all', 'so']
 
-    def builder_action_distribute2(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'soinstall',
-                'DESTDIR={}'.format(self.dst_dir)
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'install',
+            'soinstall',
+            'DESTDIR={}'.format(self.get_dst_dir())
+            ]

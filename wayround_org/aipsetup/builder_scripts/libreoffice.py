@@ -36,21 +36,33 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
         ret = 0
 
-        gid = glob.glob(wayround_org.utils.path.join(self.dst_dir, 'gid*'))
+        gid = glob.glob(
+            wayround_org.utils.path.join(
+                self.get_dst_dir(),
+                'gid*'
+                )
+            )
 
         lbo_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir, 'lib', 'libreoffice'
+            self.get_dst_host_arch_dir(), 'libreoffice'
             )
-        gid_dir = wayround_org.utils.path.join(lbo_dir, 'gid')
+
+        gid_dir = wayround_org.utils.path.join(
+            lbo_dir,
+            'gid'
+            )
+
         lbo_lnk = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir, 'bin', 'soffice'
+            self.get_dst_host_arch_dir(),
+            'bin',
+            'soffice'
             )
 
-        try:
-            os.makedirs(gid_dir)
-        except:
-            pass
-
+        os.makedirs(
+            gid_dir,
+            exist_ok=True
+            )
+        
         if not os.path.isdir(gid_dir):
             ret = 3
             log.error(
@@ -63,21 +75,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 os.rename(
                     i,
                     wayround_org.utils.path.join(
-                        gid_dir, os.path.basename(i)
+                        gid_dir,
+                        os.path.basename(i)
                         )
                     )
 
             log.info("Creating link")
             os.makedirs(
                 wayround_org.utils.path.join(
-                    self.dst_host_multiarch_dir, 'bin'
+                    self.get_dst_host_arch_dir(),
+                    'bin'
                     )
                 )
 
             os.symlink(
                 wayround_org.utils.path.relpath(
                     wayround_org.utils.path.join(
-                        lbo_dir, 'program', 'soffice'
+                        lbo_dir,
+                        'program',
+                        'soffice'
                         ),
                     os.path.dirname(lbo_lnk)
                     ),

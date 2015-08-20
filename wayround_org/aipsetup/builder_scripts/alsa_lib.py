@@ -12,7 +12,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return super().builder_action_configure_define_opts(called_as, log) + [
             '--with-pythonincludes=-I{}'.format(
                 wayround_org.utils.path.join(
-                    self.host_multiarch_dir,
+                    self.get_host_arch_dir(),
                     'include',
                     'python2.7'
                     )

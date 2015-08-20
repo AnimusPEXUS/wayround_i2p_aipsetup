@@ -21,8 +21,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_extract(self, called_as, log):
         ret = autotools.extract_high(
-            self.buildingsite,
-            self.package_info['pkg_info']['basename'],
+            self.buildingsite_path,
+            self.get_package_info()['pkg_info']['basename'],
             log=log,
             unwrap_dir=False,
             rename_dir=False,
@@ -32,14 +32,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
 
-        man_dir = wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'share', 'man')
+        man_dir = wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'share', 'man')
 
-        mans = os.listdir(self.src_dir)
+        mans = os.listdir(self.get_src_dir())
 
         for i in mans:
 
             m = wayround_org.utils.path.join(man_dir, i)
-            sm = wayround_org.utils.path.join(self.src_dir, i)
+            sm = wayround_org.utils.path.join(self.get_src_dir(), i)
 
             os.makedirs(m)
 

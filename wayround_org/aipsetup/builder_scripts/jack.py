@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = {
             'PYTHON': wayround_org.utils.file.which(
                 'python3',
-                self.host_multiarch_dir
+                self.get_host_arch_dir()
                 )
             }
         return ret
@@ -25,9 +25,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         ret = waf.waf(
-            self.src_dir,
+            self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.host_multiarch_dir),
+                '--prefix={}'.format(self.get_host_arch_dir()),
                 ],
             arguments=['configure'],
             environment={
@@ -40,9 +40,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build(self, called_as, log):
         ret = waf.waf(
-            self.src_dir,
+            self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.host_multiarch_dir),
+                '--prefix={}'.format(self.get_host_arch_dir()),
                 ],
             arguments=['build'],
             environment={
@@ -55,10 +55,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
         ret = waf.waf(
-            self.src_dir,
+            self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.host_multiarch_dir),
-                '--destdir={}'.format(self.dst_dir)
+                '--prefix={}'.format(self.get_host_arch_dir()),
+                '--destdir={}'.format(self.get_dst_dir())
                 ],
             arguments=[
                 'install'

@@ -276,10 +276,18 @@ class InfoEditorUi:
         g.attach(self.basename_entry, 1, 1, 1, 1)
 
         self.reducible_cb = Gtk.CheckButton.new_with_label("Reducible")
+        
         self.removable_cb = Gtk.CheckButton.new_with_label("Removable")
+        
         self.non_installable_cb = \
             Gtk.CheckButton.new_with_label("Non Installable")
+        
         self.deprecated_cb = Gtk.CheckButton.new_with_label("Deprecated")
+        
+        self.only_primary_install_cb = \
+            Gtk.CheckButton.new_with_label(
+                "Only Primary Install"
+                )
 
         l = Gtk.Label("Home Page")
         l.set_alignment(0, 0.5)
@@ -308,15 +316,27 @@ class InfoEditorUi:
             1, 4, 1, 1
             )
 
-        g.attach(self.reducible_cb,
-                 0, 5, 2, 1)
-        g.attach(self.removable_cb,
-                 0, 6, 2, 1)
-        g.attach(self.non_installable_cb,
-                 0, 7, 2, 1)
-        g.attach(self.deprecated_cb,
-                 0, 8, 2, 1)
-
+        g.attach(
+            self.reducible_cb,
+            0, 5, 2, 1
+            )
+        g.attach(
+            self.removable_cb,
+            0, 6, 2, 1
+            )
+        g.attach(
+            self.non_installable_cb,
+            0, 7, 2, 1
+            )
+        g.attach(
+            self.deprecated_cb,
+            0, 8, 2, 1
+            )
+                 
+        g.attach(
+            self.only_primary_install_cb,
+            0, 9, 2, 1
+            )
         return b
 
     def _init_tab_filter(self):

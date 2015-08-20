@@ -10,14 +10,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         dst_classpath_dir = wayround_org.utils.path.join(
-            self.dst_host_multiarch_dir,
-            'lib',
+            self.get_dst_host_arch_dir(),
             'java',
             'classpath'
             )
         
         src_build_dir = wayround_org.utils.path.join(
-            self.src_dir,
+            self.get_src_dir(),
             'build'
             )
             
@@ -42,10 +41,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [
                 'ant',
                 '-Dversion={}'.format(
-                    self.package_info['pkg_nameinfo']['groups']['version']
+                    self.get_package_info()['pkg_nameinfo']['groups']['version']
                     )
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )
@@ -54,12 +53,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
 
-        os.makedirs(dst_classpath_dir, exist_ok=True)
+        os.makedirs(self.custom_data['dst_classpath_dir'], exist_ok=True)
         shutil.copy(
             wayround_org.utils.path.join(
                 self.custom_data['src_build_dir'], 
                 'hamcrest-all-{}.jar'.format(
-                    self.package_info['pkg_nameinfo']['groups']['version']
+                    self.get_package_info()['pkg_nameinfo']['groups']['version']
                     )
                 ),
             self.custom_data['dst_classpath_dir']

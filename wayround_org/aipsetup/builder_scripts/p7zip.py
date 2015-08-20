@@ -26,17 +26,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         else:
             raise Exception("Can't configure")
 
-        dl = wayround_org.aipsetup.build.find_dl(self.host_multiarch_dir)
-
-        CXX = '{}-g++'.format(self.host_strong)
-        CC = '{}-gcc'.format(self.host_strong)
+        CXX = '{}-g++'.format(self.get_arch_from_pkgi())
+        CC = '{}-gcc'.format(self.get_arch_from_pkgi())
         # LOCAL_FLAGS = self.calculate_default_linker_program_gcc_parameter()
 
         ret = {
             'CXX': CXX,
             'CC': CC,
             #'LOCAL_FLAGS': LOCAL_FLAGS,
-            'PREFIX': self.host_multiarch_dir,
+            'PREFIX': self.get_host_arch_dir(),
             'makefile_suffix': makefile_suffix
             }
 
@@ -45,12 +43,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure(self, called_as, log):
         shutil.copy(
             wayround_org.utils.path.join(
-                self.src_dir,
+                self.get_src_dir(),
                 'makefile.{}'.format(
                     self.custom_data['makefile_suffix']
                     )
                 ),
-            wayround_org.utils.path.join(self.src_dir, 'makefile.machine')
+            wayround_org.utils.path.join(self.get_src_dir(), 'makefile.machine')
             )
         return 0
 
@@ -64,9 +62,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'CXX={}'.format(self.custom_data['CXX']),
                 # 'LOCAL_FLAGS={}'.format(self.custom_data['LOCAL_FLAGS']),
                 'DEST_HOME={}'.format(self.custom_data['PREFIX']),
-                'DEST_DIR={}'.format(self.dst_dir)
+                'DEST_DIR={}'.format(self.get_dst_dir())
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )
@@ -82,9 +80,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'CXX={}'.format(self.custom_data['CXX']),
                 #'LOCAL_FLAGS={}'.format(self.custom_data['LOCAL_FLAGS']),
                 'DEST_HOME={}'.format(self.custom_data['PREFIX']),
-                'DEST_DIR={}'.format(self.dst_dir)
+                'DEST_DIR={}'.format(self.get_dst_dir())
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )

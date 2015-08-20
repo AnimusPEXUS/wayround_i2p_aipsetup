@@ -32,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--strip={}'.format(wayround_org.utils.file.which(
                     'strip',
-                    self.host_multiarch_dir
+                    self.get_host_arch_dir()
                     )
                 )
             ]
@@ -40,6 +40,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_distribute_define_args(self, called_as, log):
-        ret = ['install', 'INSTALL_DIR={}'.format(self.dst_dir)]
+        ret = ['install', 'INSTALL_DIR={}'.format(self.get_dst_dir())]
         
         return ret

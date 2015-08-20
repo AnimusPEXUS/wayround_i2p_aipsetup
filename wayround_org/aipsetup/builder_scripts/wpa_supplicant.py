@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return {
             'src_dir_p_sep': wayround_org.utils.path.join(
-                self.src_dir,
+                self.get_src_dir(),
                 self.source_configure_reldir
                 )
             }
@@ -73,7 +73,7 @@ CONFIG_SMARTCARD=y
 CONFIG_WPS=y
 CFLAGS += -I{hmd}/include/libnl3
 {generated}
-""".format(hmd=self.host_multiarch_dir,
+""".format(hmd=self.get_host_arch_dir(),
            generated = '\n'.join(self.all_automatic_flags_as_list())
            )
             )
@@ -82,7 +82,7 @@ CFLAGS += -I{hmd}/include/libnl3
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
@@ -90,17 +90,20 @@ CFLAGS += -I{hmd}/include/libnl3
                 'install',
                 'LIBDIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.host_multiarch_dir 
-                        self.calculate_main_multiarch_lib_dir_name()
+                        self.get_host_lib_dir() 
                         )
                     ),
                 'BINDIR={}'.format(
-                    wayround_org.utils.path.join(self.host_multiarch_dir, 'bin')
+                    wayround_org.utils.path.join(
+                        self.get_host_arch_dir(), 'bin'
+                        )
                     ),
                 'PN531_PATH={}'.format(
-                    wayround_org.utils.path.join(self.host_multiarch_dir, 'src', 'nfc')
+                    wayround_org.utils.path.join(
+                        self.get_host_arch_dir(), 'src', 'nfc'
+                        )
                     ),
-                'DESTDIR={}'.format(self.dst_dir)
+                'DESTDIR={}'.format(self.get_dst_dir())
                 ],
             environment={},
             environment_mode='copy',
@@ -114,8 +117,12 @@ CFLAGS += -I{hmd}/include/libnl3
 
         src_dir_p_sep = self.custom_data['src_dir_p_sep']
 
-        os.makedirs(wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'man', 'man8'))
-        os.makedirs(wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'man', 'man5'))
+        os.makedirs(wayround_org.utils.path.join(
+            self.get_dst_host_arch_dir(), 'man', 'man8')
+            )
+        os.makedirs(wayround_org.utils.path.join(
+            self.get_dst_host_arch_dir(), 'man', 'man5')
+            )
 
         m8 = glob.glob(
             wayround_org.utils.path.join(src_dir_p_sep, 'doc', 'docbook', '*.8')
@@ -128,7 +135,7 @@ CFLAGS += -I{hmd}/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'man', 'man8', bn)
+                wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'man', 'man8', bn)
                 )
             log.info("    {}".format(i))
 
@@ -136,7 +143,7 @@ CFLAGS += -I{hmd}/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                wayround_org.utils.path.join(self.dst_host_multiarch_dir, 'man', 'man5', bn)
+                wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'man', 'man5', bn)
                 )
             log.info("    {}".format(i))
         return 0

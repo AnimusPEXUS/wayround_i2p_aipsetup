@@ -20,26 +20,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del(ret['build'])
         return ret
 
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'all',
-                'install',
-                #'LDPATH=-L{}'.format(
-                #    wayround_org.utils.path.join(self.host_multiarch_dir, 'lib')
-                #    ),
-                #'RUNPATH=-R$(INS_BASE)/lib -R{}'.format(
-                #    wayround_org.utils.path.join(self.host_multiarch_dir, 'lib')
-                #    ),
-                'INS_BASE={}'.format(wayround_org.utils.path.join(self.host_multiarch_dir)),
-                'DESTDIR={}'.format(self.dst_dir),
-                ] + self.all_automatic_flags_as_list(),
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
+    def builder_action_distribute_define_args(self, called_as, log):
+        ret = [
+            'all',
+            'install',
+            #'LDPATH=-L{}'.format(
+            #    wayround_org.utils.path.join(self.get_host_arch_dir(), 'lib')
+            #    ),
+            #'RUNPATH=-R$(INS_BASE)/lib -R{}'.format(
+            #    wayround_org.utils.path.join(self.get_host_arch_dir(), 'lib')
+            #    ),
+            'INS_BASE={}'.format(
+                wayround_org.utils.path.join(
+                    self.get_host_arch_dir()
+                    )
+                ),
+            'DESTDIR={}'.format(self.get_dst_dir()),
+            ] + self.all_automatic_flags_as_list(),
         return ret

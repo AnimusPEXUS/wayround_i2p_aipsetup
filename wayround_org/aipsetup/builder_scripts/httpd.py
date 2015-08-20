@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = {
             'apr_1_config': wayround_org.utils.file.which(
                 'apr-1-config',
-                self.host_multiarch_dir
+                self.get_host_arch_dir()
                 )
             }
         if ret['apr_1_config'] is None:

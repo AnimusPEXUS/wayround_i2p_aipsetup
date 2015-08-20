@@ -19,7 +19,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         dst_ant_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(), 'java', 'apache-ant'
+            self.get_dst_host_arch_dir(), 'java', 'apache-ant'
             )
 
         etc_dir = wayround_org.utils.path.join(
@@ -63,7 +63,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'bootstrap/bin/ant',
                 #'dist'
                 ],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             )
@@ -102,10 +102,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #       removes
             fi.write(
                 """\
-    #!/bin/bash
-    export ANT_HOME='/usr/lib/java/apache-ant'
-    export PATH="$PATH:$ANT_HOME/bin"
-    """
+#!/bin/bash
+export ANT_HOME='{ant_dir}'
+export PATH="$PATH:$ANT_HOME/bin"
+""".format(ant_dir=dst_ant_dir)
                 )
 
             fi.close()

@@ -16,10 +16,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = 0
 
-        if (self.package_info['pkg_nameinfo']['groups']['version_dirty']
+        if (self.get_package_info()['pkg_nameinfo']['groups']['version_dirty']
                 == '2.00'):
 
-            fn = self.src_dir + '/grub-core/gnulib/stdio.in.h'
+            fn = self.get_src_dir() + '/grub-core/gnulib/stdio.in.h'
 
             f = open(fn)
             ftl = f.readlines()
@@ -34,7 +34,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             f.writelines(ftl)
             f.close()
 
-            fn = self.src_dir + '/util/grub-mkfont.c'
+            fn = self.get_src_dir() + '/util/grub-mkfont.c'
 
             f = open(fn)
             ftl = f.readlines()
@@ -58,7 +58,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                  '/gets is a/d',
                  'grub-core/gnulib/stdio.in.h'
                  ],
-                cwd=self.src_dir,
+                cwd=self.get_src_dir(),
                 stdout=log.stdout,
                 stderr=log.stderr
                 )
@@ -71,7 +71,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                  '/gets is a/d',
                  'grub-core/gnulib/stdio.in.h'
                  ],
-                cwd=self.src_dir,
+                cwd=self.get_src_dir(),
                 stdout=log.stdout,
                 stderr=log.stderr
                 )

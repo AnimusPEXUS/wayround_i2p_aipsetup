@@ -21,7 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure(self, called_as, log):
         ret = subprocess.Popen(
             ['bash', '-c', 'xmkmf'],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             ).wait()
@@ -30,25 +30,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build(self, called_as, log):
         ret = subprocess.Popen(
             ['make', 'World'],
-            cwd=self.src_dir,
+            cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr
             ).wait()
         return ret
 
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'install.man',
-                'DESTDIR=' + self.dst_dir
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'install',
+            'install.man',
+            'DESTDIR=' + self.get_dst_dir()
+            ]

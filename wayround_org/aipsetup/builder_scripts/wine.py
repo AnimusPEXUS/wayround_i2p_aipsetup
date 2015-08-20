@@ -16,7 +16,7 @@ class Builder_wow64(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
-        self.separate_build_dir = wayround_org.utils.path.join(self.src_dir, 'wine64')
+        self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'wine64')
         #self.source_configure_reldir = '..'
 
         '''
@@ -50,7 +50,7 @@ class Builder_wow64(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure(self, called_as, log):
-        os.makedirs(wayround_org.utils.path.join(self.src_dir, 'wine64'), exist_ok=True)
+        os.makedirs(wayround_org.utils.path.join(self.get_src_dir(), 'wine64'), exist_ok=True)
         ret = super().builder_action_configure(called_as, log)
         return ret
 
@@ -61,15 +61,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
-        self.separate_build_dir = wayround_org.utils.path.join(self.src_dir, 'wine32')
+        self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'wine32')
 
         ret = {
             'Builder_wow64': None,
             #'wow64': False
             }
 
-        # if self.host_strong.startswith('i686'):
-        if self.host_strong.startswith('x86_64'):
+        # if self.get_arch_from_pkgi().startswith('i686'):
+        if self.get_arch_from_pkgi().startswith('x86_64'):
             ret['Builder_wow64'] = Builder_wow64(self.control)
 
             '''
@@ -187,7 +187,7 @@ so going to build with Wow64 support
 
             ret += [
                 '--with-wine64={}'.format(
-                    wayround_org.utils.path.join(self.src_dir, 'wine64')
+                    wayround_org.utils.path.join(self.get_src_dir(), 'wine64')
                     )
                 ]
 
@@ -247,7 +247,7 @@ so going to build with Wow64 support
         return ret
 
     def builder_action_configure(self, called_as, log):
-        os.makedirs(wayround_org.utils.path.join(self.src_dir, 'wine32'), exist_ok=True)
+        os.makedirs(wayround_org.utils.path.join(self.get_src_dir(), 'wine32'), exist_ok=True)
         ret = super().builder_action_configure(called_as, log)
         return ret
 

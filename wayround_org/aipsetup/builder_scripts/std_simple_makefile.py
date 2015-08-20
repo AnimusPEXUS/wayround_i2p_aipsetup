@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
     def builder_action_prepare_destdir(self, called_as, log):
         ret = 0
 
-        target_path = wayround_org.utils.path.join(self.dst_dir, 'usr')
+        target_path = wayround_org.utils.path.join(self.get_dst_dir(), 'usr')
 
         try:
             os.makedirs(
@@ -38,12 +38,12 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
 
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
-            self.buildingsite,
+            self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
                 'install',
-                'DESTDIR={}'.format(self.dst_dir),
+                'DESTDIR={}'.format(self.get_dst_dir()),
                 'prefix={}'.format(wayround_org.utils.path.join(self.dst_host_multiarh_dir)
                 ],
             environment={},
