@@ -120,6 +120,12 @@ def _process_h_and_a_opts_wide(opts, config):
             if arch.lower() == 'all':
                 arch = None
 
+    else:
+
+        if '-a' in opts:
+            host = config['system_settings']['host']
+            arch = opts['-a']
+
     return host, arch
 
 
@@ -221,6 +227,10 @@ def system_install_package(command_name, opts, args, adds):
                     logging.error("       {}".format(i))
 
                 ret = 3
+
+            logging.info("---------------------------------------------------")
+            logging.info("Installations finished. Usual updates comming next.")
+            logging.info("---------------------------------------------------")
 
             wayround_org.aipsetup.sysupdates.all_actions()
 
@@ -384,7 +394,7 @@ def system_list_package_files(command_name, opts, args, adds):
             host=host,
             arch=arch
             )
-        
+
         print('{}'.format(os.path.basename(latest)))
         print('------------------------')
 
@@ -1126,7 +1136,8 @@ def clean_find_garbage(command_name, opts, args, adds):
             opts_list=[
                 '-b=',
                 '--script-type=',
-                '--so'
+                '--so',
+                '-h='
                 ]
             ) != 0:
         ret = 1
@@ -1149,6 +1160,8 @@ def clean_find_garbage(command_name, opts, args, adds):
 
         only_lib = '--so' in opts
 
+        host, arch = _process_h_and_a_opts_specific(opts, config)
+
         log = wayround_org.utils.log.Log(
             os.getcwd(), 'system_garbage', timestamp=timestamp
             )
@@ -1170,7 +1183,11 @@ def clean_find_garbage(command_name, opts, args, adds):
                 )
 
             log.info("Searching for garbage")
-            res = system.find_system_garbage(mute=False, only_lib=only_lib)
+            res = system.find_system_garbage(
+                mute=False,
+                only_lib=only_lib,
+                host=host
+                )
 
             if not isinstance(res, list):
                 log.error("Some error while searching for garbage")
@@ -1185,7 +1202,7 @@ def clean_find_garbage(command_name, opts, args, adds):
 
                 libs = wayround_org.utils.path.exclude_files_not_in_dirs(
                     res,
-                    system.library_paths()
+                    system.library_paths(host=host),
                     )
 
                 libs = wayround_org.aipsetup.system.filter_so_files(
@@ -1440,7 +1457,13 @@ def clean_find_libtool_la_with_problems(
     if '-l' in opts:
         log = opts['-l']
 
+    host = config['system_settings']['host']
+    if '-h' in opts:
+        host = str(opts['-h'])
+
     get_sources = '-g' in opts
+
+    write_remove_script = '-s' in opts
 
     pkg_client = \
         wayround_org.aipsetup.controllers.pkg_client_by_config(
@@ -1453,7 +1476,8 @@ def clean_find_libtool_la_with_problems(
         base_dir
         )
 
-    res = system.find_libtool_la_with_problems(mute=False)
+    res = system.find_libtool_la_with_problems(mute=False, host=host)
+    res_for_script = res
 
     if log:
 
@@ -1532,6 +1556,20 @@ def clean_find_libtool_la_with_problems(
                     )
                 f.close()
                 errors = True
+
+    if write_remove_script:
+
+        with open('la_remove_script.sh', 'w') as f:
+            f.write('#!/bin/bash\n')
+            f.write('\n')
+            f.write('exit 1 # fuse\n')
+
+            for i in sorted(list(res_for_script.keys())):
+                f.write("rm '{}'\n".format(i))
+
+            f.write('\n')
+            f.write('echo done\n')
+            f.write('exit 0\n')
 
     if errors:
         ret = 1

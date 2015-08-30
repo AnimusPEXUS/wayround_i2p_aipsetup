@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = dict()
         ret['cc_file'] = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'bin', 'cc'
+            self.get_dst_host_dir(), 'bin', 'cc'
             )
         ret['libcpp_file'] = wayround_org.utils.path.join(
             self.get_dst_host_arch_dir(),
@@ -203,63 +203,71 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             ret += [
-
+                
                 '--disable-gold',
-
+                
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-
+                
                 # NOTE: no 'go' language in Lailalo system
                 '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-
+                
                 '--disable-bootstrap',
-
+                
                 '--enable-threads=posix',
-
+                
                 # wine Wow64 support requires this
                 # ld: Relocatable linking with relocations from format
                 #     elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
                 #     (aclui.pnv73q.o) is not supported
                 '--enable-multiarch',
                 '--enable-multilib',
-
+                
                 #'--disable-multiarch',
                 #'--disable-multilib',
-
+                
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
-
-                '--oldincludedir=' +
-                wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    'include'
-                    ),
-
-                '--with-gxx-include-dir={}'.format(
-                    wayround_org.utils.path.join(
-                        self.get_host_arch_dir(),
-                        'include-c++',
-                        #'c++',
-                        #'5.2.0'
-                        )
-                    ),
-
+                
+                #'--oldincludedir=' +
+                #wayround_org.utils.path.join(
+                #    self.get_host_dir(),
+                #    'include'
+                #    ),
+                
+                #'--with-gxx-include-dir={}'.format(
+                #    wayround_org.utils.path.join(
+                #        self.get_host_arch_dir(),
+                #        'include-c++',
+                #        #'c++',
+                #        #'5.2.0'
+                #        )
+                #    ),
+                
                 # experimental option for this place
-                # without it gcc tryes to use incompatible /lib/crt*.o files
-                #'--with-sysroot={}'.format(self.get_host_dir()),
+                #
+                # NOTE: without it gcc tryes to use incompatible
+                #       /lib/crt*.o files.
+                #
+                # NOTE: this is required. else libs will be searched
+                #       in /lib and /usr/lib, but not in
+                #       /multihost/xxx/lib!:
+                '--with-sysroot={}'.format(self.get_host_dir()),
+                
                 # '--with-build-sysroot={}'.format(self.get_host_arch_dir())
                 '--with-native-system-header-dir={}'.format(
                     wayround_org.utils.path.join(
                         #'/',
                         #'multiarch',
                         #self.get_host_from_pkgi(),
-                        self.get_host_arch_dir(),
+                        self.get_host_dir(),
                         'include'
-                        )
                     )
-                ]
+                ),
+                #'--with-isl={}'.format(self.get_host_dir())
+            ]
 
             if self.get_host_from_pkgi().startswith('x86_64'):
                 # TODO: no hardcode

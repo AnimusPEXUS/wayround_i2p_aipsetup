@@ -20,6 +20,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_build_define_opts(self, called_as, log):
-        ret = super().builder_action_build_define_opts()
+        ret = super().builder_action_build_define_opts(called_as, log)
         ret += self.all_automatic_flags_as_list()
         return ret

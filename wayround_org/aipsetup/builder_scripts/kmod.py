@@ -25,18 +25,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_make_links(self, called_as, log):
 
         os.makedirs(
-            wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'sbin'),
+            wayround_org.utils.path.join(self.get_dst_host_dir(), 'sbin'),
             exist_ok=True
             )
 
         os.makedirs(
-            wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'bin'),
+            wayround_org.utils.path.join(self.get_dst_host_dir(), 'bin'),
             exist_ok=True
             )
 
         for i in ['depmod', 'insmod', 'modinfo', 'modprobe', 'rmmod']:
 
-            ffn = wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'sbin', i)
+            ffn = wayround_org.utils.path.join(self.get_dst_host_dir(), 'sbin', i)
 
             if os.path.exists(ffn):
                 os.unlink(ffn)
@@ -53,7 +53,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         for i in ['lsmod']:
 
-            ffn = wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'bin', i)
+            ffn = wayround_org.utils.path.join(self.get_dst_host_dir(), 'bin', i)
 
             if os.path.exists(ffn):
                 os.unlink(ffn)

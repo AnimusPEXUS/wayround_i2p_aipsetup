@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "rpl2tp",
   "version_tool": "",
   "basename": "rp-l2tp",
   "filters": "",

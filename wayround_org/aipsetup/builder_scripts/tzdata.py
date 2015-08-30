@@ -32,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_verify_tarball(self, called_as, log):
-        files = os.listdir(self.tar_dir)
+        files = os.listdir(self.get_tar_dir())
         tzdata = None
         ret = 0
 

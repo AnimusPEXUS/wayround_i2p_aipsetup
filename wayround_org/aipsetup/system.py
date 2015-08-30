@@ -286,7 +286,7 @@ class SystemCtl:
                             info['deprecated']
                             or info['non_installable']
                             )
-                    ):
+                        ):
                     logging.error(
                         "Package is deprecated({}) or"
                         " non-installable({})".format(
@@ -300,7 +300,7 @@ class SystemCtl:
                 if (not force
                         and info['only_primary_install']
                         and arch != host
-                    ):
+                        ):
                     logging.error(
                         "Package is only_primary_install({}) but"
                         " host != arch"
@@ -1045,41 +1045,42 @@ class SystemCtl:
             self._installed_pkg_dir
             )
 
-        filelist = glob.glob(wayround_org.utils.path.join(listdir, '*.xz'))
+        filelist = os.listdir(listdir)
+        for i in range(len(filelist) - 1, -1, -1):
 
-        ret = 0
+            if not filelist[i].endswith('.xz'):
+                del filelist[i]
+                continue
 
-        if not os.path.isdir(listdir):
-            logging.error("not a dir {}".format(listdir))
-            ret = 1
-        else:
+            j = wayround_org.utils.path.join(
+                listdir,
+                filelist[i]
+                )
 
-            bases = []
-            for each in filelist:
-                bases.append(os.path.basename(each))
+            if not os.path.isfile(j) or os.path.islink(j):
+                del filelist[i]
+                continue
 
-            for i in ['sums', 'buildlogs', '.', '..']:
-                if i in bases:
-                    bases.remove(i)
+        if host is not None:
+            for i in range(len(filelist) - 1, -1, -1):
+                asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
+                if host != asp.host:
+                    del filelist[i]
 
-            if host is not None:
-                for i in range(len(filelist) - 1, -1, -1):
-                    asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
-                    if host != asp.host:
-                        del filelist[i]
+        if arch is not None:
+            for i in range(len(filelist) - 1, -1, -1):
+                asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
+                if arch != asp.arch:
+                    del filelist[i]
 
-            if arch is not None:
-                for i in range(len(filelist) - 1, -1, -1):
-                    asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
-                    if arch != asp.arch:
-                        del filelist[i]
+        ret = filelist
 
-            ret = filelist
-
-        if remove_extensions and isinstance(ret, list):
+        if remove_extensions:
             for i in range(len(ret)):
                 if ret[i].endswith('.xz'):
                     ret[i] = ret[i][:-3]
+
+        ret.sort()
 
         return ret
 
@@ -1189,15 +1190,22 @@ class SystemCtl:
 
         ret = 0
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        asp_name1 = os.path.basename(asp_name)
+        if asp_name != asp_name1:
+            raise ValueError(
+                "`asp_name' shuld be basename\n"
+                "{}\n"
+                " != \n"
+                "{}".format(asp_name, asp_name1)
+                )
+        del asp_name1
 
-        list_dir = wayround_org.utils.path.abspath(
-            self._installed_pkg_dir
-            )
-
-        pkg_list_file = wayround_org.utils.path.join(
-            list_dir,
-            asp_name
+        pkg_list_file = wayround_org.utils.path.abspath(
+            wayround_org.utils.path.join(
+                # self.basedir, # already added to self._installed_pkg_dir
+                self._installed_pkg_dir,
+                asp_name
+                )
             )
 
         if not pkg_list_file.endswith('.xz'):
@@ -2354,6 +2362,9 @@ class SystemCtl:
         only_lib - search only for library garbage (/multiarch/*/lib*)
         """
 
+        if not isinstance(host, str):
+            raise TypeError("`host' must be str")
+
         self._test_host_arch_parameters(host, arch)
 
         if not mute:
@@ -2755,14 +2766,26 @@ class SystemCtl:
                 if os.path.exists(locale_dir):
                     shutil.rmtree(locale_dir)
 
-                p = subprocess.Popen(
-                    ['chroot', self.basedir,
+                logging.info(
+                    "creating locale for dir: {}".format(
+                        target_dir
+                        )
+                    )
+                cmd = ['chroot', self.basedir,
 
                      'localedef',
                      '-f', 'UTF-8',
                      '-i', 'en_US',
                      rel_locale_dir
-                     ],
+                     ]
+                logging.info(
+                    " command: {}".format(
+                        ' '.join(cmd)
+                        )
+                    )
+
+                p = subprocess.Popen(
+                    cmd
                     )
 
                 ret = p.wait()
@@ -2871,6 +2894,8 @@ class SystemCtl:
             host=None
             ):
 
+        # NOTE: here is no arch parameter. it's not needed here
+
         # FIXME: attention to paths required
 
         if not isinstance(host, str):
@@ -2948,16 +2973,16 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                                wayround_org.utils.path.join(
-                                    '/multihost', host, 'lib'
-                                    )
-                                )
-                                or not os.path.isdir(
-                                wayround_org.utils.path.join(
-                                    self.basedir,
-                                    wj)
-                                )
-                                ):
+                            wayround_org.utils.path.join(
+                                        '/multihost', host, 'lib'
+                                        )
+                            )
+                            or not os.path.isdir(
+                            wayround_org.utils.path.join(
+                                        self.basedir,
+                                        wj)
+                            )
+                            ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

@@ -1,5 +1,5 @@
 {
-  "description": "write something here, please",
+  "description": "deprecated. use dconf and (?)GSettings",
   "home_page": "http://www.gnome.org",
   "buildscript": "gconf",
   "version_tool": "",
@@ -8,7 +8,7 @@
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": false,
+  "deprecated": true,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

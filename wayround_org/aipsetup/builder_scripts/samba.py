@@ -22,7 +22,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #                    '--with-swatdir=/usr/share/samba/swat',
             '--sysconfdir=/etc/samba',
             #                    '--libexecdir=/usr/libexec',
-            #'--libdir={}'.format(wayround_org.utils.path.join(self.get_host_arch_dir(), 'lib')),
+            #'--libdir={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_host_dir(), 
+            #        'lib'
+            #        )
+            #    ),
             '--with-configdir=/etc/samba',
             '--with-privatedir=/etc/samba/private',
             #                    '--includedir=/usr/include',
@@ -34,7 +39,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             wayround_org.utils.file.copytree(
                 wayround_org.utils.path.join(self.get_src_dir(), i),
-                wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'share', 'samba', i),
+                wayround_org.utils.path.join(self.get_dst_host_dir(), 'share', 'samba', i),
                 overwrite_files=True,
                 clear_before_copy=False,
                 dst_must_be_empty=False

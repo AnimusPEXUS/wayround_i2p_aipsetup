@@ -9,17 +9,18 @@ import wayround_org.aipsetup.builder_scripts.std_cmake
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
+	# TODO: tests required
         usr_share_mysql = '{}'.format(
             wayround_org.utils.path.join(
-                self.get_host_arch_dir(), 'share', 'mysql'
+                self.get_host_dir(), 'share', 'mysql'
                 )
             )
         return super().builder_action_configure_define_opts(called_as, log) + [
-            '-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_arch_dir()),
+            # '-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_dir()),
 
             '-DMYSQL_DATADIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
+                    self.get_host_dir(),
                     'share',
                     'mysql',
                     'data'
@@ -28,18 +29,19 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
             '-DINSTALL_SBINDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
+                    self.get_host_dir(),
                     'bin'
                     )
                 ),
             '-DINSTALL_LIBDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_lib_dir()
+                    self.get_host_dir(),
+		    'lib'
                     )
                 ),
             '-DINSTALL_MANDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
+                    self.get_host_dir(),
                     'share',
                     'man'
                     )
@@ -48,7 +50,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
             '-DINSTALL_DOCREADMEDIR={}'.format(usr_share_mysql),
             '-DINSTALL_INCLUDEDIR={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
+                    self.get_host_dir(),
                     'include',
                     'mysql'
                     )

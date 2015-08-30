@@ -25,7 +25,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build_define_args(self, called_as, log):
         return [
             'linux',
-            'INSTALL_TOP={}'.format(self.get_host_arch_dir()),
+            'INSTALL_TOP={}'.format(self.get_host_dir()),
             'MYCFLAGS=-std=gnu99',
             'MYLDFLAGS=-ltinfow'
             ] + self.all_automatic_flags_as_list()
@@ -33,7 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_define_args(self, called_as, log):
         return [
             'install',
-            'INSTALL_TOP={}'.format(self.get_dst_host_arch_dir()),
+            'INSTALL_TOP={}'.format(self.get_dst_host_dir()),
             'MYCFLAGS=-std=gnu99',
             'MYLDFLAGS=-ltinfow'
             ] + self.all_automatic_flags_as_list(),
@@ -41,8 +41,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_pc(self, called_as, log):
 
         pc_file_name_dir = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(),
-            self.calculate_main_multiarch_lib_dir_name(),
+            self.get_dst_host_dir(),
+            'lib', # self.calculate_main_multiarch_lib_dir_name(),
             'pkgconfig'
             )
 
@@ -63,7 +63,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             ['make',
              'pc',
-             'INSTALL_TOP={}'.format(self.get_dst_host_arch_dir())
+             'INSTALL_TOP={}'.format(self.get_dst_host_dir())
              ],
             stdout=subprocess.PIPE,
             cwd=self.get_src_dir()
@@ -103,8 +103,8 @@ Cflags: -I${{includedir}}
 """.format(
             V='.'.join(version[:2]),
             R='.'.join(version),
-            arch_path='{}'.format(self.get_host_arch_dir()),
-            lib_dir_name=self.calculate_main_multiarch_lib_dir_name()
+            arch_path='{}'.format(self.get_host_dir()),
+            lib_dir_name='lib' # self.calculate_main_multiarch_lib_dir_name()
             )
 
         pc_file.write(tpl)

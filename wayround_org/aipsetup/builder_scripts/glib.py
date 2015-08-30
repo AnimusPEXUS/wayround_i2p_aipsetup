@@ -14,7 +14,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-python={}'.format(
                 wayround_org.utils.file.which(
                     'python3',
-                    self.get_host_arch_dir()
+                    self.get_host_dir()
                     )
                 ),
             ]

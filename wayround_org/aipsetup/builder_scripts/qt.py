@@ -47,19 +47,24 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
 
+        opts = [
+            '-opensource',
+            '-confirm-license',
+            '-prefix', wayround_org.utils.path.join(
+                self.get_host_dir(),
+                'qt',
+                self.custom_data['qt_number_str']
+                ),
+            ]
+
+        if self.custom_data['qt_number_str'] == '5':
+            opts += [
+                '-pulseaudio',
+                '-no-alsa'
+                ]
+
         p = subprocess.Popen(
-            ['./configure'] +
-            [
-                '-opensource',
-                '-confirm-license',
-                '-prefix', wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    'qt',
-                    self.custom_data['qt_number_str']
-                    ),
-                #'-pulseaudio',
-                #'-no-alsa'
-                ],
+            ['./configure'] + opts,
             env=copy.deepcopy(
                 os.environ
                 ).update(
@@ -75,57 +80,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_build(self, called_as, log):
-        ''
-
-        '''
-            arguments=[
-                'CC={}'.format(
-                    wayround_org.utils.file.which(
-                        '{}-gcc'.format(self.get_arch_from_pkgi()),
-                        self.get_host_arch_dir()
-                        )
-                    ),
-                'CXX={}'.format(
-                    wayround_org.utils.file.which(
-                        '{}-g++'.format(self.get_arch_from_pkgi()),
-                        self.get_host_arch_dir()
-                        )
-                    ),
-                'LDFLAGS={}'.format(
-                    self.calculate_default_linker_program_gcc_parameter()
-                    )
-                ],
-        '''
-
-        ret = autotools.make_high(
-            self.buildingsite_path,
-            log=log,
-            options=[],
-            arguments=[
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
-
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite_path,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'INSTALL_ROOT={}'.format(self.get_dst_dir())
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'install',
+            'INSTALL_ROOT={}'.format(self.get_dst_dir())
+            ]
 
     def builder_action_environments(self, called_as, log):
 
@@ -149,7 +108,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         f = open(
             wayround_org.utils.path.join(
                 etc_profile_set_dir,
-                '009.qt{}.{}.sh'.format(qt_number_str, self.get_arch_from_pkgi())
+                '009.qt{}.{}.sh'.format(
+                    qt_number_str,
+                    self.get_arch_from_pkgi())
                 ),
             'w'
             )
@@ -171,9 +132,9 @@ export LD_LIBRARY_PATH+="{arch_dir}/qt/{qtnum}/lib"
 
 """.format(
                 qtnum=qt_number_str,
-                arch_dir=self.get_host_arch_dir()
+                arch_dir=self.get_host_dir()
                 )
-            )
+                )
         f.close()
 
         return 0

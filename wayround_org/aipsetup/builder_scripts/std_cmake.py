@@ -31,11 +31,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def calculate_compilers_options(self, d):
         if not 'CMAKE_C_COMPILER' in d:
             d['CMAKE_C_COMPILER'] = []
-        d['CMAKE_C_COMPILER'].append('{}-gcc'.format(self.calculate_CC))
+        d['CMAKE_C_COMPILER'].append('{}'.format(self.calculate_CC()))
 
         if not 'CMAKE_CXX_COMPILER' in d:
             d['CMAKE_CXX_COMPILER'] = []
-        d['CMAKE_CXX_COMPILER'].append('{}-g++'.format(self.calculate_CXX))
+        d['CMAKE_CXX_COMPILER'].append('{}'.format(self.calculate_CXX()))
+
+        if not 'CMAKE_CXX_FLAGS' in d:
+            d['CMAKE_CXX_FLAGS'] = []
+        d['CMAKE_CXX_FLAGS'].append(
+            '-m{}'.format(self.get_multilib_variant_int())
+            )
+
+        if not 'CMAKE_C_FLAGS' in d:
+            d['CMAKE_C_FLAGS'] = []
+        d['CMAKE_C_FLAGS'].append(
+            '-m{}'.format(self.get_multilib_variant_int())
+            )
 
         return
 
@@ -45,11 +57,67 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         for x in self.all_automatic_flags_as_list()]
 
         ret = [
-            '-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_arch_dir()),
-            '-DCMAKE_SYSROOT={}'.format(self.get_host_arch_dir()),
-            '-DSYSCONFDIR=/etc',
-            '-DLOCALSTATEDIR=/var',
-            ] + cmake.calc_conf_hbt_options(self) + minus_d_list
+            #'-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_dir()),
+            #
+            #'-DCMAKE_SYSROOT={}'.format(self.get_host_dir()),
+            #'-DSYSCONFDIR=/etc',
+            #'-DLOCALSTATEDIR=/var',
+            ]
+
+        std_opts = super().builder_action_configure_define_opts(called_as, log)
+
+        for i in [
+                'PREFIX',
+                'BINDIR',
+                'SBINDIR',
+                'LIBEXECDIR',
+                'SYSCONFDIR',
+                'SHAREDSTATEDIR',
+                'LOCALSTATEDIR',
+                'LIBDIR',
+                'INCLUDEDIR',
+                'OLDINCLUDEDIR',
+                'DATAROOTDIR',
+                'DATADIR',
+                'MANDIR',
+                'DOCDIR',
+                ]:
+
+            i_l_n = '--{}='.format(i.lower())
+
+            for j in std_opts:
+                if j.startswith(i_l_n):
+                    ret.append(
+                        '-DCMAKE_INSTALL_{}={}'.format(
+                            i,
+                            j.split('=', 1)[1]
+                            )
+                        )
+
+        ret += cmake.calc_conf_hbt_options(self) + minus_d_list
+
+        '''
+        ret += [
+            '-DLIB_INSTALL_DIR={}'.format(
+                wayround_org.utils.path.join(
+                    self.get_host_dir(),
+                    self.calculate_main_multiarch_lib_dir_name()
+                    )
+                ),
+                
+            ]
+
+        
+        if self.get_arch_from_pkgi().startswith('x86_64'):
+            ret += [
+                '-DLIB_SUFFIX=64',
+                '-DLIBDIR_SUFFIX=64',
+                '-DX86_64=1',
+                
+                #'-DARCH_64=TRUE',
+                #'-DFIND_LIBRARY_USE_LIB64_PATHS=1'
+                ]
+        '''
 
         return ret
 

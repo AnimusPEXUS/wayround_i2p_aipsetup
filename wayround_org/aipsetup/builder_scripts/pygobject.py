@@ -9,10 +9,14 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
-    def builder_action_configure_define_environment(self, called_as, log):
-        return {
-            'PYTHON': wayround_org.utils.file.which(
-                'python3',
-                self.get_host_arch_dir()
+    def builder_action_configure_define_opts(self, called_as, log):
+        ret = super().builder_action_configure_define_opts(called_as, log)
+        ret += [
+            'PYTHON={}'.format(
+                wayround_org.utils.file.which(
+                    'python3',
+                    self.get_host_dir()
+                    )
                 )
-            }
+            ]
+        return ret

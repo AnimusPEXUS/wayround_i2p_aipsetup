@@ -14,30 +14,30 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            '--with-autoopts-config={}'.format(
-                wayround_org.utils.file.which(
-                    'autoopts-config',
-                    self.get_host_arch_dir()
-                    )
-                ),
+            #'--with-autoopts-config={}'.format(
+            #    wayround_org.utils.file.which(
+            #        'autoopts-config',
+            #        self.get_host_dir()
+            #        )
+            #    ),
             #'GUILE={}'.format(
             #    wayround_org.utils.file.which(
             #        'guile',
-            #        self.get_host_arch_dir()
+            #        self.get_host_dir()
             #        )
             #    ),
-            'GUILE_CONFIG={}'.format(
-                wayround_org.utils.file.which(
-                    'guile-config',
-                    self.get_host_arch_dir()
-                    )
-                ),
-            'GUILE_SNARF={}'.format(
-                wayround_org.utils.file.which(
-                    'guile-snarf',
-                    self.get_host_arch_dir()
-                    )
-                ),
+            #'GUILE_CONFIG={}'.format(
+            #    wayround_org.utils.file.which(
+            #        'guile-config',
+            #        self.get_host_dir()
+            #        )
+            #    ),
+            #'GUILE_SNARF={}'.format(
+            #    wayround_org.utils.file.which(
+            #        'guile-snarf',
+            #        self.get_host_dir()
+            #        )
+            #    ),
             ]
 
         return ret

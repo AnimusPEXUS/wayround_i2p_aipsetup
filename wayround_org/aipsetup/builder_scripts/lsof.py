@@ -118,7 +118,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ret = 1
             else:
                 dst_bin_dir = wayround_org.utils.path.join(
-                    self.get_dst_host_arch_dir(),
+                    self.get_dst_host_dir(),
                     'bin'
                     )
 
@@ -133,7 +133,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     )
 
                 dst_man_dir = wayround_org.utils.path.join(
-                    self.get_dst_host_arch_dir(),
+                    self.get_dst_host_dir(),
                     'share',
                     'man',
                     'man8'

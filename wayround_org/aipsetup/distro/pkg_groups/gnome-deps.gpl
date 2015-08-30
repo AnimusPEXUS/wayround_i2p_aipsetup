@@ -27,12 +27,12 @@
 
         "accountsservice",
 
-        "ibus", "ibus-anthy", "ibus-chewing", "ibus-gjs",
+        "ibus", "ibus-anthy", "ibus-chewing", "ibus-gjs", "ibus-qt", "ibus-xkb", "ibus-xkb-layouts",
 
         "enchant",
         "libaccounts-glib", "accounts-qt", "libsignon-glib", "libsignoncrypto-qt", "signon", "signon-oauth2",
 
-        "libical", "libsoup", "libsecret",
+        "libical",
 
         "liboauth",
         

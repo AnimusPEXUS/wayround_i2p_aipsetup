@@ -21,13 +21,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--disable-audiotestsrc',
             #'--disable-videotestsrc',
             #'--disable-freetypetest',
-            #'--with-sysroot={}'.format(self.get_host_arch_dir())
+            #'--with-sysroot={}'.format(self.get_host_dir())
             ]
         return ret
 
     def builder_action_build_define_environment(self, called_as, log):
         ret = super().builder_action_build_define_environment(called_as, log)
-        ret['LD_LIBRARY_PATH'] += ':../tag/.libs'
+        # ret['LD_LIBRARY_PATH'] += ':../tag/.libs'
         return ret
 
    # def builder_action_build_define_add_args(self, called_as, log):

@@ -17,5 +17,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-inotify',
             # '--enable-kqueue', #BSD needed
             # '--enable-launchd', #MacOS needed
-            '--enable-systemd',
+
+            # NOTE: cyrcular dep with systemd. 
+            #       build without systemd may be required once
+            '--enable-systemd', 
+            #'--disable-systemd',
+
+            # NOTE: cyrcular dep with dbus-glib
+            # NOTE: dbus-glib is deprecated
+            # '--without-dbus-glib'
             ]

@@ -503,6 +503,11 @@
             "args": [],
             "kwargs": {}
             },
+        "libsecret": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
         "gvfs": {
             "proc": "gnome_get",
             "args": [],
@@ -531,12 +536,6 @@
 
 
         "ORBit2":{
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-
-        "GConf":{
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
@@ -662,11 +661,6 @@
             "args": [],
             "kwargs": {}
             },
-        "libsecret": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "libwnck": {
             "proc": "normal_get",
             "args": [],
@@ -686,7 +680,7 @@
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
-            },
+            }
     }
 
 }

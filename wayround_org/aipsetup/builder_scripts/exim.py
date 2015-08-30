@@ -11,7 +11,7 @@ import wayround_org.aipsetup.builder_scripts.std
 
 # FIXME: host/build/target fix required
 # TODO: try to set parameters to make, - without editing config file
-
+# TODO: looks like already most of all this file need to be rewrited
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
@@ -90,7 +90,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if ftl[i].startswith('BIN_DIRECTORY=/usr/exim/bin'):
                     log.info("edit: '{}'".format(ftl[i]))
                     ftl[i] = 'BIN_DIRECTORY={}/bin'.format(
-                        self.get_host_arch_dir())
+                        self.get_host_dir())
 
                 if ftl[i].startswith('CONFIGURE_FILE=/usr/exim/configure'):
                     log.info("edit: '{}'".format(ftl[i]))

@@ -26,25 +26,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute_define_args(self, called_as, log):
 
-        lib_bcc_dir = wayround_org.utils.path.join(
-            '/..',
-            '..',
-            self.calculate_main_multiarch_lib_dir_name(),
-            'bcc'
-            )
+        #lib_bcc_dir = wayround_org.utils.path.join(
+        #    '/..',
+        #    '..',
+        #    'lib',#self.calculate_main_multiarch_lib_dir_name(),
+        #    'bcc'
+        #    )
 
-        dst_dir = self.get_dst_host_arch_dir()
+        dst_dir = self.get_dst_host_dir()
 
         ret = [
             'install',
             'PREFIX=',
             'DESTDIR={}'.format(dst_dir),
             'DIST={}'.format(dst_dir),
-            'BINDIR=/bin',
-            'LIBDIR={}'.format(lib_bcc_dir),
-            'INCLDIR={}'.format(lib_bcc_dir),
-            'ASLDDIR=/bin',
-            'MANDIR=/share/man',
+            #'BINDIR=/bin',
+            #'LIBDIR={}'.format(lib_bcc_dir),
+            #'INCLDIR={}'.format(lib_bcc_dir),
+            #'ASLDDIR=/bin',
+            #'MANDIR=/share/man',
             #'INDAT=', 'INEXE='
             ]
         return ret

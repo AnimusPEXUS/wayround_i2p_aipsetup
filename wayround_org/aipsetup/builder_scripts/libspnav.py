@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         for i in [
                 self.get_dst_host_lib_dir(),
                 wayround_org.utils.path.join(
-                    self.get_dst_host_arch_dir(),
+                    self.get_dst_host_dir(),
                     'include'
                     )
                 ]:

@@ -31,6 +31,8 @@
 
         "liboil",
 
+        "pixman",
+
         "exempi",
         "libopenraw",
 

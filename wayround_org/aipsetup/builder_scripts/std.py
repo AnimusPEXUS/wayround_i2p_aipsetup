@@ -28,29 +28,14 @@ class Builder:
         self.control = buildingsite
         self.buildingsite_path = self.control.path
 
-        '''
-        # this is for glibc case, when package_info `host' should stay same
-        # as `build', but ./configure --host must be different
-        self.internal_host_redefinition = None
-
-        # done whis, but may be it's not needed
-        self.internal_build_redefinition = None  # not used
-        self.internal_target_redefinition = None  # not used
-
-        # override values is package_info.json
-        self.total_host_redefinition = None
-        self.total_build_redefinition = None
-        self.total_target_redefinition = None
-        '''
+        # this is for builder_action_autogen() method
+        self.forced_autogen = False
 
         self.separate_build_dir = False
 
         self.source_configure_reldir = '.'
 
         self.forced_target = False
-
-        #self.apply_host_spec_linking_interpreter_option = False
-        #self.apply_host_spec_linking_lib_dir_options = False
 
         self.apply_host_spec_compilers_options = True
 
@@ -202,6 +187,7 @@ class Builder:
             self.get_host_crossbuilder_dir()
             )
 
+
     def get_host_lib_dir(self):
         return wayround_org.utils.path.join(
             self.get_host_dir(),
@@ -215,10 +201,41 @@ class Builder:
             )
 
     def get_host_arch_lib_dir(self):
-        raise Exception('do not use this')
         return wayround_org.utils.path.join(
             self.get_host_arch_dir(),
-            'lib'
+            self.calculate_main_multiarch_lib_dir_name()
+            )
+
+    def get_dst_host_arch_lib_dir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.get_host_arch_lib_dir()
+            )
+
+    def calculate_install_prefix(self):
+        if self.get_host_from_pkgi() == self.get_arch_from_pkgi():
+            ret = self.get_host_dir()
+        else:
+            ret = self.get_host_arch_dir()
+        return ret
+
+    def calculate_dst_install_prefix(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.calculate_install_prefix()
+            )
+
+    def calculate_install_libdir(self):
+        if self.get_host_from_pkgi() == self.get_arch_from_pkgi():
+            ret = self.get_host_lib_dir()
+        else:
+            ret = self.get_host_arch_lib_dir()
+        return ret
+
+    def calculate_dst_install_libdir(self):
+        return wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            self.calculate_install_libdir()
             )
 
     def get_host_arch_list(self):
@@ -249,21 +266,36 @@ class Builder:
     #        self.calculate_default_linker_program_ld_parameter()
     #        )
 
-   
+
     def calculate_main_multiarch_lib_dir_name(self):
 
-        multilib_variant = str(self.get_multilib_variant_int())
+        # NOTE: at least 'guile' requires to be configured with libdir=lib64
+        #       so looks like it's "too early" to refuse using this method
+
+        # multilib_variant = str(self.get_multilib_variant_int())
+
+        host = self.get_host_from_pkgi()
+        arch = self.get_arch_from_pkgi()
 
         ret = 'lib'
-        if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
-            ret = 'lib64'
-        elif self.get_arch_from_pkgi() == 'i686-pc-linux-gnu':
-            ret = 'lib'
+
+        if host in [
+            'x86_64-pc-linux-gnu',
+            'i686-pc-linux-gnu',
+            ]:
+
+            if arch == 'i686-pc-linux-gnu':
+                ret = 'lib'
+            elif arch == 'x86_64-pc-linux-gnu':
+                ret = 'lib64'
+            else:
+                raise Exception("Don't know")
+
         else:
             raise Exception("Don't know")
 
         return ret
-    
+
 
     def calculate_pkgconfig_search_paths(self):
 
@@ -274,15 +306,26 @@ class Builder:
 
         where_to_search = [
             wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
+                self.get_host_dir(),
                 'share',
                 'pkgconfig'
                 ),
+            #wayround_org.utils.path.join(
+            #    self.get_host_lib_dir(),
+            #    # self.calculate_main_multiarch_lib_dir_name(),
+            #    'pkgconfig'
+            #    ),
             wayround_org.utils.path.join(
-                self.get_host_lib_dir(),
-                # self.calculate_main_multiarch_lib_dir_name(),
+                self.get_host_dir(),
+                'lib',
                 'pkgconfig'
                 ),
+            wayround_org.utils.path.join(
+                self.get_host_dir(),
+                'lib64',
+                'pkgconfig'
+                ),
+
             ]
 
         ret = []
@@ -313,6 +356,8 @@ class Builder:
 
     def calculate_CC_string(self):
         multilib_variants = self.get_multilib_variants_from_pkgi()
+        if len(multilib_variants) != 1:
+            raise Exception("len(multilib_variants) != 1")
         return '{} -{}'.format(self.calculate_CC(), multilib_variants[0])
 
     def calculate_CXX_string(self):
@@ -491,6 +536,8 @@ class Builder:
 
         ret = 0
 
+        do_work = False
+
         if os.path.isfile(
                 wayround_org.utils.path.join(
                     self.get_src_dir(),
@@ -498,16 +545,24 @@ class Builder:
                     cfg_script_name
                     )
                 ):
-            log.info(
-                "./{} found. generator will not be used".format(
-                    cfg_script_name
-                    )
-                )
+
+            log.info("configurer found. no generator use presumed")
         else:
+            log.info("configurer not found. generator use presumed")
+            do_work = True
+
+        if self.forced_autogen:
+            log.info(
+                "generator use is forced".format(
+                    cfg_script_name
+                )
+            )
+            do_work = True
+
+        if do_work:
 
             log.info(
-                "configuration script not found. trying to find and use"
-                " generator mesures"
+                "trying to find and use generator mesures"
                 )
 
             for i in [
@@ -515,8 +570,8 @@ class Builder:
                     ('bootstrap.sh', ['./bootstrap.sh']),
                     ('bootstrap', ['./bootstrap']),
                     ('genconfig.sh', ['./genconfig.sh']),
-                    ('configure.ac', ['autoconf']),
-                    ('configure.in', ['autoconf']),
+                    ('configure.ac', ['autoreconf', '-i']),
+                    ('configure.in', ['autoreconf', '-i']),
                     ]:
 
                 if os.path.isfile(
@@ -583,56 +638,19 @@ class Builder:
 
     def builder_action_configure_define_opts(self, called_as, log):
 
-        ret = [
-            '--prefix={}'.format(self.get_host_dir()),
-            '--bindir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'bin'
-                ),
+        ret = []
 
-            '--sbindir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'sbin'
-                ),
+        ret += [
+            '--prefix={}'.format(self.calculate_install_prefix())
+            ]
 
-            #'--libdir=' +
+        ret += [
+
+            #'--includedir=' +
             #wayround_org.utils.path.join(
-            #    self.get_host_lib_dir(),
+            #    self.get_host_arch_dir(),
+            #    'include'
             #    ),
-
-            '--libexecdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'libexec'
-                ),
-
-            '--datarootdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share'
-                ),
-
-            '--datadir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share'
-                ),
-
-            '--mandir=' + wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share',
-                'man'
-                ),
-
-            #'--prefix={}'.format(self.get_host_arch_dir()),
-
-            '--includedir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'include'
-                ),
 
             #'--localedir=' +
             # wayround_org.utils.path.join(
@@ -651,18 +669,22 @@ class Builder:
             #       many programs still can't install in lib64 even if I
             #       trying for force them do. so lib name will be fixed
             #       'lib' name for ever :E
-            # NOTE: note about crt*.o still in power. can't build gcc with 
+            # NOTE: note about crt*.o still in power. can't build gcc with
             #       multilib support and rename lib64 to lib and
             #       place it into another location. so lib and lib64
             #       need to reamin in one dir
+            # NOTE: 'python', 'tcl' and some other pacakges will install
+            #       some libs into 'lib' dir no metter what
 
             # '--libdir=' + wayround_org.utils.path.join(
             #    self.get_host_arch_dir(), 'lib'),
-            '--libdir=' + self.get_host_lib_dir(),
-            #'--libdir=' + wayround_org.utils.path.join(
+            # '--libdir=' + self.get_host_lib_dir(),
+            # '--libdir=' + wayround_org.utils.path.join(
             #    self.get_host_arch_dir(),
             #    'lib'
             #    ),
+
+            '--libdir=' + self.calculate_install_libdir(),
 
             '--sysconfdir=/etc',
             # '--sysconfdir=' + wayround_org.utils.path.join(
@@ -724,72 +746,6 @@ class Builder:
                 ),
 
         '''
-
-        return ret
-
-    def builder_action_configure_define_opts_alternate_prefix(
-            self,
-            called_as, 
-            log,
-            builder_action_configure_define_opts_result
-            ):
-
-        raise Exception("don't use it")
-
-        ret = copy.deepcopy(builder_action_configure_define_opts_result)
-
-        for i in range(len(ret) - 1, -1, -1):
-            for j in [
-                    '--prefix=',
-                    '--libdir=',
-                    ]:
-                if ret[i].startswith(j):
-                    del ret[i]
-                    break
-
-        ret += [
-            '--prefix={}'.format(self.get_host_dir()),
-            '--bindir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'bin'
-                ),
-
-            '--sbindir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'sbin'
-                ),
-
-            '--libdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_lib_dir(),
-                ),
-
-            '--libexecdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'libexec'
-                ),
-
-            '--datarootdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share'
-                ),
-
-            '--datadir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share'
-                ),
-
-            '--mandir=' + wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share',
-                'man'
-                ),
-            ]
 
         return ret
 
@@ -877,6 +833,10 @@ class Builder:
                     )
                 )
             )
+
+        #sleeptime = 5
+        #log.info("sleep: \033[0;1m{}\033[0m seconds".format(sleeptime))
+        #time.sleep(sleeptime)
         return ret
 
     def builder_action_build_define_cpu_count(self, called_as, log):
@@ -918,12 +878,14 @@ class Builder:
         LD_LIBRARY_PATH = []
 
         LD_LIBRARY_PATH += [
-            self.get_host_lib_dir()
+            # self.get_host_lib_dir()
+            #
+            #
             ]
 
         # NOTE: probably it need to be uncommented
-        # if 'LD_LIBRARY_PATH' in os.environ:
-        #     LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
+        #if 'LD_LIBRARY_PATH' in os.environ:
+        #    LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
 
         # Explanation to all this .libs in LD_LIBRARY_PATH:
         #     if building to nonstandard prefix, for some reason
@@ -961,9 +923,7 @@ class Builder:
         '''
 
         '''
-        # TODO: this is needed only by some old packages. move it there
         dot_libs = [
-            #'../tag/.libs',
             '.libs',
             '../.libs',
             '../../.libs',
@@ -981,8 +941,11 @@ class Builder:
         LD_LIBRARY_PATH += dot_libs
         '''
 
-        ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
-        # ret.update({'LD_LIBRARY_PATH': None})
+        #ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
+        #ret.update({'LD_LIBRARY_PATH': None})
+
+        if 'LD_LIBRARY_PATH' in ret:
+            del ret['LD_LIBRARY_PATH']
 
         return ret
 

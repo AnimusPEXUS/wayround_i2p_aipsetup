@@ -4,7 +4,7 @@
   "buildscript": "seed",
   "version_tool": "",
   "basename": "seed",
-  "filters": "- version !re \\d*\\.\\d*[02468]\n",
+  "filters": "",
   "removable": true,
   "reducible": true,
   "non_installable": false,

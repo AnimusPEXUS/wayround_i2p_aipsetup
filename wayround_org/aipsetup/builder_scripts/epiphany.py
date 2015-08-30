@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         pkg_config = wayround_org.utils.file.which(
             'pkg-config',
-            self.get_host_arch_dir()
+            self.get_host_dir() # TODO: it's ok?
             )
 
         nss_cflags = ''

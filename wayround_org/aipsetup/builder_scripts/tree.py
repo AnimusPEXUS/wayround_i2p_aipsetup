@@ -18,42 +18,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('distribute', self.builder_action_distribute)
             ])
 
-    def builder_action_build(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite_path,
-            log=log,
-            options=[],
-            arguments=[],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
-
-    def builder_action_distribute(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite_path,
-            log=log,
-            options=[],
-            arguments=[
-                'install',
-                'prefix={}'.format(self._dst_host_multiarch_dir),
-                'BINDIR={}'.format(
-                    wayround_org.utils.path.join(self._dst_host_multiarch_dir, 'bin')
-                    ),
-                'MANDIR={}'.format(
-                    wayround_org.utils.path.join(
-                        self._dst_host_multiarch_dir,
-                        'share',
-                        'man',
-                        'man1'
-                        )
-                    )
-                ],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
+    def builder_action_distribute_define_args(self, called_as, log):
+        return [
+            'install',
+            'prefix={}'.format(self.get_dst_host_dir()),
+            #'BINDIR={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_dst_host_dir(),
+            #        'bin'
+            #        )
+            #    ),
+            #'MANDIR={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_dst_host_arch_dir(),
+            #        'share',
+            #        'man',
+            #        'man1'
+            #        )
+            #    )
+            ]

@@ -24,7 +24,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             platform = 'linux-x86_64'
         # super().builder_action_configure_define_opts(called_as, log) +
         ret = [
-            '--prefix={}'.format(self.get_host_arch_dir()),
+            '--prefix={}'.format(self.get_host_dir()),
             '--openssldir=/etc/ssl',
             'shared',
             'zlib-dynamic',
@@ -59,7 +59,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'MANDIR={}/share/man'.format(self.get_host_arch_dir()),
+                'MANDIR={}/share/man'.format(self.get_host_dir()), # FIXME: fix path join
                 # 'MANSUFFIX=ssl',
                 'INSTALL_PREFIX=' + self.get_dst_dir()
                 ],

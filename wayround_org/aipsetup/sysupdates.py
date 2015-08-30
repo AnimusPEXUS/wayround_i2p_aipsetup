@@ -14,6 +14,10 @@ def sysupdates_all_actions(opts, args):
     all_actions()
     return 0
 
+def sync():
+    logging.info("sync")
+    os.sync()
+    return 
 
 def all_actions():
     ret = 0
@@ -21,7 +25,7 @@ def all_actions():
     if os.getuid() == 0:
 
         for i in [
-                os.sync,
+                sync,
                 ldconfig,
                 update_mime_database,
                 gdk_pixbuf_query_loaders,
@@ -29,7 +33,7 @@ def all_actions():
                 glib_compile_schemas,
                 gtk_query_immodules_2_0,
                 gtk_query_immodules_3_0,
-                os.sync
+                sync
                 ]:
             try:
                 i()

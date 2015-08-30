@@ -17,14 +17,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
         os.makedirs(wayround_org.utils.path.join(
-            self.self.get_dst_host_arch_dir(),
+            self.self.get_dst_host_dir(),
             'include',
             'rpc'
             )
             )
         os.makedirs(
             wayround_org.utils.path.join(
-                self.get_dst_host_arch_dir(),
+                self.get_dst_host_dir(),
                 'include',
                 'rpcsvc'
                 )
@@ -36,7 +36,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'rpc'
                 ),
             wayround_org.utils.path.join(
-                self.self.get_dst_host_arch_dir(),
+                self.self.get_dst_host_dir(),
                 'include',
                 'rpc'
                 ),
@@ -48,7 +48,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 self.get_src_dir(), 'rpcsvc'
                 ),
             wayround_org.utils.path.join(
-                self.self.get_dst_host_arch_dir(),
+                self.self.get_dst_host_dir(),
                 'include',
                 'rpcsvc'
                 ),

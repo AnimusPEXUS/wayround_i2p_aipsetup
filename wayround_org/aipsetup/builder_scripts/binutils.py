@@ -113,7 +113,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--disable-gold',
             '--without-gold',
 
-            # experiment:
+            # this is required. else libs will be searched in /lib and
+            # /usr/lib, but not in /multihost/xxx/lib!:
             '--with-sysroot={}'.format(self.get_host_dir()),
 
             # more experiment:

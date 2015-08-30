@@ -7,13 +7,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
         return super().builder_action_configure_define_opts(called_as, log) + [
-            # '--enable-cogl',
+            '--enable-cogl=auto',
             '--enable-directfb=auto',
-            # '--enable-drm',
-            '--enable-fc=auto',
-            '--enable-ft=yes',
+            # '--enable-drm=auto',
+            '--enable-fc',
+            '--enable-ft',
             '--enable-gl',
-            '--enable-gallium=auto',
+            # '--enable-gallium',
             #                    '--enable-glesv2',
             '--enable-pdf=yes',
             '--enable-png=yes',
@@ -34,10 +34,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-xcb',
             '--enable-xcb-shm',
             '--enable-xlib-xcb',
-            '--enable-gobject=yes',
+            '--enable-gobject=auto',
 
-            '--enable-egl',
-            '--enable-glx',
+            '--enable-egl=auto',
+            '--enable-glx=auto',
             # '--enable-wgl',
 
             # xlib is deprecated

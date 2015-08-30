@@ -11,11 +11,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            '--with-libgpg-error-prefix={}'.format(
-                self.get_host_arch_dir()
-                ),
-            '--with-libassuan-prefix={}'.format(
-                self.get_host_arch_dir()
-                ),
+            #'--with-libgpg-error-prefix={}'.format(
+            #    self.get_host_dir()
+            #    ),
+            #'--with-libassuan-prefix={}'.format(
+            #    self.get_host_dir()
+            #    ),
             ]
         return ret

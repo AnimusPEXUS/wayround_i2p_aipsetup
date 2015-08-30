@@ -14,7 +14,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
             # '--disable-silent-rules',
-            '--enable-gudev',
+            '--enable-gudev=auto',
             '--enable-gtk-doc=auto',
             '--enable-logind=auto',
             '--enable-microhttpd=auto',
@@ -24,14 +24,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # '--disable-coverage',
             '--enable-shared',
             '--enable-compat-libs',
-            '--with-libgcrypt-prefix={}'.format(self.get_host_dir()),
-            '--with-rootprefix={}'.format(self.get_host_dir()),
+            #'--with-libgcrypt-prefix={}'.format(self.get_host_dir()),
+            #'--with-rootprefix={}'.format(self.get_host_dir()),
             ]
         ret += [
             '--with-pamlibdir={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_lib_dir(),
-                    # 'lib',
+                    self.get_host_dir(),
+                    'lib',
                     'security'
                     )
                 )
@@ -40,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'PYTHON={}'.format(
                 wayround_org.utils.file.which(
                     'python',
-                    self.get_host_arch_dir()
+                    self.get_host_dir()
                     )
                 )
             ]

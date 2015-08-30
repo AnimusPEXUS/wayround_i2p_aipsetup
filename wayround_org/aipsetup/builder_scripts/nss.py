@@ -64,7 +64,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build(self, called_as, log):
 
         opts64 = []
-        if self.arch == 'x86_64-pc-linux-gnu':
+        if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
             opts64 = ['USE_64=1']
 
         ret = autotools.make_high(
@@ -76,7 +76,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'BUILD_OPT=1',
                 'NSPR_INCLUDE_DIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_arch_dir,
+                        self.get_host_dir(),
                         'include',
                         'nspr'
                         )
@@ -122,7 +122,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             OBJ_dir_bin = wayround_org.utils.path.join(OBJ_dir, 'bin')
             OBJ_dir_lib = wayround_org.utils.path.join(
                 OBJ_dir,
-                self.calculate_main_multiarch_lib_dir_name())
+                'lib'
+                )
             OBJ_dir_include = wayround_org.utils.path.join(OBJ_dir, 'include')
 
             OBJ_dir_rmarch = wayround_org.utils.path.join(
@@ -132,13 +133,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             OBJ_dir_march = wayround_org.utils.path.join(
                 OBJ_dir,
-                self.get_host_arch_dir()
+                self.get_host_dir()
                 )
 
-            OBJ_dir_ma_bin = wayround_org.utils.path.join(OBJ_dir_march, 'bin')
+            OBJ_dir_ma_bin = wayround_org.utils.path.join(
+                OBJ_dir_march,
+                'bin'
+                )
             OBJ_dir_ma_lib = wayround_org.utils.path.join(
                 OBJ_dir_march,
-                self.calculate_main_multiarch_lib_dir_name())
+                'lib'
+                )
             OBJ_dir_ma_lib_pkgconfig = wayround_org.utils.path.join(
                 OBJ_dir_ma_lib,
                 'pkgconfig'
@@ -152,6 +157,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 OBJ_dir_ma_include,
                 'nss'
                 )
+
+        if ret == 0:
 
             # convert links in bin
 
@@ -336,7 +343,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             pkg_config = """
 prefix={prefix}
 exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/lib
+libdir=${{exec_prefix}}/{libdirname}
 includedir=${{exec_prefix}}/include/nss
 
 Name: NSS
@@ -345,11 +352,13 @@ Version: {nss_major_version}.{nss_minor_version}.{nss_patch_version}
 Libs: -L${{libdir}} {libs}
 Cflags: -I${{includedir}}
 """.format(
-                prefix=self.get_host_arch_dir(),
+                prefix=self.get_host_dir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version,
-                libs=libs
+                libs=libs,
+                libdirname='lib' # TODO: possibly it is not right 
+				# self.calculate_main_multiarch_lib_dir_name()
                 )
             # -lnss{nss_major_version} -lnssutil{nss_major_version}
             # -lsmime{nss_major_version} -lssl{nss_major_version}
@@ -532,7 +541,7 @@ if test "$echo_libs" = "yes"; then
     echo $libdirs
 fi
 """.format(
-                prefix=self.get_host_arch_dir(),
+                prefix=self.get_host_dir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version
@@ -547,6 +556,14 @@ fi
 
             f.write(nss_config)
             f.close()
+
+            if self.get_arch_from_pkgi().startswith('x86_64'):
+                os.rename(
+                    OBJ_dir_ma_lib,
+                    wayround_org.utils.path.normpath(
+                        OBJ_dir_ma_lib + '/../lib64'
+                        )
+                    )
 
             log.info("    moving files to distribution dir")
             shutil.move(OBJ_dir_rmarch, dest_dir)

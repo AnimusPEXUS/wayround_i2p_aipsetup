@@ -33,11 +33,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-cxx',
             '--enable-tcl',
             '--with-tcl={}'.format(
-                # TODO: probably this need to be detected (maybe lib64, not
-                #       lib)
+                # lib dir name is allways 'lib' doe to tcl problems :-/
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    self.calculate_main_multiarch_lib_dir_name()
+                    self.get_host_dir(),
+                    'lib'
                     )
                 ),
             ]
@@ -48,7 +47,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
 
         doc_dir = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(),
+            self.get_dst_host_dir(),
             'share',
             'doc',
             'db'
@@ -67,12 +66,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install',
                 'DESTDIR={}'.format(self.get_dst_dir()),
                 'docdir={}'.format(
+                    # FIXME: fix code duplication
                     wayround_org.utils.path.join(
-                        self.get_host_arch_dir(), 'share', 'doc', 'db'
+                        self.get_host_dir(), 'share', 'doc', 'db'
                         )
                     )
                 # it's not a mistake docdir
-                # must be eq to self.get_host_arch_dir() + /share/doc/db
+                # must be eq to self.get_host_dir() + /share/doc/db
                 # with leading slash
                 ],
             environment={},

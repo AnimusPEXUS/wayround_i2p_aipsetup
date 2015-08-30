@@ -24,9 +24,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)},
             )
 
-        e.update(self.builder_action_configure_define_PATH_dict())
-
-        e['CXX'] = '{}-g++'.format(self.get_arch_from_pkgi())
+        # e.update(self.builder_action_configure_define_PATH_dict())
+	
+        e['CXX'] = '{}-g++'.format(self.get_host_from_pkgi())
         #e['CXXFLAGS'] = self.calculate_default_linker_program_gcc_parameter()
 
         ret = {
@@ -38,7 +38,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ),
             'python': wayround_org.utils.file.which(
                 'python2',
-                self.get_host_arch_dir()
+                self.get_host_dir()
                 )
             }
 
@@ -65,8 +65,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
 """.format(
                 compiler=wayround_org.utils.file.which(
-                    '{}-g++'.format(self.get_arch_from_pkgi()),
-                    self.get_host_arch_dir()
+                    '{}-g++'.format(self.get_host_from_pkgi()),
+                    self.get_host_dir()
                     ),
                 bitness=bitness
                 )
@@ -77,8 +77,8 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
         args = [
             'bash',
             './bootstrap.sh',
-            '--prefix={}'.format(self.get_host_arch_dir()),
-            '--libdir={}'.format(self.get_dst_host_lib_dir()),
+            '--prefix={}'.format(self.get_host_dir()),
+            #'--libdir={}'.format(self.get_dst_host_lib_dir()),
             '--with-python={}'.format(self.custom_data['python']),
             #                 '--with-python-version=3.3'
             ]
@@ -100,9 +100,9 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
         args = [
             wayround_org.utils.path.join(self.get_src_dir(), 'b2'),
             # NOTE: this is not an error:
-            #       prefix = self.get_dst_host_arch_dir()
-            '--prefix={}'.format(self.get_dst_host_arch_dir()),
-            '--libdir={}'.format(self.get_dst_host_lib_dir()),
+            #       prefix = self.get_dst_host_dir()
+            '--prefix={}'.format(self.get_dst_host_dir()),
+            #'--libdir={}'.format(self.get_dst_host_lib_dir()),
             #                    '--build-type=complete',
             #                    '--layout=versioned',
             #'--build-dir={}'.format(self.bld_dir),
@@ -134,8 +134,8 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
     def builder_action_distribute(self, called_as, log):
         args = [
             wayround_org.utils.path.join(self.get_src_dir(), 'b2'),
-            '--prefix={}'.format(self.get_dst_host_arch_dir()),
-            '--libdir={}'.format(self.get_dst_host_lib_dir()),
+            '--prefix={}'.format(self.get_dst_host_dir()),
+            #'--libdir={}'.format(self.get_dst_host_lib_dir()),
             #                    '--build-type=complete',
             #                    '--layout=versioned',
             #'--build-dir={}'.format(self.bld_dir),

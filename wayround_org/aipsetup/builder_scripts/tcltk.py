@@ -33,6 +33,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         for i in range(len(ret) - 1, -1, -1):
             for j in [
                     '--datarootdir=',
+                    '--libdir=' # NOTE: tcl should be allways installed in 'lib'
                     ]:
                 if ret[i].startswith(j):
                     del ret[i]
@@ -40,6 +41,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--enable-threads',
             '--enable-wince',
+            ]
+        ret += [
+            '--libdir={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'lib'
+                    )
+                )
             ]
         if self.get_arch_from_pkgi().startswith('x86_64'):
             ret += [
@@ -73,7 +82,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pkg_name = self.get_package_info()['pkg_info']['name']
 
         bin_dir = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(),
+            self.get_dst_host_dir(),
             'bin'
             )
 

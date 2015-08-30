@@ -19,9 +19,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         makefile_suffix = None
 
-        if fnmatch.fnmatch(self.host, 'i?86-pc-linux-gnu'):
+        arch = self.get_arch_from_pkgi()
+
+        if fnmatch.fnmatch(arch, 'i?86-pc-linux-gnu'):
             makefile_suffix = 'linux_any_cpu'
-        elif self.host == 'x86_64-pc-linux-gnu':
+        elif arch == 'x86_64-pc-linux-gnu':
             makefile_suffix = 'linux_any_cpu'
         else:
             raise Exception("Can't configure")
@@ -34,7 +36,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'CXX': CXX,
             'CC': CC,
             #'LOCAL_FLAGS': LOCAL_FLAGS,
-            'PREFIX': self.get_host_arch_dir(),
+            'PREFIX': self.get_host_dir(),
             'makefile_suffix': makefile_suffix
             }
 

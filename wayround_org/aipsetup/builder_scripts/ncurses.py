@@ -19,12 +19,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             wayround_org.aipsetup.build.getDIR_PATCHES(
                 self.buildingsite_path
                 )
+	
+	# TODO: must be automatically
         ret['dst_lib_dir'] = \
             wayround_org.utils.path.join(
-                self.get_dst_host_lib_dir()
+                self.get_dst_host_dir(),
+		'lib'
                 )
         ret['dst_share_dir'] = \
-            wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'share')
+            wayround_org.utils.path.join(self.get_dst_host_dir(), 'share')
         ret['dst_pc_dir'] = \
             wayround_org.utils.path.join(ret['dst_share_dir'], 'pkgconfig')
         return ret
@@ -154,7 +157,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             # NOTE: building with ada fails on new installations
             # '--without-ada',
-            '--without-ada',
             ]
 
         if not self.get_is_crossbuild() and not self.get_is_crossbuilder():

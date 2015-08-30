@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['configure']
         del ret['autogen']
         del ret['build']
-        ret['after_distribute'] = self.builder_action_after_distribute
+        #ret['after_distribute'] = self.builder_action_after_distribute
         return ret
 
     '''
@@ -64,38 +64,47 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return [
             'all',
             'install',
-            'prefix={}'.format(self.get_host_arch_dir()),
-            'exec_prefix={}'.format(self.get_host_arch_dir()),
-            'lib_prefix={}'.format(self.get_host_dir()),
-            'inc_prefix={}'.format(self.get_host_arch_dir()),
-            'man_prefix={}'.format(self.get_host_arch_dir()),
+            'prefix={}'.format(self.get_host_dir()),
+            #'exec_prefix={}'.format(self.get_host_dir()),
+            #'lib_prefix={}'.format(self.get_host_dir()),
+            #'inc_prefix={}'.format(self.get_host_dir()),
+            #'man_prefix={}'.format(self.get_host_dir()),
             'DESTDIR={}'.format(self.get_dst_dir()),
+            #'PKGCONFIGDIR={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_dst_host_dir(),
+            #       'lib',
+            #        'pkgconfig'
+            #        )
+            #    ),
             'RAISE_SETFCAP=no',
             'PAM_CAP=yes',
-            'SYSTEM_HEADERS={}'.format(
-                wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    'include'
-                    )
-                ),
-            'CFLAGS=-I{}'.format(
-                wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    'include'
-                    )
-                )
+            #'SYSTEM_HEADERS={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_host_dir(),
+            #        'include'
+            #        )
+            #    ),
+            #'CFLAGS=-I{}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_host_dir(),
+            #        'include'
+            #        )
+            #    )
             ] + self.all_automatic_flags_as_list()
 
     def builder_action_after_distribute(self, called_as, log):
 
+        raise Exception("tests required")
+
         wayround_org.utils.file.copytree(
             wayround_org.utils.path.join(
-                self.get_dst_host_arch_dir(),
+                self.get_dst_host_dir(),
                 'multiarch'
                 ),
             wayround_org.utils.path.join(
-                self.get_dst_host_arch_dir(),
-                self.calculate_main_multiarch_lib_dir_name()
+                self.get_dst_host_dir(),
+                'lib' #self.calculate_main_multiarch_lib_dir_name()
                 ),
             overwrite_files=True,
             clear_before_copy=False,
@@ -104,9 +113,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         shutil.rmtree(
             wayround_org.utils.path.join(
-                self.get_dst_host_arch_dir(),
+                self.get_dst_host_dir(),
                 'multiarch'
                 )
             )
 
-        return 0
+        return 10

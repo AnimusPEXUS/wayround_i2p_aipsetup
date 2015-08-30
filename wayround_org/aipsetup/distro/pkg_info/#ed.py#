@@ -1,0 +1,16 @@
+
+import os
+
+lst = os.listdir()
+
+for i in lst:
+
+    if i.endswith('.json'):
+
+        with open(i) as f:
+            lines= f.read().split('\n')
+
+        for j in range(len(lines)):
+            lines[i] = lines[i].replace('- version !re \\d*\\.\\d*[02468]' , '')
+
+        with open(i) as f:

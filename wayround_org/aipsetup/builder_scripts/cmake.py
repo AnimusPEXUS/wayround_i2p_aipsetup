@@ -17,13 +17,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
         return
 
     def calculate_compilers_options(self, d):
-        if not 'CMAKE_C_COMPILER' in d:
-            d['CMAKE_C_COMPILER'] = []
-        d['CMAKE_C_COMPILER'].append(self.calculate_CC())
-
-        if not 'CMAKE_CXX_COMPILER' in d:
-            d['CMAKE_CXX_COMPILER'] = []
-        d['CMAKE_CXX_COMPILER'].append(self.calculate_CXX())
+        super().calculate_compilers_options(d)
 
         if not 'CC' in d:
             d['CC'] = []
@@ -85,6 +79,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
         for i in range(len(std_opts) - 1, -1, -1):
             for j in [
+                    '--datarootdir=',
+                    '--datadir=',
+                    '--mandir=',
+                    '--libexecdir=',
+                    '--bindir=',
+                    '--sbindir=',
                     '--includedir=',
                     '--libdir=',
                     '--sysconfdir=',
@@ -98,6 +98,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
                     'CXX=',
                     'CMAKE_CXX_COMPILER=',
                     'CMAKE_C_COMPILER=',
+                    'CMAKE_CXX_FLAGS=',
+                    'CMAKE_C_FLAGS=',
                     ]:
                 if std_opts[i].startswith(j):
                     del std_opts[i]

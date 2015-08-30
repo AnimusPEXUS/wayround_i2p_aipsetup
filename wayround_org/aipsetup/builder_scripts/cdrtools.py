@@ -25,14 +25,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'all',
             'install',
             #'LDPATH=-L{}'.format(
-            #    wayround_org.utils.path.join(self.get_host_arch_dir(), 'lib')
+            #    wayround_org.utils.path.join(self.get_host_dir(), 'lib')
             #    ),
             #'RUNPATH=-R$(INS_BASE)/lib -R{}'.format(
-            #    wayround_org.utils.path.join(self.get_host_arch_dir(), 'lib')
+            #    wayround_org.utils.path.join(self.get_host_dir(), 'lib')
             #    ),
             'INS_BASE={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir()
+                    self.get_host_dir()
                     )
                 ),
             'DESTDIR={}'.format(self.get_dst_dir()),

@@ -14,7 +14,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret += [
             #'--with-trust-paths=/etc/trustcerts',  # TODO: what is this?
-            #'--with-sysroot={}'.format(self.get_host_arch_dir()),
+            #'--with-sysroot={}'.format(self.get_host_dir()),
             ]
 
         return ret

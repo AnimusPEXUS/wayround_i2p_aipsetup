@@ -31,7 +31,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'LDFLAGS=',
                 '--host=',
                 '--build=',
-                '--target='
+                '--target=',
+                'CC=',
+                'CXX=',
+                'GCC='
                 ]:
             for j in ret[:]:
                 if j.startswith(i):

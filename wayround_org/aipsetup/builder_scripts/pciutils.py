@@ -24,13 +24,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite_path,
+            log=log,
             options=[],
             arguments=[
                 'all',
                 'install',
                 'install-lib',
                 'DESTDIR={}'.format(self.get_dst_dir()),
-                'PREFIX={}'.format(self.get_host_arch_dir()),
+                'PREFIX={}'.format(self.get_host_dir()),
+                # 'LIBDIR={}'.format(self.get_host_lib_dir()),
+                #'SHAREDIR={}'.format(
+                #    wayround_org.utils.path.join(
+                #        self.get_host_dir(),
+                #        'share'
+                #        )
+                #    ),
                 'SHARED=yes',
                 ] + self.all_automatic_flags_as_list(),
             environment={},

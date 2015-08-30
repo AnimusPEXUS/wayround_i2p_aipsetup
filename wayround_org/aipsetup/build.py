@@ -35,13 +35,13 @@ import wayround_org.utils.time
 DIR_TARBALL = '00.TARBALL'
 """
 Directory for storing tarballs used in package building. contents is packed
-into resulting package as it is requirements of most good licenses
+into resulting  package as  it is requirements  of most  good licenses
 """
 
 DIR_SOURCE = '01.SOURCE'
 """
 Directory for detarred sources, which used for building package. This is not
-packed into final package, as we already have original tarballs.
+packed  into final  package,  as we  already  have original  tarballs.
 """
 
 DIR_PATCHES = '02.PATCHES'
@@ -368,8 +368,8 @@ class Constitution:
         self.arch = None
 
         if (not isinstance(multilib_variants, list)
-                    or len(multilib_variants) == 0
-                ):
+            or len(multilib_variants) == 0
+            ):
             raise ValueError("`multilib_variant' must be not empty list")
 
         if not isinstance(arch_str, str):
@@ -903,6 +903,13 @@ class PackCtl:
         self.path = wayround_org.utils.path.abspath(buildingsite_ctl.path)
         return
 
+    def destdir_chmod(self):
+        p = subprocess.Popen(
+            ['chmod', '-R', '755', self.path]
+            )
+        ret = p.wait()
+        return ret
+
     def destdir_filelist(self):
         """
         Create file list for DESTDIR contents
@@ -922,6 +929,12 @@ class PackCtl:
 
         logging.info("----------- CHECKS -----------")
 
+        # NOTE: Do not remove '/ -> /usr' and '/usr -> /multihost/xxx'
+        #       checks  as many  packages  (including modern  systemd)
+        #       still installing files into /  or /usr, but in Lailalo
+        #       system it is considered safe  to move those files into
+        #       /multihost/xxx
+
         package_info = self.buildingsite_ctl.read_package_info()
         pkg_name = package_info['pkg_info']['name']
 
@@ -934,7 +947,7 @@ class PackCtl:
             dst_dir,
             [],
             [],
-            ['mnt', 'multiarch'],
+            ['mnt', 'multiarch', 'home'],
             ['bin', 'sbin', 'lib', 'lib64'],
             [],
             [],
@@ -974,9 +987,9 @@ class PackCtl:
                 [],
                 [],
                 ['usr', 'multihost', 'multiarch'],
-                [],
-                [],
                 lst,
+                [],
+                [],
                 pkg_name
                 )
 
@@ -1015,10 +1028,10 @@ class PackCtl:
                 dst_dir,
                 [],
                 [],
-                ['usr', 'multihost', 'multiarch'],
-                [],
-                [],
+                ['usr', 'multihost', 'multiarch', 'local'],
                 lst,
+                [],
+                [],
                 pkg_name
                 )
 
@@ -1054,48 +1067,20 @@ class PackCtl:
             dst_dir,
             [],
             [],
-            ['mnt', 'usr', 'libexec', 'man', 'info', 'include'],
-            ['bin', 'sbin'],
+            ['mnt', 'usr', 'local'],
+            #['bin', 'sbin', 'include', 'man', 'info', 'libexec', 'share'],
+	    [],
             [],
             [],
             pkg_name
             )
-
-        '''
-        if host == 'x86_64-pc-linux-gnu':
-            if arch == 'x86_64-pc-linux-gnu':
-                if os.path.exists(
-                        wayround_org.utils.path.join(
-                            destdir,
-                            'multihost',
-                            'lib'
-                            )
-                        ):
-                    logging.error("    `lib' dir is not acceptable")
-                    ret = 5
-            elif arch == 'i686-pc-linux-gnu':
-                if os.path.exists(
-                        wayround_org.utils.path.join(
-                            destdir,
-                            'multihost',
-                            'lib64'
-                            )
-                        ):
-                    logging.error("    `lib' dir is not acceptable")
-                    ret = 5
-            else:
-                raise Exception("Whoot?")
-
-        else:
-            raise Exception("Whoot?")
-        '''
 
         return ret
 
     def destdir_verify_paths_correctness5(self):
 
         ret = 0
-
+        return 0
         logging.info("host/share")
 
         package_info = self.buildingsite_ctl.read_package_info()
@@ -1174,7 +1159,7 @@ class PackCtl:
     def destdir_verify_paths_correctness6(self):
 
         ret = 0
-
+        return 0
         logging.info("lib/python*")
 
         package_info = self.buildingsite_ctl.read_package_info()
@@ -1253,6 +1238,8 @@ class PackCtl:
     def destdir_verify_paths_correctness7(self):
 
         ret = 0
+        logging.info("----------- CHECKS -----------")
+        return 0
 
         package_info = self.buildingsite_ctl.read_package_info()
 
@@ -1280,8 +1267,9 @@ class PackCtl:
             '/multihost/host/multiarch/arch -> /multihost/host',
             src_dir,
             dst_dir,
-            ['lib64', 'libx32', 'lib32', 'lib'],
-            ['Python2', 'Python3'],
+            [],
+            [],  # ['Python2', 'Python3'],
+            #['lib64', 'libx32', 'lib32', 'lib'],
             [],
             [],
             [],
@@ -2054,6 +2042,7 @@ class PackCtl:
         ret = 0
 
         for i in [
+                self.destdir_chmod,
                 self.destdir_filelist,
                 self.destdir_verify_paths_correctness,
                 self.destdir_verify_paths_correctness2,
@@ -2816,6 +2805,8 @@ class BuildingSiteCtl:
             log.info("Buildingsite processes started")
             log.warning("Closing this log now, cause it can't work farther")
             log.stop()
+
+
 
             if build_ctl.complete(buildscript_ctl) != 0:
                 logging.error("Error on building stage")

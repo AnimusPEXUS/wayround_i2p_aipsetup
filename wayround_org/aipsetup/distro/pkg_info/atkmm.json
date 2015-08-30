@@ -4,11 +4,12 @@
   "buildscript": "std",
   "version_tool": "",
   "basename": "atkmm",
-  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]",
+  "filters": "#- version !re ^\\d*\\.\\d*[02468][\\.&]",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
     "/gnome.org/gnome.org/sources/"

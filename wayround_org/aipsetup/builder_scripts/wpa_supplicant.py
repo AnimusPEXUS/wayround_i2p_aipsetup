@@ -73,7 +73,7 @@ CONFIG_SMARTCARD=y
 CONFIG_WPS=y
 CFLAGS += -I{hmd}/include/libnl3
 {generated}
-""".format(hmd=self.get_host_arch_dir(),
+""".format(hmd=self.get_host_dir(),
            generated = '\n'.join(self.all_automatic_flags_as_list())
            )
             )
@@ -90,17 +90,18 @@ CFLAGS += -I{hmd}/include/libnl3
                 'install',
                 'LIBDIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_lib_dir() 
+                        self.get_host_dir(),
+			'lib'
                         )
                     ),
                 'BINDIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_arch_dir(), 'bin'
+                        self.get_host_dir(), 'bin'
                         )
                     ),
                 'PN531_PATH={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_arch_dir(), 'src', 'nfc'
+                        self.get_host_dir(), 'src', 'nfc'
                         )
                     ),
                 'DESTDIR={}'.format(self.get_dst_dir())
@@ -118,10 +119,10 @@ CFLAGS += -I{hmd}/include/libnl3
         src_dir_p_sep = self.custom_data['src_dir_p_sep']
 
         os.makedirs(wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'man', 'man8')
+            self.get_dst_host_dir(), 'man', 'man8')
             )
         os.makedirs(wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'man', 'man5')
+            self.get_dst_host_dir(), 'man', 'man5')
             )
 
         m8 = glob.glob(
@@ -135,7 +136,7 @@ CFLAGS += -I{hmd}/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'man', 'man8', bn)
+                wayround_org.utils.path.join(self.get_dst_host_dir(), 'man', 'man8', bn)
                 )
             log.info("    {}".format(i))
 
@@ -143,7 +144,7 @@ CFLAGS += -I{hmd}/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'man', 'man5', bn)
+                wayround_org.utils.path.join(self.get_dst_host_dir(), 'man', 'man5', bn)
                 )
             log.info("    {}".format(i))
         return 0

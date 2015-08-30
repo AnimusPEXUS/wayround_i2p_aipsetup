@@ -32,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_distribute(self, called_as, log):
 
-        man_dir = wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'share', 'man')
+        man_dir = wayround_org.utils.path.join(self.get_dst_host_dir(), 'share', 'man')
 
         mans = os.listdir(self.get_src_dir())
 

@@ -6,6 +6,23 @@
             "args": [],
             "kwargs": {}
         },
+        {
+            "name": "libsoup",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+        },
+        {
+            "name": "libsecret",
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+        },
+        "bc",
+	"lsof",
+	"dosfstools",
+        "apr",
+        "apr-util",
         "cpio",
         "bridge-utils",
         "boost",
@@ -20,6 +37,7 @@
         "e2fsprogs",
         "exim",
         "cyrus-sasl",
+        "gsasl",
         "elfutils",
         "file",
         "openjdk8",
@@ -61,6 +79,7 @@
         "p7zip",
         "mtdev",
         "xterm",
+        "rxvt",
         "iso-codes",
         "libnl",
         "openldap",

@@ -26,8 +26,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         file_list = os.listdir(
             '{}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    'share',
+                    self.get_host_dir(),
+                    'share', # TODO: what is this all?
                     'java'
                     )
                 )
@@ -47,6 +47,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             new_make_filename_f = open(new_make_filename, 'w')
 
+            # FIXME: paths need to be redone
             new_make_filename_f.write("""\
 # -*- Mode: Makefile -*-
 # Makefile.Lailalo

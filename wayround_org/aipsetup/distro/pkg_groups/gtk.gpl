@@ -1,6 +1,11 @@
 {
     "ask_version": false,
     "names" : {
+        "dconf": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
 
         "glib": {
             "proc": "gnome_get",
@@ -22,32 +27,27 @@
             "args": [],
             "kwargs": {}
             },
-    
-    
-	"harfbuzz": {
-	    "proc": "normal_get",
-	    "args": [],
-	    "kwargs": {}
-	    },
+
+    "GConf": {
+        "proc": "normal_get",
+        "args": [],
+        "kwargs": {}
+        },
+    "harfbuzz": {
+        "proc": "normal_get",
+        "args": [],
+        "kwargs": {}
+        },
 	"source-highlight": {
 	    "proc": "normal_get",
 	    "args": [],
 	    "kwargs": {}
 	    },
-        "pango": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "pangomm": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
         "libsigc++": {
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
+            "_comment": "not an error: must be normal_get!"
             },
         "librsvg": {
             "proc": "normal_get",
@@ -55,12 +55,12 @@
             "kwargs": {}
             },
        "atk": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },
         "atkmm": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },
@@ -86,16 +86,22 @@
             },
 
         "gtk+2": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },
 
-	        "glib": {
-            "proc": "gnome_get"
-        },
 
-
+        "pango": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
+        "pangomm": {
+            "proc": "gnome_get",
+            "args": [],
+            "kwargs": {}
+            },
         "gtk+": {
             "proc": "gnome_get",
             "args": [],
@@ -158,17 +164,22 @@
 	    "args": [],
 	    "kwargs": {}
 	    },
-"pixman": {
-	    "proc": "normal_get",
-	    "args": [],
-	    "kwargs": {}
-	    },
 "py2cairo": {
 	    "proc": "normal_get",
 	    "args": [],
 	    "kwargs": {}
 	    },
 "pycairo": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+	    "freetype": {
+	    "proc": "normal_get",
+	    "args": [],
+	    "kwargs": {}
+	    },
+	    "fontconfig": {
 	    "proc": "normal_get",
 	    "args": [],
 	    "kwargs": {}

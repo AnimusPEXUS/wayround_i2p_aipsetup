@@ -34,8 +34,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             self.internal_host_redefinition =\
                 pkgi['constitution']['target']
 
-        '''
-        ret = {
+        '''ret = {
             'Builder_multi_i686': None,
             }
 
@@ -47,9 +46,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 print("""\
 ---------
-configured for x86_64
-but i686 GCC was found too
-so going to build i686 multilib support
+configured for x86_64, but i686 GCC was found too, so going to build
+i686 multilib support
 ---------
 """)
 
@@ -103,6 +101,12 @@ so going to build i686 multilib support
 
         return ret
 
+    def calculate_install_libdir(self):
+        # NOTE: on multilib installations libraries shuld be allways
+        #       installed in host_lib_dir. Else - multilib GCC could
+        #       not be built
+        return self.get_host_lib_dir()
+    
     def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
@@ -133,16 +137,14 @@ so going to build i686 multilib support
         return {}
 
     def builder_action_configure_define_opts(self, called_as, log):
-        
+
         #'''
         with_headers = wayround_org.utils.path.join(
             self.get_host_dir(),
-            'multiarch',
-            self.get_host_from_pkgi(),
             'include'
             )
         #'''
-    
+
         '''
         with_headers = wayround_org.utils.path.join(
             self.get_host_arch_dir(),
@@ -177,7 +179,6 @@ so going to build i686 multilib support
             '--enable-kernel=3.19',
             '--enable-tls',
             '--with-elf',
-
             # disabled those 3 items on 2 jul 2015
             # reenabled those 3 items on 11 aug 2015: sims I need it
             '--enable-multi-arch',
@@ -207,10 +208,10 @@ so going to build i686 multilib support
                 # this can be commented whan gcc fulli built and installed
                 #'libc_cv_forced_unwind=yes',
 
-                # this parameter is required to build `build_02+' stage.
-                # comment and completle rebuild this glibc after rebuilding
-                # gcc without --without-headers and with
-                # --with-sysroot parameter.
+                # this parameter is required to build `build_02+'
+                # stage.  comment and completle rebuild this glibc
+                # after rebuilding gcc without --without-headers and
+                # with --with-sysroot parameter.
                 #
                 # 'libc_cv_ssp=no'
                 #
@@ -225,6 +226,13 @@ so going to build i686 multilib support
     # NOTE: this block is for multilib building
     def _t1(self, ret):
         ret = copy.copy(ret)
+
+        ret += [
+                    'slibdir={}'.format(
+                        self.calculate_install_libdir()
+                        )
+                    ]
+        '''
         if self.get_host_from_pkgi() == 'x86_64-pc-linux-gnu':
             if self.get_arch_from_pkgi().startswith('x86_64'):
                 ret += [
@@ -246,6 +254,7 @@ so going to build i686 multilib support
                     ]
         else:
             raise Exception("To Be Done")
+        '''
         return ret
 
     # NOTE: this block is for multilib building
@@ -259,7 +268,9 @@ so going to build i686 multilib support
         ret = super().builder_action_distribute_define_args(called_as, log)
         ret = self._t1(ret)
         return ret
-    '''
+    #'''
+
+
     '''
     def builder_action_build_01(self, called_as, log):
         ret = autotools.make_high(
@@ -273,7 +284,7 @@ so going to build i686 multilib support
             source_configure_reldir=self.source_configure_reldir
             )
         return ret
-    #'''
+    '''
 
     def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
@@ -413,8 +424,12 @@ then continue with gcc build_02+
 
 class Builder_multi_i686(Builder):
 
-    # TODO: force x86_64-pc-linux-gnu-gcc (not i686-pc-linux-gnu-gcc) build
-    #       32bit part of glibc
+    # NOTE: All this class is depricated. glibc for multilib support -
+    #       shuld be built as usual glibc but with
+    #       i.g. --arch=i686-pc-linux-gnu parameter
+    
+    # TODO: force x86_64-pc-linux-gnu-gcc (not i686-pc-linux-gnu-gcc)
+    #       build 32bit part of glibc
 
     def define_custom_data(self):
         self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'build_i686')

@@ -13,7 +13,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = {
             'PYTHON': wayround_org.utils.file.which(
                 'python3',
-                self.get_host_arch_dir()
+                self.get_host_dir()
                 )
             }
         return ret
@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.get_host_arch_dir()),
+                '--prefix={}'.format(self.get_host_dir()),
                 ],
             arguments=['configure'],
             environment={
@@ -42,7 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.get_host_arch_dir()),
+                '--prefix={}'.format(self.get_host_dir()),
                 ],
             arguments=['build'],
             environment={
@@ -57,7 +57,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.get_host_arch_dir()),
+                '--prefix={}'.format(self.get_host_dir()),
                 '--destdir={}'.format(self.get_dst_dir())
                 ],
             arguments=[

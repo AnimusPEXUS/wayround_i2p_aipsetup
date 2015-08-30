@@ -72,7 +72,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_sh_link(self, called_as, log):
         tsl = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'bin', 'sh'
+            self.get_dst_host_dir(), 'bin', 'sh'
             )
 
         if os.path.exists(tsl) or os.path.islink(tsl):

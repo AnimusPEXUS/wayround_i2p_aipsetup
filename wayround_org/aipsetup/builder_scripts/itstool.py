@@ -15,8 +15,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             'PYTHON={}'.format(
                 wayround_org.utils.file.which(
-                    'python3',
-                    self.get_host_arch_dir()
+                    'python2',  
+				# TODO: watch this
+				# work badly with python3
+                                # (Mon Aug 24 11:06:51 MSK 2015)
+                    self.get_host_dir()
                     )
                 ),
             ]

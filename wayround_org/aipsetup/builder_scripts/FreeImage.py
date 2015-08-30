@@ -36,19 +36,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             [
                 'make',
-                'DESTDIR={}'.format(self.get_host_arch_dir()),
-                'INCDIR={}'.format(
-                    wayround_org.utils.path.join(
-                        self.get_host_arch_dir(),
-                        'include'
-                        )
-                    ),
-                'INSTALLDIR={}'.format(
-                    wayround_org.utils.path.join(
-                        self.get_host_arch_dir(),
-                        self.calculate_main_multiarch_lib_dir_name()
-                        )
-                    )
+                'DESTDIR={}'.format(self.get_host_dir()),
+                #'INCDIR={}'.format(
+                #    wayround_org.utils.path.join(
+                #        self.get_host_dir(),
+                #        'include'
+                #        )
+                #    ),
+                #'INSTALLDIR={}'.format(
+                #    wayround_org.utils.path.join(
+                #        self.get_host_dir(),
+		#	'lib'
+                #        #self.calculate_main_multiarch_lib_dir_name()
+                #        )
+                #    )
                 ] + self.all_automatic_flags_as_list(),
             cwd=self.get_src_dir(),
             stdout=log.stdout,
@@ -61,14 +62,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         os.makedirs(
-            wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'include'),
+            wayround_org.utils.path.join(self.get_dst_host_dir(), 'include'),
             exist_ok=True
             )
 
         os.makedirs(
             wayround_org.utils.path.join(
-                self.get_dst_host_arch_dir(),
-                self.calculate_main_multiarch_lib_dir_name()
+                self.get_dst_host_dir(),
+                'lib',
+                #self.calculate_main_multiarch_lib_dir_name()
                 ),
             exist_ok=True
             )
@@ -85,8 +87,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 shutil.copy(
                     wayround_org.utils.path.join(self.get_src_dir(), 'Dist', i),
                     wayround_org.utils.path.join(
-                        self.get_dst_host_arch_dir(),
-                        self.calculate_main_multiarch_lib_dir_name(),
+                        self.get_dst_host_dir(),
+                        'lib', #self.calculate_main_multiarch_lib_dir_name(),
                         i
                         )
                     )
@@ -95,7 +97,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 i = os.path.basename(i)
                 shutil.copy(
                     wayround_org.utils.path.join(self.get_src_dir(), 'Dist', i),
-                    wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'include', i)
+                    wayround_org.utils.path.join(self.get_dst_host_dir(), 'include', i)
                     )
 
         return

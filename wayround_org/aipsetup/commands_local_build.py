@@ -226,6 +226,11 @@ def _build_complete_subroutine(
 
     ret = 0
 
+    print("host: {}".format(host))
+    print("build: {}".format(build))
+    print("target: {}".format(target))
+    print("arch: {}".format(arch))
+
     const = wayround_org.aipsetup.build.Constitution(
         host,
         build,

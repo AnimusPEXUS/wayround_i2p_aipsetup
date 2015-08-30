@@ -24,8 +24,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if index == -1:
             raise Exception("Programming error")
 
-        lst.insert(index + 1, ('build2', self.builder_action_build2))
-        lst.insert(index + 1, ('distribute2', self.builder_action_distribute2))
+        #lst.insert(index + 1, ('build2', self.builder_action_build2))
+        #lst.insert(index + 1, ('distribute2', self.builder_action_distribute2))
 
         ret = collections.OrderedDict(lst)
 
@@ -35,14 +35,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return super().builder_action_configure_define_opts(called_as, log) + [
             '--with-x',
             '--with-install-cups',
+            '--with-ijs',
+            '--with-drivers=ALL'
+            #'SHARE_IJS=1'
             ]
 
     def builder_action_build_define_args(self, called_as, log):
-        return ['all', 'so']
+        return [
+            'all', 'so', #'SHARE_IJS=1'
+            ]
 
     def builder_action_distribute_define_args(self, called_as, log):
         return [
             'install',
             'soinstall',
-            'DESTDIR={}'.format(self.get_dst_dir())
+            'DESTDIR={}'.format(self.get_dst_dir()),
+            #'SHARE_IJS=1'
             ]

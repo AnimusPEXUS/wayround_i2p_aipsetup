@@ -16,13 +16,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             called_as,
             log)
         ret += [
-            '--with-installbuilddir={}'.format(
-                wayround_org.utils.path.join(
-                    self.get_host_arch_dir(),
-                    'share',
-                    'apr',
-                    'build-1'
-                    )
-                )
+            #'--with-installbuilddir={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.get_host_dir(),
+            #        'share',
+            #        'apr',
+            #        'build-1'
+            #        )
+            #    )
             ]
         return ret
