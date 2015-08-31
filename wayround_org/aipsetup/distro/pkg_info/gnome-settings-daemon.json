@@ -4,7 +4,7 @@
   "buildscript": "gnome_settings_daemon",
   "version_tool": "",
   "basename": "gnome-settings-daemon",
-  "filters": "- version !re \\d*\\.\\d*[02468]",
+  "filters": "",
   "removable": true,
   "reducible": true,
   "non_installable": false,

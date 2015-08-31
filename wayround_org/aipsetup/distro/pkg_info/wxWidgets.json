@@ -4,7 +4,7 @@
   "buildscript": "wxwidgets",
   "version_tool": "",
   "basename": "wxWidgets",
-  "filters": "- version !re ^\\d*\\.\\d*[02468][\\.&]",
+  "filters": "",
   "removable": true,
   "reducible": true,
   "non_installable": false,

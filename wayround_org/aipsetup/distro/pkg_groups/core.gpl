@@ -47,6 +47,7 @@
         "libseccomp",
         "libtirpc",
         "libusb",
+        "groff",
         "libnftnl",
         "libmnl",
         "json-c",

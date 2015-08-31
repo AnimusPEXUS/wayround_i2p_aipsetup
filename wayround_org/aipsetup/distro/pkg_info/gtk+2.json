@@ -4,7 +4,7 @@
   "buildscript": "std",
   "version_tool": "",
   "basename": "gtk+",
-  "filters": "- version fm *\n+ version fm 2.*\n- version !re 2\\.\\d*[02468]\n- version >= 2.90\n",
+  "filters": "- version fm *\n+ version fm 2.*\n- version >= 2.90\n",
   "removable": true,
   "reducible": true,
   "non_installable": false,

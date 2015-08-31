@@ -4,6 +4,7 @@
             "name": "gtk-sharp",
             "proc": "gnome_get"
         },
+        "uhttpmock",
         "libgudev",
         "gdl",
         "gtkspell",

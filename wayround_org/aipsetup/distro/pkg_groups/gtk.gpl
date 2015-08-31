@@ -46,8 +46,8 @@
         "libsigc++": {
             "proc": "normal_get",
             "args": [],
-            "kwargs": {}
-            "_comment": "not an error: must be normal_get!"
+            "kwargs": {},
+            "_comment": "don't know: must be normal or gnome style version"
             },
         "librsvg": {
             "proc": "normal_get",
@@ -65,17 +65,17 @@
             "kwargs": {}
             },
          "at-spi2-atk": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },
         "at-spi2-core": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },
         "gdk-pixbuf": {
-            "proc": "normal_get",
+            "proc": "gnome_get",
             "args": [],
             "kwargs": {}
             },

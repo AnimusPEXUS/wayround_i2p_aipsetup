@@ -283,6 +283,9 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
 
         session = sqlalchemy.orm.Session(self.decl_base.metadata.bind)
 
+        if not 'last_set_date' in struct:
+            raise KeyError("`last_set_date' must be supplied")
+
         q = session.query(self.Info).filter_by(name=name).first()
 
         creating_new = False
@@ -326,6 +329,8 @@ class PackageInfo(wayround_org.utils.db.BasicDB):
 
             else:
                 raise Exception("Programming Error")
+
+        q.last_set_date = struct['last_set_date']
 
         q.name = name
 
@@ -603,13 +608,19 @@ class PackageInfoCtl:
                     logging.warning("File missing: {}".format(filename))
                 continue
 
-            ctime = datetime.datetime.fromtimestamp(
+            ctime = datetime.datetime.utcfromtimestamp(
                 os.stat(filename).st_ctime
                 )
 
             info_ctime = info_db.get_last_set_date(i)
 
             if info_ctime is None or ctime > info_ctime:
+                logging.info(
+                    "outdated (UTC): {} > {}".format(
+                        ctime,
+                        info_ctime
+                        )
+                )
                 ret.append(i)
 
         return ret
@@ -865,6 +876,7 @@ class PackageInfoCtl:
 
         for i in missing:
             struct = read_info_file(i)
+            struct['last_set_date'] = datetime.datetime.utcnow()
             name = os.path.basename(i)[:-5]
             if isinstance(struct, dict):
                 wayround_org.utils.terminal.progress_write(
@@ -1046,6 +1058,7 @@ def read_info_file(name):
                 ret.update(tree)
 
                 ret['name'] = name
+                # ret['last_set_date'] = 
                 del(tree)
         finally:
             f.close()
