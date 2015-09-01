@@ -1,7 +1,7 @@
 
-"""
+'''
 Edit package info on disk and update pkginfo database
-"""
+'''
 
 import collections
 import functools
