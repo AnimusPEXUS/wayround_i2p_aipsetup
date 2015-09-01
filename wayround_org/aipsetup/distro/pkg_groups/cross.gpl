@@ -1,6 +1,13 @@
 {
-    "names" : [
-	"cloog", "isl", "gmp", "mpc", "mpfr",
-	"glibc", "linux", "binutils", "gcc"
+    "names": [
+        "cloog",
+        "isl",
+        "gmp",
+        "mpc",
+        "mpfr",
+        "glibc",
+        "linux",
+        "binutils",
+        "gcc"
     ]
 }

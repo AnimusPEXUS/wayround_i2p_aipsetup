@@ -1,0 +1,48 @@
+{
+    "names": [
+        {
+            "proc": "gnome_get",
+            "name": "Botan"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "anjuta"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "brasero"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gedit"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gnome-canvose"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gnome-main-menu"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gnome-power-manager"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gnome-python"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gnome-python-desktop"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "gnome-python-extras"
+        },
+        {
+            "proc": "gnome_get",
+            "name": "wxWidgets"
+        }
+    ]
+}

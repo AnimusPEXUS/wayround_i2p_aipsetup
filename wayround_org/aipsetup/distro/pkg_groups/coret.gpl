@@ -69,7 +69,6 @@
         "fuse",
         "patch",
         "pcre",
-        "perl",
         "pkg-config",
         "polkit",
         "Python2",
@@ -97,13 +96,23 @@
         "yasm",
         "zip",
         "zlib",
-        "itstool", 
-        "xfsdump", "xfsprogs",
+        "itstool",
+        "xfsdump",
+        "xfsprogs",
         "expat",
-        "gc", "libatomic_ops", "bison", "procps-ng", "psmisc", "less",
+        "gc",
+        "libatomic_ops",
+        "bison",
+        "procps-ng",
+        "psmisc",
+        "less",
         "libmicrohttpd",
         "lzo",
         "gdbm",
-        "wget"
+        "wget",
+        {
+            "name": "perl",
+            "proc": "gnome_get"
+        }
     ]
 }

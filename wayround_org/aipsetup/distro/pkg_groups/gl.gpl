@@ -1,5 +1,8 @@
 {
-    "names" : [
+    "deprecated": {
+        "MesaLib": "renamed to 'mesa'"
+    },
+    "names": [
         "mesa",
         "MesaGLUT",
         "glu",
@@ -11,9 +14,5 @@
         "freeglut",
         "vdpauinfo",
         "libvdpau"
-    ],
-
-    "deprecated": {
-        "MesaLib": "renamed to 'mesa'"
-    }
+    ]
 }

@@ -1,686 +1,666 @@
 {
-
     "ask_version": true,
-
-    "names" : {
-
-        "adwaita-icon-theme": {
-            "proc": "gnome_get",
+    "names": {
+        "vala": {
+            "kwargs": {},
             "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-        },
-        "libgnome-keyring": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-        },
-
-        "baobab": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "cheese": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "clutter": {
             "proc": "gnome_get"
-            },
-        "clutter-gst": {
-            "proc": "gnome_get"
-            },
-        "clutter-gtk": {
-            "proc": "gnome_get",
-            "kwargs": {"daa": true}
-            },
-
-        "devhelp": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "empathy": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "eog": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
+        },
         "epiphany": {
-            "proc": "gnome_get",
-            "args": [],
             "kwargs": {
                 "version": "{asked_version}"
-                }
             },
-        "evince": {
-            "proc": "gnome_get",
             "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "evolution": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "evolution-data-server": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gcr": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gdm": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-
-        "geocode-glib": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-
-        "gnome-backgrounds": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-bluetooth": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-calculator": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-common": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-contacts": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-control-center": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-desktop": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-dictionary": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-disk-utility": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-font-viewer": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-games": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-icon-theme": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-icon-theme-extras": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-icon-theme-symbolic": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-keyring": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-menus": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-online-accounts": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-online-miners": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-packagekit": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-panel": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-search-tool": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-screenshot": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-session": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-settings-daemon": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-shell": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-shell-extensions": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-system-log": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}",
-                "daa": true,
-                "nmaa": true
-                }
-            },
-        "gnome-system-monitor": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-terminal": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-themes-standard": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-tweak-tool": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-user-docs": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gnome-user-share": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gsettings-desktop-schemas": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "gucharmap": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "libgweather": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "mousetweaks": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "mutter": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "nautilus": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "notification-daemon": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
+            "proc": "gnome_get"
+        },
         "seed": {
-            "proc": "gnome_get",
-            "args": [],
             "kwargs": {
                 "version": "{asked_version}"
-                }
             },
-        "sushi": {
-            "proc": "gnome_get",
             "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-control-center": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-screensaver": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "sushi": {
             "kwargs": {
                 "version": "{asked_version}",
-                "daa": true,
-                "nmaa": true
-                }
+                "nmaa": true,
+                "daa": true
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "cheese": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "adwaita-icon-theme": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libgdata": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
         },
         "totem": {
-            "proc": "gnome_get",
-            "args": [],
             "kwargs": {
                 "version": "{asked_version}"
-                }
             },
-        "totem-pl-parser": {
-            "proc": "gnome_get",
             "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "vino": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "yelp": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "yelp-tools": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "yelp-xsl": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-        "zenity": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-
-        "glade": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-
-        "gnome-screensaver": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {
-                "version": "{asked_version}"
-                }
-            },
-
-
-
-        "vte": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-
-        "gjs": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "libgee": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "libsoup": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "libsecret": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gvfs": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gtk-doc": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "vala": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "tracker": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gnome-doc-utils": {
-            "proc": "gnome_get",
-            "args": [],
-            "kwargs": {}
-            },
-
-
-        "ORBit2":{
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-
-        "cantarell-fonts": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "caribou": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "cogl": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "dconf": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "folks": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gnome-js-common": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gnome-video-effects": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "grilo": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "grilo-plugins": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "gssdp": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
+            "proc": "gnome_get"
+        },
         "gupnp": {
-            "proc": "normal_get",
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
+            "proc": "normal_get"
+        },
+        "gnome-terminal": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "gupnp-igd": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "gnome-contacts": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "libchamplain": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "gnome-games": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "libcroco": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
-            },
-        "exempi": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
-        "libgdata": {
-            "proc": "normal_get",
-            "args": [],
-            "kwargs": {}
-            },
+            "proc": "gnome_get"
+        },
         "libgee": {
-            "proc": "gnome_get",
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
-            },
-        "libgnomekbd": {
-            "proc": "normal_get",
+            "proc": "gnome_get"
+        },
+        "vte": {
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "gnome-icon-theme": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "libgsf": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
-            },
-        "libgtop": {
-            "proc": "normal_get",
+            "proc": "gnome_get"
+        },
+        "gssdp": {
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
+            "proc": "normal_get"
+        },
+        "gnome-icon-theme-symbolic": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "glade": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "tracker": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "nautilus": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-font-viewer": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-panel": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "evince": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "zenity": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
         "libgxps": {
-            "proc": "normal_get",
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
+            "proc": "normal_get"
+        },
+        "gnome-bluetooth": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "libmediaart": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "empathy": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "libnotify": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "clutter-gtk": {
+            "kwargs": {
+                "daa": true
             },
-        "libpeas": {
-            "proc": "normal_get",
+            "proc": "gnome_get"
+        },
+        "gnome-shell-extensions": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "mutter": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "libwnck": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
-            },
-        "libzapojit": {
-            "proc": "normal_get",
+            "proc": "gnome_get"
+        },
+        "libgtop": {
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
+            "proc": "normal_get"
+        },
+        "yelp-xsl": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
-        "network-manager-applet": {
-            "proc": "normal_get",
             "args": [],
-            "kwargs": {}
+            "proc": "gnome_get"
+        },
+        "gupnp-igd": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "cantarell-fonts": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-backgrounds": {
+            "kwargs": {
+                "version": "{asked_version}"
             },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-settings-daemon": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-disk-utility": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "devhelp": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gvfs": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "exempi": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "mousetweaks": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libgsf": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-keyring": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-search-tool": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-video-effects": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "yelp": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "ORBit2": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-themes-standard": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-session": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "grilo": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "libgnome-keyring": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "dconf": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-shell": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libgnomekbd": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-screenshot": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
         "rest": {
-            "proc": "normal_get",
+            "kwargs": {},
             "args": [],
-            "kwargs": {}
-            }
+            "proc": "normal_get"
+        },
+        "gnome-calculator": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "grilo-plugins": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "baobab": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-user-share": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "clutter-gst": {
+            "proc": "gnome_get"
+        },
+        "clutter": {
+            "proc": "gnome_get"
+        },
+        "gnome-user-docs": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gtk-doc": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libsoup": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "evolution-data-server": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gdm": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "totem-pl-parser": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libgweather": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-js-common": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "eog": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "network-manager-applet": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-tweak-tool": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-dictionary": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "cogl": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "folks": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gsettings-desktop-schemas": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libnotify": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "libwnck": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-packagekit": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-desktop": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-doc-utils": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "notification-daemon": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "evolution": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-online-accounts": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-menus": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libcroco": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-system-log": {
+            "kwargs": {
+                "version": "{asked_version}",
+                "nmaa": true,
+                "daa": true
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libpeas": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "libchamplain": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gjs": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "caribou": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-icon-theme-extras": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libmediaart": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "yelp-tools": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gcr": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-online-miners": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "geocode-glib": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gnome-common": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libzapojit": {
+            "kwargs": {},
+            "args": [],
+            "proc": "normal_get"
+        },
+        "gnome-system-monitor": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "libsecret": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "vino": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        },
+        "gucharmap": {
+            "kwargs": {
+                "version": "{asked_version}"
+            },
+            "args": [],
+            "proc": "gnome_get"
+        }
     }
-
 }

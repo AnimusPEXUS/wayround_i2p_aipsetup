@@ -1,7 +1,11 @@
 {
-    "names" : [
+    "names": [
         "apparmor",
-
-        "checkpolicy", "libselinux", "libsemanage", "libsepol", "policycoreutils", "sepolgen"
+        "checkpolicy",
+        "libselinux",
+        "libsemanage",
+        "libsepol",
+        "policycoreutils",
+        "sepolgen"
     ]
 }

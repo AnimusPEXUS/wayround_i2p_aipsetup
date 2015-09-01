@@ -1,5 +1,5 @@
 {
-    "names" : [
+    "names": [
         "gnupg1",
         "gnupg2",
         "gnutls",
@@ -10,10 +10,11 @@
         "libgpg-error",
         "libksba",
         "libtasn1",
-        "nettle", "nettle2",
+        "nettle",
+        "nettle2",
         "npth",
         "opencdk",
         "scute",
         "p11-kit"
-        ]
+    ]
 }
