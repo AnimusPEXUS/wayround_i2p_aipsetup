@@ -44,23 +44,23 @@
         
         "libxklavier",
         
-        "polkit-gnome": {
+{"name":        "polkit-gnome",
     "proc": "normal_get",
     "args": [],
     "kwargs": {}
     },
     
 
-"rest": {
+{"name":"rest",
     "proc": "normal_get",
     "args": [],
     "kwargs": {}
     },
-        "mm-common": {
+{"name":        "mm-common",
             "proc": "normal_get",
             "args": [],
             "kwargs": {}
-            },
+            }
 
 
     ]
