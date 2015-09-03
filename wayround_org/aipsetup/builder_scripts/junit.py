@@ -27,7 +27,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         dst_classpath_dir = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(),
+            self.calculate_dst_install_prefix(),
+            'opt',
             'java',
             'classpath'
             )
@@ -44,7 +45,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             [
                 'ant',
                 '-Dversion={}'.format(
-                    self.get_package_info()['pkg_nameinfo']['groups']['version']
+                    self.get_package_info()['pkg_nameinfo'][
+                        'groups']['version']
                     ),
                 'dist'
                 ],
@@ -60,7 +62,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         shutil.copy(
             wayround_org.utils.path.join(
-                src_junit_dir, 'junit-{}.jar'.format(
+                src_junit_dir,
+                'junit-{}.jar'.format(
                     pkg_info['pkg_nameinfo']['groups']['version']
                     )
                 ),

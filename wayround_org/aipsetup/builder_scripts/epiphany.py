@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         pkg_config = wayround_org.utils.file.which(
             'pkg-config',
-            self.get_host_dir() # TODO: it's ok?
+            self.get_host_dir()
             )
 
         nss_cflags = ''
@@ -37,7 +37,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_opts(self, called_as, log):
-        return super().builder_action_configure_define_opts(called_as, log) + [
-            'NSS_CFLAGS=' + self.custom_data['NSS_CFLAGS'],
-            'NSS_LIBS=' + self.custom_data['NSS_LIBS']
+        ret = super().builder_action_configure_define_opts(called_as, log)
+        ret += [
+            'NSS_CFLAGS={}'.format(self.custom_data['NSS_CFLAGS']),
+            'NSS_LIBS={}'.format(self.custom_data['NSS_LIBS'])
             ]
+        return ret

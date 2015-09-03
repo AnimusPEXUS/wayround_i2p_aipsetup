@@ -84,14 +84,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
 
         if self.get_is_crossbuilder():
-            raise Exception("redo")
             prefix = wayround_org.utils.path.join(
-                self.host_crossbuilders_dir, self.target
+                self.get_host_crossbuilders_dir(),
+                self.target
                 )
 
             ret = [
-                '--prefix=' + prefix,
-                '--mandir=' + wayround_org.utils.path.join(prefix, 'share', 'man'),
+                '--prefix={}'.format(prefix),
+                '--mandir={}'.format(
+                    wayround_org.utils.path.join(
+                        prefix,
+                        'share',
+                        'man'
+                        )
+                    ),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared'

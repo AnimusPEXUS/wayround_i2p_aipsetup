@@ -27,7 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.get_host_dir()),
+                '--prefix={}'.format(self.calculate_install_prefix()),
                 ],
             arguments=['configure'],
             environment={
@@ -42,7 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.get_host_dir()),
+                '--prefix={}'.format(self.calculate_install_prefix()),
                 ],
             arguments=['build'],
             environment={
@@ -57,7 +57,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = waf.waf(
             self.get_src_dir(),
             options=[
-                '--prefix={}'.format(self.get_host_dir()),
+                '--prefix={}'.format(self.calculate_install_prefix()),
                 '--destdir={}'.format(self.get_dst_dir())
                 ],
             arguments=[

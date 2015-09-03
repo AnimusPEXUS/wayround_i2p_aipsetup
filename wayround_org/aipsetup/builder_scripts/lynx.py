@@ -13,4 +13,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-ssl',
             '--with-gnutls',
             '--enable-ipv6',
-            ]
+            '--enable-widec',
+            '--with-screen=ncursesw'
+        ]

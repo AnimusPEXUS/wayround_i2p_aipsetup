@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://www.freedesktop.org/",
-  "buildscript": "std",
+  "buildscript": "telepathy_mission_control",
   "version_tool": "",
   "basename": "telepathy-mission-control",
   "filters": "- version re .*99+.*",
@@ -9,6 +9,7 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

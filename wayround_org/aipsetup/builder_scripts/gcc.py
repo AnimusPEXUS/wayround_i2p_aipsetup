@@ -27,10 +27,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = dict()
         ret['cc_file'] = wayround_org.utils.path.join(
-            self.get_dst_host_dir(), 'bin', 'cc'
+            self.calculate_dst_install_prefix(), 'bin', 'cc'
             )
         ret['libcpp_file'] = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(),
+            self.calculate_dst_install_prefix(),
             'lib',
             'cpp'
             )
@@ -131,7 +131,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
 
         if self.get_is_crossbuilder():
-            raise Exception("redo")
+
             prefix = wayround_org.utils.path.join(
                 self.get_host_crossbuilders_dir(),
                 self.get_target_from_pkgi()
@@ -139,7 +139,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             ret = [
                 '--prefix=' + prefix,
-                '--mandir=' + wayround_org.utils.path.join(prefix, 'share', 'man'),
+                '--mandir=' +
+                wayround_org.utils.path.join(prefix, 'share', 'man'),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared',
@@ -203,40 +204,40 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             ret += [
-                
+
                 '--disable-gold',
-                
+
                 '--enable-tls',
                 '--enable-nls',
                 '--enable-__cxa_atexit',
-                
+
                 # NOTE: no 'go' language in Lailalo system
                 '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
-                
+
                 '--disable-bootstrap',
-                
+
                 '--enable-threads=posix',
-                
+
                 # wine Wow64 support requires this
                 # ld: Relocatable linking with relocations from format
                 #     elf64-x86-64 (aclui.Itv5tk.o) to format elf32-i386
                 #     (aclui.pnv73q.o) is not supported
                 '--enable-multiarch',
                 '--enable-multilib',
-                
+
                 #'--disable-multiarch',
                 #'--disable-multilib',
-                
+
                 '--enable-checking=release',
                 '--enable-libada',
                 '--enable-shared',
-                
+
                 #'--oldincludedir=' +
-                #wayround_org.utils.path.join(
+                # wayround_org.utils.path.join(
                 #    self.get_host_dir(),
                 #    'include'
                 #    ),
-                
+
                 #'--with-gxx-include-dir={}'.format(
                 #    wayround_org.utils.path.join(
                 #        self.get_host_arch_dir(),
@@ -245,7 +246,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #        #'5.2.0'
                 #        )
                 #    ),
-                
+
                 # experimental option for this place
                 #
                 # NOTE: without it gcc tryes to use incompatible
@@ -255,13 +256,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #       in /lib and /usr/lib, but not in
                 #       /multihost/xxx/lib!:
                 '--with-sysroot={}'.format(self.get_host_dir()),
-                
+
                 # '--with-build-sysroot={}'.format(self.get_host_arch_dir())
                 '--with-native-system-header-dir={}'.format(
                     wayround_org.utils.path.join(
                         #'/',
                         #'multiarch',
-                        #self.get_host_from_pkgi(),
+                        # self.get_host_from_pkgi(),
                         self.get_host_dir(),
                         'include'
                     )
@@ -270,11 +271,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ]
 
             if self.get_host_from_pkgi().startswith('x86_64'):
-                # TODO: no hardcode
-                # NOTE: this hack is to make gcc use libc from i686 multiarch
-                #       dir, as well as avoid using libstdc++ from i686
-                #       multiarch dir
-
                 ret += [
                     '--enable-targets=all'
                     ]

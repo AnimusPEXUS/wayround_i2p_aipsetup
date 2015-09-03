@@ -65,7 +65,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         os.makedirs(
             wayround_org.utils.path.join(
-                self.get_dst_host_lib_dir()
+                self.calculate_dst_install_prefix()
                 ),
             exist_ok=True
             )
@@ -75,7 +75,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix={}'.format(self.get_dst_host_dir())
+                'prefix={}'.format(self.calculate_dst_install_prefix())
                 ],
             environment={},
             environment_mode='copy',
@@ -103,7 +103,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         os.makedirs(
             wayround_org.utils.path.join(
-                self.get_dst_host_lib_dir()
+                self.calculate_dst_install_libdir()
                 ),
             exist_ok=True
             )
@@ -113,7 +113,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix={}'.format(self.get_dst_host_dir()),
+                'prefix={}'.format(self.calculate_dst_install_prefix()),
                 'SHARED=1'
                 ],
             environment={},

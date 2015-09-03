@@ -14,15 +14,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             '--bindir=' +
             wayround_org.utils.path.join(
-                self.get_host_dir(),
+                self.calculate_install_prefix(),
                 'bin'
                 ),
 
             '--sbindir=' +
             wayround_org.utils.path.join(
-                self.get_host_dir(),
+                self.calculate_install_prefix(),
                 'sbin'
                 ),
 
             ]
+
         return ret

@@ -4,6 +4,7 @@ import json
 import logging
 import os.path
 import re
+import pprint
 
 import wayround_org.aipsetup.client_pkg
 import wayround_org.aipsetup.client_src
@@ -74,13 +75,17 @@ def find_gnome_tarball_name(
             source_version_comparator
             )
         )
+    #print("required_v1: {}, required_v2: {}".format(required_v1, required_v2))
+    #print("tarballs: {}".format(pprint.pformat(tarballs)))
 
     if (required_v1 is None or required_v2 is None) and len(tarballs) != 0:
 
         for i in tarballs:
 
-            parsed = wayround_org.utils.tarball.\
-                parse_tarball_name(i, mute=True)
+            parsed = wayround_org.utils.tarball.parse_tarball_name(
+                i,
+                mute=True
+            )
 
             parsed_groups_version_list = parsed['groups']['version_list']
 
@@ -99,7 +104,7 @@ def find_gnome_tarball_name(
                         and not is_development
                         )
                     ):
-
+                # print("{} passed".format(i))
                 if required_v1 is None:
                     required_v1 = int(parsed['groups']['version_list'][0])
 
@@ -107,7 +112,10 @@ def find_gnome_tarball_name(
                     required_v2 = int(parsed['groups']['version_list'][1])
 
                 break
-
+                #else:
+                #print("{} didn't passed".format(i))
+                    
+    #print("required_v1: {}, required_v2: {}".format(required_v1, required_v2))
     found_required_targeted_tarballs = []
 
     for i in tarballs:
@@ -131,6 +139,8 @@ def find_gnome_tarball_name(
 
                     found_required_targeted_tarballs.append(i)
 
+    # print("found_required_targeted_tarballs: {}".format(found_required_targeted_tarballs))
+                    
     if (len(found_required_targeted_tarballs) == 0
             and find_lower_version_if_required_missing == True):
 
@@ -185,8 +195,7 @@ def find_gnome_tarball_name(
         if next_found_acceptable_tarball is not None:
 
             for i in tarballs:
-                if wayround_org.utils.version.\
-                    source_version_comparator(
+                if wayround_org.utils.version.source_version_comparator(
                         i,
                         next_found_acceptable_tarball,
                         acceptable_extensions_order_list
@@ -194,11 +203,13 @@ def find_gnome_tarball_name(
                     found_required_targeted_tarballs.append(i)
 
     ret = None
-    for i in acceptable_extensions_order_list:
-        for j in found_required_targeted_tarballs:
+    for j in found_required_targeted_tarballs:
+        for i in acceptable_extensions_order_list:
             if j.endswith(i):
                 ret = j
                 break
+        if ret is not None:
+            break
 
     if ret is None and len(found_required_targeted_tarballs) != 0:
         ret = found_required_targeted_tarballs[0]

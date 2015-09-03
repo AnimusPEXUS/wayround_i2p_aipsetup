@@ -17,7 +17,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         p = subprocess.Popen(
-            ['qmake', 'PREFIX={}'.format(self.get_host_dir())],
+            ['qmake', 'PREFIX={}'.format(self.calculate_install_prefix())],
             cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr

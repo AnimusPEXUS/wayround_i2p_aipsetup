@@ -21,7 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_define_args(self, called_as, log):
         return [
             'install',
-            'prefix={}'.format(self.get_dst_host_dir()),
+            'prefix={}'.format(self.calculate_dst_install_prefix()),
             #'BINDIR={}'.format(
             #    wayround_org.utils.path.join(
             #        self.get_dst_host_dir(),

@@ -15,15 +15,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-selinux',
             '--includedir={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_dir(),
+                    self.calculate_install_prefix(),
                     'include',
                     'security' # it's not a mistake: 'security' dir is here
-                               #                     required at least by 'polkit'
+                               # required at least by 'polkit'
                     )
                 ),
             '--enable-securedir={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_dir(),
+                    self.calculate_install_prefix(),
                     'lib',
                     'security'
                     )

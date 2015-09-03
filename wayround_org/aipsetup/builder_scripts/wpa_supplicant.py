@@ -73,8 +73,8 @@ CONFIG_SMARTCARD=y
 CONFIG_WPS=y
 CFLAGS += -I{hmd}/include/libnl3
 {generated}
-""".format(hmd=self.get_host_dir(),
-           generated = '\n'.join(self.all_automatic_flags_as_list())
+""".format(hmd=self.calculate_install_prefix(),
+           generated='\n'.join(self.all_automatic_flags_as_list())
            )
             )
         f.close()
@@ -90,18 +90,18 @@ CFLAGS += -I{hmd}/include/libnl3
                 'install',
                 'LIBDIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_dir(),
-			'lib'
+                        self.calculate_install_prefix(),
+                        'lib'
                         )
                     ),
                 'BINDIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_dir(), 'bin'
+                        self.calculate_install_prefix(), 'bin'
                         )
                     ),
                 'PN531_PATH={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_dir(), 'src', 'nfc'
+                        self.calculate_install_prefix(), 'src', 'nfc'
                         )
                     ),
                 'DESTDIR={}'.format(self.get_dst_dir())
@@ -126,17 +126,30 @@ CFLAGS += -I{hmd}/include/libnl3
             )
 
         m8 = glob.glob(
-            wayround_org.utils.path.join(src_dir_p_sep, 'doc', 'docbook', '*.8')
+            wayround_org.utils.path.join(
+                src_dir_p_sep,
+                'doc',
+                'docbook',
+                '*.8')
             )
         m5 = glob.glob(
-            wayround_org.utils.path.join(src_dir_p_sep, 'doc', 'docbook', '*.5')
+            wayround_org.utils.path.join(
+                src_dir_p_sep,
+                'doc',
+                'docbook',
+                '*.5')
             )
 
         for i in m8:
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                wayround_org.utils.path.join(self.get_dst_host_dir(), 'man', 'man8', bn)
+                wayround_org.utils.path.join(
+                    self.calculate_dst_install_prefix(),
+                    'man',
+                    'man8',
+                    bn
+                    )
                 )
             log.info("    {}".format(i))
 
@@ -144,7 +157,11 @@ CFLAGS += -I{hmd}/include/libnl3
             bn = os.path.basename(i)
             shutil.copyfile(
                 i,
-                wayround_org.utils.path.join(self.get_dst_host_dir(), 'man', 'man5', bn)
+                wayround_org.utils.path.join(
+                    self.calculate_dst_install_prefix(),
+                    'man',
+                    'man5',
+                    bn)
                 )
             log.info("    {}".format(i))
         return 0

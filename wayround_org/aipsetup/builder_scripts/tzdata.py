@@ -14,10 +14,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         ret = dict()
-        ret['makefile'] = wayround_org.utils.path.join(self.get_src_dir(), 'Makefile')
-        ret['zoneinfo'] = wayround_org.utils.path.join(self.get_dst_dir(), 'usr', 'share', 'zoneinfo')
-        ret['zoneinfop'] = wayround_org.utils.path.join(ret['zoneinfo'], 'posix')
-        ret['zoneinfor'] = wayround_org.utils.path.join(ret['zoneinfo'], 'right')
+        ret['makefile'] = wayround_org.utils.path.join(
+            self.get_src_dir(), 'Makefile'
+            )
+        ret['zoneinfo'] = wayround_org.utils.path.join(
+            self.calculate_dst_install_prefix(),
+            'share',
+            'zoneinfo'
+            )
+        ret['zoneinfop'] = wayround_org.utils.path.join(
+            ret['zoneinfo'],
+            'posix'
+            )
+        ret['zoneinfor'] = wayround_org.utils.path.join(
+            ret['zoneinfo'],
+            'right'
+            )
         return ret
 
     def define_actions(self):
@@ -89,9 +101,9 @@ printtdata:
     def builder_action_distribute(self, called_as, log):
         ret = 0
 
-        os.makedirs(self.custom_data['zoneinfo'])
-        os.makedirs(self.custom_data['zoneinfop'])
-        os.makedirs(self.custom_data['zoneinfor'])
+        os.makedirs(self.custom_data['zoneinfo'], exist_ok=True)
+        os.makedirs(self.custom_data['zoneinfop'], exist_ok=True)
+        os.makedirs(self.custom_data['zoneinfor'], exist_ok=True)
 
         zonefiles = []
 
@@ -152,7 +164,9 @@ printtdata:
                 if i.endswith('.tab'):
                     shutil.copy(
                         wayround_org.utils.path.join(self.get_src_dir(), i),
-                        wayround_org.utils.path.join(self.custom_data['zoneinfo'], i)
+                        wayround_org.utils.path.join(
+                            self.custom_data['zoneinfo'],
+                            i)
                         )
 
         return ret

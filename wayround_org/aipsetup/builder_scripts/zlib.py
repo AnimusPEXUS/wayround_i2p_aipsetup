@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
         ret = [
-            '--prefix={}'.format(self.get_host_dir()),
+            '--prefix={}'.format(self.calculate_install_prefix()),
             #'--libdir={}'.format(self.get_host_lib_dir()),
             '--shared',
             ]
@@ -34,13 +34,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_build_define_args(self, called_as, log):
         return [
-            'prefix={}'.format(self.get_dst_host_dir()),
+            'prefix={}'.format(self.calculate_dst_install_prefix()),
             #'libdir={}'.format(self.get_dst_host_lib_dir()),
             ]
 
     def builder_action_distribute_define_args(self, called_as, log):
         return [
             'install',
-            'prefix={}'.format(self.get_dst_host_dir()),
+            'prefix={}'.format(self.calculate_dst_install_prefix()),
             #'libdir={}'.format(self.get_dst_host_lib_dir()),
             ]

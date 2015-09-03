@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://ibus.googlecode.com/files/",
-  "buildscript": "std",
+  "buildscript": "ibus",
   "version_tool": "",
   "basename": "ibus",
   "filters": "- version re .*\\d{5}.*",

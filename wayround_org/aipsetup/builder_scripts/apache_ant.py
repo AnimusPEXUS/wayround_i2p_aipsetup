@@ -18,19 +18,27 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 )
             )
 
+        ant_dir = wayround_org.utils.path.join(
+            self.calculate_install_prefix(),
+            'opt',
+            'java',
+            'apache-ant'
+            )
+
         dst_ant_dir = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'java', 'apache-ant'
+            self.get_dst_dir(),
+            ant_dir
             )
 
         etc_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(), 
-            'etc', 
-            'profile.d', 
+            self.get_dst_host_dir(),
+            'etc',
+            'profile.d',
             'SET'
             )
 
         apacheant009 = wayround_org.utils.path.join(
-            etc_dir, 
+            etc_dir,
             '009.apache-ant.{}.{}.sh'.format(
                 self.get_host_from_pkgi(),
                 self.get_arch_from_pkgi()
@@ -39,6 +47,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = {
             'src_ant_dir': src_ant_dir,
+            'ant_dir': ant_dir,
             'dst_ant_dir': dst_ant_dir,
             'etc_dir': etc_dir,
             'apacheant009': apacheant009
@@ -83,31 +92,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             clear_before_copy=True,
             dst_must_be_empty=True
             )
-    
-        # NOTE: disabled because I fink it's not needed
-        if False:
 
-            os.makedirs(
-                self.custom_data['etc_dir'], 
-                exist_ok=True
-                )
+        os.makedirs(
+            self.custom_data['etc_dir'],
+            exist_ok=True
+            )
 
-            fi = open(
-                self.custom_data['apacheant009'], 
-                'w'
-                )
-            
-            # TODO: may be all such PATH creators better to move away from
-            #       builder scripts, so creators don't be deleted with package
-            #       removes
-            fi.write(
-                """\
+        fi = open(self.custom_data['apacheant009'], 'w')
+
+        fi.write(
+"""\
 #!/bin/bash
 export ANT_HOME='{ant_dir}'
 export PATH="$PATH:$ANT_HOME/bin"
-""".format(ant_dir=dst_ant_dir)
-                )
+""".format(ant_dir=self.custom_data['ant_dir'])
+            )
 
-            fi.close()
+        fi.close()
 
         return 0

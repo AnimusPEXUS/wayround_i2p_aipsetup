@@ -24,12 +24,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
             
-        '''
-        ret = self.builder_action_configure_define_opts_alternate_prefix(
-            called_as, log,
-            ret
-            )
-        '''
         for i in range(len(ret) - 1, -1, -1):
             for j in [
                     '--datarootdir=',
@@ -43,6 +37,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-wince',
             ]
         ret += [
+            # NOTE: tcl should be allways installed in 'lib'
             '--libdir={}'.format(
                 wayround_org.utils.path.join(
                     self.calculate_install_prefix(),
@@ -82,7 +77,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pkg_name = self.get_package_info()['pkg_info']['name']
 
         bin_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
+            self.calculate_install_prefix(),
             'bin'
             )
 

@@ -50,7 +50,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_patch(self, called_as, log):
-        makefile_name = wayround_org.utils.path.join(self.get_src_dir(), 'Makefile')
+        makefile_name = wayround_org.utils.path.join(
+            self.get_src_dir(),
+            'Makefile'
+            )
 
         ret = 0
 

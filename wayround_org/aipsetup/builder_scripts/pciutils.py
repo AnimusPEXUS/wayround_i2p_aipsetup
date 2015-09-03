@@ -31,7 +31,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'install',
                 'install-lib',
                 'DESTDIR={}'.format(self.get_dst_dir()),
-                'PREFIX={}'.format(self.get_host_dir()),
+                'PREFIX={}'.format(self.calculate_install_prefix()),
                 # 'LIBDIR={}'.format(self.get_host_lib_dir()),
                 #'SHAREDIR={}'.format(
                 #    wayround_org.utils.path.join(

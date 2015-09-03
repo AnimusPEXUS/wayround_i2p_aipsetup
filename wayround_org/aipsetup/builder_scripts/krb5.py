@@ -7,3 +7,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         self.source_configure_reldir = 'src'
+        return

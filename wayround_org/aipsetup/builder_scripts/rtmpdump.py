@@ -28,7 +28,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'prefix={}'.format(self.get_host_dir()),
+                'prefix={}'.format(self.calculate_install_prefix()),
                 'DESTDIR={}'.format(self.get_dst_dir()),
                 ] + self.all_automatic_flags_as_list(),
             environment={},

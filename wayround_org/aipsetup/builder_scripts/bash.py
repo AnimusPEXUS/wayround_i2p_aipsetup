@@ -44,8 +44,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if subprocess.Popen(
                         ['patch',
                          '-i',
-                         wayround_org.utils.path.join(self.get_patches_dir(), i),
-                         '-p0'],
+                         wayround_org.utils.path.join(
+                             self.get_patches_dir(),
+                             i),
+                            '-p0'],
                         cwd=self.get_src_dir()
                         ).wait() != 0:
                     log.error("Patch error")
@@ -53,7 +55,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_opts(self, called_as, log):
-        ret = [
+
+        ret = super().builder_action_configure_define_opts(called_as, log)
+
+        ret += [
             '--enable-multibyte',
             '--with-curses'
             ]
@@ -67,12 +72,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #                              build
                 ]
 
-        return super().builder_action_configure_define_opts(
-            called_as, log) + ret
+        return ret
 
     def builder_action_sh_link(self, called_as, log):
         tsl = wayround_org.utils.path.join(
-            self.get_dst_host_dir(), 'bin', 'sh'
+            self.calculate_dst_install_prefix(), 'bin', 'sh'
             )
 
         if os.path.exists(tsl) or os.path.islink(tsl):

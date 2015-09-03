@@ -10,7 +10,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
         dst_classpath_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
+            self.calculate_dst_install_prefix(),
+            'opt',
             'java',
             'classpath'
             )
@@ -24,6 +25,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'dst_classpath_dir': dst_classpath_dir,
             'src_build_dir':src_build_dir
             }
+
         return ret
 
     def define_actions(self):

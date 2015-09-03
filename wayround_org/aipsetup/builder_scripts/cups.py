@@ -19,7 +19,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #    ),
             'SERVERBIN={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_dst_host_lib_dir(),
+                    self.calculate_dst_install_libdir(),
                     'cups'
                     )
                 ),
@@ -32,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'BUILDROOT={}'.format(self.get_dst_dir()),
             'SERVERBIN={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_dst_host_lib_dir(),
+                    self.calculate_dst_install_libdir(),
                     'cups'
                     )
                 )

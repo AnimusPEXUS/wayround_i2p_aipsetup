@@ -8,11 +8,7 @@ import wayround_org.aipsetup.buildtools.autotools as autotools
 
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
-    ''
-
     def define_custom_data(self):
-        self.apply_host_spec_linking_interpreter_option = False
-        self.apply_host_spec_linking_lib_dir_options = False
         self.apply_host_spec_compilers_options = True
         return
 
@@ -27,7 +23,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
             d['CXX'] = []
         d['CXX'].append(self.calculate_CXX_string())
 
-        return 
+        return
 
     def builder_action_configure_define_environment(self, called_as, log):
 
@@ -48,7 +44,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
         # print("std_env0: {}".format(std_cmake_opts_dict))
 
-        #print(
+        # print(
         #    "std_env: {}".format(
         #        wayround_org.aipsetup.builder_scripts.std.Builder.\
         #        all_automatic_flags_as_dict(self)
@@ -57,10 +53,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
         ret.update(self.all_automatic_flags_as_dict())
         ret.update(
-            wayround_org.aipsetup.builder_scripts.std.Builder.\
-                all_automatic_flags_as_dict(
-                    self
-                    )
+            wayround_org.aipsetup.builder_scripts.std.Builder.
+            all_automatic_flags_as_dict(
+                self
+                )
             )
         ret.update(std_cmake_opts_dict)
 
@@ -129,13 +125,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
             '--',
             #'-DCURSES_INCLUDE_PATH={}'.format(
             #    wayround_org.utils.path.join(
-            #        self.get_host_arch_dir(),
+            #        self.calculate_install_prefix(),
             #        'include'
             #        )
-            #    )
+            #    ),
             #'-DCURSES_INCLUDE_DIRS={}'.format(
             #    wayround_org.utils.path.join(
-            #        self.get_host_arch_dir(),
+            #        self.calculate_install_prefix(),
             #        'include',
             #        'ncursesw'
             #        )
@@ -148,9 +144,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     builder_action_configure = \
         wayround_org.aipsetup.builder_scripts.std.Builder.\
-            builder_action_configure
+        builder_action_configure
 
-    def builder_action_build_define_arguments(self, called_as, log):
+    def builder_action_build_define_args(self, called_as, log):
         ret = super().builder_action_build_define_arguments(called_as, log)
         ret += ['VERBOSE=1']
         return ret

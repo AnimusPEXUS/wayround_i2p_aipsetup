@@ -14,7 +14,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         # f.write('ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n')
         # f.close()
 
-
         ret = super().builder_action_configure_define_opts(called_as, log)
         '''
         ret = self.builder_action_configure_define_opts_alternate_prefix(
@@ -33,6 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ]
 
         """
+            # TODO: need to figure out what is this for
             '--with-libc={}'.format(
                 wayround_org.utils.path.join(
                     self.target_host_root,
@@ -48,7 +48,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         # NOTE: python shuld be ALLWAYS be installed in 'lib' dir. be it i?86
         #       or x86_64 build, else *.so modules will go into lib64 and
-        #       python modules will remain in lib and Your system 
+        #       python modules will remain in lib and Your system
         #       will crush because of this
         for i in range(len(ret) - 1, -1, -1):
             for j in [
@@ -60,7 +60,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret += [
             # NOTE: at least python 2.7.10 and 3.4.3 are hard coded and can't
-            #       be configured to install scripts into lib64 dir 
+            #       be configured to install scripts into lib64 dir
             '--libdir=' + wayround_org.utils.path.join(
                 self.calculate_install_prefix(),
                 'lib'
@@ -68,12 +68,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ]
 
         ret += [
-           # 'SCRIPTDIR={}'.format(
-           #     wayround_org.utils.path.join(
-           #         self.get_host_dir(),
-           #         'lib'
-           #         )
-           #     ),
+            # 'SCRIPTDIR={}'.format(
+            #     wayround_org.utils.path.join(
+            #         self.get_host_dir(),
+            #         'lib'
+            #         )
+            #     ),
             ] + cb_opts
 
         ret += cb_opts
@@ -92,12 +92,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build_define_args(self, called_as, log):
         ret = super().builder_action_build_define_args(called_as, log)
         ret += [
-           # 'SCRIPTDIR={}'.format(
-           #     wayround_org.utils.path.join(
-           #         self.get_host_dir(),
-           #         'lib'
-           #         )
-           #     ),
+            # 'SCRIPTDIR={}'.format(
+            #     wayround_org.utils.path.join(
+            #         self.get_host_dir(),
+            #         'lib'
+            #         )
+            #     ),
             ]
 
         return ret

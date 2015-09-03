@@ -19,16 +19,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #        )
             #    )
             ]
-        '''
-                    '--with-perl={}'.format(
-                wayround_org.utils.path.join(
-                    wayround_org.utils.file.which(
-                        'perl'
-                        )
-                    )
-                )
-
-        '''
 
         return ret
 

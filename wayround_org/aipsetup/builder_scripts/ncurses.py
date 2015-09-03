@@ -19,15 +19,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             wayround_org.aipsetup.build.getDIR_PATCHES(
                 self.buildingsite_path
                 )
-	
-	# TODO: must be automatically
+
+        # TODO: must be automatically
         ret['dst_lib_dir'] = \
             wayround_org.utils.path.join(
-                self.get_dst_host_dir(),
-		'lib'
+                self.calculate_dst_install_libdir()
                 )
         ret['dst_share_dir'] = \
-            wayround_org.utils.path.join(self.get_dst_host_dir(), 'share')
+            wayround_org.utils.path.join(
+            self.calculate_dst_install_prefix(),
+            'share')
         ret['dst_pc_dir'] = \
             wayround_org.utils.path.join(ret['dst_share_dir'], 'pkgconfig')
         return ret
@@ -217,6 +218,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         dst_pc_lib_dir = self.custom_data['dst_pc_dir']
+
+        if not os.path.isdir(dst_pc_lib_dir):
+            raise Exception("`{}' dir is not exists".format(dst_pc_lib_dir))
 
         for s in [
                 ('*w.pc', 'w.pc', '.pc'),

@@ -51,7 +51,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log=log,
             options=[],
             arguments=[
-                'PREFIX={}'.format(self.get_host_dir()),
+                'PREFIX={}'.format(self.calculate_install_prefix()),
                 'CFLAGS=  -fpic -fPIC -Wall -Winline -O2 -g '
                 '-D_FILE_OFFSET_BITS=64',
                 'libbz2.a',
@@ -76,7 +76,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'PREFIX={}'.format(self.get_dst_host_dir())
+                'PREFIX={}'.format(self.calculate_dst_install_prefix())
                 ],
             environment={},
             environment_mode='copy',
@@ -95,7 +95,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             arguments=[
                 'CFLAGS= -fpic -fPIC -Wall -Winline -O2 -g '
                 '-D_FILE_OFFSET_BITS=64',
-                'PREFIX={}'.format(self.get_dst_host_dir())
+                'PREFIX={}'.format(self.calculate_dst_install_prefix())
                 ] + [self.custom_data['thr']['CC']] +
             [self.custom_data['thr']['AR']] +
             [self.custom_data['thr']['RANLIB']],
@@ -113,9 +113,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         di = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
-            'lib' # NOTE: don't make lib64 changes here. only farther in
-                  #       fix_libdir_positions
+            self.calculate_dst_install_prefix(),
+            'lib'  # NOTE: don't make lib64 changes here. only farther in
+            #       fix_libdir_positions
             )
 
         '''
@@ -132,7 +132,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             sos = glob.glob(
                 wayround_org.utils.path.join(
                     self.get_src_dir(),
-                    '*.so.*'))
+                    '*.so.*'
+                    )
+                )
 
             for i in sos:
 
@@ -162,7 +164,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         bin_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
+            self.calculate_dst_install_prefix(),
             'bin'
             )
         files = os.listdir(bin_dir)
@@ -190,9 +192,26 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_fix_libdir_positions(self, called_as, log):
         ret = 0
+
+        if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
+            os.rename(
+                wayround_org.utils.path.join(
+                    self.calculate_dst_install_prefix(),
+                    'lib'
+                    ),
+                wayround_org.utils.path.join(
+                    self.calculate_dst_install_prefix(),
+                    'lib64'
+                    )
+            )
+
+        return ret
+
+        # FIXME: delete garbage after testing above code
+
         if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
             p = subprocess.Popen(
-                ['cp','-r', 
+                ['cp', '-r',
                     wayround_org.utils.path.join(
                         self.get_dst_host_dir(),
                         'lib'
@@ -201,11 +220,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         self.get_dst_host_dir(),
                         'lib64'
                         ),
-                ]
+                 ]
                 )
             ret = p.wait()
+
         return ret
-        # FIXME: garbage
+
+        # FIXME: delete garbage after testing above code
 
         if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
             fldn = 'lib'

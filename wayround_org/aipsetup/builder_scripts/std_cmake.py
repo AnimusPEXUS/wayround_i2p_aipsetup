@@ -59,9 +59,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = [
             #'-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_dir()),
             #
-            #'-DCMAKE_SYSROOT={}'.format(self.get_host_dir()),
-            #'-DSYSCONFDIR=/etc',
-            #'-DLOCALSTATEDIR=/var',
+            '-DCMAKE_SYSROOT={}'.format(self.get_host_dir()),
+            '-DSYSCONFDIR=/etc',
+            '-DLOCALSTATEDIR=/var',
             ]
 
         std_opts = super().builder_action_configure_define_opts(called_as, log)

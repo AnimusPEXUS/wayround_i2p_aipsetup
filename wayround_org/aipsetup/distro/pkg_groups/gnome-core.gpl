@@ -479,7 +479,7 @@
         "cogl": {
             "kwargs": {},
             "args": [],
-            "proc": "normal_get"
+            "proc": "gnome_get"
         },
         "folks": {
             "kwargs": {},

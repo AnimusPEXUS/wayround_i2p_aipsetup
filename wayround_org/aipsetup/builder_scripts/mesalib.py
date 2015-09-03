@@ -37,7 +37,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-dri', #-
             '--enable-dri3', #-
 
-            '--enable-glx-tls',
+            # '--enable-glx-tls',
 
             '--enable-xorg', #-
 
@@ -68,7 +68,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #    )
 
 
-            # NOTE: By default llvm is installed into 'lib' dir and
+            # NOTE: llvm is installed into 'lib' dir and
             #       trying to use 32-bit glibc libs, while it must use
             #       64-bit. so here is the hack to point it to right
             #       'lib64' dir

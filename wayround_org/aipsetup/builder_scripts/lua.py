@@ -25,7 +25,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build_define_args(self, called_as, log):
         return [
             'linux',
-            'INSTALL_TOP={}'.format(self.get_host_dir()),
+            'INSTALL_TOP={}'.format(self.calculate_install_prefix()),
             'MYCFLAGS=-std=gnu99',
             'MYLDFLAGS=-ltinfow'
             ] + self.all_automatic_flags_as_list()
@@ -33,16 +33,29 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute_define_args(self, called_as, log):
         return [
             'install',
-            'INSTALL_TOP={}'.format(self.get_dst_host_dir()),
+            'INSTALL_TOP={}'.format(self.calculate_dst_install_prefix()),
             'MYCFLAGS=-std=gnu99',
             'MYLDFLAGS=-ltinfow'
             ] + self.all_automatic_flags_as_list(),
 
     def builder_action_pc(self, called_as, log):
 
+        libdir = wayround_org.utils.path.join(
+            self.calculate_dst_install_prefix(),
+            'lib'
+            )
+
+        if not os.path.isdir(libdir):
+            libdir = wayround_org.utils.path.join(
+                self.calculate_dst_install_prefix(),
+                'lib64'
+                )
+
+        if not os.path.isdir(libdir):
+            raise Exception("Can't calculate libdir")
+
         pc_file_name_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
-            'lib', # self.calculate_main_multiarch_lib_dir_name(),
+            libdir,
             'pkgconfig'
             )
 
@@ -63,7 +76,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             ['make',
              'pc',
-             'INSTALL_TOP={}'.format(self.get_dst_host_dir())
+             'INSTALL_TOP={}'.format(self.calculate_dst_install_prefix())
              ],
             stdout=subprocess.PIPE,
             cwd=self.get_src_dir()
@@ -86,12 +99,12 @@ R={R}
 prefix={arch_path}
 INSTALL_BIN=${{prefix}}/bin
 INSTALL_INC=${{prefix}}/include
-INSTALL_LIB=${{prefix}}/../../{lib_dir_name}
+INSTALL_LIB=${{prefix}}/{lib_dir_name}
 INSTALL_MAN=${{prefix}}/man/man1
 INSTALL_LMOD=${{prefix}}/share/lua/${{V}}
-INSTALL_CMOD=${{prefix}}/../../{lib_dir_name}/lua/${{V}}
+INSTALL_CMOD=${{prefix}}/{lib_dir_name}/lua/${{V}}
 exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/../../{lib_dir_name}
+libdir=${{exec_prefix}}/{lib_dir_name}
 includedir=${{prefix}}/include
 
 Name: Lua
@@ -103,8 +116,11 @@ Cflags: -I${{includedir}}
 """.format(
             V='.'.join(version[:2]),
             R='.'.join(version),
-            arch_path='{}'.format(self.get_host_dir()),
-            lib_dir_name='lib' # self.calculate_main_multiarch_lib_dir_name()
+            arch_path='{}'.format(self.calculate_install_prefix()),
+            os.path.relpath(
+                self.calculate_install_libdir(),
+                self.calculate_install_prefix()
+                )
             )
 
         pc_file.write(tpl)

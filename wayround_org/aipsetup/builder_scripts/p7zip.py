@@ -36,7 +36,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'CXX': CXX,
             'CC': CC,
             #'LOCAL_FLAGS': LOCAL_FLAGS,
-            'PREFIX': self.get_host_dir(),
+            'PREFIX': self.calculate_install_prefix(),
             'makefile_suffix': makefile_suffix
             }
 
@@ -50,7 +50,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     self.custom_data['makefile_suffix']
                     )
                 ),
-            wayround_org.utils.path.join(self.get_src_dir(), 'makefile.machine')
+            wayround_org.utils.path.join(
+                self.get_src_dir(),
+                'makefile.machine'
+                )
             )
         return 0
 

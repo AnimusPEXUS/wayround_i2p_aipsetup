@@ -8,49 +8,43 @@ import wayround_org.utils.file
 class Builder_old(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
-        prefix = self.get_host_dir()
+        prefix = self.calculate_install_prefix()
         return [
             '--prefix=' + prefix,
             '--python={}'.format(
                 wayround_org.utils.file.which(
                     'python',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '--perl={}'.format(
                 wayround_org.utils.file.which(
                     'perl',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '--flex={}'.format(
                 wayround_org.utils.file.which(
                     'flex',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '--bison={}'.format(
                 wayround_org.utils.file.which(
                     'bison',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '--make={}'.format(
                 wayround_org.utils.file.which(
                     'make',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '--dot={}'.format(
                 wayround_org.utils.file.which(
                     'dot',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '--shared'
@@ -60,56 +54,49 @@ class Builder_old(wayround_org.aipsetup.builder_scripts.std.Builder):
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
-        prefix = self.get_host_dir()
+        prefix = self.calculate_install_prefix()
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
             '-DPYTHON_EXECUTABLE={}'.format(
                 wayround_org.utils.file.which(
                     'python3',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             #'--perl={}'.format(
             #    wayround_org.utils.file.which(
             #        'perl',
-            #        under=prefix,
-            #        exception_if_not_found=True
+            #        under=prefix
             #        )
             #    ),
             '-DFLEX_EXECUTABLE={}'.format(
                 wayround_org.utils.file.which(
                     'flex',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '-DBISON_EXECUTABLE={}'.format(
                 wayround_org.utils.file.which(
                     'bison',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             #'--make={}'.format(
             #    wayround_org.utils.file.which(
             #        'make',
-            #        under=prefix,
-            #        exception_if_not_found=True
+            #        under=prefix
             #       )
             #    ),
             '-DDOT={}'.format(
                 wayround_org.utils.file.which(
                     'dot',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
             '-DXMLLINT={}'.format(
                 wayround_org.utils.file.which(
                     'xmllint',
-                    under=prefix,
-                    exception_if_not_found=True
+                    under=prefix
                     )
                 ),
 

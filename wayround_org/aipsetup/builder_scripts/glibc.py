@@ -34,27 +34,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             self.internal_host_redefinition =\
                 pkgi['constitution']['target']
 
-        '''ret = {
-            'Builder_multi_i686': None,
-            }
-
-        if self.get_host_from_pkgi().startswith('x86_64'):
-            if wayround_org.utils.file.which(
-                    'i686-pc-linux-gnu-gcc',
-                    '/multiarch/i686-pc-linux-gnu'
-                    ) != None:
-
-                print("""\
----------
-configured for x86_64, but i686 GCC was found too, so going to build
-i686 multilib support
----------
-""")
-
-                ret['Builder_multi_i686'] = Builder_multi_i686(self.control)
-
-        '''
-
         return
 
     def define_actions(self):
@@ -86,27 +65,17 @@ i686 multilib support
             del ret['build']
             del ret['distribute']
 
-        if not self.get_is_crossbuilder() and not self.get_is_crossbuild():
-            '''
-            # NOTE: this block is for multilib building
-            if self.custom_data['Builder_multi_i686']:
-                builder = self.custom_data['Builder_multi_i686']
-                acts = builder.define_actions()
-
-                for i in list(acts.keys()):
-                    ret['{}_multi_i686'.format(i)] = acts[i]
-            '''
-
+        if 'distribute' in ret:
             ret.move_to_end('distribute', True)
 
         return ret
 
     def calculate_install_libdir(self):
-        # NOTE: on multilib installations libraries shuld be allways
+        # NOTE: on multilib installations glibc libraries shuld be allways
         #       installed in host_lib_dir. Else - multilib GCC could
         #       not be built
         return self.get_host_lib_dir()
-    
+
     def builder_action_edit_package_info(self, called_as, log):
 
         ret = 0
@@ -138,26 +107,17 @@ i686 multilib support
 
     def builder_action_configure_define_opts(self, called_as, log):
 
-        #'''
         with_headers = wayround_org.utils.path.join(
             self.get_host_dir(),
             'include'
             )
-        #'''
-
-        '''
-        with_headers = wayround_org.utils.path.join(
-            self.get_host_arch_dir(),
-            'include'
-            )
-        '''
 
         ret = super().builder_action_configure_define_opts(called_as, log)
 
         if self.get_is_crossbuilder():
-            raise Exception("redo")
+
             prefix = wayround_org.utils.path.join(
-                self.host_crossbuilders_dir,
+                self.get_host_crossbuilders_dir(),
                 self.target
                 )
 
@@ -168,7 +128,9 @@ i686 multilib support
 
             ret = [
                 '--prefix={}'.format(prefix),
-                '--mandir={}'.format(wayround_org.utils.path.join(prefix, 'share', 'man')),
+                '--mandir={}'.format(
+                    wayround_org.utils.path.join(prefix, 'share', 'man')
+                    ),
                 '--sysconfdir=/etc',
                 '--localstatedir=/var',
                 '--enable-shared'
@@ -197,6 +159,7 @@ i686 multilib support
 
         '''
         # NOTE: it's not working
+        # NOTE: don't remove this block. it's for informational reason
         if self.get_arch_from_pkgi().startswith('x86_64'):
             ret += ['slibdir=lib64']
         else:
@@ -222,69 +185,26 @@ i686 multilib support
 
         return ret
 
-    #'''
-    # NOTE: this block is for multilib building
     def _t1(self, ret):
         ret = copy.copy(ret)
 
         ret += [
-                    'slibdir={}'.format(
-                        self.calculate_install_libdir()
-                        )
-                    ]
-        '''
-        if self.get_host_from_pkgi() == 'x86_64-pc-linux-gnu':
-            if self.get_arch_from_pkgi().startswith('x86_64'):
-                ret += [
-                    'slibdir={}'.format(
-                        wayround_org.utils.path.join(
-                            self.get_host_dir(),
-                            'lib64'
-                            )
-                        )
-                    ]
-            else:
-                ret += [
-                    'slibdir={}'.format(
-                        wayround_org.utils.path.join(
-                            self.get_host_dir(),
-                            'lib'
-                            )
-                        )
-                    ]
-        else:
-            raise Exception("To Be Done")
-        '''
+            'slibdir={}'.format(
+                self.calculate_install_libdir()
+                )
+            ]
+
         return ret
 
-    # NOTE: this block is for multilib building
     def builder_action_build_define_args(self, called_as, log):
         ret = super().builder_action_build_define_args(called_as, log)
         ret = self._t1(ret)
         return ret
 
-    # NOTE: this block is for multilib building
     def builder_action_distribute_define_args(self, called_as, log):
         ret = super().builder_action_distribute_define_args(called_as, log)
         ret = self._t1(ret)
         return ret
-    #'''
-
-
-    '''
-    def builder_action_build_01(self, called_as, log):
-        ret = autotools.make_high(
-            self.buildingsite_path,
-            log=log,
-            options=[],
-            arguments=['all-gcc'],
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
-        return ret
-    '''
 
     def builder_action_distribute_01(self, called_as, log):
         ret = autotools.make_high(
@@ -320,12 +240,18 @@ i686 multilib support
 
     def builder_action_distribute_01_3(self, called_as, log):
 
-        gres = glob.glob(wayround_org.utils.path.join(self.bld_dir, 'csu', '*crt*.o'))
+        gres = glob.glob(
+            wayround_org.utils.path.join(
+                self.get_bld_dir(),
+                'csu',
+                '*crt*.o'))
 
         dest_lib_dir = wayround_org.utils.path.join(
-            self.dst_host_crossbuilders_dir,
+            self.get_dst_host_crossbuilders_dir(),
             self.target,
             self.calculate_main_multiarch_lib_dir_name()
+            # TODO: need fix?
+            # TODO: need test!
             )
 
         os.makedirs(dest_lib_dir, exist_ok=True)
@@ -341,7 +267,7 @@ i686 multilib support
     def builder_action_distribute_01_4(self, called_as, log):
 
         cwd = wayround_org.utils.path.join(
-            self.dst_host_crossbuilders_dir,
+            self.get_dst_host_crossbuilders_dir(),
             self.target,
             self.calculate_main_multiarch_lib_dir_name()
             )
@@ -367,7 +293,7 @@ i686 multilib support
     def builder_action_distribute_01_5(self, called_as, log):
 
         cwd = wayround_org.utils.path.join(
-            self.dst_host_crossbuilders_dir,
+            self.get_dst_host_crossbuilders_dir(),
             self.target,
             'include',
             'gnu'
@@ -420,181 +346,3 @@ then continue with gcc build_02+
             source_configure_reldir=self.source_configure_reldir
             )
         return ret
-
-
-class Builder_multi_i686(Builder):
-
-    # NOTE: All this class is depricated. glibc for multilib support -
-    #       shuld be built as usual glibc but with
-    #       i.g. --arch=i686-pc-linux-gnu parameter
-    
-    # TODO: force x86_64-pc-linux-gnu-gcc (not i686-pc-linux-gnu-gcc)
-    #       build 32bit part of glibc
-
-    def define_custom_data(self):
-        self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'build_i686')
-        ret = {
-            'original_host': self.get_arch_from_pkgi()
-            }
-        #self.total_host_redefinition = 'i686-pc-linux-gnu'
-        #self.total_build_redefinition = 'i686-pc-linux-gnu'
-        #self.total_build_redefinition = 'x86_64-pc-linux-gnu'
-        #self.total_target_redefinition = 'i686-pc-linux-gnu'
-
-        self.internal_host_redefinition = 'i686-pc-linux-gnu'
-        #self.internal_build_redefinition = 'x86_64-pc-linux-gnu'
-
-        self.force_crossbuilder = False
-        self.force_crossbuild = False
-
-        return ret
-
-    def define_actions(self):
-
-        lst = [
-            #('redefine_host', self.builder_action_redefine_host),
-            ('make_dir', self.builder_action_make_dir),
-            ('configure', self.builder_action_configure),
-            ('build', self.builder_action_build),
-            #('restore_host_definition',
-            #    self.builder_action_restore_host_definition),
-            ('distribute', self.builder_action_distribute),
-            #('raname_arch_dir', self.builder_action_rename_arch_dir)
-            ]
-
-        ret = collections.OrderedDict(lst)
-
-        return ret
-
-    def builder_action_configure_define_environment(self, called_as, log):
-        return {}
-
-    def builder_action_build_define_environment(self, called_as, log):
-        return {}
-
-    def builder_action_configure_define_opts(self, called_as, log):
-        ret = super().builder_action_configure_define_opts(called_as, log)
-
-        '''
-        for i in range(len(ret) - 1, -1, -1):
-            for j in [
-                    '--prefix=',
-                    '--includedir=',
-                    '--libdir=',
-                    '--mandir=',
-                    '--with-headers=',
-                    ]:
-                if ret[i].startswith(j):
-                    ret[i] = ret[i].replace(
-                        'i686-pc-linux-gnu',
-                        self.custom_data['original_host']
-                        )
-        '''
-
-        for i in range(len(ret) - 1, -1, -1):
-            for j in [
-                    'CC=',
-                    'GCC=',
-                    'CXX='
-                    ]:
-                if ret[i].startswith(j):
-                    del ret[i]
-                    break
-
-        '''
-        ret += [
-            'CC={}'.format(
-                wayround_org.utils.file.which(
-                    '{}-gcc'.format(self.custom_data['original_host'])
-                    )
-                ),
-            'CXX={}'.format(
-                wayround_org.utils.file.which(
-                    '{}-g++'.format(self.custom_data['original_host'])
-                    )
-                ),
-            'GCC={}'.format(
-                wayround_org.utils.file.which(
-                    '{}-gcc'.format(self.custom_data['original_host'])
-                    )
-                ),
-            ]
-        '''
-
-        ret += [
-            'CC={}-gcc -m32'.format(self.custom_data['original_host']),
-            'CXX={}-g++ -m32'.format(self.custom_data['original_host']),
-            #'GCC={}-gcc'.format(self.custom_data['original_host']),
-            ]
-
-        ret += [
-            # 'CFLAGS=-m32'
-            ]
-
-        ret += [
-            # '--disable-werror'
-            ]
-
-        return ret
-
-    # NOTE: this block is for multilib building
-    def _t2(self, ret):
-        ret = copy.copy(ret)
-        for i in range(len(ret) - 1, -1, -1):
-            for j in [
-                    'slibdir=',
-                    ]:
-                if ret[i].startswith(j):
-                    ret[i] = ret[i].replace(
-                        'i686-pc-linux-gnu',
-                        self.custom_data['original_host']
-                        )
-        return ret
-
-    # NOTE: this block is for multilib building
-    def builder_action_build_define_args(self, called_as, log):
-        ret = Builder.builder_action_build_define_args(self, called_as, log)
-        # print('ret: {}'.format(ret))
-        ret = self._t2(ret)
-        return ret
-
-    # NOTE: this block is for multilib building
-    def builder_action_distribute_define_args(self, called_as, log):
-        ret = Builder.builder_action_distribute_define_args(
-            self,
-            called_as,
-            log
-            )
-        ret = self._t2(ret)
-        return ret
-
-    def builder_action_make_dir(self, called_as, log):
-        os.makedirs(self.separate_build_dir, exist_ok=True)
-        return 0
-
-    # builder_action_configure = Builder.builder_action_configure
-
-    # builder_action_build = Builder.builder_action_build
-
-    def builder_action_restore_host_definition(self, called_as, log):
-        self.total_host_redefinition = None
-        self.total_build_redefinition = None
-        self.total_target_redefinition = None
-        log.info("Restored host definition to: {}".format(self.get_arch_from_pkgi()))
-        return 0
-
-    # builder_action_distribute = Builder.builder_action_distribute
-
-    '''
-    def builder_action_rename_arch_dir(self, called_as, log):
-        ret = 0
-
-        dir_name = self.dst_host_multiarch
-
-        self.total_host_redefinition=None
-        self.total_build_redefinition = None
-        self.total_target_redefinition = None
-
-        if os.path.isdir()
-        return ret
-    '''

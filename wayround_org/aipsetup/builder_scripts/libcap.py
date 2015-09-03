@@ -64,7 +64,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return [
             'all',
             'install',
-            'prefix={}'.format(self.get_host_dir()),
+            'prefix={}'.format(self.calculate_install_prefix()),
             #'exec_prefix={}'.format(self.get_host_dir()),
             #'lib_prefix={}'.format(self.get_host_dir()),
             #'inc_prefix={}'.format(self.get_host_dir()),

@@ -11,7 +11,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            #NOTE: --with-gmp-prefix= - required. else cloog
+            # NOTE: --with-gmp-prefix= - required. else cloog
             #      configurer will use 32bit gmp found in lib dir
             #      to build for x86_64
             #'--with-gmp=system',

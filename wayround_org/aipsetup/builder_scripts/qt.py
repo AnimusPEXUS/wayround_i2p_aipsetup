@@ -51,7 +51,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '-opensource',
             '-confirm-license',
             '-prefix', wayround_org.utils.path.join(
-                self.get_host_dir(),
+                self.calculate_install_prefix(),
+                'opt',
                 'qt',
                 self.custom_data['qt_number_str']
                 ),
@@ -108,27 +109,30 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         f = open(
             wayround_org.utils.path.join(
                 etc_profile_set_dir,
-                '009.qt{}.{}.sh'.format(
+                '009.qt{}.{}.{}.sh'.format(
                     qt_number_str,
-                    self.get_arch_from_pkgi())
+                    self.get_host_from_pkgi(),
+                    self.get_arch_from_pkgi()
+                    )
                 ),
             'w'
             )
 
-        # TODO: separate this :-/
         f.write("""\
 #!/bin/bash
-export PATH=$PATH:{arch_dir}/qt/{qtnum}/bin
+export PATH=$PATH:{arch_dir}/opt/qt/{qtnum}/bin
 
 if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
     PKG_CONFIG_PATH+=":"
 fi
-export PKG_CONFIG_PATH+="{arch_dir}/qt/{qtnum}/lib/pkgconfig"
+export PKG_CONFIG_PATH+="{arch_dir}/opt/qt/{qtnum}/lib/pkgconfig"
+export PKG_CONFIG_PATH+=":{arch_dir}/opt/qt/{qtnum}/lib64/pkgconfig"
 
 if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"
 fi
-export LD_LIBRARY_PATH+="{arch_dir}/qt/{qtnum}/lib"
+export LD_LIBRARY_PATH+="{arch_dir}/opt/qt/{qtnum}/lib"
+export LD_LIBRARY_PATH+=":{arch_dir}/opt/qt/{qtnum}/lib64"
 
 """.format(
                 qtnum=qt_number_str,

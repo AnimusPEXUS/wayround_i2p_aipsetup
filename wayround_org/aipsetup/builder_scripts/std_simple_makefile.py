@@ -22,17 +22,11 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
     def builder_action_prepare_destdir(self, called_as, log):
         ret = 0
 
-        target_path = wayround_org.utils.path.join(self.get_dst_dir(), 'usr')
+        target_path = wayround_org.utils.path.join(
+            self.calculate_dst_install_prefix()
+            )
 
-        try:
-            os.makedirs(
-                target_path,
-                mode=0o755,
-                exist_ok=True
-                )
-        except:
-            log.exception("Error creating directory: {}".format(target_path))
-            ret = 1
+        os.makedirs(target_path, exist_ok=True)
 
         return ret
 
@@ -44,7 +38,10 @@ class Builder(wayround_org.aipsetup.build_scripts.std):
             arguments=[
                 'install',
                 'DESTDIR={}'.format(self.get_dst_dir()),
-                'prefix={}'.format(wayround_org.utils.path.join(self.dst_host_multiarh_dir)
+                'prefix={}'.format(
+                    wayround_org.utils.path.join(
+                        self.calculate_dst_install_prefix()
+                        )
                 ],
             environment={},
             environment_mode='copy',

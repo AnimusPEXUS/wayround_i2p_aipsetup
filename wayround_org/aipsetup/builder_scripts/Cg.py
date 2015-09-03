@@ -25,7 +25,9 @@ class Builder(wayround_org.aipsetup.build_scripts.std_simple_makefile):
                 try:
                     shutil.move(
                         jo,
-                        wayround_org.utils.path.join(self.get_dst_dir(), 'usr')
+                        wayround_org.utils.path.join(
+                            self.calculate_dst_install_prefix()
+                            )
                         )
                 except:
                     log.exception(

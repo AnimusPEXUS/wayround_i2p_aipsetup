@@ -1,0 +1,10 @@
+{
+    "ask_version": false,
+    "names": {
+        "gtk+2": {
+            "kwargs": {},
+            "args": [],
+            "proc": "gnome_get"
+        }
+    }
+}

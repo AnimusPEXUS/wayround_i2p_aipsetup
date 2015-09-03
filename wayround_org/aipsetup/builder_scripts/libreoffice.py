@@ -44,7 +44,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         lbo_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(), 'libreoffice'
+            self.calculate_dst_install_prefix(), 'opt', 'libreoffice'
             )
 
         gid_dir = wayround_org.utils.path.join(
@@ -53,7 +53,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         lbo_lnk = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
+            self.calculate_dst_install_prefix(),
             'bin',
             'soffice'
             )
@@ -83,7 +83,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             log.info("Creating link")
             os.makedirs(
                 wayround_org.utils.path.join(
-                    self.get_dst_host_dir(),
+                    self.calculate_dst_install_prefix(),
                     'bin'
                     )
                 )

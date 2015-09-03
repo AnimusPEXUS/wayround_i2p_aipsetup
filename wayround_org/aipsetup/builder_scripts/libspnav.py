@@ -11,9 +11,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_distribute(self, called_as, log):
         arch_dir = self.get_dst_host_dir()
         for i in [
-                self.get_dst_host_lib_dir(),
+                self.calculate_dst_install_libdir(),
                 wayround_org.utils.path.join(
-                    self.get_dst_host_dir(),
+                    self.calculate_dst_install_prefix(),
                     'include'
                     )
                 ]:
@@ -25,7 +25,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             options=[],
             arguments=[
                 'install',
-                'PREFIX={}'.format(self.get_dst_host_dir())
+                'PREFIX={}'.format(self.calculate_dst_install_prefix())
                 ],
             environment={},
             environment_mode='copy',

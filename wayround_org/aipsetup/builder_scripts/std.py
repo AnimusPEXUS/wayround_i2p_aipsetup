@@ -187,7 +187,6 @@ class Builder:
             self.get_host_crossbuilder_dir()
             )
 
-
     def get_host_lib_dir(self):
         return wayround_org.utils.path.join(
             self.get_host_dir(),
@@ -266,7 +265,6 @@ class Builder:
     #        self.calculate_default_linker_program_ld_parameter()
     #        )
 
-
     def calculate_main_multiarch_lib_dir_name(self):
 
         # NOTE: at least 'guile' requires to be configured with libdir=lib64
@@ -280,9 +278,9 @@ class Builder:
         ret = 'lib'
 
         if host in [
-            'x86_64-pc-linux-gnu',
-            'i686-pc-linux-gnu',
-            ]:
+                'x86_64-pc-linux-gnu',
+                'i686-pc-linux-gnu',
+                ]:
 
             if arch == 'i686-pc-linux-gnu':
                 ret = 'lib'
@@ -295,7 +293,6 @@ class Builder:
             raise Exception("Don't know")
 
         return ret
-
 
     def calculate_pkgconfig_search_paths(self):
 
@@ -310,7 +307,7 @@ class Builder:
                 'share',
                 'pkgconfig'
                 ),
-            #wayround_org.utils.path.join(
+            # wayround_org.utils.path.join(
             #    self.get_host_lib_dir(),
             #    # self.calculate_main_multiarch_lib_dir_name(),
             #    'pkgconfig'
@@ -628,11 +625,11 @@ class Builder:
 
         pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
-        ret.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
-            )
+        # ret.update(
+        #    {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+        #    )
 
-        # ret.update(self.builder_action_configure_define_PATH_dict())
+        ret.update(self.builder_action_configure_define_PATH_dict())
 
         return ret
 
@@ -647,7 +644,7 @@ class Builder:
         ret += [
 
             #'--includedir=' +
-            #wayround_org.utils.path.join(
+            # wayround_org.utils.path.join(
             #    self.get_host_arch_dir(),
             #    'include'
             #    ),
@@ -764,8 +761,14 @@ class Builder:
 
     def builder_action_configure_define_PATH_list(self):
         ret = [
-            wayround_org.utils.path.join(self.get_host_arch_dir(), 'bin'),
-            wayround_org.utils.path.join(self.get_host_arch_dir(), 'sbin')
+            wayround_org.utils.path.join(
+                self.calculate_install_prefix(),
+                'bin'
+            ),
+            wayround_org.utils.path.join(
+                self.calculate_install_prefix(),
+                'sbin'
+            )
             ]
         return ret
 
@@ -836,7 +839,7 @@ class Builder:
 
         #sleeptime = 5
         #log.info("sleep: \033[0;1m{}\033[0m seconds".format(sleeptime))
-        #time.sleep(sleeptime)
+        # time.sleep(sleeptime)
         return ret
 
     def builder_action_build_define_cpu_count(self, called_as, log):
@@ -865,13 +868,13 @@ class Builder:
     def builder_action_build_define_environment(self, called_as, log):
         ret = self.builder_action_configure_define_environment(called_as, log)
 
-        ret.update(self.all_automatic_flags_as_dict())
+        # ret.update(self.all_automatic_flags_as_dict())
 
-        # ret.update(self.builder_action_configure_define_PATH_dict())
+        ret.update(self.builder_action_configure_define_PATH_dict())
 
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+        # pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
-        ret.update({'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)})
+        # ret.update({'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)})
 
         # ret.update({'PKG_CONFIG_PATH': None})
 
@@ -884,7 +887,7 @@ class Builder:
             ]
 
         # NOTE: probably it need to be uncommented
-        #if 'LD_LIBRARY_PATH' in os.environ:
+        # if 'LD_LIBRARY_PATH' in os.environ:
         #    LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
 
         # Explanation to all this .libs in LD_LIBRARY_PATH:

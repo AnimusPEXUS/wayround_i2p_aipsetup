@@ -25,5 +25,5 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'all',
             'install.all',
             'GLEW_DEST=' +
-            wayround_org.utils.path.join(self.get_dst_host_dir()),
+            wayround_org.utils.path.join(self.calculate_dst_install_prefix()),
             ] + self.all_automatic_flags_as_list()

@@ -41,7 +41,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-apxs={}'.format(
                 wayround_org.utils.file.which(
                     'apxs',
-                    self.get_host_arch_dir()
+                    self.get_host_dir()
                     )
                 )
             ]
@@ -49,7 +49,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_build(self, called_as, log):
 
         os.makedirs(
-            wayround_org.utils.path.join(self.get_dst_dir(), 'daemons', 'httpd', 'etc'),
+            wayround_org.utils.path.join(
+                self.get_dst_dir(),
+                'daemons', 'httpd', 'etc'
+                ),
             exist_ok=True
             )
 

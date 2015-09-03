@@ -76,7 +76,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'BUILD_OPT=1',
                 'NSPR_INCLUDE_DIR={}'.format(
                     wayround_org.utils.path.join(
-                        self.get_host_dir(),
+                        self.calculate_install_prefix(),
                         'include',
                         'nspr'
                         )
@@ -342,8 +342,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             pkg_config = """
 prefix={prefix}
-exec_prefix=${{prefix}}
-libdir=${{exec_prefix}}/{libdirname}
+exec_prefix={prefix}
+libdir={libdir}
 includedir=${{exec_prefix}}/include/nss
 
 Name: NSS
@@ -352,13 +352,12 @@ Version: {nss_major_version}.{nss_minor_version}.{nss_patch_version}
 Libs: -L${{libdir}} {libs}
 Cflags: -I${{includedir}}
 """.format(
-                prefix=self.get_host_dir(),
+                prefix=self.calculate_install_prefix(),
+                libdir=self.calculate_install_libdir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version,
-                libs=libs,
-                libdirname='lib' # TODO: possibly it is not right 
-				# self.calculate_main_multiarch_lib_dir_name()
+                libs=libs
                 )
             # -lnss{nss_major_version} -lnssutil{nss_major_version}
             # -lsmime{nss_major_version} -lssl{nss_major_version}
@@ -541,7 +540,8 @@ if test "$echo_libs" = "yes"; then
     echo $libdirs
 fi
 """.format(
-                prefix=self.get_host_dir(),
+                prefix=self.calculate_install_prefix(),
+                #libdir=self.calculate_install_libdir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version

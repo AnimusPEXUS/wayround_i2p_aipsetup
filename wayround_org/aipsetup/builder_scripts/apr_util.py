@@ -15,7 +15,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = {
             'apr_1_config': wayround_org.utils.file.which(
                 'apr-1-config',
-                self.get_host_dir()
+                self.calculate_install_prefix()
                 )
             }
         if ret['apr_1_config'] is None:
@@ -27,5 +27,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             called_as,
             log) + [
                 '--with-apr=' + self.custom_data['apr_1_config'],
-                '--with-berkeley-db={}'.format(self.get_host_dir()),
+                '--with-berkeley-db={}'.format(
+                    self.calculate_install_prefix()
+                    ),
                 ]

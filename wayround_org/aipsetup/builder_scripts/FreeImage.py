@@ -36,7 +36,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         p = subprocess.Popen(
             [
                 'make',
-                'DESTDIR={}'.format(self.get_host_dir()),
+                'DESTDIR={}'.format(self.calculate_install_prefix()),
                 #'INCDIR={}'.format(
                 #    wayround_org.utils.path.join(
                 #        self.get_host_dir(),
@@ -46,7 +46,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'INSTALLDIR={}'.format(
                 #    wayround_org.utils.path.join(
                 #        self.get_host_dir(),
-		#	'lib'
+                #	'lib'
                 #        #self.calculate_main_multiarch_lib_dir_name()
                 #        )
                 #    )
@@ -62,33 +62,41 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = 0
 
         os.makedirs(
-            wayround_org.utils.path.join(self.get_dst_host_dir(), 'include'),
+            wayround_org.utils.path.join(
+                self.calculate_dst_install_prefix(),
+                'include'
+                ),
             exist_ok=True
             )
 
         os.makedirs(
             wayround_org.utils.path.join(
-                self.get_dst_host_dir(),
-                'lib',
-                #self.calculate_main_multiarch_lib_dir_name()
+                self.calculate_dst_install_libdir(),
                 ),
             exist_ok=True
             )
 
         if ret == 0:
 
-            libs = glob.glob(wayround_org.utils.path.join(self.get_src_dir(), 'Dist', '*.a'))
-            libs += glob.glob(wayround_org.utils.path.join(self.get_src_dir(), 'Dist', '*.so'))
+            libs = glob.glob(wayround_org.utils.path.join(
+                self.get_src_dir(), 'Dist', '*.a')
+                )
+            libs += glob.glob(wayround_org.utils.path.join(
+                self.get_src_dir(), 'Dist', '*.so')
+                )
 
-            headers = glob.glob(wayround_org.utils.path.join(self.get_src_dir(), 'Dist', '*.h'))
+            headers = glob.glob(wayround_org.utils.path.join(
+                self.get_src_dir(), 'Dist', '*.h')
+                )
 
             for i in libs:
                 i = os.path.basename(i)
                 shutil.copy(
-                    wayround_org.utils.path.join(self.get_src_dir(), 'Dist', i),
                     wayround_org.utils.path.join(
-                        self.get_dst_host_dir(),
-                        'lib', #self.calculate_main_multiarch_lib_dir_name(),
+                        self.get_src_dir(), 'Dist', i
+                        ),
+                    wayround_org.utils.path.join(
+                        self.calculate_dst_install_libdir(),
                         i
                         )
                     )
@@ -96,8 +104,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             for i in headers:
                 i = os.path.basename(i)
                 shutil.copy(
-                    wayround_org.utils.path.join(self.get_src_dir(), 'Dist', i),
-                    wayround_org.utils.path.join(self.get_dst_host_dir(), 'include', i)
+                    wayround_org.utils.path.join(
+                        self.get_src_dir(), 'Dist', i
+                        ),
+                    wayround_org.utils.path.join(
+                        self.calculate_dst_install_prefix(), 'include', i
+                        )
                     )
 
         return

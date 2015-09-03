@@ -1,5 +1,5 @@
 {
-  "description": "deprecated. use dconf and (?)GSettings",
+  "description": "deprecated. use dconf and (?)GSettings\n\ncan't depricate: used by ibus",
   "home_page": "http://www.gnome.org",
   "buildscript": "gconf",
   "version_tool": "",
@@ -8,7 +8,8 @@
   "removable": true,
   "reducible": true,
   "non_installable": false,
-  "deprecated": true,
+  "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

@@ -14,7 +14,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             # /usr/lib/systemd/system
             #'--with-systemdsystemunitdir={}'.format(
             #    wayround_org.utils.path.join(
-            #        self.get_host_lib_dir(),
+            #        self.calculate_install_prefix(),
             #        'systemd',
             #        'system'
             #        )

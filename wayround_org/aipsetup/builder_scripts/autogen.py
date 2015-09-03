@@ -16,7 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         #       records in log.. guile related configuration is insane :-/
         #       and --with-libguile= usage is probably incorrect
 
-        guile_prefix = self.get_host_dir()
+        guile_prefix = self.calculate_install_prefix()
 
         guile_config = wayround_org.utils.path.join(
             guile_prefix,
@@ -36,14 +36,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
 
         ret += [
-            # '--with-guile-ver=2.0.11'
-            ]
-
-        ret += [
             '--with-libguile={}'.format(
                 wayround_org.utils.path.join(
-                    self.get_host_dir(),
-                    # 'include', 'guile', '2.0'
+                    self.calculate_install_prefix()
                     )
                 ),
             ]
@@ -53,26 +48,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-libguile-libs={}'.format(guile_libs),
             ]
 
-        '''
-        --with-libguile-cflags
-        --with-libguile-libs
-        --with-guile-ver
-
-        '''
-
-        ret += [
-            #'--with-libxml2={}'.format(
-            #    wayround_org.utils.path.join(
-            #        self.get_host_dir(),
-            #        )
-            #    )
-            ]
-
-        '''
-        for i in range(len(ret) - 1, -1, -1):
-            for j in ['--with-sysroot=']:
-                if ret[i].startswith(j):
-                    del ret[i]
-                    break
-        '''
         return ret

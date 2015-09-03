@@ -24,12 +24,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         file_list = os.listdir(
-            '{}'.format(
-                wayround_org.utils.path.join(
-                    self.get_host_dir(),
-                    'share', # TODO: what is this all?
-                    'java'
-                    )
+            wayround_org.utils.path.join(
+                self.get_host_dir(),
+                'share',
+                'java'
                 )
             )
 
@@ -72,7 +70,7 @@ export CXX= $(TOOLPATH)g++
 export GCJ= $(TOOLPATH)gcj
 export GCJH= $(TOOLPATH)gcjh
 export GJAR= $(TOOLPATH)gjar
-export LIBGCJ= /usr/share/java/libgcj$(VERSUFF).jar
+export LIBGCJ= {prefix}/share/java/libgcj$(VERSUFF).jar
 export AR= ar
 export RM= rm
 export ARFLAGS= rs
@@ -86,7 +84,10 @@ export GCJHFLAGS= -force
 export LDLIBS= -lgcj
 
 include Makefile.Base
-""".format(gcj_version=gcj_version)
+""".format(
+                    gcj_version=gcj_version,
+                    prefix=self.calculate_install_prefix()
+                    )
                 )
             new_make_filename_f.close()
         return 0
@@ -105,9 +106,13 @@ include Makefile.Base
 
         ret = 0
 
-        sbin = wayround_org.utils.path.join(self.get_src_dir(), 'pdftk', 'pdftk')
+        sbin = wayround_org.utils.path.join(
+            self.get_src_dir(),
+            'pdftk',
+            'pdftk'
+            )
         bin_dir = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'bin'
+            self.calculate_dst_install_prefix(), 'bin'
             )
 
         os.makedirs(bin_dir, exist_ok=True)
@@ -123,7 +128,7 @@ include Makefile.Base
 
         sman = wayround_org.utils.path.join(self.get_src_dir(), 'pdftk.1')
         man = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(), 'share', 'man', 'man1'
+            self.calculate_dst_install_prefix(), 'share', 'man', 'man1'
             )
 
         os.makedirs(man, exist_ok=True)

@@ -11,9 +11,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
         return [
-		'-d',
-		'-prefix={}'.format(self.get_host_dir())
-		]
+            '-d',
+            '-prefix={}'.format(self.self.calculate_install_prefix())
+            ]
 
     def define_actions(self):
         ret = super().define_actions()
@@ -27,11 +27,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         #    )
 
         cfg_file = wayround_org.utils.path.join(
-            self.get_dst_host_dir(), 
-            #'multihost', 
-            #self.get_host_from_pkgi(),
-            'share', 
-            'misc', 
+            self.calculate_dst_install_prefix(),
+            #'multihost',
+            # self.get_host_from_pkgi(),
+            'share',
+            'misc',
             'man.conf'
             )
 
