@@ -123,12 +123,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
         ret += [
             '--',
-            #'-DCURSES_INCLUDE_PATH={}'.format(
-            #    wayround_org.utils.path.join(
-            #        self.calculate_install_prefix(),
-            #        'include'
-            #        )
-            #    ),
+            '-DCURSES_INCLUDE_PATH={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'include',
+                    'ncursesw'
+                    )
+                ),
             #'-DCURSES_INCLUDE_DIRS={}'.format(
             #    wayround_org.utils.path.join(
             #        self.calculate_install_prefix(),
@@ -147,6 +148,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
         builder_action_configure
 
     def builder_action_build_define_args(self, called_as, log):
-        ret = super().builder_action_build_define_arguments(called_as, log)
+        ret = super().builder_action_build_define_args(called_as, log)
         ret += ['VERBOSE=1']
         return ret

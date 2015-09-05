@@ -138,7 +138,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret += [
             '--enable-obsolete-rpc',
-            '--enable-kernel=3.19',
+            '--enable-kernel=4.0',
             '--enable-tls',
             '--with-elf',
             # disabled those 3 items on 2 jul 2015

@@ -3,6 +3,7 @@
 import os.path
 import collections
 import shutil
+import logging
 
 import wayround_org.utils.path
 import wayround_org.utils.file
@@ -64,6 +65,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
+    def builder_action_build_define_cpu_count(self, called_as, log):
+        return 1  # NOTE: openjdk has problems with this
+
     def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite_path,
@@ -83,13 +87,30 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_after_distribute(self, called_as, log):
         ret = 0
 
-        java_dir = wayround_org.utils.path.join(self.get_dst_host_arch_dir(), 'lib', 'java')
+        java_dir = wayround_org.utils.path.join(
+            self.calculate_install_prefix(),
+            'opt',
+            'java'
+            )
 
-        etc_dir = wayround_org.utils.path.join(self.get_dst_dir(), 'etc', 'profile.d', 'SET')
+        dst_java_dir = wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            java_dir
+            )
+
+        etc_dir = wayround_org.utils.path.join(
+            self.get_dst_dir(),
+            'etc',
+            'profile.d',
+            'SET'
+            )
 
         java009 = wayround_org.utils.path.join(
             etc_dir,
-            '009.java.{}.sh'.format(self.get_arch_from_pkgi())
+            '009.java.{}.{}.sh'.format(
+                self.get_host_from_pkgi(),
+                self.get_arch_from_pkgi()
+                )
             )
 
         existing_result_dir = None
@@ -99,7 +120,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         files = os.listdir(self.get_dst_dir())
 
         if 'bin' in files:
-            shutil.rmtree(wayround_org.utils.path.join(self.get_dst_dir(), 'bin'))
+            shutil.rmtree(
+                wayround_org.utils.path.join(
+                    self.get_dst_dir(),
+                    'bin'
+                    )
+                )
 
         if not 'jvm' in files:
             ret = 10
@@ -120,7 +146,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if ret == 0:
 
             try:
-                os.makedirs(java_dir)
+                os.makedirs(dst_java_dir)
 
                 os.rename(
                     wayround_org.utils.path.join(
@@ -129,7 +155,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         resulted_java_dir_basename
                         ),
                     wayround_org.utils.path.join(
-                        java_dir,
+                        dst_java_dir,
                         resulted_java_dir_basename
                         )
                     )
@@ -151,9 +177,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         if ret == 0:
             try:
                 for i in [
-                        wayround_org.utils.path.join(java_dir, 'jre'),
-                        wayround_org.utils.path.join(java_dir, 'jdk'),
-                        wayround_org.utils.path.join(java_dir, 'java')
+                        wayround_org.utils.path.join(dst_java_dir, 'jre'),
+                        wayround_org.utils.path.join(dst_java_dir, 'jdk'),
+                        wayround_org.utils.path.join(dst_java_dir, 'java')
                         ]:
 
                     if os.path.islink(i):
@@ -173,14 +199,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             fi.write(
                 """\
 #!/bin/bash
-export JAVA_HOME=/usr/lib/java/jdk
+export JAVA_HOME={java_dir}/jdk
 export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
 export MANPATH=$MANPATH:$JAVA_HOME/man
-if [ "${#LD_LIBRARY_PATH}" -ne "0" ]; then
+if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"
 fi
 export LD_LIBRARY_PATH+="$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client"
-"""
+export LD_LIBRARY_PATH+=":$JAVA_HOME/jre/lib/amd64:$JAVA_HOME/jre/lib/amd64/client"
+""".format(java_dir=java_dir)
                 )
 
             fi.close()

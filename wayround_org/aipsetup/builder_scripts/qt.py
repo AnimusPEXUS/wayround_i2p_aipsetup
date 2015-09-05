@@ -56,6 +56,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'qt',
                 self.custom_data['qt_number_str']
                 ),
+            #'-openssl-linked',
             ]
 
         if self.custom_data['qt_number_str'] == '5':
@@ -80,6 +81,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
 
         return ret
+
+    #def builder_action_build_define_cpu_count(self, called_as, log):
+    #    return 1
 
     def builder_action_distribute_define_args(self, called_as, log):
         return [
@@ -136,7 +140,7 @@ export LD_LIBRARY_PATH+=":{arch_dir}/opt/qt/{qtnum}/lib64"
 
 """.format(
                 qtnum=qt_number_str,
-                arch_dir=self.get_host_dir()
+                arch_dir=self.calculate_install_prefix()
                 )
                 )
         f.close()

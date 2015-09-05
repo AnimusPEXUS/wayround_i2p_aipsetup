@@ -2043,7 +2043,7 @@ def system_snapshot_create(command_name, opts, args, adds):
         ('asps', [])
         ])
 
-    res = system.list_installed_asps(host=False, remove_extensions=True)
+    res = system.list_installed_asps(host=None, remove_extensions=True)
 
     if res is None:
         ret = 1

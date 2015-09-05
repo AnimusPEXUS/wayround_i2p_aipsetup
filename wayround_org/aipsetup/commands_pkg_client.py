@@ -743,6 +743,7 @@ def get_by_snapshot(command_name, opts, args, adds):
                         wayround_org.aipsetup.client_pkg.get_asp(
                             url,
                             asp_obj.host,
+                            asp_obj.arch,
                             i + '.asp'
                             ),
                         str

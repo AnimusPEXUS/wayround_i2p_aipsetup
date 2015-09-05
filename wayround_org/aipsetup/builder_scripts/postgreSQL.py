@@ -12,7 +12,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return super().builder_action_configure_define_opts(called_as, log) + [
             '--with-tcl',
             '--with-tclconfig={}'.format(
-                self.get_host_dir() 
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'lib'
+                    )
                 ),
             '--with-perl',
             '--with-python',

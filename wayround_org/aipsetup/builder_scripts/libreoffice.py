@@ -2,6 +2,7 @@
 import glob
 import os.path
 
+
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.aipsetup.builder_scripts.std
@@ -13,21 +14,53 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = super().define_actions()
-
         ret['after_distribute'] = self.builder_action_after_distribute
-
         return ret
+        
+    def define_custom_data(self):
+        # TODO: do I need to make it install under 'opt' dir?
+        return
 
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
             '--with-system-cairo',
+            '--with-system-icu',
+            '--with-system-libxml',
+            '--with-system-openldap',
+            '--with-system-postgresql',
+
             '--enable-gtk3',
             '--disable-gtk',
+
             '--without-junit',
+
+            '--with-jdk-home={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'opt', 'java', 'jdk'
+                    )
+                ),
+            '--with-ant-home={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'opt', 'java', 'apache-ant'
+                    )
+                ),
+            #'--with-java={}'.format(
+            #    wayround_org.utils.file.which(
+            #        'java',
+            #        self.calculate_install_prefix()
+            #        )
+            #    ),
+            #'--with-jvm-path={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.calculate_install_prefix(),
+            #        'opt', 'java'
+            #        )
+            #    ),
             # TODO: track fixing of this
             # '--with-system-npapi-headers=no',
-            '--with-system-postgresql',
             #'--with-system-headers',
 
             ]
@@ -62,7 +95,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             gid_dir,
             exist_ok=True
             )
-        
+
         if not os.path.isdir(gid_dir):
             ret = 3
             log.error(

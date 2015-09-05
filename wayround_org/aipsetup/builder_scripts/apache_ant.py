@@ -13,9 +13,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def define_custom_data(self):
         src_ant_dir = wayround_org.utils.path.join(
             self.get_src_dir(),
-            'apache-ant-{}'.format(
-                self.get_package_info()['pkg_nameinfo']['groups']['version']
-                )
+            'dist'
+            #'apache-ant-{}'.format(
+            #    self.get_package_info()['pkg_nameinfo']['groups']['version']
+            #    )
             )
 
         ant_dir = wayround_org.utils.path.join(
@@ -31,7 +32,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         etc_dir = wayround_org.utils.path.join(
-            self.get_dst_host_dir(),
+            self.get_dst_dir(),
             'etc',
             'profile.d',
             'SET'
@@ -61,16 +62,28 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('src_cleanup', self.builder_action_src_cleanup),
             ('bld_cleanup', self.builder_action_bld_cleanup),
             ('extract', self.builder_action_extract),
+            ('bootstrap', self.builder_action_bootstrap),
             ('build', self.builder_action_build),
             ('distribute', self.builder_action_distribute)
             ])
         return ret
 
+    def builder_action_bootstrap(self, called_as, log):
+        p = subprocess.Popen(
+            [
+                './bootstrap.sh'
+                ],
+            cwd=self.get_src_dir(),
+            stdout=log.stdout,
+            stderr=log.stderr
+            )
+        ret = p.wait()
+        return ret
+
     def builder_action_build(self, called_as, log):
         p = subprocess.Popen(
             [
-                'bootstrap/bin/ant',
-                #'dist'
+                './bootstrap/bin/ant'
                 ],
             cwd=self.get_src_dir(),
             stdout=log.stdout,
@@ -80,18 +93,20 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_distribute(self, called_as, log):
+        ret = 0
         os.makedirs(
             self.custom_data['dst_ant_dir'],
             exist_ok=True
             )
 
-        wayround_org.utils.file.copytree(
+        if wayround_org.utils.file.copytree(
             self.custom_data['src_ant_dir'],
             self.custom_data['dst_ant_dir'],
             overwrite_files=True,
             clear_before_copy=True,
             dst_must_be_empty=True
-            )
+            ) != 0:
+            ret += 1
 
         os.makedirs(
             self.custom_data['etc_dir'],
@@ -110,4 +125,4 @@ export PATH="$PATH:$ANT_HOME/bin"
 
         fi.close()
 
-        return 0
+        return ret
