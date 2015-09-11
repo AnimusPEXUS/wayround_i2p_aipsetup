@@ -1,135 +1,25 @@
-This README is too old. Low on useful information.
+Software For Building and Maintaining Own GNU/Linux distribution
 
----------
+			       aipsetup
 
-October 31 2009
+Features:
 
-Hi All
+    * building software packages from tarrballs
+      * multihost package buildings supported
+      * multilib package buildings supported
+    * installing and uninstalling packages
+    * searching for and deletion of garbage among system files
+    * some sort of tools for creating distributions
 
-I'm AGUtilities, and I'm mainteining my own GNU/Linux distribution,
-it's called Atlas WayRound GNU/Linux (Atlas Linux for short). While
-i've moved to my target, I realized that there is no packaging system,
-suitable by my requests. So I decided to write My own. So here it
-is. I called it `aipsetup'
+Requirements:
+    some packages from my GitHub page are required.
+    also You'll need BottlePy, CherryPy, Mako, SQLAlchemy, lxml
+    and some other stuff. GUI elements requires Gtk+3 and PyGObject.
 
-~~~
+    aipsetup is written (and oriented) on system with Python 3.4
 
-What does it do?
+GitHub page is here:
+     https://github.com/AnimusPEXUS/wayround_org_aipsetup
 
-For My own, I needed software to easily build pack install and
-uninstall different software packages on system. So, basic properties
-of this tools are follow:
-
-1. easy extraction source tarball
-2. flexible building system
-3. easy and fast pack
-4. installing packages
-5. uninstalling packages
-6. checking installed package integrity
-etc
-
-~~~
-
-Installation.
-
-Download lattest aipsetup package from
-http://wayround.org/mirrors/AtlasLinux/aipsetup/ , extract it
-somewhere, and do:
-
-make install
-
-It will be installed in /usr/lib/aipsetup directory, and executable
-file, will be placed to /usr/bin.
-
-Installation is now complite :-)
-
-~~~
-
-Usage.
-
-~~~~~~~~
-One command program build
-~~~~~~~~
-
-if your' aipsetup has propriaste template installed, then You can
-build many apps by one single command:
-
-aipsetup bd wine wine-1.1.31.tar.gz
-
- where:
-  aipsetup           - command
-  bd       	     - aipsetup command
-  wine     	     - template aipsetup must use to build package
-  wine-1.1.31.tar.gz - sources ( can be multiple filenames or wildcard)
-
-aipsetup, internaly, does all staff, including extraction, building
-and packaging.
-
-on the end, You'll have pack directory with new, ready to install
-package, or if any errors will happen, log of all operation
-
-~~~~~~~~
-File extraction
-~~~~~~~~
-
-aipsetup ex filename
-
-will extract fiven file to current dir
-
-~~~~~~~~
-Compilling building script 
-~~~~~~~~
-
-aipsetup sc wine
-
-Will create build script for building package.
-
-This command assumed to be deploid right in the first source dir ofthe
-package. 
-
-~~~~~~~~
-Building packare
-~~~~~~~~
-
-execute script created by aipsetup with bash and it will build
-package, logging all process to package's 'var' dir.
-
-~~~~~~~~
-Creating installation package
-~~~~~~~~
-
-Go to new package dir and command
-
-aipsetup pk
-
-and it will create package in ../pack directory
-
-~~~~~~~~
-Installing and uninstallin package
-~~~~~~~~
-
-package can be installed or uninstalled
-
-aipsetup in 'package filename or wildcard'
-aipsetup in wine-*.tar.bz2
-
-aipsetup rm 'package filename or wildcard'
-aipsetup rm 'wine-*'
-
-~~~~~~~~
-List installed packages
-~~~~~~~~
-
-aipsetup ls 'wine-*'
-
-
-~~~~~~~~~~~
-
-aipsetup have also some nice tools for serchid dependenties and things
-like thet. See aipsetup --help
-
-~~
-
-Finally I have updated this README. 
-
-be Happy
+Some slack distribution packages are here:
+     rsync://wayround.org/Lailalo_snapshots/

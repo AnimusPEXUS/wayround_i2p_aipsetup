@@ -278,9 +278,11 @@ def system_package_list(command_name, opts, args, adds):
             )
 
         lst = sorted(
-            system.list_installed_packages(mask),
-            host=host,
-            arch=arch
+            system.list_installed_packages(
+                mask,
+                host=host,
+                arch=arch
+                )
             )
 
         wayround_org.utils.text.columned_list_print(
