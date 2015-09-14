@@ -33,11 +33,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         #    'bcc'
         #    )
 
-        dst_dir = self.get_dst_host_dir()
+        dst_dir = self.calculate_dst_install_prefix()
 
         ret = [
             'install',
-            'PREFIX=',
+            'PREFIX=/',
             'DESTDIR={}'.format(dst_dir),
             'DIST={}'.format(dst_dir),
             #'BINDIR=/bin',

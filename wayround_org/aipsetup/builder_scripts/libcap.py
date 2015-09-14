@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del ret['configure']
         del ret['autogen']
         del ret['build']
-        #ret['after_distribute'] = self.builder_action_after_distribute
+        ret['after_distribute'] = self.builder_action_after_distribute
         return ret
 
     '''
@@ -61,7 +61,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     '''
 
     def builder_action_distribute_define_args(self, called_as, log):
-        return [
+        ret = [
             'all',
             'install',
             'prefix={}'.format(self.calculate_install_prefix()),
@@ -93,29 +93,28 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #    )
             ] + self.all_automatic_flags_as_list()
 
+        return ret
+
     def builder_action_after_distribute(self, called_as, log):
 
-        raise Exception("tests required")
+        host = self.get_host_from_pkgi()
+        arch = self.get_host_from_pkgi()
 
-        wayround_org.utils.file.copytree(
-            wayround_org.utils.path.join(
-                self.get_dst_host_dir(),
-                'multiarch'
-                ),
-            wayround_org.utils.path.join(
-                self.get_dst_host_dir(),
-                'lib' #self.calculate_main_multiarch_lib_dir_name()
-                ),
-            overwrite_files=True,
-            clear_before_copy=False,
-            dst_must_be_empty=True,
-            )
+        if host == 'x86_64-pc-linux-gnu' and host == arch:
 
-        shutil.rmtree(
-            wayround_org.utils.path.join(
-                self.get_dst_host_dir(),
-                'multiarch'
+            dd = wayround_org.utils.path.join(
+                self.calculate_dst_install_prefix(),
+                'lib64',
+                'security'
                 )
-            )
+            sd = wayround_org.utils.path.join(
+                self.calculate_dst_install_prefix(),
+                'lib',
+                'security'
+                )
 
-        return 10
+            if os.path.isdir(dd):
+                os.makedirs(os.path.dirname(sd))
+                os.rename(dd, sd)
+
+        return 0

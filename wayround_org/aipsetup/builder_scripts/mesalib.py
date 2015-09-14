@@ -14,6 +14,51 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
+
+            # NOTE: on OpenGL version printed by glxinfo or qtdiag
+            #       http://permalink.gmane.org/gmane.comp.video.mesa3d.user/3311
+
+            # ------------------------
+            # next block is copy&paste from
+            # https://wiki.freedesktop.org/nouveau/InstallNouveau/
+            # ->
+            '--enable-texture-float',
+            '--enable-gles1',
+            '--enable-gles2',
+            '--enable-glx',
+            '--enable-egl',
+            '--enable-gallium-egl',
+            '--enable-gallium-llvm',
+            '--enable-shared-glapi',
+            '--enable-gbm',
+            '--enable-glx-tls',  # undefined reference to `_glapi_tls_Dispatch'
+            '--enable-dri',
+            '--enable-osmesa',
+            '--enable-vdpau',
+            #'--with-egl-platforms=x11,drm',
+            #'--with-gallium-drivers=nouveau',
+            #'--with-dri-drivers=nouveau',
+            # <-
+            # end of https://wiki.freedesktop.org/nouveau/InstallNouveau/
+            # block
+            # ------------------------
+
+            # ------------------------
+            # https://pkg-xorg.alioth.debian.org/howto/build-mesa.html
+            # ->
+
+            #'--with-dri-driverdir={}/lib/dri'.format(
+            #    self.calculate_install_prefix()
+            #    ),
+            '--enable-driglx-direct',
+
+            # <-
+            # ------------------------
+
+            #'--libdir={}/lib'.format(
+            #    self.calculate_install_prefix()
+            #    ),
+
             '--enable-texture-float',
 
             '--enable-gles1',
@@ -21,8 +66,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             '--enable-openvg=auto',
 
-            '--enable-osmesa', #-
-            '--with-osmesa-bits=64', #-
+            '--enable-osmesa',  # -
+            '--with-osmesa-bits=64',  # -
 
             '--enable-xa',
             '--enable-gbm',
@@ -30,22 +75,22 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--disable-gallium',
             #'--disable-gallium-llvm',
 
-             '--enable-egl',
-            '--enable-gallium-egl', #-
-             '--enable-gallium-gbm',
+            '--enable-egl',
+            '--enable-gallium-egl',  # -
+            '--enable-gallium-gbm',
 
-            '--enable-dri', #-
-            '--enable-dri3', #-
+            '--enable-dri',  # -
+            '--enable-dri3=auto',  # -
 
             # '--enable-glx-tls',
 
-            '--enable-xorg', #-
+            '--enable-xorg',  # -
 
-            '--with-egl-platforms=x11,drm,wayland', #-
+            '--with-egl-platforms=x11,drm,wayland',  # -
 
 
-            '--with-gallium-drivers=nouveau,svga,swrast',#-
-            '--with-dri-drivers=nouveau,i915,i965,r200,radeon,swrast',#-
+            '--with-gallium-drivers=nouveau,svga,swrast',  # -
+            '--with-dri-drivers=nouveau,i915,i965,r200,radeon,swrast',  # -
             #'--without-gallium-drivers',
             #'--without-dri-drivers',
 
@@ -93,4 +138,3 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ),
         ]
         return ret
-    

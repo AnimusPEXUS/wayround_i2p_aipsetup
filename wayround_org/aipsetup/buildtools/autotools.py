@@ -20,35 +20,39 @@ import wayround_org.utils.tarball
 
 def calc_conf_hbt_options(builder_obj):
 
-    host = builder_obj.get_host_from_pkgi()
-    build = builder_obj.get_build_from_pkgi()
-    target = builder_obj.get_target_from_pkgi()
-    arch = builder_obj.get_arch_from_pkgi()
+    hi = builder_obj.get_host_from_pkgi()
+    bi = builder_obj.get_build_from_pkgi()
+    ti = builder_obj.get_target_from_pkgi()
+    ai = builder_obj.get_arch_from_pkgi()
 
     forced_target = builder_obj.forced_target
 
-    if (arch is not None
+    if (ai is not None
                 and (
-                    (host == build == target)
+                    (hi == bi == ti)
                     or
-                    (arch == build == target)
+                    (ai == bi == ti)
                     or
-                    ((host == build) and (target is None))
+                    ((hi == bi) and (ti is None))
                     )
                 and not forced_target
             ):
-        target = None
+        ti = None
+
+    if builder_obj.get_is_only_other_arch():
+        hi = ai
+        bi = hi
 
     ret = []
 
-    if arch not in [None, 'none']:
-        ret.append('--host={}'.format(arch))
+    if hi not in [None, 'none']:
+        ret.append('--host={}'.format(hi))
 
-    if build not in [None, 'none']:
-        ret.append('--build={}'.format(build))
+    if bi not in [None, 'none']:
+        ret.append('--build={}'.format(bi))
 
-    if target not in [None, 'none']:
-        ret.append('--target={}'.format(target))
+    if ti not in [None, 'none']:
+        ret.append('--target={}'.format(ti))
 
     return ret
 

@@ -48,7 +48,7 @@ def list_arch_roots(basedir='/'):
 
     ret = []
 
-    march_dir = wayround_org.utils.path.join(basedir, 'multiarch')
+    march_dir = wayround_org.utils.path.join(basedir, 'multihost')
 
     march_dir_files = os.listdir(march_dir)
 

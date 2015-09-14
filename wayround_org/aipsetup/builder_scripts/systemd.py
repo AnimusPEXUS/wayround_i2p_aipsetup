@@ -40,7 +40,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'PYTHON={}'.format(
                 wayround_org.utils.file.which(
                     'python',
-                    self.get_host_dir()
+                    self.calculate_install_prefix()
                     )
                 )
             ]

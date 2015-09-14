@@ -79,7 +79,7 @@ class Builder:
         ret = self.force_crossbuild
         if ret is None:
             ret = (
-                self.get_build_from_pkgi() != self.get_host_from_pkgi()
+                self.get_host_from_pkgi() != self.get_build_from_pkgi()
 
                 and
 
@@ -94,12 +94,38 @@ class Builder:
         if ret is None:
             ret = (self.get_target_from_pkgi() is not None
 
-                   and (self.get_target_from_pkgi()
-                        != self.get_host_from_pkgi())
+                   and
 
-                   and (self.get_arch_from_pkgi()
-                        != self.get_host_from_pkgi())
+                   (self.get_host_from_pkgi() != self.get_target_from_pkgi())
+
+                   and
+
+                   (self.get_host_from_pkgi() != self.get_arch_from_pkgi())
                    )
+
+        return ret
+
+    def get_is_only_other_arch(self):
+        h = self.get_host_from_pkgi()
+        b = self.get_build_from_pkgi()
+        t = self.get_target_from_pkgi()
+        a = self.get_arch_from_pkgi()
+
+        ret = (
+            (h == b)
+
+            and
+
+            (
+                (t is not None and t == h)
+                or
+                (t is None)
+                )
+
+            and
+
+            (a != h)
+            )
 
         return ret
 
@@ -296,33 +322,27 @@ class Builder:
 
     def calculate_pkgconfig_search_paths(self):
 
-        multilib_variant = str(self.get_multilib_variant_int())
+        #multilib_variant = str(self.get_multilib_variant_int())
 
-        host_archs = self.get_host_arch_list()
+        # host_archs = self.get_host_arch_list()
         # host_archs += [self.get_host_dir()]
 
         where_to_search = [
             wayround_org.utils.path.join(
-                self.get_host_dir(),
+                self.calculate_install_prefix(),
                 'share',
                 'pkgconfig'
                 ),
-            # wayround_org.utils.path.join(
-            #    self.get_host_lib_dir(),
-            #    # self.calculate_main_multiarch_lib_dir_name(),
-            #    'pkgconfig'
-            #    ),
             wayround_org.utils.path.join(
-                self.get_host_dir(),
+                self.calculate_install_prefix(),
                 'lib',
                 'pkgconfig'
                 ),
             wayround_org.utils.path.join(
-                self.get_host_dir(),
+                self.calculate_install_prefix(),
                 'lib64',
                 'pkgconfig'
                 ),
-
             ]
 
         ret = []
@@ -332,6 +352,136 @@ class Builder:
             if os.path.isdir(i):
                 ret.append(i)
 
+        return ret
+
+    def calculate_LD_LIBRARY_PATH(self):
+
+        ret = []
+
+        # if 'LD_LIBRARY_PATH' in os.environ:
+        #    LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
+
+        inst_prefix = self.get_host_dir()
+
+        for i in [
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib'
+                    ),
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib64'
+                    ),
+                ]:
+            if os.path.isdir(i):
+                if not i in ret:
+                    ret.append(i)
+
+        inst_prefix = self.calculate_install_prefix()
+
+        for i in [
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib'
+                    ),
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib64'
+                    ),
+                ]:
+            if os.path.isdir(i):
+                if not i in ret:
+                    ret.append(i)
+
+        return ret
+
+    def calculate_LIBRARY_PATH(self):
+
+        # NOTE: this is different from LD_LIBRARY_PATH. LIBRARY_PATH is
+        #       for GCC and it's friends
+
+        ret = []
+
+        inst_prefix = self.get_host_dir()
+
+        for i in [
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib'
+                    ),
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib64'
+                    ),
+                ]:
+
+            if os.path.isdir(i):
+                if not i in ret:
+                    ret.append(i)
+
+        inst_prefix = self.calculate_install_prefix()
+
+        for i in [
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib'
+                    ),
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'lib64'
+                    ),
+                ]:
+            if os.path.isdir(i):
+                if not i in ret:
+                    ret.append(i)
+
+        return ret
+
+    def calculate_C_INCLUDE_PATH(self):
+
+        C_INCLUDE_PATH = []
+
+        inst_prefix = self.calculate_install_prefix()
+
+        for i in [
+                wayround_org.utils.path.join(
+                    inst_prefix,
+                    'include'
+                    ),
+                ]:
+            if os.path.isdir(i):
+                C_INCLUDE_PATH.append(i)
+
+        return C_INCLUDE_PATH
+
+    def calculate_PATH(self):
+        ret = []
+        for i in [
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'bin'
+                ),
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'sbin'
+                ),
+                wayround_org.utils.path.join(
+                    self.get_host_dir(),
+                    'bin'
+                ),
+                wayround_org.utils.path.join(
+                    self.get_host_dir(),
+                    'sbin'
+                )
+                ]:
+            if not i in ret:
+                ret.append(i)
+        return ret
+
+    def calculate_PATH_dict(self):
+        ret = {
+            'PATH': ':'.join(self.calculate_PATH())
+            }
         return ret
 
     def get_CC_from_pkgi(self):
@@ -625,11 +775,35 @@ class Builder:
 
         pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
-        # ret.update(
-        #    {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
-        #    )
+        ret.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            )
 
-        ret.update(self.builder_action_configure_define_PATH_dict())
+        LD_LIBRARY_PATH = self.calculate_LD_LIBRARY_PATH()
+
+        ret.update(
+            {'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)}
+            )
+
+        LIBRARY_PATH = self.calculate_LIBRARY_PATH()
+
+        ret.update(
+            {'LIBRARY_PATH': ':'.join(LIBRARY_PATH)}
+            )
+
+        C_INCLUDE_PATH = self.calculate_C_INCLUDE_PATH()
+
+        ret.update(
+            {'C_INCLUDE_PATH': ':'.join(C_INCLUDE_PATH)}
+            )
+
+        PATH = self.calculate_PATH()
+
+        ret.update(
+            {'PATH': ':'.join(PATH)}
+            )
+
+        # ret.update(self.builder_action_configure_define_PATH_dict())
 
         return ret
 
@@ -759,25 +933,6 @@ class Builder:
     def builder_action_configure_define_relative_call(self, called_as, log):
         return False
 
-    def builder_action_configure_define_PATH_list(self):
-        ret = [
-            wayround_org.utils.path.join(
-                self.calculate_install_prefix(),
-                'bin'
-            ),
-            wayround_org.utils.path.join(
-                self.calculate_install_prefix(),
-                'sbin'
-            )
-            ]
-        return ret
-
-    def builder_action_configure_define_PATH_dict(self):
-        ret = {
-            'PATH': ':'.join(self.builder_action_configure_define_PATH_list())
-            }
-        return ret
-
     def builder_action_configure(self, called_as, log):
 
         log.info(
@@ -866,89 +1021,38 @@ class Builder:
         return ret
 
     def builder_action_build_define_environment(self, called_as, log):
+
         ret = self.builder_action_configure_define_environment(called_as, log)
 
-        # ret.update(self.all_automatic_flags_as_dict())
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
 
-        ret.update(self.builder_action_configure_define_PATH_dict())
+        ret.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            )
 
-        # pkg_config_paths = self.calculate_pkgconfig_search_paths()
+        LD_LIBRARY_PATH = self.calculate_LD_LIBRARY_PATH()
 
-        # ret.update({'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)})
+        ret.update(
+            {'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)}
+            )
 
-        # ret.update({'PKG_CONFIG_PATH': None})
+        LIBRARY_PATH = self.calculate_LIBRARY_PATH()
 
-        LD_LIBRARY_PATH = []
+        ret.update(
+            {'LIBRARY_PATH': ':'.join(LIBRARY_PATH)}
+            )
 
-        LD_LIBRARY_PATH += [
-            # self.get_host_lib_dir()
-            #
-            #
-            ]
+        C_INCLUDE_PATH = self.calculate_C_INCLUDE_PATH()
 
-        # NOTE: probably it need to be uncommented
-        # if 'LD_LIBRARY_PATH' in os.environ:
-        #    LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
+        ret.update(
+            {'C_INCLUDE_PATH': ':'.join(C_INCLUDE_PATH)}
+            )
 
-        # Explanation to all this .libs in LD_LIBRARY_PATH:
-        #     if building to nonstandard prefix, for some reason
-        #     building breaks with errors similar to
+        PATH = self.calculate_PATH()
 
-        '''
-        [i] [2015-08-05T11:08:26.167109] [pulseaudio build]   CCLD     channelmap-test
-        [e] [2015-08-05T11:08:26.41759 ] [pulseaudio build] /multiarch/i686-pc-linux-gnu/lib/gcc/i686-pc-linux-gnu/5.2.0/../../../../i
-        686-pc-linux-gnu/bin/ld: warning: libpulsecommon-6.0.so, needed by ./.libs/libpulse.so, not found (try using -rpath or -rpath-
-        link)
-        [e] [2015-08-05T11:08:26.417712] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_getu8'
-        [e] [2015-08-05T11:08:26.41777 ] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_put_format_info'
-        [e] [2015-08-05T11:08:26.417815] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_mutex_unlock'
-        [e] [2015-08-05T11:08:26.417853] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_format_info_get_channel_ma
-        p'
-        [e] [2015-08-05T11:08:26.417888] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_init_proplist'
-        [e] [2015-08-05T11:08:26.417922] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_put_boolean'
-        [e] [2015-08-05T11:08:26.417955] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_rtclock_from_wallclock'
-        [e] [2015-08-05T11:08:26.417988] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_timespec_store'
-        [e] [2015-08-05T11:08:26.418022] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_memblockq_get_length'
-        [e] [2015-08-05T11:08:26.418055] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_get_usec'
-        [e] [2015-08-05T11:08:26.418089] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_memblockq_peek'
-        [e] [2015-08-05T11:08:26.418127] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_pdispatch_register_reply'
-        [e] [2015-08-05T11:08:26.418161] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_memblockq_new'
-        [e] [2015-08-05T11:08:26.418199] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_strbuf_tostring_free'
-        [e] [2015-08-05T11:08:26.418243] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_snprintf'
-        [e] [2015-08-05T11:08:26.41828 ] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_strlist_pop'
-        [e] [2015-08-05T11:08:26.418314] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_get_channel_map'
-        [e] [2015-08-05T11:08:26.418347] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_tagstruct_free'
-        [e] [2015-08-05T11:08:26.41838 ] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_hashmap_new_full'
-        [e] [2015-08-05T11:08:26.418412] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_mutex_new'
-        [e] [2015-08-05T11:08:26.418445] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_pstream_set_receive_memblo
-        ck_callback'
-        [e] [2015-08-05T11:08:26.418478] [pulseaudio build] ./.libs/libpulse.so: undefined reference to `pa_smoother_new'
-        '''
-
-        '''
-        dot_libs = [
-            '.libs',
-            '../.libs',
-            '../../.libs',
-            '../../../.libs',
-            '../../../../.libs',
-            './.libs',
-            './../.libs',
-            './../../.libs',
-            './../../../.libs',
-            './../../../../.libs',
-            ]
-
-        dot_libs.sort()
-
-        LD_LIBRARY_PATH += dot_libs
-        '''
-
-        #ret.update({'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)})
-        #ret.update({'LD_LIBRARY_PATH': None})
-
-        if 'LD_LIBRARY_PATH' in ret:
-            del ret['LD_LIBRARY_PATH']
+        ret.update(
+            {'PATH': ':'.join(PATH)}
+            )
 
         return ret
 
@@ -991,7 +1095,40 @@ class Builder:
         return ret
 
     def builder_action_distribute_define_environment(self, called_as, log):
-        return {}
+
+        ret = self.builder_action_configure_define_environment(called_as, log)
+
+        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+
+        ret.update(
+            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            )
+
+        LD_LIBRARY_PATH = self.calculate_LD_LIBRARY_PATH()
+
+        ret.update(
+            {'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)}
+            )
+
+        LIBRARY_PATH = self.calculate_LIBRARY_PATH()
+
+        ret.update(
+            {'LIBRARY_PATH': ':'.join(LIBRARY_PATH)}
+            )
+
+        C_INCLUDE_PATH = self.calculate_C_INCLUDE_PATH()
+
+        ret.update(
+            {'C_INCLUDE_PATH': ':'.join(C_INCLUDE_PATH)}
+            )
+
+        PATH = self.calculate_PATH()
+
+        ret.update(
+            {'PATH': ':'.join(PATH)}
+            )
+
+        return ret
 
     def builder_action_distribute_define_opts(self, called_as, log):
         return []

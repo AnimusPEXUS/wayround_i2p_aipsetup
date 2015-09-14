@@ -83,11 +83,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ('copy_source', self.builder_action_copy_source)
             ])
 
-        if self.get_is_crossbuilder():
+        if self.get_is_crossbuilder() or self.get_is_only_other_arch():
 
-            logging.info(
-                "Crosscompiler building detected. only headers will be built"
-                )
+            if self.get_is_crossbuilder():
+                logging.info(
+                    "Crossbuilder building detected."
+                    " only headers will be built"
+                    )
+
+            if self.get_is_only_other_arch():
+                logging.info(
+                    "Subarch building detected. only headers will be built"
+                    )
 
             ret = collections.OrderedDict([
                 ('src_cleanup', self.builder_action_src_cleanup),
@@ -114,7 +121,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pi = self.get_package_info()
 
         if self.get_is_crossbuilder():
-            pi['pkg_info']['name'] = 'cb-linux-headers-{}'.format(self.get_host_from_pkgi())
+            pi['pkg_info']['name'] = 'cb-linux-headers-{}'.format(
+                self.get_host_from_pkgi()
+                )
         else:
             pi['pkg_info']['name'] = 'linux'
 
@@ -190,7 +199,8 @@ continue building procedure with command
             p2 = wayround_org.utils.path.join(
                 self.custom_data['dst_boot_dir'],
                 'vmlinuz-{}-{}'.format(
-                    self.get_package_info()['pkg_nameinfo']['groups']['version'],
+                    self.get_package_info()['pkg_nameinfo'][
+                        'groups']['version'],
                     self.get_host_from_pkgi()
                     )
                 )
@@ -279,16 +289,24 @@ continue building procedure with command
         if h_all:
             command = 'headers_install_all'
 
-        install_hdr_path = wayround_org.utils.path.join(
-            self.get_dst_dir(), 'usr'
-            )
+        if self.get_is_only_other_arch():
 
-        if self.get_is_crossbuilder():
+            install_hdr_path = wayround_org.utils.path.join(
+                self.get_dst_dir(), 'usr', 'multiarch',
+                self.get_arch_from_pkgi()
+                )
+
+        elif self.get_is_crossbuilder():
 
             install_hdr_path = wayround_org.utils.path.join(
                 self.get_dst_dir(), 'usr', 'crossbuilders',
-                self.target
-                #, usr
+                self.get_target_from_pkgi()
+                )
+
+        else:
+
+            install_hdr_path = wayround_org.utils.path.join(
+                self.get_dst_dir(), 'usr'
                 )
 
         if ret == 0:
@@ -306,15 +324,15 @@ continue building procedure with command
                 source_configure_reldir=self.source_configure_reldir
                 )
 
-        if h_all:
-            print('-----------------')
-            print("Now You need to create asm symlink in include dir")
-            if self.get_is_crossbuilder():
-                print("and pack this building site")
-            if not self.get_is_crossbuilder() and not self.get_is_crossbuild():
-                print("and continue with 'distr_man+' action")
-            print('-----------------')
+        print('-----------------')
+        print("Now You need to create asm symlink in include dir")
+        if self.get_is_crossbuilder() or self.get_is_only_other_arch():
+            print("and pack this building site")
+            ret = 0
+        else:
+            print("and continue with 'distr_man+' action")
             ret = 1
+        print('-----------------')
 
         return ret
 
@@ -353,7 +371,8 @@ continue building procedure with command
 
             man_files = glob.glob(
                 wayround_org.utils.path.join(
-                    self.get_src_dir(), 'Documentation', 'DocBook', 'man', '*.9.gz'
+                    self.get_src_dir(
+                        ), 'Documentation', 'DocBook', 'man', '*.9.gz'
                     )
                 )
 
@@ -382,7 +401,8 @@ continue building procedure with command
                     self.usr_list_item[0],
                     'src',
                     'linux-{}'.format(
-                        self.get_package_info()['pkg_nameinfo']['groups']['version']
+                        self.get_package_info()['pkg_nameinfo'][
+                            'groups']['version']
                         )
                     ),
                 overwrite_files=True,

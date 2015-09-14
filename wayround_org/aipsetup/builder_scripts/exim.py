@@ -90,7 +90,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 if ftl[i].startswith('BIN_DIRECTORY=/usr/exim/bin'):
                     log.info("edit: '{}'".format(ftl[i]))
                     ftl[i] = 'BIN_DIRECTORY={}/bin'.format(
-                        self.get_host_dir())
+                        self.calculate_install_prefix()
+                        )
 
                 if ftl[i].startswith('CONFIGURE_FILE=/usr/exim/configure'):
                     log.info("edit: '{}'".format(ftl[i]))
@@ -218,13 +219,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_sendmail_link(self, called_as, log):
         lnk = wayround_org.utils.path.join(
-            self.get_dst_host_arch_dir(),
+            self.calculate_dst_install_prefix(),
             'bin',
             'sendmail'
             )
 
         if os.path.exists(lnk) or os.path.islink(lnk):
             os.unlink(lnk)
+
+        lnk_dir = os.path.dirname(lnk)
+        os.makedirs(lnk_dir, exist_ok=True)
 
         log.info("link: '{}'".format(lnk))
         os.symlink('./exim', lnk)

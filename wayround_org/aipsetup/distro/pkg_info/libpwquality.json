@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://fedorahosted.org/",
-  "buildscript": "std",
+  "buildscript": "libpwquality",
   "version_tool": "",
   "basename": "libpwquality",
   "filters": "",
@@ -9,6 +9,7 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

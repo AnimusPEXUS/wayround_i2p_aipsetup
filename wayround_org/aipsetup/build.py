@@ -368,7 +368,7 @@ class Constitution:
         self.arch = None
 
         if (not isinstance(multilib_variants, list)
-            or len(multilib_variants) == 0
+                or len(multilib_variants) == 0
             ):
             raise ValueError("`multilib_variant' must be not empty list")
 
@@ -986,7 +986,7 @@ class PackCtl:
                 dst_dir,
                 [],
                 [],
-                ['usr', 'multihost', 'multiarch'],
+                ['usr', 'multihost'],
                 lst,
                 [],
                 [],
@@ -1069,7 +1069,7 @@ class PackCtl:
             [],
             ['mnt', 'usr', 'local'],
             #['bin', 'sbin', 'include', 'man', 'info', 'libexec', 'share'],
-	    [],
+            [],
             [],
             [],
             pkg_name
@@ -1159,8 +1159,54 @@ class PackCtl:
     def destdir_verify_paths_correctness6(self):
 
         ret = 0
-        return 0
-        logging.info("lib/python*")
+
+        package_info = self.buildingsite_ctl.read_package_info()
+
+        pkg_name = package_info['pkg_info']['name']
+        host = package_info['constitution']['host']
+        arch = package_info['constitution']['arch']
+
+        src_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'multiarch',
+            arch,
+            'usr'
+            )
+
+        dst_dir = wayround_org.utils.path.join(
+            self.buildingsite_ctl.getDIR_DESTDIR(),
+            'multihost',
+            host,
+            'multiarch',
+            arch
+            )
+
+        if os.path.exists(src_dir) and os.path.isdir(src_dir):
+            lst = os.listdir(src_dir)
+
+            ret = _dir_wanisher(
+                '/multihost/host/multiarch/arch/usr -> '
+                '/multihost/host/multiarch/arch',
+                src_dir,
+                dst_dir,
+                [],
+                [],
+                ['usr', 'multihost', 'multiarch', 'local'],
+                lst,
+                [],
+                [],
+                pkg_name
+                )
+
+        wayround_org.utils.file.remove_if_exists(src_dir)
+
+        return ret
+
+    def destdir_verify_paths_correctness7(self):
+
+        ret = 0
 
         package_info = self.buildingsite_ctl.read_package_info()
 
@@ -1169,76 +1215,27 @@ class PackCtl:
         host = package_info['constitution']['host']
         arch = package_info['constitution']['arch']
 
-        python_lib_dir = wayround_org.utils.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(),
-            'multihost',
-            host,
-            'multiarch',
-            arch,
-            'lib'
-            )
+        for i in [
+                wayround_org.utils.path.join(
+                    self.buildingsite_ctl.getDIR_DESTDIR(),
+                    'multihost',
+                    host,
+                    'multiarch',
+                    arch
+                    ),
+                wayround_org.utils.path.join(
+                    self.buildingsite_ctl.getDIR_DESTDIR(),
+                    'multihost',
+                    host,
+                    'multiarch'
+                    ),
+                ]:
 
-        tgt_python_lib_dir = wayround_org.utils.path.join(
-            self.buildingsite_ctl.getDIR_DESTDIR(),
-            'multihost',
-            host,
-            'lib'
-            )
+            if len(os.listdir(i)) == 0:
+                os.rmdir(i)
 
-        if os.path.isdir(python_lib_dir):
-            lst = os.listdir(python_lib_dir)
-
-            for i in lst:
-
-                if i.startswith('python'):
-
-                    jo = wayround_org.utils.path.join(
-                        python_lib_dir,
-                        i
-                        )
-
-                    if os.path.isdir(jo):
-
-                        logging.info("    {}".format(i))
-
-                        jo2 = wayround_org.utils.path.join(
-                            tgt_python_lib_dir,
-                            i
-                            )
-
-                        os.makedirs(
-                            jo2,
-                            exist_ok=True
-                            )
-
-                        if wayround_org.utils.file.copytree(
-                                jo,
-                                jo2,
-                                overwrite_files=True,
-                                clear_before_copy=False,
-                                dst_must_be_empty=False,
-                                verbose=False
-                                ) != 0:
-                            ret += 1
-
-                        else:
-
-                            shutil.rmtree(jo)
-
-        if os.path.isdir(python_lib_dir):
-            if len(os.listdir(python_lib_dir)) == 0:
-                shutil.rmtree(python_lib_dir)
-                ret = 0
-            else:
-                logging.error("arch/lib dir is not empty")
-                ret = 1
-
-        return ret
-
-    def destdir_verify_paths_correctness7(self):
-
-        ret = 0
         logging.info("----------- CHECKS -----------")
+
         return 0
 
         package_info = self.buildingsite_ctl.read_package_info()
@@ -2805,8 +2802,6 @@ class BuildingSiteCtl:
             log.info("Buildingsite processes started")
             log.warning("Closing this log now, cause it can't work farther")
             log.stop()
-
-
 
             if build_ctl.complete(buildscript_ctl) != 0:
                 logging.error("Error on building stage")
