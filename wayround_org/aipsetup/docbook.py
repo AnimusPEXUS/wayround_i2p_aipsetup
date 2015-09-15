@@ -38,7 +38,7 @@ INSTRUCTION = """\
                   docbook-4.5b or docbook-4.5CR.
 
                   IF AIPSETUP DOWNLOADS SUCH FILES DO NOT TRUST IT AND
-                  DOWNLOAD NORMAL FILES MANUALLY!!
+                  DOWNLOAD RIGHT FILES MANUALLY!!
 
 2. Build files (root rights not required for this):
    aipsetup build full -d *
@@ -49,6 +49,22 @@ INSTRUCTION = """\
 4. Use command "aipsetup docbook install" as root
 
 At this point docbook must be installed
+
+NOTE: xmlcatalog command from vanilla libxml2-2.9.2.tar.gz has bug,
+      which leads to incorrect work with xml catalog, which leads to
+      damagede docbook installation
+
+      following patch need to be appyed on libxml2-2.9.2 for xmlcatalog
+      to work properly:
+
+sed \
+  -e /xmlInitializeCatalog/d \
+  -e 's/((ent->checked =.*&&/(((ent->checked == 0) ||\
+          ((ent->children == NULL) \&\& (ctxt->options \& XML_PARSE_NOENT))) \&\&/' \
+  -i parser.c
+
+    this patch is taken from here:
+    http://www.linuxfromscratch.org/blfs/view/stable/general/libxml2.html
 """
 
 
@@ -312,8 +328,9 @@ def import_catalog_xml_to_super_docbook_catalog(
 
     target_catalog_xml = wayround_org.utils.path.abspath(target_catalog_xml)
     base_dir = wayround_org.utils.path.abspath(base_dir)
-    super_docbook_catalog_xml = \
-        wayround_org.utils.path.abspath(super_docbook_catalog_xml)
+    super_docbook_catalog_xml = wayround_org.utils.path.abspath(
+        super_docbook_catalog_xml
+        )
 
     target_catalog_xml_fn = wayround_org.utils.path.abspath(
         wayround_org.utils.path.join(base_dir, target_catalog_xml)
@@ -325,10 +342,13 @@ def import_catalog_xml_to_super_docbook_catalog(
         target_catalog_xml_fn_dir_virtual, base_dir
         )
 
-    super_docbook_catalog_xml_fn = \
-        wayround_org.utils.path.join(base_dir, super_docbook_catalog_xml)
-    super_docbook_catalog_xml_fn_dir = \
-        os.path.dirname(super_docbook_catalog_xml_fn)
+    super_docbook_catalog_xml_fn = wayround_org.utils.path.join(
+        base_dir,
+        super_docbook_catalog_xml
+        )
+    super_docbook_catalog_xml_fn_dir = os.path.dirname(
+        super_docbook_catalog_xml_fn
+        )
 
     if not os.path.exists(super_docbook_catalog_xml_fn_dir):
         os.makedirs(super_docbook_catalog_xml_fn_dir)
@@ -368,21 +388,18 @@ def import_catalog_xml_to_super_docbook_catalog(
                         '/', target_catalog_xml_fn_dir_virtual, src_uri
                         )
 
-                logging.info(
-                    "    adding {}".format(
-                        i.get(tag + 'Id')
-                        )
-                    )
+                logging.info("    adding {}".format(i.get(tag + 'Id')))
 
-                p = subprocess.Popen(
-                    [
-                        'xmlcatalog', '--noout', '--add',
-                        tag,
-                        i.get(tag + 'Id'),
-                        'file://{}'.format(dst_uri),
-                        super_docbook_catalog_xml_fn,
-                        ]
-                    )
+                cmd = [
+                    'xmlcatalog', '--noout', '--add',
+                    tag,
+                    i.get(tag + 'Id'),
+                    'file://{}'.format(dst_uri),
+                    super_docbook_catalog_xml_fn,
+                    #i.get(tag + 'Id')
+                    ]
+
+                p = subprocess.Popen(cmd)
 
                 p.wait()
 
@@ -413,6 +430,8 @@ def import_to_super_docbook_catalog(
 
     if 'docbook.cat' in files:
 
+        print('docbook.cat')
+
         p = subprocess.Popen(
             [
                 'xmlcatalog',
@@ -427,6 +446,8 @@ def import_to_super_docbook_catalog(
 
     if 'catalog.xml' in files:
 
+        print('catalog.xml')
+
         target_catalog_xml = wayround_org.utils.path.join(
             target_dir,
             'catalog.xml'
@@ -435,6 +456,8 @@ def import_to_super_docbook_catalog(
         import_catalog_xml_to_super_docbook_catalog(
             target_catalog_xml, base_dir, super_catalog_xml
             )
+
+    return
 
 
 def make_new_docbook_xml_look_like_old(
@@ -763,6 +786,8 @@ def install(
                 base_dir, target_dir, super_catalog_xml, xml_catalog
                 )
 
+        #raise Exception("breakpoint")
+
         logging.info("Installing docbook-xsl")
 
         for i in xsl_dirs:
@@ -774,7 +799,7 @@ def install(
                 base_dir
                 )
 
-            #import_to_super_docbook_catalog(
+            # import_to_super_docbook_catalog(
             #    target_dir, base_dir, super_catalog_sgml, super_catalog_xml
             #    )
 
