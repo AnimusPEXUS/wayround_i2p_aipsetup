@@ -64,7 +64,7 @@ def commands():
 
 
 def docbook_install(opts, args):
-    install()
+    return install()
 
 
 def set_correct_modes(directory):
@@ -72,7 +72,10 @@ def set_correct_modes(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], d))
+            fd = wayround_org.utils.path.abspath(
+                wayround_org.utils.path.join(
+                    each[0],
+                    d))
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
@@ -80,7 +83,10 @@ def set_correct_modes(directory):
                      stat.S_IROTH | stat.S_IXOTH)
 
         for f in each[2]:
-            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], f))
+            fd = wayround_org.utils.path.abspath(
+                wayround_org.utils.path.join(
+                    each[0],
+                    f))
             # print fd
             os.chmod(fd,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
@@ -94,12 +100,18 @@ def set_correct_owners(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], d))
+            fd = wayround_org.utils.path.abspath(
+                wayround_org.utils.path.join(
+                    each[0],
+                    d))
             # print fd
             os.chown(fd, 0, 0)
 
         for f in each[2]:
-            fd = wayround_org.utils.path.abspath(wayround_org.utils.path.join(each[0], f))
+            fd = wayround_org.utils.path.abspath(
+                wayround_org.utils.path.join(
+                    each[0],
+                    f))
             # print fd
             os.chown(fd, 0, 0)
 
@@ -128,6 +140,7 @@ def make_directories(base_dir, lst):
             return 1
 
     return 0
+
 
 def prepare_sgml_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
 
@@ -168,27 +181,27 @@ def prepare_catalog(base_dir_etc_xml_catalog, base_dir_etc_xml_docbook):
 def import_docbook_to_catalog(base_dir_etc_xml_catalog):
 
     for each in [
-        [
-            'xmlcatalog', '--noout', '--add', 'delegatePublic',
-            '-//OASIS//ENTITIES DocBook XML',
-            'file:///etc/xml/docbook'
-            ],
-        [
-            'xmlcatalog', '--noout', '--add', 'delegatePublic',
-            '-//OASIS//DTD DocBook XML',
-            'file:///etc/xml/docbook'
-            ],
-        [
-            'xmlcatalog', '--noout', '--add', 'delegateSystem',
-            'http://www.oasis-open.org/docbook/',
-            'file:///etc/xml/docbook'
-            ],
-        [
-            'xmlcatalog', '--noout', '--add', 'delegateURI',
-            'http://www.oasis-open.org/docbook/',
-            'file:///etc/xml/docbook'
-            ]
-        ]:
+            [
+                'xmlcatalog', '--noout', '--add', 'delegatePublic',
+                '-//OASIS//ENTITIES DocBook XML',
+                'file:///etc/xml/docbook'
+                ],
+            [
+                'xmlcatalog', '--noout', '--add', 'delegatePublic',
+                '-//OASIS//DTD DocBook XML',
+                'file:///etc/xml/docbook'
+                ],
+            [
+                'xmlcatalog', '--noout', '--add', 'delegateSystem',
+                'http://www.oasis-open.org/docbook/',
+                'file:///etc/xml/docbook'
+                ],
+            [
+                'xmlcatalog', '--noout', '--add', 'delegateURI',
+                'http://www.oasis-open.org/docbook/',
+                'file:///etc/xml/docbook'
+                ]
+            ]:
 
         p = subprocess.Popen(each + [base_dir_etc_xml_catalog])
 
@@ -199,10 +212,9 @@ def import_docbook_to_catalog(base_dir_etc_xml_catalog):
 
 
 def import_docbook_xsl_to_catalog(
-    target_xsl_dir, base_dir='/', current=False,
-    super_xml_catalog='/etc/xml/catalog'
-    ):
-
+        target_xsl_dir, base_dir='/', current=False,
+        super_xml_catalog='/etc/xml/catalog'
+        ):
     """
     target_xsl_dir: [/base_dir]/usr/share/xml/docbook/docbook-xsl-1.78.1
     super_xml_catalog: [/base_dir]/etc/xml/catalog
@@ -236,7 +248,8 @@ def import_docbook_xsl_to_catalog(
         ).wait()
 
     if ret != 0:
-        logging.error("error adding rewriteSystem to {}".format(super_xml_catalog_fn))
+        logging.error(
+            "error adding rewriteSystem to {}".format(super_xml_catalog_fn))
 
     ret = subprocess.Popen(
         [
@@ -248,7 +261,8 @@ def import_docbook_xsl_to_catalog(
         ).wait()
 
     if ret != 0:
-        logging.error("error adding rewriteURI to {}".format(super_xml_catalog_fn))
+        logging.error(
+            "error adding rewriteURI to {}".format(super_xml_catalog_fn))
 
     if current:
         ret = subprocess.Popen(
@@ -260,7 +274,11 @@ def import_docbook_xsl_to_catalog(
                 ]
             ).wait()
         if ret != 0:
-            logging.error("[current] error adding rewriteURI to {}".format(super_xml_catalog_fn))
+            logging.error(
+                "[current] error adding rewriteURI to {}".format(
+                    super_xml_catalog_fn
+                    )
+                )
 
         ret = subprocess.Popen(
             [
@@ -271,17 +289,20 @@ def import_docbook_xsl_to_catalog(
             ]
             ).wait()
         if ret != 0:
-            logging.error("[current] error adding rewriteURI to {}".format(super_xml_catalog_fn))
+            logging.error(
+                "[current] error adding rewriteURI to {}".format(
+                    super_xml_catalog_fn
+                    )
+                )
 
     return
 
 
 def import_catalog_xml_to_super_docbook_catalog(
-    target_catalog_xml,
-    base_dir='/',
-    super_docbook_catalog_xml='/etc/xml/docbook'
-    ):
-
+        target_catalog_xml,
+        base_dir='/',
+        super_docbook_catalog_xml='/etc/xml/docbook'
+        ):
     """
     target_catalog_xml:
     [/base_dir]/usr/share/xml/docbook/docbook-xml-4.5/catalog.xml
@@ -336,8 +357,8 @@ def import_catalog_xml_to_super_docbook_catalog(
                 dst_uri = ''
 
                 if (src_uri.startswith('http://')
-                    or src_uri.startswith('https://')
-                    or src_uri.startswith('file://')):
+                        or src_uri.startswith('https://')
+                        or src_uri.startswith('file://')):
 
                     dst_uri = src_uri
 
@@ -369,11 +390,11 @@ def import_catalog_xml_to_super_docbook_catalog(
 
 
 def import_to_super_docbook_catalog(
-    target_dir,
-    base_dir='/',
-    super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
-    super_catalog_xml='/etc/xml/docbook'
-    ):
+        target_dir,
+        base_dir='/',
+        super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
+        super_catalog_xml='/etc/xml/docbook'
+        ):
     """
     target_dir: [/base_dir]/usr/share/xml/docbook/docbook-xml-4.5
 
@@ -417,11 +438,11 @@ def import_to_super_docbook_catalog(
 
 
 def make_new_docbook_xml_look_like_old(
-    base_dir='/',
-    installed_docbook_xml_dir='/usr/share/xml/docbook/docbook-xml-4.5',
-    super_catalog_xml='/etc/xml/docbook',
-    xml_catalog='/etc/xml/catalog'
-    ):
+        base_dir='/',
+        installed_docbook_xml_dir='/usr/share/xml/docbook/docbook-xml-4.5',
+        super_catalog_xml='/etc/xml/docbook',
+        xml_catalog='/etc/xml/catalog'
+        ):
 
     base_dir = wayround_org.utils.path.abspath(base_dir)
     installed_docbook_xml_dir = \
@@ -443,71 +464,87 @@ def make_new_docbook_xml_look_like_old(
 
         p = subprocess.Popen(
             [
-             'xmlcatalog', '--noout', '--add', 'public',
-             '-//OASIS//DTD DocBook XML V{}//EN'.format(i),
-             "http://www.oasis-open.org/docbook/xml/{}/docbookx.dtd".format(i),
-             super_catalog_xml_fn
-             ]
+                'xmlcatalog', '--noout', '--add', 'public',
+                '-//OASIS//DTD DocBook XML V{}//EN'.format(i),
+                "http://www.oasis-open.org/docbook/xml/{}/docbookx.dtd".format(
+                    i),
+                super_catalog_xml_fn
+                ]
             )
         ret = p.wait()
         if ret != 0:
-            logging.error("Error adding public {} to {}".format(i, super_catalog_xml_fn))
+            logging.error(
+                "Error adding public {} to {}".format(
+                    i,
+                    super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
-             'xmlcatalog', '--noout', '--add', "rewriteSystem",
-             "http://www.oasis-open.org/docbook/xml/{}".format(i),
-             "file://{}".format(installed_docbook_xml_dir),
-             super_catalog_xml_fn
-             ]
+                'xmlcatalog', '--noout', '--add', "rewriteSystem",
+                "http://www.oasis-open.org/docbook/xml/{}".format(i),
+                "file://{}".format(installed_docbook_xml_dir),
+                super_catalog_xml_fn
+                ]
             )
         ret = p.wait()
         if ret != 0:
-            logging.error("Error adding rewriteSystem {} to {}".format(i, super_catalog_xml_fn))
+            logging.error(
+                "Error adding rewriteSystem {} to {}".format(
+                    i,
+                    super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
-             'xmlcatalog', '--noout', '--add', "rewriteURI",
-             "http://www.oasis-open.org/docbook/xml/{}".format(i),
-             "file://{}".format(installed_docbook_xml_dir),
-             super_catalog_xml_fn
-             ]
+                'xmlcatalog', '--noout', '--add', "rewriteURI",
+                "http://www.oasis-open.org/docbook/xml/{}".format(i),
+                "file://{}".format(installed_docbook_xml_dir),
+                super_catalog_xml_fn
+                ]
             )
         if ret != 0:
-            logging.error("Error adding rewriteURI {} to {}".format(i, super_catalog_xml_fn))
+            logging.error(
+                "Error adding rewriteURI {} to {}".format(
+                    i,
+                    super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
-             'xmlcatalog', '--noout', '--add', "delegateSystem",
-             "http://www.oasis-open.org/docbook/xml/{}".format(i),
-             "file://{}".format(super_catalog_xml),
-             super_catalog_xml_fn
-             ]
+                'xmlcatalog', '--noout', '--add', "delegateSystem",
+                "http://www.oasis-open.org/docbook/xml/{}".format(i),
+                "file://{}".format(super_catalog_xml),
+                super_catalog_xml_fn
+                ]
             )
         ret = p.wait()
         if ret != 0:
-            logging.error("Error adding delegateSystem {} to {}".format(i, super_catalog_xml_fn))
+            logging.error(
+                "Error adding delegateSystem {} to {}".format(
+                    i,
+                    super_catalog_xml_fn))
 
         p = subprocess.Popen(
             [
-             'xmlcatalog', '--noout', '--add', "delegateURI",
-             "http://www.oasis-open.org/docbook/xml/{}".format(i),
-             "file://{}".format(super_catalog_xml),
-             super_catalog_xml_fn
-             ]
+                'xmlcatalog', '--noout', '--add', "delegateURI",
+                "http://www.oasis-open.org/docbook/xml/{}".format(i),
+                "file://{}".format(super_catalog_xml),
+                super_catalog_xml_fn
+                ]
             )
 
         ret = p.wait()
         if ret != 0:
-            logging.error("Error adding relegateURI {} to {}".format(i, super_catalog_xml_fn))
+            logging.error(
+                "Error adding relegateURI {} to {}".format(
+                    i,
+                    super_catalog_xml_fn))
 
     return
 
 
 def make_new_docbook_4_5_look_like_old(
-    base_dir='/',
-    installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-4.5',
-    ):
+        base_dir='/',
+        installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-4.5',
+        ):
 
     base_dir = wayround_org.utils.path.abspath(base_dir)
 
@@ -555,9 +592,9 @@ def make_new_docbook_4_5_look_like_old(
 
 
 def make_new_docbook_3_1_look_like_old(
-    base_dir='/',
-    installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-3.1',
-    ):
+        base_dir='/',
+        installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-3.1',
+        ):
 
     base_dir = wayround_org.utils.path.abspath(base_dir)
 
@@ -607,13 +644,13 @@ def make_new_docbook_3_1_look_like_old(
 
 
 def install(
-    base_dir='/',
-    super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
-    super_catalog_xml='/etc/xml/docbook',
-    sys_sgml_dir='/usr/share/sgml/docbook',
-    sys_xml_dir='/usr/share/xml/docbook',
-    xml_catalog='/etc/xml/catalog'
-    ):
+        base_dir='/',
+        super_catalog_sgml='/etc/sgml/sgml-docbook.cat',
+        super_catalog_xml='/etc/xml/docbook',
+        sys_sgml_dir='/multihost/x86_64-pc-linux-gnu/share/sgml/docbook',
+        sys_xml_dir='/multihost/x86_64-pc-linux-gnu/share/xml/docbook',
+        xml_catalog='/etc/xml/catalog'
+        ):
 
     ret = 0
 
@@ -632,11 +669,11 @@ def install(
     make_directories(
         base_dir,
         [
-         '/etc/sgml',
-         '/etc/xml',
-         '/usr/share/xml/docbook',
-         '/usr/share/sgml/docbook'
-         ]
+            os.path.dirname(super_catalog_sgml),
+            os.path.dirname(super_catalog_xml),
+            sys_xml_dir,
+            sys_sgml_dir
+            ]
         )
     prepare_catalog(xml_catalog_fn, super_catalog_xml_fn)
 
@@ -658,8 +695,8 @@ def install(
 
     logging.info("Checking {}".format(sys_sgml_dir_fn))
     if (len(dirs) != 2
-        or not 'docbook-3.1' in dirs
-        or not 'docbook-4.5' in dirs):
+            or not 'docbook-3.1' in dirs
+            or not 'docbook-4.5' in dirs):
         logging.error(
             "    docbook-[version] dirs must be exacly:"
             " docbook-3.1 and docbook-4.5"
@@ -737,9 +774,9 @@ def install(
                 base_dir
                 )
 
-    #        import_to_super_docbook_catalog(
-    #            target_dir, base_dir, super_catalog_sgml, super_catalog_xml
-    #            )
+            #import_to_super_docbook_catalog(
+            #    target_dir, base_dir, super_catalog_sgml, super_catalog_xml
+            #    )
 
             import_docbook_xsl_to_catalog(
                 target_dir, base_dir, xml_catalog
@@ -750,7 +787,7 @@ def install(
     return
 
 
-##### some unknown sgml subroutine taken from sgml_common.py builder srcipt
+# some unknown sgml subroutine taken from sgml_common.py builder srcipt
 
 
 def main1111111111(basedir):
@@ -760,7 +797,7 @@ def main1111111111(basedir):
          '--add',
          '/etc/sgml/sgml-ent.cat',
          '/usr/share/sgml/sgml-iso-entities-8879.1986/catalog'
-        ]
+         ]
         ).wait()
 
     subprocess.Popen(
@@ -768,6 +805,5 @@ def main1111111111(basedir):
          '--add',
          '/etc/sgml/sgml-docbook.cat',
          '/etc/sgml/sgml-ent.cat'
-        ]
+         ]
         ).wait()
-
