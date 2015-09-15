@@ -33,7 +33,13 @@ def main(buildingsite, action=None):
 
             zip_file = os.listdir(tar_dir)
 
-            xml_dir = wayround_org.utils.path.join(dst_dir, 'usr', 'share', 'sgml', 'docbook')
+            xml_dir = wayround_org.utils.path.join(
+                dst_dir,
+                'usr',
+                'share',
+                'sgml',
+                'docbook'
+                )
 
             if not len(zip_file) == 1:
                 ret = 1

@@ -18,8 +18,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         p = subprocess.Popen(
-            [wayround_org.utils.file.which('perl', self.get_host_dir()),
-                'Makefile.PL'],  # TODO: host dependent actions required
+            [
+                wayround_org.utils.file.which(
+                    'perl', 
+                    self.calculate_install_prefix()
+                    ),
+                'Makefile.PL'
+                ],  
             cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr

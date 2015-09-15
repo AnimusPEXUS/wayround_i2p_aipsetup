@@ -35,6 +35,25 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    def builder_action_configure_define_environment(self, called_as, log):
-        ret = self.all_automatic_flags_as_dict()
+    #def builder_action_configure_define_environment(self, called_as, log):
+    #    ret = self.all_automatic_flags_as_dict()
+    #    return ret
+
+    # def builder_action_build_define_environment(self, called_as, log):
+    #    ret = super().builder_action_build_define_environment(called_as, log)
+    #    ret.update(self.all_automatic_flags_as_dict())
+    #    return ret
+
+    def builder_action_build_define_args(self, called_as, log):
+        ret = super().builder_action_build_define_args(called_as, log)
+        #ret += self.all_automatic_flags_as_list()
+        ret += [
+            #'V=1'
+            'GCC={}'.format(self.calculate_CC_string())
+            ]
         return ret
+
+    # def builder_action_distribute_define_environment(self, called_as, log):
+    #    ret = super().builder_action_build_define_environment(called_as, log)
+    #    ret.update(self.all_automatic_flags_as_dict())
+    #    return ret

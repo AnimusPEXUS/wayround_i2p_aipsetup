@@ -226,10 +226,12 @@ def configure_high(
 
         if len(environment) > 0:
             log.info(
-                "Environment modifications:\n{}".format(
-                    pprint.pformat(environment)
-                    )
+                "Environment modifications:"
                 )
+
+            for i in sorted(list(environment.keys())):
+                log.info("    {}:".format(i))
+                log.info("        {}".format(environment[i]))
 
         script_path = determine_abs_configure_dir(
             building_site,
@@ -365,10 +367,11 @@ def make_high(
 
     if len(environment) > 0:
         log.info(
-            "Environment modifications:\n{}".format(
-                pprint.pformat(environment)
-                )
+            "Environment modifications:"
             )
+
+        for i in sorted(list(environment.keys())):
+            log.info("    {}: {}".format(i, environment[i]))
 
     working_dir = determine_building_dir(
         building_site,

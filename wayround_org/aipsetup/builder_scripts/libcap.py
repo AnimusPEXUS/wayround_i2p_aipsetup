@@ -61,10 +61,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     '''
 
     def builder_action_distribute_define_args(self, called_as, log):
+        lib = self.calculate_main_multiarch_lib_dir_name()
         ret = [
             'all',
             'install',
             'prefix={}'.format(self.calculate_install_prefix()),
+            'lib={}'.format(lib),
             #'exec_prefix={}'.format(self.get_host_dir()),
             #'lib_prefix={}'.format(self.get_host_dir()),
             #'inc_prefix={}'.format(self.get_host_dir()),

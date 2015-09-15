@@ -28,9 +28,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret['dst_share_dir'] = \
             wayround_org.utils.path.join(
             self.calculate_dst_install_prefix(),
-            'share')
+            'share'
+            )
         ret['dst_pc_dir'] = \
-            wayround_org.utils.path.join(ret['dst_share_dir'], 'pkgconfig')
+            wayround_org.utils.path.join(
+                ret['dst_share_dir'],
+                'pkgconfig'
+                )
         return ret
 
     def define_actions(self):
@@ -144,7 +148,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure_define_opts(self, called_as, log):
-        ret = [
+
+        ret = super().builder_action_configure_define_opts(
+            called_as,
+            log
+            )
+
+        ret += [
             '--enable-shared',
             '--enable-widec',
             '--enable-const',
@@ -154,10 +164,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-gpm',
             '--with-ticlib',
             '--with-termlib',
-            '--with-pkg-config',
+            '--with-pkg-config={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'share',
+                    'pkgconfig'
+                    )
+                ),
 
             # NOTE: building with ada fails on new installations
-            # '--without-ada',
+            '--without-ada',
             ]
 
         if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
@@ -168,8 +184,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--without-ada'
                 ]
 
-        return super().builder_action_configure_define_opts(
-            called_as, log) + ret
+        return ret
 
     def builder_action_links(self, called_as, log):
 

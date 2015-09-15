@@ -36,12 +36,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_build_define_args(self, called_as, log):
         ret = super().builder_action_build_define_args(called_as, log)
         ret += [
-            #'INCLUDES=-I{}'.format(
-            #    wayround_org.utils.path.join(
-            #        self.get_host_dir(),
-            #        'include',
-            #        'ncursesw'
-            #        )
-            #    )
+            'INCLUDES=-I{}'.format(
+                wayround_org.utils.path.join(
+                    self.get_host_dir(),
+                    'include',
+                    'ncursesw'
+                    )
+                )
             ]
         return ret

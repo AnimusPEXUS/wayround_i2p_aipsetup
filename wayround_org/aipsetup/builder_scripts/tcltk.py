@@ -77,7 +77,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         pkg_name = self.get_package_info()['pkg_info']['name']
 
         bin_dir = wayround_org.utils.path.join(
-            self.calculate_install_prefix(),
+            self.calculate_dst_install_prefix(),
             'bin'
             )
 

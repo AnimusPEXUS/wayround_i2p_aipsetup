@@ -28,8 +28,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         else:
             raise Exception("Can't configure")
 
-        CXX = '{}-g++'.format(self.get_arch_from_pkgi())
-        CC = '{}-gcc'.format(self.get_arch_from_pkgi())
+        CC = self.calculate_CC_string()
+        CXX = self.calculate_CXX_string()
         # LOCAL_FLAGS = self.calculate_default_linker_program_gcc_parameter()
 
         ret = {
