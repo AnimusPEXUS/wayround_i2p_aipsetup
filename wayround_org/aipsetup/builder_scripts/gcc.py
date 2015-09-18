@@ -211,8 +211,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-nls',
                 '--enable-__cxa_atexit',
 
-                # NOTE: no 'go' language in Lailalo system
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+                # NOTE: gcc somtimes fails to crossbuild self with go enabled
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
 
                 '--disable-bootstrap',
 

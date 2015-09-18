@@ -16,7 +16,10 @@ class Builder_wow64(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
-        self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'wine64')
+        self.separate_build_dir = wayround_org.utils.path.join(
+            self.get_src_dir(),
+            'wine64'
+            )
         #self.source_configure_reldir = '..'
 
         '''
@@ -50,7 +53,13 @@ class Builder_wow64(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure(self, called_as, log):
-        os.makedirs(wayround_org.utils.path.join(self.get_src_dir(), 'wine64'), exist_ok=True)
+        os.makedirs(
+            wayround_org.utils.path.join(
+                self.get_src_dir(),
+                'wine64'
+                ),
+            exist_ok=True
+            )
         ret = super().builder_action_configure(called_as, log)
         return ret
 
@@ -61,7 +70,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
-        self.separate_build_dir = wayround_org.utils.path.join(self.get_src_dir(), 'wine32')
+        self.separate_build_dir = wayround_org.utils.path.join(
+            self.get_src_dir(),
+            'wine32'
+            )
 
         ret = {
             'Builder_wow64': None,
@@ -133,6 +145,7 @@ so going to build with Wow64 support
         del ret['PATH']
         return ret
 
+    '''
     def calculate_pkgconfig_search_paths(self):
 
         ret = []
@@ -166,6 +179,7 @@ so going to build with Wow64 support
         ret += super().calculate_pkgconfig_search_paths()
 
         return ret
+    '''
 
     '''
     def builder_action_configure_define_PATH_list(self):
@@ -247,7 +261,13 @@ so going to build with Wow64 support
         return ret
 
     def builder_action_configure(self, called_as, log):
-        os.makedirs(wayround_org.utils.path.join(self.get_src_dir(), 'wine32'), exist_ok=True)
+        os.makedirs(
+            wayround_org.utils.path.join(
+                self.get_src_dir(),
+                'wine32'
+                ),
+            exist_ok=True
+            )
         ret = super().builder_action_configure(called_as, log)
         return ret
 
@@ -258,8 +278,10 @@ so going to build with Wow64 support
         return ret
     '''
 
+    '''
     def builder_action_build_define_environment(self, called_as, log):
         return {}
+    '''
 
     '''
     def builder_action_build_define_environment(self, called_as, log):

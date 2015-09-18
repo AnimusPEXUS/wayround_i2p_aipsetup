@@ -20,6 +20,8 @@ import wayround_org.utils.log
 
 import wayround_org.utils.system_type
 
+import wayround_org.aipsetup.host_arch_params
+
 
 def commands():
     return collections.OrderedDict([
@@ -63,7 +65,7 @@ def commands():
             ])),
         ('sys-replica', collections.OrderedDict([
             ('instr', system_replica_instruction),
-            ('dir-tree', system_create_directory_tree),
+            ('maketree', system_create_directory_tree),
             ])),
         ('docbook', collections.OrderedDict([
             ('instr', docbook_instruction),
@@ -75,91 +77,23 @@ def commands():
         ])
 
 
-def _process_h_and_a_opts_specific(opts, config):
+_process_h_and_a_opts_specific = \
+    wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_specific
 
-    host = config['system_settings']['host']
-    if '-h' in opts:
+_process_h_and_a_opts_wide = \
+    wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_wide
 
-        host = opts['-h']
-
-        if host.lower() == 'all':
-            host = None
-
-    arch = host
-
-    if host is not None:
-
-        if '-a' in opts:
-
-            arch = opts['-a']
-
-            if arch.lower() == 'all':
-                arch = None
-
-    return host, arch
-
-
-def _process_h_and_a_opts_wide(opts, config):
-
-    host = None
-    arch = None
-
-    if '-h' in opts:
-
-        host = opts['-h']
-
-        if host.lower() == 'all':
-            host = None
-
-    if host is not None:
-
-        if '-a' in opts:
-
-            arch = opts['-a']
-
-            if arch.lower() == 'all':
-                arch = None
-
-    else:
-
-        if '-a' in opts:
-            host = config['system_settings']['host']
-            arch = opts['-a']
-
-    return host, arch
-
-
-def _process_h_and_a_opts_strict(opts, config):
-
-    host = None
-    arch = None
-
-    if '-h' in opts:
-        host = opts['-h']
-
-    else:
-        host = config['system_settings']['host']
-
-    if '-a' in opts:
-        arch = opts['-a']
-
-    else:
-        arch = host
-
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
-        raise ValueError("Invalid host triplet")
-
-    if wayround_org.utils.system_type.parse_triplet(arch) is None:
-        raise ValueError("Invalid arch triplet")
-
-    return host, arch
+_process_h_and_a_opts_strict = \
+    wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_strict
 
 
 def system_install_package(command_name, opts, args, adds):
     """
     Install package(s)
 
-    [-b=DIRNAME] [--force] [-h=host-triplet] NAMES
+    [-b=DIRNAME] [--force]
+    [-h=all|cpu-vend-os-triplet] [-a=all|cpu-vend-os-triplet]
+    NAMES
 
     If -b is given - it is used as destination root
     """
@@ -228,10 +162,6 @@ def system_install_package(command_name, opts, args, adds):
 
                 ret = 3
 
-            logging.info("---------------------------------------------------")
-            logging.info("Installations finished. Usual updates comming next.")
-            logging.info("---------------------------------------------------")
-
             wayround_org.aipsetup.sysupdates.all_actions()
 
     return ret
@@ -241,7 +171,9 @@ def system_package_list(command_name, opts, args, adds):
     """
     List installed packages
 
-    [-b=DIRNAME] MASK
+    [-b=DIRNAME]
+    [-h=all|cpu-vend-os-triplet] [-a=all|cpu-vend-os-triplet]
+    MASK
 
     -b is same as in install
     """
@@ -296,7 +228,9 @@ def system_package_list_asps(command_name, opts, args, adds):
     """
     List installed package's ASPs
 
-    [-b=DIRNAME] NAME
+    [-b=DIRNAME]
+    [-h=all|cpu-vend-os-triplet] [-a=all|cpu-vend-os-triplet]
+    NAME
 
     -b is same as in install
     """
@@ -359,6 +293,13 @@ def system_package_list_asps(command_name, opts, args, adds):
 
 
 def system_list_package_files(command_name, opts, args, adds):
+
+    """
+    Print list of files installed by package
+    
+    [-h=cpu-vend-os-triplet] [-a=cpu-vend-os-triplet]
+    PKG_NAME
+    """
 
     import wayround_org.aipsetup.controllers
 
@@ -425,7 +366,9 @@ def system_remove_package(command_name, opts, args, adds):
     """
     Removes package matching NAME.
 
-    [-b=DIRNAME] [--force] NAME
+    [-b=DIRNAME] [--force]
+    [-h=all|cpu-vend-os-triplet] [-a=all|cpu-vend-os-triplet]
+    NAME
 
     --force    force removal of packages for which info is not
                available or which is not removable
@@ -488,7 +431,8 @@ def system_find_package_files(command_name, opts, args, adds):
     """
     Looks for LOOKFOR in all installed packages using one of methods:
 
-    [-b=DIRNAME] [-m=beg|re|plain|sub|fm] LOOKFOR
+    [-b=DIRNAME] [-h=all|cpu-vend-os-triplet] [-a=all|cpu-vend-os-triplet]
+    [-m=beg|re|plain|sub|fm] TARGET
 
     ================ ===================================
     -m option value  meaning
@@ -579,6 +523,7 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
     asp
 
     [-b=DESTDIR] ASP_NAME
+    [-h=cpu-vend-os-triplet] [-a=cpu-vend-os-triplet]
     """
 
     import wayround_org.aipsetup.controllers
@@ -689,8 +634,6 @@ def system_make_asp_deps(command_name, opts, args, adds):
 
 
 def system_create_directory_tree(command_name, opts, args, adds):
-
-    raise Exception("TODO")
 
     import wayround_org.aipsetup.controllers
 
@@ -1119,6 +1062,8 @@ def clean_find_garbage(command_name, opts, args, adds):
     """
     Search system for garbage making log and cleaning script
 
+    [-h=all|cpu-vend-os-triplet] [-a=all|cpu-vend-os-triplet]
+
     -b=BASENAME        - system root path
     --script-type=bash - system cleaning script language (only bash supported)
     --so               - look only for .so files garbage in /usr/lib directory
@@ -1139,7 +1084,8 @@ def clean_find_garbage(command_name, opts, args, adds):
                 '-b=',
                 '--script-type=',
                 '--so',
-                '-h='
+                '-h=',
+                '-a='
                 ]
             ) != 0:
         ret = 1
@@ -1753,11 +1699,14 @@ def clean_install_etc(command_name, opts, args, adds):
 
     ret = 0
 
+    '''
+    # NOTE: necesserity of such measure is questionabe
     if os.getuid() != 0:
         logging.error("Only root allowed to use this command")
         ret = 1
     else:
-
+    '''
+    if True:
         base_dir = '/'
         if '-b' in opts:
             base_dir = opts['-b']
@@ -1766,7 +1715,10 @@ def clean_install_etc(command_name, opts, args, adds):
         # TODO: do over config, not constant
 
         src_etc_dir = wayround_org.utils.path.join(
-            os.path.dirname(__file__), 'distro', 'etc.tar.xz'
+            os.path.dirname(__file__),
+            'distro',
+            'etc',
+            'etc.tar.xz'
             )
 
         ret = wayround_org.utils.archive.extract_tar_canonical(
@@ -1913,7 +1865,7 @@ def system_replica_instruction(command_name, opts, args, adds):
     print("""\
 --
 This instruction provids information on how to replicate current
-UNICORN system core to other filesystem partition.
+Lailalo system core to other filesystem partition.
 --
 
  => TARGET SYSTEM PARTITION TABLES PREPERATIONS <=
@@ -1929,37 +1881,37 @@ UNICORN system core to other filesystem partition.
 
  => CORE ELEMENTS PREPERATIONS <=
 
-    3. Use command `aipsetup3 sys-replica dir-tree /mnt/sdb2` to create needed
+    3. Use command `aipsetup3 sys-replica maketree /mnt/sdb2` to create needed
        directories in pointed path. (/mnt/sdb2 here and farther in this text -
        is path to mounted root of new future system)
 
     4. Locate already built core components or download them using command:
 
-        `aipsetup3 pkg-client get-by-list core`
+        `aipsetup pkg-client get-by-list core`
 
        or get sources
 
-        `aipsetup3 pkg-client-src get-by-list core`
+        `aipsetup pkg-client-src get-by-list core`
 
        and build them
 
     5. Install core packages:
 
-        `aipsetup3 sys install -b=/mnt/sdb2 *.asp`
+        `aipsetup sys install -b=/mnt/sdb2 *.asp`
 
     6. Install /etc structure (default setting for shells, PAM and other basic
        system components)
 
-        `aipsetup3 sys-clean install-etc -b=/mnt/sdb2`
+        `aipsetup sys-clean install-etc -b=/mnt/sdb2`
 
     7. Install en_US.UTF-8 locale:
 
-        `aipsetup3 sys-clean gen-locale -b=/mnt/sdb2`
+        `aipsetup sys-clean gen-locale -b=/mnt/sdb2`
 
     8. Use commands:
 
-        `aipsetup3 sys-clean sys-users -b=/mnt/sdb2`
-        `aipsetup3 sys-clean sys-perms -b=/mnt/sdb2`
+        `aipsetup sys-clean sys-users -b=/mnt/sdb2`
+        `aipsetup sys-clean sys-perms -b=/mnt/sdb2`
 
         to install system users and correct permissions on executables and
         directories.

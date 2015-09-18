@@ -37,7 +37,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ['make',
              '-f', 'unix/Makefile',
              'install',
-             'prefix={}'.format(self.calculate_install_prefix())
+             'prefix={}'.format(self.calculate_dst_install_prefix())
              ],
             cwd=self.get_src_dir(),
             stdout=log.stdout,

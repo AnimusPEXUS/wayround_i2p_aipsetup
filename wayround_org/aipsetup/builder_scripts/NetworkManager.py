@@ -6,6 +6,10 @@ import wayround_org.aipsetup.builder_scripts.std
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
+    def define_custom_data(self):
+        self.forced_autogen = False
+        return
+
     def builder_action_configure_define_opts(self, called_as, log):
 
         '''

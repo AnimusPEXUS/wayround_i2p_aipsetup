@@ -1,0 +1,17 @@
+{
+    "names": [
+            "cfe",
+            "clang-tools-extra",
+            "compiler-rt",
+            "libcxx",
+            "libcxxabi",
+            "libunwind",
+            "lld",
+            "lldb",
+            "llvm",
+            "openmp",
+            "polly",
+
+	    "emscripten"
+    ]
+}

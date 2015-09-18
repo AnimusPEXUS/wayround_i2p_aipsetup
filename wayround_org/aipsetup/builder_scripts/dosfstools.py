@@ -19,8 +19,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del(ret['configure'])
         return ret
 
-    def builder_action_build_define_args(self, called_as, log):
-        return self.all_automatic_flags_as_list(),
+    # def builder_action_build_define_args(self, called_as, log):
+     #   return self.all_automatic_flags_as_list(),
 
     def builder_action_distribute_define_args(self, called_as, log):
         return [

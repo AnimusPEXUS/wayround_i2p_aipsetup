@@ -48,20 +48,43 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         d['CMAKE_C_FLAGS'].append(
             '-m{}'.format(self.get_multilib_variant_int())
             )
+        # d['CMAKE_C_FLAGS'].append(
+        #    '-I{}'.format(
+        #        wayround_org.utils.path.join(
+        #            self.calculate_install_prefix(),
+        #            'include'
+        #            )
+        #        )
+        #    )
 
         return
 
     def builder_action_configure_define_opts(self, called_as, log):
 
-        minus_d_list = ['-D{}'.format(x)
-                        for x in self.all_automatic_flags_as_list()]
+        minus_d_list = [
+            '-D{}'.format(x) for x in self.all_automatic_flags_as_list()
+            ]
 
         ret = [
-            #'-DCMAKE_INSTALL_PREFIX={}'.format(self.get_host_dir()),
+            #'-DCMAKE_INSTALL_PREFIX={}'.format(
+            #    self.calculate_install_prefix()
+            #    ),
             #
-            '-DCMAKE_SYSROOT={}'.format(self.get_host_dir()),
+            #'-DCMAKE_SYSROOT={}'.format(self.calculate_install_prefix()),
             '-DSYSCONFDIR=/etc',
             '-DLOCALSTATEDIR=/var',
+            #'-DCMAKE_SYSTEM_PREFIX_PATH={}'.format(
+            #    self.calculate_install_prefix()
+            #    ),
+            #'-DCMAKE_SYSTEM_INCLUDE_PATH={}'.format(
+            #    wayround_org.utils.path.join(
+            #        self.calculate_install_prefix(),
+            #        'include'
+            #        )
+            #    ),
+            # '-DCMAKE_FIND_ROOT_PATH={}'.format(
+            #    self.calculate_install_prefix()
+            #    ),
             ]
 
         std_opts = super().builder_action_configure_define_opts(called_as, log)
@@ -104,16 +127,16 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     self.calculate_main_multiarch_lib_dir_name()
                     )
                 ),
-                
+
             ]
 
-        
+
         if self.get_arch_from_pkgi().startswith('x86_64'):
             ret += [
                 '-DLIB_SUFFIX=64',
                 '-DLIBDIR_SUFFIX=64',
                 '-DX86_64=1',
-                
+
                 #'-DARCH_64=TRUE',
                 #'-DFIND_LIBRARY_USE_LIB64_PATHS=1'
                 ]
@@ -158,3 +181,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         return ret
+
+    #def builder_action_build_define_environment(self, called_as, log):
+    #    return {}
+
+    #def builder_action_distribute_define_environment(self, called_as, log):
+    #    return {}

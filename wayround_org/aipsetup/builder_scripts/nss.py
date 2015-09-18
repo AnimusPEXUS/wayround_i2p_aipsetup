@@ -61,36 +61,31 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         f.close()
         return 0
 
-    def builder_action_build(self, called_as, log):
+    def builder_action_build_define_cpu_count(self, called_as, log):
+        # FIXME: nss can't build with more than 1 j
+        return 1
 
+    def builder_action_build_define_args(self, called_as, log):
         opts64 = []
         if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
             opts64 = ['USE_64=1']
 
-        ret = autotools.make_high(
-            self.buildingsite_path,
-            log=log,
-            options=[],
-            arguments=[
-                'nss_build_all',
-                'BUILD_OPT=1',
-                'NSPR_INCLUDE_DIR={}'.format(
-                    wayround_org.utils.path.join(
-                        self.calculate_install_prefix(),
-                        'include',
-                        'nspr'
-                        )
-                    ),
-                'USE_SYSTEM_ZLIB=1',
+        ret = [
+            'nss_build_all',
+            'BUILD_OPT=1',
+            'NSPR_INCLUDE_DIR={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'include',
+                    'nspr'
+                    )
+                ),
+            'USE_SYSTEM_ZLIB=1',
 
-                'ZLIB_LIBS=-lz',
-                'NSS_USE_SYSTEM_SQLITE=1',
-                ] + opts64 + self.all_automatic_flags_as_list(),
-            environment={},
-            environment_mode='copy',
-            use_separate_buildding_dir=self.separate_build_dir,
-            source_configure_reldir=self.source_configure_reldir
-            )
+            'ZLIB_LIBS=-lz',
+            'NSS_USE_SYSTEM_SQLITE=1',
+            ] + opts64 + self.all_automatic_flags_as_list()
+
         return ret
 
     def builder_action_distribute(self, called_as, log):
@@ -133,7 +128,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             OBJ_dir_march = wayround_org.utils.path.join(
                 OBJ_dir,
-                self.get_host_dir()
+                self.calculate_install_prefix()
                 )
 
             OBJ_dir_ma_bin = wayround_org.utils.path.join(
@@ -541,7 +536,7 @@ if test "$echo_libs" = "yes"; then
 fi
 """.format(
                 prefix=self.calculate_install_prefix(),
-                #libdir=self.calculate_install_libdir(),
+                # libdir=self.calculate_install_libdir(),
                 nss_major_version=nss_major_version,
                 nss_minor_version=nss_minor_version,
                 nss_patch_version=nss_patch_version

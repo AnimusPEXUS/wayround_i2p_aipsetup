@@ -1,0 +1,20 @@
+
+Creation of installation booting flash drive
+
+ 1. Create empty dir
+ 2. Install fi.gpl (flash installer) list packages into it
+ 3. use phisical or virtual disk drive
+    3.1. Create new table on drive with one single partition
+    	 (this version of manual uses MBR, not GPT)
+    3.2. Format partition with Ext2 (3 or 4 is overhead)
+ 4. Mount partition somethere
+ 5. cp -a contents of dir from step 1. into partition from step 3.2
+    (5.-1.) Remove man info and any other un necessary dirs from installations
+ 6. Install extlinux onto drive:
+    6.1. cat /multihost/x86_64-pc-linux-gnu/share/syslinux/mbr.bin > drive
+    6.2. cp -r /multihost/x86_64-pc-linux-gnu/share/syslinux/* /boot/extlinux
+    6.3. cd into /boot/extlinux and use extlinux command to install
+       	(cautiosly using --drive option in case extlinux fails to recognize
+	 drive automatically)
+
+presumably this is all.

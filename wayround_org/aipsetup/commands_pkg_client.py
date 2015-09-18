@@ -2,9 +2,10 @@
 import collections
 import logging
 
-
 import wayround_org.utils.path
 import wayround_org.utils.text
+
+import wayround_org.aipsetup.host_arch_params
 
 
 def commands():
@@ -20,7 +21,7 @@ def commands():
             ('get-lat', get_asp_latest),
             ('get-lat-cat', get_asp_lat_cat),
             ('get-by-list', get_asp_by_list),
-            ('get-by-snapshot', get_by_snapshot),
+            ('get-by-snap', get_by_snapshot),
             ])),
         ('pkg-client-src', collections.OrderedDict([
             ('search', tar_list),
@@ -317,6 +318,12 @@ def get_asp_latest(command_name, opts, args, adds):
 
     config = adds['config']
 
+    host, arch = \
+        wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_strict(
+            opts,
+            config
+            )
+
     ret = 1
 
     if not len(args) == 1:
@@ -328,7 +335,12 @@ def get_asp_latest(command_name, opts, args, adds):
 
         name = args[0]
 
-        res = wayround_org.aipsetup.client_pkg.get_latest_asp(url, name)
+        res = wayround_org.aipsetup.client_pkg.get_latest_asp(
+            url,
+            name,
+            host,
+            arch
+            )
 
         if isinstance(res, str):
             ret = 0
@@ -611,6 +623,12 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
 
     ret = 1
 
+    host, arch = \
+        wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_strict(
+            opts,
+            config
+            )
+
     list_name = None
     if len(args) > 0:
         list_name = args[0]
@@ -644,7 +662,9 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
             version,
             pkg_client,
             src_client,
-            acceptable_extensions_order_list
+            acceptable_extensions_order_list,
+            host=host,
+            arch=arch
             )
 
     return ret

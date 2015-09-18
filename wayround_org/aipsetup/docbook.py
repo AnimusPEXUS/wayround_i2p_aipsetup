@@ -20,6 +20,7 @@ import wayround_org.utils.file
 import wayround_org.utils.archive
 import wayround_org.utils.path
 
+# TODO: error checks
 
 INSTRUCTION = """\
 
@@ -430,8 +431,6 @@ def import_to_super_docbook_catalog(
 
     if 'docbook.cat' in files:
 
-        print('docbook.cat')
-
         p = subprocess.Popen(
             [
                 'xmlcatalog',
@@ -445,8 +444,6 @@ def import_to_super_docbook_catalog(
         p.wait()
 
     if 'catalog.xml' in files:
-
-        print('catalog.xml')
 
         target_catalog_xml = wayround_org.utils.path.join(
             target_dir,

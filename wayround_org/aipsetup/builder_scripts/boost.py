@@ -22,13 +22,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
 
-        e = copy.deepcopy(os.environ)
+        e = self.builder_action_build_define_environment(None, None)
 
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
+        print("env: {}".format(pprint.pformat(e)))
 
-        e.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)},
-            )
+        e = wayround_org.utils.osutils.env_vars_edit(e, 'copy')
 
         # e.update(self.builder_action_configure_define_PATH_dict())
 
@@ -44,8 +42,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 ),
             'python': wayround_org.utils.file.which(
                 'python2',
-                self.get_host_dir()  # TODO: is this should be changed on
-                #       calculate_install_prefix()?
+                self.calculate_install_prefix()
                 )
             }
 
@@ -93,9 +90,7 @@ using gcc : : {compiler} : <compileflags>-m{bitness} <linkflags>-m{bitness} ;
             #                 '--with-python-version=3.3'
             ]
 
-        log.info(
-            pprint.pformat(args)
-            )
+        log.info("cmd: {}".format(pprint.pformat(args)))
 
         p = subprocess.Popen(
             args,

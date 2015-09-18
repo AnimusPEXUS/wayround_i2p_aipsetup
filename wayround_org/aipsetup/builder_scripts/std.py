@@ -773,37 +773,26 @@ class Builder:
 
         ret = {}
 
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
-
         ret.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
+            {'PKG_CONFIG_PATH': ':'.join(self.calculate_pkgconfig_search_paths())}
             )
 
-        LD_LIBRARY_PATH = self.calculate_LD_LIBRARY_PATH()
-
         ret.update(
-            {'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)}
+            {'LD_LIBRARY_PATH': ':'.join(self.calculate_LD_LIBRARY_PATH())}
             )
 
-        LIBRARY_PATH = self.calculate_LIBRARY_PATH()
-
         ret.update(
-            {'LIBRARY_PATH': ':'.join(LIBRARY_PATH)}
+            {'LIBRARY_PATH': ':'.join(self.calculate_LIBRARY_PATH())}
             )
 
-        C_INCLUDE_PATH = self.calculate_C_INCLUDE_PATH()
 
         ret.update(
-            {'C_INCLUDE_PATH': ':'.join(C_INCLUDE_PATH)}
+            {'C_INCLUDE_PATH': ':'.join(self.calculate_C_INCLUDE_PATH())}
             )
-
-        PATH = self.calculate_PATH()
-
-        ret.update(
-            {'PATH': ':'.join(PATH)}
-            )
-
-        # ret.update(self.builder_action_configure_define_PATH_dict())
+        
+        ret.update({'PATH': ':'.join(self.calculate_PATH())})
+        ret.update({'CC': self.calculate_CC_string()})
+        ret.update({'CXX': self.calculate_CXX_string()})
 
         return ret
 
@@ -1021,39 +1010,7 @@ class Builder:
         return ret
 
     def builder_action_build_define_environment(self, called_as, log):
-
         ret = self.builder_action_configure_define_environment(called_as, log)
-
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
-
-        ret.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
-            )
-
-        LD_LIBRARY_PATH = self.calculate_LD_LIBRARY_PATH()
-
-        ret.update(
-            {'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)}
-            )
-
-        LIBRARY_PATH = self.calculate_LIBRARY_PATH()
-
-        ret.update(
-            {'LIBRARY_PATH': ':'.join(LIBRARY_PATH)}
-            )
-
-        C_INCLUDE_PATH = self.calculate_C_INCLUDE_PATH()
-
-        ret.update(
-            {'C_INCLUDE_PATH': ':'.join(C_INCLUDE_PATH)}
-            )
-
-        PATH = self.calculate_PATH()
-
-        ret.update(
-            {'PATH': ':'.join(PATH)}
-            )
-
         return ret
 
     def builder_action_build_define_opts(self, called_as, log):
@@ -1095,39 +1052,7 @@ class Builder:
         return ret
 
     def builder_action_distribute_define_environment(self, called_as, log):
-
-        ret = self.builder_action_configure_define_environment(called_as, log)
-
-        pkg_config_paths = self.calculate_pkgconfig_search_paths()
-
-        ret.update(
-            {'PKG_CONFIG_PATH': ':'.join(pkg_config_paths)}
-            )
-
-        LD_LIBRARY_PATH = self.calculate_LD_LIBRARY_PATH()
-
-        ret.update(
-            {'LD_LIBRARY_PATH': ':'.join(LD_LIBRARY_PATH)}
-            )
-
-        LIBRARY_PATH = self.calculate_LIBRARY_PATH()
-
-        ret.update(
-            {'LIBRARY_PATH': ':'.join(LIBRARY_PATH)}
-            )
-
-        C_INCLUDE_PATH = self.calculate_C_INCLUDE_PATH()
-
-        ret.update(
-            {'C_INCLUDE_PATH': ':'.join(C_INCLUDE_PATH)}
-            )
-
-        PATH = self.calculate_PATH()
-
-        ret.update(
-            {'PATH': ':'.join(PATH)}
-            )
-
+        ret = self.builder_action_build_define_environment(called_as, log)
         return ret
 
     def builder_action_distribute_define_opts(self, called_as, log):

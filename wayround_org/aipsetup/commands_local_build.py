@@ -440,18 +440,19 @@ def build_full(command_name, opts, args, adds):
     Place named source files in new building site and build new package from
     them
 
-    [-d] [-o] [--host=HOST-NAME-TRIPLET]
-    [--weak-host]
-    TARBALL[, TARBALL[, TARBALL[,TARBALL...]]]
+    [-d] [-o]
+    [--host=VALUE] [--build=VALUE] [--target=VALUE] [--arch=VALUE]
+    TARBALL1 .. TARBALLn
 
     ================ ====================================
     options          meaning
     ================ ====================================
     -d               remove building site on success
     -o               treat all tarballs as for one build
-    --host=TRIPLET
-    --build=TRIPLET
-    --target=TRIPLET
+    --host=VALUE
+    --build=VALUE
+    --target=VALUE
+    --arch=VALUE
     ================ ====================================
     """
 
@@ -461,6 +462,19 @@ def build_full(command_name, opts, args, adds):
     ret = 0
 
     config = adds['config']
+
+    if wayround_org.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-d',
+                '-o',
+                '--host=',
+                '--build=',
+                '--target=',
+                '--arch='
+                ]
+            ) != 0:
+        raise Exception("Invalid Parameters")
 
     r_bds = '-d' in opts
 
@@ -518,19 +532,16 @@ def build_full(command_name, opts, args, adds):
 
 def build_full_hosts(command_name, opts, args, adds):
     """
-    Place named source files in new building site and build new package from
-    them
+    Build for multiple hosts
 
-    [-d] [-o] TARBALL[, TARBALL[, TARBALL[,TARBALL...]]]
+    [-d] [-o] TARBALL1 .. TARBALLn
 
-    ================ ====================================
+    ================ ======================================
     options          meaning
-    ================ ====================================
+    ================ ======================================
     -d               remove building site on success
-    -o               treat all tarballs as for one build
-    -m               build for multiple archs pointed by
-                         multiple_arch_build in config
-    ================ ====================================
+    -o               treat all tarballs as for single build
+    ================ ======================================
     """
 
     import wayround_org.aipsetup.build
@@ -539,6 +550,15 @@ def build_full_hosts(command_name, opts, args, adds):
     ret = 0
 
     config = adds['config']
+
+    if wayround_org.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-d',
+                '-o'
+                ]
+            ) != 0:
+        raise Exception("Invalid Parameters")
 
     r_bds = '-d' in opts
 
@@ -617,20 +637,18 @@ def build_full_hosts(command_name, opts, args, adds):
 
     return ret
 
+
 def build_full_archs(command_name, opts, args, adds):
     """
-    Place named source files in new building site and build new package from
-    them
+    Build for multiple archs
 
-    [-d] [-o] TARBALL[, TARBALL[, TARBALL[,TARBALL...]]]
+    [-d] [-o] TARBALL1 .. TARBALLn
 
     ================ ====================================
     options          meaning
     ================ ====================================
     -d               remove building site on success
     -o               treat all tarballs as for one build
-    -m               build for multiple archs pointed by
-                         multiple_arch_build in config
     ================ ====================================
     """
 
@@ -640,6 +658,15 @@ def build_full_archs(command_name, opts, args, adds):
     ret = 0
 
     config = adds['config']
+
+    if wayround_org.utils.getopt.check_options(
+            opts,
+            opts_list=[
+                '-d',
+                '-o'
+                ]
+            ) != 0:
+        raise Exception("Invalid Parameters")
 
     r_bds = '-d' in opts
 

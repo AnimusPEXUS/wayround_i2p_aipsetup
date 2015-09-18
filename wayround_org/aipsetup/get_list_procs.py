@@ -112,9 +112,9 @@ def find_gnome_tarball_name(
                     required_v2 = int(parsed['groups']['version_list'][1])
 
                 break
-                #else:
+                # else:
                 #print("{} didn't passed".format(i))
-                    
+
     #print("required_v1: {}, required_v2: {}".format(required_v1, required_v2))
     found_required_targeted_tarballs = []
 
@@ -127,8 +127,8 @@ def find_gnome_tarball_name(
 
             parsed_groups_version_list = parsed['groups']['version_list']
             if (int(parsed_groups_version_list[0]) == required_v1
-                    and
-                    int(parsed_groups_version_list[1]) == required_v2
+                        and
+                        int(parsed_groups_version_list[1]) == required_v2
                     ):
 
                 is_nineties = check_nineties(parsed)
@@ -140,7 +140,7 @@ def find_gnome_tarball_name(
                     found_required_targeted_tarballs.append(i)
 
     # print("found_required_targeted_tarballs: {}".format(found_required_targeted_tarballs))
-                    
+
     if (len(found_required_targeted_tarballs) == 0
             and find_lower_version_if_required_missing == True):
 
@@ -170,22 +170,22 @@ def find_gnome_tarball_name(
                 if next_found_acceptable_tarball is None:
 
                     if (is_nineties
-                            and nineties_minors_are_acceptable == True
-                            and int_parsed_groups_version_list_1 < required_v2
+                                and nineties_minors_are_acceptable == True
+                                and int_parsed_groups_version_list_1 < required_v2
                             ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
-                            and is_development
-                            and development_are_acceptable == True
-                            and int_parsed_groups_version_list_1 < required_v2
+                                and is_development
+                                and development_are_acceptable == True
+                                and int_parsed_groups_version_list_1 < required_v2
                             ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
-                            and not is_nineties
-                            and not is_development
-                            and int_parsed_groups_version_list_1 < required_v2
+                                and not is_nineties
+                                and not is_development
+                                and int_parsed_groups_version_list_1 < required_v2
                             ):
                         next_found_acceptable_tarball = i
 
@@ -222,6 +222,8 @@ def gnome_get(
         pkg_client,
         src_client,
         acceptable_extensions_order_list,
+        host,
+        arch,
         pkgname,
         version,
         args,
@@ -292,6 +294,8 @@ def gnome_get(
             pkg_client,
             src_client,
             acceptable_extensions_order_list,
+            host,
+            arch,
             pkgname,
             version,
             args,
@@ -305,6 +309,7 @@ def normal_get(
         mode,
         pkg_client, src_client,
         acceptable_extensions_order_list,
+        host, arch,
         pkgname, version,
         args, kwargs
         ):
@@ -351,7 +356,14 @@ def normal_get(
 
     elif mode == 'asp':
 
-        if not isinstance(pkg_client.get_latest_asp(pkgname), str):
+        if not isinstance(
+                pkg_client.get_latest_asp(
+                    pkgname,
+                    host,
+                    arch
+                    ),
+                str
+                ):
             ret = 1
 
     return ret
@@ -363,6 +375,8 @@ def _get_by_glp_subroutine(
         src_client,
         name,
         acceptable_extensions_order_list,
+        host,
+        arch,
         version,
         proc,
         args,
@@ -380,6 +394,8 @@ def _get_by_glp_subroutine(
         pkg_client,
         src_client,
         acceptable_extensions_order_list,
+        host,
+        arch,
         name,
         version=version,
         args=args,
@@ -431,6 +447,8 @@ def get_by_glp(
         version,
         pkg_client, src_client,
         acceptable_extensions_order_list,
+        host,
+        arch,
         mute=False
         ):
 
@@ -535,6 +553,8 @@ def get_by_glp(
                     src_client,
                     i_name,
                     acceptable_extensions_order_list,
+                    host,
+                    arch,
                     version,
                     proc,
                     args,

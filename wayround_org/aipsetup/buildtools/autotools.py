@@ -409,7 +409,7 @@ def make_low(
     if make_filename is not None:
         mfn = ['-f', make_filename]
 
-    cmd = ['make'] + mfn + opts + args
+    cmd = ['make'] + list(mfn) + list(opts) + list(args)
 
     log.info("directory: {}".format(working_dir))
     log.info("command:")

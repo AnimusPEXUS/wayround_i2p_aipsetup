@@ -287,7 +287,7 @@ class SystemCtl:
                             info['deprecated']
                             or info['non_installable']
                             )
-                        ):
+                    ):
                     logging.error(
                         "Package is deprecated({}) or"
                         " non-installable({})".format(
@@ -301,7 +301,7 @@ class SystemCtl:
                 if (not force
                         and info['only_primary_install']
                         and arch != host
-                        ):
+                    ):
                     logging.error(
                         "Package is only_primary_install({}) but"
                         " host != arch"
@@ -2667,8 +2667,6 @@ class SystemCtl:
 
     def create_directory_tree(self):
 
-        raise Exception("too old attention required")
-
         ret = 0
 
         for i in [
@@ -2678,7 +2676,7 @@ class SystemCtl:
                 '/etc',
                 '/home',
                 '/media',
-                '/multiarch',
+                '/multihost',
                 '/mnt',
                 '/opt',
                 '/proc',
@@ -2692,13 +2690,21 @@ class SystemCtl:
             joined = wayround_org.utils.path.join(self.basedir, i)
 
             if not os.path.isdir(joined):
-                try:
-                    os.makedirs(joined)
-                except:
-                    logging.exception(
-                        "Can't create dir {} -- continuing".format(joined)
-                        )
-                    ret = 1
+                print("creating: {}".format(joined))
+                os.makedirs(joined, exist_ok=True)
+
+        for i in [
+                self._installed_pkg_dir,
+                self._installed_pkg_dir_buildlogs,
+                self._installed_pkg_dir_sums,
+                self._installed_pkg_dir_deps
+                ]:
+
+            joined = wayround_org.utils.path.join(i)
+
+            if not os.path.isdir(joined):
+                print("creating: {}".format(joined))
+                os.makedirs(joined, exist_ok=True)
 
         for i in [
                 'bin', 'sbin', 'lib', 'lib64'
@@ -2709,6 +2715,7 @@ class SystemCtl:
             if not os.path.exists(joined) and not os.path.islink(joined):
 
                 try:
+                    # not error: not 'multihost' - 'usr'
                     os.symlink('usr/{}'.format(i), joined)
                 except:
                     logging.exception(
@@ -2716,9 +2723,10 @@ class SystemCtl:
                         )
                     ret = 1
 
-        if not os.path.exists('/usr') and not os.path.islink('/usr'):
+        jusr = wayround_org.utils.path.join(self.basedir, 'usr')
+        if not os.path.exists(jusr) and not os.path.islink(jusr):
             try:
-                os.symlink('multihost/_primary', '/usr')
+                os.symlink('multihost/_primary', jusr)
             except:
                 logging.exception("Can't create link /usr -- continuing")
                 ret = 1
@@ -2774,11 +2782,11 @@ class SystemCtl:
                     )
                 cmd = ['chroot', self.basedir,
 
-                     'localedef',
-                     '-f', 'UTF-8',
-                     '-i', 'en_US',
-                     rel_locale_dir
-                     ]
+                       'localedef',
+                       '-f', 'UTF-8',
+                       '-i', 'en_US',
+                       rel_locale_dir
+                       ]
                 logging.info(
                     " command: {}".format(
                         ' '.join(cmd)
@@ -2974,16 +2982,16 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                            wayround_org.utils.path.join(
-                                        '/multihost', host, 'lib'
-                                        )
-                            )
-                            or not os.path.isdir(
-                            wayround_org.utils.path.join(
-                                        self.basedir,
-                                        wj)
-                            )
-                            ):
+                                wayround_org.utils.path.join(
+                                    '/multihost', host, 'lib'
+                                    )
+                                )
+                                or not os.path.isdir(
+                                wayround_org.utils.path.join(
+                                    self.basedir,
+                                    wj)
+                                )
+                                ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

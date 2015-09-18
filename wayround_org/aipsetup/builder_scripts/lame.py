@@ -16,8 +16,15 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--disable-gtktest',
             #'--enable-decode-layer1',
             #'--enable-decode-layer2',
-            '--disable-frontend',
-            
+            #'--disable-frontend',
+            'CFLAGS=-O2 -g -I{}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'include',
+                    'ncursesw'
+                    )
+                ),
+            'LDFLAGS=-ltinfow'
             ]
 
         if 'i686' in self.get_arch_from_pkgi():
