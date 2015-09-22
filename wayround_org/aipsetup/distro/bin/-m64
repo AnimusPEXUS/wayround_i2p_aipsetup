@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+
+import sys
+import subprocess
+
+del sys.path[0]
+
+exit(subprocess.Popen(sys.argv[1:]).wait())

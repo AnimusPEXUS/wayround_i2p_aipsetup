@@ -16,6 +16,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         return ret
 
     def builder_action_configure(self, called_as, log):
+        # TODO: env, opts, args etc..
         p = subprocess.Popen(
             ['qmake', 'PREFIX={}'.format(self.calculate_install_prefix())],
             cwd=self.get_src_dir(),
@@ -24,6 +25,9 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
         ret = p.wait()
         return ret
+
+    def builder_action_build_define_cpu_count(self, called_as, log):
+        return 1
 
     def builder_action_distribute_define_args(self, called_as, log):
         ret = [

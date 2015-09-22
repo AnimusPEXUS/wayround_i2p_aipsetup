@@ -43,6 +43,8 @@ class Builder:
         self.force_crossbuilder = None
         self.force_crossbuild = None
 
+        #self.override_get_arch_from_pkgi = False
+
         self.custom_data = self.define_custom_data()
 
         self.action_dict = self.define_actions()
@@ -136,7 +138,10 @@ class Builder:
         return self.get_package_info()['constitution']['build']
 
     def get_target_from_pkgi(self):
-        return self.get_package_info()['constitution']['target']
+        ret = self.get_package_info()['constitution']['target']
+        #if self.override_get_arch_from_pkgi:
+        #    ret = self.override_get_arch_from_pkgi
+        return ret
 
     def get_arch_from_pkgi(self):
         return self.get_package_info()['constitution']['arch']
@@ -320,28 +325,20 @@ class Builder:
 
         return ret
 
-    def calculate_pkgconfig_search_paths(self):
+    def _calculate_pkgconfig_search_paths_qt5(self, prefix=None):
 
-        #multilib_variant = str(self.get_multilib_variant_int())
-
-        # host_archs = self.get_host_arch_list()
-        # host_archs += [self.get_host_dir()]
+        if prefix is None:
+            prefix = self.calculate_install_prefix()
 
         where_to_search = [
             wayround_org.utils.path.join(
-                self.calculate_install_prefix(),
-                'share',
-                'pkgconfig'
+                prefix, 'opt', 'qt', '5', 'share', 'pkgconfig'
                 ),
             wayround_org.utils.path.join(
-                self.calculate_install_prefix(),
-                'lib',
-                'pkgconfig'
+                prefix, 'opt', 'qt', '5', 'lib', 'pkgconfig'
                 ),
             wayround_org.utils.path.join(
-                self.calculate_install_prefix(),
-                'lib64',
-                'pkgconfig'
+                prefix, 'opt', 'qt', '5', 'lib64', 'pkgconfig'
                 ),
             ]
 
@@ -354,12 +351,51 @@ class Builder:
 
         return ret
 
-    def calculate_LD_LIBRARY_PATH(self):
+    def calculate_pkgconfig_search_paths(self, prefix=None):
+
+        #multilib_variant = str(self.get_multilib_variant_int())
+
+        # host_archs = self.get_host_arch_list()
+        # host_archs += [self.get_host_dir()]
+
+        if prefix is None:
+            prefix = self.calculate_install_prefix()
+
+        where_to_search = [
+            wayround_org.utils.path.join(
+                prefix,
+                'share',
+                'pkgconfig'
+                ),
+            wayround_org.utils.path.join(
+                prefix,
+                'lib',
+                'pkgconfig'
+                ),
+            wayround_org.utils.path.join(
+                prefix,
+                'lib64',
+                'pkgconfig'
+                ),
+            ]
 
         ret = []
 
-        # if 'LD_LIBRARY_PATH' in os.environ:
-        #    LD_LIBRARY_PATH += os.environ['LD_LIBRARY_PATH'].split(':')
+        for i in where_to_search:
+
+            if os.path.isdir(i):
+                ret.append(i)
+
+        ret += self._calculate_pkgconfig_search_paths_qt5(prefix)
+
+        return ret
+
+    def calculate_LD_LIBRARY_PATH(self, prefix=None):
+
+        ret = []
+
+        if prefix is None:
+            prefix = self.calculate_install_prefix()
 
         inst_prefix = self.get_host_dir()
 
@@ -373,11 +409,12 @@ class Builder:
                     'lib64'
                     ),
                 ]:
+
             if os.path.isdir(i):
                 if not i in ret:
                     ret.append(i)
 
-        inst_prefix = self.calculate_install_prefix()
+        inst_prefix = prefix
 
         for i in [
                 wayround_org.utils.path.join(
@@ -395,74 +432,44 @@ class Builder:
 
         return ret
 
-    def calculate_LIBRARY_PATH(self):
+    def calculate_LIBRARY_PATH(self, prefix=None):
+        # NOTE: potentially this is different from LD_LIBRARY_PATH.
+        #       LIBRARY_PATH is for GCC and it's friends. so it's possible
+        #       for it to differ also in code, in future, not only in name.
+        ret = self.calculate_LD_LIBRARY_PATH(prefix)
+        return ret
 
-        # NOTE: this is different from LD_LIBRARY_PATH. LIBRARY_PATH is
-        #       for GCC and it's friends
+    def calculate_C_INCLUDE_PATH(self, prefix=None):
+
+        if prefix is None:
+            prefix = self.calculate_install_prefix()
 
         ret = []
 
-        inst_prefix = self.get_host_dir()
-
         for i in [
                 wayround_org.utils.path.join(
-                    inst_prefix,
-                    'lib'
-                    ),
-                wayround_org.utils.path.join(
-                    inst_prefix,
-                    'lib64'
-                    ),
-                ]:
-
-            if os.path.isdir(i):
-                if not i in ret:
-                    ret.append(i)
-
-        inst_prefix = self.calculate_install_prefix()
-
-        for i in [
-                wayround_org.utils.path.join(
-                    inst_prefix,
-                    'lib'
-                    ),
-                wayround_org.utils.path.join(
-                    inst_prefix,
-                    'lib64'
-                    ),
-                ]:
-            if os.path.isdir(i):
-                if not i in ret:
-                    ret.append(i)
-
-        return ret
-
-    def calculate_C_INCLUDE_PATH(self):
-
-        C_INCLUDE_PATH = []
-
-        inst_prefix = self.calculate_install_prefix()
-
-        for i in [
-                wayround_org.utils.path.join(
-                    inst_prefix,
+                    prefix,
                     'include'
                     ),
                 ]:
             if os.path.isdir(i):
-                C_INCLUDE_PATH.append(i)
+                ret.append(i)
 
-        return C_INCLUDE_PATH
+        return ret
 
-    def calculate_PATH(self):
+    def calculate_PATH(self, prefix=None):
+
+        if prefix is None:
+            prefix = self.calculate_install_prefix()
+
         ret = []
         for i in [
                 wayround_org.utils.path.join(
-                    self.calculate_install_prefix(),
+                    prefix,
                     'bin'
                 ),
                 wayround_org.utils.path.join(
-                    self.calculate_install_prefix(),
+                    prefix,
                     'sbin'
                 ),
                 wayround_org.utils.path.join(
@@ -478,9 +485,9 @@ class Builder:
                 ret.append(i)
         return ret
 
-    def calculate_PATH_dict(self):
+    def calculate_PATH_dict(self, prefix=None):
         ret = {
-            'PATH': ':'.join(self.calculate_PATH())
+            'PATH': ':'.join(self.calculate_PATH(prefix=prefix))
             }
         return ret
 
@@ -774,7 +781,8 @@ class Builder:
         ret = {}
 
         ret.update(
-            {'PKG_CONFIG_PATH': ':'.join(self.calculate_pkgconfig_search_paths())}
+            {'PKG_CONFIG_PATH': ':'.join(
+                self.calculate_pkgconfig_search_paths())}
             )
 
         ret.update(
@@ -785,11 +793,10 @@ class Builder:
             {'LIBRARY_PATH': ':'.join(self.calculate_LIBRARY_PATH())}
             )
 
-
         ret.update(
             {'C_INCLUDE_PATH': ':'.join(self.calculate_C_INCLUDE_PATH())}
             )
-        
+
         ret.update({'PATH': ':'.join(self.calculate_PATH())})
         ret.update({'CC': self.calculate_CC_string()})
         ret.update({'CXX': self.calculate_CXX_string()})

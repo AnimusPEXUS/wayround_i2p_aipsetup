@@ -17,6 +17,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
         return ret
 
     def builder_action_after_distribute(self, called_as, log):
+
         hs = glob.glob(
             wayround_org.utils.path.join(
                 self.get_src_dir(),
@@ -25,7 +26,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
             )
 
         incl_dir = wayround_org.utils.path.join(
-            self.calculate_install_prefix(),
+            self.calculate_dst_install_prefix(),
             'include',
             'miniupnpc'
             )

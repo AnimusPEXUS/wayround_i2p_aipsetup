@@ -131,6 +131,7 @@ if [ "${{#PKG_CONFIG_PATH}}" -ne "0" ]; then
 fi
 export PKG_CONFIG_PATH+="{arch_dir}/opt/qt/{qtnum}/lib/pkgconfig"
 export PKG_CONFIG_PATH+=":{arch_dir}/opt/qt/{qtnum}/lib64/pkgconfig"
+export PKG_CONFIG_PATH+=":{arch_dir}/opt/qt/{qtnum}/share/pkgconfig"
 
 if [ "${{#LD_LIBRARY_PATH}}" -ne "0" ]; then
     LD_LIBRARY_PATH+=":"
