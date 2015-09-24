@@ -7,8 +7,11 @@
         "linux",
         "readline",
         "util-linux",
+        "parted",
+        "squashfs",
         "sqlite-autoconf",
         "syslinux",
+        "grub2",
         "mc",
         "slang",
         "glib",
@@ -45,7 +48,8 @@
         "usbutils",
 	"libcap2",
 	"mdadm",
-	"lvm2"
+	"lvm2",
+	"cryptsetup"
 	],
 	"disabled": [
 	"libseccomp",

@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "",
+  "buildscript": "std_qmake",
   "version_tool": "",
-  "basename": "",
+  "basename": "qt-creator-opensource-src",
   "filters": "",
   "removable": true,
   "reducible": true,

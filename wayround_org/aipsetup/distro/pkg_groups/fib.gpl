@@ -1,0 +1,16 @@
+{
+    "names": [
+	"libcap2",
+        "ncurses",
+        "bash",
+        "glibc",
+        "coreutils",
+        "readline",
+        "util-linux",
+        "xz",
+        "zlib",
+	    "e2fsprogs",
+    	"attr",
+    	"acl"
+    	]
+}
