@@ -1,5 +1,7 @@
 {
     "names": [
+        "file",
+        "less",
         "ncurses",
         "bash",
         "glibc",

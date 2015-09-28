@@ -15,13 +15,58 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         del(ret['autogen'])
         return ret
 
+    def builder_action_configure_define_opts(self, called_as, log):
+
+        ret = []
+
+        ret += [
+            'PREFIX={}'.format(self.calculate_install_prefix())
+            ]
+    
+        return ret
+
     def builder_action_configure(self, called_as, log):
-        # TODO: env, opts, args etc..
+        envs = {}
+        if hasattr(self, 'builder_action_configure_define_environment'):
+            envs = self.builder_action_configure_define_environment(
+                called_as,
+                log
+                )
+
+        opts = []
+        if hasattr(self, 'builder_action_configure_define_opts'):
+            opts = self.builder_action_configure_define_opts(
+                called_as,
+                log
+                )
+
+        args = []
+        if hasattr(self, 'builder_action_configure_define_args'):
+            args = self.builder_action_configure_define_args(
+                called_as,
+                log
+                )
+
+        env = wayround_org.utils.osutils.env_vars_edit(
+            envs,
+            'copy'
+            )
+
+        if len(environment) > 0:
+            log.info(
+                "Environment modifications:"
+                )
+
+            for i in sorted(list(environment.keys())):
+                log.info("    {}:".format(i))
+                log.info("        {}".format(environment[i]))
+
         p = subprocess.Popen(
-            ['qmake', 'PREFIX={}'.format(self.calculate_install_prefix())],
+            ['qmake']+ opts + args,
             cwd=self.get_src_dir(),
             stdout=log.stdout,
-            stderr=log.stderr
+            stderr=log.stderr,
+            env=env
             )
         ret = p.wait()
         return ret

@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std_qmake",
+  "buildscript": "qtcreator",
   "version_tool": "",
   "basename": "qt-creator-opensource-src",
   "filters": "",

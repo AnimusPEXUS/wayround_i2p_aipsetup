@@ -869,51 +869,6 @@ class Builder:
             ] + autotools.calc_conf_hbt_options(self) + \
             self.all_automatic_flags_as_list()
 
-        '''
-            '--bindir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'bin'
-                ),
-
-            '--sbindir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'sbin'
-                ),
-
-            '--libexecdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'libexec'
-                ),
-
-            '--includedir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'include'
-                ),
-
-            '--datarootdir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share'
-                ),
-
-            '--datadir=' +
-            wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share'
-                ),
-
-            '--mandir=' + wayround_org.utils.path.join(
-                self.get_host_arch_dir(),
-                'share',
-                'man'
-                ),
-
-        '''
-
         return ret
 
     def builder_action_configure_define_script_name(self, called_as, log):

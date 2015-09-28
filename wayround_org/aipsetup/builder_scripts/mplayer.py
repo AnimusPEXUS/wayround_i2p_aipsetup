@@ -5,6 +5,7 @@ import os.path
 import wayround_org.aipsetup.build
 import wayround_org.aipsetup.buildtools.autotools as autotools
 import wayround_org.utils.file
+import wayround_org.utils.path
 
 import wayround_org.aipsetup.builder_scripts.std
 
@@ -33,10 +34,18 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-real',
             '--enable-xvid-lavc',
             '--enable-x264-lavc',
-            '--mandir=' + \
-            self.get_package_info()['constitution']['paths']['man'],
-            '--confdir=' + \
-            self.get_package_info()['constitution']['paths']['config']
+            '--mandir={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'share',
+                    'man'
+                    )
+                ),
+            '--confdir={}'.format(
+                wayround_org.utils.path.join(
+                    '/etc/mplayer'
+                    )
+                )
             ]
         for i in range(len(ret) - 1, -1, -1):
             for j in [
@@ -45,7 +54,10 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     '--enable-shared',
                     '--host=',
                     '--build=',
-                    '--target='
+                    '--target=',
+                    'CC=',
+                    'CXX=',
+                    'GCC=',
                     ]:
                 if ret[i].startswith(j):
                     del ret[i]

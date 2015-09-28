@@ -66,6 +66,7 @@ def commands():
         ('sys-replica', collections.OrderedDict([
             ('instr', system_replica_instruction),
             ('maketree', system_create_directory_tree),
+            ('make-flash', system_replica_make_installation_flashdrive)
             ])),
         ('docbook', collections.OrderedDict([
             ('instr', docbook_instruction),
@@ -1929,6 +1930,13 @@ Your self.
 
     return 0
 
+def system_replica_make_installation_flashdrive(command_name, opts, args, adds):
+    
+    import wayround_org.aipsetup.bootimage
+    
+    ret = wayround_org.aipsetup.bootimage.create_flashdrive_image('.')
+    
+    return ret
 
 def system_convert_certdata_txt(command_name, opts, args, adds):
     ret = 0

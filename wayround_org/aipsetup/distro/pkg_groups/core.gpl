@@ -118,6 +118,9 @@
         "subversion",
         "hamcrest-java",
         "rsync",
-        "valgrind"
+        "valgrind",
+        "miniupnpd",
+        "miniupnpc",
+        "mono"
     ]
 }

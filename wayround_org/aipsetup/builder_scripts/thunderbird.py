@@ -1,25 +1,13 @@
 
 
-import os.path
-import wayround_org.utils.path
-import wayround_org.aipsetup.buildtools.autotools as autotools
-import wayround_org.aipsetup.builder_scripts.std
+import wayround_org.aipsetup.builder_scripts.xulrunner
 
 
-class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+class Builder(wayround_org.aipsetup.builder_scripts.xulrunner.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
-        return super().builder_action_configure_define_opts(called_as, log) + [
-            '--enable-calendar',
+        ret = super().builder_action_configure_define_opts(called_as, log)
+        ret += [
             '--enable-application=mail',
-            '--enable-default-toolkit=cairo-gtk3',
-            '--enable-freetype2',
-            '--enable-shared',
-            '--enable-shared-js',
-            '--enable-xft',
-            '--with-pthreads',
-            '--enable-webrtc',
-            '--enable-optimize',
-            '--with-system-nspr',
-            '--with-system-nss',
             ]
+        return ret
