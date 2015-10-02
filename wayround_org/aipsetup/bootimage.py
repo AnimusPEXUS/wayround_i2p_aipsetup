@@ -25,6 +25,9 @@ def clean_working_dirs(
         verbose=True
         ):
 
+    # TODO: to deletion
+    raise Exception('delete')
+
     if force_packages_download:
         for i in [initrd_f, root_f]:
             if verbose:
@@ -44,13 +47,134 @@ def get_packages(list_name, output_dir):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    ret = 0
-
     p = subprocess.Popen(
         ['aipsetup', 'pkg-client', 'get-by-list', list_name],
         cwd=output_dir
         )
     ret = p.wait()
+
+    return ret
+
+
+def get_python_packages(python_pkg_dir):
+    os.makedirs(python_pkg_dir, exist_ok=True)
+    p = subprocess.Popen(
+        [
+            'python3',
+            '-m',
+            'pip', 'install', '-d', python_pkg_dir,
+            'pip',
+            'setuptools',
+            'bottle',
+            'lxml',
+            'mako',
+            #'cython',
+            'certdata',
+            'sqlalchemy',
+            # 'aipsetup',
+            # 'wayround_org_utils'
+            ]
+        )
+    ret = p.wait()
+    return
+
+
+def check_python_packages(python_pkg_dir):
+    """
+    return: True - Ok, False - error
+    """
+    ret = True
+
+    if ret:
+        if not os.path.isdir(python_pkg_dir):
+            ret = False
+
+    if ret:
+        lst = os.listdir(python_pkg_dir)
+        for i in [
+                'pip',
+                'setuptools',
+                'bottle',
+                'lxml',
+                'mako',
+                #'cython',
+                'certdata',
+                'sqlalchemy',
+                'aipsetup',
+                'wayround_org_utils'
+                ]:
+            found = False
+            for j in lst:
+                if j.lower().startswith(i):
+                    found = True
+                    break
+
+            if not found:
+                print("    {} python package not found".format(i))
+                ret = False
+
+    return ret
+
+
+def root_ldconfig(output_dir):
+    p = subprocess.Popen(
+        [
+            'chroot', output_dir,
+            '/bin/bash',
+            '-c',
+            'ldconfig ; exit '
+            ]
+        )
+    ret = p.wait()
+    return ret
+
+
+def install_python_packages(output_dir, python_pkg_dir):
+
+    ret = 0
+
+    target_mont_dir = wayround_org.utils.path.join(
+        output_dir,
+        'root_old'
+        )
+
+    if not os.path.isdir(python_pkg_dir):
+        ret = 1
+
+    if ret == 0:
+
+        p = subprocess.Popen(
+            [
+                'mount', '--bind', python_pkg_dir, target_mont_dir
+                ]
+            )
+        ret = p.wait()
+
+    if ret == 0:
+
+        p = subprocess.Popen(
+            [
+                'chroot', output_dir,
+                '/bin/bash',
+                '-c',
+                """\
+python3 -m ensurepip
+python3 -m pip install /root_old/wayround*
+#python3 -m pip install /root_old/MarkupSafe*
+#python3 -m pip install /root_old/certdata*
+python3 -m pip install -f /root_old/ /root_old/*
+exit 0
+"""
+                ]
+            )
+        ret = p.wait()
+
+    p = subprocess.Popen(
+        [
+            'umount', target_mont_dir
+            ]
+        )
+    p.wait()
 
     return ret
 
@@ -102,7 +226,7 @@ def install_etc(output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     p = subprocess.Popen(
-        ['aipsetup', 'sys-clean', 'install-etc', output_dir],
+        ['aipsetup', 'sys-clean', 'install-etc', '-b={}'.format(output_dir)],
         cwd=output_dir
         )
     ret = p.wait()
@@ -138,25 +262,37 @@ def make_initrd_init(output_dir, boot_part_uuid):
         """\
 #!/bin/bash
 
+echo
+echo
+echo
+echo '                                    LAILALO'
+echo
+echo
+echo
+
 #set -x
 
+export LD_LIBRARY_PATH=/lib:/lib64
+
 # this should be already mounted by kernel
-#mount -t devtmpfs devtmpfs /dev
+# mount -t devtmpfs devtmpfs /dev
 
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
-mount PARTUUID={uuid} /boot
+mount -o ro PARTUUID={uuid} /boot
 mount /boot/root.squash /root_new
 
-mount --move /boot /root_new/boot
-mount --move /proc /root_new/proc
-mount --move /dev /root_new/dev
-mount --move /sys /root_new/sys
+# echo "testing overlayfs"
+# /bin/bash
 
-#umount /proc
-#umount /boot
-#umount /dev
-#umount /sys
+# echo "Ignore next 4 possible /root_new/* mount error messages"
+# umount /boot
+
+mount --move /boot /root_new/boot
+
+umount /proc
+umount /dev
+umount /sys
 
 cd /root_new
 
@@ -176,7 +312,7 @@ exec chroot . /init.sh
     return 0
 
 
-def make_root_init(output_dir):
+def make_root_init(output_dir, boot_part_uuid):
     dirname = wayround_org.utils.path.join(output_dir)
     filename = wayround_org.utils.path.join(dirname, 'init.sh')
 
@@ -187,18 +323,62 @@ def make_root_init(output_dir):
         """\
 #!/bin/bash
 
+# set -x
+
 umount /root_old
 
-echo "------------------------------------------------------"
-echo "Wellcome into Lailalo GNU/Linux distribution installer"
-echo "-------------------------[special agent's distro ;-)]-"
+mount -t tmpfs tmpfs /overlay
+
+mkdir /overlay/upper
+mkdir /overlay/work
+
+mount -t overlay overlay \
+-olowerdir=/,upperdir=/overlay/upper,workdir=/overlay/work /overlay_merged
+
+mount --move /boot /overlay_merged/boot
+
+exec chroot /overlay_merged /init_merged.sh
+
+""".format(
+            uuid=boot_part_uuid.lower()
+            ))
+    f.close()
+
+    p = subprocess.Popen(['chmod', '+x', filename])
+    p.wait()
+
+    return 0
+
+def make_root_init_merged(output_dir, boot_part_uuid):
+    dirname = wayround_org.utils.path.join(output_dir)
+    filename = wayround_org.utils.path.join(dirname, 'init_merged.sh')
+
+    os.makedirs(dirname, exist_ok=True)
+
+    f = open(filename, 'w')
+    f.write(
+        """\
+#!/bin/bash
+
+# set -x
+
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+# mount -o ro PARTUUID={uuid} /boot
+
+echo "---------------------------------------------------------------"
+echo "Wellcome into Lailalo GNU/Linux distribution installation shell"
+echo "----------------------------------[special agent's distro ;-)]-"
 echo ''
-echo "This is currently a development build. Expect problems"
+echo "This is currently a development build - expect problems"
 echo ''
 
 exec /bin/bash
 
-""")
+""".format(
+            uuid=boot_part_uuid.lower()
+            ))
     f.close()
 
     p = subprocess.Popen(['chmod', '+x', filename])
@@ -242,6 +422,10 @@ def make_boot_dir(boot_d, root_d):
     for i in lst:
         sj = wayround_org.utils.path.join(src_dir, i)
         bj = wayround_org.utils.path.join(boot_d, i)
+
+        if os.path.isfile(bj):
+            os.unlink(bj)
+
         os.link(sj, bj)
 
     return ret
@@ -283,7 +467,7 @@ PROMPT 1
 TIMEOUT 50
 
 
-LABEL normal
+LABEL Lailalo GNU/Linux distribution installation shell
     LINUX /{linux_file_name}
     APPEND root=/dev/ram0 vga=0x318 init=/init.sh initrd=/initrd.squash.gz \
 ramdisk_size={ramdisk_size} ro
@@ -301,9 +485,29 @@ ramdisk_size={ramdisk_size} ro
     return 0
 
 
+def smart_redo_aips_dirs(
+        initrd_f, initrd_d,
+        root_f, root_d
+        ):
+    for i in [
+            (initrd_f, initrd_d),
+            (root_f, root_d),
+            ]:
+
+        if wayround_org.utils.checksum.is_dir_changed(
+                i[0],
+                i[0] + '.sha512',
+                verbose=True
+                ):
+            if os.path.exists(i[1]):
+                wayround_org.utils.file.remove_if_exists(i[1])
+    return
+
+
 def smart_redo_d_dirs(
         initrd_d, initrd_squash,
-        root_d, root_squash
+        root_d, root_squash,
+        snap_d, snap_squash
         ):
     for i in [
             (initrd_d, initrd_squash),
@@ -339,11 +543,6 @@ def smart_redo(
         mnt_extlinux_path,
         boot_img
         ):
-
-    smart_redo_d_dirs(
-        initrd_d, initrd_squash,
-        root_d, root_squash
-        )
 
     anything_removed = True
     while anything_removed:
@@ -394,7 +593,6 @@ def create_flashdrive_image(
         force_snap_image_rebuild=False,
         force_root_image_rebuild=False,
         force_initrd_image_rebuild=False,
-        force_drive_image_rebuild=False,
         target_system='x86_64-pc-linux-gnu'
         ):
 
@@ -410,6 +608,8 @@ def create_flashdrive_image(
 
     os.makedirs(working_dir, exist_ok=True)
 
+    python_pkg_dir = wayround_org.utils.path.join(working_dir, 'py_packs')
+
     boot_d = wayround_org.utils.path.join(working_dir, 'boot')
     boot_tar = wayround_org.utils.path.join(working_dir, 'boot.tar')
 
@@ -418,6 +618,8 @@ def create_flashdrive_image(
 
     root_d = wayround_org.utils.path.join(working_dir, 'root')
     root_f = wayround_org.utils.path.join(working_dir, 'root_aips')
+
+    snap_d = wayround_org.utils.path.join(working_dir, 'snap')
 
     initrd_d_init_sh = wayround_org.utils.path.join(initrd_d, 'init.sh')
     root_d_init_sh = wayround_org.utils.path.join(root_d, 'init.sh')
@@ -430,12 +632,14 @@ def create_flashdrive_image(
     initrd_squash_comp = initrd_squash + initrd_final_compressor_ext
     root_squash = wayround_org.utils.path.join(working_dir, 'root.squash')
 
+    snap_squash = wayround_org.utils.path.join(working_dir, 'snap.squash')
+
     dst_initrd_squash_comp = wayround_org.utils.path.join(
-        working_dir,
-        'boot',
+        boot_d,
         'initrd.squash' + initrd_final_compressor_ext
         )
     dst_root_squash = wayround_org.utils.path.join(boot_d, 'root.squash')
+    dst_snap_squash = wayround_org.utils.path.join(boot_d, 'snap.squash')
 
     loop_dev_name = 'loop0'
     loop_dev_path = wayround_org.utils.path.join('/dev', loop_dev_name)
@@ -447,8 +651,14 @@ def create_flashdrive_image(
 
     # == here starts real actions
 
-    make_initrd_init(initrd_d, boot_partition_uuid)
-    make_root_init(root_d)
+    get_python_packages(python_pkg_dir)
+
+    if not check_python_packages(python_pkg_dir):
+        raise Exception(
+            "provide {} dir with required python packages".format(
+                python_pkg_dir
+                )
+            )
 
     smart_redo(
         working_dir,
@@ -475,22 +685,16 @@ def create_flashdrive_image(
     if not isinstance(initrd_final_compressor_options, list):
         initrd_final_compressor_options = [initrd_final_compressor_options]
 
-    clean_working_dirs(
-        boot_d,
-        initrd_d, initrd_f,
-        root_d, root_f,
-        force_packages_download,
-        force_packages_reinstall
-        )
-
     # TODO: at the time of coding this (26 sep 2015), both of those are
     #       returning non-zero. it's normal as for "distro under construction".
-    #       but it must be fixed and returnin values must be taken into account
-    if not os.path.isdir(initrd_f):
-        get_packages('fib', initrd_f)
+    #       but it must be fixed and return values must be taken into account
+    get_packages('fib', initrd_f)
+    get_packages('fi', root_f)
 
-    if not os.path.isdir(root_f):
-        get_packages('fi', root_f)
+    smart_redo_aips_dirs(
+        initrd_f, initrd_d,
+        root_f, root_d
+        )
 
     # TODO: same as for get_packages() functions
 
@@ -499,26 +703,81 @@ def create_flashdrive_image(
         install_packages(initrd_f, initrd_d)
         # install_etc(initrd_d)
         make_primary_symlink(initrd_d, target_system)
-        os.makedirs(
-            wayround_org.utils.path.join(initrd_d, 'root_new'),
-            exist_ok=True
-            )
 
     if not os.path.isdir(root_d):
         make_root_dirtree(root_d)
         install_packages(root_f, root_d)
-        install_etc(root_d)
         make_primary_symlink(root_d, target_system)
-        os.makedirs(
-            wayround_org.utils.path.join(root_d, 'root_old'),
-            exist_ok=True
-            )
         clean_linux_source(root_d)
+
+    install_etc(root_d)
+
+    os.makedirs(
+        wayround_org.utils.path.join(initrd_d, 'root_new'),
+        exist_ok=True
+        )
+
+    #os.makedirs(
+    #    wayround_org.utils.path.join(initrd_d, 'root_new_ro'),
+    #    exist_ok=True
+    #    )
+
+    os.makedirs(
+        wayround_org.utils.path.join(root_d, 'root_old'),
+        exist_ok=True
+        )
+    os.makedirs(
+        wayround_org.utils.path.join(root_d, 'snap'),
+        exist_ok=True
+        )
+
+    os.makedirs(
+        wayround_org.utils.path.join(root_d, 'overlay'),
+        exist_ok=True
+        )
+
+    os.makedirs(
+        wayround_org.utils.path.join(root_d, 'overlay_merged'),
+        exist_ok=True
+        )
+
+    root_ldconfig(root_d)
+
+    install_python_packages(root_d, python_pkg_dir)
+
+    make_initrd_init(initrd_d, boot_partition_uuid)
+    make_root_init(root_d, boot_partition_uuid)
+    make_root_init_merged(root_d, boot_partition_uuid)
+
+    smart_redo_d_dirs(
+        initrd_d, initrd_squash,
+        root_d, root_squash,
+        snap_d, snap_squash
+        )
+
+    smart_redo(
+        working_dir,
+        boot_d,
+        boot_tar,
+        root_d,
+        root_f,
+        initrd_d,
+        initrd_f,
+        initrd_d_init_sh,
+        root_d_init_sh,
+        mnt_d,
+        initrd_squash,
+        initrd_squash_comp,
+        root_squash,
+        dst_initrd_squash_comp,
+        dst_root_squash,
+        mnt_extlinux_path,
+        boot_img
+        )
 
     # == root ==
 
-    if not os.path.isdir(boot_d):
-        make_boot_dir(boot_d, root_d)
+    make_boot_dir(boot_d, root_d)
 
     if force_root_image_rebuild:
         if os.path.isfile(root_squash):
@@ -553,6 +812,20 @@ def create_flashdrive_image(
     initrd_squash_size_kb = int(os.stat(initrd_squash).st_size / 1024) + 1
     #print("initrd_squash_size_kb: {}".format(initrd_squash_size_kb))
 
+    # == squash ==
+
+    if not os.path.isdir(snap_d):
+        raise Exception(
+            "provide {} dir".format(snap_d)
+            )
+
+    if force_snap_image_rebuild:
+        if os.path.isfile(snap_squash):
+            os.unlink(snap_squash)
+
+    if not os.path.isfile(snap_squash):
+        squash_dir(snap_d, snap_squash, squash_params)
+
     # ====
 
     if os.path.isfile(dst_initrd_squash_comp):
@@ -561,8 +834,12 @@ def create_flashdrive_image(
     if os.path.isfile(dst_root_squash):
         os.unlink(dst_root_squash)
 
+    if os.path.isfile(dst_snap_squash):
+        os.unlink(dst_snap_squash)
+
     os.link(initrd_squash_comp, dst_initrd_squash_comp)
     os.link(root_squash, dst_root_squash)
+    os.link(snap_squash, dst_snap_squash)
 
     if not os.path.isfile(boot_tar):
         lst = os.listdir(boot_d)
@@ -570,10 +847,6 @@ def create_flashdrive_image(
         res = p.wait()
         if res != 0:
             raise Exception('tar -cvf')
-
-    if force_drive_image_rebuild:
-        if os.path.isfile(boot_img):
-            os.unlink(boot_img)
 
     p = subprocess.Popen(['umount', loop_dev_part1_name])
     p.wait()
@@ -583,6 +856,9 @@ def create_flashdrive_image(
 
     p = subprocess.Popen(['losetup', '-d', loop_dev_path])
     p.wait()
+
+    if os.path.isfile(boot_img):
+        os.unlink(boot_img)
 
     if not os.path.isfile(boot_img):
         p = subprocess.Popen(['fallocate', '-l', image_size, boot_img])
@@ -672,7 +948,9 @@ uuid={boot_partition_uuid}, attrs="LegacyBIOSBootable"
         )
 
     if len(linux_file_name) != 1:
-        raise Exception("vmlinuz-* file count != 1")
+        raise Exception(
+            "vmlinuz-* file count != 1 ({})".format(len(linux_file_name))
+            )
 
     linux_file_name = os.path.basename(linux_file_name[0])
 

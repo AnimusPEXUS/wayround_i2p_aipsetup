@@ -294,10 +294,9 @@ def system_package_list_asps(command_name, opts, args, adds):
 
 
 def system_list_package_files(command_name, opts, args, adds):
-
     """
     Print list of files installed by package
-    
+
     [-h=cpu-vend-os-triplet] [-a=cpu-vend-os-triplet]
     PKG_NAME
     """
@@ -1696,6 +1695,8 @@ def clean_gen_locale(command_name, opts, args, adds):
 def clean_install_etc(command_name, opts, args, adds):
     """
     (only root) Install new clean basic UNICORN /etc files
+
+    use -b=dir for changing target root directory
     """
 
     ret = 0
@@ -1930,13 +1931,16 @@ Your self.
 
     return 0
 
-def system_replica_make_installation_flashdrive(command_name, opts, args, adds):
-    
+
+def system_replica_make_installation_flashdrive(
+        command_name, opts, args, adds):
+
     import wayround_org.aipsetup.bootimage
-    
+
     ret = wayround_org.aipsetup.bootimage.create_flashdrive_image('.')
-    
+
     return ret
+
 
 def system_convert_certdata_txt(command_name, opts, args, adds):
     ret = 0

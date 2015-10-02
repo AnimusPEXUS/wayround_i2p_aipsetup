@@ -1,5 +1,26 @@
 {
     "names": [
+        "pkg-config",
+    
+        "openssl",
+
+"gnupg1",
+"gnupg2",
+"gnutls",
+"gpa",
+"gpgme",
+"libassuan",
+"libgcrypt",
+"libgpg-error",
+"libksba",
+"libtasn1",
+"nettle",
+"nettle2",
+"npth",
+"opencdk",
+"scute",
+"p11-kit",
+
         "file",
         "less",
         "ncurses",

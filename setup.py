@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 import os.path
+import wayround_org.utils.path
 
 from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.2.8',
+    version='3.3.0',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -19,7 +20,7 @@ setup(
         ],
     # scripts=['aipsetup3.py'],
     install_requires=[
-        'wayround_org_utils>=1.8.0',
+        'wayround_org_utils>=1.9.1',
         'certdata',
         'sqlalchemy',
         'bottle',

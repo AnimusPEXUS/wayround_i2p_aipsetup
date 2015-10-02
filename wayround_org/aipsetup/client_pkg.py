@@ -55,8 +55,10 @@ class PackageServerClient:
     def get_asp(self, host, arch, filename, out_dir=None, out_to_temp=False):
         return get_asp(self._url, host, arch, filename, out_dir, out_to_temp)
 
-    def get_latest_asp(self, pkg_name, host, arch, out_dir=None, out_to_temp=False):
-        return get_latest_asp(self._url, pkg_name, host, arch, out_dir, out_to_temp)
+    def get_latest_asp(self, pkg_name, host, arch,
+                       out_dir=None, out_to_temp=False):
+        return get_latest_asp(self._url, pkg_name, host,
+                              arch, out_dir, out_to_temp)
 
     def tarballs(self, pkg_name):
         return tarballs(self._url, pkg_name)
@@ -71,6 +73,9 @@ class PackageServerClient:
 
     def snapshot_list(self):
         return snapshot_list(self._url)
+
+    def snapshot_latest(self):
+        return snapshot_latest(self._url)
 
     def snapshot_get(self, name):
         return snapshot_get(self._url, name)
@@ -221,6 +226,7 @@ def hosts(url, pkg_name):
 
     return ret
 
+
 def archs(url, pkg_name, host):
 
     ret = None
@@ -303,7 +309,8 @@ def asps_latest(url, pkg_name, host, arch):
     res = None
     try:
         res = urllib.request.urlopen(
-            '{}package/{}/asps/{}/{}?{}'.format(url, pkg_name, host, arch, data)
+            '{}package/{}/asps/{}/{}?{}'.format(url,
+                                                pkg_name, host, arch, data)
         )
     except:
         pass
@@ -648,8 +655,13 @@ def snapshot_list(url):
 
     if isinstance(res, http.client.HTTPResponse) and res.status == 200:
         ret = json.loads(str(res.read(), 'utf-8'))
+        ret.sort(reverse=True)
 
     return ret
+
+
+def snapshot_latest(url):
+    return max(snapshot_list(url))
 
 
 def snapshot_get(url, name):

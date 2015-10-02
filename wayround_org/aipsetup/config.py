@@ -7,6 +7,7 @@ import configparser
 import os.path
 import logging
 import collections
+import pprint
 
 import wayround_org.utils.path
 
@@ -17,7 +18,7 @@ EMBEDDED_DISTRO_DIR = wayround_org.utils.path.join(
     )
 
 
-DEFAULT_CONFIG = collections.OrderedDict([
+DEFAULT_CONFIG = collections.OrderedDict((
 
     ('general', collections.OrderedDict([
         ('editor', 'emacs'),
@@ -25,7 +26,7 @@ DEFAULT_CONFIG = collections.OrderedDict([
             '.tar.xz .tar.lzma .tar.bz2 .tar.gz '
             '.txz .tlzma .tbz2 .tgz .7z .zip .jar .tar'),
         ('distro_buildout_dir', EMBEDDED_DISTRO_DIR),
-        ('working_dir', None),
+        ('working_dir', ''),
         ])
      ),
 
@@ -109,7 +110,7 @@ DEFAULT_CONFIG = collections.OrderedDict([
         ])
      ),
 
-    ])
+    ))
 
 
 def load_config(filename):
@@ -134,6 +135,7 @@ def save_config(filename, config):
 
     if isinstance(config, dict):
         cfg = configparser.ConfigParser()
+        print("DEFAULT_CONFIG: \n{}".format(pprint.pformat(DEFAULT_CONFIG)))
         cfg.read_dict(DEFAULT_CONFIG)
         cfg.read_dict(config)
         config = cfg
