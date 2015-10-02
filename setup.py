@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.3.0',
+    version='3.3.1',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -20,7 +20,7 @@ setup(
         ],
     # scripts=['aipsetup3.py'],
     install_requires=[
-        'wayround_org_utils>=1.9.1',
+        'wayround_org_utils>=1.9.0',
         'certdata',
         'sqlalchemy',
         'bottle',
