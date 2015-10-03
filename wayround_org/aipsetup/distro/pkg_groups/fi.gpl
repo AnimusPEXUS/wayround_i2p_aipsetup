@@ -72,7 +72,13 @@
 	"libcap2",
 	"mdadm",
 	"lvm2",
-	"cryptsetup"
+	"cryptsetup",
+	"gcc",
+	"gmp",
+	"mpfr",
+	"mpc",
+	"isl",
+	"cloog"
 	],
 	"disabled": [
 	"libseccomp",

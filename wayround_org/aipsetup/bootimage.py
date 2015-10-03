@@ -135,20 +135,22 @@ def install_python_packages(output_dir, python_pkg_dir):
 
     target_mont_dir = wayround_org.utils.path.join(
         output_dir,
-        'root_old'
+        'py_pack'
         )
 
     if not os.path.isdir(python_pkg_dir):
         ret = 1
 
     if ret == 0:
-
-        p = subprocess.Popen(
-            [
-                'mount', '--bind', python_pkg_dir, target_mont_dir
-                ]
+    
+        wayround_org.utils.file.copytree(
+            python_pkg_dir, 
+            target_mont_dir,
+            overwrite_files=False,
+            clear_before_copy=True,
+            dst_must_be_empty=True,
+            verbose=True
             )
-        ret = p.wait()
 
     if ret == 0:
 
@@ -159,22 +161,15 @@ def install_python_packages(output_dir, python_pkg_dir):
                 '-c',
                 """\
 python3 -m ensurepip
-python3 -m pip install /root_old/wayround*
-#python3 -m pip install /root_old/MarkupSafe*
-#python3 -m pip install /root_old/certdata*
-python3 -m pip install -f /root_old/ /root_old/*
+python3 -m pip install /py_pack/wayround*
+#python3 -m pip install /py_pack/MarkupSafe*
+#python3 -m pip install /py_pack/certdata*
+python3 -m pip install -f /py_pack/ /root_old/*
 exit 0
 """
                 ]
             )
         ret = p.wait()
-
-    p = subprocess.Popen(
-        [
-            'umount', target_mont_dir
-            ]
-        )
-    p.wait()
 
     return ret
 
@@ -512,6 +507,7 @@ def smart_redo_d_dirs(
     for i in [
             (initrd_d, initrd_squash),
             (root_d, root_squash),
+            (snap_d, snap_squash)
             ]:
 
         if wayround_org.utils.checksum.is_dir_changed(
@@ -534,12 +530,14 @@ def smart_redo(
         initrd_f,
         initrd_d_init_sh,
         root_d_init_sh,
+        snap_d,
         mnt_d,
         initrd_squash,
         initrd_squash_comp,
         root_squash,
         dst_initrd_squash_comp,
         dst_root_squash,
+        snap_squash,
         mnt_extlinux_path,
         boot_img
         ):
@@ -596,7 +594,7 @@ def create_flashdrive_image(
         target_system='x86_64-pc-linux-gnu'
         ):
 
-    image_size = '7995MiB'  # value for fallocate command
+    image_size = '9GiB'  # value for fallocate command
 
     boot_partition_uuid = '5A44A96C-37FF-4E15-A9B5-A7275C3B98A3'
 
@@ -670,12 +668,14 @@ def create_flashdrive_image(
         initrd_f,
         initrd_d_init_sh,
         root_d_init_sh,
+        snap_d,
         mnt_d,
         initrd_squash,
         initrd_squash_comp,
         root_squash,
         dst_initrd_squash_comp,
         dst_root_squash,
+        snap_squash,
         mnt_extlinux_path,
         boot_img
         )
@@ -765,12 +765,14 @@ def create_flashdrive_image(
         initrd_f,
         initrd_d_init_sh,
         root_d_init_sh,
+        snap_d,
         mnt_d,
         initrd_squash,
         initrd_squash_comp,
         root_squash,
         dst_initrd_squash_comp,
         dst_root_squash,
+        snap_squash,
         mnt_extlinux_path,
         boot_img
         )
@@ -812,7 +814,7 @@ def create_flashdrive_image(
     initrd_squash_size_kb = int(os.stat(initrd_squash).st_size / 1024) + 1
     #print("initrd_squash_size_kb: {}".format(initrd_squash_size_kb))
 
-    # == squash ==
+    # == snap ==
 
     if not os.path.isdir(snap_d):
         raise Exception(
