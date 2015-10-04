@@ -1758,7 +1758,8 @@ def clean_sys_users(command_name, opts, args, adds):
         if '-b' in opts:
             base_dir = opts['-b']
 
-        daemons_dir = config['system_paths']['daemons']
+        # TODO: find and fix everywhere config['system_paths']['daemons']
+        daemons_dir = wayround_org.aipsetup.system.DAEMONS_DIR
 
         ret = wayround_org.aipsetup.sysuser.sys_users(base_dir, daemons_dir)
 

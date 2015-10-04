@@ -164,7 +164,7 @@ python3 -m ensurepip
 python3 -m pip install /py_pack/wayround*
 #python3 -m pip install /py_pack/MarkupSafe*
 #python3 -m pip install /py_pack/certdata*
-python3 -m pip install -f /py_pack/ /root_old/*
+python3 -m pip install -f /py_pack/ /py_pack/*
 exit 0
 """
                 ]

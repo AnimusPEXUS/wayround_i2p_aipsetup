@@ -1,6 +1,6 @@
 Software For Building and Maintaining Own GNU/Linux distribution
 
-			       aipsetup
+                       aipsetup
 
 Features:
 
@@ -16,10 +16,16 @@ Requirements:
     also You'll need BottlePy, CherryPy, Mako, SQLAlchemy, lxml
     and some other stuff. GUI elements requires Gtk+3 and PyGObject.
 
-    aipsetup is written (and oriented) on system with Python 3.4
+    aipsetup is written (and oriented) on system with Python 3.5
 
 GitHub page is here:
      https://github.com/AnimusPEXUS/wayround_org_aipsetup
 
 Some slack distribution packages are here:
      rsync://wayround.org/Lailalo_snapshots/
+
+
+
+
+---
+accepting donations: bitcoin:1DkYn1sDaUVbUtevR5zxZjmkkA8mtHXKM1

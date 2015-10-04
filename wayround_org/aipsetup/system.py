@@ -30,6 +30,8 @@ import wayround_org.aipsetup.version
 
 import certdata.certdata
 
+DAEMONS_DIR = '/daemons'
+MULTIHOST_DIR = '/multihost'
 
 LOCAL_DIRS = [
     'boot',
@@ -283,10 +285,10 @@ class SystemCtl:
 
             if ret == 0:
                 if (not force
-                        and (
-                            info['deprecated']
-                            or info['non_installable']
-                            )
+                    and (
+                                info['deprecated']
+                                or info['non_installable']
+                                )
                     ):
                     logging.error(
                         "Package is deprecated({}) or"
@@ -299,8 +301,8 @@ class SystemCtl:
 
             if ret == 0:
                 if (not force
-                        and info['only_primary_install']
-                        and arch != host
+                    and info['only_primary_install']
+                    and arch != host
                     ):
                     logging.error(
                         "Package is only_primary_install({}) but"
@@ -2982,15 +2984,15 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                                wayround_org.utils.path.join(
-                                    '/multihost', host, 'lib'
+                                    wayround_org.utils.path.join(
+                                        '/multihost', host, 'lib'
+                                        )
                                     )
-                                )
-                                or not os.path.isdir(
-                                wayround_org.utils.path.join(
-                                    self.basedir,
-                                    wj)
-                                )
+                                    or not os.path.isdir(
+                                    wayround_org.utils.path.join(
+                                        self.basedir,
+                                        wj)
+                                    )
                                 ):
 
                             # TODO: do we need it?

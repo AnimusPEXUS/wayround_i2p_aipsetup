@@ -182,26 +182,6 @@ def snapshot_ctl_new(dir_path):
     return wayround_org.aipsetup.info.SnapshotCtl(dir_path)
 
 
-def constitution_by_config(config, host, target, build):
-
-    ret = None
-
-    try:
-        ret = wayround_org.aipsetup.build.Constitution(
-            host_str=host,
-            build_str=build,
-            target_str=target
-            )
-    except wayround_org.utils.system_type.SystemTypeInvalidFullName:
-        logging.exception("Wrong host: {}".format(host))
-        ret = 1
-    else:
-
-        ret.paths = dict(config['system_paths'])
-
-    return ret
-
-
 def asp_package(asp_filename):
     return wayround_org.aipsetup.package.ASPackage(asp_filename)
 

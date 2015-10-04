@@ -1,9 +1,10 @@
 
 import copy
-import grp
 import os.path
-import pwd
 import subprocess
+import pwd
+import spwd
+import grp
 
 import wayround_org.utils.path
 import wayround_org.utils.terminal
@@ -16,7 +17,7 @@ SYS_GID_MAX = 999
 
 
 USERS = {
-    #users for groups
+    # users for groups
 
     # logick separation (special users) 1-9
     1: 'nobody',
@@ -115,238 +116,199 @@ USERS = {
     105: 'systemd-journal-gateway',
     106: 'systemd-journal-remote',
     107: 'systemd-journal-upload',
-    
+
     200: 'tor'
     }
 
 
-GROUPS = copy.copy(USERS)
+# GROUPS = copy.copy(USERS)
+
+
+def calc_daemon_home_dir(base_dir, daemons_dir_no_base, user_name):
+    ret = wayround_org.utils.path.join(
+        base_dir,
+        daemons_dir_no_base,
+        user_name
+        )
+    return ret
+
+
+def calc_user_home_dir(base_dir, user_name):
+    if user_name == 'root':
+
+        ret = wayround_org.utils.path.join(
+            base_dir,
+            'root'
+            )
+
+    else:
+
+        ret = wayround_org.utils.path.join(
+            base_dir,
+            'home',
+            user_name
+            )
+
+    return ret
+
+
+def personalize_home(home_dir, user, user_id):
+
+    ret = 0
+
+    os.makedirs(home_dir, exist_ok=True)
+
+    if user_id < 1000:
+
+        p = subprocess.Popen(
+            [
+                'chown',
+                '-R',
+                '{0}:{0}'.format(user),
+                home_dir
+            ]
+            )
+        ret += int(p.wait() != 0)
+
+        p = subprocess.Popen(
+            [
+                'chmod',
+                '-R',
+                '700',
+                home_dir
+            ]
+            )
+        ret += int(p.wait() != 0)
+
+    return ret
 
 
 def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
 
-    base_dir = wayround_org.utils.path.abspath(base_dir)
-    daemons_dir = wayround_org.utils.path.abspath(
-        wayround_org.utils.path.join(base_dir, daemons_dir_no_base)
-        )
+    pwall = pwd.getpwall()
+    spall = spwd.getspall()
+    grall = grp.getgrall()
 
-    daemons_dir_no_base = daemons_dir
+    pwall.sort(key=lambda x: x[2])
+    grall.sort(key=lambda x: x[2])
+    spall.sort(key=lambda x: x[0])
 
-    if base_dir != '/':
-        daemons_dir_no_base = daemons_dir[len(base_dir):]
+    pw_file_name = wayround_org.utils.path.join(base_dir, 'etc', 'passwd')
+    gr_file_name = wayround_org.utils.path.join(base_dir, 'etc', 'group')
+    sp_file_name = wayround_org.utils.path.join(base_dir, 'etc', 'shadow')
 
-    root = wayround_org.utils.path.join(base_dir, 'root')
+    pw_file = open(pw_file_name, 'w')
+    gr_file = open(gr_file_name, 'w')
+    sp_file = open(sp_file_name, 'w')
 
-    root_no_base = root
+    spall_dict = {}
+    for i in spall:
+        spall_dict[i[0]] = i
 
-    if base_dir != '/':
-        root_no_base = root[len(base_dir):]
+    ids = {}
 
-    chroot = ['chroot', '--userspec=0:0', base_dir]
+    for i in pwall:
+        ids[i[2]] = i
 
-    errors = 0
+    user_ids = {}
 
-    print("Removing existing user records")
-    for i in pwd.getpwall():
-        if 0 < i.pw_uid <= SYS_UID_MAX:
-            wayround_org.utils.terminal.progress_write(
-                "  uid {:4d} {}".format(
-                    i.pw_uid,
-                    i.pw_name
-                    )
-                )
-            p = subprocess.Popen(
-                chroot + ['userdel', i.pw_name]
-                )
-            p.wait()
-    wayround_org.utils.terminal.progress_write_finish()
+    for i in sorted(list(ids.keys())):
+        if i == 0 or i >= 1000:
+            user_ids[i] = ids[i]
 
-    print("Removing existing group records")
-    for i in grp.getgrall():
-        if 0 < i.gr_gid <= SYS_GID_MAX:
-            wayround_org.utils.terminal.progress_write(
-                "  gid {:4d} {}".format(
-                    i.gr_gid,
-                    i.gr_name
-                    )
-                )
-            p = subprocess.Popen(
-                chroot + ['groupdel', i.gr_name]
-                )
-            p.wait()
-    wayround_org.utils.terminal.progress_write_finish()
-
-    print("Adding new group records")
-    for i in sorted(list(GROUPS.keys())):
-        name = GROUPS[i]
-        wayround_org.utils.terminal.progress_write(
-            "  gid {:4d} {}".format(
-                i,
-                name
-                )
-            )
-        p = subprocess.Popen(
-            chroot + ['groupadd', '-r', '-o', '-g', str(i), name]
-            )
-        res = p.wait()
-        if res != 0:
-            errors += 1
-    wayround_org.utils.terminal.progress_write_finish()
-
-    print("Checking `{}' dir".format(daemons_dir))
-    if not os.path.exists(daemons_dir):
-        print("   ..creating")
-        try:
-            os.makedirs(daemons_dir)
-        except:
-            print("Error creating dir: {}".format(daemons_dir))
-
-    print("Creating special user accounts")
+    print("Writing system users")
     for i in sorted(list(USERS.keys())):
-        name = USERS[i]
-        home_path = wayround_org.utils.path.join(daemons_dir, name)
-        home_path_no_base = home_path
+        user_name = USERS[i]
 
-        if base_dir != '/':
-            home_path_no_base = home_path[len(base_dir):]
+        home_dir = calc_daemon_home_dir(
+            base_dir,
+            daemons_dir_no_base,
+            user_name
+            )
 
-        wayround_org.utils.terminal.progress_write(
-            "  uid {:4d} {}".format(
+        pw_file.write(
+            '{}:{}:{}:{}:{}:{}:{}\n'.format(
+                user_name,
+                'x',
                 i,
-                name
+                i,
+                user_name,
+                home_dir,
+                '/bin/false'
                 )
             )
-        p = subprocess.Popen(
-            chroot + ['useradd', '-r', '-g', str(i), '-G', name, '-u', str(i),
-             '-d', home_path_no_base,
-             '-s', '/bin/false',
-             name]
+
+        gr_file.write(
+            '{}:{}:{}:{}\n'.format(
+                user_name,
+                'x',
+                i,
+                user_name
+                )
             )
-        res = p.wait()
-        if res != 0:
-            errors += 1
 
-        p = subprocess.Popen(
-            chroot + ['usermod', '-L', name]
+        sp_file.write(
+            '{}:{}:::::::\n'.format(
+                user_name,
+                '!'
+                )
             )
-        res = p.wait()
-        if res != 0:
-            errors += 1
 
-        try:
-            os.makedirs(home_path)
-        except:
-            pass
-            # print("Error creating dir: {}".format(home_path))
+    print("Writing root and normal users:")
+    for i in sorted(list(user_ids.keys())):
 
-        p = subprocess.Popen(
-            chroot + ['chown', '-R', '{}:'.format(name), home_path_no_base]
+        user_name = user_ids[i][0]
+        home_dir = calc_user_home_dir(base_dir, user_name)
+
+        print("    {}".format(user_name))
+
+        pw_file.write(
+            '{}:{}:{}:{}:{}:{}:{}\n'.format(
+                user_name,
+                'x',
+                i,
+                i,
+                user_name,
+                home_dir,
+                user_ids[i][-1]
+                )
             )
-        res = p.wait()
-        if res != 0:
-            errors += 1
 
-        p = subprocess.Popen(
-            chroot + ['chmod', '-R', '700', home_path_no_base]
+        gr_file.write(
+            '{}:{}:{}:{}\n'.format(
+                user_name,
+                'x',
+                i,
+                user_name
+                )
             )
-        res = p.wait()
-        if res != 0:
-            errors += 1
 
-    wayround_org.utils.terminal.progress_write_finish()
+        if user_name in spall_dict:
+            sp_file.write(
+                '{}:{}:{}:{}:{}:{}:{}:{}:{}\n'.format(
+                    *spall_dict[user_name]
+                    )
+                )
 
-    print("Ensuring `{}' permissions".format(daemons_dir))
-    p = subprocess.Popen(
-        chroot + ['chown', '0:0', daemons_dir_no_base]
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
+    pw_file.close()
+    gr_file.close()
+    sp_file.close()
 
-    p = subprocess.Popen(
-        chroot + ['chmod', '755', daemons_dir_no_base]
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
+    for i in sorted(list(USERS.keys())):
+        user_name = USERS[i]
+        home_dir = calc_daemon_home_dir(
+            base_dir,
+            daemons_dir_no_base,
+            user_name
+            )
+        personalize_home(home_dir, user_name, i)
 
-    print("Starting /etc/aipsetup.d/sysuser_local.sh")
-    p = subprocess.Popen(
-        chroot + ['bash', '/etc/aipsetup.d/sysuser_local.sh']
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
+    for i in sorted(list(user_ids.keys())):
+        user_name = user_ids[i][0]
+        home_dir = calc_user_home_dir(base_dir, user_name)
+        personalize_home(home_dir, user_name, i)
 
-    print("Ensuring `root' user existance")
-    p = subprocess.Popen(
-        chroot +
-        ['useradd',
-         '-r',
-         '-g', '0',
-         '-G', 'root',
-         '-u', '0',
-         '-d', '/root',
-         '-s', '/bin/bash',
-         'root']
-        )
-    p.wait()
-
-    p = subprocess.Popen(
-        chroot + ['usermod',
-         '-U',
-         'root']
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
-
-    if not os.path.exists(root):
-        try:
-            os.makedirs(root)
-        except:
-            print("Error creating dir: {}".format(root))
-
-    p = subprocess.Popen(
-        chroot + ['chown',
-         '-R',
-         'root:root',
-         root_no_base]
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
-
-    p = subprocess.Popen(
-        chroot + ['chmod',
-         '-R',
-         '700',
-         root_no_base]
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
-
-    print("Sorting passwd and group files")
-    p = subprocess.Popen(
-        chroot + ['pwck', '-s']
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
-
-    p = subprocess.Popen(
-        chroot + ['grpck', '-s']
-        )
-    res = p.wait()
-    if res != 0:
-        errors += 1
-
-    ret = 0
-    if errors != 0:
-        ret = 1
-
-    return ret
+    return 0
 
 
 def sys_perms(chroot):
