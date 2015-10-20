@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "xen",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "xen",
+  "basename": "monitoring-plugins",
   "filters": "",
   "removable": true,
   "reducible": true,

@@ -121,6 +121,9 @@
         "valgrind",
         "miniupnpd",
         "miniupnpc",
-        "mono"
+        "mono",
+        "acpica-unix",
+        "ntfs-3g_ntfsprogs",
+        "libyaml"
     ]
 }

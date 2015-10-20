@@ -120,17 +120,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += cmake.calc_conf_hbt_options(self) + minus_d_list
 
         '''
-        ret += [
-            '-DLIB_INSTALL_DIR={}'.format(
-                wayround_org.utils.path.join(
-                    self.get_host_dir(),
-                    self.calculate_main_multiarch_lib_dir_name()
-                    )
-                ),
-
-            ]
-
-
         if self.get_arch_from_pkgi().startswith('x86_64'):
             ret += [
                 '-DLIB_SUFFIX=64',
@@ -141,6 +130,12 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 #'-DFIND_LIBRARY_USE_LIB64_PATHS=1'
                 ]
         '''
+
+        if self.get_arch_from_pkgi().startswith('x86_64'):
+            ret += [
+                '-DLIB_SUFFIX=64',
+                '-DLIBDIR_SUFFIX=64',
+                ]
 
         return ret
 

@@ -13,7 +13,6 @@ import wayround_org.utils.terminal
 
 
 SYS_UID_MAX = 999
-SYS_GID_MAX = 999
 
 
 USERS = {
@@ -117,7 +116,8 @@ USERS = {
     106: 'systemd-journal-remote',
     107: 'systemd-journal-upload',
 
-    200: 'tor'
+    200: 'tor',
+    201: 'shinken'
     }
 
 
@@ -311,27 +311,133 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     return 0
 
 
+def get_sys_perms_shell_script():
+    ret = """\
+
+
+chown root: /
+chmod 755 /
+
+chmod 1777 /tmp
+
+usermod -G httpd,ejabberd,ssl httpd
+usermod -G ejabberd,ssl ejabberd
+usermod -G jabberd2,ssl jabberd2
+
+usermod -G dovecot,ssl,mail dovecot
+usermod -G exim,ssl,mail exim
+
+usermod -G adch,ssl adch
+
+chmod 750 /daemons/ejabberd
+chmod 750 /daemons/ejabberd/var
+chmod 750 /daemons/ejabberd/var/www
+chmod -R 750 /daemons/ejabberd/var/www/logs
+
+chmod -R 750 /daemons/ssl
+
+chown root:mail /var/mail
+chmod 1777 /var/mail
+
+chgrp exim /etc/shadow
+chmod g+r /etc/shadow
+
+
+chown -R root:mail /var/spool/exim
+chmod -R 770 /var/spool/exim
+
+chown -R root:mail /var/log/dovecot
+chmod -R 770 /var/log/dovecot
+
+# polkit settings
+chown root:root /etc/polkit-1/localauthority
+chmod 0700 /etc/polkit-1/localauthority
+
+#chown root:root /var/lib/polkit-1
+#chmod 0700 /var/lib/polkit-1
+chown root:root /etc/pam.d/polkit-1
+chmod 0700 /etc/pam.d/polkit-1
+
+# systemd service files
+
+for i in \
+    '/usr/lib/systemd/system' \
+    '/usr/lib/systemd/user' \
+    '/etc/systemd/system' \
+    '/etc/systemd/user'
+do
+
+    chmod 0755 "$i"
+    find "$i" -type d -exec chmod 755 '{}' ';'
+    find "$i" -type f -exec chmod 644 '{}' ';'
+
+done
+
+
+chmod 4755 /usr/libexec/dbus-daemon-launch-helper
+chmod 4755 /usr/lib/polkit-1/polkit-agent-helper-1
+chmod 4755 /usr/bin/pkexec
+
+# NOTE: starting from 1.16 xorg-server chmod is not needed and device
+#       handlers retrived from systemd
+# chmod 4755 "`which xinit`"
+
+chmod 4755 "`which su`"
+chmod 4755 "`which sudo`"
+# chmod 4755 "`which mount`"
+chmod 4755 "`which exim`"
+# chmod 4755 "`which weston-launch`"
+#chmod 4755 /usr/lib/virtualbox/bin/VirtualBox
+
+
+exit 0
+"""
+    return ret
+
+
 def sys_perms(chroot):
 
     errors = 0
 
-    sysuser_sys = wayround_org.utils.path.join(
-        wayround_org.utils.path.abspath(os.path.dirname(__file__)),
-        'sys_perms.sh'
-        )
-
-    f = open(sysuser_sys)
-    script = f.read()
-    f.close()
-
-    print("Starting {}".format(sysuser_sys))
-
     p = subprocess.Popen(
-        chroot + ['bash'], stdin=subprocess.PIPE
+        chroot + [
+            'bash', '-c', get_sys_perms_shell_script()
+            ]
         )
-    p.communicate(bytes(script, 'utf-8'))
     res = p.wait()
     if res != 0:
         errors += 1
+
+    # fix simple user groups
+
+    pwall = pwd.getpwall()
+    pwall.sort(key=lambda x: x[2])
+
+    spall_dict = {}
+    for i in spall_dict:
+        spall_dict[i[0]] = i
+
+    ids = {}
+
+    for i in pwall:
+        ids[i[2]] = i
+
+    user_ids = {}
+
+    for i in sorted(list(ids.keys())):
+        if i >= 1000:
+            user_ids[i] = ids[i]
+
+    for i in sorted(list(user_ids.keys())):
+        p = subprocess.Popen(
+            [
+                'usermod',
+                '-G',
+                '{},pts,tty,pulse-access,audio,kvm,video'.format(
+                    user_ids[i][0]
+                    ),
+                user_ids[i][0]
+                ]
+            )
 
     return errors

@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "xen",
+  "buildscript": "libaio",
   "version_tool": "",
-  "basename": "xen",
+  "basename": "libaio",
   "filters": "",
   "removable": true,
   "reducible": true,

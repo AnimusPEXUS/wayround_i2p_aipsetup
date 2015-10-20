@@ -285,11 +285,11 @@ class SystemCtl:
 
             if ret == 0:
                 if (not force
-                    and (
-                                info['deprecated']
-                                or info['non_installable']
-                                )
-                    ):
+                        and (
+                            info['deprecated']
+                            or info['non_installable']
+                            )
+                        ):
                     logging.error(
                         "Package is deprecated({}) or"
                         " non-installable({})".format(
@@ -301,9 +301,9 @@ class SystemCtl:
 
             if ret == 0:
                 if (not force
-                    and info['only_primary_install']
-                    and arch != host
-                    ):
+                        and info['only_primary_install']
+                        and arch != host
+                        ):
                     logging.error(
                         "Package is only_primary_install({}) but"
                         " host != arch"
@@ -2733,6 +2733,27 @@ class SystemCtl:
                 logging.exception("Can't create link /usr -- continuing")
                 ret = 1
 
+        for i in ['x86_64-pc-linux-gnu']:
+
+            host_dir = wayround_org.utils.path.join(
+                self.basedir,
+                'multihost',
+                i
+                )
+
+            usr_link_name = wayround_org.utils.path.join(
+                host_dir,
+                'usr'
+                )
+
+            multihost_link_name = wayround_org.utils.path.join(
+                host_dir,
+                'multihost'
+                )
+
+            os.symlink('.', usr_link_name)
+            os.symlink('/multihost', multihost_link_name)
+
         return ret
 
     def gen_locale(self, host=None):
@@ -2984,16 +3005,16 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                                    wayround_org.utils.path.join(
+                            wayround_org.utils.path.join(
                                         '/multihost', host, 'lib'
                                         )
-                                    )
-                                    or not os.path.isdir(
-                                    wayround_org.utils.path.join(
+                            )
+                            or not os.path.isdir(
+                            wayround_org.utils.path.join(
                                         self.basedir,
                                         wj)
-                                    )
-                                ):
+                            )
+                            ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

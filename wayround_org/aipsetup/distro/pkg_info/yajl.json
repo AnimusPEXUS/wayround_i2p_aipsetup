@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "xen",
+  "buildscript": "std_cmake",
   "version_tool": "",
-  "basename": "xen",
+  "basename": "yajl",
   "filters": "",
   "removable": true,
   "reducible": true,
