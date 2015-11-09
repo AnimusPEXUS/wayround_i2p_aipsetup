@@ -30,6 +30,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             )
 
         ret += [
+            '--sysconfdir={}'.format(
+                wayround_org.utils.path.join(
+                    '/etc', 'httpd'
+                    )
+                ),
             '--with-apr={}'.format(self.custom_data['apr_1_config']),
 
             '--enable-shared',

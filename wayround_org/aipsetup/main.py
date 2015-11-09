@@ -2,8 +2,7 @@
 
 import sys
 
-if sys.path[0] == '':
-    del sys.path[0]
+del sys.path[0]
 
 import logging
 
