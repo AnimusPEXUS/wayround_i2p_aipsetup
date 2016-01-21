@@ -343,7 +343,7 @@ chgrp exim /etc/shadow
 chmod g+r /etc/shadow
 
 
-chown -R root:mail /var/spool/exim
+chown -R root:exim /var/spool/exim
 chmod -R 770 /var/spool/exim
 
 chown -R root:mail /var/log/dovecot

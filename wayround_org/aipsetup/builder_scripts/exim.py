@@ -13,6 +13,7 @@ import wayround_org.aipsetup.builder_scripts.std
 # TODO: try to set parameters to make, - without editing config file
 # TODO: looks like already most of all this file need to be rewrited
 
+
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_custom_data(self):
@@ -103,6 +104,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
                 if ftl[i].startswith('# EXIM_GROUP='):
                     log.info("edit: '{}'".format(ftl[i]))
+                    # TODO: question: 'exim' or 'mail' group? as exim it self
+                    #       has exim:exim rights
                     ftl[i] = 'EXIM_GROUP=ref:exim'
 
                 for j in [
