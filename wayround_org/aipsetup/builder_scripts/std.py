@@ -325,7 +325,10 @@ class Builder:
 
         return ret
 
+    '''
     def _calculate_pkgconfig_search_paths_qt5(self, prefix=None):
+
+        # TODO: what does this do here?
 
         if prefix is None:
             prefix = self.calculate_install_prefix()
@@ -350,6 +353,7 @@ class Builder:
                 ret.append(i)
 
         return ret
+    '''
 
     def calculate_pkgconfig_search_paths(self, prefix=None):
 

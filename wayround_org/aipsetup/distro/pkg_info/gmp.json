@@ -4,11 +4,12 @@
   "buildscript": "gmp",
   "version_tool": "",
   "basename": "gmp",
-  "filters": "# 'a' suffix is ok :-/\n#- status !re ^$",
+  "filters": "# 'a' suffix is ok :-/\n#- status !re ^$\n- filename fm *rc*",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
     "/gmplib.org/"
