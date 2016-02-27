@@ -149,7 +149,7 @@ def _constitution_configurer_sub01(
                 raise Exception(
                     "Can't get `{}' value for package"
                     ", as it is not in package constitution"
-                    ", nor in system settings".format(name)
+                    ", nor in system settings.".format(name)
                     )
                 value = None
 
@@ -1320,6 +1320,7 @@ class PackCtl:
         del(files)
 
         # TODO: do I really need this rest of this method?
+        # ANSWER: YES
 
         etc_new_name = '{}.distr.{}.{}'.format('etc', host, arch)
 

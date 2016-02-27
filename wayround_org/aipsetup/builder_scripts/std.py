@@ -325,7 +325,7 @@ class Builder:
 
         return ret
 
-    '''
+    # '''
     def _calculate_pkgconfig_search_paths_qt5(self, prefix=None):
 
         # TODO: what does this do here?
@@ -353,7 +353,7 @@ class Builder:
                 ret.append(i)
 
         return ret
-    '''
+    # '''
 
     def calculate_pkgconfig_search_paths(self, prefix=None):
 
@@ -606,7 +606,7 @@ class Builder:
         return None
 
     def define_actions(self):
-        return collections.OrderedDict([
+        ret = collections.OrderedDict([
             ('dst_cleanup', self.builder_action_dst_cleanup),
             ('src_cleanup', self.builder_action_src_cleanup),
             ('bld_cleanup', self.builder_action_bld_cleanup),
@@ -617,6 +617,7 @@ class Builder:
             ('build', self.builder_action_build),
             ('distribute', self.builder_action_distribute)
             ])
+        return ret
 
     def check_deprecated_methods(self, called_as, log):
         for i in [

@@ -12,7 +12,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         return [
             '-d',
-            '-prefix={}'.format(self.self.calculate_install_prefix())
+            '-prefix={}'.format(self.calculate_install_prefix())
             ]
 
     def define_actions(self):

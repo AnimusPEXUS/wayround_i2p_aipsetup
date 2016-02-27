@@ -9,8 +9,9 @@ import wayround_org.aipsetup.builder_scripts.std
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
-        return super().builder_action_configure_define_opts(called_as, log) + [
-            '--disable-latex',
-            '--enable-pthread',
-            '--enable-libusb_1_0'
+        raise Exception("this is not needed. use usual std.py")
+        ret = super().builder_action_configure_define_opts(called_as, log)
+        ret += [
+            '',
             ]
+        return ret
