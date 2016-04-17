@@ -22,7 +22,6 @@ APPLICATION_JSON = 'application/json; codepage=utf-8'
 
 
 def src_server_start(command_name, opts, args, adds):
-
     """
     Starts serving specified host and port
 

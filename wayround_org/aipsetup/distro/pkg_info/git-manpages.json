@@ -4,11 +4,12 @@
   "buildscript": "git_manpages",
   "version_tool": "",
   "basename": "git-manpages",
-  "filters": "",
+  "filters": "- filename re .*rc\\d+.*",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
     "/kernel.org/"
