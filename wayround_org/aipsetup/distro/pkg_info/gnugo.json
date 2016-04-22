@@ -11,7 +11,7 @@
   "deprecated": false,
   "tags": [],
   "source_path_prefixes": [
-    "/gnu.org/ftp.gnu.org/gnu/gnugo/"
+    "/gnu.org/main/gnu/gnugo/"
   ],
   "build_deps": [],
   "so_deps": [],

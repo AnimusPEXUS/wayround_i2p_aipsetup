@@ -11,7 +11,7 @@
   "deprecated": false,
   "tags": [],
   "source_path_prefixes": [
-    "/gnu.org/ftp.gnu.org/gnu/dejagnu/"
+    "/gnu.org/main/gnu/dejagnu/"
   ],
   "build_deps": [],
   "so_deps": [],
