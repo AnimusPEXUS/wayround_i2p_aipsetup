@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "tree",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "tree",
+  "basename": "libyaml",
   "filters": "",
   "removable": true,
   "reducible": true,
@@ -11,9 +11,7 @@
   "deprecated": false,
   "only_primary_install": false,
   "tags": [],
-  "source_path_prefixes": [
-    "/indstate.edu/"
-  ],
+  "source_path_prefixes": [],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

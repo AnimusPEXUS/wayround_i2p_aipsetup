@@ -9,9 +9,10 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/gnu.org/ftp.gnu.org/"
+    "/gnu.org/main/"
   ],
   "build_deps": [],
   "so_deps": [],

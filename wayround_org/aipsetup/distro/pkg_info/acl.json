@@ -9,9 +9,10 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/gnu.org/savannah.gnu.org/"
+    "/gnu.org/savannah/"
   ],
   "build_deps": [],
   "so_deps": [],
