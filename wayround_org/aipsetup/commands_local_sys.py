@@ -1620,7 +1620,14 @@ def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
         basedir='/'
         )
 
-    r = system.get_asps_depending_on_asp(args[0], mute=False)
+    host, arch = _process_h_and_a_opts_specific(opts, config)
+
+    r = system.get_asps_depending_on_asp(
+        args[0],
+        mute=False,
+        host=host,
+        arch=arch
+        )
 
     pprint.pprint(r)
 

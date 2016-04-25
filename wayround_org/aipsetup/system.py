@@ -289,7 +289,7 @@ class SystemCtl:
                             info['deprecated']
                             or info['non_installable']
                             )
-                        ):
+                    ):
                     logging.error(
                         "Package is deprecated({}) or"
                         " non-installable({})".format(
@@ -303,7 +303,7 @@ class SystemCtl:
                 if (not force
                         and info['only_primary_install']
                         and arch != host
-                        ):
+                    ):
                     logging.error(
                         "Package is only_primary_install({}) but"
                         " host != arch"
@@ -1898,12 +1898,16 @@ class SystemCtl:
     def get_asps_depending_on_asp(
             self,
             asp_name,
-            mute=False
+            mute=False,
+            host=None,
+            arch=None
             ):
 
         ret = 0
 
         destdir = wayround_org.utils.path.abspath(self.basedir)
+
+        print("host: {}, arch: {}".format(host, arch))
 
         asp_name_latest = None
 
@@ -1931,6 +1935,8 @@ class SystemCtl:
             asp_name_latest = (
                 self.latest_installed_package_s_asp(
                     package_name,
+                    host=host,
+                    arch=arch
                     )
                 )
 
@@ -3005,16 +3011,16 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                            wayround_org.utils.path.join(
-                                        '/multihost', host, 'lib'
-                                        )
-                            )
-                            or not os.path.isdir(
-                            wayround_org.utils.path.join(
-                                        self.basedir,
-                                        wj)
-                            )
-                            ):
+                                wayround_org.utils.path.join(
+                                    '/multihost', host, 'lib'
+                                    )
+                                )
+                                or not os.path.isdir(
+                                wayround_org.utils.path.join(
+                                    self.basedir,
+                                    wj)
+                                )
+                                ):
 
                             # TODO: do we need it?
                             # NOTE: possible some strange results.

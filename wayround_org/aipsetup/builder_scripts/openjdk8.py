@@ -33,19 +33,34 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         if ret == 0:
 
-            for i in ['corba', 'hostspot', 'jaxp', 'jaxws',
-                      'langtools', 'nashorn']:
+            components_with_problems = []
+
+            for i in [
+                    'corba',
+                    'hotspot',
+                    'jaxp',
+                    'jaxws',
+                    'langtools',
+                    'nashorn',
+                    'jdk'
+                    ]:
 
                 if autotools.extract_high(
                         self.buildingsite_path,
-                        i,
+                        'jdk-' + i,
                         log=log,
                         unwrap_dir=False,
                         rename_dir=i
                         ) != 0:
 
                     log.error("Can't extract component: {}".format(i))
+                    components_with_problems.append(i)
                     ret = 2
+                    break
+
+            if len(components_with_problems) != 0:
+                for i in components_with_problems:
+                    log.error("Can't extract component: {}".format(i))
 
         return ret
 

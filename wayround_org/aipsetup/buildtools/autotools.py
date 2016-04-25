@@ -28,14 +28,14 @@ def calc_conf_hbt_options(builder_obj):
     forced_target = builder_obj.forced_target
 
     if (ai is not None
-                and (
-                    (hi == bi == ti)
-                    or
-                    (ai == bi == ti)
-                    or
-                    ((hi == bi) and (ti is None))
-                    )
-                and not forced_target
+            and (
+                (hi == bi == ti)
+                or
+                        (ai == bi == ti)
+                or
+                        ((hi == bi) and (ti is None))
+                )
+            and not forced_target
             ):
         ti = None
 
@@ -148,6 +148,16 @@ def extract_high(
                 i, mute=True
                 )
             if isinstance(parsed, dict):
+                '''
+                print("parsed['groups']['name'] == tarball_basename")
+                print(
+                    "  {} == {} == {}".format(
+                        parsed['groups']['name'],
+                        tarball_basename,
+                        parsed['groups']['name'] == tarball_basename
+                        )
+                    )
+                '''
                 if parsed['groups']['name'] == tarball_basename:
                     tarball = tarball_dir + os.path.sep + i
                     break

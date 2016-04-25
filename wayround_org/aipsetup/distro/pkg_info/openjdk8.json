@@ -3,7 +3,7 @@
   "home_page": "http://www.sun.com",
   "buildscript": "openjdk8",
   "version_tool": "",
-  "basename": "jdk8u60-jdk8u60",
+  "basename": "jdk",
   "filters": "#- version < 8\n#- version >= 9",
   "removable": true,
   "reducible": true,
