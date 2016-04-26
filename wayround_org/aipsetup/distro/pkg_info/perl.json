@@ -4,7 +4,7 @@
   "buildscript": "perl",
   "version_tool": "",
   "basename": "perl",
-  "filters": "- status !re ^$\n- version re \\d{4}\n\n- version re 5\\.22\\.?.*",
+  "filters": "- status !re ^$\n- version re \\d{4}\n\n#- version re 5\\.22(\\.?.*)",
   "removable": true,
   "reducible": true,
   "non_installable": false,
@@ -12,7 +12,7 @@
   "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/cpan.org/CPAN/authors/"
+    "/cpan.org/"
   ],
   "build_deps": [],
   "so_deps": [],

@@ -12,7 +12,7 @@
   "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/sourceforge.net/else/out/t/tc/tcl/"
+    "/sourceforge.net/primary/"
   ],
   "build_deps": [],
   "so_deps": [],

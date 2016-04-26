@@ -147,7 +147,7 @@ class InfoEditorUi:
         self.show_path_filtered_button = show_path_filtered_button
 
         show_filtered_button = \
-            Gtk.Button("'Source Paths' and 'Filtes' Filtered..")
+            Gtk.Button("'Source Paths' and \n'Filtes' Filtered..")
         self.show_filtered_button = show_filtered_button
 
         quit_button = Gtk.Button("Quit")
@@ -230,12 +230,15 @@ class InfoEditorUi:
             self._init_tab_description(),
             l
             )
+        
+        f33 = Gtk.Frame()
+        f33.add(b2)
 
         b2.pack_start(notebook, True, True, 0)
         b2.pack_start(b3, False, False, 0)
 
         main_box.pack_start(mbb, True, True, 0)
-        main_box.pack_start(b2, True, True, 0)
+        main_box.pack_start(f33, True, True, 0)
 
         main_box.show_all()
 
@@ -276,14 +279,14 @@ class InfoEditorUi:
         g.attach(self.basename_entry, 1, 1, 1, 1)
 
         self.reducible_cb = Gtk.CheckButton.new_with_label("Reducible")
-        
+
         self.removable_cb = Gtk.CheckButton.new_with_label("Removable")
-        
+
         self.non_installable_cb = \
             Gtk.CheckButton.new_with_label("Non Installable")
-        
+
         self.deprecated_cb = Gtk.CheckButton.new_with_label("Deprecated")
-        
+
         self.only_primary_install_cb = \
             Gtk.CheckButton.new_with_label(
                 "Only Primary Install"
@@ -332,7 +335,7 @@ class InfoEditorUi:
             self.deprecated_cb,
             0, 8, 2, 1
             )
-                 
+
         g.attach(
             self.only_primary_install_cb,
             0, 9, 2, 1

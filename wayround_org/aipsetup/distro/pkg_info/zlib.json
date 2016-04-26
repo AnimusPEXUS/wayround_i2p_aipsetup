@@ -9,9 +9,10 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/sourceforge.net/else/out/l/li/libpng/zlib/"
+    "/sourceforge.net/primary/"
   ],
   "build_deps": [],
   "so_deps": [],

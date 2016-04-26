@@ -127,9 +127,9 @@ def find_gnome_tarball_name(
 
             parsed_groups_version_list = parsed['groups']['version_list']
             if (int(parsed_groups_version_list[0]) == required_v1
-                        and
-                        int(parsed_groups_version_list[1]) == required_v2
-                    ):
+                and
+                int(parsed_groups_version_list[1]) == required_v2
+                ):
 
                 is_nineties = check_nineties(parsed)
 
@@ -170,23 +170,23 @@ def find_gnome_tarball_name(
                 if next_found_acceptable_tarball is None:
 
                     if (is_nineties
-                                and nineties_minors_are_acceptable == True
-                                and int_parsed_groups_version_list_1 < required_v2
-                            ):
+                        and nineties_minors_are_acceptable == True
+                        and int_parsed_groups_version_list_1 < required_v2
+                        ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
-                                and is_development
-                                and development_are_acceptable == True
-                                and int_parsed_groups_version_list_1 < required_v2
-                            ):
+                        and is_development
+                        and development_are_acceptable == True
+                        and int_parsed_groups_version_list_1 < required_v2
+                        ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
-                                and not is_nineties
-                                and not is_development
-                                and int_parsed_groups_version_list_1 < required_v2
-                            ):
+                        and not is_nineties
+                        and not is_development
+                        and int_parsed_groups_version_list_1 < required_v2
+                        ):
                         next_found_acceptable_tarball = i
 
                 if next_found_acceptable_tarball is not None:
@@ -386,9 +386,6 @@ def _get_by_glp_subroutine(
 
     ret = 0
 
-    if not mute:
-        print("   getting `{}': ".format(name), end='')
-
     res = proc(
         mode,
         pkg_client,
@@ -402,16 +399,17 @@ def _get_by_glp_subroutine(
         kwargs=kwargs
         )
 
+    res_text = None
+
     if isinstance(res, int) and res != 0:
+        res_text = 'ERROR'
         ret = 1
 
-        if not mute:
-            print('ERROR')
-
     else:
+        res_text = 'OK'
 
-        if not mute:
-            print('OK')
+    if not mute:
+        print("   getting {:/<40}: {}".format("`{}'".format(name), res_text))
 
     return ret
 

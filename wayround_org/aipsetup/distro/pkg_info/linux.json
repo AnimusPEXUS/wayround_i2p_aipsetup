@@ -9,9 +9,10 @@
   "reducible": false,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/kernel.org/kernel.org/ftp.kernel.org/"
+    "/kernel.org/downloads/linux/"
   ],
   "build_deps": [],
   "so_deps": [],

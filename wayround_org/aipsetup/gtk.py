@@ -81,6 +81,8 @@ class MainWindow:
             self.onExitClicked
             )
 
+        '''
+
         self.ui['button2'].connect(
             'clicked',
             self.onEditInfoClicked
@@ -90,9 +92,13 @@ class MainWindow:
             'clicked',
             self.onEditLatestButtonActivated
             )
+        '''
+
         self.ui['window1'].iconify()
 
         self.ui['window1'].show_all()
+
+        return
 
     def onExitClicked(self, toggle):
 
@@ -100,14 +106,20 @@ class MainWindow:
 
         Gtk.main_quit()
 
+        return
+
     def onEditLatestButtonActivated(self, toggle):
 
         import wayround_org.aipsetup.latesteditor
 
         wayround_org.aipsetup.latesteditor.main()
 
+        return
+
     def onEditInfoClicked(self, toggle):
 
         import wayround_org.aipsetup.infoeditor
 
         wayround_org.aipsetup.infoeditor.main()
+
+        return
