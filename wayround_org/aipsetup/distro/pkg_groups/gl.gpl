@@ -1,12 +1,12 @@
 {
     "deprecated": {
-        "MesaLib": "renamed to 'mesa'"
+        "MesaLib": "renamed to 'mesa'",
+        "glut": "is MesaGLUT"
     },
     "names": [
         "mesa",
         "MesaGLUT",
         "glu",
-        "glut",
         "glw",
         "glm",
         "mesa-demos",

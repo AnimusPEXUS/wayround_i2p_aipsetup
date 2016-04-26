@@ -59,7 +59,7 @@ def find_gnome_tarball_name(
         acceptable_extensions_order_list=None
         ):
 
-    #print('nineties_minors_are_acceptable: {}'.format(
+    # print('nineties_minors_are_acceptable: {}'.format(
     #    nineties_minors_are_acceptable))
 
     if acceptable_extensions_order_list is None:
@@ -119,7 +119,7 @@ def find_gnome_tarball_name(
                     required_v2 = int(parsed['groups']['version_list'][1])
 
                 break
-            #else:
+            # else:
                 #print("  {} didn't passed".format(i))
 
     #print("required_v1: {}, required_v2: {}".format(required_v1, required_v2))
@@ -146,7 +146,7 @@ def find_gnome_tarball_name(
 
                     found_required_targeted_tarballs.append(i)
 
-    #print("found_required_targeted_tarballs: {}".format(
+    # print("found_required_targeted_tarballs: {}".format(
     #    found_required_targeted_tarballs))
 
     if (len(found_required_targeted_tarballs) == 0
@@ -264,6 +264,8 @@ def gnome_get(
 
             for i in range(len(version_numbers)):
                 version_numbers[i] = int(version_numbers[i])
+
+            del kwargs['version']
 
         # if kwargs = {}
 
