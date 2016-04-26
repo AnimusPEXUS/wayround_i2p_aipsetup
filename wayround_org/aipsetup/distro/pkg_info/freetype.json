@@ -9,10 +9,11 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/sourceforge.net/else/out/f/fr/freetype/",
-    "/gnu.org/savannah.gnu.org/freetype/"
+    "/gnu.org/savannah/freetype/",
+    "/sourceforge.net/primary/downloads/sourceforge_net/freetype/"
   ],
   "build_deps": [],
   "so_deps": [],

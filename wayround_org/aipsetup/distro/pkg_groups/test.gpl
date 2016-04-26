@@ -1,9 +1,12 @@
 {
     "names": [
-        "cpio",
-        "bridge-utils",
-        "boost",
-        "autogen",
-        "bash"
+        {
+            "kwargs": {
+                "nmaa": true,
+                "daa": true
+            },
+            "name": "upower",
+            "proc": "gnome_get"
+        }
     ]
 }
