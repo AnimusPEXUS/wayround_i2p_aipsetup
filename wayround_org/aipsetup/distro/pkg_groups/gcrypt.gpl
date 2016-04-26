@@ -1,4 +1,7 @@
 {
+    "disabled": [
+        "opencdk"
+        ],
     "names": [
         "gnupg1",
         "gnupg2",
@@ -13,7 +16,6 @@
         "nettle",
         "nettle2",
         "npth",
-        "opencdk",
         "scute",
         "p11-kit"
     ]

@@ -1,4 +1,7 @@
 {
+    "disabled": [
+"opencdk"
+        ],
     "names": [
         "pkg-config",
     
@@ -17,7 +20,6 @@
 "nettle",
 "nettle2",
 "npth",
-"opencdk",
 "scute",
 "p11-kit",
 
