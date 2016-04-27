@@ -12,8 +12,7 @@
   "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/openjpeg.org/",
-    "/sourceforge.net/else/out/o/op/openjpeg.mirror/"
+    "/sourceforge.net/primary/downloads/sourceforge_net/openjpeg.mirror/"
   ],
   "build_deps": [],
   "so_deps": [],
