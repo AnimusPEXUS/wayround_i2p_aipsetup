@@ -4,14 +4,16 @@
   "buildscript": "gcc",
   "version_tool": "",
   "basename": "gcc",
-  "filters": "- version re \\d+\\.\\d+\\.0(\\.*)?",
+  "filters": "- version re \\d+\\.0(\\.*)?",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
   "only_primary_install": true,
   "tags": [],
-  "source_path_prefixes": [],
+  "source_path_prefixes": [
+    "/gnu.org/main/downloads/gnu_org/"
+  ],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

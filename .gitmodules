@@ -1,0 +1,3 @@
+[submodule "wayround_org/aipsetup/distro/pkg_source"]
+	path = wayround_org/aipsetup/distro/pkg_source
+	url = ./pkg_source

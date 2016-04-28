@@ -4,7 +4,7 @@
   "buildscript": "linux",
   "version_tool": "",
   "basename": "linux",
-  "filters": "",
+  "filters": "- status !re ^$",
   "removable": false,
   "reducible": false,
   "non_installable": false,
