@@ -21,8 +21,11 @@ import wayround_org.utils.tarball
 def calc_conf_hbt_options(builder_obj):
 
     hi = builder_obj.get_host_from_pkgi()
+
     bi = builder_obj.get_build_from_pkgi()
+
     ti = builder_obj.get_target_from_pkgi()
+
     ai = builder_obj.get_arch_from_pkgi()
 
     forced_target = builder_obj.forced_target
@@ -31,17 +34,20 @@ def calc_conf_hbt_options(builder_obj):
             and (
                 (hi == bi == ti)
                 or
-                        (ai == bi == ti)
+                (ai == bi == ti)
                 or
                         ((hi == bi) and (ti is None))
                 )
             and not forced_target
-            ):
+        ):
         ti = None
 
     if builder_obj.get_is_only_other_arch():
         hi = ai
         bi = hi
+        ti = hi
+        if not forced_target:
+            ti = None
 
     ret = []
 

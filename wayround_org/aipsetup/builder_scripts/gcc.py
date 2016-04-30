@@ -212,7 +212,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-__cxa_atexit',
 
                 # NOTE: gcc somtimes fails to crossbuild self with go enabled
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada', 
 
                 '--disable-bootstrap',
 

@@ -1694,7 +1694,9 @@ def clean_gen_locale(command_name, opts, args, adds):
             basedir=base_dir
             )
 
-        ret = system.gen_locale()
+        host, arch = _process_h_and_a_opts_strict(opts, config)
+
+        ret = system.gen_locale(host=host)
 
     return ret
 
