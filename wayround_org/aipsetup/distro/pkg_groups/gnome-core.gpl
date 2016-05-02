@@ -407,11 +407,6 @@
             "args": [],
             "proc": "gnome_get"
         },
-        "gtk-doc": {
-            "kwargs": {},
-            "args": [],
-            "proc": "gnome_get"
-        },
         "libsoup": {
             "kwargs": {},
             "args": [],

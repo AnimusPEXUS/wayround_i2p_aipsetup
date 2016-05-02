@@ -316,7 +316,7 @@ def configure_low(
             env=env,
             stdout=log.stdout,
             stderr=log.stderr,
-            stdin=subprocess.DEVNULL,
+            #stdin=subprocess.DEVNULL,
             cwd=working_dir
             )
     except:
