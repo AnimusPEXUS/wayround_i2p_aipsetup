@@ -1,6 +1,7 @@
 {
     "names": [
         "wayland",
-        "weston"
+        "weston",
+        "wayland-protocols"
     ]
 }

@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std_cmake",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "libcxx",
+  "basename": "wayland-protocols",
   "filters": "",
   "removable": true,
   "reducible": true,

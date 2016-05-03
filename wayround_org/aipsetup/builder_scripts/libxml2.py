@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         '''
         NOTE: xmlcatalog command from vanilla libxml2-2.9.2.tar.gz has bug,
               which leads to incorrect work with xml catalog, which leads to
-              damagede docbook installation
+              damaged docbook installation
 
               following patch need to be appyed on libxml2-2.9.2 for xmlcatalog
               to work properly:
@@ -56,12 +56,14 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            #'--with-python-install-dir={}'.format(
-            #    wayround_org.utils.path.join(
-            #        self.calculate_install_prefix(),
-            #        'lib'
-            #        ),
-            #    )
+            '--with-python-install-dir={}'.format(
+                wayround_org.utils.path.join(
+                    self.calculate_install_prefix(),
+                    'lib',
+                    'python2.7',
+                    'site-packages'
+                    ),
+                ),
             '--with-python={}'.format(
                 wayround_org.utils.path.join(
                     self.calculate_install_prefix(),
