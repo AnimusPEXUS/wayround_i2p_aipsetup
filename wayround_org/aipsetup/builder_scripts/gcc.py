@@ -123,6 +123,60 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
+    def builder_action_patch(self, called_as, log):
+        ret = 0
+        if (self.get_package_info()['pkg_nameinfo']['groups']['version']
+                == '5.3.0'):
+
+            # patch info: https://bugs.archlinux.org/task/48054
+
+            pa1 = """\
+--- trunk/gcc/config/i386/i386.c	2016/01/06 20:13:19	232110
++++ trunk/gcc/config/i386/i386.c	2016/01/06 20:19:04	232111
+@@ -13065,6 +13065,8 @@
+       m->fs.fp_valid = true;
+     }
+
++  m->fs.sp_valid = !frame_pointer_needed;
++
+   if (!int_registers_saved)
+     ix86_emit_save_regs_using_mov (frame.reg_save_offset);
+   if (!sse_registers_saved)
+"""
+            pa2 = """\
+--- branches/gcc-5-branch/gcc/config/i386/i386.c	2016/01/18 16:18:49	232527
++++ branches/gcc-5-branch/gcc/config/i386/i386.c	2016/01/18 16:19:53	232528
+@@ -9690,6 +9690,10 @@
+   if (TARGET_64BIT_MS_ABI && get_frame_size () > SEH_MAX_FRAME_SIZE)
+     return true;
+
++  /* SSE saves require frame-pointer when stack is misaligned.  */
++  if (TARGET_64BIT_MS_ABI && ix86_incoming_stack_boundary < 128)
++    return true;
++
+   /* In ix86_option_override_internal, TARGET_OMIT_LEAF_FRAME_POINTER
+      turns off the frame pointer by default.  Turn it back on now if
+      we've not got a leaf function.  */
+"""
+
+            for i in [
+                    (pa1, 1),
+                    (pa2, 2)
+                    ]:
+
+                p = subprocess.Popen(
+                    ['patch', '-p{}'.format(i[1])],
+                    cwd=self.get_src_dir(),
+                    stdin=subprocess.PIPE,
+                    stdout=log.stdout,
+                    stderr=log.stderr
+                    )
+                p.communicate(bytes(i[0], 'utf-8'))
+                if p.wait() != 0:
+                    ret = 1
+
+        return ret
+
     def builder_action_configure_define_environment(self, called_as, log):
         return {}
 
@@ -212,7 +266,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 '--enable-__cxa_atexit',
 
                 # NOTE: gcc somtimes fails to crossbuild self with go enabled
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada', 
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
 
                 '--disable-bootstrap',
 

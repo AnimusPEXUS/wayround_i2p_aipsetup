@@ -89,7 +89,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--with-egl-platforms=x11,drm,wayland',  # -
 
 
-            '--with-gallium-drivers=nouveau,svga,swrast',  # -
+            '--with-gallium-drivers=nouveau,svga,swrast,virgl',  # -
             '--with-dri-drivers=nouveau,i915,i965,r200,radeon,swrast',  # -
             #'--without-gallium-drivers',
             #'--without-dri-drivers',

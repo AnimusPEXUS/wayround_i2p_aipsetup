@@ -139,7 +139,7 @@ class Builder:
 
     def get_target_from_pkgi(self):
         ret = self.get_package_info()['constitution']['target']
-        #if self.override_get_arch_from_pkgi:
+        # if self.override_get_arch_from_pkgi:
         #    ret = self.override_get_arch_from_pkgi
         return ret
 
@@ -683,7 +683,40 @@ class Builder:
         return ret
 
     def builder_action_patch(self, called_as, log):
-        # TODO: add some default patch handler
+        series_file_path = wayround_org.utils.path.join(
+            self.get_patches_dir(),
+            'series'
+            )
+
+        series = []
+
+        if os.path.isfile(series_file_path):
+            with open(series_file_path) as f:
+                series = f.read().split('\n')
+
+        for i in series:
+            p_file = wayround_org.utils.path.join(
+                self.get_patches_dir(),
+                i
+            )
+
+            if os.path.isfile(p_file):
+                log.info("applying patch {}".format(i))
+
+                with open(p_file) as f:
+                    p_text = f.read()
+
+                p = subprocess.Popen(
+                    ['patch', '-p1'],
+                    cwd=self.get_src_dir(),
+                    stdin=subprocess.PIPE,
+                    stdout=log.stdout,
+                    stderr=log.stderr
+                    )
+                p.communicate(bytes(p_text, 'utf-8'))
+                if p.wait() != 0:
+                    ret = 1
+
         return 0
 
     def builder_action_autogen(self, called_as, log):
