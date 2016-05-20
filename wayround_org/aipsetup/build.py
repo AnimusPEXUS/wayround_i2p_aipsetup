@@ -685,7 +685,8 @@ class BuildCtl:
                         )
                     )
 
-            log.close()
+            # NOTE: log closes it self automatically now
+            # log.close()
 
             if ret != 0:
                 break
@@ -2802,7 +2803,8 @@ class BuildingSiteCtl:
                 )
             log.info("Buildingsite processes started")
             log.warning("Closing this log now, cause it can't work farther")
-            log.stop()
+            # log.stop()
+            del log
 
             if build_ctl.complete(buildscript_ctl) != 0:
                 logging.error("Error on building stage")

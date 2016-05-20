@@ -186,7 +186,7 @@ def extract_high(
                 )
 
     if own_log:
-        log.close()
+        # log.close()
 
     return ret
 
@@ -273,7 +273,7 @@ def configure_high(
             )
 
     if own_log:
-        log.close()
+        # log.close()
 
     return ret
 
@@ -406,7 +406,7 @@ def make_high(
         )
 
     if own_log:
-        log.close()
+        # log.close()
 
     return ret
 

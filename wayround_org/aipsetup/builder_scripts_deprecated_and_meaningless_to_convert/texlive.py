@@ -94,7 +94,7 @@ def main(buildingsite, action=None):
                 rename_dir=False
                 )
 
-            log.close()
+            # log.close()
 
         if 'configure' in actions and ret == 0:
 

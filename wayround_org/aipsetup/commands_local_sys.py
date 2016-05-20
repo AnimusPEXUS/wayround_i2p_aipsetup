@@ -765,7 +765,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
     log_name = log.log_filename
 
-    log.close()
+    # log.close()
 
     logging.info("Log saved to {}".format(log_name))
 
@@ -892,7 +892,6 @@ def clean_find_so_problems(command_name, opts, args, adds):
     for i in total_problem_packages_list:
         log.info("    {}".format(i))
 
-    log.stop()
     print("Log written to {}".format(log.log_filename))
 
     return ret
@@ -1271,7 +1270,7 @@ Wrong cleaning can ruin your system
 """
                                 )
 
-            log.close()
+            # log.close()
 
     return ret
 

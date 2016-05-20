@@ -134,7 +134,7 @@ def cmake_high(
         )
 
     if own_log:
-        log.close()
+        # log.close()
 
     return ret
 
