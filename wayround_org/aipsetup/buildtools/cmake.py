@@ -133,7 +133,7 @@ def cmake_high(
         env=env
         )
 
-    if own_log:
+    # if own_log:
         # log.close()
 
     return ret

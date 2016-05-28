@@ -56,11 +56,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                 'qt',
                 self.custom_data['qt_number_str']
                 ),
-            #'-openssl-linked',
+            '-system-sqlite',
+
+            # I'm adding this for qt5, don't know if qt4 has this
+            '-dbus-linked',
+            '-openssl-linked',
             ]
 
         if self.custom_data['qt_number_str'] == '5':
             opts += [
+                '-no-compile-examples',
+                '-skip', 'qtwebengine',
                 '-pulseaudio',
                 '-no-alsa'
                 ]
@@ -82,7 +88,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
         return ret
 
-    #def builder_action_build_define_cpu_count(self, called_as, log):
+    # def builder_action_build_define_cpu_count(self, called_as, log):
     #    return 1
 
     def builder_action_distribute_define_args(self, called_as, log):

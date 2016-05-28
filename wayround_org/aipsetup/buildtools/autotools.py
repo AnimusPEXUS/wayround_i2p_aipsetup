@@ -185,7 +185,7 @@ def extract_high(
                 more_when_one_extracted_ok=more_when_one_extracted_ok
                 )
 
-    if own_log:
+    #if own_log:
         # log.close()
 
     return ret
@@ -272,7 +272,7 @@ def configure_high(
             script_name
             )
 
-    if own_log:
+    #if own_log:
         # log.close()
 
     return ret
@@ -405,7 +405,7 @@ def make_high(
         make_filename=make_filename
         )
 
-    if own_log:
+    #if own_log:
         # log.close()
 
     return ret

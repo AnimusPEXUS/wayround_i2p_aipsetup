@@ -74,13 +74,13 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             ret = 10
         return ret
 
-    def builder_action_after_distribute(self, called_as, log):
+    def builder_action_distribute(self, called_as, log):
         ret = autotools.make_high(
             self.buildingsite_path,
             log=log,
             options=[],
             arguments=[
-                'all',
+                'default',
                 'install',
                 'PWD={}'.format(self.get_src_dir()),
                 'KERNELRELEASE={}'.format(self.custom_data['kern_rel']),

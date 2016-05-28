@@ -1058,8 +1058,21 @@ class Builder:
     def builder_action_distribute_define_opts(self, called_as, log):
         return []
 
+    def builder_action_distribute_define_DESTDIR_name(self, called_as, log):
+        return 'DESTDIR'
+
     def builder_action_distribute_define_args(self, called_as, log):
-        return ['install', 'DESTDIR={}'.format(self.get_dst_dir())]
+        ret = [
+            'install',
+            '{}={}'.format(
+                self.builder_action_distribute_define_DESTDIR_name(
+                    called_as,
+                    log
+                    ),
+                self.get_dst_dir()
+                )
+            ]
+        return ret
 
     def builder_action_distribute(self, called_as, log):
 

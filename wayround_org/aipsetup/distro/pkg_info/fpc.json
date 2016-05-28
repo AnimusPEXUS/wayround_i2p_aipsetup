@@ -1,19 +1,17 @@
 {
   "description": "",
-  "home_page": "",
-  "buildscript": "go",
+  "home_page": "http://www.freepascal.org/",
+  "buildscript": "fpc",
   "version_tool": "",
-  "basename": "go",
+  "basename": "fpc",
   "filters": "",
   "removable": true,
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
-  "only_primary_install": true,
+  "only_primary_install": false,
   "tags": [],
-  "source_path_prefixes": [
-    "/golang.org/"
-  ],
+  "source_path_prefixes": [],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []

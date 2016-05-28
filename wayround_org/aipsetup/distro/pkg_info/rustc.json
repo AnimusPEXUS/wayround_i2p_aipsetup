@@ -1,9 +1,9 @@
 {
   "description": "",
-  "home_page": "",
-  "buildscript": "go",
+  "home_page": "https://www.rust-lang.org/",
+  "buildscript": "rustc",
   "version_tool": "",
-  "basename": "go",
+  "basename": "rustc",
   "filters": "",
   "removable": true,
   "reducible": true,
@@ -11,9 +11,7 @@
   "deprecated": false,
   "only_primary_install": true,
   "tags": [],
-  "source_path_prefixes": [
-    "/golang.org/"
-  ],
+  "source_path_prefixes": [],
   "build_deps": [],
   "so_deps": [],
   "runtime_deps": []
