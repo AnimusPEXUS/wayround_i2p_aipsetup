@@ -9,6 +9,12 @@ import glob
 import logging
 import os.path
 
+import gi
+
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+
+
 from gi.repository import Gdk, Gtk
 
 import wayround_org.aipsetup.controllers
@@ -171,7 +177,7 @@ class MainWindow:
                     )
 
                 self.currently_opened = os.path.basename(filename)
-                
+
                 self.ui.window.set_title(
                     filename + " - aipsetup v3 .json info file editor"
                     )

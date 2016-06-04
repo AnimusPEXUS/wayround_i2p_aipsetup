@@ -185,6 +185,8 @@ def cmake_low(
 
         try:
             p.wait()
+        except KeyboardInterrupt:
+            raise
         except:
             log.error(
                 "Exception occurred while waiting for cmake\n{}".format(

@@ -34,6 +34,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             f.writelines(ftl)
             f.close()
 
+            '''
             fn = self.get_src_dir() + '/util/grub-mkfont.c'
 
             f = open(fn)
@@ -48,6 +49,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             f = open(fn, 'w')
             f.writelines(ftl)
             f.close()
+            '''
 
             """
 

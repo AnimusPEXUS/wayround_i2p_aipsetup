@@ -3,6 +3,7 @@
         "sane-backends",
         "libsndfile",
         "x264",
+        "x265",
         "ffmpeg",
         "mplayer",
         "lame",

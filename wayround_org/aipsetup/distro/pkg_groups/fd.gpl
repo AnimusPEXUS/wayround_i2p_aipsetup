@@ -13,7 +13,6 @@
             "name": "libevdev",
             "proc": "gnome_get"
         },
-        "freetype",
         "libgusb",
         "geoclue",
         "hicolor-icon-theme",

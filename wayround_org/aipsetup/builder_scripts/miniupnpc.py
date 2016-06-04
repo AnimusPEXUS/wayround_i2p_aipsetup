@@ -11,6 +11,10 @@ import wayround_org.aipsetup.builder_scripts.std_cmake
 
 class Builder(wayround_org.aipsetup.builder_scripts.std_cmake.Builder):
 
+    def define_custom_data(self):
+        self.source_configure_reldir = 'miniupnpc'
+        return
+
     def define_actions(self):
         ret = super().define_actions()
         ret['after_distribute'] = self.builder_action_after_distribute

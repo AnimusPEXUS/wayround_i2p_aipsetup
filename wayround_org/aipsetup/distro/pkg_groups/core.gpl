@@ -20,6 +20,7 @@
         },
 	"mdadm",
 	"lvm2",
+	"avahi",
 	    "cryptsetup",
         "bc",
         "lsof",
@@ -58,7 +59,10 @@
         "json-c",
         "Linux-PAM",
         "man",
+        "man-db",
+        "man-pages",
         "net-snmp",
+        "libpipeline",
         "ntp",
         "openexr",
         "openvpn",
@@ -122,6 +126,8 @@
         "mono",
         "acpica-unix",
         "ntfs-3g_ntfsprogs",
-        "libyaml"
+        "libyaml",
+        "npth",
+        "libpthread-stubs"
     ]
 }

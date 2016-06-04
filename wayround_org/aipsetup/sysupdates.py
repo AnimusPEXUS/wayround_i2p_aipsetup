@@ -44,7 +44,7 @@ def all_actions():
                 ldconfig,
                 update_mime_database,
                 gdk_pixbuf_query_loaders,
-                pango_querymodules,
+                # pango_querymodules,
                 glib_compile_schemas,
                 gtk_query_immodules_2_0,
                 gtk_query_immodules_3_0,

@@ -6,7 +6,12 @@ import wayround_org.aipsetup.builder_scripts.std
 
 
 class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
+    raise Exception("depricated")
+    pass
 
+    # NOTE: 4.0 uses normal configure.ac already
+
+    '''
     def define_custom_data(self):
         self.apply_host_spec_linking_interpreter_option = False
         self.apply_host_spec_linking_lib_dir_options = False
@@ -15,8 +20,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def define_actions(self):
         ret = super().define_actions()
-        del(ret['autogen'])
-        del(ret['configure'])
+        # del(ret['autogen'])
+        # del(ret['configure'])
         return ret
 
     # def builder_action_build_define_args(self, called_as, log):
@@ -27,3 +32,4 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'install',
             'PREFIX={}'.format(self.calculate_dst_install_prefix())
             ]
+    '''

@@ -185,7 +185,7 @@ def extract_high(
                 more_when_one_extracted_ok=more_when_one_extracted_ok
                 )
 
-    #if own_log:
+    # if own_log:
         # log.close()
 
     return ret
@@ -272,7 +272,7 @@ def configure_high(
             script_name
             )
 
-    #if own_log:
+    # if own_log:
         # log.close()
 
     return ret
@@ -316,7 +316,7 @@ def configure_low(
             env=env,
             stdout=log.stdout,
             stderr=log.stderr,
-            #stdin=subprocess.DEVNULL,
+            # stdin=subprocess.DEVNULL,
             cwd=working_dir
             )
     except:
@@ -334,6 +334,8 @@ def configure_low(
 
         try:
             p.wait()
+        except KeyboardInterrupt:
+            raise
         except:
             log.error(
                 "Exception occurred while waiting for configure\n" +
@@ -405,8 +407,8 @@ def make_high(
         make_filename=make_filename
         )
 
-    #if own_log:
-        # log.close()
+    # if own_log:
+    # log.close()
 
     return ret
 
@@ -432,6 +434,7 @@ def make_low(
     log.info("command:")
     for i in cmd:
         log.info("    {}".format(i))
+    # log.info("debug: mfn: {}, opts: {}, args: {}".format(mfn, opts, args))
 
     p = None
     try:
@@ -457,6 +460,8 @@ def make_low(
 
         try:
             p.wait()
+        except KeyboardInterrupt:
+            raise
         except:
             log.error(
                 "exception occurred while waiting for builder\n" +

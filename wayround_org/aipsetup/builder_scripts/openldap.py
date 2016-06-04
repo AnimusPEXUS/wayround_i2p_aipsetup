@@ -7,6 +7,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure_define_opts(self, called_as, log):
         return super().builder_action_configure_define_opts(called_as, log) + [
-            #'--enable-bdb=no'
+            #'--enable-bdb=no',
+            '--with-tls=openssl',
+            '--disable-bdb',
+            '--disable-hdb',
             ]
-

@@ -9,7 +9,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
             '--disable-gtk',
-            '--enable-gtk3',
+            '--disable-gtk3',
             '--enable-glib',
             '--enable-gobject',
             '--enable-python',
@@ -18,7 +18,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             #'--disable-python-dbus',
             '--disable-pygtk',
             '--disable-qt3',
-            '--enable-qt4',
+            '--disable-qt4',
             '--with-distro=lfs',
             #                    '--with-distro=' +
             #                        pkg_info['constitution']['system_title'],

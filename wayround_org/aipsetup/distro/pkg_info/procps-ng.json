@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "http://sf.net",
-  "buildscript": "std",
+  "buildscript": "procps_ng",
   "version_tool": "",
   "basename": "procps-ng",
   "filters": "- status !re ^$",
@@ -9,6 +9,7 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

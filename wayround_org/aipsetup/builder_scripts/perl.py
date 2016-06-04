@@ -18,7 +18,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '-Dprefix={}'.format(self.calculate_install_prefix()),
             '-Dcc={}-gcc'.format(self.get_host_from_pkgi()),
             '-Duseshrplib',
-            '-d'
+            '-d',
+            '-e'
             ]
         #if self.get_arch_from_pkgi().startswith('x86_64'):
         #    ret +=

@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://www.kernel.org",
-  "buildscript": "man-pages",
+  "buildscript": "man_pages",
   "version_tool": "",
   "basename": "man-pages",
   "filters": "",
@@ -9,6 +9,7 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

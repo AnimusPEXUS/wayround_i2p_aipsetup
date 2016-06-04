@@ -758,6 +758,7 @@ class Builder:
                 )
 
             for i in [
+                    ('makeconf.sh', ['./makeconf.sh']),
                     ('autogen.sh', ['./autogen.sh']),
                     ('bootstrap.sh', ['./bootstrap.sh']),
                     ('bootstrap', ['./bootstrap']),
@@ -904,6 +905,9 @@ class Builder:
             #          *.la files
             # '--with-sysroot={}'.format(self.get_host_arch_dir())
 
+            # '--disable-silent-rules' # some packages configs exiting with
+            #                          # error if option is unknown
+
             ] + autotools.calc_conf_hbt_options(self) + \
             self.all_automatic_flags_as_list()
 
@@ -987,7 +991,9 @@ class Builder:
         return ret
 
     def builder_action_build_define_cpu_count(self, called_as, log):
-        return os.cpu_count()  # 1
+        # NOTE: more than 1 sometimes brings
+        #       many problems
+        return 1  # os.cpu_count()  # 1
 
     def builder_action_build_collect_options(self, called_as, log):
         ret = []
