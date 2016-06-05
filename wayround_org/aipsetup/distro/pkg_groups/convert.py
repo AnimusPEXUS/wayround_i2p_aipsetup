@@ -4,14 +4,8 @@ import os.path
 import json
 import yaml
 
-files = glob.glob('*.gpl')
+files = glob.glob('*.gpl.yaml')
 
 for i in files:
 
-    with open(i) as f:
-        txt = f.read()
-
-    data = json.loads(txt)
-
-    with open(i + '.yaml', 'w') as f:
-        f.write(yaml.dump(data))
+    os.rename(i, i[:-5])
