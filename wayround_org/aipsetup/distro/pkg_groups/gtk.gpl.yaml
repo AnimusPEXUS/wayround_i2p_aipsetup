@@ -1,0 +1,135 @@
+ask_version: false
+names:
+  GConf:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  at-spi2-atk:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  at-spi2-core:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  atk:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  atkmm:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  cairo:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  cairomm:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  dconf:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  fontconfig:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  freetype:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gdk-pixbuf:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  glib:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  glib-networking:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  glibmm:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gmime:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gobject-introspection:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gtk+:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gtk+2:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gtk-doc:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gtk-engines:
+    args: []
+    kwargs: {daa: false, nmaa: false, version: '2.20'}
+    proc: gnome_get
+  gtkhtml:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gtkmm:
+    args: []
+    kwargs: {daa: true, nmaa: false}
+    proc: gnome_get
+  gtksourceview:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  harfbuzz:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  json-glib:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  librsvg:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libsigc++:
+    _comment: 'don''t know: must be normal or gnome style version'
+    args: []
+    kwargs: {}
+    proc: normal_get
+  pango:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  pangomm:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  py2cairo:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  pycairo:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  pygobject:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  source-highlight:
+    args: []
+    kwargs: {}
+    proc: normal_get

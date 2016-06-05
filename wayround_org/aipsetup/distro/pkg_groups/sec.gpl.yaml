@@ -1,0 +1,2 @@
+names: [apparmor, checkpolicy, libselinux, libsemanage, libsepol, policycoreutils,
+  sepolgen]

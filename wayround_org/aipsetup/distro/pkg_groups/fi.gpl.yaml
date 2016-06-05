@@ -1,0 +1,9 @@
+disabled: [libseccomp, gcc, Linux-PAM, emacs, shadow, systemd]
+names: [pkg-config, openssl, gnupg1, gnupg2, gnutls, gpa, gpgme, libassuan, libgcrypt,
+  libgpg-error, libksba, libtasn1, nettle, nettle2, npth, scute, p11-kit, file, less,
+  ncurses, bash, glibc, coreutils, linux, readline, util-linux, parted, squashfs,
+  sqlite-autoconf, syslinux, grub2, mc, slang, glib, nano, Python3, tar, xz, gzip,
+  bzip2, zlib, e2fsprogs, dosfstools, attr, acl, kmod, iproute2, iptables, groff,
+  less, findutils, pcre, grep, sed, gc, libatomic_ops, procps-ng, psmisc, gdbm, db,
+  inetutils, man, texinfo, pciutils, usbutils, libcap2, mdadm, lvm2, cryptsetup, gcc,
+  gmp, mpfr, mpc, isl, cloog]

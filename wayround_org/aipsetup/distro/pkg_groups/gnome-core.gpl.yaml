@@ -1,0 +1,415 @@
+ask_version: true
+names:
+  ORBit2:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  adwaita-icon-theme:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  baobab:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  cantarell-fonts:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  caribou:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  cheese:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  clutter: {proc: gnome_get}
+  clutter-gst: {proc: gnome_get}
+  clutter-gtk:
+    kwargs: {daa: true}
+    proc: gnome_get
+  cogl:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  dconf:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  devhelp:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  empathy:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  eog:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  epiphany:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  evince:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  evolution:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  evolution-data-server:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  exempi:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  folks:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gcr:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gdm:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  geocode-glib:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gjs:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  glade:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-backgrounds:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-bluetooth:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-calculator:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-common:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-contacts:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-control-center:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-desktop:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-dictionary:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-disk-utility:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-doc-utils:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  gnome-font-viewer:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-games:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-icon-theme:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-icon-theme-extras:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-icon-theme-symbolic:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-js-common:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gnome-keyring:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-menus:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-online-accounts:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-online-miners:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-packagekit:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-panel:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-screensaver:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-screenshot:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-search-tool:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-session:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-settings-daemon:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-shell:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-shell-extensions:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-system-log:
+    args: []
+    kwargs: {daa: true, nmaa: true, version: '{asked_version}'}
+    proc: gnome_get
+  gnome-system-monitor:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-terminal:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-themes-standard:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-tweak-tool:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-user-docs:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-user-share:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gnome-video-effects:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  grilo:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  grilo-plugins:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gsettings-desktop-schemas:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gssdp:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gucharmap:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  gupnp:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gupnp-igd:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  gvfs:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  libchamplain:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libcroco:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libgdata:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libgee:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  libgnome-keyring:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  libgnomekbd:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  libgsf:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libgtop:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libgweather:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  libgxps:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libmediaart:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libnotify:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libpeas:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libsecret:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  libsoup:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  libwnck:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  libzapojit:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  mousetweaks:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  mutter:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  nautilus:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  network-manager-applet:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  notification-daemon:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  rest:
+    args: []
+    kwargs: {}
+    proc: normal_get
+  seed:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  sushi:
+    args: []
+    kwargs: {daa: true, nmaa: true, version: '{asked_version}'}
+    proc: gnome_get
+  totem:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  totem-pl-parser:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  tracker:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  vala:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  vino:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  vte:
+    args: []
+    kwargs: {}
+    proc: gnome_get
+  yelp:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  yelp-tools:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  yelp-xsl:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get
+  zenity:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get

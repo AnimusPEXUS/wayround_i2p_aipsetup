@@ -1,0 +1,116 @@
+names:
+- sane-backends
+- libsndfile
+- x264
+- x265
+- ffmpeg
+- mplayer
+- lame
+- flac
+- cdparanoia-III
+- celt
+- cortado
+- ezstream
+- flac
+- icecast
+- ices
+- libao
+- libfishsound
+- libogg
+- liboggz
+- libshout
+- libtheora
+- libvorbis
+- libquicktime
+- mgm
+- opus
+- opus-tools
+- opusfile
+- rogg
+- speex
+- speexdsp
+- vorbis-tools
+- xvidcore
+- ghostscript
+- FreeImage
+- sox
+- librsvgmm
+- librsvg
+- openjpeg1
+- openjpeg2
+- kwargs: {daa: true}
+  name: libjpeg-turbo
+  proc: gnome_get
+- mjpegtools
+- jasper
+- openexr
+- ilmbase
+- giflib
+- giflib4
+- libungif
+- openimageio
+- DevIL
+- libgd
+- vigra
+- djvulibre
+- tiff
+- lcms
+- lcms2
+- libpng
+- frei0r-plugins
+- gimp
+- gap
+- gegl
+- gegl_0_2
+- gegl_0_3
+- gsl
+- babl
+- gmerlin
+- gmerlin-avdecoder
+- gmerlin-effectv
+- gmerlin-encoders
+- libmad
+- madplay
+- libid3tag
+- libwebp
+- libvpx
+- libexif
+- exif
+- a52dec
+- libgphoto2
+- gphoto2
+- popt
+- libcroco
+- args: []
+  kwargs: {}
+  name: gst-plugins-base
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: gst-plugins-good
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: gst-plugins-bad
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: gst-plugins-ugly
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: gst-plugins-gl
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: gst-ffmpeg
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: gstreamer
+  proc: gnome_get
+- libmusicbrainz
+- opencv2
+- opencv3
+- openal-soft
+- freealut

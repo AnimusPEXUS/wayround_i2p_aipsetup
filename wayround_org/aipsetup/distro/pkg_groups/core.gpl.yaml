@@ -1,0 +1,125 @@
+names:
+- args: []
+  kwargs: {}
+  name: NetworkManager
+  proc: normal_get
+- args: []
+  kwargs: {}
+  name: libsoup
+  proc: gnome_get
+- args: []
+  kwargs: {}
+  name: libsecret
+  proc: gnome_get
+- mdadm
+- lvm2
+- avahi
+- cryptsetup
+- bc
+- lsof
+- dosfstools
+- apr
+- apr-util
+- cpio
+- bridge-utils
+- boost
+- apache-ant
+- dev86
+- bind9
+- bluez
+- curl
+- dhcp
+- dhcpcd
+- dovecot
+- e2fsprogs
+- squashfs
+- exim
+- cyrus-sasl
+- gsasl
+- elfutils
+- file
+- openjdk8
+- ilmbase
+- imagemagick
+- libgcrypt
+- libseccomp
+- libtirpc
+- libusb
+- groff
+- lynx
+- libnftnl
+- libmnl
+- json-c
+- Linux-PAM
+- man
+- man-db
+- man-pages
+- net-snmp
+- libpipeline
+- ntp
+- openexr
+- openvpn
+- ppp
+- pptpd
+- rp-l2tp
+- rp-pppoe
+- scons
+- sudo
+- qrencode
+- zint
+- zbar
+- cups
+- ijs
+- cups-filters
+- foomatic-db-engine
+- foomatic-filters
+- qpdf
+- wireless_tools
+- wpa_supplicant
+- kismet
+- tree
+- libpcap
+- pciutils
+- usbutils
+- xmlto
+- cppunit
+- libgssapi
+- gss
+- gssdp
+- libgssglue
+- librpcsecgss
+- libnfsidmap
+- shishi
+- doxygen
+- p7zip
+- mtdev
+- xterm
+- iso-codes
+- libnl
+- openldap
+- libatasmart
+- bash-completion
+- ModemManager
+- graphviz
+- qemu
+- libclc
+- neon
+- tor
+- torsocks
+- libevent
+- asciidoc
+- libpwquality
+- cracklib
+- krb5
+- subversion
+- hamcrest-java
+- rsync
+- valgrind
+- miniupnpd
+- miniupnpc
+- mono
+- acpica-unix
+- ntfs-3g_ntfsprogs
+- libyaml
+- npth
+- libpthread-stubs

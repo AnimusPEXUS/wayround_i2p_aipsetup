@@ -1,0 +1,6 @@
+ask_version: false
+names:
+  gtk+2:
+    args: []
+    kwargs: {}
+    proc: gnome_get

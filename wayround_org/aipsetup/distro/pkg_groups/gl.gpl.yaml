@@ -1,0 +1,3 @@
+deprecated: {MesaLib: renamed to 'mesa', glut: is MesaGLUT}
+names: [mesa, MesaGLUT, glu, glw, glm, mesa-demos, glew, freeglut, vdpauinfo, libvdpau,
+  libomxil-bellagio]

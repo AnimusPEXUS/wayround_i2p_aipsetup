@@ -1,6 +1,6 @@
 
 import functools
-import json
+import yaml
 import logging
 import os.path
 import re
@@ -594,8 +594,7 @@ def get_list(config, list_name):
             )
         )
 
-    f = open(list_filename)
-    conf = json.loads(f.read())
-    f.close()
+    with open(list_filename) as f:
+        conf = yaml.load(f.read())
 
     return conf

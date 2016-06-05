@@ -1,0 +1,63 @@
+names:
+- xproto
+- libXau
+- libpthread-stubs
+- libpciaccess
+- colord
+- colord-gtk
+- desktop-file-utils
+- libdrm
+- fontconfig
+- {name: libevdev, proc: gnome_get}
+- libgusb
+- geoclue
+- hicolor-icon-theme
+- libepoxy
+- libmbim
+- libinput
+- liboil
+- pixman
+- exempi
+- libopenraw
+- libqmi
+- libspectre
+- media-player-info
+- libnice
+- p11-kit
+- pkg-config
+- polkit
+- plymouth
+- poppler
+- poppler-data
+- {name: pulseaudio, proc: gnome_get}
+- shared-mime-info
+- startup-notification
+- icon-naming-utils
+- tango-icon-theme
+- kwargs: {daa: true, nmaa: false}
+  name: udisks
+  proc: gnome_get
+- kwargs: {daa: true, nmaa: true}
+  name: upower
+  proc: gnome_get
+- libxcb
+- xcb-proto
+- xcb-util
+- xcb-util-cursor
+- xcb-util-image
+- xcb-util-keysyms
+- xcb-util-renderutil
+- xcb-util-wm
+- farstream
+- farsight
+- farsight2
+- libjingle
+- telepathy-glib
+- telepathy-inspector
+- telepathy-mission-control
+- telepathy-farstream
+- telepathy-gabble
+- telepathy-haze
+- telepathy-idle
+- telepathy-salut
+- telepathy-logger

@@ -1,0 +1,49 @@
+names:
+- {name: gtk-sharp, proc: gnome_get}
+- uhttpmock
+- libgudev
+- gdl
+- gtkspell
+- gtkspell3
+- itstool
+- libcanberra
+- libe-book
+- libndp
+- librevenge
+- libxkbcommon
+- libzeitgeist
+- {name: webkitgtk, proc: gnome_get}
+- {name: webkitgtk2.4, proc: gnome_get}
+- zeitgeist
+- accountsservice
+- ibus
+- ibus-anthy
+- ibus-chewing
+- ibus-gjs
+- ibus-qt
+- ibus-xkb
+- ibus-xkb-layouts
+- enchant
+- libaccounts-glib
+- accounts-qt
+- libsignon-glib
+- libsignoncrypto-qt
+- signon
+- signon-oauth2
+- libical
+- liboauth
+- libIDL
+- libwacom
+- libxklavier
+- args: []
+  kwargs: {}
+  name: polkit-gnome
+  proc: normal_get
+- args: []
+  kwargs: {}
+  name: rest
+  proc: normal_get
+- args: []
+  kwargs: {}
+  name: mm-common
+  proc: normal_get
