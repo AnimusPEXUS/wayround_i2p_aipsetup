@@ -31,14 +31,14 @@ def calc_conf_hbt_options(builder_obj):
     forced_target = builder_obj.forced_target
 
     if (ai is not None
-            and (
-                (hi == bi == ti)
-                or
-                (ai == bi == ti)
-                or
-                        ((hi == bi) and (ti is None))
-                )
-            and not forced_target
+        and (
+                    (hi == bi == ti)
+                    or
+                    (ai == bi == ti)
+                    or
+                    ((hi == bi) and (ti is None))
+                    )
+        and not forced_target
         ):
         ti = None
 
@@ -139,9 +139,12 @@ def extract_high(
 
     tarball_dir_files_len = len(tarball_dir_files)
 
-    tmpdir = tempfile.mkdtemp(
-        dir=wayround_org.aipsetup.build.getDIR_TEMP(building_site)
-        )
+    tmpdir = wayround_org.aipsetup.build.getDIR_TEMP(building_site)
+
+    if not os.path.isdir(tmpdir):
+        os.makedirs(tmpdir)
+
+    tmpdir = tempfile.mkdtemp(dir=tmpdir)
 
     if tarball_dir_files_len == 0:
         log.error("No Source Tarball Supplied")

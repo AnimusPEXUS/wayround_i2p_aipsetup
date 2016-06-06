@@ -1,15 +1,15 @@
 names:
-- args: []
+- name: NetworkManager
+  args: []
   kwargs: {}
-  name: NetworkManager
   proc: normal_get
-- args: []
+- name: libsoup
+  args: []
   kwargs: {}
-  name: libsoup
   proc: gnome_get
-- args: []
+- name: libsecret
+  args: []
   kwargs: {}
-  name: libsecret
   proc: gnome_get
 - mdadm
 - lvm2

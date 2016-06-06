@@ -7,7 +7,7 @@ names:
 - mplayer
 - lame
 - flac
-- cdparanoia-III
+# - cdparanoia-III # project seems abendoned
 - celt
 - cortado
 - ezstream
@@ -38,8 +38,8 @@ names:
 - librsvg
 - openjpeg1
 - openjpeg2
-- kwargs: {daa: true}
-  name: libjpeg-turbo
+- name: libjpeg-turbo
+  kwargs: {daa: true}
   proc: gnome_get
 - mjpegtools
 - jasper
@@ -81,9 +81,9 @@ names:
 - gphoto2
 - popt
 - libcroco
-- args: []
+- name: gst-plugins-base
+  args: []
   kwargs: {}
-  name: gst-plugins-base
   proc: gnome_get
 - args: []
   kwargs: {}

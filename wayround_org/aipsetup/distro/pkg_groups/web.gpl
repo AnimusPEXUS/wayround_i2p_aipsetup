@@ -1,2 +1,17 @@
-names: [nss, nspr, js185, mozjs, mozjs24, mozjs17, firefox, thunderbird, seamonkey,
-  xulrunner]
+names:
+- nss
+- nspr
+
+# - js185 # deprecated
+
+- mozjs
+- mozjs24 
+- mozjs17
+
+# NOTE: disabling those: to huge
+# - firefox
+# - thunderbird
+# - seamonkey
+
+- xulrunner
+
