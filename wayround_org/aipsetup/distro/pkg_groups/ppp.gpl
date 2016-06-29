@@ -1,0 +1,8 @@
+names: [
+    ppp, 
+    rp-pppoe,
+    pptp,
+    pptpd,
+    # poptop # do not be confused. "poptop" is project name, not the package name.
+             # and "pptpd" is theyr product
+    ]

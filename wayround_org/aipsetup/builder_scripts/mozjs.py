@@ -78,6 +78,11 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             uaver = '.'.join(
                 [re.match(r'(\d+)', i).group(1) for i in milestone.split('.')]
                 )
+            versym = re.match(
+                r'^.*\d+(?P<sym>(\w+\d*)?)$', 
+                milestone
+                ).group('sym')
+            ver_major = int(milestone.split('.')[0])
 
             config_file_path = wayround_org.utils.path.join(
                 self.get_src_dir(),
@@ -91,12 +96,23 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             for i in range(len(config_file_text_lines)):
                 if config_file_text_lines[i].startswith('MOZILLA_VERSION='):
-                    config_file_text_lines[
-                        i] = 'MOZILLA_VERSION={}'.format(ver)
+                    config_file_text_lines[i] = 'MOZILLA_VERSION={}'.format(
+                        ver
+                        )
 
                 if config_file_text_lines[i].startswith('MOZILLA_UAVERSION='):
-                    config_file_text_lines[
-                        i] = 'MOZILLA_UAVERSION={}'.format(uaver)
+                    config_file_text_lines[i] = 'MOZILLA_UAVERSION={}'.format(
+                        uaver
+                        )
+
+                if config_file_text_lines[i].startswith('MOZILLA_SYMBOLVERSION='):
+                    config_file_text_lines[i] = \
+                        'MOZILLA_SYMBOLVERSION={}{}'.format(
+                            ver_major,
+                            versym
+                            )
+
+
 
             with open(config_file_path, 'w') as f:
                 f.write('\n'.join(config_file_text_lines))

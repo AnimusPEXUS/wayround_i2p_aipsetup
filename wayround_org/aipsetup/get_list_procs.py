@@ -134,9 +134,9 @@ def find_gnome_tarball_name(
 
             parsed_groups_version_list = parsed['groups']['version_list']
             if (int(parsed_groups_version_list[0]) == required_v1
-                    and
-                    int(parsed_groups_version_list[1]) == required_v2
-                    ):
+                and
+                int(parsed_groups_version_list[1]) == required_v2
+                ):
 
                 is_nineties = check_nineties(parsed)
 
@@ -178,23 +178,23 @@ def find_gnome_tarball_name(
                 if next_found_acceptable_tarball is None:
 
                     if (is_nineties
-                            and nineties_minors_are_acceptable == True
-                            and int_parsed_groups_version_list_1 < required_v2
-                            ):
+                        and nineties_minors_are_acceptable == True
+                        and int_parsed_groups_version_list_1 < required_v2
+                        ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
-                            and is_development
-                            and development_are_acceptable == True
-                            and int_parsed_groups_version_list_1 < required_v2
-                            ):
+                        and is_development
+                        and development_are_acceptable == True
+                        and int_parsed_groups_version_list_1 < required_v2
+                        ):
                         next_found_acceptable_tarball = i
 
                     if (next_found_acceptable_tarball is None
-                            and not is_nineties
-                            and not is_development
-                            and int_parsed_groups_version_list_1 < required_v2
-                            ):
+                        and not is_nineties
+                        and not is_development
+                        and int_parsed_groups_version_list_1 < required_v2
+                        ):
                         next_found_acceptable_tarball = i
 
                 if next_found_acceptable_tarball is not None:
@@ -364,25 +364,27 @@ def normal_get(
                 logging.error("Could not get tarball for `{}'".format(pkgname))
                 ret = 4
             else:
-                if not isinstance(
-                        wayround_org.aipsetup.client_pkg.get_tarball(found),
-                        str
-                        ):
+                ret = wayround_org.aipsetup.client_pkg.get_tarball(found)
+
+                if not isinstance(ret, str):
                     ret = 3
+
         else:
             ret = 2
 
     elif mode == 'asp':
 
-        if not isinstance(
-                pkg_client.get_latest_asp(
-                    pkgname,
-                    host,
-                    arch
-                    ),
-                str
-                ):
+        ret = pkg_client.get_latest_asp(
+            pkgname,
+            host,
+            arch
+            )
+
+        if not isinstance(ret, str):
             ret = 1
+
+    else:
+        raise Exception("whoot?")
 
     return ret
 
@@ -402,6 +404,9 @@ def _get_by_glp_subroutine(
         mute
         ):
 
+    if not callable(proc):
+        raise Exception("`proc' must be callable")
+
     ret = 0
 
     res = proc(
@@ -419,15 +424,23 @@ def _get_by_glp_subroutine(
 
     res_text = None
 
-    if isinstance(res, int) and res != 0:
+    if isinstance(res, str):
+        res_text = 'OK'
+    else:
         res_text = 'ERROR'
         ret = 1
 
-    else:
-        res_text = 'OK'
-
     if not mute:
-        print("   getting {:/<40}: {}".format("`{}'".format(name), res_text))
+        filename = ''
+        if ret == 0:
+            filename = os.path.basename(res)
+        print(
+            "   getting {:/<40}: {} {}".format(
+                "`{}'".format(name),
+                res_text,
+                filename
+                )
+            )
 
     return ret
 
@@ -439,14 +452,16 @@ def _get_by_glp_subroutine2(data):
     kwargs = {}
 
     if 'proc' in data:
-        if data['proc'] == 'normal_get':
-            proc = normal_get
+        data_proc = data['proc']
+        if (
+                data_proc in ['normal_get', 'gnome_get']
+                and data_proc in globals()
+                ):
 
-        elif data['proc'] == 'gnome_get':
-            proc = gnome_get
+            proc = globals().get(data_proc)
 
         else:
-            raise Exception("invalid `proc' value: {}".format(data['proc']))
+            raise Exception("invalid `proc' value: {}".format(data_proc))
 
     if 'args' in data:
         args = data['args']

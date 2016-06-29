@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name='aipsetup',
-    version='3.4.1',
+    version='3.4.2',
     description='software tools for building and maintaining own gnu+linux distro',
     author='Alexey V Gorshkov',
     author_email='animus@wayround.org',
@@ -44,6 +44,6 @@ setup(
             ],
         },
     entry_points={
-        'console_scripts': 'aipsetup = wayround_org.aipsetup.main'
+        'console_scripts': 'aipsetup = wayround_org.aipsetup.main:main'
         }
     )

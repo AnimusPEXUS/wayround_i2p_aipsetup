@@ -142,7 +142,7 @@ def extract_high(
     tmpdir = wayround_org.aipsetup.build.getDIR_TEMP(building_site)
 
     if not os.path.isdir(tmpdir):
-        os.makedirs(tmpdir)
+        os.makedirs(tmpdir, exist_ok=True)
 
     tmpdir = tempfile.mkdtemp(dir=tmpdir)
 
