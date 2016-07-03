@@ -1,0 +1,7 @@
+disabled: [opencdk]
+names: [
+  gnupg1, gnupg2, gnutls, gpa, gpgme, libassuan, libgcrypt, libgpg-error, libksba,
+  libtasn1, nettle, nettle2, npth, scute, p11-kit,
+  
+  openssl
+  ]

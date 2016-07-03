@@ -68,7 +68,8 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                         i,
                         log=log,
                         unwrap_dir=False,
-                        rename_dir=i
+                        rename_dir=i,
+                        cleanup_output_dir=False
                         ) != 0:
 
                     log.error("Can't extract component: {}".format(i))

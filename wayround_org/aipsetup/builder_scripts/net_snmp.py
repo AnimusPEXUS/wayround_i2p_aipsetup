@@ -23,3 +23,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
 
             '--disable-embedded-perl'
             ]
+
+    def builder_action_build_define_cpu_count(self, called_as, log):
+        return 1

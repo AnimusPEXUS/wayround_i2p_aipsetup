@@ -116,7 +116,8 @@ def extract_high(
         unwrap_dir,
         rename_dir,
         more_when_one_extracted_ok=False,
-        log=None
+        log=None,
+        cleanup_output_dir=True
         ):
 
     building_site = wayround_org.utils.path.abspath(building_site)
@@ -185,7 +186,8 @@ def extract_high(
                 source_dir,
                 unwrap_dir=unwrap_dir,
                 rename_dir=rename_dir,
-                more_when_one_extracted_ok=more_when_one_extracted_ok
+                more_when_one_extracted_ok=more_when_one_extracted_ok,
+                cleanup_output_dir=cleanup_output_dir
                 )
 
     # if own_log:

@@ -44,3 +44,6 @@ def main():
         logging.exception("Exception while closing database connections")
 
     return ret
+
+if __name__ == '__main__':
+    exit(main())

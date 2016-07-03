@@ -993,7 +993,7 @@ class Builder:
     def builder_action_build_define_cpu_count(self, called_as, log):
         # NOTE: more than 1 sometimes brings
         #       many problems
-        return 1  # os.cpu_count()  # 1
+        return  os.cpu_count()  # 1
 
     def builder_action_build_collect_options(self, called_as, log):
         ret = []

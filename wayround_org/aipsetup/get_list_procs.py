@@ -292,6 +292,8 @@ def gnome_get(
             **kwargs
             )
 
+        # print("found gnome_tarball_name: {}".format(tarball))
+
         if tarball is None:
             ret = 2
         else:
@@ -304,7 +306,7 @@ def gnome_get(
 
             else:
 
-                ret = 0
+                ret = tarball
 
     elif mode == 'asp':
         ret = normal_get(

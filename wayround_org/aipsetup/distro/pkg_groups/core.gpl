@@ -102,7 +102,7 @@ names:
 - ModemManager
 - graphviz
 - qemu
-- libclc
+#- libclc # it's too old: 2003. what do i need it for? :/
 - neon
 - tor
 - torsocks

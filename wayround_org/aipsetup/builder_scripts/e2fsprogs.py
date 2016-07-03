@@ -22,3 +22,6 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'install-libs',
             'DESTDIR={}'.format(self.get_dst_dir())
             ]
+
+    def builder_action_build_define_cpu_count(self, called_as, log):
+        return  1

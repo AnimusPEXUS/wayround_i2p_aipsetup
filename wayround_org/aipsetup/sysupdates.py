@@ -205,7 +205,7 @@ def gdk_pixbuf_query_loaders():
         paths2 = glob.glob(
             wayround_org.utils.path.join(
                 i,
-                '*/gdk-pixbuf-2.0/*/loaders'
+                '*', 'gdk-pixbuf-2.0', '*', 'loaders'
                 )
             )
 
@@ -218,6 +218,11 @@ def gdk_pixbuf_query_loaders():
                         'gdk-pixbuf-query-loaders'
                         ),
                     j,
+                    wayround_org.utils.path.normpath(
+                        wayround_org.utils.path.join(
+                            j, '..','loaders.cache'
+                            )
+                        )
                     )
                 )
 
@@ -225,17 +230,25 @@ def gdk_pixbuf_query_loaders():
         if os.path.isdir(i[1]):
             logging.info('    {}'.format(i[1]))
             try:
-                if subprocess.Popen(
-                        [i[0], '--update-cache'],
-                        env=wayround_org.utils.osutils.env_vars_edit(
-                            {'GDK_PIXBUF_MODULEDIR': i[1]},
-                            'copy'
-                            )
-                        ).wait() != 0:
+                cmd = [i[0], '--update-cache']
+                env = wayround_org.utils.osutils.env_vars_edit(
+                    {
+                        'GDK_PIXBUF_MODULEDIR': i[1],
+                        'GDK_PIXBUF_MODULE_FILE': i[2]
+                        },
+                    'copy'
+                    )
+                # logging.info(
+                #     "    GDK_PIXBUF_MODULEDIR={} {}".format(
+                #         i[1], ' '.join(cmd))
+                #     )
+                if subprocess.Popen(cmd, env=env).wait() != 0:
                     err += 1
+
             except:
                 logging.exception("Error")
                 err += 1
+
     return err
 
 
