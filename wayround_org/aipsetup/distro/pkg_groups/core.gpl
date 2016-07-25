@@ -123,3 +123,5 @@ names:
 - libyaml
 - npth
 - libpthread-stubs
+- hdparm
+- smartmontools
