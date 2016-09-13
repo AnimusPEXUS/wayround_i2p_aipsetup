@@ -1952,6 +1952,22 @@ def system_replica_make_installation_flashdrive(
 
 
 def system_convert_certdata_txt(command_name, opts, args, adds):
+    (
+        """
+
+
+    usual place for it is
+
+    """
+        'https://hg.mozilla.org/releases/mozilla-release/file/'
+        'default/security/nss/lib/ckfw/builtins/certdata.txt'
+        """
+        download raw file by uri:
+        """
+        'https://hg.mozilla.org/releases/mozilla-release/'
+        'raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt'
+        )
+
     ret = 0
 
     import wayround_org.aipsetup.system

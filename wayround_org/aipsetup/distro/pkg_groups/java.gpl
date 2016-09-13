@@ -1,1 +1,7 @@
-names: [openjdk8, gradle, openjfx]
+names: [
+    openjdk8, 
+    gradle, 
+    openjfx,
+    icedtea-web,
+    icedtea-sound
+    ]

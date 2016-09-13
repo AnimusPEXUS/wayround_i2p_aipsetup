@@ -19,4 +19,5 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
                     'jdk'
                     )
                 ),
+            '--disable-plugin' # main browsers no longer supports binary plugins
             ]
