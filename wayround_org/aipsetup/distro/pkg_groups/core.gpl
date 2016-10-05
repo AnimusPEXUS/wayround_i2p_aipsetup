@@ -126,3 +126,6 @@ names:
 - hdparm
 - smartmontools
 - cabextract
+- iw
+- policycoreutils
+- poco

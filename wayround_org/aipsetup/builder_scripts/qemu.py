@@ -11,10 +11,17 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
         ret += [
-            '--with-gtkabi=3.0',
+            '--enable-virglrenderer',
+
+            '--disable-gtk',
+            #'--with-gtkabi=3.0',
+
             #'--cpu=x86_64',
             '--audio-drv-list=pa',
+
             '--enable-sdl',
+            '--with-sdlabi=2.0',
+
             '--enable-kvm',
             '--enable-system',
             '--enable-user',

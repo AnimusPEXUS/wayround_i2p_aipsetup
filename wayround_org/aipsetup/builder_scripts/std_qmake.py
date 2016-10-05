@@ -22,7 +22,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret += [
             'PREFIX={}'.format(self.calculate_install_prefix())
             ]
-    
+
         return ret
 
     def builder_action_configure(self, called_as, log):
@@ -52,17 +52,21 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             'copy'
             )
 
-        if len(environment) > 0:
+        if len(env) > 0:
             log.info(
                 "Environment modifications:"
                 )
 
-            for i in sorted(list(environment.keys())):
+            for i in sorted(list(env.keys())):
                 log.info("    {}:".format(i))
-                log.info("        {}".format(environment[i]))
+                log.info("        {}".format(env[i]))
+
+        cmd_l = ['/multihost/x86_64-pc-linux-gnu/opt/qt/5/bin/qmake'] + opts + args
+
+        log.info("config cmd line: {}".format(' '.join(cmd_l)))
 
         p = subprocess.Popen(
-            ['qmake']+ opts + args,
+            cmd_l,
             cwd=self.get_src_dir(),
             stdout=log.stdout,
             stderr=log.stderr,
@@ -71,7 +75,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
         ret = p.wait()
         return ret
 
-    #def builder_action_build_define_cpu_count(self, called_as, log):
+    # def builder_action_build_define_cpu_count(self, called_as, log):
     #    return 1
 
     def builder_action_distribute_define_args(self, called_as, log):

@@ -114,3 +114,7 @@ names:
 - opencv3
 - openal-soft
 - freealut
+- audacity
+- libopenshot
+- libopensho-audio
+- openshot-qt

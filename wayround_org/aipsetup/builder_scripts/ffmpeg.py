@@ -21,6 +21,7 @@ class Builder(wayround_org.aipsetup.builder_scripts.std.Builder):
             '--enable-libxvid',
             '--enable-runtime-cpudetect',
             '--enable-doc',
+            '--enable-avresample',
             ]
 
         for i in range(len(ret) - 1, -1, -1):
