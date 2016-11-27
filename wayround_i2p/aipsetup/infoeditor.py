@@ -17,12 +17,12 @@ gi.require_version('Gdk', '3.0')
 
 from gi.repository import Gdk, Gtk
 
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.gtk
-import wayround_org.aipsetup.gui.infoeditor
-import wayround_org.aipsetup.info
-import wayround_org.utils.gtk
-import wayround_org.utils.list
+import wayround_i2p.aipsetup.controllers
+import wayround_i2p.aipsetup.gtk
+import wayround_i2p.aipsetup.gui.infoeditor
+import wayround_i2p.aipsetup.info
+import wayround_i2p.utils.gtk
+import wayround_i2p.utils.list
 
 
 class MainWindow:
@@ -42,7 +42,7 @@ class MainWindow:
 
         self.currently_opened = None
 
-        self.ui = wayround_org.aipsetup.gui.infoeditor.InfoEditorUi()
+        self.ui = wayround_i2p.aipsetup.gui.infoeditor.InfoEditorUi()
 
         self.ui.window.show_all()
 
@@ -92,7 +92,7 @@ class MainWindow:
 
         ret = 0
 
-        filename = wayround_org.utils.path.join(
+        filename = wayround_i2p.utils.path.join(
             self.info_ctl.get_info_dir(),
             filename
             )
@@ -109,7 +109,7 @@ class MainWindow:
             dia.destroy()
 
         else:
-            data = wayround_org.aipsetup.info.read_info_file(filename)
+            data = wayround_i2p.aipsetup.info.read_info_file(filename)
 
             if not isinstance(data, dict):
                 dia = Gtk.MessageDialog(
@@ -196,7 +196,7 @@ class MainWindow:
             ret = 1
         else:
 
-            filename = wayround_org.utils.path.join(
+            filename = wayround_i2p.utils.path.join(
                 self.info_ctl.get_info_dir(),
                 filename
                 )
@@ -223,7 +223,7 @@ class MainWindow:
 
             tags = tags.splitlines()
 
-            tags = wayround_org.utils.list\
+            tags = wayround_i2p.utils.list\
                 .list_strip_remove_empty_remove_duplicated_lines(
                     tags
                     )
@@ -276,7 +276,7 @@ class MainWindow:
 
             data['name'] = name
 
-            if wayround_org.aipsetup.info.write_info_file(filename, data) != 0:
+            if wayround_i2p.aipsetup.info.write_info_file(filename, data) != 0:
                 dia = Gtk.MessageDialog(
                     self.ui.window,
                     Gtk.DialogFlags.MODAL,
@@ -318,7 +318,7 @@ class MainWindow:
 
     def load_list(self):
 
-        mask = wayround_org.utils.path.join(
+        mask = wayround_i2p.utils.path.join(
             self.info_ctl.get_info_dir(),
             '*.json')
 
@@ -347,7 +347,7 @@ class MainWindow:
         return
 
     def scroll_package_list_to_name(self, name):
-        wayround_org.utils.gtk.list_view_select_and_scroll_to_name(
+        wayround_i2p.utils.gtk.list_view_select_and_scroll_to_name(
             self.ui.tree_view1,
             name
             )
@@ -384,7 +384,7 @@ class MainWindow:
                 and
                 (event.state & Gdk.ModifierType.CONTROL_MASK != 0)
                 ):
-            wayround_org.aipsetup.gtk.stop_session()
+            wayround_i2p.aipsetup.gtk.stop_session()
 
         if (
                 (event.keyval == Gdk.KEY_s)
@@ -455,7 +455,7 @@ class MainWindow:
                 dia.run()
                 dia.destroy()
             else:
-                wayround_org.utils.gtk.text_view(
+                wayround_i2p.utils.gtk.text_view(
                     '\n'.join(lst),
                     "{} - Non-filtered tarballs".format(
                         self.ui.name_entry.get_text()
@@ -498,7 +498,7 @@ class MainWindow:
                 dia.run()
                 dia.destroy()
             else:
-                wayround_org.utils.gtk.text_view(
+                wayround_i2p.utils.gtk.text_view(
                     '\n'.join(lst),
                     "{} - Path-filtered tarballs".format(
                         self.ui.name_entry.get_text()
@@ -508,7 +508,7 @@ class MainWindow:
         return
 
     def onQuitButtonClicked(self, button):
-        wayround_org.aipsetup.gtk.stop_session()
+        wayround_i2p.aipsetup.gtk.stop_session()
         return
 
     def onShowFilteredSourceFilesButtonActivated(self, button):
@@ -528,7 +528,7 @@ class MainWindow:
             lst = self.pkg_client.tarballs(self.ui.name_entry.get_text())
 
             def source_version_comparator(v1, v2):
-                return wayround_org.utils.version.source_version_comparator(
+                return wayround_i2p.utils.version.source_version_comparator(
                     v1, v2,
                     self.acceptable_source_name_extensions
                     )
@@ -553,7 +553,7 @@ class MainWindow:
                     reverse=True
                     )
 
-                wayround_org.utils.gtk.text_view(
+                wayround_i2p.utils.gtk.text_view(
                     '\n'.join(lst),
                     "{} - Filtered tarballs".format(
                         self.ui.name_entry.get_text()
@@ -579,11 +579,11 @@ class MainWindow:
 
 def main(name_to_edit=None, config=None):
 
-    info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+    info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
-    src_client = wayround_org.aipsetup.controllers.src_client_by_config(config)
+    src_client = wayround_i2p.aipsetup.controllers.src_client_by_config(config)
 
-    pkg_client = wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+    pkg_client = wayround_i2p.aipsetup.controllers.pkg_client_by_config(config)
 
     mw = MainWindow(
         info_ctl, src_client, pkg_client,
@@ -594,8 +594,8 @@ def main(name_to_edit=None, config=None):
 
     if isinstance(name_to_edit, str):
         if mw.load_data(os.path.basename(name_to_edit)) == 0:
-            wayround_org.aipsetup.gtk.start_session()
+            wayround_i2p.aipsetup.gtk.start_session()
     else:
-        wayround_org.aipsetup.gtk.start_session()
+        wayround_i2p.aipsetup.gtk.start_session()
 
     return

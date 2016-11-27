@@ -9,13 +9,13 @@ import re
 
 import bottle
 
-import wayround_org.utils.version
-import wayround_org.utils.tarball
-import wayround_org.utils.system_type
+import wayround_i2p.utils.version
+import wayround_i2p.utils.tarball
+import wayround_i2p.utils.system_type
 
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.server_pkg_ui
-import wayround_org.aipsetup.client_src
+import wayround_i2p.aipsetup.controllers
+import wayround_i2p.aipsetup.server_pkg_ui
+import wayround_i2p.aipsetup.client_src
 
 
 TEXT_PLAIN = 'text/plain; codepage=utf-8'
@@ -30,13 +30,13 @@ def server_start_host(command_name, opts, args, adds):
     config = adds['config']
 
     pkg_repo_ctl = \
-        wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
     info_ctl = \
-        wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
     snapshot_ctl = \
-        wayround_org.aipsetup.controllers.snapshot_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.snapshot_ctl_by_config(config)
 
     app = ASPServer(
         pkg_repo_ctl,
@@ -70,11 +70,11 @@ class ASPServer:
 
         self._src_page_url = src_page_url
 
-        web = wayround_org.utils.path.join(os.path.dirname(__file__), 'web', 'pkg_server')
+        web = wayround_i2p.utils.path.join(os.path.dirname(__file__), 'web', 'pkg_server')
 
-        templates_dir = wayround_org.utils.path.join(web, 'templates')
-        css_dir = wayround_org.utils.path.join(web, 'css')
-        js_dir = wayround_org.utils.path.join(web, 'js')
+        templates_dir = wayround_i2p.utils.path.join(web, 'templates')
+        css_dir = wayround_i2p.utils.path.join(web, 'css')
+        js_dir = wayround_i2p.utils.path.join(web, 'js')
 
         # TODO: extinct self.config
         #        self.config = config
@@ -93,7 +93,7 @@ class ASPServer:
         self.acceptable_source_name_extensions = \
             acceptable_source_name_extensions
 
-        self.ui = wayround_org.aipsetup.server_pkg_ui.UI(templates_dir)
+        self.ui = wayround_i2p.aipsetup.server_pkg_ui.UI(templates_dir)
 
         self.app = bottle.Bottle()
 
@@ -153,16 +153,16 @@ class ASPServer:
 
         base = os.path.basename(name2)
 
-        if wayround_org.utils.system_type.parse_triplet(host) is None:
+        if wayround_i2p.utils.system_type.parse_triplet(host) is None:
             raise bottle.HTTPError(400, "Invalid host triplet")
 
-        if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
             raise bottle.HTTPError(400, "Invalid arch triplet")
 
         path = self.pkg_repo_ctl.get_package_path_string(name)
 
-        filename = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
+        filename = wayround_i2p.utils.path.abspath(
+            wayround_i2p.utils.path.join(
                 self.pkg_repo_ctl.get_repository_dir(),
                 path,
                 'pack',
@@ -349,7 +349,7 @@ class ASPServer:
 
         if resultmode == 'html':
 
-            keys = list(wayround_org.aipsetup.info.
+            keys = list(wayround_i2p.aipsetup.info.
                         SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES.keys())
 
             rows = collections.OrderedDict()
@@ -363,7 +363,7 @@ class ASPServer:
             for i in keys:
 
                 rows[i] = (
-                    wayround_org.aipsetup.info.
+                    wayround_i2p.aipsetup.info.
                     SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES[i],
                     str(pkg_info[i])
                     )
@@ -449,7 +449,7 @@ class ASPServer:
         if not resultmode in ['html', 'json']:
             raise bottle.HTTPError(400, "Invalid resultmode")
 
-        if wayround_org.utils.system_type.parse_triplet(host) is None:
+        if wayround_i2p.utils.system_type.parse_triplet(host) is None:
             raise bottle.HTTPError(400, "Invalid host triplet")
 
         filesl = self.pkg_repo_ctl.get_package_host_archs(name, host)
@@ -484,10 +484,10 @@ class ASPServer:
 
         decoded_params = bottle.request.params.decode('utf-8')
 
-        if wayround_org.utils.system_type.parse_triplet(host) is None:
+        if wayround_i2p.utils.system_type.parse_triplet(host) is None:
             raise bottle.HTTPError(400, "Invalid host triplet")
 
-        if wayround_org.utils.system_type.parse_triplet(arch) is None:
+        if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
             raise bottle.HTTPError(400, "Invalid arch triplet")
 
         ret = ''
@@ -508,7 +508,7 @@ class ASPServer:
 
         filesl.sort(
             key=functools.cmp_to_key(
-                wayround_org.aipsetup.version.package_version_comparator
+                wayround_i2p.aipsetup.version.package_version_comparator
                 ),
             reverse=True
             )
@@ -521,13 +521,13 @@ class ASPServer:
                 base = os.path.basename(i)
 
                 stat = os.stat(
-                    wayround_org.utils.path.join(
+                    wayround_i2p.utils.path.join(
                         self.pkg_repo_ctl.get_repository_dir(),
                         i
                         )
                     )
 
-                parsed = wayround_org.aipsetup.package_name_parser.\
+                parsed = wayround_i2p.aipsetup.package_name_parser.\
                     package_name_parse(
                         base
                         )
@@ -586,7 +586,7 @@ class ASPServer:
         basename = rec['basename']
         filters = rec['filters']
 
-        filesl = wayround_org.aipsetup.client_src.files(
+        filesl = wayround_i2p.aipsetup.client_src.files(
             self._src_page_url, basename, rec['source_path_prefixes']
             )
 
@@ -597,7 +597,7 @@ class ASPServer:
             filesl = []
 
         filesl = (
-            wayround_org.utils.tarball.filter_tarball_list(
+            wayround_i2p.utils.tarball.filter_tarball_list(
                 filesl,
                 filters
                 )
@@ -607,7 +607,7 @@ class ASPServer:
             raise bottle.HTTPError(500, "tarball filter error")
 
         def source_version_comparator(v1, v2):
-            return wayround_org.utils.version.source_version_comparator(
+            return wayround_i2p.utils.version.source_version_comparator(
                 v1, v2,
                 self.acceptable_source_name_extensions
                 )

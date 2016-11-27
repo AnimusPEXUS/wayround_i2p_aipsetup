@@ -1,7 +1,7 @@
 
 import os.path
 
-import wayround_org.utils.path
+import wayround_i2p.utils.path
 
 import mako.template
 
@@ -29,7 +29,7 @@ class UI:
             'name_by_name'
             ]:
             self.templates[i] = mako.template.Template(
-                filename=wayround_org.utils.path.join(templates_dir, i + '.html'),
+                filename=wayround_i2p.utils.path.join(templates_dir, i + '.html'),
                 format_exceptions=False
                 )
 

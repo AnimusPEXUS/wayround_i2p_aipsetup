@@ -5,7 +5,7 @@ to minimize possible negative impact on distribution developer working system
 """
 
 import os.path
-import wayround_org.utils.path
+import wayround_i2p.utils.path
 
 
 class VirtualBuildingHost:
@@ -90,7 +90,7 @@ exit(p.wait())
 
 """
 
-        j = wayround_org.utils.path.join(self.path, 'start')
+        j = wayround_i2p.utils.path.join(self.path, 'start')
 
         with open(j, 'w') as f:
             f.write(script)

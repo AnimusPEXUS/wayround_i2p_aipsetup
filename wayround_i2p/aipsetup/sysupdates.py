@@ -8,9 +8,9 @@ import subprocess
 import logging
 import glob
 
-import wayround_org.utils.checksum
-import wayround_org.utils.path
-import wayround_org.utils.osutils
+import wayround_i2p.utils.checksum
+import wayround_i2p.utils.path
+import wayround_i2p.utils.osutils
 
 
 def sysupdates_all_actions(opts, args):
@@ -63,18 +63,18 @@ def list_arch_roots(basedir='/'):
 
     ret = []
 
-    mhost_dir = wayround_org.utils.path.join(basedir, 'multihost')
+    mhost_dir = wayround_i2p.utils.path.join(basedir, 'multihost')
 
     mhost_dir_files = os.listdir(mhost_dir)
 
     for i in mhost_dir_files:
 
-        joined = wayround_org.utils.path.join(mhost_dir, i)
+        joined = wayround_i2p.utils.path.join(mhost_dir, i)
 
         if os.path.isdir(joined) and not os.path.islink(joined):
             ret.append(joined)
 
-            march_dir = wayround_org.utils.path.join(
+            march_dir = wayround_i2p.utils.path.join(
                 joined,
                 'multiarch'
                 )
@@ -82,7 +82,7 @@ def list_arch_roots(basedir='/'):
             march_dir_files = os.listdir(march_dir)
 
             for j in march_dir_files:
-                joined2 = wayround_org.utils.path.join(march_dir, j)
+                joined2 = wayround_i2p.utils.path.join(march_dir, j)
 
                 if os.path.isdir(joined2) and not os.path.islink(joined2):
                     ret.append(joined2)
@@ -105,20 +105,20 @@ def _update_mime_database_check(path):
 
     errors = 0
 
-    mime_dir = wayround_org.utils.path.join(path, 'share', 'mime')
+    mime_dir = wayround_i2p.utils.path.join(path, 'share', 'mime')
 
     try:
 
         os.makedirs(mime_dir, exist_ok=True)
 
-        mime_dir_sha512sums = wayround_org.utils.path.join(
+        mime_dir_sha512sums = wayround_i2p.utils.path.join(
             mime_dir,
             'sha512sums'
             )
 
         mime_dir_sha512sums_tmp = mime_dir_sha512sums + '.tmp'
 
-        wayround_org.utils.checksum.make_dir_checksums(
+        wayround_i2p.utils.checksum.make_dir_checksums(
             mime_dir,
             mime_dir_sha512sums_tmp,
             rel_to='/',
@@ -128,10 +128,10 @@ def _update_mime_database_check(path):
                 ],
             verbose=False
             )
-        summ1 = wayround_org.utils.checksum.make_file_checksum(
+        summ1 = wayround_i2p.utils.checksum.make_file_checksum(
             mime_dir_sha512sums
             )
-        summ2 = wayround_org.utils.checksum.make_file_checksum(
+        summ2 = wayround_i2p.utils.checksum.make_file_checksum(
             mime_dir_sha512sums_tmp
             )
         os.unlink(mime_dir_sha512sums_tmp)
@@ -160,7 +160,7 @@ def _update_mime_database_recalculate(path):
         p = subprocess.Popen([p1, p2])
         ret = p.wait()
 
-        wayround_org.utils.checksum.make_dir_checksums(
+        wayround_i2p.utils.checksum.make_dir_checksums(
             '{}/share/mime'.format(path),
             '{}/share/mime/sha512sums'.format(path),
             rel_to='/',
@@ -203,7 +203,7 @@ def gdk_pixbuf_query_loaders():
     for i in roots:
 
         paths2 = glob.glob(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 i,
                 '*', 'gdk-pixbuf-2.0', '*', 'loaders'
                 )
@@ -212,14 +212,14 @@ def gdk_pixbuf_query_loaders():
         for j in paths2:
             paths.append(
                 (
-                    wayround_org.utils.path.join(
+                    wayround_i2p.utils.path.join(
                         i,
                         'bin',
                         'gdk-pixbuf-query-loaders'
                         ),
                     j,
-                    wayround_org.utils.path.normpath(
-                        wayround_org.utils.path.join(
+                    wayround_i2p.utils.path.normpath(
+                        wayround_i2p.utils.path.join(
                             j, '..','loaders.cache'
                             )
                         )
@@ -231,7 +231,7 @@ def gdk_pixbuf_query_loaders():
             logging.info('    {}'.format(i[1]))
             try:
                 cmd = [i[0], '--update-cache']
-                env = wayround_org.utils.osutils.env_vars_edit(
+                env = wayround_i2p.utils.osutils.env_vars_edit(
                     {
                         'GDK_PIXBUF_MODULEDIR': i[1],
                         'GDK_PIXBUF_MODULE_FILE': i[2]

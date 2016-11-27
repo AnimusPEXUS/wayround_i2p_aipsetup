@@ -7,8 +7,8 @@ Allows minimize DB access requests
 
 import logging
 
-import wayround_org.aipsetup.info
-import wayround_org.aipsetup.repository
+import wayround_i2p.aipsetup.info
+import wayround_i2p.aipsetup.repository
 
 
 _info_db_connection = None
@@ -40,7 +40,7 @@ def info_db_new_connection(config_string):
     logging.info(
         "Getting info DB connection: {}".format(config_string)
         )
-    ret = wayround_org.aipsetup.info.PackageInfo(
+    ret = wayround_i2p.aipsetup.info.PackageInfo(
         config_string
         )
 
@@ -74,7 +74,7 @@ def pkg_repo_db_new_connection(config_string):
             config_string
             )
         )
-    ret = wayround_org.aipsetup.repository.PackageRepo(
+    ret = wayround_i2p.aipsetup.repository.PackageRepo(
         config_string
         )
 
@@ -107,7 +107,7 @@ def src_repo_db_new_connection(config_string):
             config_string
             )
         )
-    ret = wayround_org.aipsetup.repository.SourceRepo(
+    ret = wayround_i2p.aipsetup.repository.SourceRepo(
         config_string
         )
 

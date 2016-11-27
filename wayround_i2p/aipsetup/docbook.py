@@ -16,9 +16,9 @@ except:
     logging.error("Error importing XML parser. reinstall lxml!")
     raise
 
-import wayround_org.utils.file
-import wayround_org.utils.archive
-import wayround_org.utils.path
+import wayround_i2p.utils.file
+import wayround_i2p.utils.archive
+import wayround_i2p.utils.path
 
 # TODO: error checks
 
@@ -89,8 +89,8 @@ def set_correct_modes(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            fd = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     each[0],
                     d))
             # print fd
@@ -100,8 +100,8 @@ def set_correct_modes(directory):
                      stat.S_IROTH | stat.S_IXOTH)
 
         for f in each[2]:
-            fd = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            fd = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     each[0],
                     f))
             # print fd
@@ -117,16 +117,16 @@ def set_correct_owners(directory):
     for each in os.walk(directory):
 
         for d in each[1]:
-            fd = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            fd = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     each[0],
                     d))
             # print fd
             os.chown(fd, 0, 0)
 
         for f in each[2]:
-            fd = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            fd = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     each[0],
                     f))
             # print fd
@@ -137,14 +137,14 @@ def set_correct_owners(directory):
 
 def make_directories(base_dir, lst):
 
-    base_dir = wayround_org.utils.path.abspath(base_dir)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
 
     logging.info("Preparing base dir: {}".format(base_dir))
 
     for i in lst:
 
-        i_ap = wayround_org.utils.path.abspath(i)
-        i_ap_fn = wayround_org.utils.path.join(base_dir, i_ap)
+        i_ap = wayround_i2p.utils.path.abspath(i)
+        i_ap_fn = wayround_i2p.utils.path.join(base_dir, i_ap)
 
         logging.info("    preparing: {}".format(i_ap_fn))
         try:
@@ -239,16 +239,16 @@ def import_docbook_xsl_to_catalog(
 
     ret = 0
 
-    target_xsl_dir = wayround_org.utils.path.abspath(target_xsl_dir)
-    base_dir = wayround_org.utils.path.abspath(base_dir)
-    super_xml_catalog = wayround_org.utils.path.abspath(super_xml_catalog)
+    target_xsl_dir = wayround_i2p.utils.path.abspath(target_xsl_dir)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
+    super_xml_catalog = wayround_i2p.utils.path.abspath(super_xml_catalog)
 
-    target_xsl_dir_fn = wayround_org.utils.path.join(base_dir, target_xsl_dir)
+    target_xsl_dir_fn = wayround_i2p.utils.path.join(base_dir, target_xsl_dir)
     target_xsl_dir_fn_no_base = \
-        wayround_org.utils.path.remove_base(target_xsl_dir_fn, base_dir)
+        wayround_i2p.utils.path.remove_base(target_xsl_dir_fn, base_dir)
 
     super_xml_catalog_fn = \
-        wayround_org.utils.path.join(base_dir, super_xml_catalog)
+        wayround_i2p.utils.path.join(base_dir, super_xml_catalog)
 
     bn = os.path.basename(target_xsl_dir)
 
@@ -327,23 +327,23 @@ def import_catalog_xml_to_super_docbook_catalog(
     super_docbook_catalog_xml: [/base_dir]/etc/xml/docbook
     """
 
-    target_catalog_xml = wayround_org.utils.path.abspath(target_catalog_xml)
-    base_dir = wayround_org.utils.path.abspath(base_dir)
-    super_docbook_catalog_xml = wayround_org.utils.path.abspath(
+    target_catalog_xml = wayround_i2p.utils.path.abspath(target_catalog_xml)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
+    super_docbook_catalog_xml = wayround_i2p.utils.path.abspath(
         super_docbook_catalog_xml
         )
 
-    target_catalog_xml_fn = wayround_org.utils.path.abspath(
-        wayround_org.utils.path.join(base_dir, target_catalog_xml)
+    target_catalog_xml_fn = wayround_i2p.utils.path.abspath(
+        wayround_i2p.utils.path.join(base_dir, target_catalog_xml)
         )
     target_catalog_xml_fn_dir = os.path.dirname(target_catalog_xml_fn)
 
     target_catalog_xml_fn_dir_virtual = target_catalog_xml_fn_dir
-    target_catalog_xml_fn_dir_virtual = wayround_org.utils.path.remove_base(
+    target_catalog_xml_fn_dir_virtual = wayround_i2p.utils.path.remove_base(
         target_catalog_xml_fn_dir_virtual, base_dir
         )
 
-    super_docbook_catalog_xml_fn = wayround_org.utils.path.join(
+    super_docbook_catalog_xml_fn = wayround_i2p.utils.path.join(
         base_dir,
         super_docbook_catalog_xml
         )
@@ -385,7 +385,7 @@ def import_catalog_xml_to_super_docbook_catalog(
 
                 else:
 
-                    dst_uri = wayround_org.utils.path.join(
+                    dst_uri = wayround_i2p.utils.path.join(
                         '/', target_catalog_xml_fn_dir_virtual, src_uri
                         )
 
@@ -420,12 +420,12 @@ def import_to_super_docbook_catalog(
     super_catalog_xml: [/base_dir]/etc/xml/docbook
     """
 
-    target_dir = wayround_org.utils.path.abspath(target_dir)
-    base_dir = wayround_org.utils.path.abspath(base_dir)
-    super_catalog_sgml = wayround_org.utils.path.abspath(super_catalog_sgml)
-    super_catalog_xml = wayround_org.utils.path.abspath(super_catalog_xml)
+    target_dir = wayround_i2p.utils.path.abspath(target_dir)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
+    super_catalog_sgml = wayround_i2p.utils.path.abspath(super_catalog_sgml)
+    super_catalog_xml = wayround_i2p.utils.path.abspath(super_catalog_xml)
 
-    target_dir_fd = wayround_org.utils.path.join(base_dir, target_dir)
+    target_dir_fd = wayround_i2p.utils.path.join(base_dir, target_dir)
 
     files = os.listdir(target_dir_fd)
 
@@ -437,7 +437,7 @@ def import_to_super_docbook_catalog(
                 '--sgml',
                 '--noout',
                 '--add',
-                wayround_org.utils.path.join(target_dir, 'docbook.cat'),
+                wayround_i2p.utils.path.join(target_dir, 'docbook.cat'),
                 super_catalog_sgml
                 ]
             )
@@ -445,7 +445,7 @@ def import_to_super_docbook_catalog(
 
     if 'catalog.xml' in files:
 
-        target_catalog_xml = wayround_org.utils.path.join(
+        target_catalog_xml = wayround_i2p.utils.path.join(
             target_dir,
             'catalog.xml'
             )
@@ -464,13 +464,13 @@ def make_new_docbook_xml_look_like_old(
         xml_catalog='/etc/xml/catalog'
         ):
 
-    base_dir = wayround_org.utils.path.abspath(base_dir)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
     installed_docbook_xml_dir = \
-        wayround_org.utils.path.abspath(installed_docbook_xml_dir)
-    super_catalog_xml = wayround_org.utils.path.abspath(super_catalog_xml)
-    xml_catalog = wayround_org.utils.path.abspath(xml_catalog)
+        wayround_i2p.utils.path.abspath(installed_docbook_xml_dir)
+    super_catalog_xml = wayround_i2p.utils.path.abspath(super_catalog_xml)
+    xml_catalog = wayround_i2p.utils.path.abspath(xml_catalog)
 
-    super_catalog_xml_fn = wayround_org.utils.path.join(
+    super_catalog_xml_fn = wayround_i2p.utils.path.join(
         base_dir,
         super_catalog_xml
         )
@@ -566,20 +566,20 @@ def make_new_docbook_4_5_look_like_old(
         installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-4.5',
         ):
 
-    base_dir = wayround_org.utils.path.abspath(base_dir)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
 
     installed_docbook_xml_dir = \
-        wayround_org.utils.path.abspath(
+        wayround_i2p.utils.path.abspath(
             installed_docbook_sgml_dir
             )
 
     installed_docbook_xml_dir_fn = \
-        wayround_org.utils.path.join(
+        wayround_i2p.utils.path.join(
             base_dir,
             installed_docbook_xml_dir
             )
 
-    catalog_fn = wayround_org.utils.path.join(
+    catalog_fn = wayround_i2p.utils.path.join(
         installed_docbook_xml_dir_fn,
         'docbook.cat'
         )
@@ -616,20 +616,20 @@ def make_new_docbook_3_1_look_like_old(
         installed_docbook_sgml_dir='/usr/share/sgml/docbook/docbook-3.1',
         ):
 
-    base_dir = wayround_org.utils.path.abspath(base_dir)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
 
     installed_docbook_xml_dir = \
-        wayround_org.utils.path.abspath(
+        wayround_i2p.utils.path.abspath(
             installed_docbook_sgml_dir
             )
 
     installed_docbook_xml_dir_fn = \
-        wayround_org.utils.path.join(
+        wayround_i2p.utils.path.join(
             base_dir,
             installed_docbook_xml_dir
             )
 
-    catalog_fn = wayround_org.utils.path.join(
+    catalog_fn = wayround_i2p.utils.path.join(
         installed_docbook_xml_dir_fn,
         'docbook.cat'
         )
@@ -674,17 +674,17 @@ def install(
 
     ret = 0
 
-    base_dir = wayround_org.utils.path.abspath(base_dir)
-    super_catalog_sgml = wayround_org.utils.path.abspath(super_catalog_sgml)
-    super_catalog_xml = wayround_org.utils.path.abspath(super_catalog_xml)
-    sys_xml_dir = wayround_org.utils.path.abspath(sys_xml_dir)
-    xml_catalog = wayround_org.utils.path.abspath(xml_catalog)
+    base_dir = wayround_i2p.utils.path.abspath(base_dir)
+    super_catalog_sgml = wayround_i2p.utils.path.abspath(super_catalog_sgml)
+    super_catalog_xml = wayround_i2p.utils.path.abspath(super_catalog_xml)
+    sys_xml_dir = wayround_i2p.utils.path.abspath(sys_xml_dir)
+    xml_catalog = wayround_i2p.utils.path.abspath(xml_catalog)
 
     super_catalog_xml_fn = \
-        wayround_org.utils.path.join(base_dir, super_catalog_xml)
-    sys_sgml_dir_fn = wayround_org.utils.path.join(base_dir, sys_sgml_dir)
-    sys_xml_dir_fn = wayround_org.utils.path.join(base_dir, sys_xml_dir)
-    xml_catalog_fn = wayround_org.utils.path.join(base_dir, xml_catalog)
+        wayround_i2p.utils.path.join(base_dir, super_catalog_xml)
+    sys_sgml_dir_fn = wayround_i2p.utils.path.join(base_dir, sys_sgml_dir)
+    sys_xml_dir_fn = wayround_i2p.utils.path.join(base_dir, sys_xml_dir)
+    xml_catalog_fn = wayround_i2p.utils.path.join(base_dir, xml_catalog)
 
     make_directories(
         base_dir,
@@ -748,8 +748,8 @@ def install(
         for i in dirs:
             logging.info("Installing {}".format(i))
 
-            target_dir = wayround_org.utils.path.join(sys_sgml_dir_fn, i)
-            target_dir = wayround_org.utils.path.remove_base(
+            target_dir = wayround_i2p.utils.path.join(sys_sgml_dir_fn, i)
+            target_dir = wayround_i2p.utils.path.remove_base(
                 target_dir,
                 base_dir
                 )
@@ -769,8 +769,8 @@ def install(
         for i in xml_dirs:
             logging.info("Installing {}".format(i))
 
-            target_dir = wayround_org.utils.path.join(sys_xml_dir_fn, i)
-            target_dir = wayround_org.utils.path.remove_base(
+            target_dir = wayround_i2p.utils.path.join(sys_xml_dir_fn, i)
+            target_dir = wayround_i2p.utils.path.remove_base(
                 target_dir,
                 base_dir
                 )
@@ -790,8 +790,8 @@ def install(
         for i in xsl_dirs:
             logging.info("Installing {}".format(i))
 
-            target_dir = wayround_org.utils.path.join(sys_xml_dir_fn, i)
-            target_dir = wayround_org.utils.path.remove_base(
+            target_dir = wayround_i2p.utils.path.join(sys_xml_dir_fn, i)
+            target_dir = wayround_i2p.utils.path.remove_base(
                 target_dir,
                 base_dir
                 )

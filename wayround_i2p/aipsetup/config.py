@@ -9,11 +9,11 @@ import logging
 import collections
 import pprint
 
-import wayround_org.utils.path
+import wayround_i2p.utils.path
 
 
-CUR_DIR = wayround_org.utils.path.abspath(os.path.dirname(__file__))
-EMBEDDED_DISTRO_DIR = wayround_org.utils.path.join(
+CUR_DIR = wayround_i2p.utils.path.abspath(os.path.dirname(__file__))
+EMBEDDED_DISTRO_DIR = wayround_i2p.utils.path.join(
     CUR_DIR, 'distro'
     )
 

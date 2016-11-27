@@ -9,22 +9,22 @@ def main():
 
     import logging
 
-    import wayround_org.utils.program
+    import wayround_i2p.utils.program
 
-    wayround_org.utils.program.logging_setup(loglevel='INFO')
+    wayround_i2p.utils.program.logging_setup(loglevel='INFO')
 
-    import wayround_org.aipsetup.commands
-    import wayround_org.aipsetup.config
-    import wayround_org.aipsetup.build
-    import wayround_org.aipsetup.dbconnections
+    import wayround_i2p.aipsetup.commands
+    import wayround_i2p.aipsetup.config
+    import wayround_i2p.aipsetup.build
+    import wayround_i2p.aipsetup.dbconnections
 
-    config = wayround_org.aipsetup.config.load_config('/etc/aipsetup.conf')
+    config = wayround_i2p.aipsetup.config.load_config('/etc/aipsetup.conf')
 
     package_info = None
 
-    commands = wayround_org.aipsetup.commands.commands()
+    commands = wayround_i2p.aipsetup.commands.commands()
 
-    ret = wayround_org.utils.program.program(
+    ret = wayround_i2p.utils.program.program(
         'aipsetup3',
         commands,
         additional_data={
@@ -33,13 +33,13 @@ def main():
         )
 
     try:
-        import wayround_org.aipsetup.gtk
-        wayround_org.aipsetup.gtk.stop_session()
+        import wayround_i2p.aipsetup.gtk
+        wayround_i2p.aipsetup.gtk.stop_session()
     except:
         logging.error("Exception while stopping Gtk+ session")
 
     try:
-        wayround_org.aipsetup.dbconnections.close_all()
+        wayround_i2p.aipsetup.dbconnections.close_all()
     except:
         logging.exception("Exception while closing database connections")
 

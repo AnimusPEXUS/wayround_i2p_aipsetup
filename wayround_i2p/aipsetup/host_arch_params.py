@@ -1,5 +1,5 @@
 
-import wayround_org.utils.system_type
+import wayround_i2p.utils.system_type
 
 
 def process_h_and_a_opts_wide(opts, config):
@@ -90,10 +90,10 @@ def process_h_and_a_opts_strict(opts, config):
     else:
         arch = host
 
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(host) is None:
         raise ValueError("Invalid host triplet")
 
-    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
         raise ValueError("Invalid arch triplet")
 
     return host, arch

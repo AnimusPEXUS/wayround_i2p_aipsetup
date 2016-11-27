@@ -5,9 +5,9 @@ Version comparison utilities
 
 import logging
 
-import wayround_org.utils.version
+import wayround_i2p.utils.version
 
-import wayround_org.aipsetup.package_name_parser
+import wayround_i2p.aipsetup.package_name_parser
 
 
 def package_version_comparator(name1, name2):
@@ -17,11 +17,11 @@ def package_version_comparator(name1, name2):
 
     ret = 0
 
-    d1 = wayround_org.aipsetup.package_name_parser.package_name_parse(
+    d1 = wayround_i2p.aipsetup.package_name_parser.package_name_parse(
         name1
         )
 
-    d2 = wayround_org.aipsetup.package_name_parser.package_name_parse(
+    d2 = wayround_i2p.aipsetup.package_name_parser.package_name_parse(
         name2
         )
 
@@ -44,7 +44,7 @@ def package_version_comparator(name1, name2):
         if d2['re'] == 'aipsetup2':
             d2_ts = [d2_ts[0][0:8], d2_ts[0][8:], '0']
 
-        com_res = wayround_org.utils.version.standard_comparison(
+        com_res = wayround_i2p.utils.version.standard_comparison(
             d1_ts, None,
             d2_ts, None,
             )
@@ -80,7 +80,7 @@ def lb_comparator(version_str, pattern_str='== 0.0.0'):
     version_str = version_str.split('.')
 
     cmp_res = \
-        wayround_org.utils.version.standard_comparator(
+        wayround_i2p.utils.version.standard_comparator(
             version_str,
             pattern_str
             )

@@ -6,7 +6,7 @@ import logging
 import os.path
 
 
-import wayround_org.utils.path
+import wayround_i2p.utils.path
 
 
 def commands():
@@ -41,9 +41,9 @@ def commands():
 
 def pkg_server_start(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.server_pkg
+    import wayround_i2p.aipsetup.server_pkg
 
-    return wayround_org.aipsetup.server_pkg.server_start_host(
+    return wayround_i2p.aipsetup.server_pkg.server_start_host(
         command_name, opts, args, adds
         )
 
@@ -53,13 +53,13 @@ def pkg_repo_cleanup(command_name, opts, args, adds):
     Removes old packages from package repository
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     # TODO: more descriptive help text required
 
-    pkg_repo_ctl = wayround_org.aipsetup.controllers.\
+    pkg_repo_ctl = wayround_i2p.aipsetup.controllers.\
         pkg_repo_ctl_by_config(config)
 
     pkg_repo_ctl.cleanup_repo()
@@ -78,7 +78,7 @@ def info_find_missing_pkg_info_records(command_name, opts, args, adds):
     -f forces rewrite existing .json files
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -88,10 +88,10 @@ def info_find_missing_pkg_info_records(command_name, opts, args, adds):
 
     f = '-f' in opts
 
-    info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+    info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
     pkg_index_ctl = \
-        wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
     try:
         info_ctl.get_missing_info_records_list(pkg_index_ctl, t, f)
@@ -109,13 +109,13 @@ def info_find_outdated_pkg_info_records(command_name, opts, args, adds):
     Finds pkg info records which differs to FS .json files
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     ret = 0
 
-    info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+    info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
     try:
         res = info_ctl.get_outdated_info_records_list(
@@ -141,11 +141,11 @@ def info_update_outdated_pkg_info_records(command_name, opts, args, adds):
     Loads pkg info records which differs to FS .json files
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
-    info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+    info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
     info_ctl.update_outdated_pkg_info_records()
 
@@ -161,7 +161,7 @@ def info_delete_pkg_info_records(command_name, opts, args, adds):
     MASK
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -174,7 +174,7 @@ def info_delete_pkg_info_records(command_name, opts, args, adds):
 
     if mask is not None:
 
-        info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+        info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
         info_ctl.delete_info_records(mask)
 
@@ -194,7 +194,7 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
     Existing files are skipped, unless -f is set
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -205,7 +205,7 @@ def info_backup_package_info_to_filesystem(command_name, opts, args, adds):
 
     force = '-f' in opts
 
-    info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+    info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
     ret = info_ctl.save_info_records_to_fs(mask, force)
 
@@ -223,7 +223,7 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
     -a force load all records, not only missing.
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -233,7 +233,7 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
     if len(args) == 0:
         filenames = (
             glob.glob(
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     config['pkg_server']['info_json_dir'],
                     '*'
                     )
@@ -244,7 +244,7 @@ def info_load_package_info_from_filesystem(command_name, opts, args, adds):
 
     rewrite_all = '-a' in opts
 
-    info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+    info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
     info_ctl.load_info_records_from_fs(
         filenames, rewrite_all
@@ -258,8 +258,8 @@ def info_editor(command_name, opts, args, adds):
     Start special info-file editor
     """
 
-    import wayround_org.aipsetup.infoeditor
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.infoeditor
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -279,7 +279,7 @@ def info_editor(command_name, opts, args, adds):
         if isinstance(file_name, str) and os.path.isfile(file_name):
 
             info_ctl = \
-                wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+                wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
             pkg_name = (
                 info_ctl.get_package_name_by_tarball_filename(file_name)
@@ -301,7 +301,7 @@ def info_editor(command_name, opts, args, adds):
             if not file_name.endswith('.json'):
                 file_name = file_name + '.json'
 
-        wayround_org.aipsetup.infoeditor.main(file_name, config)
+        wayround_i2p.aipsetup.infoeditor.main(file_name, config)
 
     return ret
 
@@ -335,7 +335,7 @@ def info_mass_cat_by_path(command_name, opts, args, adds):
 
     path = os.path.abspath(path)
 
-    source_index = wayround_org.utils.file.files_recurcive_list(
+    source_index = wayround_i2p.utils.file.files_recurcive_list(
         dirname=path,
         relative_to=None,
         mute=True,
@@ -367,8 +367,8 @@ def info_mass_cat(command_name, opts, args, adds):
         force  redefine existing basenames
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.info
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.info
 
     config = adds['config']
 
@@ -401,9 +401,9 @@ def info_mass_cat(command_name, opts, args, adds):
 
     if ret == 0:
 
-        info_ctl = wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+        info_ctl = wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
         pkg_repo_ctl = \
-            wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+            wayround_i2p.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
         known_names = set()
         exts = config['pkg_server']['acceptable_src_file_extensions'].split()
@@ -427,7 +427,7 @@ def info_mass_cat(command_name, opts, args, adds):
 
             pkg_name = info_ctl.get_package_name_by_tarball_filename(i)
 
-            parsed_name = wayround_org.utils.tarball.\
+            parsed_name = wayround_i2p.utils.tarball.\
                 parse_tarball_name(i, mute=True)
 
             if not parsed_name:
@@ -491,7 +491,7 @@ def info_mass_cat(command_name, opts, args, adds):
                         logging.info(
                             "Adding `{}' to repository".format(parsed_name)
                             )
-                        total_pkg_path = wayround_org.utils.path.join(
+                        total_pkg_path = wayround_i2p.utils.path.join(
                             config['pkg_server']['repository_dir'],
                             subpath,
                             parsed_name
@@ -502,7 +502,7 @@ def info_mass_cat(command_name, opts, args, adds):
                             pass
 
                         f = open(
-                            wayround_org.utils.path.join(
+                            wayround_i2p.utils.path.join(
                                 total_pkg_path, '.package'
                                 ),
                             'w'
@@ -512,7 +512,7 @@ def info_mass_cat(command_name, opts, args, adds):
 
                         try:
                             os.makedirs(
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     total_pkg_path, 'pack'
                                     )
                                 )
@@ -523,18 +523,18 @@ def info_mass_cat(command_name, opts, args, adds):
 
                     info_dir = config['pkg_server']['info_json_dir']
 
-                    p1 = wayround_org.utils.path.join(
+                    p1 = wayround_i2p.utils.path.join(
                         info_dir,
                         parsed_name + '.json'
                         )
 
-                    info = wayround_org.aipsetup.info.read_info_file(p1)
+                    info = wayround_i2p.aipsetup.info.read_info_file(p1)
 
                     if not isinstance(info, dict):
                         logging.error("Wrong info {}. rewriting".format(p1))
 
                         info = copy.copy(
-                            wayround_org.aipsetup.info.
+                            wayround_i2p.aipsetup.info.
                             SAMPLE_PACKAGE_INFO_STRUCTURE
                             )
 
@@ -572,7 +572,7 @@ def info_mass_cat(command_name, opts, args, adds):
                                     )
                                 )
 
-                    wayround_org.aipsetup.info.write_info_file(p1, info)
+                    wayround_i2p.aipsetup.info.write_info_file(p1, info)
 
         pkg_repo_index_and_update(command_name, {}, [], adds)
 
@@ -592,14 +592,14 @@ def pkg_repo_index(command_name, opts, args, adds):
     to database
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     ret = 0
 
     pkgindex = \
-        wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
     res = pkgindex.scan_repo_for_pkg_and_cat()
 
@@ -665,7 +665,7 @@ def pkg_repo_put_file(command_name, opts, args, adds):
     -m      move, not copy
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -685,7 +685,7 @@ def pkg_repo_put_file(command_name, opts, args, adds):
     else:
 
         index = \
-            wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+            wayround_i2p.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
         ret = index.put_asps_to_index(files, move=move)
 
@@ -693,11 +693,11 @@ def pkg_repo_put_file(command_name, opts, args, adds):
 
 
 def pkg_snap_list(command_name, opts, args, adds):
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
     snapshot_ctl = \
-        wayround_org.aipsetup.controllers.snapshot_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.snapshot_ctl_by_config(config)
     print(repr(snapshot_ctl.list()))
     return 0
 
@@ -707,7 +707,7 @@ def pkg_snap_put(command_name, opts, args, adds):
     Set bundle to package server
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -723,7 +723,7 @@ def pkg_snap_put(command_name, opts, args, adds):
     else:
 
         snapshot_ctl = \
-            wayround_org.aipsetup.controllers.snapshot_ctl_by_config(config)
+            wayround_i2p.aipsetup.controllers.snapshot_ctl_by_config(config)
 
         for i in args:
 

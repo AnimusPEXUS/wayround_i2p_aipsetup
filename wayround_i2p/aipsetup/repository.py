@@ -13,18 +13,18 @@ import shutil
 
 import sqlalchemy.ext.declarative
 
-import wayround_org.aipsetup.package
-import wayround_org.aipsetup.package_name_parser
-import wayround_org.aipsetup.version
-import wayround_org.utils.db
-import wayround_org.utils.file
-import wayround_org.utils.path
-import wayround_org.utils.tag
-import wayround_org.utils.tarball
-import wayround_org.utils.terminal
+import wayround_i2p.aipsetup.package
+import wayround_i2p.aipsetup.package_name_parser
+import wayround_i2p.aipsetup.version
+import wayround_i2p.utils.db
+import wayround_i2p.utils.file
+import wayround_i2p.utils.path
+import wayround_i2p.utils.tag
+import wayround_i2p.utils.tarball
+import wayround_i2p.utils.terminal
 
 
-class PackageRepo(wayround_org.utils.db.BasicDB):
+class PackageRepo(wayround_i2p.utils.db.BasicDB):
 
     """
     Main package index DB handling class
@@ -112,7 +112,7 @@ class PackageRepo(wayround_org.utils.db.BasicDB):
         return
 
 
-class SourceRepo(wayround_org.utils.tag.TagEngine):
+class SourceRepo(wayround_i2p.utils.tag.TagEngine):
     pass
 
 
@@ -120,8 +120,8 @@ class PackageRepoCtl:
 
     def __init__(self, repository_dir, garbage_dir, db_connection):
 
-        self._repository_dir = wayround_org.utils.path.abspath(repository_dir)
-        self._garbage_dir = wayround_org.utils.path.abspath(garbage_dir)
+        self._repository_dir = wayround_i2p.utils.path.abspath(repository_dir)
+        self._garbage_dir = wayround_i2p.utils.path.abspath(garbage_dir)
         self._db_connection = db_connection
 
         return
@@ -142,7 +142,7 @@ class PackageRepoCtl:
 
         return (os.path.isdir(path)
                 and os.path.isfile(
-                wayround_org.utils.path.join(path, '.package')
+                wayround_i2p.utils.path.join(path, '.package')
                 )
                 )
 
@@ -163,8 +163,8 @@ class PackageRepoCtl:
                 ret = 2
             else:
 
-                package_dir = wayround_org.utils.path.abspath(
-                    wayround_org.utils.path.join(
+                package_dir = wayround_i2p.utils.path.abspath(
+                    wayround_i2p.utils.path.join(
                         self._repository_dir,
                         package_path,
                         'pack'
@@ -183,7 +183,7 @@ class PackageRepoCtl:
                     files.sort()
 
                     for i in files:
-                        if os.path.isdir(wayround_org.utils.path.join(package_dir, i)):
+                        if os.path.isdir(wayround_i2p.utils.path.join(package_dir, i)):
                             ret.append(i)
 
         return ret
@@ -205,8 +205,8 @@ class PackageRepoCtl:
                 ret = 2
             else:
 
-                package_dir = wayround_org.utils.path.abspath(
-                    wayround_org.utils.path.join(
+                package_dir = wayround_i2p.utils.path.abspath(
+                    wayround_i2p.utils.path.join(
                         self._repository_dir,
                         package_path,
                         'pack',
@@ -226,7 +226,7 @@ class PackageRepoCtl:
                     files.sort()
 
                     for i in files:
-                        if os.path.isdir(wayround_org.utils.path.join(package_dir, i)):
+                        if os.path.isdir(wayround_i2p.utils.path.join(package_dir, i)):
                             ret.append(i)
 
         return ret
@@ -251,8 +251,8 @@ class PackageRepoCtl:
                 ret = 2
             else:
 
-                package_dir = wayround_org.utils.path.abspath(
-                    wayround_org.utils.path.join(
+                package_dir = wayround_i2p.utils.path.abspath(
+                    wayround_i2p.utils.path.join(
                         self._repository_dir,
                         package_path,
                         'pack',
@@ -270,7 +270,7 @@ class PackageRepoCtl:
                         "Looking for package files in `{}'".format(package_dir)
                         )
 
-                    files = glob.glob(wayround_org.utils.path.join(package_dir, '*.asp'))
+                    files = glob.glob(wayround_i2p.utils.path.join(package_dir, '*.asp'))
 
                     needed_files = []
 
@@ -279,7 +279,7 @@ class PackageRepoCtl:
                         if not os.path.isfile(i):
                             continue
 
-                        parsed = wayround_org.aipsetup.package_name_parser.\
+                        parsed = wayround_i2p.aipsetup.package_name_parser.\
                             package_name_parse(i)
 
                         if (parsed
@@ -289,7 +289,7 @@ class PackageRepoCtl:
                             ):
                             needed_files.append(
                                 os.path.sep +
-                                wayround_org.utils.path.relpath(
+                                wayround_i2p.utils.path.relpath(
                                     i,
                                     self._repository_dir
                                     )
@@ -508,14 +508,14 @@ class PackageRepoCtl:
         if pps is not None:
 
             cur_pkg_path = os.path.abspath(
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     self._repository_dir,
                     pps
                     )
                 )
 
             new_pkg_path = os.path.abspath(
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     self._repository_dir,
                     new_subpath
                     )
@@ -527,7 +527,7 @@ class PackageRepoCtl:
             ret = 3
 
         if ret == 0:
-            if not wayround_org.utils.path.is_subpath_real(
+            if not wayround_i2p.utils.path.is_subpath_real(
                     new_pkg_path,
                     self._repository_dir
                     ):
@@ -535,7 +535,7 @@ class PackageRepoCtl:
                 ret = 1
 
         if ret == 0:
-            if cur_pkg_path == wayround_org.utils.path.join(new_pkg_path, pkg_name):
+            if cur_pkg_path == wayround_i2p.utils.path.join(new_pkg_path, pkg_name):
                 logging.error(
                     "Supplyed same subpath as currently is"
                     )
@@ -546,7 +546,7 @@ class PackageRepoCtl:
             npps = new_pkg_path.split('/')
             for i in range(len(npps)):
 
-                npjap = wayround_org.utils.path.join(
+                npjap = wayround_i2p.utils.path.join(
                     '/', npps[:i + 1], '.package'
                     )
 
@@ -572,13 +572,13 @@ class PackageRepoCtl:
             try:
                 os.rename(
                     cur_pkg_path,
-                    wayround_org.utils.path.join(new_pkg_path, pkg_name)
+                    wayround_i2p.utils.path.join(new_pkg_path, pkg_name)
                     )
             except:
                 logging.exception(
                     "Can't rename\n    `{}'\n    to\n    {}".format(
                         cur_pkg_path,
-                        wayround_org.utils.path.join(new_pkg_path, pkg_name)
+                        wayround_i2p.utils.path.join(new_pkg_path, pkg_name)
                         )
                     )
                 ret = 7
@@ -787,7 +787,7 @@ class PackageRepoCtl:
     def scan_repo_for_pkg_and_cat(self):
         ret = 0
 
-        repo_dir = wayround_org.utils.path.abspath(
+        repo_dir = wayround_i2p.utils.path.abspath(
             self._repository_dir
             )
 
@@ -809,7 +809,7 @@ class PackageRepoCtl:
                     )
 
             else:
-                relpath = wayround_org.utils.path.relpath(
+                relpath = wayround_i2p.utils.path.relpath(
                     os_walk_iter[0],
                     repo_dir
                     )
@@ -857,7 +857,7 @@ class PackageRepoCtl:
                         parent_cid=parent_cat_id
                         )
 
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    scanning "
                     "(found: {} categories, {} packages): {}".format(
                         len(category_locations.keys()),
@@ -866,7 +866,7 @@ class PackageRepoCtl:
                         )
                     )
 
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
         if ret == 0:
             ret = {'cats': category_locations, 'packs': package_locations}
@@ -925,7 +925,7 @@ class PackageRepoCtl:
         ret = 0
 
         for i in ['pack']:
-            full_path = wayround_org.utils.path.join(path, i)
+            full_path = wayround_i2p.utils.path.join(path, i)
 
             if not os.path.exists(full_path):
                 try:
@@ -971,8 +971,8 @@ class PackageRepoCtl:
 
         for file1 in files:
 
-            full_path = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(repository_path, subdir)
+            full_path = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(repository_path, subdir)
                 )
 
             os.makedirs(full_path, exist_ok=True)
@@ -1016,10 +1016,10 @@ class PackageRepoCtl:
             ret = 10
         else:
 
-            asp = wayround_org.aipsetup.package.ASPackage(filename)
+            asp = wayround_i2p.aipsetup.package.ASPackage(filename)
 
             if asp.check_package(mute=True) == 0:
-                parsed = wayround_org.aipsetup.package_name_parser.\
+                parsed = wayround_i2p.aipsetup.package_name_parser.\
                     package_name_parse(
                         filename
                         )
@@ -1032,7 +1032,7 @@ class PackageRepoCtl:
                         )
                     ret = 13
                 else:
-                    file1 = wayround_org.utils.path.abspath(filename)
+                    file1 = wayround_i2p.utils.path.abspath(filename)
 
                     files = [
                         file1
@@ -1051,7 +1051,7 @@ class PackageRepoCtl:
                         ret = 11
                     else:
 
-                        path = wayround_org.utils.path.join(
+                        path = wayround_i2p.utils.path.join(
                             package_path,
                             'pack',
                             parsed['groups']['host'],
@@ -1135,7 +1135,7 @@ class PackageRepoCtl:
 
     def cleanup_repo_package_pack_host_arch(self, g_path, name, host, arch):
 
-        path = wayround_org.utils.path.join(
+        path = wayround_i2p.utils.path.join(
             self._repository_dir,
             self.get_package_path_string(name),
             'pack',
@@ -1150,13 +1150,13 @@ class PackageRepoCtl:
 
         for i in files:
 
-            p1 = wayround_org.utils.path.join(path, i)
+            p1 = wayround_i2p.utils.path.join(path, i)
 
             if os.path.exists(p1):
 
-                p2 = wayround_org.utils.path.join(g_path, i)
+                p2 = wayround_i2p.utils.path.join(g_path, i)
 
-                pkg = wayround_org.aipsetup.package.ASPackage(p1)
+                pkg = wayround_i2p.aipsetup.package.ASPackage(p1)
 
                 if pkg.check_package(True) != 0:
                     logging.warning(
@@ -1173,14 +1173,14 @@ class PackageRepoCtl:
         files = os.listdir(path)
         files.sort(
             key=functools.cmp_to_key(
-                wayround_org.aipsetup.version.package_version_comparator
+                wayround_i2p.aipsetup.version.package_version_comparator
                 ),
             reverse=True
             )
 
         if len(files) > 5:
             for i in files[5:]:
-                p1 = wayround_org.utils.path.join(path, i)
+                p1 = wayround_i2p.utils.path.join(path, i)
 
                 logging.warning(
                     "Removing outdated package: {}".format(
@@ -1196,7 +1196,7 @@ class PackageRepoCtl:
 
     def cleanup_repo_package_pack_host(self, g_path, name, host):
 
-        path = wayround_org.utils.path.join(
+        path = wayround_i2p.utils.path.join(
             self._repository_dir,
             self.get_package_path_string(name),
             'pack',
@@ -1209,7 +1209,7 @@ class PackageRepoCtl:
         files.sort()
 
         for arch in files:
-            if os.path.isdir(wayround_org.utils.path.join(path, arch)):
+            if os.path.isdir(wayround_i2p.utils.path.join(path, arch)):
                 self.cleanup_repo_package_pack_host_arch(
                     g_path,
                     name,
@@ -1225,18 +1225,18 @@ class PackageRepoCtl:
         files.sort()
 
         for i in files:
-            p1 = wayround_org.utils.path.join(path, i)
+            p1 = wayround_i2p.utils.path.join(path, i)
 
             if os.path.islink(p1):
                 logging.warning("Removing {}".format(p1))
-                wayround_org.utils.file.remove_if_exists(p1)
+                wayround_i2p.utils.file.remove_if_exists(p1)
 
         files = os.listdir(path)
         files.sort()
 
         for i in files:
 
-            p1 = wayround_org.utils.path.join(path, i)
+            p1 = wayround_i2p.utils.path.join(path, i)
 
             if os.path.isfile(p1):
 
@@ -1247,7 +1247,7 @@ class PackageRepoCtl:
                         " moving to garbage".format(p1)
                         )
 
-                    shutil.move(p1, wayround_org.utils.path.join(g_path, i))
+                    shutil.move(p1, wayround_i2p.utils.path.join(g_path, i))
 
             '''
             if os.path.isdir(p1) and remove_dirs:
@@ -1256,19 +1256,19 @@ class PackageRepoCtl:
                     "Can't move file to index. moving to garbage"
                     )
 
-                shutil.move(p1, wayround_org.utils.path.join(g_path, i))
+                shutil.move(p1, wayround_i2p.utils.path.join(g_path, i))
             '''
 
         return
 
     def cleanup_repo_package_pack(self, name):
 
-        g_path = wayround_org.utils.path.join(self._garbage_dir, name)
+        g_path = wayround_i2p.utils.path.join(self._garbage_dir, name)
 
         if not os.path.exists(g_path):
             os.makedirs(g_path, exist_ok=True)
 
-        path = wayround_org.utils.path.join(
+        path = wayround_i2p.utils.path.join(
             self._repository_dir,
             self.get_package_path_string(name),
             'pack'
@@ -1276,7 +1276,7 @@ class PackageRepoCtl:
 
         self.create_required_dirs_at_package(path)
 
-        path = wayround_org.utils.path.abspath(path)
+        path = wayround_i2p.utils.path.abspath(path)
 
         self._ccc1(path, g_path)
 
@@ -1284,24 +1284,24 @@ class PackageRepoCtl:
         files.sort()
 
         for host in files:
-            if os.path.isdir(wayround_org.utils.path.join(path, host)):
+            if os.path.isdir(wayround_i2p.utils.path.join(path, host)):
                 self.cleanup_repo_package_pack_host(g_path, name, host)
 
         return
 
     def cleanup_repo_package(self, name):
 
-        g_path = wayround_org.utils.path.join(self._garbage_dir, name)
+        g_path = wayround_i2p.utils.path.join(self._garbage_dir, name)
 
         if not os.path.exists(g_path):
             os.makedirs(g_path)
 
-        path = wayround_org.utils.path.join(
+        path = wayround_i2p.utils.path.join(
             self._garbage_dir,
             self.get_package_path_string(name)
             )
 
-        path = wayround_org.utils.path.abspath(path)
+        path = wayround_i2p.utils.path.abspath(path)
 
         self.create_required_dirs_at_package(path)
 
@@ -1310,7 +1310,7 @@ class PackageRepoCtl:
         for i in files:
             if not i in ['.package', 'pack']:
 
-                p1 = wayround_org.utils.path.join(path, i)
+                p1 = wayround_i2p.utils.path.join(path, i)
                 p2 = g_path
                 logging.warning(
                     "moving `{}'\n\tto {}".format(
@@ -1354,7 +1354,7 @@ class PackageRepoCtl:
             else:
                 perc = 100.0 / (float(lst_l) / lst_i)
 
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "    {:6.2f}% (package {})".format(
                     perc,
                     pkgs[i]
@@ -1370,7 +1370,7 @@ class PackageRepoCtl:
             p1 = garbage_dir + os.path.sep + i
             if not os.path.islink(p1):
                 if os.path.isdir(p1):
-                    if wayround_org.utils.file.isdirempty(p1):
+                    if wayround_i2p.utils.file.isdirempty(p1):
                         try:
                             os.rmdir(p1)
                         except:
@@ -1397,7 +1397,7 @@ class PackageRepoCtl:
             ret = max(
                 files,
                 key=functools.cmp_to_key(
-                    wayround_org.aipsetup.version.package_version_comparator
+                    wayround_i2p.aipsetup.version.package_version_comparator
                     )
                 )
 
@@ -1450,7 +1450,7 @@ class SourceRepoCtl:
         if not isinstance(database_connection, SourceRepo):
             raise ValueError(
                 "database_connection must be of type "
-                "wayround_org.aipsetup.repository.SourceRepo"
+                "wayround_i2p.aipsetup.repository.SourceRepo"
                 )
 
         self.sources_dir = sources_dir
@@ -1467,15 +1467,15 @@ class SourceRepoCtl:
             clean_only=False
             ):
 
-        src_dir = wayround_org.utils.path.abspath(self.sources_dir)
-        sub_src_dir = wayround_org.utils.path.abspath(subdir_name)
+        src_dir = wayround_i2p.utils.path.abspath(self.sources_dir)
+        sub_src_dir = wayround_i2p.utils.path.abspath(subdir_name)
 
         ret = 0
 
         if (
                 not (sub_src_dir + '/').startswith(src_dir + '/')
                 or not os.path.isdir(
-                    wayround_org.utils.path.abspath(subdir_name)
+                    wayround_i2p.utils.path.abspath(subdir_name)
                     )):
             logging.error("Not a subdir of pkg_source: {}".format(subdir_name))
             ret = 1
@@ -1505,14 +1505,14 @@ class SourceRepoCtl:
         ''
 
         '''
-        root_dir_name = wayround_org.utils.path.realpath(root_dir_name)
-        sub_dir_name = wayround_org.utils.path.realpath(sub_dir_name)
+        root_dir_name = wayround_i2p.utils.path.realpath(root_dir_name)
+        sub_dir_name = wayround_i2p.utils.path.realpath(sub_dir_name)
         '''
 
-        root_dir_name = wayround_org.utils.path.abspath(root_dir_name)
-        sub_dir_name = wayround_org.utils.path.abspath(sub_dir_name)
+        root_dir_name = wayround_i2p.utils.path.abspath(root_dir_name)
+        sub_dir_name = wayround_i2p.utils.path.abspath(sub_dir_name)
 
-        rel_path = wayround_org.utils.path.relpath(sub_dir_name, root_dir_name)
+        rel_path = wayround_i2p.utils.path.relpath(sub_dir_name, root_dir_name)
         rel_path = os.path.sep + rel_path + os.path.sep
 
         logging.debug("Root dir: {}".format(root_dir_name))
@@ -1528,7 +1528,7 @@ class SourceRepoCtl:
 
             logging.info("Indexing {}...".format(root_dir_name))
 
-            source_index = wayround_org.utils.file.files_recurcive_list(
+            source_index = wayround_i2p.utils.file.files_recurcive_list(
                 dirname=sub_dir_name,
                 relative_to=root_dir_name,
                 mute=False,
@@ -1538,7 +1538,7 @@ class SourceRepoCtl:
                 list_symlincs=False
                 )
 
-            source_index = wayround_org.utils.path.prepend_path(
+            source_index = wayround_i2p.utils.path.prepend_path(
                 source_index,
                 '/'
                 )
@@ -1554,7 +1554,7 @@ class SourceRepoCtl:
                 removed = 0
                 logging.info("Removing found files from index")
                 for i in source_index:
-                    wayround_org.utils.terminal.progress_write(
+                    wayround_i2p.utils.terminal.progress_write(
                         "    removed {} of {}".format(removed, found_count)
                         )
                     self.src_db.del_object_tags(i)
@@ -1562,7 +1562,7 @@ class SourceRepoCtl:
 
                 self.src_db.commit()
 
-                wayround_org.utils.terminal.progress_write_finish()
+                wayround_i2p.utils.terminal.progress_write_finish()
 
             index = 0
             failed_count = 0
@@ -1582,7 +1582,7 @@ class SourceRepoCtl:
                 else:
 
                     parsed_src_filename = (
-                        wayround_org.utils.tarball.
+                        wayround_i2p.utils.tarball.
                         parse_tarball_name(
                             i,
                             mute=True,
@@ -1596,21 +1596,21 @@ class SourceRepoCtl:
                         additions_memory.append(
                             (i, [parsed_src_filename['groups']['name']])
                             )
-                        wayround_org.utils.terminal.progress_write(
+                        wayround_i2p.utils.terminal.progress_write(
                             "    adding: {}\n".format(
                                 os.path.basename(i)
                                 )
                             )
                         added_count += 1
                     else:
-                        wayround_org.utils.terminal.progress_write(
+                        wayround_i2p.utils.terminal.progress_write(
                             "    failed to parse: {}\n".format(
                                 os.path.basename(i)
                                 )
                             )
                         failed_count += 1
 
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    {} out of {} "
                     "({:.2f}%, adding {}, failed {}, skipped {})".format(
                         index,
@@ -1622,7 +1622,7 @@ class SourceRepoCtl:
                         )
                     )
 
-            wayround_org.utils.terminal.progress_write_finish()
+            wayround_i2p.utils.terminal.progress_write_finish()
 
             del source_index
 
@@ -1655,17 +1655,17 @@ class SourceRepoCtl:
 
             if i.startswith(rel_path):
 
-                rp = wayround_org.utils.path.join(
+                rp = wayround_i2p.utils.path.join(
                     root_dir_name, i
                     )
 
                 if os.path.islink(rp) or not os.path.isfile(
-                        wayround_org.utils.path.abspath(
+                        wayround_i2p.utils.path.abspath(
                             rp
                             )
                         ):
                     '''
-                    wayround_org.utils.path.realpath(
+                    wayround_i2p.utils.path.realpath(
                         rp
                         )
                     ):
@@ -1679,7 +1679,7 @@ class SourceRepoCtl:
                 skipped_count += 1
 
             i_i += 1
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "    {:.2f}%, scanned {}, marked for "
                 "deletion {}, skipped {}: {}".format(
                     100.0 / (float(src_tag_objects_l) / i_i),
@@ -1690,7 +1690,7 @@ class SourceRepoCtl:
                     )
                 )
 
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
         self.src_db.del_object_tags(to_deletion, False)
 

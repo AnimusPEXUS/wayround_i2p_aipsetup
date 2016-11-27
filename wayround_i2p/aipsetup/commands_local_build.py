@@ -5,7 +5,7 @@ import os.path
 import tempfile
 
 
-import wayround_org.utils.path
+import wayround_i2p.utils.path
 
 
 def commands():
@@ -34,7 +34,7 @@ def building_site_init(command_name, opts, args, adds):
     [DIRNAME] [TARBALL [TARBALL [TARBALL ...]]]
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     #    config = adds['config']
 
@@ -47,7 +47,7 @@ def building_site_init(command_name, opts, args, adds):
     if len(args) > 1:
         files = args[1:]
 
-    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(init_dir)
+    bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(init_dir)
 
     ret = bs.init(files)
 
@@ -61,7 +61,7 @@ def building_site_apply_info(command_name, opts, args, adds):
     [DIRNAME [FILENAME]]
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -76,13 +76,13 @@ def building_site_apply_info(command_name, opts, args, adds):
 
     # TODO: add check for dirname correctness
 
-    pkg_info = wayround_org.aipsetup.build.read_package_info(
+    pkg_info = wayround_i2p.aipsetup.build.read_package_info(
         dirname,
         None
         )
 
     host, build, target, arch, ccp_res = \
-        wayround_org.aipsetup.build.constitution_configurer(
+        wayround_i2p.aipsetup.build.constitution_configurer(
             config,
             pkg_info,
             opts.get('--host', None),
@@ -91,7 +91,7 @@ def building_site_apply_info(command_name, opts, args, adds):
             opts.get('--arch', None)
             )
 
-    const = wayround_org.aipsetup.build.Constitution(
+    const = wayround_i2p.aipsetup.build.Constitution(
         host,
         build,
         target,
@@ -102,8 +102,8 @@ def building_site_apply_info(command_name, opts, args, adds):
 
         )
 
-    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
-    pkg_client = wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+    bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(dirname)
+    pkg_client = wayround_i2p.aipsetup.controllers.pkg_client_by_config(config)
     ret = bs.apply_info(pkg_client, const, src_file_name=file)
 
     return ret
@@ -116,7 +116,7 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
     [DIRNAME] PACKAGE_INFO_NAME
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -137,13 +137,13 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
         logging.error("Must be 1 or 2 parameters")
         ret = 1
 
-    pkg_info = wayround_org.aipsetup.build.read_package_info(
+    pkg_info = wayround_i2p.aipsetup.build.read_package_info(
         dirname,
         None
         )
 
     host, build, target, arch, ccp_res = \
-        wayround_org.aipsetup.build.constitution_configurer(
+        wayround_i2p.aipsetup.build.constitution_configurer(
             config,
             pkg_info,
             opts.get('--host', None),
@@ -152,7 +152,7 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
             opts.get('--arch', None)
             )
 
-    const = wayround_org.aipsetup.build.Constitution(
+    const = wayround_i2p.aipsetup.build.Constitution(
         host,
         build,
         target,
@@ -163,8 +163,8 @@ def building_site_apply_info_by_name(command_name, opts, args, adds):
         ccp_res['CXX']
         )
 
-    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
-    pkg_client = wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+    bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(dirname)
+    pkg_client = wayround_i2p.aipsetup.controllers.pkg_client_by_config(config)
     ret = bs.apply_info_by_name(pkg_client, const, package_name)
 
     return ret
@@ -182,7 +182,7 @@ def build_continue(command_name, opts, args, adds):
     started (if not error will occur)
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -201,10 +201,10 @@ def build_continue(command_name, opts, args, adds):
         if '-b' in opts:
             dirname = opts['-b']
 
-        bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
-        build_ctl = wayround_org.aipsetup.controllers.build_ctl_new(bs)
+        bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(dirname)
+        build_ctl = wayround_i2p.aipsetup.controllers.build_ctl_new(bs)
         script = \
-            wayround_org.aipsetup.controllers.bscript_ctl_by_config(config)
+            wayround_i2p.aipsetup.controllers.bscript_ctl_by_config(config)
         ret = build_ctl.start_building_script(script, action=action)
 
     return ret
@@ -222,7 +222,7 @@ def _build_complete_subroutine(
         remove_buildingsite_after_success
         ):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
@@ -231,7 +231,7 @@ def _build_complete_subroutine(
     print("target: {}".format(target))
     print("arch: {}".format(arch))
 
-    const = wayround_org.aipsetup.build.Constitution(
+    const = wayround_i2p.aipsetup.build.Constitution(
         host,
         build,
         target,
@@ -245,16 +245,16 @@ def _build_complete_subroutine(
         ret = 1
     else:
 
-        bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dirname)
+        bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(dirname)
 
-        build_ctl = wayround_org.aipsetup.controllers.build_ctl_new(bs)
-        pack_ctl = wayround_org.aipsetup.controllers.pack_ctl_new(bs)
+        build_ctl = wayround_i2p.aipsetup.controllers.build_ctl_new(bs)
+        pack_ctl = wayround_i2p.aipsetup.controllers.pack_ctl_new(bs)
 
         build_script_ctl = \
-            wayround_org.aipsetup.controllers.bscript_ctl_by_config(config)
+            wayround_i2p.aipsetup.controllers.bscript_ctl_by_config(config)
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(config)
 
         ret = bs.complete(
             build_ctl,
@@ -299,7 +299,7 @@ def build_complete(command_name, opts, args, adds):
     ================ ====================================
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -311,13 +311,13 @@ def build_complete(command_name, opts, args, adds):
 
     if args_l == 0:
 
-        pkg_info = wayround_org.aipsetup.build.read_package_info(
+        pkg_info = wayround_i2p.aipsetup.build.read_package_info(
             '.',
             None
             )
 
         host, build, target, arch, ccp_res = \
-            wayround_org.aipsetup.build.constitution_configurer(
+            wayround_i2p.aipsetup.build.constitution_configurer(
                 config,
                 pkg_info,
                 opts.get('--host', None),
@@ -340,13 +340,13 @@ def build_complete(command_name, opts, args, adds):
 
     elif args_l == 1 and os.path.isfile(args[0]):
 
-        pkg_info = wayround_org.aipsetup.build.read_package_info(
+        pkg_info = wayround_i2p.aipsetup.build.read_package_info(
             '.',
             None
             )
 
         host, build, target, arch, ccp_res = \
-            wayround_org.aipsetup.build.constitution_configurer(
+            wayround_i2p.aipsetup.build.constitution_configurer(
                 config,
                 pkg_info,
                 opts.get('--host', None),
@@ -369,13 +369,13 @@ def build_complete(command_name, opts, args, adds):
 
     elif args_l == 2 and os.path.isdir(args[0]) and os.path.isfile(args[1]):
 
-        pkg_info = wayround_org.aipsetup.build.read_package_info(
+        pkg_info = wayround_i2p.aipsetup.build.read_package_info(
             args[0],
             None
             )
 
         host, build, target, arch, ccp_res = \
-            wayround_org.aipsetup.build.constitution_configurer(
+            wayround_i2p.aipsetup.build.constitution_configurer(
                 config,
                 pkg_info,
                 opts.get('--host', None),
@@ -402,13 +402,13 @@ def build_complete(command_name, opts, args, adds):
 
         for i in args:
 
-            pkg_info = wayround_org.aipsetup.build.read_package_info(
+            pkg_info = wayround_i2p.aipsetup.build.read_package_info(
                 i,
                 None
                 )
 
             host, build, target, arch, ccp_res = \
-                wayround_org.aipsetup.build.constitution_configurer(
+                wayround_i2p.aipsetup.build.constitution_configurer(
                     config,
                     pkg_info,
                     opts.get('--host', None),
@@ -456,14 +456,14 @@ def build_full(command_name, opts, args, adds):
     ================ ====================================
     """
 
-    import wayround_org.aipsetup.build
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.build
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
     config = adds['config']
 
-    if wayround_org.utils.getopt.check_options(
+    if wayround_i2p.utils.getopt.check_options(
             opts,
             opts_list=[
                 '-d',
@@ -488,7 +488,7 @@ def build_full(command_name, opts, args, adds):
 
         if len(args) > 0:
             sources = args
-            building_site_dir = wayround_org.utils.path.abspath(
+            building_site_dir = wayround_i2p.utils.path.abspath(
                 os.path.dirname(sources[0])
                 )
 
@@ -544,14 +544,14 @@ def build_full_hosts(command_name, opts, args, adds):
     ================ ======================================
     """
 
-    import wayround_org.aipsetup.build
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.build
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
     config = adds['config']
 
-    if wayround_org.utils.getopt.check_options(
+    if wayround_i2p.utils.getopt.check_options(
             opts,
             opts_list=[
                 '-d',
@@ -573,7 +573,7 @@ def build_full_hosts(command_name, opts, args, adds):
 
         if len(args) > 0:
             sources = args
-            building_site_dir = wayround_org.utils.path.abspath(
+            building_site_dir = wayround_i2p.utils.path.abspath(
                 os.path.dirname(sources[0])
                 )
 
@@ -652,14 +652,14 @@ def build_full_archs(command_name, opts, args, adds):
     ================ ====================================
     """
 
-    import wayround_org.aipsetup.build
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.build
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
     config = adds['config']
 
-    if wayround_org.utils.getopt.check_options(
+    if wayround_i2p.utils.getopt.check_options(
             opts,
             opts_list=[
                 '-d',
@@ -683,7 +683,7 @@ def build_full_archs(command_name, opts, args, adds):
 
         if len(args) > 0:
             sources = args
-            building_site_dir = wayround_org.utils.path.abspath(
+            building_site_dir = wayround_i2p.utils.path.abspath(
                 os.path.dirname(sources[0])
                 )
 
@@ -757,7 +757,7 @@ def build_pack(command_name, opts, args, adds):
     DIRNAME - set building site. Default is current directory
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
@@ -771,9 +771,9 @@ def build_pack(command_name, opts, args, adds):
         if args_l == 1:
             dir_name = args[0]
 
-        bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dir_name)
+        bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(dir_name)
 
-        packer = wayround_org.aipsetup.controllers.pack_ctl_new(bs)
+        packer = wayround_i2p.aipsetup.controllers.pack_ctl_new(bs)
 
         ret = packer.complete()
 
@@ -789,7 +789,7 @@ def build_build(command_name, opts, args, adds):
     DIRNAME - set building site. Default is current directory
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -805,12 +805,12 @@ def build_build(command_name, opts, args, adds):
         if args_l == 1:
             dir_name = args[0]
 
-        bs = wayround_org.aipsetup.controllers.bsite_ctl_new(dir_name)
+        bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(dir_name)
 
-        build_ctl = wayround_org.aipsetup.controllers.build_ctl_new(bs)
+        build_ctl = wayround_i2p.aipsetup.controllers.build_ctl_new(bs)
 
         buildscript_ctl = \
-            wayround_org.aipsetup.controllers.bscript_ctl_by_config(config)
+            wayround_i2p.aipsetup.controllers.bscript_ctl_by_config(config)
 
         ret = build_ctl.complete(buildscript_ctl)
 
@@ -827,7 +827,7 @@ def build_sub_01(
     """
     Gathering function for all package building process
 
-    Uses :func:`wayround_org.aipsetup.buildingsite.init` to create building
+    Uses :func:`wayround_i2p.aipsetup.buildingsite.init` to create building
     site. Farther process controlled by :func:`complete`.
 
     :param source_files: tarball name or list of them.
@@ -835,7 +835,7 @@ def build_sub_01(
 
     ret = 0
 
-    par_res = wayround_org.utils.tarball.parse_tarball_name(
+    par_res = wayround_i2p.utils.tarball.parse_tarball_name(
         source_files[0],
         mute=True
         )
@@ -860,7 +860,7 @@ def build_sub_01(
         else:
 
             pkg_client = \
-                wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+                wayround_i2p.aipsetup.controllers.pkg_client_by_config(config)
 
             pkg_name = pkg_client.name_by_name(source_files[0])
 
@@ -910,11 +910,11 @@ Can't select between those package names (for {})
                     #             'version': par_res['groups']['version'],
                     #             'status': par_res['groups']['status'],
                     #             'timestamp':
-                    #                 wayround_org.utils.time.currenttime_stamp()
+                    #                 wayround_i2p.utils.time.currenttime_stamp()
                     #             }
                     #         )
 
-                    _ts = wayround_org.utils.time.currenttime_stamp()
+                    _ts = wayround_i2p.utils.time.currenttime_stamp()
                     while '.' in _ts:
                         _ts = _ts.replace('.', '')
 
@@ -932,7 +932,7 @@ Can't select between those package names (for {})
                         dir=buildingsites_dir
                         )
 
-                    bs = wayround_org.aipsetup.controllers.bsite_ctl_new(
+                    bs = wayround_i2p.aipsetup.controllers.bsite_ctl_new(
                         build_site_dir
                         )
 
@@ -941,13 +941,13 @@ Can't select between those package names (for {})
                         ret = 3
                     else:
 
-                        pkg_info = wayround_org.aipsetup.build.read_package_info(
+                        pkg_info = wayround_i2p.aipsetup.build.read_package_info(
                             build_site_dir,
                             None
                             )
 
                         host, build, target, arch, ccp_res = \
-                            wayround_org.aipsetup.build.constitution_configurer(
+                            wayround_i2p.aipsetup.build.constitution_configurer(
                                 config,
                                 pkg_info,
                                 opts.get('--host', None),

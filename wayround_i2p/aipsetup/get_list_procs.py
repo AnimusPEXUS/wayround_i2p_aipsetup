@@ -6,13 +6,13 @@ import os.path
 import re
 import pprint
 
-import wayround_org.aipsetup.client_pkg
-import wayround_org.aipsetup.client_src
-import wayround_org.utils.path
-import wayround_org.utils.tarball
-import wayround_org.utils.terminal
-import wayround_org.utils.types
-import wayround_org.utils.version
+import wayround_i2p.aipsetup.client_pkg
+import wayround_i2p.aipsetup.client_src
+import wayround_i2p.utils.path
+import wayround_i2p.utils.tarball
+import wayround_i2p.utils.terminal
+import wayround_i2p.utils.types
+import wayround_i2p.utils.version
 
 
 def check_nineties(parsed):
@@ -66,7 +66,7 @@ def find_gnome_tarball_name(
         acceptable_extensions_order_list = ['.tar.xz', '.tar.bz2', '.tar.gz']
 
     def source_version_comparator(v1, v2):
-        return wayround_org.utils.version.source_version_comparator(
+        return wayround_i2p.utils.version.source_version_comparator(
             v1, v2,
             acceptable_extensions_order_list
             )
@@ -89,7 +89,7 @@ def find_gnome_tarball_name(
 
         for i in tarballs:
 
-            parsed = wayround_org.utils.tarball.parse_tarball_name(
+            parsed = wayround_i2p.utils.tarball.parse_tarball_name(
                 i,
                 mute=True
             )
@@ -127,7 +127,7 @@ def find_gnome_tarball_name(
 
     for i in tarballs:
 
-        parsed = wayround_org.utils.tarball.\
+        parsed = wayround_i2p.utils.tarball.\
             parse_tarball_name(i, mute=True)
 
         if parsed:
@@ -156,7 +156,7 @@ def find_gnome_tarball_name(
 
         for i in tarballs:
 
-            parsed = wayround_org.utils.tarball.\
+            parsed = wayround_i2p.utils.tarball.\
                 parse_tarball_name(i, mute=True)
 
             if parsed:
@@ -203,7 +203,7 @@ def find_gnome_tarball_name(
         if next_found_acceptable_tarball is not None:
 
             for i in tarballs:
-                if wayround_org.utils.version.source_version_comparator(
+                if wayround_i2p.utils.version.source_version_comparator(
                         i,
                         next_found_acceptable_tarball,
                         acceptable_extensions_order_list
@@ -299,7 +299,7 @@ def gnome_get(
         else:
 
             if not isinstance(
-                    wayround_org.aipsetup.client_pkg.get_tarball(tarball),
+                    wayround_i2p.aipsetup.client_pkg.get_tarball(tarball),
                     str
                     ):
                 ret = 3
@@ -366,7 +366,7 @@ def normal_get(
                 logging.error("Could not get tarball for `{}'".format(pkgname))
                 ret = 4
             else:
-                ret = wayround_org.aipsetup.client_pkg.get_tarball(found)
+                ret = wayround_i2p.aipsetup.client_pkg.get_tarball(found)
 
                 if not isinstance(ret, str):
                     ret = 3
@@ -490,20 +490,20 @@ def get_by_glp(
 
     if not isinstance(
             pkg_client,
-            wayround_org.aipsetup.client_pkg.PackageServerClient
+            wayround_i2p.aipsetup.client_pkg.PackageServerClient
             ):
         raise TypeError(
             "`pkg_client' must be inst of "
-            "wayround_org.aipsetup.client_pkg.PackageServerClient"
+            "wayround_i2p.aipsetup.client_pkg.PackageServerClient"
             )
 
     if not isinstance(
             src_client,
-            wayround_org.aipsetup.client_src.SourceServerClient
+            wayround_i2p.aipsetup.client_src.SourceServerClient
             ):
         raise TypeError(
             "`pkg_client' must be inst of "
-            "wayround_org.aipsetup.client_src.SourceServerClient"
+            "wayround_i2p.aipsetup.client_src.SourceServerClient"
             )
 
     ret = 0
@@ -602,8 +602,8 @@ def get_list(config, list_name):
 
     # TODO: place next to config
 
-    list_filename = wayround_org.utils.path.abspath(
-        wayround_org.utils.path.join(
+    list_filename = wayround_i2p.utils.path.abspath(
+        wayround_i2p.utils.path.join(
             os.path.dirname(__file__),
             'distro',
             'pkg_groups',

@@ -8,8 +8,8 @@ import tempfile
 import urllib.parse
 import urllib.request
 
-import wayround_org.aipsetup.package_name_parser
-import wayround_org.utils.path
+import wayround_i2p.aipsetup.package_name_parser
+import wayround_i2p.utils.path
 
 
 class PackageServerClient:
@@ -254,10 +254,10 @@ def archs(url, pkg_name, host):
 
 def asps(url, pkg_name, host, arch):
 
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(host) is None:
         raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
 
-    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
         raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
@@ -291,10 +291,10 @@ def asps(url, pkg_name, host, arch):
 
 def asps_latest(url, pkg_name, host, arch):
 
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(host) is None:
         raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
 
-    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
         raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
@@ -321,7 +321,7 @@ def asps_latest(url, pkg_name, host, arch):
     if ret and len(ret) != 0:
         ret.sort(
             key=functools.cmp_to_key(
-                wayround_org.aipsetup.version.package_version_comparator
+                wayround_i2p.aipsetup.version.package_version_comparator
                 ),
             reverse=True
             )
@@ -339,15 +339,15 @@ def get_asp(url, host, arch, filename, out_dir=None, out_to_temp=False):
     does not metter and file wil be downloaded to current dir
     """
 
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(host) is None:
         raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
 
-    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
         raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
 
-    parsed = wayround_org.aipsetup.package_name_parser.package_name_parse(
+    parsed = wayround_i2p.aipsetup.package_name_parser.package_name_parse(
         filename
         )
 
@@ -405,17 +405,17 @@ def get_asp(url, host, arch, filename, out_dir=None, out_to_temp=False):
     if res != 0:
         ret = res
     else:
-        ret = wayround_org.utils.path.abspath(option_O)
+        ret = wayround_i2p.utils.path.abspath(option_O)
 
     return ret
 
 
 def get_latest_asp(url, pkg_name, host, arch, out_dir=None, out_to_temp=False):
 
-    if wayround_org.utils.system_type.parse_triplet(host) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(host) is None:
         raise ValueError("Invalid host triplet: {}".format(str(host)[:20]))
 
-    if wayround_org.utils.system_type.parse_triplet(arch) is None:
+    if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
         raise ValueError("Invalid arch triplet: {}".format(str(arch)[:20]))
 
     ret = None
@@ -459,7 +459,7 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
     """
 
     def source_version_comparator(v1, v2):
-        return wayround_org.utils.version.source_version_comparator(
+        return wayround_i2p.utils.version.source_version_comparator(
             v1, v2,
             acceptable_extensions_order_list
             )
@@ -499,7 +499,7 @@ def tarballs_latest(url, pkg_name, acceptable_extensions_order_list):
 
         # remain only packages with same version, but with different extensions
         for i in ret[:]:
-            if (wayround_org.utils.version.source_version_comparator(
+            if (wayround_i2p.utils.version.source_version_comparator(
                 i, m,
                 acceptable_extensions_order_list
                 )
@@ -600,7 +600,7 @@ def get_tarball(
     if res != 0:
         ret = res
     else:
-        ret = wayround_org.utils.path.abspath(option_O)
+        ret = wayround_i2p.utils.path.abspath(option_O)
 
     return ret
 

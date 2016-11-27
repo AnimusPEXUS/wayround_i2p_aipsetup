@@ -2,7 +2,7 @@
 import os.path
 import logging
 
-import wayround_org.utils.gtk
+import wayround_i2p.utils.gtk
 
 _gtk_session = None
 
@@ -65,14 +65,14 @@ class MainWindow:
 
         self.currently_opened = None
 
-        ui_file = wayround_org.utils.path.join(
+        ui_file = wayround_i2p.utils.path.join(
             os.path.dirname(__file__), 'gui', 'main_loop.glade'
             )
 
         ui = Gtk.Builder()
         ui.add_from_file(ui_file)
 
-        self.ui = wayround_org.utils.gtk.widget_dict(ui)
+        self.ui = wayround_i2p.utils.gtk.widget_dict(ui)
 
         self.ui['window1'].connect("delete-event", Gtk.main_quit)
 
@@ -110,16 +110,16 @@ class MainWindow:
 
     def onEditLatestButtonActivated(self, toggle):
 
-        import wayround_org.aipsetup.latesteditor
+        import wayround_i2p.aipsetup.latesteditor
 
-        wayround_org.aipsetup.latesteditor.main()
+        wayround_i2p.aipsetup.latesteditor.main()
 
         return
 
     def onEditInfoClicked(self, toggle):
 
-        import wayround_org.aipsetup.infoeditor
+        import wayround_i2p.aipsetup.infoeditor
 
-        wayround_org.aipsetup.infoeditor.main()
+        wayround_i2p.aipsetup.infoeditor.main()
 
         return

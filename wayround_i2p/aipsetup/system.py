@@ -16,17 +16,17 @@ import tarfile
 import bottle
 
 
-import wayround_org.utils.file
-import wayround_org.utils.format.elf
-import wayround_org.utils.list
-import wayround_org.utils.path
-import wayround_org.utils.terminal
-import wayround_org.utils.system_type
+import wayround_i2p.utils.file
+import wayround_i2p.utils.format.elf
+import wayround_i2p.utils.list
+import wayround_i2p.utils.path
+import wayround_i2p.utils.terminal
+import wayround_i2p.utils.system_type
 
-import wayround_org.aipsetup.client_pkg
-import wayround_org.aipsetup.package
-import wayround_org.aipsetup.package_name_parser
-import wayround_org.aipsetup.version
+import wayround_i2p.aipsetup.client_pkg
+import wayround_i2p.aipsetup.package
+import wayround_i2p.aipsetup.package_name_parser
+import wayround_i2p.aipsetup.version
 
 import certdata.certdata
 
@@ -76,31 +76,31 @@ class SystemCtl:
 
         if not isinstance(
                 pkg_client,
-                wayround_org.aipsetup.client_pkg.PackageServerClient
+                wayround_i2p.aipsetup.client_pkg.PackageServerClient
                 ):
 
             raise ValueError(
                 "pkg_client must be of type "
-                "wayround_org.aipsetup.client_pkg.PackageServerClient"
+                "wayround_i2p.aipsetup.client_pkg.PackageServerClient"
                 )
 
-        self.basedir = wayround_org.utils.path.abspath(basedir)
+        self.basedir = wayround_i2p.utils.path.abspath(basedir)
 
         self._pkg_client = pkg_client
 
-        self._installed_pkg_dir = wayround_org.utils.path.join(
+        self._installed_pkg_dir = wayround_i2p.utils.path.join(
             self.basedir,
             installed_pkg_dir
             )
-        self._installed_pkg_dir_buildlogs = wayround_org.utils.path.join(
+        self._installed_pkg_dir_buildlogs = wayround_i2p.utils.path.join(
             self.basedir,
             installed_pkg_dir_buildlogs
             )
-        self._installed_pkg_dir_sums = wayround_org.utils.path.join(
+        self._installed_pkg_dir_sums = wayround_i2p.utils.path.join(
             self.basedir,
             installed_pkg_dir_sums
             )
-        self._installed_pkg_dir_deps = wayround_org.utils.path.join(
+        self._installed_pkg_dir_deps = wayround_i2p.utils.path.join(
             self.basedir,
             installed_pkg_dir_deps
             )
@@ -119,11 +119,11 @@ class SystemCtl:
             raise ValueError("if `host' is None, `arch' must be None too")
 
         if isinstance(host, str):
-            if wayround_org.utils.system_type.parse_triplet(host) is None:
+            if wayround_i2p.utils.system_type.parse_triplet(host) is None:
                 raise bottle.HTTPError(400, "Invalid host triplet")
 
         if isinstance(arch, str):
-            if wayround_org.utils.system_type.parse_triplet(arch) is None:
+            if wayround_i2p.utils.system_type.parse_triplet(arch) is None:
                 raise bottle.HTTPError(400, "Invalid arch triplet")
 
         return
@@ -184,7 +184,7 @@ class SystemCtl:
                 lst.sort(
                     reverse=True,
                     key=functools.cmp_to_key(
-                        wayround_org.aipsetup.version.
+                        wayround_i2p.aipsetup.version.
                         package_version_comparator
                         )
                     )
@@ -197,7 +197,7 @@ class SystemCtl:
                 for i in lst:
 
                     name = \
-                        wayround_org.aipsetup.package_name_parser.\
+                        wayround_i2p.aipsetup.package_name_parser.\
                         rm_ext_from_pkg_name(i)
 
                     if not mute:
@@ -243,12 +243,12 @@ class SystemCtl:
 
             logging.info(
                 "Trying to install file (package) `{}'".format(
-                    wayround_org.utils.path.abspath(name)
+                    wayround_i2p.utils.path.abspath(name)
                     )
                 )
 
             name_parsed = \
-                wayround_org.aipsetup.package_name_parser.package_name_parse(
+                wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                     name
                     )
 
@@ -394,7 +394,7 @@ class SystemCtl:
 
             if ret == 0:
 
-                latest_full_path = wayround_org.utils.path.abspath(
+                latest_full_path = wayround_i2p.utils.path.abspath(
                     latest_full_path
                     )
 
@@ -434,7 +434,7 @@ class SystemCtl:
 
         try:
 
-            asp = wayround_org.aipsetup.package.ASPackage(asp_package)
+            asp = wayround_i2p.aipsetup.package.ASPackage(asp_package)
             host = asp.host
             arch = asp.arch
 
@@ -462,7 +462,7 @@ class SystemCtl:
 
             package_name = os.path.basename(asp.filename)
 
-            if wayround_org.aipsetup.package_name_parser.package_name_parse(
+            if wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                     package_name
                     ) is None:
 
@@ -508,8 +508,8 @@ class SystemCtl:
 
                 if i[0] == './05.BUILD_LOGS.tar.xz':
                     out_filename = (
-                        wayround_org.utils.path.abspath(
-                            wayround_org.utils.path.join(
+                        wayround_i2p.utils.path.abspath(
+                            wayround_i2p.utils.path.join(
                                 i[1],
                                 package_name + '.tar.xz'
                                 )
@@ -517,8 +517,8 @@ class SystemCtl:
                         )
                 else:
                     out_filename = (
-                        wayround_org.utils.path.abspath(
-                            wayround_org.utils.path.join(
+                        wayround_i2p.utils.path.abspath(
+                            wayround_i2p.utils.path.join(
                                 i[1],
                                 package_name + '.xz'
                                 )
@@ -537,7 +537,7 @@ class SystemCtl:
                         )
                     )
 
-                if wayround_org.utils.archive.tar_member_get_extract_file_to(
+                if wayround_i2p.utils.archive.tar_member_get_extract_file_to(
                         tarf,
                         i[0],
                         out_filename
@@ -556,10 +556,10 @@ class SystemCtl:
         if ret == 0:
             logging.info("Installing package's destdir")
 
-            dd_fobj = wayround_org.utils.archive.tar_member_get_extract_file(
+            dd_fobj = wayround_i2p.utils.archive.tar_member_get_extract_file(
                 tarf,
                 './{}.tar.xz'.format(
-                    wayround_org.aipsetup.build.DIR_DESTDIR
+                    wayround_i2p.aipsetup.build.DIR_DESTDIR
                     )
                 )
             if not isinstance(dd_fobj, tarfile.ExFileObject):
@@ -568,7 +568,7 @@ class SystemCtl:
             else:
                 try:
                     tec = \
-                        wayround_org.utils.archive.extract_tar_canonical_fobj(
+                        wayround_i2p.utils.archive.extract_tar_canonical_fobj(
                             dd_fobj,
                             self.basedir,
                             'xz',
@@ -604,7 +604,7 @@ class SystemCtl:
             dirs = []
 
             installed_file_list = \
-                wayround_org.utils.archive.tar_member_get_extract_file(
+                wayround_i2p.utils.archive.tar_member_get_extract_file(
                     tarf,
                     './06.LISTS/DESTDIR.lst.xz'
                     )
@@ -618,7 +618,7 @@ class SystemCtl:
                 ret = 10
             else:
                 try:
-                    text_lst = wayround_org.utils.archive.xzcat(
+                    text_lst = wayround_i2p.utils.archive.xzcat(
                         installed_file_list,
                         convert_to_str='utf-8'
                         )
@@ -626,7 +626,7 @@ class SystemCtl:
                     files = text_lst.split('\n')
 
                     files = sorted(
-                        wayround_org.utils.list.
+                        wayround_i2p.utils.list.
                         filelist_strip_remove_empty_remove_duplicated_lines(
                             files
                             )
@@ -638,8 +638,8 @@ class SystemCtl:
                     dirs = sorted(dirs)
 
                     for i in dirs:
-                        f_d_p = wayround_org.utils.path.abspath(
-                            wayround_org.utils.path.join(
+                        f_d_p = wayround_i2p.utils.path.abspath(
+                            wayround_i2p.utils.path.join(
                                 self.basedir,
                                 i
                                 )
@@ -651,8 +651,8 @@ class SystemCtl:
                             os.chmod(f_d_p, 0o755)
 
                     for i in files:
-                        f_f_p = wayround_org.utils.path.abspath(
-                            wayround_org.utils.path.join(
+                        f_f_p = wayround_i2p.utils.path.abspath(
+                            wayround_i2p.utils.path.join(
                                 self.basedir,
                                 i
                                 )
@@ -669,7 +669,7 @@ class SystemCtl:
             logging.info("Searching post installation script")
 
             script_obj = \
-                wayround_org.utils.archive.tar_member_get_extract_file(
+                wayround_i2p.utils.archive.tar_member_get_extract_file(
                     tarf,
                     './post_install.py'
                     )
@@ -735,7 +735,7 @@ class SystemCtl:
         exclude = copy.copy(exclude)
 
         # ensure destdir correctness
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
         lines = self.list_files_installed_by_asp(
             asp_name,
@@ -752,9 +752,9 @@ class SystemCtl:
         else:
 
             # from this point we working with other system's files
-            lines = wayround_org.utils.path.prepend_path(lines, destdir)
+            lines = wayround_i2p.utils.path.prepend_path(lines, destdir)
 
-            lines = wayround_org.utils.path.realpaths(lines)
+            lines = wayround_i2p.utils.path.realpaths(lines)
 
             logging.info("Removing `{}' files".format(asp_name))
 
@@ -766,12 +766,12 @@ class SystemCtl:
 
                     lines_before_ex = len(lines)
 
-                    exclude = wayround_org.utils.path.prepend_path(
+                    exclude = wayround_i2p.utils.path.prepend_path(
                         exclude,
                         destdir
                         )
 
-                    exclude = wayround_org.utils.path.realpaths(exclude)
+                    exclude = wayround_i2p.utils.path.realpaths(exclude)
 
                     lines = list(set(lines) - set(exclude))
 
@@ -790,52 +790,52 @@ class SystemCtl:
                 for i in lines:
                     if os.path.isfile(i):
                         if os.path.dirname(i) in [
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     self.basedir, 'usr', 'lib'
                                     ),
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     self.basedir, 'usr', 'lib64'
                                     ),
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     self.basedir, 'usr', 'lib32'
                                     ),
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     self.basedir, 'usr', 'libx32'
                                     ),
                                 ] + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multiarch', '*', 'lib'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multiarch', '*', 'lib64'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multiarch', '*', 'lib32'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multiarch', '*', 'libx32'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multihost', '*', 'lib'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multihost', '*', 'lib64'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multihost', '*', 'lib32'
                                         )
                                     ) + glob.glob(
-                                    wayround_org.utils.path.join(
+                                    wayround_i2p.utils.path.join(
                                         self.basedir, 'multihost', '*', 'libx32'
                                         )
                                     ):
-                            e = wayround_org.utils.format.elf.ELF(i)
+                            e = wayround_i2p.utils.format.elf.ELF(i)
                             if e.elf_type_name == 'ET_DYN':
                                 shared_objects.add(i)
 
@@ -851,7 +851,7 @@ class SystemCtl:
 
                 for line in lines:
 
-                    rm_file_name = wayround_org.utils.path.abspath(
+                    rm_file_name = wayround_i2p.utils.path.abspath(
                         line
                         )
 
@@ -863,7 +863,7 @@ class SystemCtl:
                             os.path.isfile(rm_file_name)
                             or
                             (os.path.isdir(rm_file_name)
-                             and wayround_org.utils.file.is_dir_empty(
+                             and wayround_i2p.utils.file.is_dir_empty(
                                 rm_file_name
                                 )
                              )
@@ -894,7 +894,7 @@ class SystemCtl:
                                     )
 
                                 if not os.path.islink(rm_file_name_dir):
-                                    if wayround_org.utils.file.is_dir_empty(
+                                    if wayround_i2p.utils.file.is_dir_empty(
                                             rm_file_name_dir
                                             ):
                                         try:
@@ -937,15 +937,15 @@ class SystemCtl:
                     ]:
 
                 if i == self._installed_pkg_dir_buildlogs:
-                    rm_file_name = wayround_org.utils.path.abspath(
-                        wayround_org.utils.path.join(
+                    rm_file_name = wayround_i2p.utils.path.abspath(
+                        wayround_i2p.utils.path.join(
                             i,
                             asp_name + '.tar.xz'
                             )
                         )
                 else:
-                    rm_file_name = wayround_org.utils.path.abspath(
-                        wayround_org.utils.path.join(
+                    rm_file_name = wayround_i2p.utils.path.abspath(
+                        wayround_i2p.utils.path.join(
                             i,
                             asp_name + '.xz'
                             )
@@ -983,7 +983,7 @@ class SystemCtl:
         reduce_to = os.path.basename(reduce_to)
 
         reduce_to = (
-            wayround_org.aipsetup.package_name_parser.rm_ext_from_pkg_name(
+            wayround_i2p.aipsetup.package_name_parser.rm_ext_from_pkg_name(
                 reduce_to
                 )
             )
@@ -991,7 +991,7 @@ class SystemCtl:
         for i in range(len(reduce_what)):
             reduce_what[i] = os.path.basename(reduce_what[i])
             reduce_what[i] = (
-                wayround_org.aipsetup.package_name_parser.rm_ext_from_pkg_name(
+                wayround_i2p.aipsetup.package_name_parser.rm_ext_from_pkg_name(
                     reduce_what[i]
                     )
                 )
@@ -1042,9 +1042,9 @@ class SystemCtl:
 
         self._test_host_arch_parameters(host, arch)
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
-        listdir = wayround_org.utils.path.abspath(
+        listdir = wayround_i2p.utils.path.abspath(
             self._installed_pkg_dir
             )
 
@@ -1055,7 +1055,7 @@ class SystemCtl:
                 del filelist[i]
                 continue
 
-            j = wayround_org.utils.path.join(
+            j = wayround_i2p.utils.path.join(
                 listdir,
                 filelist[i]
                 )
@@ -1066,13 +1066,13 @@ class SystemCtl:
 
         if host is not None:
             for i in range(len(filelist) - 1, -1, -1):
-                asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
+                asp = wayround_i2p.aipsetup.package.ASPackage(filelist[i])
                 if host != asp.host:
                     del filelist[i]
 
         if arch is not None:
             for i in range(len(filelist) - 1, -1, -1):
-                asp = wayround_org.aipsetup.package.ASPackage(filelist[i])
+                asp = wayround_i2p.aipsetup.package.ASPackage(filelist[i])
                 if arch != asp.arch:
                     del filelist[i]
 
@@ -1113,7 +1113,7 @@ class SystemCtl:
 
             for i in asps:
                 parsed = \
-                    wayround_org.aipsetup.package_name_parser.\
+                    wayround_i2p.aipsetup.package_name_parser.\
                     package_name_parse(i)
 
                 if not isinstance(parsed, dict):
@@ -1160,7 +1160,7 @@ class SystemCtl:
 
             for i in asps_list:
                 asps_list_parsed[i] = \
-                    wayround_org.aipsetup.package_name_parser.\
+                    wayround_i2p.aipsetup.package_name_parser.\
                     package_name_parse(i)
 
             for i in name_or_list:
@@ -1203,8 +1203,8 @@ class SystemCtl:
                 )
         del asp_name1
 
-        pkg_list_file = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
+        pkg_list_file = wayround_i2p.utils.path.abspath(
+            wayround_i2p.utils.path.join(
                 # self.basedir, # already added to self._installed_pkg_dir
                 self._installed_pkg_dir,
                 asp_name
@@ -1223,7 +1223,7 @@ class SystemCtl:
             ret = 2
         else:
 
-            pkg_file_list = wayround_org.utils.archive.xzcat(
+            pkg_file_list = wayround_i2p.utils.archive.xzcat(
                 f,
                 convert_to_str=True
                 )
@@ -1232,7 +1232,7 @@ class SystemCtl:
 
             pkg_file_list = pkg_file_list.splitlines()
             pkg_file_list = \
-                wayround_org.utils.list.\
+                wayround_i2p.utils.list.\
                 filelist_strip_remove_empty_remove_duplicated_lines(
                     pkg_file_list
                     )
@@ -1256,13 +1256,13 @@ class SystemCtl:
 
         ret = 0
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
-        list_dir = wayround_org.utils.path.abspath(
+        list_dir = wayround_i2p.utils.path.abspath(
             self._installed_pkg_dir_sums
             )
 
-        pkg_list_file = wayround_org.utils.path.join(list_dir, asp_name)
+        pkg_list_file = wayround_i2p.utils.path.join(list_dir, asp_name)
 
         if not pkg_list_file.endswith('.xz'):
             pkg_list_file += '.xz'
@@ -1274,7 +1274,7 @@ class SystemCtl:
             ret = 2
         else:
 
-            pkg_file_list = wayround_org.utils.archive.xzcat(
+            pkg_file_list = wayround_i2p.utils.archive.xzcat(
                 f, convert_to_str=True
                 )
 
@@ -1283,7 +1283,7 @@ class SystemCtl:
             if not isinstance(pkg_file_list, str):
                 pkg_file_list = str(pkg_file_list, 'utf-8')
 
-            pkg_file_list = wayround_org.utils.checksum.parse_checksums_text(
+            pkg_file_list = wayround_i2p.utils.checksum.parse_checksums_text(
                 pkg_file_list
                 )
 
@@ -1346,7 +1346,7 @@ class SystemCtl:
             lst_i += 1
 
             if not mute:
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    {} of {} ({:.2f}%)".format(
                         lst_i,
                         lst_c,
@@ -1355,7 +1355,7 @@ class SystemCtl:
                     )
 
         if not mute:
-            wayround_org.utils.terminal.progress_write_finish()
+            wayround_i2p.utils.terminal.progress_write_finish()
 
         return ret
 
@@ -1394,7 +1394,7 @@ class SystemCtl:
             lst_i += 1
 
             if not mute:
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    {} of {} ({:.2f}%)".format(
                         lst_i,
                         lst_c,
@@ -1403,7 +1403,7 @@ class SystemCtl:
                     )
 
         if not mute:
-            wayround_org.utils.terminal.progress_write_finish()
+            wayround_i2p.utils.terminal.progress_write_finish()
 
         return ret
 
@@ -1430,7 +1430,7 @@ class SystemCtl:
             latest = max(
                 lst,
                 key=functools.cmp_to_key(
-                    wayround_org.aipsetup.version.package_version_comparator
+                    wayround_i2p.aipsetup.version.package_version_comparator
                     )
                 )
 
@@ -1508,7 +1508,7 @@ class SystemCtl:
                 else:
                     perc = 100.0 / (float(lst_l) / float(lst_i))
 
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    {:6.2f}% (found {} packages) ({})".format(
                         perc,
                         len(ret.keys()),
@@ -1517,7 +1517,7 @@ class SystemCtl:
                     )
 
         if not mute:
-            wayround_org.utils.terminal.progress_write_finish()
+            wayround_i2p.utils.terminal.progress_write_finish()
 
         return ret
 
@@ -1632,13 +1632,13 @@ class SystemCtl:
         raise Exception("deprecated")
         ret = None
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
         deps = self.get_asp_dependencies(asp_name, mute)
 
         deps_dir = self._installed_pkg_dir_deps
 
-        file_name = wayround_org.utils.path.join(
+        file_name = wayround_i2p.utils.path.join(
             deps_dir, asp_name
             )
 
@@ -1658,7 +1658,7 @@ class SystemCtl:
                 f = open(file_name, 'wb')
 
                 try:
-                    ret = wayround_org.utils.archive.canonical_compressor(
+                    ret = wayround_i2p.utils.archive.canonical_compressor(
                         'xz',
                         vf,
                         f,
@@ -1682,11 +1682,11 @@ class SystemCtl:
 
         ret = None
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
         dire = self._installed_pkg_dir_deps
 
-        file_name = wayround_org.utils.path.join(
+        file_name = wayround_i2p.utils.path.join(
             dire, asp_name
             )
 
@@ -1700,7 +1700,7 @@ class SystemCtl:
         else:
             f = open(file_name, 'rb')
             try:
-                txt = wayround_org.utils.archive.xzcat(f, convert_to_str=True)
+                txt = wayround_i2p.utils.archive.xzcat(f, convert_to_str=True)
             except:
                 raise
             else:
@@ -1738,7 +1738,7 @@ class SystemCtl:
         for i in asps:
 
             parsed_name = \
-                wayround_org.aipsetup.package_name_parser.package_name_parse(
+                wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                     i
                     )
 
@@ -1747,7 +1747,7 @@ class SystemCtl:
             else:
 
                 package_date = \
-                    wayround_org.aipsetup.package_name_parser.parse_timestamp(
+                    wayround_i2p.aipsetup.package_name_parser.parse_timestamp(
                         parsed_name['groups']['timestamp']
                         )
 
@@ -1840,7 +1840,7 @@ class SystemCtl:
             arch=arch
             )
 
-        elfs = sorted(wayround_org.utils.path.realpaths(elfs))
+        elfs = sorted(wayround_i2p.utils.path.realpaths(elfs))
 
         elfs_c = len(elfs)
         elfs_i = 0
@@ -1855,7 +1855,7 @@ class SystemCtl:
                         )
                     )
 
-            wayround_org.utils.format.elf.ELF(i)
+            wayround_i2p.utils.format.elf.ELF(i)
 
         return 0
 
@@ -1905,14 +1905,14 @@ class SystemCtl:
 
         ret = 0
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
         print("host: {}, arch: {}".format(host, arch))
 
         asp_name_latest = None
 
         package_name_parsed = \
-            wayround_org.aipsetup.package_name_parser.package_name_parse(
+            wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                 asp_name
                 )
         package_name = None
@@ -1962,11 +1962,11 @@ class SystemCtl:
                         )
 
                     asp_name_latest_files = \
-                        wayround_org.utils.path.prepend_path(
+                        wayround_i2p.utils.path.prepend_path(
                             asp_name_latest_files, destdir
                             )
 
-                    asp_name_latest_files = wayround_org.utils.path.realpaths(
+                    asp_name_latest_files = wayround_i2p.utils.path.realpaths(
                         asp_name_latest_files
                         )
 
@@ -1983,7 +1983,7 @@ class SystemCtl:
 
                     for i in range(len(asp_name_latest_files)):
 
-                        e = wayround_org.utils.format.elf.ELF(
+                        e = wayround_i2p.utils.format.elf.ELF(
                             asp_name_latest_files[i]
                             )
                         if e.is_elf:
@@ -2004,11 +2004,11 @@ class SystemCtl:
                     )
                 )
 
-            asp_name_files = wayround_org.utils.path.prepend_path(
+            asp_name_files = wayround_i2p.utils.path.prepend_path(
                 asp_name_files, destdir
                 )
 
-            asp_name_files = wayround_org.utils.path.realpaths(
+            asp_name_files = wayround_i2p.utils.path.realpaths(
                 asp_name_files
                 )
 
@@ -2025,7 +2025,7 @@ class SystemCtl:
 
             for i in range(len(asp_name_files)):
 
-                e = wayround_org.utils.format.elf.ELF(asp_name_files[i])
+                e = wayround_i2p.utils.format.elf.ELF(asp_name_files[i])
                 if e.is_elf:
                     asp_name_files2.append(asp_name_files[i])
 
@@ -2073,12 +2073,12 @@ class SystemCtl:
                             )
                         )
 
-                    files_list = wayround_org.utils.path.prepend_path(
+                    files_list = wayround_i2p.utils.path.prepend_path(
                         files_list,
                         destdir
                         )
 
-                    files_list = wayround_org.utils.path.realpaths(
+                    files_list = wayround_i2p.utils.path.realpaths(
                         files_list
                         )
 
@@ -2129,7 +2129,7 @@ class SystemCtl:
                 installed_asp_names_i += 1
 
                 if not mute:
-                    wayround_org.utils.terminal.progress_write(
+                    wayround_i2p.utils.terminal.progress_write(
                         "    {} of {} ({:.2f}%) "
                         "found: {}; last found: {}".format(
                             installed_asp_names_i,
@@ -2235,7 +2235,7 @@ class SystemCtl:
 
         ret = 0
 
-        destdir = wayround_org.utils.path.abspath(self.basedir)
+        destdir = wayround_i2p.utils.path.abspath(self.basedir)
 
         if not force:
             ret = self.load_asp_deps(asp_name, mute)
@@ -2275,12 +2275,12 @@ class SystemCtl:
                     ret = 1
                 else:
 
-                    asp_name_files = wayround_org.utils.path.prepend_path(
+                    asp_name_files = wayround_i2p.utils.path.prepend_path(
                         asp_name_files,
                         destdir
                         )
 
-                    asp_name_files = wayround_org.utils.path.realpaths(
+                    asp_name_files = wayround_i2p.utils.path.realpaths(
                         asp_name_files
                         )
 
@@ -2314,7 +2314,7 @@ class SystemCtl:
                 asp_name_elfs = set()
                 for i in asp_name_files:
 
-                    e = wayround_org.utils.format.elf.ELF(i)
+                    e = wayround_i2p.utils.format.elf.ELF(i)
                     if e.is_elf:
                         asp_name_elfs.add(os.path.realpath(i))
 
@@ -2336,7 +2336,7 @@ class SystemCtl:
                     if not i_normal in asp_name_elf_deps:
                         asp_name_elf_deps[i_normal] = set()
 
-                    e = wayround_org.utils.format.elf.ELF(i_normal)
+                    e = wayround_i2p.utils.format.elf.ELF(i_normal)
                     i_libs_list = e.needed_libs_list
 
                     if isinstance(i_libs_list, (list, set)):
@@ -2391,7 +2391,7 @@ class SystemCtl:
 
         if not only_lib:
 
-            lst = wayround_org.utils.file.files_recurcive_list(
+            lst = wayround_i2p.utils.file.files_recurcive_list(
                 self.basedir,
                 exclude_paths=LOCAL_DIRS,
                 mute=mute,
@@ -2402,8 +2402,8 @@ class SystemCtl:
 
             # TODO: /usr/lib must be calculated, - not constant
 
-            lst = wayround_org.utils.file.files_recurcive_list(
-                wayround_org.utils.path.join(
+            lst = wayround_i2p.utils.file.files_recurcive_list(
+                wayround_i2p.utils.path.join(
                     self.basedir,
                     'multihost',
                     host,
@@ -2414,8 +2414,8 @@ class SystemCtl:
                 maxdepth=1
                 )
 
-            lst2 = wayround_org.utils.file.files_recurcive_list(
-                wayround_org.utils.path.join(
+            lst2 = wayround_i2p.utils.file.files_recurcive_list(
+                wayround_i2p.utils.path.join(
                     self.basedir,
                     'multihost',
                     host,
@@ -2431,7 +2431,7 @@ class SystemCtl:
             del lst2
 
         lst = sorted(
-            wayround_org.utils.path.unprepend_path(
+            wayround_i2p.utils.path.unprepend_path(
                 lst,
                 self.basedir
                 )
@@ -2462,11 +2462,11 @@ class SystemCtl:
             if not found:
                 result.append(lst_i)
 
-                fsn = wayround_org.utils.path.join(self.basedir, lst_i)
+                fsn = wayround_i2p.utils.path.join(self.basedir, lst_i)
 
                 if (os.path.isfile(fsn) and
                         not os.path.islink(fsn) and
-                        fsn == wayround_org.utils.path.realpath(fsn)):
+                        fsn == wayround_i2p.utils.path.realpath(fsn)):
                     fs = os.stat(fsn)
 
                     size += fs.st_size
@@ -2476,13 +2476,13 @@ class SystemCtl:
 
                 lf = lst_i
 
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    found: {}".format(lf),
                     new_line=True
                     )
             ii += 1
 
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "    {} of {} ({:.2f}%) found:"
                 " {} size: {} MiB position: {}".format(
                     ii,
@@ -2494,7 +2494,7 @@ class SystemCtl:
                     )
                 )
 
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
         ret = result
 
@@ -2567,13 +2567,13 @@ class SystemCtl:
         ret = []
 
         ret.append(
-            wayround_org.utils.path.join('/multihost', host, 'lib')
+            wayround_i2p.utils.path.join('/multihost', host, 'lib')
             )
         ret.append(
-            wayround_org.utils.path.join('/multihost', host, 'lib64'))
+            wayround_i2p.utils.path.join('/multihost', host, 'lib64'))
 
-        ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
-        ret = wayround_org.utils.path.realpaths(ret)
+        ret = wayround_i2p.utils.path.prepend_path(ret, self.basedir)
+        ret = wayround_i2p.utils.path.realpaths(ret)
         ret = list(set(ret))
 
         return ret
@@ -2589,7 +2589,7 @@ class SystemCtl:
         ret = []
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 '/multihost',
                 host,
                 'multiarch',
@@ -2599,7 +2599,7 @@ class SystemCtl:
             )
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 '/multihost',
                 host,
                 'multiarch',
@@ -2610,8 +2610,8 @@ class SystemCtl:
 
         ret += self.library_paths(host=host)
 
-        ret = wayround_org.utils.path.prepend_path(ret, self.basedir)
-        ret = wayround_org.utils.path.realpaths(ret)
+        ret = wayround_i2p.utils.path.prepend_path(ret, self.basedir)
+        ret = wayround_i2p.utils.path.realpaths(ret)
         ret = list(set(ret))
 
         return ret
@@ -2695,7 +2695,7 @@ class SystemCtl:
                 '/var/mail'
                 ]:
 
-            joined = wayround_org.utils.path.join(self.basedir, i)
+            joined = wayround_i2p.utils.path.join(self.basedir, i)
 
             if not os.path.isdir(joined):
                 print("creating: {}".format(joined))
@@ -2708,7 +2708,7 @@ class SystemCtl:
                 self._installed_pkg_dir_deps
                 ]:
 
-            joined = wayround_org.utils.path.join(i)
+            joined = wayround_i2p.utils.path.join(i)
 
             if not os.path.isdir(joined):
                 print("creating: {}".format(joined))
@@ -2718,7 +2718,7 @@ class SystemCtl:
                 'bin', 'sbin', 'lib', 'lib64'
                 ]:
 
-            joined = wayround_org.utils.path.join(self.basedir, i)
+            joined = wayround_i2p.utils.path.join(self.basedir, i)
 
             if not os.path.exists(joined) and not os.path.islink(joined):
 
@@ -2731,7 +2731,7 @@ class SystemCtl:
                         )
                     ret = 1
 
-        jusr = wayround_org.utils.path.join(self.basedir, 'usr')
+        jusr = wayround_i2p.utils.path.join(self.basedir, 'usr')
         if not os.path.exists(jusr) and not os.path.islink(jusr):
             try:
                 os.symlink('multihost/_primary', jusr)
@@ -2741,18 +2741,18 @@ class SystemCtl:
 
         for i in ['x86_64-pc-linux-gnu']:
 
-            host_dir = wayround_org.utils.path.join(
+            host_dir = wayround_i2p.utils.path.join(
                 self.basedir,
                 'multihost',
                 i
                 )
 
-            usr_link_name = wayround_org.utils.path.join(
+            usr_link_name = wayround_i2p.utils.path.join(
                 host_dir,
                 'usr'
                 )
 
-            multihost_link_name = wayround_org.utils.path.join(
+            multihost_link_name = wayround_i2p.utils.path.join(
                 host_dir,
                 'multihost'
                 )
@@ -2770,13 +2770,13 @@ class SystemCtl:
         ret = 0
 
         for i in [
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     self.basedir,
                     'multihost',
                     host,
                     'lib'
                     ),
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     self.basedir,
                     'multihost',
                     host,
@@ -2784,7 +2784,7 @@ class SystemCtl:
                     ),
                 ]:
 
-            target_dir = wayround_org.utils.path.join(
+            target_dir = wayround_i2p.utils.path.join(
                 i,
                 'locale'
                 )
@@ -2793,11 +2793,11 @@ class SystemCtl:
 
             if os.path.isdir(target_dir):
 
-                locale_dir = wayround_org.utils.path.join(
+                locale_dir = wayround_i2p.utils.path.join(
                     target_dir, 'en_US.UTF-8'
                     )
 
-                rel_locale_dir = wayround_org.utils.path.relpath(
+                rel_locale_dir = wayround_i2p.utils.path.relpath(
                     locale_dir, self.basedir
                     )
 
@@ -2857,7 +2857,7 @@ class SystemCtl:
 
         for i in all_installed_files.keys():
             all_installed_files2[i] = \
-                wayround_org.utils.path.bases(all_installed_files[i])
+                wayround_i2p.utils.path.bases(all_installed_files[i])
 
         all_installed_files = all_installed_files2
 
@@ -2900,10 +2900,10 @@ class SystemCtl:
 
                         lst2.append(x)
                         if not mute:
-                            wayround_org.utils.terminal.progress_write(
+                            wayround_i2p.utils.terminal.progress_write(
                                 "Added: {}\n".format(x)
                                 )
-                            wayround_org.utils.terminal.progress_write(
+                            wayround_i2p.utils.terminal.progress_write(
                                 "Searching.. {} of {} ({:5.2f}% ready)".format(
                                     i,
                                     all_deps_keys_l,
@@ -2913,7 +2913,7 @@ class SystemCtl:
 
             i += 1
             if not mute:
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "Searching.. {} of {} ({:5.2f}% ready)".format(
                         i,
                         all_deps_keys_l,
@@ -2922,7 +2922,7 @@ class SystemCtl:
                     )
 
         if not mute:
-            wayround_org.utils.terminal.progress_write_finish()
+            wayround_i2p.utils.terminal.progress_write_finish()
 
         return ret
 
@@ -2941,7 +2941,7 @@ class SystemCtl:
 
         la_with_problems = dict()
 
-        mask = wayround_org.utils.path.join(
+        mask = wayround_i2p.utils.path.join(
             self.basedir,
             'multihost',
             host,
@@ -2993,10 +2993,10 @@ class SystemCtl:
 
                 search_dirs = set(
                     [
-                        wayround_org.utils.path.join(
+                        wayround_i2p.utils.path.join(
                             '/multihost', host, 'lib'
                             ),
-                        wayround_org.utils.path.join(
+                        wayround_i2p.utils.path.join(
                             '/multihost', host, 'lib64'
                             ),
                         ]
@@ -3011,12 +3011,12 @@ class SystemCtl:
                         wj = j[2:]
 
                         if (not wj.startswith(
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     '/multihost', host, 'lib'
                                     )
                                 )
                                 or not os.path.isdir(
-                                wayround_org.utils.path.join(
+                                wayround_i2p.utils.path.join(
                                     self.basedir,
                                     wj)
                                 )
@@ -3050,7 +3050,7 @@ class SystemCtl:
 
                             for l in ['so', 'a']:
                                 if os.path.isfile(
-                                        wayround_org.utils.path.join(
+                                        wayround_i2p.utils.path.join(
                                             self.basedir,
                                             k,
                                             'lib{}.{}'.format(wj, l)
@@ -3069,7 +3069,7 @@ class SystemCtl:
                     elif j.endswith('.la'):
 
                         if not os.path.isfile(
-                                wayround_org.utils.path.join(self.basedir, j)
+                                wayround_i2p.utils.path.join(self.basedir, j)
                                 ):
                             la.add(j)
 
@@ -3084,7 +3084,7 @@ class SystemCtl:
 
             la_files_len_i += 1
             if not mute:
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     '    {} of {} ({:5.2f}%)'.format(
                         la_files_len_i,
                         la_files_len,
@@ -3093,7 +3093,7 @@ class SystemCtl:
                     )
 
         if not mute:
-            wayround_org.utils.terminal.progress_write_finish()
+            wayround_i2p.utils.terminal.progress_write_finish()
 
         return la_with_problems
 
@@ -3108,7 +3108,7 @@ def find_all_so_files(paths, verbose=False):
     for i in paths:
         so_files += find_so_files(i, verbose)
 
-    so_files = wayround_org.utils.path.realpaths(so_files)
+    so_files = wayround_i2p.utils.path.realpaths(so_files)
 
     so_files = list(set(so_files))
 
@@ -3129,13 +3129,13 @@ def find_so_files(directory, verbose=False):
 
         files = os.listdir(directory)
 
-        files = wayround_org.utils.path.prepend_path(files, directory)
-        files = wayround_org.utils.path.realpaths(files)
+        files = wayround_i2p.utils.path.prepend_path(files, directory)
+        files = wayround_i2p.utils.path.realpaths(files)
         files = filter_so_files(files, verbose=verbose)
         ret = files
 
     if verbose:
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
     ret = list(ret)
 
@@ -3152,7 +3152,7 @@ def find_all_elf_files(paths, verbose=False):
     for i in paths:
         elf_files += find_elf_files(i, verbose)
 
-    elf_files = wayround_org.utils.path.realpaths(elf_files)
+    elf_files = wayround_i2p.utils.path.realpaths(elf_files)
 
     elf_files = list(set(elf_files))
 
@@ -3173,13 +3173,13 @@ def find_elf_files(directory, verbose=False):
 
         files = os.listdir(directory)
 
-        files = wayround_org.utils.path.prepend_path(files, directory)
-        files = wayround_org.utils.path.realpaths(files)
+        files = wayround_i2p.utils.path.prepend_path(files, directory)
+        files = wayround_i2p.utils.path.realpaths(files)
         files = filter_elf_files(files, verbose=verbose)
         ret = files
 
     if verbose:
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
     ret = list(ret)
 
@@ -3209,7 +3209,7 @@ def filter_so_files(files, verbose=False):
 
         if os.path.isfile(i):
             if os.path.basename(i).find('.so') != -1:
-                elf = wayround_org.utils.format.elf.ELF(i)
+                elf = wayround_i2p.utils.format.elf.ELF(i)
                 if (
                         elf.is_elf
                         and elf.elf_type_name == 'ET_DYN'
@@ -3220,7 +3220,7 @@ def filter_so_files(files, verbose=False):
         count += 1
 
         if verbose:
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "Looking for .so files: {} of {} files (sos: {})".format(
                     count,
                     files_c,
@@ -3252,7 +3252,7 @@ def filter_elf_files(files, verbose=False):
     for i in files:
 
         if os.path.isfile(i):
-            elf = wayround_org.utils.format.elf.ELF(i)
+            elf = wayround_i2p.utils.format.elf.ELF(i)
 
             if elf.is_elf:
                 ret.add(i)
@@ -3261,7 +3261,7 @@ def filter_elf_files(files, verbose=False):
         count += 1
 
         if verbose:
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "Looking for elf files: {} of {} files (elfs: {})".format(
                     count,
                     files_c,
@@ -3297,7 +3297,7 @@ def build_binary_dependency_tree_for_given_elf_files(
 
     for i in elf_files:
 
-        e = wayround_org.utils.format.elf.ELF(i)
+        e = wayround_i2p.utils.format.elf.ELF(i)
 
         libs_elf_linked_to = e.needed_libs_list
 
@@ -3313,7 +3313,7 @@ def build_binary_dependency_tree_for_given_elf_files(
         elf_files_i += 1
 
         if verbose:
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "Progress: {} ELF files of {}".format(
                     elf_files_i,
                     elf_files_c
@@ -3321,7 +3321,7 @@ def build_binary_dependency_tree_for_given_elf_files(
                 )
 
     if verbose:
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
     return deps
 
@@ -3345,7 +3345,7 @@ def find_so_problems_by_given_so_and_elfs(
     if not isinstance(elf_files, list):
         raise TypeError("elf_files must be list")
 
-    so_files = wayround_org.utils.path.bases(so_files)
+    so_files = wayround_i2p.utils.path.bases(so_files)
 
     if verbose:
         so_files.sort()
@@ -3361,7 +3361,7 @@ def find_so_problems_by_given_so_and_elfs(
 
     for i in elf_files:
 
-        e = wayround_org.utils.format.elf.ELF(i)
+        e = wayround_i2p.utils.format.elf.ELF(i)
 
         libs_elf_linked_to = e.needed_libs_list
 
@@ -3379,7 +3379,7 @@ def find_so_problems_by_given_so_and_elfs(
         elf_files_i += 1
 
         if verbose:
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 "Checked dependencies: {} of {} ({} missing found)".format(
                     elf_files_i,
                     elf_files_c,
@@ -3388,7 +3388,7 @@ def find_so_problems_by_given_so_and_elfs(
                 )
 
     if verbose:
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
         logging.info("Libraries missing: {}".format(len(reqs.keys())))
 
     return reqs

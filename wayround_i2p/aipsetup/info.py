@@ -16,13 +16,13 @@ import datetime
 
 import sqlalchemy.ext.declarative
 
-import wayround_org.aipsetup.repository
-import wayround_org.utils.db
-import wayround_org.utils.file
-import wayround_org.utils.path
-import wayround_org.utils.tarball
-import wayround_org.utils.terminal
-import wayround_org.utils.version
+import wayround_i2p.aipsetup.repository
+import wayround_i2p.utils.db
+import wayround_i2p.utils.file
+import wayround_i2p.utils.path
+import wayround_i2p.utils.tarball
+import wayround_i2p.utils.terminal
+import wayround_i2p.utils.version
 
 
 SAMPLE_PACKAGE_INFO_STRUCTURE = collections.OrderedDict([
@@ -120,7 +120,7 @@ SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES = collections.OrderedDict([
 #""")
 
 
-class PackageInfo(wayround_org.utils.db.BasicDB):
+class PackageInfo(wayround_i2p.utils.db.BasicDB):
 
     """
     Main package index DB handling class
@@ -373,7 +373,7 @@ class PackageInfoCtl:
         #print("info_dir: {}".format(info_dir))
         #raise Exception('123')
 
-        self._info_dir = wayround_org.utils.path.abspath(info_dir)
+        self._info_dir = wayround_i2p.utils.path.abspath(info_dir)
 
         self.info_db = info_db
 
@@ -449,7 +449,7 @@ class PackageInfoCtl:
 
         self.tag_db.set_object_tags(
             name,
-            wayround_org.utils.list.
+            wayround_i2p.utils.list.
             list_strip_remove_empty_remove_duplicated_lines(
                 struct['tags']
                 )
@@ -457,7 +457,7 @@ class PackageInfoCtl:
 
         self.source_path_prefixes_db.set_object_tags(
             name,
-            wayround_org.utils.list.
+            wayround_i2p.utils.list.
             list_strip_remove_empty_remove_duplicated_lines(
                 struct['source_path_prefixes']
                 )
@@ -465,7 +465,7 @@ class PackageInfoCtl:
 
         self.build_deps_db.set_object_tags(
             name,
-            wayround_org.utils.list.
+            wayround_i2p.utils.list.
             list_strip_remove_empty_remove_duplicated_lines(
                 struct['build_deps']
                 )
@@ -473,7 +473,7 @@ class PackageInfoCtl:
 
         self.so_deps_db.set_object_tags(
             name,
-            wayround_org.utils.list.
+            wayround_i2p.utils.list.
             list_strip_remove_empty_remove_duplicated_lines(
                 struct['so_deps']
                 )
@@ -481,7 +481,7 @@ class PackageInfoCtl:
 
         self.runtime_deps_db.set_object_tags(
             name,
-            wayround_org.utils.list.
+            wayround_i2p.utils.list.
             list_strip_remove_empty_remove_duplicated_lines(
                 struct['runtime_deps']
                 )
@@ -495,11 +495,11 @@ class PackageInfoCtl:
 
         if not isinstance(
                 pkg_index_ctl,
-                wayround_org.aipsetup.repository.PackageRepoCtl
+                wayround_i2p.aipsetup.repository.PackageRepoCtl
                 ):
             raise ValueError(
                 "pkg_index_ctl must be of type "
-                "wayround_org.aipsetup.repository.PackageRepoCtl"
+                "wayround_i2p.aipsetup.repository.PackageRepoCtl"
                 )
 
         info_db = self.info_db
@@ -535,7 +535,7 @@ class PackageInfoCtl:
 
                 if create_templates:
 
-                    filename = wayround_org.utils.path.join(
+                    filename = wayround_i2p.utils.path.join(
                         self._info_dir,
                         '{}.json'.format(each)
                         )
@@ -598,7 +598,7 @@ class PackageInfoCtl:
 
         for i in obj_lst:
 
-            filename = wayround_org.utils.path.join(
+            filename = wayround_i2p.utils.path.join(
                 self._info_dir,
                 '{}.json'.format(i)
                 )
@@ -632,7 +632,7 @@ class PackageInfoCtl:
 
         ret = None
 
-        parsed = wayround_org.utils.tarball.parse_tarball_name(
+        parsed = wayround_i2p.utils.tarball.parse_tarball_name(
             tarball_filename,
             mute=mute
             )
@@ -658,7 +658,7 @@ class PackageInfoCtl:
 
             for i in q:
 
-                res = wayround_org.utils.tarball.filter_tarball_list(
+                res = wayround_i2p.utils.tarball.filter_tarball_list(
                     lst,
                     i.filters
                     )
@@ -679,7 +679,7 @@ class PackageInfoCtl:
         logging.info("Found {} outdated records".format(len(oir)))
 
         for i in range(len(oir)):
-            oir[i] = wayround_org.utils.path.join(
+            oir[i] = wayround_i2p.utils.path.join(
                 self._info_dir,
                 oir[i] + '.json'
                 )
@@ -797,7 +797,7 @@ class PackageInfoCtl:
         for i in obj_lst:
             if fnmatch.fnmatch(i, mask):
 
-                filename = wayround_org.utils.path.join(
+                filename = wayround_i2p.utils.path.join(
                     self._info_dir,
                     '{}.json'.format(i))
 
@@ -853,7 +853,7 @@ class PackageInfoCtl:
                 perc = 0
             else:
                 perc = float(100) / (float(files_l) / float(num))
-            wayround_org.utils.terminal.progress_write(
+            wayround_i2p.utils.terminal.progress_write(
                 '    {:6.2f}%'.format(perc)
                 )
 
@@ -868,9 +868,9 @@ class PackageInfoCtl:
             else:
                 missing.append(i)
 
-        wayround_org.utils.terminal.progress_write_finish()
+        wayround_i2p.utils.terminal.progress_write_finish()
 
-        wayround_org.utils.terminal.progress_write(
+        wayround_i2p.utils.terminal.progress_write(
             "-i- Loading missing records"
             )
 
@@ -879,7 +879,7 @@ class PackageInfoCtl:
             struct['last_set_date'] = datetime.datetime.utcnow()
             name = os.path.basename(i)[:-5]
             if isinstance(struct, dict):
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    loading record: {}\n".format(name)
                     )
 
@@ -916,7 +916,7 @@ class PackageInfoCtl:
                 ret.append(i.name)
 
         if not mute:
-            wayround_org.utils.text.columned_list_print(ret)
+            wayround_i2p.utils.text.columned_list_print(ret)
             logging.info("Total found {} records".format(found))
 
         session.close()
@@ -924,23 +924,23 @@ class PackageInfoCtl:
         return ret
 
 
-class Tags(wayround_org.utils.tag.TagEngine):
+class Tags(wayround_i2p.utils.tag.TagEngine):
     pass
 
 
-class SourcePathsRepo(wayround_org.utils.tag.TagEngine):
+class SourcePathsRepo(wayround_i2p.utils.tag.TagEngine):
     pass
 
 
-class BuildDepsRepo(wayround_org.utils.tag.TagEngine):
+class BuildDepsRepo(wayround_i2p.utils.tag.TagEngine):
     pass
 
 
-class SODepsRepo(wayround_org.utils.tag.TagEngine):
+class SODepsRepo(wayround_i2p.utils.tag.TagEngine):
     pass
 
 
-class RuntimeDepsRepo(wayround_org.utils.tag.TagEngine):
+class RuntimeDepsRepo(wayround_i2p.utils.tag.TagEngine):
     pass
 
 
@@ -960,7 +960,7 @@ class SnapshotCtl:
 
         ret = None
 
-        fn = wayround_org.utils.path.join(self._path, name)
+        fn = wayround_i2p.utils.path.join(self._path, name)
 
         if os.path.isfile(fn):
 
@@ -985,7 +985,7 @@ class SnapshotCtl:
         if not os.path.isdir(self._path):
             os.makedirs(self._path)
 
-        fn = wayround_org.utils.path.join(self._path, name)
+        fn = wayround_i2p.utils.path.join(self._path, name)
 
         f = open(fn, 'w')
         if isinstance(data, str):

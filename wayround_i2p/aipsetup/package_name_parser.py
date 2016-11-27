@@ -9,8 +9,8 @@ import logging
 import os.path
 import re
 
-import wayround_org.utils.list
-import wayround_org.utils.text
+import wayround_i2p.utils.list
+import wayround_i2p.utils.text
 
 
 ASP_NAME_REGEXPS = {
@@ -122,13 +122,13 @@ def package_name_parse(filename):
                 ret['groups']['status'] = ''
 
             ret['groups']['version_list_dirty'] = (
-                wayround_org.utils.text.slice_string_to_sections(
+                wayround_i2p.utils.text.slice_string_to_sections(
                     ret['groups']['version']
                     )
                 )
 
             ret['groups']['version_list_dirty'] = (
-                wayround_org.utils.list.list_strip(
+                wayround_i2p.utils.list.list_strip(
                     ret['groups']['version_list_dirty'],
                     ALL_DELIMITERS
                     )
@@ -138,19 +138,19 @@ def package_name_parse(filename):
                 copy.copy(ret['groups']['version_list_dirty'])
                 )
 
-            wayround_org.utils.list.remove_all_values(
+            wayround_i2p.utils.list.remove_all_values(
                 ret['groups']['version_list'],
                 ALL_DELIMITERS
                 )
 
             ret['groups']['status_list_dirty'] = (
-                wayround_org.utils.text.slice_string_to_sections(
+                wayround_i2p.utils.text.slice_string_to_sections(
                     ret['groups']['status']
                     )
                 )
 
             ret['groups']['status_list_dirty'] = (
-                wayround_org.utils.list.list_strip(
+                wayround_i2p.utils.list.list_strip(
                     ret['groups']['status_list_dirty'],
                     ALL_DELIMITERS
                     )
@@ -160,7 +160,7 @@ def package_name_parse(filename):
                 copy.copy(ret['groups']['status_list_dirty'])
                 )
 
-            wayround_org.utils.list.remove_all_values(
+            wayround_i2p.utils.list.remove_all_values(
                 ret['groups']['status_list'],
                 ALL_DELIMITERS
                 )

@@ -6,8 +6,8 @@ import pwd
 import spwd
 import grp
 
-import wayround_org.utils.path
-import wayround_org.utils.terminal
+import wayround_i2p.utils.path
+import wayround_i2p.utils.terminal
 
 # TODO: consider moving to system.py
 
@@ -125,7 +125,7 @@ USERS = {
 
 
 def calc_daemon_home_dir(base_dir, daemons_dir_no_base, user_name):
-    ret = wayround_org.utils.path.join(
+    ret = wayround_i2p.utils.path.join(
         base_dir,
         daemons_dir_no_base,
         user_name
@@ -136,14 +136,14 @@ def calc_daemon_home_dir(base_dir, daemons_dir_no_base, user_name):
 def calc_user_home_dir(base_dir, user_name):
     if user_name == 'root':
 
-        ret = wayround_org.utils.path.join(
+        ret = wayround_i2p.utils.path.join(
             base_dir,
             'root'
             )
 
     else:
 
-        ret = wayround_org.utils.path.join(
+        ret = wayround_i2p.utils.path.join(
             base_dir,
             'home',
             user_name
@@ -193,9 +193,9 @@ def sys_users(base_dir='/', daemons_dir_no_base='/daemons'):
     grall.sort(key=lambda x: x[2])
     spall.sort(key=lambda x: x[0])
 
-    pw_file_name = wayround_org.utils.path.join(base_dir, 'etc', 'passwd')
-    gr_file_name = wayround_org.utils.path.join(base_dir, 'etc', 'group')
-    sp_file_name = wayround_org.utils.path.join(base_dir, 'etc', 'shadow')
+    pw_file_name = wayround_i2p.utils.path.join(base_dir, 'etc', 'passwd')
+    gr_file_name = wayround_i2p.utils.path.join(base_dir, 'etc', 'group')
+    sp_file_name = wayround_i2p.utils.path.join(base_dir, 'etc', 'shadow')
 
     pw_file = open(pw_file_name, 'w')
     gr_file = open(gr_file_name, 'w')

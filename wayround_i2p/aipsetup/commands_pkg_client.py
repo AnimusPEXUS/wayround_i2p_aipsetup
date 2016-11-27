@@ -2,10 +2,10 @@
 import collections
 import logging
 
-import wayround_org.utils.path
-import wayround_org.utils.text
+import wayround_i2p.utils.path
+import wayround_i2p.utils.text
 
-import wayround_org.aipsetup.host_arch_params
+import wayround_i2p.aipsetup.host_arch_params
 
 
 def commands():
@@ -43,7 +43,7 @@ def list_(command_name, opts, args, adds):
         -n                   non case sensitive
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
     config = adds['config']
 
     ret = 1
@@ -63,14 +63,14 @@ def list_(command_name, opts, args, adds):
         if '-n' in opts:
             cs = False
 
-        res = wayround_org.aipsetup.client_pkg.list_(
+        res = wayround_i2p.aipsetup.client_pkg.list_(
             url,
             args[0],
             searchmode,
             cs
             )
 
-        columned_list = wayround_org.utils.text.return_columned_list(res)
+        columned_list = wayround_i2p.utils.text.return_columned_list(res)
         c = len(res)
         print(
             "Result ({} items):\n{}Result ({} items)".format(
@@ -88,7 +88,7 @@ def list_cat(command_name, opts, args, adds):
     List all packages in category and sub categories
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
     config = adds['config']
 
     ret = 1
@@ -102,7 +102,7 @@ def list_cat(command_name, opts, args, adds):
 
         path = args[0]
 
-        for path, cats, packs in wayround_org.aipsetup.client_pkg.walk(
+        for path, cats, packs in wayround_i2p.aipsetup.client_pkg.walk(
                 url,
                 path
                 ):
@@ -115,12 +115,12 @@ def list_cat(command_name, opts, args, adds):
             for i in packs:
                 packsn.append('{}'.format(i))
 
-            text = wayround_org.utils.text.return_columned_list(
+            text = wayround_i2p.utils.text.return_columned_list(
                 catsn
                 )
             del catsn
             print(text)
-            text = wayround_org.utils.text.return_columned_list(
+            text = wayround_i2p.utils.text.return_columned_list(
                 packsn
                 )
             print(text)
@@ -137,7 +137,7 @@ def ls(command_name, opts, args, adds):
     arguments: path
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -158,7 +158,7 @@ def ls(command_name, opts, args, adds):
 
         url = config['pkg_client']['server_url']
 
-        res = wayround_org.aipsetup.client_pkg.ls(
+        res = wayround_i2p.aipsetup.client_pkg.ls(
             url, path
             )
 
@@ -167,10 +167,10 @@ def ls(command_name, opts, args, adds):
 
         else:
 
-            cats = wayround_org.utils.text.return_columned_list(
+            cats = wayround_i2p.utils.text.return_columned_list(
                 res['categories']
                 )
-            packs = wayround_org.utils.text.return_columned_list(
+            packs = wayround_i2p.utils.text.return_columned_list(
                 res['packages']
                 )
 
@@ -201,8 +201,8 @@ def print_info(command_name, opts, args, adds):
     attributes: package_name
     """
 
-    import wayround_org.aipsetup.info
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.info
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -215,7 +215,7 @@ def print_info(command_name, opts, args, adds):
 
         url = config['pkg_client']['server_url']
 
-        res = wayround_org.aipsetup.client_pkg.info(url, args[0])
+        res = wayround_i2p.aipsetup.client_pkg.info(url, args[0])
 
         if res is None:
             ret = 2
@@ -223,13 +223,13 @@ def print_info(command_name, opts, args, adds):
 
             text = ''
 
-            for i in wayround_org.aipsetup.info.\
+            for i in wayround_i2p.aipsetup.info.\
                     SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES.keys():
 
                 if i in res:
 
                     text += "    | {}: {}\n".format(
-                        wayround_org.aipsetup.info.
+                        wayround_i2p.aipsetup.info.
                             SAMPLE_PACKAGE_INFO_STRUCTURE_TITLES[i],
                         res[i]
                         )
@@ -248,7 +248,7 @@ def asp_list(command_name, opts, args, adds):
     attributes: package_name
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -261,15 +261,15 @@ def asp_list(command_name, opts, args, adds):
 
         url = config['pkg_client']['server_url']
 
-        res = wayround_org.aipsetup.client_pkg.asps(url, args[0])
+        res = wayround_i2p.aipsetup.client_pkg.asps(url, args[0])
 
         if res is None:
             ret = 2
         else:
 
-            bases = wayround_org.utils.path.bases(res)
+            bases = wayround_i2p.utils.path.bases(res)
 
-            text = wayround_org.utils.text.return_columned_list(
+            text = wayround_i2p.utils.text.return_columned_list(
                 bases
                 )
 
@@ -287,7 +287,7 @@ def get_asp(command_name, opts, args, adds):
     attributes: file_base_name
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -302,7 +302,7 @@ def get_asp(command_name, opts, args, adds):
 
         name = args[0]
 
-        ret = wayround_org.aipsetup.client_pkg.asps(url, name)
+        ret = wayround_i2p.aipsetup.client_pkg.asps(url, name)
 
     return ret
 
@@ -314,12 +314,12 @@ def get_asp_latest(command_name, opts, args, adds):
     attributes: file_base_name
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
     host, arch = \
-        wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_strict(
+        wayround_i2p.aipsetup.host_arch_params.process_h_and_a_opts_strict(
             opts,
             config
             )
@@ -335,7 +335,7 @@ def get_asp_latest(command_name, opts, args, adds):
 
         name = args[0]
 
-        res = wayround_org.aipsetup.client_pkg.get_latest_asp(
+        res = wayround_i2p.aipsetup.client_pkg.get_latest_asp(
             url,
             name,
             host,
@@ -359,7 +359,7 @@ def get_asp_lat_cat(command_name, opts, args, adds):
     -n           include non-installable
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
     out_dir = ''
@@ -380,7 +380,7 @@ def get_asp_lat_cat(command_name, opts, args, adds):
 
         path = args[0]
 
-        res = wayround_org.aipsetup.client_pkg.get_recurcive_package_list(
+        res = wayround_i2p.aipsetup.client_pkg.get_recurcive_package_list(
             url,
             path
             )
@@ -395,7 +395,7 @@ def get_asp_lat_cat(command_name, opts, args, adds):
 
             for i in res:
 
-                info = wayround_org.aipsetup.client_pkg.info(url, i)
+                info = wayround_i2p.aipsetup.client_pkg.info(url, i)
 
                 can_continue = False
                 if info['deprecated'] and not deprecated:
@@ -415,7 +415,7 @@ def get_asp_lat_cat(command_name, opts, args, adds):
 
                 if can_continue:
 
-                    res2 = wayround_org.aipsetup.client_pkg.get_latest_asp(
+                    res2 = wayround_i2p.aipsetup.client_pkg.get_latest_asp(
                         url,
                         i,
                         out_dir,
@@ -439,7 +439,7 @@ def tar_list(command_name, opts, args, adds):
     List all tarballs for named package
     """
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -452,15 +452,15 @@ def tar_list(command_name, opts, args, adds):
 
         url = config['pkg_client']['server_url']
 
-        res = wayround_org.aipsetup.client_pkg.tarballs(url, args[0])
+        res = wayround_i2p.aipsetup.client_pkg.tarballs(url, args[0])
 
         if res is None:
             ret = 2
         else:
 
-            bases = wayround_org.utils.path.bases(res)
+            bases = wayround_i2p.utils.path.bases(res)
 
-            text = wayround_org.utils.text.return_columned_list(
+            text = wayround_i2p.utils.text.return_columned_list(
                 bases
                 )
 
@@ -496,21 +496,21 @@ def get_tar_latest(command_name, opts, args, adds):
 
 def _get_tarballs_latest(url, name, config, out_dir=None, mute=True):
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     ret = 1
 
     exts = config['pkg_client']['acceptable_src_file_extensions'].split()
 
-    res = wayround_org.aipsetup.client_pkg.tarballs_latest(
+    res = wayround_i2p.aipsetup.client_pkg.tarballs_latest(
         url, name, exts
         )
 
     if res is not None and len(res) != 0:
 
-        res = wayround_org.utils.path.select_by_prefered_extension(res, exts)
+        res = wayround_i2p.utils.path.select_by_prefered_extension(res, exts)
 
-        res = wayround_org.aipsetup.client_pkg.get_tarball(
+        res = wayround_i2p.aipsetup.client_pkg.get_tarball(
             res,
             out_dir=out_dir,
             mute_downloader=mute
@@ -532,7 +532,7 @@ def get_tar_lat_cat(command_name, opts, args, adds):
     -o           include deprecated
     -n           include non-installable
     """
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
     out_dir = ''
@@ -553,7 +553,7 @@ def get_tar_lat_cat(command_name, opts, args, adds):
 
         path = args[0]
 
-        res = wayround_org.aipsetup.client_pkg.get_recurcive_package_list(
+        res = wayround_i2p.aipsetup.client_pkg.get_recurcive_package_list(
             url,
             path
             )
@@ -570,7 +570,7 @@ def get_tar_lat_cat(command_name, opts, args, adds):
 
                 logging.info("Getting tarball for `{}'".format(i))
 
-                info = wayround_org.aipsetup.client_pkg.info(url, i)
+                info = wayround_i2p.aipsetup.client_pkg.info(url, i)
 
                 can_continue = False
                 if info['deprecated'] and not deprecated:
@@ -616,15 +616,15 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
     -v=VERSION
     """
 
-    import wayround_org.aipsetup.get_list_procs
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.get_list_procs
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     ret = 1
 
     host, arch = \
-        wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_strict(
+        wayround_i2p.aipsetup.host_arch_params.process_h_and_a_opts_strict(
             opts,
             config
             )
@@ -644,19 +644,19 @@ def get_x_by_list(command_name, opts, args, adds, mode='tar'):
 
         logging.info("Loading list `{}'".format(list_name))
 
-        conf = wayround_org.aipsetup.get_list_procs.get_list(config, list_name)
+        conf = wayround_i2p.aipsetup.get_list_procs.get_list(config, list_name)
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(config)
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(config)
         src_client = \
-            wayround_org.aipsetup.controllers.src_client_by_config(config)
+            wayround_i2p.aipsetup.controllers.src_client_by_config(config)
 
         acceptable_extensions_order_list = []
         if mode == 'tar':
             acceptable_extensions_order_list = \
                 config['pkg_client']['acceptable_src_file_extensions'].split()
 
-        ret = wayround_org.aipsetup.get_list_procs.get_by_glp(
+        ret = wayround_i2p.aipsetup.get_list_procs.get_by_glp(
             mode,
             conf,
             version,
@@ -684,23 +684,23 @@ get_tar_by_list.__doc__ = get_x_by_list.__doc__
 
 def snapshot_list(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
     url = config['pkg_client']['server_url']
 
-    res = wayround_org.aipsetup.client_pkg.snapshot_list(url)
+    res = wayround_i2p.aipsetup.client_pkg.snapshot_list(url)
 
     if res is None:
         ret = 2
     else:
 
-        bases = wayround_org.utils.path.bases(res)
+        bases = wayround_i2p.utils.path.bases(res)
 
         bases.sort(reverse=True)
 
-        text = wayround_org.utils.text.return_columned_list(
+        text = wayround_i2p.utils.text.return_columned_list(
             bases
             )
 
@@ -713,13 +713,13 @@ def snapshot_list(command_name, opts, args, adds):
 
 def snapshot_get(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
     url = config['pkg_client']['server_url']
 
-    res = wayround_org.aipsetup.client_pkg.snapshot_get(url, name)
+    res = wayround_i2p.aipsetup.client_pkg.snapshot_get(url, name)
 
     if res is None:
         ret = 2
@@ -732,7 +732,7 @@ def snapshot_get(command_name, opts, args, adds):
 
 def get_by_snapshot(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -749,7 +749,7 @@ def get_by_snapshot(command_name, opts, args, adds):
 
         name = args[0]
 
-        res = wayround_org.aipsetup.client_pkg.snapshot_get(url, name)
+        res = wayround_i2p.aipsetup.client_pkg.snapshot_get(url, name)
 
         if res is None:
             ret = 2
@@ -758,9 +758,9 @@ def get_by_snapshot(command_name, opts, args, adds):
             errors = False
 
             for i in res['asps']:
-                asp_obj = wayround_org.aipsetup.package.ASPackage(i)
+                asp_obj = wayround_i2p.aipsetup.package.ASPackage(i)
                 if not isinstance(
-                        wayround_org.aipsetup.client_pkg.get_asp(
+                        wayround_i2p.aipsetup.client_pkg.get_asp(
                             url,
                             asp_obj.host,
                             asp_obj.arch,

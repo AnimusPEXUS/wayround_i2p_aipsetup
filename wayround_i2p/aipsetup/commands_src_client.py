@@ -2,8 +2,8 @@
 import collections
 
 
-import wayround_org.utils.path
-import wayround_org.utils.text
+import wayround_i2p.utils.path
+import wayround_i2p.utils.text
 
 
 def commands():
@@ -28,7 +28,7 @@ def search(command_name, opts, args, adds):
         -p=NAME              reduce search to package name paths
     """
 
-    import wayround_org.aipsetup.client_src
+    import wayround_i2p.aipsetup.client_src
 
     config = adds['config']
 
@@ -49,14 +49,14 @@ def search(command_name, opts, args, adds):
         if '-n' in opts:
             cs = False
 
-        res = wayround_org.aipsetup.client_src.search(
+        res = wayround_i2p.aipsetup.client_src.search(
             url,
             args[0],
             searchmode,
             cs
             )
 
-        columned_list = wayround_org.utils.text.return_columned_list(res)
+        columned_list = wayround_i2p.utils.text.return_columned_list(res)
         c = len(res)
         print(
             "Result ({} items):\n{}Result ({} items)".format(
@@ -76,7 +76,7 @@ def files(command_name, opts, args, adds):
     [options] name
     """
 
-    import wayround_org.aipsetup.client_src
+    import wayround_i2p.aipsetup.client_src
 
     config = adds['config']
 
@@ -91,7 +91,7 @@ def files(command_name, opts, args, adds):
 
         name = args[0]
 
-        res = wayround_org.aipsetup.client_src.files(
+        res = wayround_i2p.aipsetup.client_src.files(
             url,
             name,
             []
@@ -101,7 +101,7 @@ def files(command_name, opts, args, adds):
             ret = 1
             print("No result")
         else:
-            columned_list = wayround_org.utils.text.return_columned_list(res)
+            columned_list = wayround_i2p.utils.text.return_columned_list(res)
             c = len(res)
             print(
                 "Result ({} items):\n{}Result ({} items)".format(
@@ -122,7 +122,7 @@ def get(command_name, opts, args, adds):
     directory
     """
 
-    import wayround_org.aipsetup.client_src
+    import wayround_i2p.aipsetup.client_src
 
     config = adds['config']
 
@@ -135,7 +135,7 @@ def get(command_name, opts, args, adds):
 
         url = config['src_client']['server_url']
 
-        res = wayround_org.aipsetup.client_src.get(
+        res = wayround_i2p.aipsetup.client_src.get(
             url,
             args[0]
             )

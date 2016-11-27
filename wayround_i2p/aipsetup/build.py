@@ -3,7 +3,7 @@
 Build software before packaging
 
 This module provides functions for building package using building script (see
-:mod:`buildscript<wayround_org.aipsetup.buildscript>` module for more info on
+:mod:`buildscript<wayround_i2p.aipsetup.buildscript>` module for more info on
 building scripts)
 """
 
@@ -21,15 +21,15 @@ import collections
 import re
 import glob
 
-import wayround_org.aipsetup.client_pkg
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.info
-import wayround_org.utils.format.elf
-import wayround_org.utils.path
-import wayround_org.utils.system_type
-import wayround_org.utils.tarball
-import wayround_org.utils.terminal
-import wayround_org.utils.time
+import wayround_i2p.aipsetup.client_pkg
+import wayround_i2p.aipsetup.controllers
+import wayround_i2p.aipsetup.info
+import wayround_i2p.utils.format.elf
+import wayround_i2p.utils.path
+import wayround_i2p.utils.system_type
+import wayround_i2p.utils.tarball
+import wayround_i2p.utils.terminal
+import wayround_i2p.utils.time
 
 
 DIR_TARBALL = '00.TARBALL'
@@ -376,17 +376,17 @@ class Constitution:
             raise ValueError("`arch_str' must be str")
 
         if host_str is not None:
-            self.host = wayround_org.utils.system_type.SystemType(host_str)
+            self.host = wayround_i2p.utils.system_type.SystemType(host_str)
 
         if build_str is not None:
-            self.build = wayround_org.utils.system_type.SystemType(build_str)
+            self.build = wayround_i2p.utils.system_type.SystemType(build_str)
 
         if target_str is not None:
-            self.target = wayround_org.utils.system_type.SystemType(target_str)
+            self.target = wayround_i2p.utils.system_type.SystemType(target_str)
 
         if arch_str is not None:
             self.arch = \
-                wayround_org.utils.system_type.SystemType(arch_str)
+                wayround_i2p.utils.system_type.SystemType(arch_str)
 
         self.multilib_variants = sorted(multilib_variants)
 
@@ -460,7 +460,7 @@ class BuildScriptCtrl:
 
             try:
                 module = importlib.import_module(
-                    'wayround_org.aipsetup.builder_scripts.{}'.format(name)
+                    'wayround_i2p.aipsetup.builder_scripts.{}'.format(name)
                     )
             except:
                 logging.exception(
@@ -488,11 +488,11 @@ class BuildCtl:
                 ):
             raise TypeError(
                 "buildingsite_ctl must be an instance of "
-                "wayround_org.aipsetup.build.BuildingSiteCtl"
+                "wayround_i2p.aipsetup.build.BuildingSiteCtl"
                 )
 
         self.buildingsite_ctl = buildingsite_ctl
-        self.path = wayround_org.utils.path.abspath(buildingsite_ctl.path)
+        self.path = wayround_i2p.utils.path.abspath(buildingsite_ctl.path)
         return
 
     def complete(self, buildscript_ctl):
@@ -519,10 +519,10 @@ class BuildCtl:
         if not isinstance(buildscript_ctl, BuildScriptCtrl):
             raise ValueError(
                 "buildscript_ctl must be of type "
-                "wayround_org.aipsetup.build.BuildScriptCtrl"
+                "wayround_i2p.aipsetup.build.BuildScriptCtrl"
                 )
 
-        building_site = wayround_org.utils.path.abspath(self.path)
+        building_site = wayround_i2p.utils.path.abspath(self.path)
 
         package_info = self.buildingsite_ctl.read_package_info(
             ret_on_error=None
@@ -659,7 +659,7 @@ class BuildCtl:
                 ret_on_error=None
                 )
 
-            log = wayround_org.utils.log.Log(
+            log = wayround_i2p.utils.log.Log(
                 log_output_directory,
                 '{} {}'.format(
                     package_info['pkg_info']['name'], i
@@ -704,8 +704,8 @@ def _destdir_filelist(name_to_store_in, destdir, lists_dir):
 
     lists_dir = lists_dir
 
-    output_file = wayround_org.utils.path.abspath(
-        wayround_org.utils.path.join(
+    output_file = wayround_i2p.utils.path.abspath(
+        wayround_i2p.utils.path.join(
             lists_dir,
             name_to_store_in
             )
@@ -722,11 +722,11 @@ def _destdir_filelist(name_to_store_in, destdir, lists_dir):
         ret = 2
 
     else:
-        lst = wayround_org.utils.file.files_recurcive_list(destdir)
+        lst = wayround_i2p.utils.file.files_recurcive_list(destdir)
 
         lst2 = []
         for i in lst:
-            lst2.append('/' + wayround_org.utils.path.relpath(i, destdir))
+            lst2.append('/' + wayround_i2p.utils.path.relpath(i, destdir))
 
         lst = lst2
 
@@ -774,20 +774,20 @@ def _dir_wanisher(
 
             for i in list_dirs_disasterous_with_pkg_name_exclusion:
 
-                p1 = wayround_org.utils.path.join(src_dir, i)
+                p1 = wayround_i2p.utils.path.join(src_dir, i)
 
                 if os.path.islink(p1) or os.path.exists(p1):
                     if not pkg_name in list_package_name_exclusions:
                         logging.error(
                             "Forbidden path: {}".format(
-                                wayround_org.utils.path.relpath(p1, src_dir)
+                                wayround_i2p.utils.path.relpath(p1, src_dir)
                                 )
                             )
                         ret = 1
                     else:
                         logging.warning(
                             "Usually forbidden path: {}".format(
-                                wayround_org.utils.path.relpath(p1, src_dir)
+                                wayround_i2p.utils.path.relpath(p1, src_dir)
                                 )
                             )
                         logging.warning(
@@ -798,12 +798,12 @@ def _dir_wanisher(
         if ret == 0:
             for i in list_dirs_which_is_disaster:
 
-                p1 = wayround_org.utils.path.join(src_dir, i)
+                p1 = wayround_i2p.utils.path.join(src_dir, i)
 
                 if os.path.islink(p1) or os.path.exists(p1):
                     logging.error(
                         "Forbidden file or directory: {}".format(
-                            wayround_org.utils.path.relpath(p1, src_dir)
+                            wayround_i2p.utils.path.relpath(p1, src_dir)
                             )
                         )
                     ret = 1
@@ -811,7 +811,7 @@ def _dir_wanisher(
         if ret == 0:
             for i in list_dirs_which_can_be_safely_moved:
 
-                p1 = wayround_org.utils.path.join(src_dir, i)
+                p1 = wayround_i2p.utils.path.join(src_dir, i)
 
                 if os.path.islink(p1):
                     os.unlink(p1)
@@ -828,9 +828,9 @@ def _dir_wanisher(
                                 )
                             )
 
-                        wayround_org.utils.file.copytree(
+                        wayround_i2p.utils.file.copytree(
                             p1,
-                            wayround_org.utils.path.join(dst_dir, i),
+                            wayround_i2p.utils.path.join(dst_dir, i),
                             dst_must_be_empty=False,
                             verbose=False
                             )
@@ -840,7 +840,7 @@ def _dir_wanisher(
         if ret == 0:
             for i in list_dirs_which_can_be_moved_unless_in_following_list:
 
-                p1 = wayround_org.utils.path.join(src_dir, i)
+                p1 = wayround_i2p.utils.path.join(src_dir, i)
 
                 if os.path.islink(p1):
                     os.unlink(p1)
@@ -859,9 +859,9 @@ def _dir_wanisher(
                                     )
                                 )
 
-                            wayround_org.utils.file.copytree(
+                            wayround_i2p.utils.file.copytree(
                                 p1,
-                                wayround_org.utils.path.join(dst_dir, i),
+                                wayround_i2p.utils.path.join(dst_dir, i),
                                 dst_must_be_empty=False,
                                 verbose=False
                                 )
@@ -871,7 +871,7 @@ def _dir_wanisher(
                         else:
                             logging.warning(
                                 "Usually moved path: {}".format(
-                                    wayround_org.utils.path.relpath(
+                                    wayround_i2p.utils.path.relpath(
                                         p1,
                                         src_dir)
                                     )
@@ -897,11 +897,11 @@ class PackCtl:
                 ):
             raise TypeError(
                 "buildingsite_ctl must be an instance of "
-                "wayround_org.aipsetup.build.BuildingSiteCtl"
+                "wayround_i2p.aipsetup.build.BuildingSiteCtl"
                 )
 
         self.buildingsite_ctl = buildingsite_ctl
-        self.path = wayround_org.utils.path.abspath(buildingsite_ctl.path)
+        self.path = wayround_i2p.utils.path.abspath(buildingsite_ctl.path)
         return
 
     def destdir_chmod(self):
@@ -940,7 +940,7 @@ class PackCtl:
         pkg_name = package_info['pkg_info']['name']
 
         src_dir = self.buildingsite_ctl.getDIR_DESTDIR()
-        dst_dir = wayround_org.utils.path.join(src_dir, 'usr')
+        dst_dir = wayround_i2p.utils.path.join(src_dir, 'usr')
 
         ret = _dir_wanisher(
             '/ -> /usr',
@@ -966,12 +966,12 @@ class PackCtl:
         pkg_name = package_info['pkg_info']['name']
         host = package_info['constitution']['host']
 
-        src_dir = wayround_org.utils.path.join(
+        src_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'usr'
             )
 
-        dst_dir = wayround_org.utils.path.join(
+        dst_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host
@@ -994,7 +994,7 @@ class PackCtl:
                 pkg_name
                 )
 
-        wayround_org.utils.file.remove_if_exists(src_dir)
+        wayround_i2p.utils.file.remove_if_exists(src_dir)
 
         return ret
 
@@ -1007,14 +1007,14 @@ class PackCtl:
         pkg_name = package_info['pkg_info']['name']
         host = package_info['constitution']['host']
 
-        src_dir = wayround_org.utils.path.join(
+        src_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host,
             'usr'
             )
 
-        dst_dir = wayround_org.utils.path.join(
+        dst_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host
@@ -1036,7 +1036,7 @@ class PackCtl:
                 pkg_name
                 )
 
-        wayround_org.utils.file.remove_if_exists(src_dir)
+        wayround_i2p.utils.file.remove_if_exists(src_dir)
 
         return ret
 
@@ -1053,8 +1053,8 @@ class PackCtl:
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
-        src_dir = wayround_org.utils.path.join(destdir, 'multihost', host)
-        dst_dir = wayround_org.utils.path.join(
+        src_dir = wayround_i2p.utils.path.join(destdir, 'multihost', host)
+        dst_dir = wayround_i2p.utils.path.join(
             destdir,
             'multihost',
             host,
@@ -1091,14 +1091,14 @@ class PackCtl:
         host = package_info['constitution']['host']
         arch = package_info['constitution']['arch']
 
-        host_share_dir = wayround_org.utils.path.join(
+        host_share_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host,
             'share',
             )
 
-        tgt_host_share_dir = wayround_org.utils.path.join(
+        tgt_host_share_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host,
@@ -1114,7 +1114,7 @@ class PackCtl:
 
                 if i in ['man', 'doc', 'docs']:
 
-                    jo = wayround_org.utils.path.join(
+                    jo = wayround_i2p.utils.path.join(
                         host_share_dir,
                         i
                         )
@@ -1123,7 +1123,7 @@ class PackCtl:
 
                         logging.info("    {}".format(i))
 
-                        jo2 = wayround_org.utils.path.join(
+                        jo2 = wayround_i2p.utils.path.join(
                             tgt_host_share_dir,
                             i
                             )
@@ -1133,7 +1133,7 @@ class PackCtl:
                             exist_ok=True
                             )
 
-                        if wayround_org.utils.file.copytree(
+                        if wayround_i2p.utils.file.copytree(
                                 jo,
                                 jo2,
                                 overwrite_files=True,
@@ -1167,7 +1167,7 @@ class PackCtl:
         host = package_info['constitution']['host']
         arch = package_info['constitution']['arch']
 
-        src_dir = wayround_org.utils.path.join(
+        src_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host,
@@ -1176,7 +1176,7 @@ class PackCtl:
             'usr'
             )
 
-        dst_dir = wayround_org.utils.path.join(
+        dst_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multihost',
             host,
@@ -1201,7 +1201,7 @@ class PackCtl:
                 pkg_name
                 )
 
-        wayround_org.utils.file.remove_if_exists(src_dir)
+        wayround_i2p.utils.file.remove_if_exists(src_dir)
 
         return ret
 
@@ -1217,14 +1217,14 @@ class PackCtl:
         arch = package_info['constitution']['arch']
 
         for i in [
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     self.buildingsite_ctl.getDIR_DESTDIR(),
                     'multihost',
                     host,
                     'multiarch',
                     arch
                     ),
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     self.buildingsite_ctl.getDIR_DESTDIR(),
                     'multihost',
                     host,
@@ -1248,14 +1248,14 @@ class PackCtl:
 
         destdir = self.buildingsite_ctl.getDIR_DESTDIR()
 
-        src_dir = wayround_org.utils.path.join(
+        src_dir = wayround_i2p.utils.path.join(
             destdir,
             'multihost',
             host,
             'multiarch',
             arch
             )
-        dst_dir = wayround_org.utils.path.join(
+        dst_dir = wayround_i2p.utils.path.join(
             destdir,
             'multihost',
             host
@@ -1298,8 +1298,8 @@ class PackCtl:
         for i in ['etc', 'var']:
 
             i_new_name = '{}.distr.{}.{}'.format(i, host, arch)
-            src_dir_name = wayround_org.utils.path.join(dst_dir, i)
-            target_dir_name = wayround_org.utils.path.join(dst_dir, i_new_name)
+            src_dir_name = wayround_i2p.utils.path.join(dst_dir, i)
+            target_dir_name = wayround_i2p.utils.path.join(dst_dir, i_new_name)
 
             if i in files:
 
@@ -1325,12 +1325,12 @@ class PackCtl:
 
         etc_new_name = '{}.distr.{}.{}'.format('etc', host, arch)
 
-        src_set_dir = wayround_org.utils.path.join(
+        src_set_dir = wayround_i2p.utils.path.join(
             dst_dir,
             etc_new_name,
             'profile.d',
             'SET')
-        dst_set_dir = wayround_org.utils.path.join(
+        dst_set_dir = wayround_i2p.utils.path.join(
             dst_dir,
             'etc',
             'profile.d',
@@ -1338,7 +1338,7 @@ class PackCtl:
 
         if os.path.isdir(src_set_dir):
             logging.info("Copying profile.d/SET files")
-            if wayround_org.utils.file.copy_file_or_directory(
+            if wayround_i2p.utils.file.copy_file_or_directory(
                     src_set_dir,
                     dst_set_dir,
                     overwrite_files=True,
@@ -1360,13 +1360,13 @@ class PackCtl:
 
         host = package_info['constitution']['host']
 
-        arch_dir = wayround_org.utils.path.join(
+        arch_dir = wayround_i2p.utils.path.join(
             self.buildingsite_ctl.getDIR_DESTDIR(),
             'multiarch',
             host
             )
 
-        lib_dir = wayround_org.utils.path.join(arch_dir, 'lib')
+        lib_dir = wayround_i2p.utils.path.join(arch_dir, 'lib')
 
         os.makedirs(lib_dir, exist_ok=True)
 
@@ -1378,7 +1378,7 @@ class PackCtl:
             if i in ['lib64', 'lib32', 'libx32']:
                 logging.info("{} contents selected for moving".format(i))
                 libx_dirs.append(
-                    wayround_org.utils.path.join(
+                    wayround_i2p.utils.path.join(
                         arch_dir,
                         i
                         )
@@ -1390,9 +1390,9 @@ class PackCtl:
             j_files = os.listdir(j)
 
             for i in j_files:
-                if wayround_org.utils.file.copy_file_or_directory(
-                        wayround_org.utils.path.join(j, i),
-                        wayround_org.utils.path.join(lib_dir, i),
+                if wayround_i2p.utils.file.copy_file_or_directory(
+                        wayround_i2p.utils.path.join(j, i),
+                        wayround_i2p.utils.path.join(lib_dir, i),
                         overwrite_files=False,
                         clear_before_copy=False,
                         dst_must_be_empty=True,
@@ -1447,15 +1447,15 @@ class PackCtl:
             for dirpath, dirnames, filenames in os.walk(destdir):
                 filenames.sort()
                 dirnames.sort()
-                dirpath = wayround_org.utils.path.abspath(dirpath)
+                dirpath = wayround_i2p.utils.path.abspath(dirpath)
 
                 for i in dirnames:
-                    f = wayround_org.utils.path.join(dirpath, i)
+                    f = wayround_i2p.utils.path.join(dirpath, i)
                     if not os.path.islink(f):
                         os.chmod(f, mode=0o755)
 
                 for i in filenames:
-                    f = wayround_org.utils.path.join(dirpath, i)
+                    f = wayround_i2p.utils.path.join(dirpath, i)
                     if not os.path.islink(f):
                         os.chmod(f, mode=0o755)
 
@@ -1517,16 +1517,16 @@ class PackCtl:
 
         if not skip_patch:
 
-            dl32 = wayround_org.aipsetup.build.find_dl(
-                wayround_org.utils.path.join(
+            dl32 = wayround_i2p.aipsetup.build.find_dl(
+                wayround_i2p.utils.path.join(
                     '/',
                     'multiarch',
                     'i686-pc-linux-gnu'
                     )
                 )
 
-            dl64 = wayround_org.aipsetup.build.find_dl(
-                wayround_org.utils.path.join(
+            dl64 = wayround_i2p.aipsetup.build.find_dl(
+                wayround_i2p.utils.path.join(
                     '/',
                     'multiarch',
                     'x86_64-pc-linux-gnu'
@@ -1553,8 +1553,8 @@ class PackCtl:
 
             lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
-            lists_file = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            lists_file = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     lists_dir,
                     'DESTDIR.lst'
                     )
@@ -1576,15 +1576,15 @@ class PackCtl:
                     file_list_i = 0
                     file_list_l = len(file_list)
                     for i in file_list:
-                        filename = wayround_org.utils.path.abspath(
-                            wayround_org.utils.path.join(destdir, i)
+                        filename = wayround_i2p.utils.path.abspath(
+                            wayround_i2p.utils.path.join(destdir, i)
                             )
 
                         if (os.path.isfile(filename)
                                 and os.path.exists(filename)):
 
                             try:
-                                elf = wayround_org.utils.format.elf.ELF(
+                                elf = wayround_i2p.utils.format.elf.ELF(
                                     filename)
                             except:
                                 logging.exception(
@@ -1609,7 +1609,7 @@ class PackCtl:
 
                         file_list_i += 1
 
-                        wayround_org.utils.terminal.progress_write(
+                        wayround_i2p.utils.terminal.progress_write(
                             "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".
                             format_map(
                                 {
@@ -1622,7 +1622,7 @@ class PackCtl:
                                 )
                             )
 
-                    wayround_org.utils.terminal.progress_write_finish()
+                    wayround_i2p.utils.terminal.progress_write_finish()
 
                     logging.info(
                         "    found executable elfs: {}".format(
@@ -1635,7 +1635,7 @@ class PackCtl:
                         )
 
                     for i in exec_elfs_list:
-                        elf = wayround_org.utils.format.elf.ELF(i)
+                        elf = wayround_i2p.utils.format.elf.ELF(i)
                         logging.info(
                             "        patching: ({:10}) {}".format(
                                 elf.elf_machine_name,
@@ -1685,8 +1685,8 @@ class PackCtl:
 
         lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
-        output_file = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
+        output_file = wayround_i2p.utils.path.abspath(
+            wayround_i2p.utils.path.join(
                 lists_dir,
                 'DESTDIR.sha512'
                 )
@@ -1704,7 +1704,7 @@ class PackCtl:
             logging.error("LIST dir can't be used")
             ret = 2
         else:
-            ret = wayround_org.utils.checksum.make_dir_checksums(
+            ret = wayround_i2p.utils.checksum.make_dir_checksums(
                 destdir,
                 output_file,
                 destdir
@@ -1725,15 +1725,15 @@ class PackCtl:
 
         lists_dir = self.buildingsite_ctl.getDIR_LISTS()
 
-        lists_file = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
+        lists_file = wayround_i2p.utils.path.abspath(
+            wayround_i2p.utils.path.join(
                 lists_dir,
                 'DESTDIR.lst'
                 )
             )
 
-        deps_file = wayround_org.utils.path.abspath(
-            wayround_org.utils.path.join(
+        deps_file = wayround_i2p.utils.path.abspath(
+            wayround_i2p.utils.path.join(
                 lists_dir,
                 'DESTDIR.dep_c'
                 )
@@ -1755,14 +1755,14 @@ class PackCtl:
                 file_list_i = 0
                 file_list_l = len(file_list)
                 for i in file_list:
-                    filename = wayround_org.utils.path.abspath(
-                        wayround_org.utils.path.join(destdir, i)
+                    filename = wayround_i2p.utils.path.abspath(
+                        wayround_i2p.utils.path.join(destdir, i)
                         )
 
                     if os.path.isfile(filename) and os.path.exists(filename):
 
                         try:
-                            elf = wayround_org.utils.format.elf.ELF(filename)
+                            elf = wayround_i2p.utils.format.elf.ELF(filename)
                         except:
                             logging.exception(
                                 "Error parsing file: `{}'".format(filename)
@@ -1782,7 +1782,7 @@ class PackCtl:
 
                     file_list_i += 1
 
-                    wayround_org.utils.terminal.progress_write(
+                    wayround_i2p.utils.terminal.progress_write(
                         "    ({perc:.2f}%) ELFs: {elfs}; non-ELFs: {n_elfs}".
                         format_map(
                             {
@@ -1795,7 +1795,7 @@ class PackCtl:
                             )
                         )
 
-                wayround_org.utils.terminal.progress_write_finish()
+                wayround_i2p.utils.terminal.progress_write_finish()
 
                 logging.info("ELFs: {elfs}; non-ELFs: {n_elfs}".format_map({
                     'elfs': elfs,
@@ -1835,8 +1835,8 @@ class PackCtl:
                 DIR_DESTDIR,
                 DIR_BUILD_LOGS
                 ]:
-            dirname = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            dirname = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     self.path,
                     i
                     )
@@ -1848,7 +1848,7 @@ class PackCtl:
                 ret = 1
                 break
             else:
-                size = wayround_org.utils.file.get_file_size(dirname)
+                size = wayround_i2p.utils.file.get_file_size(dirname)
                 logging.info(
                     "Compressing {} (size: {} B ~= {:4.2f} MiB)".format(
                         i,
@@ -1857,7 +1857,7 @@ class PackCtl:
                         )
                     )
 
-                wayround_org.utils.archive.archive_tar_canonical(
+                wayround_i2p.utils.archive.archive_tar_canonical(
                     dirname,
                     filename,
                     'xz',
@@ -1879,10 +1879,10 @@ class PackCtl:
         for i in ['DESTDIR_orig.lst', 'DESTDIR.lst', 'DESTDIR.sha512',
                   'DESTDIR.dep_c']:
 
-            infile = wayround_org.utils.path.join(lists_dir, i)
+            infile = wayround_i2p.utils.path.join(lists_dir, i)
             outfile = infile + '.xz'
 
-            if wayround_org.utils.exec.process_file(
+            if wayround_i2p.utils.exec.process_file(
                     'xz',
                     infile,
                     outfile,
@@ -1901,9 +1901,9 @@ class PackCtl:
 
         logging.info("Making checksums for buildingsite files")
 
-        buildingsite = wayround_org.utils.path.abspath(self.path)
+        buildingsite = wayround_i2p.utils.path.abspath(self.path)
 
-        package_checksums = wayround_org.utils.path.join(
+        package_checksums = wayround_i2p.utils.path.join(
             buildingsite,
             'package.sha512'
             )
@@ -1917,14 +1917,14 @@ class PackCtl:
             if os.path.islink(i) or not os.path.isfile(i):
                 logging.error(
                     "Not exists or not a normal file: {}".format(
-                        wayround_org.utils.path.relpath(i, buildingsite)
+                        wayround_i2p.utils.path.relpath(i, buildingsite)
                         )
                     )
                 ret = 10
 
         if ret == 0:
 
-            check_summs = wayround_org.utils.checksum.checksums_by_list(
+            check_summs = wayround_i2p.utils.checksum.checksums_by_list(
                 list_to_checksum, method='sha512'
                 )
 
@@ -1933,7 +1933,7 @@ class PackCtl:
 
             for i in paths:
                 check_summs2[
-                    '/' + wayround_org.utils.path.relpath(i, buildingsite)
+                    '/' + wayround_i2p.utils.path.relpath(i, buildingsite)
                     ] = check_summs[i]
 
             check_summs = check_summs2
@@ -1942,7 +1942,7 @@ class PackCtl:
 
             f = open(package_checksums, 'w')
             f.write(
-                wayround_org.utils.checksum.render_checksum_dict_to_txt(
+                wayround_i2p.utils.checksum.render_checksum_dict_to_txt(
                     check_summs,
                     sort=True
                     )
@@ -1959,7 +1959,7 @@ class PackCtl:
 
         ret = 0
 
-        buildingsite = wayround_org.utils.path.abspath(self.path)
+        buildingsite = wayround_i2p.utils.path.abspath(self.path)
 
         logging.info("Creating package")
 
@@ -1972,15 +1972,15 @@ class PackCtl:
             ret = 1
         else:
 
-            pack_dir = wayround_org.utils.path.abspath(
-                wayround_org.utils.path.join(
+            pack_dir = wayround_i2p.utils.path.abspath(
+                wayround_i2p.utils.path.join(
                     buildingsite,
                     '..',
                     'pack'
                     )
                 )
 
-            pack_file_name = wayround_org.utils.path.join(
+            pack_file_name = wayround_i2p.utils.path.join(
                 pack_dir,
                 "({pkgname})-({version})-({status})-"
                 "({timestamp})-({hostinfo})-({arch}).asp".format_map(
@@ -1991,7 +1991,7 @@ class PackCtl:
                         'status':
                             package_info['pkg_nameinfo']['groups']['status'],
                         'timestamp':
-                            wayround_org.utils.time.currenttime_stamp(),
+                            wayround_i2p.utils.time.currenttime_stamp(),
                         'hostinfo': package_info['constitution']['host'],
                         'arch': package_info['constitution']['arch']
                         }
@@ -2009,7 +2009,7 @@ class PackCtl:
 
             for i in list_to_tar:
                 list_to_tar2.append(
-                    './' + wayround_org.utils.path.relpath(i, buildingsite)
+                    './' + wayround_i2p.utils.path.relpath(i, buildingsite)
                     )
 
             list_to_tar = list_to_tar2
@@ -2081,46 +2081,46 @@ class PackCtl:
 
     def get_list_of_items_to_pack(self):
 
-        building_site = wayround_org.utils.path.abspath(self.path)
+        building_site = wayround_i2p.utils.path.abspath(self.path)
 
         ret = []
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 building_site,
                 DIR_DESTDIR + '.tar.xz'
                 )
             )
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 building_site,
                 DIR_PATCHES + '.tar.xz'
                 )
             )
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 building_site,
                 DIR_BUILD_LOGS + '.tar.xz'
                 )
             )
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 building_site,
                 'package_info.json'
                 )
             )
 
         ret.append(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 building_site,
                 'package.sha512'
                 )
             )
 
-        post_install_script = wayround_org.utils.path.join(
+        post_install_script = wayround_i2p.utils.path.join(
             building_site, 'post_install.py'
             )
 
@@ -2133,7 +2133,7 @@ class PackCtl:
 
         for i in tarballs:
             ret.append(
-                wayround_org.utils.path.join(
+                wayround_i2p.utils.path.join(
                     building_site,
                     DIR_TARBALL, i
                     )
@@ -2146,7 +2146,7 @@ class PackCtl:
         for i in lists:
             if i.endswith('.xz'):
                 ret.append(
-                    wayround_org.utils.path.join(
+                    wayround_i2p.utils.path.join(
                         building_site,
                         DIR_LISTS, i
                         )
@@ -2163,7 +2163,7 @@ def read_package_info(path, ret_on_error=None):
 class BuildingSiteCtl:
 
     def __init__(self, path):
-        self.path = wayround_org.utils.path.abspath(path)
+        self.path = wayround_i2p.utils.path.abspath(path)
         return
 
     def getDIR_TARBALL(self):
@@ -2195,7 +2195,7 @@ class BuildingSiteCtl:
 
     def is_building_site(self):
         return os.path.isfile(
-            wayround_org.utils.path.join(self.path, 'package_info.json'))
+            wayround_i2p.utils.path.join(self.path, 'package_info.json'))
 
     def init(self, files=None):
         """
@@ -2208,7 +2208,7 @@ class BuildingSiteCtl:
 
         ret = 0
 
-        path = wayround_org.utils.path.abspath(self.path)
+        path = wayround_i2p.utils.path.abspath(self.path)
 
         logging.info("Initiating building site `{}'".format(path))
 
@@ -2238,8 +2238,8 @@ class BuildingSiteCtl:
 
             logging.info("Creating required subdirs")
             for i in DIR_ALL:
-                a = wayround_org.utils.path.abspath(
-                    wayround_org.utils.path.join(
+                a = wayround_i2p.utils.path.abspath(
+                    wayround_i2p.utils.path.join(
                         path,
                         i))
 
@@ -2288,7 +2288,7 @@ class BuildingSiteCtl:
             default)
         """
 
-        path = wayround_org.utils.path.abspath(self.path)
+        path = wayround_i2p.utils.path.abspath(self.path)
 
         logging.debug(
             "Trying to read package info in building site `{}'".format(path)
@@ -2296,7 +2296,7 @@ class BuildingSiteCtl:
 
         ret = ret_on_error
 
-        pi_filename = wayround_org.utils.path.join(path, 'package_info.json')
+        pi_filename = wayround_i2p.utils.path.join(path, 'package_info.json')
 
         if not os.path.isfile(pi_filename):
             logging.error("`{}' not found".format(pi_filename))
@@ -2326,11 +2326,11 @@ class BuildingSiteCtl:
         Raises exceptions in case of errors
         """
 
-        path = wayround_org.utils.path.abspath(self.path)
+        path = wayround_i2p.utils.path.abspath(self.path)
 
         ret = 0
 
-        package_information_filename = wayround_org.utils.path.join(
+        package_information_filename = wayround_i2p.utils.path.join(
             path,
             'package_info.json')
 
@@ -2374,7 +2374,7 @@ class BuildingSiteCtl:
 
         package_info = self.read_package_info({})
 
-        parse_result = wayround_org.utils.tarball.parse_tarball_name(base)
+        parse_result = wayround_i2p.utils.tarball.parse_tarball_name(base)
 
         if not isinstance(parse_result, dict):
             logging.error("Can't correctly parse file name")
@@ -2454,7 +2454,7 @@ class BuildingSiteCtl:
         if not isinstance(const, Constitution):
             raise ValueError(
                 "const must be of type "
-                "wayround_org.aipsetup.build.Constitution"
+                "wayround_i2p.aipsetup.build.Constitution"
                 )
 
         ret = 0
@@ -2488,11 +2488,11 @@ class BuildingSiteCtl:
 
         if not isinstance(
                 pkg_client,
-                wayround_org.aipsetup.client_pkg.PackageServerClient
+                wayround_i2p.aipsetup.client_pkg.PackageServerClient
                 ):
             raise TypeError(
                 "pkg_client must be of type "
-                "wayround_org.aipsetup.client_pkg.PackageServerClient"
+                "wayround_i2p.aipsetup.client_pkg.PackageServerClient"
                 )
 
         package_info = self.read_package_info(ret_on_error={})
@@ -2580,16 +2580,16 @@ class BuildingSiteCtl:
         if not isinstance(const, Constitution):
             raise ValueError(
                 "const must be of type "
-                "wayround_org.aipsetup.build.Constitution"
+                "wayround_i2p.aipsetup.build.Constitution"
                 )
 
         if not isinstance(
                 pkg_client,
-                wayround_org.aipsetup.client_pkg.PackageServerClient
+                wayround_i2p.aipsetup.client_pkg.PackageServerClient
                 ):
             raise TypeError(
                 "pkg_client must be of type "
-                "wayround_org.aipsetup.client_pkg.PackageServerClient"
+                "wayround_i2p.aipsetup.client_pkg.PackageServerClient"
                 )
 
         return
@@ -2601,7 +2601,7 @@ class BuildingSiteCtl:
 
         self._apply_info_common01(pkg_client, const)
 
-        path = wayround_org.utils.path.abspath(self.path)
+        path = wayround_i2p.utils.path.abspath(self.path)
 
         ret = 0
 
@@ -2623,7 +2623,7 @@ class BuildingSiteCtl:
             if self.read_package_info(None) is None:
                 logging.info(
                     "Applying new package info to dir `{}'".format(
-                        wayround_org.utils.path.abspath(
+                        wayround_i2p.utils.path.abspath(
                             path
                             )
                         )
@@ -2656,7 +2656,7 @@ class BuildingSiteCtl:
 
         self._apply_info_common01(pkg_client, const)
 
-        path = wayround_org.utils.path.abspath(self.path)
+        path = wayround_i2p.utils.path.abspath(self.path)
 
         ret = 0
 
@@ -2665,7 +2665,7 @@ class BuildingSiteCtl:
         if self.read_package_info(None) is None:
             logging.info(
                 "Applying new package info to dir `{}'".format(
-                    wayround_org.utils.path.abspath(
+                    wayround_i2p.utils.path.abspath(
                         path
                         )
                     )
@@ -2723,49 +2723,49 @@ class BuildingSiteCtl:
 
         :param main_src_file: used with function
             :func:`buildingsite.apply_info
-            <wayround_org.aipsetup.buildingsite.apply_info>`
+            <wayround_i2p.aipsetup.buildingsite.apply_info>`
         """
 
         if not isinstance(const, Constitution):
             raise ValueError(
                 "const must be of type "
-                "wayround_org.aipsetup.build.Constitution"
+                "wayround_i2p.aipsetup.build.Constitution"
                 )
 
         if not isinstance(build_ctl, BuildCtl):
             raise ValueError(
                 "build_ctl must be of type "
-                "wayround_org.aipsetup.build.BuildCtl"
+                "wayround_i2p.aipsetup.build.BuildCtl"
                 )
 
         if not isinstance(pack_ctl, PackCtl):
             raise ValueError(
-                "pack_ctl must be of type wayround_org.aipsetup.build.PackCtl"
+                "pack_ctl must be of type wayround_i2p.aipsetup.build.PackCtl"
                 )
 
         if not isinstance(buildscript_ctl, BuildScriptCtrl):
             raise ValueError(
                 "buildscript_ctl must be of type "
-                "wayround_org.aipsetup.build.BuildScriptCtrl"
+                "wayround_i2p.aipsetup.build.BuildScriptCtrl"
                 )
 
         if not isinstance(
                 pkg_client,
-                wayround_org.aipsetup.client_pkg.PackageServerClient
+                wayround_i2p.aipsetup.client_pkg.PackageServerClient
                 ):
             raise TypeError(
                 "pkg_client must be of type "
-                "wayround_org.aipsetup.client_pkg.PackageServerClient"
+                "wayround_i2p.aipsetup.client_pkg.PackageServerClient"
                 )
 
-        rp = wayround_org.utils.path.relpath(self.path, os.getcwd())
+        rp = wayround_i2p.utils.path.relpath(self.path, os.getcwd())
 
         logging.info(
             "+++++++++++ Starting Complete build under `{}' +++++++++++".
             format(rp)
             )
 
-        building_site = wayround_org.utils.path.abspath(self.path)
+        building_site = wayround_i2p.utils.path.abspath(self.path)
 
         ret = 0
 
@@ -2797,7 +2797,7 @@ class BuildingSiteCtl:
 
         if ret == 0:
 
-            log = wayround_org.utils.log.Log(
+            log = wayround_i2p.utils.log.Log(
                 self.getDIR_BUILD_LOGS(),
                 'buildingsite complete'
                 )
@@ -2836,8 +2836,8 @@ def getDIR_x(path, x='TARBALL'):
     Returns absolute path to DIR_{_x}
     '''
 
-    ret = wayround_org.utils.path.abspath(
-        wayround_org.utils.path.join(
+    ret = wayround_i2p.utils.path.abspath(
+        wayround_i2p.utils.path.join(
             path,
             eval('DIR_{}'.format(x))
             )
@@ -3032,7 +3032,7 @@ def isWdDirRestricted(path):
 
     exec_dirs = ['/opt', '/var', '/']
 
-    dir_str_abs = wayround_org.utils.path.abspath(path)
+    dir_str_abs = wayround_i2p.utils.path.abspath(path)
 
     for i in dirs_begining_with:
         if dir_str_abs.startswith(i):
@@ -3066,7 +3066,7 @@ def find_dl(root_dir_path):
         root_dir_path = os.path.abspath(root_dir_path)
 
         gr = glob.glob(
-            wayround_org.utils.path.join(
+            wayround_i2p.utils.path.join(
                 root_dir_path,
                 'lib',
                 'ld-linux*.so.2'))

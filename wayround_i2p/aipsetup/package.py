@@ -7,11 +7,11 @@ import logging
 import os.path
 import tarfile
 
-import wayround_org.utils.archive
-import wayround_org.utils.checksum
-import wayround_org.utils.path
+import wayround_i2p.utils.archive
+import wayround_i2p.utils.checksum
+import wayround_i2p.utils.path
 
-import wayround_org.aipsetup.package_name_parser
+import wayround_i2p.aipsetup.package_name_parser
 
 
 class ASPackage:
@@ -20,9 +20,9 @@ class ASPackage:
     """
 
     def __init__(self, asp_filename):
-        self._filename = wayround_org.utils.path.abspath(asp_filename)
+        self._filename = wayround_i2p.utils.path.abspath(asp_filename)
         self.parsed_name = \
-            wayround_org.aipsetup.package_name_parser.package_name_parse(
+            wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                 os.path.basename(self.filename)
                 )
         return
@@ -77,7 +77,7 @@ class ASPackage:
         ret = None
         ts = self.timestamp
         if ts is not None:
-            ret = wayround_org.aipsetup.package_name_parser.parse_timestamp(
+            ret = wayround_i2p.aipsetup.package_name_parser.parse_timestamp(
                 ts
                 )
         return ret
@@ -111,7 +111,7 @@ class ASPackage:
                 ret = 1
             else:
                 try:
-                    f = wayround_org.utils.archive.tar_member_get_extract_file(
+                    f = wayround_i2p.utils.archive.tar_member_get_extract_file(
                         tarf,
                         './package.sha512'
                         )
@@ -122,7 +122,7 @@ class ASPackage:
                         sums_txt = f.read()
                         f.close()
                         sums = \
-                            wayround_org.utils.checksum.parse_checksums_text(
+                            wayround_i2p.utils.checksum.parse_checksums_text(
                                 sums_txt
                                 )
                         del(sums_txt)
@@ -156,7 +156,7 @@ class ASPackage:
                             cresult = ''
                             if (
                                     not i in sums
-                                    or wayround_org.utils.archive.
+                                    or wayround_i2p.utils.archive.
                                 tarobj_check_member_sum(
                                     tarf, sums, i
                                     ) == False
@@ -187,7 +187,7 @@ class ASPackage:
                             #       by tar -t output to privent installation of
                             #       broken DESTDIR
 
-                            fobj = wayround_org.utils.archive.\
+                            fobj = wayround_i2p.utils.archive.\
                                 tar_member_get_extract_file(
                                     tarf,
                                     './06.LISTS/DESTDIR.lst.xz'
@@ -198,7 +198,7 @@ class ASPackage:
 
                                 try:
                                     dest_dir_files_list = \
-                                        wayround_org.utils.archive.xzcat(
+                                        wayround_i2p.utils.archive.xzcat(
                                             fobj,
                                             convert_to_str='utf-8'
                                             )

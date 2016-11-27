@@ -13,9 +13,9 @@ import urllib.request
 import bottle
 from mako.template import Template
 
-import wayround_org.aipsetup.controllers
-import wayround_org.aipsetup.dbconnections
-import wayround_org.utils.version
+import wayround_i2p.aipsetup.controllers
+import wayround_i2p.aipsetup.dbconnections
+import wayround_i2p.utils.version
 
 
 APPLICATION_JSON = 'application/json; codepage=utf-8'
@@ -42,7 +42,7 @@ def src_server_start(command_name, opts, args, adds):
 
     serv = SRCServer(
         config['src_server']['tarball_repository_root'],
-        wayround_org.aipsetup.dbconnections.src_repo_db(
+        wayround_i2p.aipsetup.dbconnections.src_repo_db(
             config
             ),
         host=host,
@@ -71,7 +71,7 @@ def src_server_reindex(command_name, opts, args, adds):
 
     config = adds['config']
 
-    ctl = wayround_org.aipsetup.controllers.src_repo_ctl_by_config(config)
+    ctl = wayround_i2p.aipsetup.controllers.src_repo_ctl_by_config(config)
 
     ctl.index_sources(
         config['src_server']['tarball_repository_root'],
@@ -103,7 +103,7 @@ class SRCServer:
         self.host = host
         self.port = port
 
-        self.template_dir = wayround_org.utils.path.join(
+        self.template_dir = wayround_i2p.utils.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'web',
             'src_server',
@@ -127,7 +127,7 @@ class SRCServer:
             'html', 'tag_list', 'file_list', 'search'
             ]:
             self.templates[i] = Template(
-                filename=wayround_org.utils.path.join(self.template_dir, '{}.html'.format(i)),
+                filename=wayround_i2p.utils.path.join(self.template_dir, '{}.html'.format(i)),
                 format_exceptions=False
                 )
 
@@ -323,7 +323,7 @@ class SRCServer:
                     del results[i]
 
         def source_version_comparator(v1, v2):
-            return wayround_org.utils.version.source_version_comparator(
+            return wayround_i2p.utils.version.source_version_comparator(
                 v1, v2,
                 self.acceptable_source_name_extensions
                 )

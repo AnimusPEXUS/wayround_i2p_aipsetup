@@ -10,17 +10,17 @@ import shlex
 import sys
 
 
-import wayround_org.utils.path
-import wayround_org.utils.getopt
-import wayround_org.utils.archive
-import wayround_org.utils.terminal
-import wayround_org.utils.datetime_iso8601
-import wayround_org.utils.text
-import wayround_org.utils.log
+import wayround_i2p.utils.path
+import wayround_i2p.utils.getopt
+import wayround_i2p.utils.archive
+import wayround_i2p.utils.terminal
+import wayround_i2p.utils.datetime_iso8601
+import wayround_i2p.utils.text
+import wayround_i2p.utils.log
 
-import wayround_org.utils.system_type
+import wayround_i2p.utils.system_type
 
-import wayround_org.aipsetup.host_arch_params
+import wayround_i2p.aipsetup.host_arch_params
 
 
 def commands():
@@ -79,13 +79,13 @@ def commands():
 
 
 _process_h_and_a_opts_specific = \
-    wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_specific
+    wayround_i2p.aipsetup.host_arch_params.process_h_and_a_opts_specific
 
 _process_h_and_a_opts_wide = \
-    wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_wide
+    wayround_i2p.aipsetup.host_arch_params.process_h_and_a_opts_wide
 
 _process_h_and_a_opts_strict = \
-    wayround_org.aipsetup.host_arch_params.process_h_and_a_opts_strict
+    wayround_i2p.aipsetup.host_arch_params.process_h_and_a_opts_strict
 
 
 def system_install_package(command_name, opts, args, adds):
@@ -99,12 +99,12 @@ def system_install_package(command_name, opts, args, adds):
     If -b is given - it is used as destination root
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.sysupdates
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.sysupdates
 
     config = adds['config']
 
-    ret = wayround_org.utils.getopt.check_options(
+    ret = wayround_i2p.utils.getopt.check_options(
         opts,
         ['-b', '--force', '-h', '-a']
         )
@@ -128,11 +128,11 @@ def system_install_package(command_name, opts, args, adds):
             fpi = []
 
             pkg_client = \
-                wayround_org.aipsetup.controllers.pkg_client_by_config(
+                wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                     config
                     )
 
-            syst = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+            syst = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
                 config,
                 pkg_client,
                 basedir
@@ -163,7 +163,7 @@ def system_install_package(command_name, opts, args, adds):
 
                 ret = 3
 
-            wayround_org.aipsetup.sysupdates.all_actions()
+            wayround_i2p.aipsetup.sysupdates.all_actions()
 
     return ret
 
@@ -179,7 +179,7 @@ def system_package_list(command_name, opts, args, adds):
     -b is same as in install
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -202,11 +202,11 @@ def system_package_list(command_name, opts, args, adds):
     if ret == 0:
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                 config
                 )
 
-        system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
             config, pkg_client, basedir
             )
 
@@ -218,7 +218,7 @@ def system_package_list(command_name, opts, args, adds):
                 )
             )
 
-        wayround_org.utils.text.columned_list_print(
+        wayround_i2p.utils.text.columned_list_print(
             lst, fd=sys.stdout.fileno()
             )
 
@@ -236,8 +236,8 @@ def system_package_list_asps(command_name, opts, args, adds):
     -b is same as in install
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.version
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.version
 
     config = adds['config']
 
@@ -266,11 +266,11 @@ def system_package_list_asps(command_name, opts, args, adds):
             logging.info("Searching ASPs for package `{}'".format(name))
 
             pkg_client = \
-                wayround_org.aipsetup.controllers.pkg_client_by_config(
+                wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                     config
                     )
 
-            system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+            system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
                 config, pkg_client, basedir
                 )
 
@@ -283,7 +283,7 @@ def system_package_list_asps(command_name, opts, args, adds):
             lst.sort(
                 reverse=True,
                 key=functools.cmp_to_key(
-                    wayround_org.aipsetup.version.package_version_comparator
+                    wayround_i2p.aipsetup.version.package_version_comparator
                     )
                 )
 
@@ -301,7 +301,7 @@ def system_list_package_files(command_name, opts, args, adds):
     PKG_NAME
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -324,11 +324,11 @@ def system_list_package_files(command_name, opts, args, adds):
         pkg_name = args[0]
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                 config
                 )
 
-        system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
             config, pkg_client, basedir
             )
 
@@ -374,8 +374,8 @@ def system_remove_package(command_name, opts, args, adds):
                available or which is not removable
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.sysupdates
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.sysupdates
 
     config = adds['config']
 
@@ -404,11 +404,11 @@ def system_remove_package(command_name, opts, args, adds):
     if ret == 0:
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                 config
                 )
 
-        system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
             config,
             pkg_client,
             basedir
@@ -422,7 +422,7 @@ def system_remove_package(command_name, opts, args, adds):
             arch=arch
             )
 
-        wayround_org.aipsetup.sysupdates.all_actions()
+        wayround_i2p.aipsetup.sysupdates.all_actions()
 
     return ret
 
@@ -445,7 +445,7 @@ def system_find_package_files(command_name, opts, args, adds):
     ================ ===================================
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -465,11 +465,11 @@ def system_find_package_files(command_name, opts, args, adds):
         lookfor = args[0]
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir
@@ -526,8 +526,8 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
     [-h=cpu-vend-os-triplet] [-a=cpu-vend-os-triplet]
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.package_name_parser
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.package_name_parser
 
     config = adds['config']
 
@@ -548,7 +548,7 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
 
         for asp_name in args:
             package_name_parsed = \
-                wayround_org.aipsetup.package_name_parser.package_name_parse(
+                wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                     asp_name
                     )
             package_name = None
@@ -567,11 +567,11 @@ def system_reduce_asp_to_latest(command_name, opts, args, adds):
                     )
 
                 pkg_client = \
-                    wayround_org.aipsetup.controllers.pkg_client_by_config(
+                    wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                         config
                         )
 
-                system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+                system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
                     config,
                     pkg_client,
                     destdir
@@ -599,7 +599,7 @@ def system_make_asp_deps(command_name, opts, args, adds):
     /destdir/var/log/packages/deps
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -618,11 +618,11 @@ def system_make_asp_deps(command_name, opts, args, adds):
         asp_name = args[0]
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                 config
                 )
 
-        system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
             config,
             pkg_client,
             destdir
@@ -635,7 +635,7 @@ def system_make_asp_deps(command_name, opts, args, adds):
 
 def system_create_directory_tree(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -651,11 +651,11 @@ def system_create_directory_tree(command_name, opts, args, adds):
         destdir = args[0]
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                 config
                 )
 
-        system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
             config,
             pkg_client,
             destdir
@@ -671,16 +671,16 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
     Find packages with broken files
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir='/'
@@ -724,7 +724,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
                 else:
 
-                    _sum = wayround_org.utils.checksum.make_file_checksum(
+                    _sum = wayround_i2p.utils.checksum.make_file_checksum(
                         j, method='sha512'
                         )
 
@@ -734,7 +734,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
                 fi += 1
 
-                wayround_org.utils.terminal.progress_write(
+                wayround_i2p.utils.terminal.progress_write(
                     "    ({perc:5.2f}%) {p} packages of {pc}, {f} files of "
                     "{fc}. found {b} broken, {m} missing".format(
                         perc=perc,
@@ -757,7 +757,7 @@ def clean_packages_with_broken_files(command_name, opts, args, adds):
 
     print()
 
-    log = wayround_org.utils.log.Log(
+    log = wayround_i2p.utils.log.Log(
         os.getcwd(), 'problems'
         )
 
@@ -780,16 +780,16 @@ def clean_check_elfs_readiness(command_name, opts, args, adds):
     can be used to detect broken elf files.
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir='/'
@@ -806,7 +806,7 @@ def clean_find_so_problems(command_name, opts, args, adds):
     missing libraries.
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -815,11 +815,11 @@ def clean_find_so_problems(command_name, opts, args, adds):
     basedir = '/'
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config, pkg_client, basedir
         )
 
@@ -829,7 +829,7 @@ def clean_find_so_problems(command_name, opts, args, adds):
 
     libs = sorted(problems.keys())
 
-    log = wayround_org.utils.log.Log(
+    log = wayround_i2p.utils.log.Log(
         os.getcwd(), 'problems'
         )
 
@@ -902,8 +902,8 @@ def clean_find_old_packages(command_name, opts, args, adds):
     Find packages older then month
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.package_name_parser
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.package_name_parser
 
     # TODO: add arguments
     # TODO: must work with basedir!
@@ -915,11 +915,11 @@ def clean_find_old_packages(command_name, opts, args, adds):
     ret = 0
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir='/'
@@ -931,14 +931,14 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
     for i in res:
         parsed_name = \
-            wayround_org.aipsetup.package_name_parser.package_name_parse(i)
+            wayround_i2p.aipsetup.package_name_parser.package_name_parse(i)
 
         if not parsed_name:
             logging.warning("Can't parse package name `{}'".format(i))
         else:
 
             package_date = \
-                wayround_org.aipsetup.package_name_parser.parse_timestamp(
+                wayround_i2p.aipsetup.package_name_parser.parse_timestamp(
                     parsed_name['groups']['timestamp']
                     )
 
@@ -956,7 +956,7 @@ def clean_find_old_packages(command_name, opts, args, adds):
                 logging.info(
                     "    {:30}: {}: {}".format(
                         str(datetime.datetime.now() - package_date),
-                        wayround_org.aipsetup.package_name_parser.parse_timestamp(
+                        wayround_i2p.aipsetup.package_name_parser.parse_timestamp(
                             parsed_name['groups']['timestamp']
                             ),
                         i
@@ -969,10 +969,10 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
                     lat = pkg_client.tarballs_latest(package_name)
                     if lat is not None and len(lat) > 0:
-                        res = wayround_org.utils.path.select_by_prefered_extension(
+                        res = wayround_i2p.utils.path.select_by_prefered_extension(
                             lat, config
                             )
-                        res = wayround_org.aipsetup.client_pkg.get_tarball(
+                        res = wayround_i2p.aipsetup.client_pkg.get_tarball(
                             res
                             )
                         if not isinstance(res, str):
@@ -1003,7 +1003,7 @@ def clean_find_old_packages(command_name, opts, args, adds):
 
 def clean_find_invalid_deps_lists(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
@@ -1015,11 +1015,11 @@ def clean_find_invalid_deps_lists(command_name, opts, args, adds):
         basedir = opts['-b']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir=basedir
@@ -1068,16 +1068,16 @@ def clean_find_garbage(command_name, opts, args, adds):
     --so               - look only for .so files garbage in /usr/lib directory
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.package_name_parser
-    import wayround_org.aipsetup.client_pkg
-    import wayround_org.aipsetup.system
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.package_name_parser
+    import wayround_i2p.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.system
 
     config = adds['config']
 
     ret = 0
 
-    if wayround_org.utils.getopt.check_options(
+    if wayround_i2p.utils.getopt.check_options(
             opts,
             opts_list=[
                 '-b=',
@@ -1091,7 +1091,7 @@ def clean_find_garbage(command_name, opts, args, adds):
 
     if ret == 0:
 
-        timestamp = wayround_org.utils.time.currenttime_stamp()
+        timestamp = wayround_i2p.utils.time.currenttime_stamp()
 
         basedir = '/'
         script = 'system_garbage_remove_{}.sh'.format(timestamp)
@@ -1109,7 +1109,7 @@ def clean_find_garbage(command_name, opts, args, adds):
 
         host, arch = _process_h_and_a_opts_specific(opts, config)
 
-        log = wayround_org.utils.log.Log(
+        log = wayround_i2p.utils.log.Log(
             os.getcwd(), 'system_garbage', timestamp=timestamp
             )
 
@@ -1119,11 +1119,11 @@ def clean_find_garbage(command_name, opts, args, adds):
         else:
 
             pkg_client = \
-                wayround_org.aipsetup.controllers.pkg_client_by_config(
+                wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                     config
                     )
 
-            system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+            system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
                 config,
                 pkg_client,
                 basedir=basedir
@@ -1147,12 +1147,12 @@ def clean_find_garbage(command_name, opts, args, adds):
                     "which packages depending on them"
                     )
 
-                libs = wayround_org.utils.path.exclude_files_not_in_dirs(
+                libs = wayround_i2p.utils.path.exclude_files_not_in_dirs(
                     res,
                     system.library_paths(host=host),
                     )
 
-                libs = wayround_org.aipsetup.system.filter_so_files(
+                libs = wayround_i2p.aipsetup.system.filter_so_files(
                     libs,
                     verbose=True
                     )
@@ -1160,7 +1160,7 @@ def clean_find_garbage(command_name, opts, args, adds):
                 if only_lib:
                     res = libs
 
-                libs = wayround_org.utils.path.bases(libs)
+                libs = wayround_i2p.utils.path.bases(libs)
 
                 asp_deps = system.load_asp_deps_all(mute=False)
 
@@ -1176,7 +1176,7 @@ def clean_find_garbage(command_name, opts, args, adds):
                     for file_name in list(asp_deps[asp_name].keys()):
 
                         file_name_with_dest_dir = \
-                            wayround_org.utils.path.insert_base(
+                            wayround_i2p.utils.path.insert_base(
                                 file_name, basedir
                                 )
 
@@ -1238,7 +1238,7 @@ exit 1
                 required_packages = set()
 
                 for i in list(asps_lkd_to_garbage.keys()):
-                    p = wayround_org.aipsetup.package_name_parser.\
+                    p = wayround_i2p.aipsetup.package_name_parser.\
                         package_name_parse(i)
 
                     if not p:
@@ -1287,9 +1287,9 @@ def clean_find_packages_requiring_deleteds(
     -g           - get sources for all found packages
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.package_name_parser
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.package_name_parser
+    import wayround_i2p.aipsetup.client_pkg
 
     config = adds['config']
 
@@ -1304,11 +1304,11 @@ def clean_find_packages_requiring_deleteds(
     get_sources = '-g' in opts
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         base_dir
@@ -1334,7 +1334,7 @@ def clean_find_packages_requiring_deleteds(
         for i in res.keys():
 
             name = \
-                wayround_org.aipsetup.package_name_parser.package_name_parse(i)
+                wayround_i2p.aipsetup.package_name_parser.package_name_parse(i)
 
             if name is None:
                 x = "Can't parse as package name: `{}'".format(i)
@@ -1350,10 +1350,10 @@ def clean_find_packages_requiring_deleteds(
 
                 lat = pkg_client.tarballs_latest(name)
                 if lat is not None and len(lat) > 0:
-                    res = wayround_org.utils.path.select_by_prefered_extension(
+                    res = wayround_i2p.utils.path.select_by_prefered_extension(
                         lat, config
                         )
-                    res = wayround_org.aipsetup.client_pkg.get_tarball(
+                    res = wayround_i2p.aipsetup.client_pkg.get_tarball(
                         res
                         )
                     if not isinstance(res, str):
@@ -1388,9 +1388,9 @@ def clean_find_libtool_la_with_problems(
     .so files
     """
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.aipsetup.package_name_parser
-    import wayround_org.aipsetup.client_pkg
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.aipsetup.package_name_parser
+    import wayround_i2p.aipsetup.client_pkg
 
     ret = 0
 
@@ -1413,11 +1413,11 @@ def clean_find_libtool_la_with_problems(
     write_remove_script = '-s' in opts
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         base_dir
@@ -1457,7 +1457,7 @@ def clean_find_libtool_la_with_problems(
 
         for each in asp_names:
             name = \
-                wayround_org.aipsetup.package_name_parser.package_name_parse(
+                wayround_i2p.aipsetup.package_name_parser.package_name_parse(
                     each
                     )
 
@@ -1482,10 +1482,10 @@ def clean_find_libtool_la_with_problems(
             print("    {}".format(name))
             lat = pkg_client.tarballs_latest(name)
             if lat is not None and len(lat) > 0:
-                res = wayround_org.utils.path.select_by_prefered_extension(
+                res = wayround_i2p.utils.path.select_by_prefered_extension(
                     lat, config
                     )
-                res = wayround_org.aipsetup.client_pkg.get_tarball(
+                res = wayround_i2p.aipsetup.client_pkg.get_tarball(
                     res
                     )
                 if not isinstance(res, str):
@@ -1531,30 +1531,30 @@ def clean_check_list_of_installed_packages_and_asps_auto(
     Searches for packages with more when one asp installed
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     logging.info("Working. Please wait, it will be not long...")
 
     pkg_repo_ctl = \
-        wayround_org.aipsetup.controllers.pkg_repo_ctl_by_config(config)
+        wayround_i2p.aipsetup.controllers.pkg_repo_ctl_by_config(config)
 
     return pkg_repo_ctl.check_list_of_installed_packages_and_asps_auto()
 
 
 def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir='/'
@@ -1569,18 +1569,18 @@ def pkgdeps_print_asps_asp_depends_on(command_name, opts, args, adds):
 
 def pkgdeps_print_asp_depends(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
     config = adds['config']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir='/'
@@ -1604,16 +1604,16 @@ def pkgdeps_print_asp_depends(command_name, opts, args, adds):
 
 def pkgdeps_print_asps_depending_on_asp(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     config = adds['config']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         basedir='/'
@@ -1640,7 +1640,7 @@ def package_check(command_name, opts, args, adds):
 
     # TODO: move it to build commands?
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
@@ -1655,7 +1655,7 @@ def package_check(command_name, opts, args, adds):
 
     else:
 
-        asp_pkg = wayround_org.aipsetup.controllers.asp_package(file)
+        asp_pkg = wayround_i2p.aipsetup.controllers.asp_package(file)
 
         ret = asp_pkg.check_package()
 
@@ -1667,7 +1667,7 @@ def clean_gen_locale(command_name, opts, args, adds):
     (only root) Generate general unicode locale
     """
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
@@ -1683,11 +1683,11 @@ def clean_gen_locale(command_name, opts, args, adds):
             base_dir = opts['-b']
 
         pkg_client = \
-            wayround_org.aipsetup.controllers.pkg_client_by_config(
+            wayround_i2p.aipsetup.controllers.pkg_client_by_config(
                 config
                 )
 
-        system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+        system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
             config,
             pkg_client,
             basedir=base_dir
@@ -1724,14 +1724,14 @@ def clean_install_etc(command_name, opts, args, adds):
         # TODO: move to system.py?
         # TODO: do over config, not constant
 
-        src_etc_dir = wayround_org.utils.path.join(
+        src_etc_dir = wayround_i2p.utils.path.join(
             os.path.dirname(__file__),
             'distro',
             'etc',
             'etc.tar.xz'
             )
 
-        ret = wayround_org.utils.archive.extract_tar_canonical(
+        ret = wayround_i2p.utils.archive.extract_tar_canonical(
             src_etc_dir,
             base_dir,
             'xz',
@@ -1751,7 +1751,7 @@ def clean_sys_users(command_name, opts, args, adds):
     (only root) Creates system users and their directories under /daemons
     """
 
-    import wayround_org.aipsetup.sysuser
+    import wayround_i2p.aipsetup.sysuser
 
     ret = 0
 
@@ -1767,9 +1767,9 @@ def clean_sys_users(command_name, opts, args, adds):
             base_dir = opts['-b']
 
         # TODO: find and fix everywhere config['system_paths']['daemons']
-        daemons_dir = wayround_org.aipsetup.system.DAEMONS_DIR
+        daemons_dir = wayround_i2p.aipsetup.system.DAEMONS_DIR
 
-        ret = wayround_org.aipsetup.sysuser.sys_users(base_dir, daemons_dir)
+        ret = wayround_i2p.aipsetup.sysuser.sys_users(base_dir, daemons_dir)
 
     return ret
 
@@ -1779,7 +1779,7 @@ def clean_sys_perms(command_name, opts, args, adds):
     (only root) Ensures system files and dirs permissions
     """
 
-    import wayround_org.aipsetup.sysuser
+    import wayround_i2p.aipsetup.sysuser
 
     ret = 0
 
@@ -1794,7 +1794,7 @@ def clean_sys_perms(command_name, opts, args, adds):
 
         chroot = ['chroot', '--userspec=0:0', base_dir]
 
-        ret = wayround_org.aipsetup.sysuser.sys_perms(chroot)
+        ret = wayround_i2p.aipsetup.sysuser.sys_perms(chroot)
 
     return ret
 
@@ -1806,7 +1806,7 @@ def info_parse_pkg_name(command_name, opts, args, adds):
     NAME
     """
 
-    import wayround_org.aipsetup.package_name_parser
+    import wayround_i2p.aipsetup.package_name_parser
 
     ret = 0
 
@@ -1817,7 +1817,7 @@ def info_parse_pkg_name(command_name, opts, args, adds):
 
         filename = args[0]
 
-        p_re = wayround_org.aipsetup.package_name_parser.package_name_parse(
+        p_re = wayround_i2p.aipsetup.package_name_parser.package_name_parse(
             filename
             )
 
@@ -1831,8 +1831,8 @@ def info_parse_pkg_name(command_name, opts, args, adds):
 
 def info_parse_tarball(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
-    import wayround_org.utils.tarball
+    import wayround_i2p.aipsetup.controllers
+    import wayround_i2p.utils.tarball
 
     config = adds['config']
 
@@ -1847,7 +1847,7 @@ def info_parse_tarball(command_name, opts, args, adds):
 
         tarball = args[0]
 
-        parsed = wayround_org.utils.tarball.parse_tarball_name(
+        parsed = wayround_i2p.utils.tarball.parse_tarball_name(
             tarball,
             mute=False
             )
@@ -1860,7 +1860,7 @@ def info_parse_tarball(command_name, opts, args, adds):
             pprint.pprint(parsed)
 
             info_ctl = \
-                wayround_org.aipsetup.controllers.info_ctl_by_config(config)
+                wayround_i2p.aipsetup.controllers.info_ctl_by_config(config)
 
             pkg_name = (
                 info_ctl.get_package_name_by_tarball_filename(tarball)
@@ -1944,9 +1944,9 @@ Your self.
 def system_replica_make_installation_flashdrive(
         command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.bootimage
+    import wayround_i2p.aipsetup.bootimage
 
-    ret = wayround_org.aipsetup.bootimage.create_flashdrive_image('.')
+    ret = wayround_i2p.aipsetup.bootimage.create_flashdrive_image('.')
 
     return ret
 
@@ -1970,7 +1970,7 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
 
     ret = 0
 
-    import wayround_org.aipsetup.system
+    import wayround_i2p.aipsetup.system
 
     filename = None
     if len(args) != 1:
@@ -1980,7 +1980,7 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
         filename = args[0]
 
     if ret == 0:
-        res = wayround_org.aipsetup.system.convert_certdata_txt_for_system(
+        res = wayround_i2p.aipsetup.system.convert_certdata_txt_for_system(
             filename
             )
         f = open('cert.pem.tmp', 'wb')
@@ -1997,31 +1997,31 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
 
 
 def docbook_instruction(command_name, opts, args, adds):
-    import wayround_org.aipsetup.docbook
-    print(wayround_org.aipsetup.docbook.INSTRUCTION)
+    import wayround_i2p.aipsetup.docbook
+    print(wayround_i2p.aipsetup.docbook.INSTRUCTION)
     return 0
 
 
 def docbook_install(command_name, opts, args, adds):
-    import wayround_org.aipsetup.docbook
-    wayround_org.aipsetup.docbook.install()
+    import wayround_i2p.aipsetup.docbook
+    wayround_i2p.aipsetup.docbook.install()
     return 0
 
 
 def system_snapshot_create(command_name, opts, args, adds):
 
-    import wayround_org.aipsetup.controllers
+    import wayround_i2p.aipsetup.controllers
 
     ret = 0
 
     config = adds['config']
 
     pkg_client = \
-        wayround_org.aipsetup.controllers.pkg_client_by_config(
+        wayround_i2p.aipsetup.controllers.pkg_client_by_config(
             config
             )
 
-    system = wayround_org.aipsetup.controllers.sys_ctl_by_config(
+    system = wayround_i2p.aipsetup.controllers.sys_ctl_by_config(
         config,
         pkg_client,
         '/'
@@ -2041,7 +2041,7 @@ def system_snapshot_create(command_name, opts, args, adds):
     else:
         snapshot_struct['asps'] = res
         snapshot_struct['info']['timestamp'] = \
-            wayround_org.utils.time.currenttime_stamp()
+            wayround_i2p.utils.time.currenttime_stamp()
 
         filename = '{}.json'.format(snapshot_struct['info']['timestamp'])
 
