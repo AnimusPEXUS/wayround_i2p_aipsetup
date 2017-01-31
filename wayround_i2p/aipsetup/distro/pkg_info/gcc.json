@@ -4,7 +4,7 @@
   "buildscript": "gcc",
   "version_tool": "",
   "basename": "gcc",
-  "filters": "- version re \\d+\\.0(.*)?",
+  "filters": "- version re \\d+\\.0(\\.*)?",
   "removable": true,
   "reducible": true,
   "non_installable": false,
