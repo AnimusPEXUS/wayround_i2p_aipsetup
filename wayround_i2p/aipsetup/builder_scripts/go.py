@@ -46,7 +46,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
             env=wayround_i2p.utils.osutils.env_vars_edit(
                 {
                     # os.environ['GOROOT'],
-                    'GOROOT_BOOTSTRAP': '/multihost/x86_64-pc-linux-gnu/lib64/go1.7.3',
+                    'GOROOT_BOOTSTRAP': os.environ['GOROOT'],
                     #'GOROOT_BOOTSTRAP': self.get_host_dir(),
                     'GOOS': os_name,
                     'GOARCH': arch
