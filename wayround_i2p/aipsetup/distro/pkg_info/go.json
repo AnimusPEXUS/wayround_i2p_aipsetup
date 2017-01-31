@@ -1,5 +1,5 @@
 {
-  "description": "",
+  "description": "go is only_primary_install as it's already pretty portable",
   "home_page": "",
   "buildscript": "go",
   "version_tool": "",

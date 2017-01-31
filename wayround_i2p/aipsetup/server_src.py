@@ -58,7 +58,6 @@ def src_server_start(command_name, opts, args, adds):
 
 
 def src_server_reindex(command_name, opts, args, adds):
-
     """
     Tarball sources server index tool
 
@@ -87,12 +86,12 @@ def src_server_reindex(command_name, opts, args, adds):
 class SRCServer:
 
     def __init__(
-        self,
-        repository_dir,
-        src_db,
-        host='localhost', port=8080,
-        acceptable_source_name_extensions=None
-        ):
+            self,
+            repository_dir,
+            src_db,
+            host='localhost', port=8080,
+            acceptable_source_name_extensions=None
+            ):
 
         self.repository_dir = os.path.abspath(repository_dir)
 
@@ -124,10 +123,12 @@ class SRCServer:
         self.templates = {}
 
         for i in [
-            'html', 'tag_list', 'file_list', 'search'
-            ]:
+                'html', 'tag_list', 'file_list', 'search'
+                ]:
             self.templates[i] = Template(
-                filename=wayround_i2p.utils.path.join(self.template_dir, '{}.html'.format(i)),
+                filename=wayround_i2p.utils.path.join(
+                    self.template_dir, '{}.html'.format(i)
+                    ),
                 format_exceptions=False
                 )
 
@@ -135,9 +136,9 @@ class SRCServer:
         bottle.run(self.app, host=self.host, port=self.port)
 
     def search_tpl(
-        self,
-        searchmode='filemask', mask='*', cs=True
-        ):
+            self,
+            searchmode='filemask', mask='*', cs=True
+            ):
         return self.templates['search'].render(
             searchmode=searchmode,
             mask=mask,
@@ -233,9 +234,9 @@ class SRCServer:
                     look_for = look_for.lower()
 
                 if (
-                    (searchmode == 'filemask' and fnmatch.fnmatch(look_for, mask)) or
-                    (searchmode == 'regexp' and re.match(mask, look_for))
-                    ):
+                        (searchmode == 'filemask' and fnmatch.fnmatch(look_for, mask)) or
+                        (searchmode == 'regexp' and re.match(mask, look_for))
+                        ):
                     filtered_tags.append(i)
 
             filtered_tags.sort()
@@ -245,7 +246,7 @@ class SRCServer:
             if resultmode == 'html':
                 ret = self.templates['html'].render(
                     title="List of tarball names found by request mode "
-                        "`{}', using mask `{}' in `{}' mode".format(
+                    "`{}', using mask `{}' in `{}' mode".format(
                         searchmode_name,
                         mask,
                         cs_name
@@ -255,8 +256,8 @@ class SRCServer:
                         mask=mask,
                         cs=cs
                         )
-                        +
-                        self.templates['tag_list'].render(tags=filtered_tags),
+                    +
+                    self.templates['tag_list'].render(tags=filtered_tags),
                     css=[]
                     )
 
@@ -269,8 +270,8 @@ class SRCServer:
     def get_file_list(self):
 
         for i in [
-            'name'
-            ]:
+                'name'
+                ]:
             if not i in bottle.request.params:
                 raise bottle.HTTPError(
                     400,
@@ -285,7 +286,7 @@ class SRCServer:
 
         pkgname_paths = None
 
-        if pkgname == None:
+        if pkgname is None:
             pkgname = ''
 
         if 'paths' in decoded_params:
@@ -346,10 +347,10 @@ class SRCServer:
                     mask=name,
                     cs=True
                     )
-                    + self.templates['file_list'].render(
-                        files=results,
-                        name=name
-                        ),
+                + self.templates['file_list'].render(
+                    files=results,
+                    name=name
+                    ),
                 css=[]
                 )
 

@@ -45,7 +45,8 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
             cwd=cwd,
             env=wayround_i2p.utils.osutils.env_vars_edit(
                 {
-                    'GOROOT_BOOTSTRAP': os.environ['GOROOT'],
+                    # os.environ['GOROOT'],
+                    'GOROOT_BOOTSTRAP': '/multihost/x86_64-pc-linux-gnu/lib64/go1.7.3',
                     #'GOROOT_BOOTSTRAP': self.get_host_dir(),
                     'GOOS': os_name,
                     'GOARCH': arch
@@ -116,15 +117,34 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
 
         os.makedirs(dst_etc_dir, exist_ok=True)
 
-        with open(etc_file_path, 'w') as f:
-            f.write("""\
-#!/bin/bash
+        # NOTE: set-file is needed only in primary install.
+        #       also, go should be 'only primary install' in package settings.
+        if self.get_host_from_pkgi() == self.get_arch_from_pkgi():
 
-export GOROOT='{goroot}'
+            with open(etc_file_path, 'w') as f:
+
+                f.write("""\
+#!/bin/env bash
+
+export GOROOT="{goroot}"
+
 export PATH+=":$GOROOT/bin"
-export GOPATH="$HOME/gopath"
-export PATH+=":$GOPATH/bin"
 
-""".format(goroot=dir_path))
+TEMP_PATH="$HOME/gopath_clean"
+
+export GOPATH="$TEMP_PATH"
+export PATH+=":$TEMP_PATH/bin"
+
+TEMP_PATH="$HOME/gopath_work"
+
+export GOPATH+=":$TEMP_PATH"
+export PATH+=":$TEMP_PATH/bin"
+
+unset TEMP_GOPATH
+
+""".format(
+                    goroot=dir_path
+                    )
+                    )
 
         return ret

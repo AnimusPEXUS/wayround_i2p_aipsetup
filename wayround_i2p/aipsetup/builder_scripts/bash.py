@@ -1,6 +1,7 @@
 
 import os.path
 import subprocess
+import re
 
 import wayround_i2p.aipsetup.build
 import wayround_i2p.aipsetup.buildtools.autotools as autotools
@@ -31,7 +32,8 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
             patches2 = []
 
             for i in patches:
-                if not i.endswith('.sig'):
+
+                if re.match(r"^bash\d+-\d+$", i):
                     patches2.append(i)
 
             patches = patches2

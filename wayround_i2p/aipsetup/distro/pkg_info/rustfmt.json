@@ -1,9 +1,9 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "llvm_components",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "libcxxabi",
+  "basename": "rustfmt",
   "filters": "",
   "removable": true,
   "reducible": true,

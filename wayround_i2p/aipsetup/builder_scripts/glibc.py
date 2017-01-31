@@ -168,7 +168,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
 
         if self.get_is_crossbuilder():
             ret += [
-                # this can be commented whan gcc fulli built and installed
+                # this can be commented whan gcc fully built and installed
                 #'libc_cv_forced_unwind=yes',
 
                 # this parameter is required to build `build_02+'

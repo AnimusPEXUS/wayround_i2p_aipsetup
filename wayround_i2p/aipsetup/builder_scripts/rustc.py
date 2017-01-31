@@ -12,12 +12,14 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
         ret = super().builder_action_configure_define_opts(called_as, log)
 
         ret += [
-            '--llvm-root={}'.format(self.get_host_dir()),
+            '--llvm-root={}'.format(self.get_host_arch_dir()),
 
             # trying to make build process faster
             '--enable-ccache',
             '--disable-debug',
-            '--enable-optimize'
+            '--enable-optimize',
+
+            '--enable-local-rust'
             ]
 
         for i in ['--enable-shared']:
@@ -35,6 +37,8 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
             for j in range(len(ret) - 1, -1, -1):
                 if ret[j].startswith(i):
                     del ret[j]
+
+        # ret.append('--build={}'.format(self.get_arch_from_pkgi()))
 
         return ret
 

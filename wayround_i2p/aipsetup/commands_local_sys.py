@@ -1990,7 +1990,13 @@ def system_convert_certdata_txt(command_name, opts, args, adds):
         print(
             "'cert.pem.tmp' written."
             " copy it into /etc/ssl and rename as 'cert.pem'\n"
-            " (NOTE: some sources tells it should be named 'ca-bundle.crt')"
+            " (NOTE: some sources tells it should be named "
+            "/etc/ssl/ca-bundle.crt, "
+            "/etc/ssl/certs/ca-certificates.crt,"
+            "/etc/pki/tls/certs/ca-bundle.crt, "
+            "/etc/ssl/ca-bundle.pem and/or "
+            "/etc/pki/tls/cacert.pem"
+            ")"
             )
 
     return ret

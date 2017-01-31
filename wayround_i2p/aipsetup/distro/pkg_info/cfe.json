@@ -1,7 +1,7 @@
 {
   "description": "write something here, please",
   "home_page": "http://llvm.org",
-  "buildscript": "std_cmake_single_thread",
+  "buildscript": "llvm_components",
   "version_tool": "",
   "basename": "cfe",
   "filters": "",

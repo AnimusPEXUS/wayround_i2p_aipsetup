@@ -1,7 +1,7 @@
 {
   "description": "",
   "home_page": "",
-  "buildscript": "std",
+  "buildscript": "llvm_components",
   "version_tool": "",
   "basename": "emscripten",
   "filters": "",

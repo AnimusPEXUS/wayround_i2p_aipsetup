@@ -102,7 +102,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
         if ret == 0:
 
             for i in ['mpc', 'mpfr', 'cloog',
-                      'isl',
+                      'isl', 'gmp',
                       #'gmp',
                       # NOTE: sometimes gcc could not compile with gmp.
                       #       so use system gmp
@@ -267,7 +267,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
                 '--enable-__cxa_atexit',
 
                 # NOTE: gcc somtimes fails to crossbuild self with go enabled
-                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada',
+                '--enable-languages=c,c++,java,objc,obj-c++,fortran,ada,go',
 
                 '--disable-bootstrap',
 
