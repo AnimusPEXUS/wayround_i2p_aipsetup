@@ -37,7 +37,6 @@ names:
     args: []
     kwargs: {}
     proc: normal_get
-  devhelp:
     args: []
     kwargs: {version: '{asked_version}'}
     proc: gnome_get

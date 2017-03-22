@@ -1,9 +1,9 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.gnome.org",
-  "buildscript": "vte",
+  "description": "",
+  "home_page": "http://www.x.org",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "vte",
+  "basename": "libXfont2",
   "filters": "",
   "removable": true,
   "reducible": true,

@@ -16,6 +16,9 @@ import wayround_i2p.utils.version
 
 
 def check_nineties(parsed):
+    """
+    at 1 Feb of 2017 it is discovered what 8x also may be development
+    """
 
     ret = False
 
@@ -27,7 +30,7 @@ def check_nineties(parsed):
 
         for i in range(1, vl_l):
 
-            res = re.match(r'^9\d+$', vl[i]) is not None
+            res = re.match(r'^[89]\d+$', vl[i]) is not None
 
             if res:
                 ret = True

@@ -1,10 +1,10 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.sourceforge.net",
-  "buildscript": "tcltk",
+  "description": "",
+  "home_page": "http://www.csx.cam.ac.uk",
+  "buildscript": "pcre",
   "version_tool": "",
-  "basename": "tk",
-  "filters": "- status !re ^src$",
+  "basename": "pcre2",
+  "filters": "- status !re ^$",
   "removable": true,
   "reducible": true,
   "non_installable": false,
@@ -12,7 +12,7 @@
   "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/sourceforge.net/primary/"
+    "/csx.cam.ac.uk/ftp.csx.cam.ac.uk/"
   ],
   "build_deps": [],
   "so_deps": [],

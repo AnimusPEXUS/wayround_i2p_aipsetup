@@ -1,5 +1,9 @@
-ask_version: false
+ask_version: true
 names:
+  libglade:
+    args: []
+    kwargs: {}
+    proc: gnome_get
   GConf:
     args: []
     kwargs: {}
@@ -23,11 +27,11 @@ names:
   cairo:
     args: []
     kwargs: {}
-    proc: normal_get
+    proc: gnome_get
   cairomm:
     args: []
     kwargs: {}
-    proc: normal_get
+    proc: gnome_get
   dconf:
     args: []
     kwargs: {}
@@ -133,3 +137,7 @@ names:
     args: []
     kwargs: {}
     proc: normal_get
+  devhelp:
+    args: []
+    kwargs: {version: '{asked_version}'}
+    proc: gnome_get

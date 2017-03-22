@@ -401,38 +401,30 @@ class Builder:
         if prefix is None:
             prefix = self.calculate_install_prefix()
 
-        inst_prefix = self.get_host_dir()
+        for inst_prefix in [self.get_host_dir(), prefix]:
 
-        for i in [
+            check_lst = []
+
+            # if self.get_arch_from_pkgi() == 'i686-pc-linux-gnu':
+            check_lst.append(
                 wayround_i2p.utils.path.join(
                     inst_prefix,
                     'lib'
-                    ),
+                    )
+                )
+
+            # if self.get_arch_from_pkgi() == 'x86_64-pc-linux-gnu':
+            check_lst.append(
                 wayround_i2p.utils.path.join(
                     inst_prefix,
                     'lib64'
-                    ),
-                ]:
+                    )
+                )
 
-            if os.path.isdir(i):
-                if not i in ret:
-                    ret.append(i)
-
-        inst_prefix = prefix
-
-        for i in [
-                wayround_i2p.utils.path.join(
-                    inst_prefix,
-                    'lib'
-                    ),
-                wayround_i2p.utils.path.join(
-                    inst_prefix,
-                    'lib64'
-                    ),
-                ]:
-            if os.path.isdir(i):
-                if not i in ret:
-                    ret.append(i)
+            for i in check_lst:
+                if os.path.isdir(i):
+                    if not i in ret:
+                        ret.append(i)
 
         return ret
 

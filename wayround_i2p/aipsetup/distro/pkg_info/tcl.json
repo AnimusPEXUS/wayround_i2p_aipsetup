@@ -4,7 +4,7 @@
   "buildscript": "tcltk",
   "version_tool": "",
   "basename": "tcl",
-  "filters": "",
+  "filters": "- status !re ^src$",
   "removable": true,
   "reducible": true,
   "non_installable": false,

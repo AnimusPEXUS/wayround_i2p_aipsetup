@@ -55,6 +55,7 @@ names:
 - fuse
 - patch
 - pcre
+- pcre2
 - pkg-config
 - polkit
 - Python2

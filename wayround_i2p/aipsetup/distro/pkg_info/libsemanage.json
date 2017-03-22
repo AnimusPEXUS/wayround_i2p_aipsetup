@@ -1,9 +1,9 @@
 {
-  "description": "write something here, please",
-  "home_page": "http://www.gnome.org",
-  "buildscript": "vte",
+  "description": "",
+  "home_page": "",
+  "buildscript": "std",
   "version_tool": "",
-  "basename": "vte",
+  "basename": "libsemanage",
   "filters": "",
   "removable": true,
   "reducible": true,

@@ -11,8 +11,14 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
     def builder_action_configure_define_opts(self, called_as, log):
         ret = super().builder_action_configure_define_opts(called_as, log)
 
+        llvm_root = ''
+        if self.get_host_from_pkgi() == self.get_arch_from_pkgi():
+            llvm_root = self.get_host_dir()
+        else:
+            llvm_root = self.get_host_arch_dir()
+
         ret += [
-            '--llvm-root={}'.format(self.get_host_arch_dir()),
+            '--llvm-root={}'.format(llvm_root),
 
             # trying to make build process faster
             '--enable-ccache',

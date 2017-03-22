@@ -138,7 +138,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
 
         ret += [
             '--enable-obsolete-rpc',
-            '--enable-kernel=4.0',
+            '--enable-kernel=4.9',
             '--enable-tls',
             '--with-elf',
             # disabled those 3 items on 2 jul 2015

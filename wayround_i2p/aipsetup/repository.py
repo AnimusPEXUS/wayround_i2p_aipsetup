@@ -820,6 +820,9 @@ class PackageRepoCtl:
                         category_locations,
                         os.path.dirname(relpath)
                         )
+                    if parent_cat is None:
+                        print("   can't determine parent category for {}".format(relpath))
+                        return 1
                     parent_cat_id = parent_cat['cid']
 
                     package_locations[relpath] = self._srfpac_pkg_struct(
