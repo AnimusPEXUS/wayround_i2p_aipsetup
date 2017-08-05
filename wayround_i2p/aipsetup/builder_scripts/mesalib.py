@@ -28,14 +28,14 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
             '--enable-glx',
             '--enable-egl',
             '--enable-gallium-egl',
-            '--enable-gallium-llvm',
+            '--enable-llvm', #'--enable-gallium-llvm',
             '--enable-shared-glapi',
             '--enable-gbm',
             '--enable-glx-tls',  # undefined reference to `_glapi_tls_Dispatch'
             '--enable-dri',
             '--enable-osmesa',
             '--enable-vdpau',
-            #'--with-egl-platforms=x11,drm',
+            #'--with-platforms=x11,drm', '--with-egl-platforms=x11,drm',
             #'--with-gallium-drivers=nouveau',
             #'--with-dri-drivers=nouveau',
             # <-
@@ -73,7 +73,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
             '--enable-gbm',
 
             #'--disable-gallium',
-            #'--disable-gallium-llvm',
+            #'--disable-llvm', #'--disable-gallium-llvm',
 
             '--enable-egl',
             '--enable-gallium-egl',  # -
@@ -86,7 +86,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
 
             '--enable-xorg',  # -
 
-            '--with-egl-platforms=x11,drm,wayland',  # -
+            '--with-platforms=x11,drm,wayland',# '--with-egl-platforms=x11,drm,wayland',  # -
 
 
             '--with-gallium-drivers=nouveau,svga,swrast,virgl',  # -
