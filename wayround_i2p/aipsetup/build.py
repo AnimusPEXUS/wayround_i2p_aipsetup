@@ -933,7 +933,7 @@ class PackCtl:
         # NOTE: Do not remove '/ -> /usr' and '/usr -> /multihost/xxx'
         #       checks  as many  packages  (including modern  systemd)
         #       still installing files into /  or /usr, but in Lailalo
-        #       system it is considered safe  to move those files into
+        #       system it is considered safe to move those files into
         #       /multihost/xxx
 
         package_info = self.buildingsite_ctl.read_package_info()
@@ -1471,7 +1471,7 @@ class PackCtl:
         #       /multiarch dir. In future, Lailalo need to avoid existing of
         #       standard /usr, /bin, /sbin, /lib, /lib64 etc dirs and
         #       as much as possible move everythin under /multiarch
-        #       dirs
+        #       dirs. (update 2017-11-25: root's named dirs are unavoidable, and at minimum must be symlinks)
 
         raise Exception(
             "Don't do this any more."

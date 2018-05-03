@@ -185,6 +185,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
 
         ret = super().builder_action_configure_define_opts(called_as, log)
 
+        # 1
         if self.get_is_crossbuilder():
 
             prefix = wayround_i2p.utils.path.join(
@@ -202,6 +203,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
                 '--disable-gold',
                 ] + autotools.calc_conf_hbt_options(self)
 
+        # 2
         if self.get_is_crossbuilder():
             ret += [
                 '--disable-gold',
@@ -238,6 +240,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
                 # TODO: need to try building without --with-sysroot if possible
                 ]
 
+        # 3
         if self.get_is_crossbuild():
             ret += [
                 '--enable-tls',
@@ -257,6 +260,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
                 '--disable-gold',
                 ]
 
+        # 4
         if not self.get_is_crossbuild() and not self.get_is_crossbuilder():
             ret += [
 

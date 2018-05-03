@@ -9,6 +9,7 @@
   "reducible": true,
   "non_installable": true,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [],
   "build_deps": [],

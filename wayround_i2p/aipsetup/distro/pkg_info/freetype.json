@@ -12,8 +12,8 @@
   "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/gnu.org/savannah/freetype/",
-    "/sourceforge.net/primary/downloads/sourceforge_net/freetype/"
+    "/sourceforge.net/primary/downloads/sourceforge_net/freetype/",
+    "/gnu.org/savannah/freetype/"
   ],
   "build_deps": [],
   "so_deps": [],

@@ -9,10 +9,11 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/icculus.org/icculus.org/SDL_sound/",
-    "/libsdl.org/"
+    "/libsdl.org/",
+    "/icculus.org/icculus.org/SDL_sound/"
   ],
   "build_deps": [],
   "so_deps": [],

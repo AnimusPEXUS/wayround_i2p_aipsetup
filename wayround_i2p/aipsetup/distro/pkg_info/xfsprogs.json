@@ -12,8 +12,8 @@
   "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/kernel.org/downloads/xfsprogs/",
-    "/sgi.com/downloads/xfsprogs/"
+    "/sgi.com/downloads/xfsprogs/",
+    "/kernel.org/downloads/xfsprogs/"
   ],
   "build_deps": [],
   "so_deps": [],

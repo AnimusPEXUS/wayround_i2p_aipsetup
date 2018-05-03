@@ -14,8 +14,8 @@
   "source_path_prefixes": [],
   "build_deps": [
     "fftw",
-    "jack",
-    "portaudio"
+    "portaudio",
+    "jack"
   ],
   "so_deps": [],
   "runtime_deps": []

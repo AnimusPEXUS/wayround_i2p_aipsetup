@@ -9,10 +9,11 @@
   "reducible": true,
   "non_installable": false,
   "deprecated": false,
+  "only_primary_install": false,
   "tags": [],
   "source_path_prefixes": [
-    "/invisible-island.net/",
-    "/gnu.org/"
+    "/gnu.org/",
+    "/invisible-island.net/"
   ],
   "build_deps": [],
   "so_deps": [],

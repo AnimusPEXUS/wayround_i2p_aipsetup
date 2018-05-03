@@ -152,7 +152,7 @@ class Builder(wayround_i2p.aipsetup.builder_scripts.std.Builder):
 
     def builder_action_configure(self, called_as, log):
         log.info("""
-You now need to configure kernel by your needs and
+Now You need to configure kernel by your needs and
 continue building procedure with command
 'aipsetup build continue build+'
 """)
